@@ -116,7 +116,7 @@
       <p class="source-path">Generated from <code>docs/content-authoring.md</code></p>
     </header>
     <article class="document"><h2 id="content-authoring-guide">Content authoring guide<a class="heading-anchor" href="#content-authoring-guide" aria-label="Link to this section">#</a></h2>
-<p>Course content must be correct, runnable, accessible to its intended learner, and explicit about prerequisites. This guide defines the shared contract; track-specific rules live in <a href="../python/AGENTS.md.html">python/AGENTS.md</a>, <a href="../sql/AGENTS.md.html">sql/AGENTS.md</a>, and <a href="../bridge/AGENTS.md.html">bridge/AGENTS.md</a>.</p>
+<p>Course content must be correct, runnable, accessible to its intended learner, and explicit about prerequisites. This guide defines the shared contract; track-specific rules live in <a href="../python/AGENTS.md.html">python/AGENTS.md</a>, <a href="../sql/AGENTS.md.html">sql/AGENTS.md</a>, and <a href="../bridge/AGENTS.md.html">bridge/AGENTS.md</a>. The <a href="curriculum-design-references.md.html">curriculum design references</a> record the external tutorial patterns that informed this contract.</p>
 <h3 id="before-authoring">Before authoring<a class="heading-anchor" href="#before-authoring" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Read the closest <code>AGENTS.md</code>.</li>
@@ -143,6 +143,67 @@
 <li><strong>Separate solution</strong> — reasoning, alternatives, and edge cases</li>
 </ol>
 <p>Prefer “write a query that returns…” or “implement and verify…” over “understand…”. For a named professional module, list every direct catalog prerequisite by its exact backticked stable ID inside <code>## Level and prerequisites</code>. Put transitive background and merely helpful material in separately labeled prose so Codex and learners do not mistake it for a hard gate.</p>
+<h3 id="complete-amateur-depth-standard">Complete-amateur depth standard<a class="heading-anchor" href="#complete-amateur-depth-standard" aria-label="Link to this section">#</a></h3>
+<p>The section checklist above is necessary, but a heading with one sentence or a list of unexplained terms is not a complete lesson. Write for a learner who has never seen the topic and may not yet know what to type, where to type it, or how to tell whether it worked.</p>
+<p>Every companion guide in the Python, SQL, and bridge tracks must provide all of the following:</p>
+<ol>
+<li><strong>A plain-language purpose and mental model.</strong> Explain what problem the concept solves and connect it to something the learner already knows.</li>
+<li><strong>Definitions before use.</strong> Define each new term in a complete sentence. Say what the thing is, what role it plays, and one important distinction from a nearby concept.</li>
+<li><strong>Syntax or query anatomy.</strong> Break a representative expression or statement into its meaningful parts. Do not assume punctuation, indentation, aliases, clauses, or evaluation order are self-explanatory.</li>
+<li><strong>At least two focused worked examples.</strong> One should demonstrate the normal case. The other should change one meaningful condition, expose an edge case, or contrast a common wrong approach. Annotate the important lines or clauses.</li>
+<li><strong>An expected observation.</strong> Show the bounded output, result columns and row grain, assertion, or precise behavior the learner should see. When output can vary, explain the invariant instead of inventing an exact value.</li>
+<li><strong>A novice-safe run path.</strong> Name the file or notebook, tool, kernel or database, command or button, where output appears, and what success looks like. SQL guides must lead with the guided SQL notebook route and retain separately labeled PowerShell and POSIX <code>psql</code> alternatives.</li>
+<li><strong>A practice ramp.</strong> Move from prediction and tracing to a guided change, independent construction, debugging, an edge case, and transfer to a new context. A long list of equally vague tasks is not progression.</li>
+<li><strong>Diagnosis, not just warnings.</strong> For each important mistake, show the symptom or likely error, explain its cause, and give the smallest useful investigation step.</li>
+<li><strong>Retrieval and explanation.</strong> End with questions that require the learner to explain the idea without copying syntax and identify what evidence would prove their work correct.</li>
+</ol>
+<p>Avoid repeating a generic paragraph across lessons. Shared setup belongs in a canonical setup document, but every lesson still needs a short, concrete handoff to that workflow. Topic explanations, examples, mistakes, and expected observations must be specific to the lesson.</p>
+<p>Do not paste mechanically shortened prompt text such as <code>For task &quot;Build a pipeli...&quot;</code> into learner-facing prose. Name the operation directly, and state its complete expected evidence. Likewise, placeholders such as “the key named in the prompt,” “the operation being learned,” or “the declared object” must be resolved to the actual key, concept, or object before review.</p>
+<h4 id="exercise-contracts">Exercise contracts<a class="heading-anchor" href="#exercise-contracts" aria-label="Link to this section">#</a></h4>
+<p>An exercise must be specific enough that a learner and a reviewer can agree on whether it is complete. Include:</p>
+<ul>
+<li>the supplied input, table, or starting code;</li>
+<li>the requested output or behavior;</li>
+<li>meaningful constraints, such as “do not mutate the input” or “one row per customer”;</li>
+<li>at least one concrete normal case and one boundary or failure case; and</li>
+<li>a verification method that does not require opening the official solution.</li>
+</ul>
+<p>For example, do not write:</p>
+<blockquote><p>Replace a loop that appends filtered values with a list comprehension.</p></blockquote>
+<p>Write a bounded contract instead:</p>
+<blockquote><p>Given <code>temperatures = [18, -3, 25, 0, 14, -8]</code>, first run an ordinary loop that appends only values greater than or equal to zero. Rewrite that behavior as one list comprehension named <code>non_freezing</code>. Preserve input order, do not modify <code>temperatures</code>, and verify that the result is <code>[18, 25, 0, 14]</code>. Then test an empty list and a list containing only negative values.</p></blockquote>
+<p>The second version names the input, filter boundary, result name, ordering and mutation constraints, expected value, and edge cases without revealing the comprehension itself.</p>
+<p>An <code><strong>Expected:</strong></code> or <code><strong>Verify:</strong></code> label is not evidence by itself. Its body must name something the learner can inspect: an assertion and value, an exact exception, output columns and row grain, a bounded count, a file and hash, a metric and tolerance, a command and exit status, a transcript, or another topic-specific artifact. Do not copy the exercise behind a generic wrapper such as “a deterministic result demonstrates the requirement,” and do not apply every possible control to every task. A one-row aggregate does not need a ranking tie-breaker; a simple projection does not need a CTE-stage audit; a configuration parser does not need a database query. Verification must follow the actual mechanism and failure modes of that exercise.</p>
+<p>More prose is not automatically more teaching. Do not inflate a lesson with a generated “independent verification,” “edge case,” or “alternative” paragraph whose test does not apply to that exact query or program. A wrong scalar, join, window, DML, limit, or time-boundary checklist is worse than omitting the check. Keep the exercise-specific explanation and remove boilerplate whenever the artifact cannot name literal inputs, keys, measures, expected values, and the independent evidence that proves them.</p>
+<h4 id="notebook-teaching-flow">Notebook teaching flow<a class="heading-anchor" href="#notebook-teaching-flow" aria-label="Link to this section">#</a></h4>
+<p>Historical Python notebooks should no longer be four-cell summaries. A tutorial notebook should normally separate:</p>
+<ol>
+<li>goal, prerequisites, and how to run;</li>
+<li>mental model and vocabulary;</li>
+<li>first explained example;</li>
+<li>a prediction or trace before execution;</li>
+<li>second contrasting example;</li>
+<li>guided practice with a starter cell;</li>
+<li>independent and debugging practice with scratch cells;</li>
+<li>checks and expected observations; and</li>
+<li>retrieval questions and next steps.</li>
+</ol>
+<p>The exact number of cells may vary, but each cell should have one teaching job. Do not hide all examples in one large code cell or all instructions in one large Markdown cell. A learner must be able to run top to bottom from a fresh kernel without relying on state created out of order.</p>
+<h4 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Every companion guide must end with an optional <code>## Ask Codex about this lesson</code> section containing a copy-ready fenced <code>text</code> prompt. The course prose must remain sufficient without it.</p>
+<p>The prompt must be specific rather than “explain this topic.” Include:</p>
+<ul>
+<li>the stable lesson ID and title;</li>
+<li>the exact companion-guide and learner-artifact paths;</li>
+<li>the checked-in <code>$guide-ds60sqlpy-learning</code> skill;</li>
+<li>the declared prerequisite boundary and beginner-appropriate depth;</li>
+<li>the key concepts or decisions this particular lesson emphasizes;</li>
+<li>an instruction not to read <code>solutions/</code> until the learner asks or has made an honest attempt;</li>
+<li>the explain → predict → attempt → one-hint-at-a-time → evidence-review loop;</li>
+<li>the exact environment safety boundary for live SQL; and</li>
+<li>a done condition based on working evidence and retrieval in the learner&#x27;s own words.</li>
+</ul>
+<p>The generated lesson reader extracts this exact fenced prompt into a dedicated, copyable coaching panel; it does not maintain a second hand-authored prompt. Keep the Markdown block complete so the same source remains usable in VS Code, plain text, static HTML, and private portal modes.</p>
 <h3 id="difficulty-and-pacing">Difficulty and pacing<a class="heading-anchor" href="#difficulty-and-pacing" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>A beginner lesson should not silently require an intermediate concept.</li>
@@ -160,6 +221,7 @@
 <li>Keep learner exercises answer-free.</li>
 <li>Provide hints that do not collapse immediately into the answer.</li>
 <li>Make solution reasoning more important than syntax.</li>
+<li>Give each exercise one authoritative numbered solution section. Integrate legacy explanations and later clause/line maps beneath it; do not leave two sections with the same exercise number, different function names, or conflicting edge-case policies.</li>
 <li>Include at least one edge case or alternative.</li>
 <li>Avoid brittle assertions tied to random or time-dependent output.</li>
 <li>Do not use the official solution as the only test of correctness.</li>
@@ -176,11 +238,13 @@
 <li>Keep generated output and models in ignored directories.</li>
 <li>Add direct imports to the appropriate dependency group.</li>
 </ul>
-<p>For PostgreSQL-in-Jupyter lessons, use JupySQL from the selected course kernel. Read <code>DS60_DATABASE_URL</code>, select SQLAlchemy&#x27;s explicit Psycopg 3 dialect, pass the engine object to <code>%sql</code>, disable connection display, bound results, and use named binding for values. Never add <code>%pip</code>, a credential, or an untrusted Jinja fragment to a lesson notebook.</p>
+<p>For PostgreSQL-in-Jupyter lessons, use JupySQL from the selected course kernel. Read <code>DS60_DATABASE_URL</code> and validate it with <code>ds60sqlpy.sql_notebook.validate_course_database_target()</code> before passing it to SQLAlchemy. This keeps every notebook on the exact course boundary: the disposable <code>advanced_sql_training</code> database through a native local socket or loopback host, with remote/multi-host targets and routing, service, file-reading, or unsupported query overrides rejected. Then select SQLAlchemy&#x27;s explicit Psycopg 3 dialect, pass the engine object to <code>%sql</code>, disable connection display, bound results, and use named binding for values. Never add <code>%pip</code>, a credential, or an untrusted Jinja fragment to a lesson notebook.</p>
 <h3 id="postgresql">PostgreSQL<a class="heading-anchor" href="#postgresql" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Target PostgreSQL 16+ and test canonical automation on PostgreSQL 17.</li>
 <li>Use PostgreSQL syntax in runnable files.</li>
+<li>State the outer result grain with its real identity columns. Do not infer grain from the last selected alias, treat a measure such as <code>count</code> or <code>ranking</code> as a unique key, or use placeholders such as “the answer&#x27;s named identity.”</li>
+<li>List the final projected columns explicitly in exercise contracts instead of saying <code>*</code>. If order matters, state only the outer query&#x27;s final <code>ORDER BY</code>; never copy a window frame, nested subquery, CTE body, or truncated SQL fragment into the result-order description.</li>
 <li>Keep normal lessons transactional and rollback-safe.</li>
 <li>Declare persistent project fixtures.</li>
 <li>Explain NULL, ordering, time zone, and money assumptions.</li>
@@ -199,7 +263,12 @@
 <h3 id="cross-platform-commands">Cross-platform commands<a class="heading-anchor" href="#cross-platform-commands" aria-label="Link to this section">#</a></h3>
 <p>When commands differ, give separately labeled blocks:</p>
 <pre><code class="language-powershell"># Windows PowerShell
-.\.venv\Scripts\python.exe scripts\course.py doctor</code></pre>
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython scripts\course.py doctor</code></pre>
 <pre><code class="language-bash"># macOS/Linux
 .venv/bin/python scripts/course.py doctor</code></pre>
 <p>Do not put Bash operators in PowerShell examples. Prefer a cross-platform Python helper when the procedure is more than a few commands.</p>

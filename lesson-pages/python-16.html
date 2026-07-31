@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-16-numpy-arrays-vectorization-and-broadcasting">Day 16 — NumPy Arrays, Vectorization, and Broadcasting<a class="heading-anchor" href="#guide--day-16-numpy-arrays-vectorization-and-broadcasting" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
 <p>NumPy stores homogeneous values in an <code>ndarray</code> and applies compiled operations across whole arrays. Shape and dtype are part of every array&#x27;s contract.</p>
@@ -292,6 +331,84 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete the Python foundations through Day 15 (<code>python-15</code>). The standard setup installs the <code>data</code> dependency group containing NumPy.</p>
+<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<ol>
+<li>Confirm the course environment before changing it:</li>
+</ol>
+<pre><code class="language-powershell">   # Windows PowerShell
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   &amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash">   # macOS/Linux
+   .venv/bin/python scripts/course.py doctor</code></pre>
+<ol>
+<li>Read <code>python/ds-60day/companion-guides/day16_numpy_fundamentals.md</code>, then open <code>python/ds-60day/notebooks/day16_numpy_fundamentals.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
+<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
+<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
+<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+</ol>
+<p><strong>Lesson outcome:</strong> use day 16 — numpy arrays, vectorization, and broadcasting to practice NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
+<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
+<p>A NumPy array is a rectangular, usually homogeneous block of values. Its <code>shape</code> states the length of each dimension, its <code>ndim</code> counts dimensions, and its <code>dtype</code> controls representation and supported numeric behavior. Unlike a nested Python list, an array supports elementwise operations and axis-aware reductions.</p>
+<p>Vectorization expresses work as array operations implemented in optimized compiled loops. Broadcasting compares shapes from the right and virtually expands dimensions of length one or missing leading dimensions. It avoids manual loops, but a broadcastable expression can still be semantically wrong; always state what each axis represents.</p>
+<h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>array:</strong> a multidimensional homogeneous data container.</li>
+<li><strong>shape:</strong> the length of every array dimension.</li>
+<li><strong>dtype:</strong> the stored scalar representation, such as <code>int64</code> or <code>float64</code>.</li>
+<li><strong>axis:</strong> a dimension along which an operation is applied.</li>
+<li><strong>vectorization:</strong> expressing elementwise work as array operations.</li>
+<li><strong>broadcasting:</strong> NumPy&#x27;s rule for combining compatible unequal shapes.</li>
+</ul>
+<h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<p>For a shape <code>(rows, columns)</code> array, <code>values.mean(axis=0)</code> collapses the row axis and returns one mean per column; <code>axis=1</code> collapses columns and returns one mean per row. In <code>matrix - column_means</code>, shapes <code>(r, c)</code> and <code>(c,)</code> align from the right, so the one-dimensional vector is used across every row.</p>
+<h5 id="guide--worked-example-1-inspect-shape-before-calculating">Worked example 1 — Inspect shape before calculating<a class="heading-anchor" href="#guide--worked-example-1-inspect-shape-before-calculating" aria-label="Link to this section">#</a></h5>
+<p>Give each dimension a meaning and compare axis reductions. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">import numpy as np
+
+scores = np.array([[8, 6, 10], [4, 9, 8]])
+{
+    &quot;shape&quot;: scores.shape,
+    &quot;per_column&quot;: scores.mean(axis=0).tolist(),
+    &quot;per_row&quot;: scores.mean(axis=1).tolist(),
+}</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`{&#x27;shape&#x27;: (2, 3), &#x27;per_column&#x27;: [6.0, 7.5, 9.0], &#x27;per_row&#x27;: [8.0, 7.0]}`.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--worked-example-2-center-every-column-through-broadcasting">Worked example 2 — Center every column through broadcasting<a class="heading-anchor" href="#guide--worked-example-2-center-every-column-through-broadcasting" aria-label="Link to this section">#</a></h5>
+<p>A length-three vector applies to the three columns of every row. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">column_means = scores.mean(axis=0)
+centered = scores - column_means
+(centered.tolist(), centered.mean(axis=0).round(10).tolist())</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">The centered rows are displayed and every column mean is `[0.0, 0.0, 0.0]` up to floating-point precision.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
+<p>When the output differs from your prediction, use this order:</p>
+<ol>
+<li>Print <code>.shape</code>, <code>.dtype</code>, and a small slice before diagnosing an array calculation.</li>
+<li>Name axis meanings in prose before choosing <code>axis=0</code> or <code>axis=1</code>.</li>
+<li>When broadcasting fails, align shapes from the right and insert an explicit singleton dimension if needed.</li>
+<li>Distinguish a view from a copy before mutating a slice.</li>
+</ol>
+<h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
+<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
+<ol>
+<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
+<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
+<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
+<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
+<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
+</ol>
+<p><strong>Useful alternative:</strong> Use Python lists for small heterogeneous general-purpose data; use arrays for rectangular numeric computation.</p>
+<p><strong>Boundary to remember:</strong> Empty axes, integer overflow, NaN propagation, boolean-mask shape mismatch, and accidental view mutation need deliberate handling. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Array:</strong> homogeneous n-dimensional container.</li>
@@ -314,21 +431,25 @@ assert centered.shape == scores.shape
 assert np.allclose(centered.mean(axis=0), 0.0)</code></pre>
 <p><code>column_means</code> has shape <code>(3,)</code>, compatible with the matrix&#x27;s trailing dimension, so it broadcasts across both rows.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Create a <code>1000 x 1000</code> matrix and compute row means without Python loops. <strong>Hint:</strong> verify the result has 1,000 values and choose the axis that removes columns.</li>
-<li>Normalize each column to <code>[0, 1]</code> with broadcasting. <strong>Hint:</strong> compute column-wise minima and ranges separately; decide what a zero-range column should become.</li>
-<li>Show how changing a slice can change its source, then prevent that behavior. <strong>Hint:</strong> check <code>np.shares_memory</code> and compare a basic slice with <code>.copy()</code>.</li>
+<li>Create a 3×4 array containing integers 0 through 11, then compute row sums, column means, and the maximum of each row. <strong>Expected behavior:</strong> shapes are <code>(3, 4)</code>, <code>(3,)</code>, <code>(4,)</code>, and <code>(3,)</code> for the original and three results. <strong>Constraint:</strong> use vectorized reductions with explicit axes, not Python loops. <strong>Verify:</strong> assert both shapes and exact values.</li>
 </ol>
-<p>Use a seeded generator (<code>np.random.default_rng(42)</code>) if you generate data so results remain deterministic.</p>
+<ol>
+<li>Generate two deterministic arrays with <code>np.random.default_rng(42)</code>, perform elementwise addition/multiplication, matrix multiplication where shapes permit, and boolean-mask selection. <strong>Constraints:</strong> write the shape equation before <code>@</code> and do not use the legacy global random state. <strong>Verify:</strong> rerunning from a fresh kernel produces identical arrays and results.</li>
+</ol>
+<ol>
+<li>Demonstrate broadcasting by standardizing each column of a small 2-D array. <strong>Expected behavior:</strong> each standardized column has mean approximately 0 and standard deviation approximately 1. <strong>Constraints:</strong> keep means/stds as <code>(columns,)</code>, reject zero-standard-deviation columns, and assert the final shape equals the input shape. <strong>Verify:</strong> Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy.</li>
+</ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Reason about shape, axis, dtype, and view/copy semantics before applying vectorized operations. Verify results with small arrays.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict the shape and values of a <code>(2, 3)</code> array plus a <code>(3,)</code> array, then explain broadcasting alignment. <strong>Progressive hint:</strong> Broadcasting compares dimensions from the right.</li>
-<li><strong>Tracing:</strong> Trace <code>array.sum(axis=0)</code> and <code>array.sum(axis=1)</code> by naming which dimension is removed and what each output element represents. <strong>Progressive hint:</strong> The named axis is the dimension reduced.</li>
-<li><strong>Implementation:</strong> Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. <strong>Progressive hint:</strong> Replace a zero standard deviation with a safe denominator.</li>
-<li><strong>Debugging:</strong> Repair code that mutates an original array through a slice when an independent working array was intended. <strong>Progressive hint:</strong> Use <code>.copy()</code> at the ownership boundary.</li>
-<li><strong>Edge case and explanation:</strong> Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic. <strong>Progressive hint:</strong> The array dtype, not Python&#x27;s unbounded integer behavior, controls storage.</li>
+<li><strong>Prediction:</strong> Predict the shape and values of a <code>(2, 3)</code> array plus a <code>(3,)</code> array, then explain broadcasting alignment. <strong>Progressive hint:</strong> Broadcasting compares dimensions from the right. <strong>Verify:</strong> Assert the <code>(2, 3) + (3,)</code> result shape and exact values; write which right-aligned dimension proves the broadcast is valid.</li>
+<li><strong>Tracing:</strong> Trace <code>array.sum(axis=0)</code> and <code>array.sum(axis=1)</code> by naming which dimension is removed and what each output element represents. <strong>Progressive hint:</strong> The named axis is the dimension reduced. <strong>Verify:</strong> Calculate both reductions by hand and assert <code>axis=0</code> removes rows into one value per column while <code>axis=1</code> removes columns into one per row.</li>
+<li><strong>Implementation:</strong> Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. <strong>Progressive hint:</strong> Replace a zero standard deviation with a safe denominator. <strong>Verify:</strong> Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved.</li>
+<li><strong>Debugging:</strong> Repair code that mutates an original array through a slice when an independent working array was intended. <strong>Progressive hint:</strong> Use <code>.copy()</code> at the ownership boundary. <strong>Verify:</strong> Record <code>np.shares_memory</code> before repair, mutate the working slice, and assert <code>.copy()</code> keeps the original array unchanged.</li>
+<li><strong>Edge case and explanation:</strong> Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic. <strong>Progressive hint:</strong> The array dtype, not Python&#x27;s unbounded integer behavior, controls storage. <strong>Verify:</strong> Show the small-dtype wrapped result, repeat after casting to a sufficiently wide dtype, and assert the widened arithmetic matches Python&#x27;s expected integer.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -352,17 +473,33 @@ assert np.allclose(centered.mean(axis=0), 0.0)</code></pre>
 <li><a href="python-16.html#learner">Open the learner notebook</a></li>
 <li><a href="python-16.html#solution-1">Check the separate solution</a></li>
 <li><a href="python-17.html#guide">Next: Day 17 — pandas fundamentals</a></li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-16`
+(Day 16 — NumPy Arrays, Vectorization, and Broadcasting). Direct catalog prerequisites: `python-15`.
+I have completed the direct prerequisites: `python-15`. Emphasize NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
+Read `python/ds-60day/companion-guides/day16_numpy_fundamentals.md` and use the learner notebook
+`python/ds-60day/notebooks/day16_numpy_fundamentals.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -379,12 +516,12 @@ assert np.allclose(centered.mean(axis=0), 0.0)</code></pre>
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-16-numpy-fundamentals-arrays-vectorization-broadcasting">Day 16 — NumPy fundamentals: arrays, vectorization, broadcasting<a class="heading-anchor" href="#learner--cell-1--day-16-numpy-fundamentals-arrays-vectorization-broadcasting" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -393,7 +530,57 @@ assert np.allclose(centered.mean(axis=0), 0.0)</code></pre>
 <li>Vectorize operations to replace Python loops.</li>
 <li>Use broadcasting effectively.</li>
 </ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
+<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>This is the editable learner artifact for <code>python-16</code>. Read <code>python/ds-60day/companion-guides/day16_numpy_fundamentals.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
+<p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
+<p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--core-mental-model">Core mental model<a class="heading-anchor" href="#learner--cell-3--core-mental-model" aria-label="Link to this section">#</a></h4>
+<p>A NumPy array is a rectangular, usually homogeneous block of values. Its <code>shape</code> states the length of each dimension, its <code>ndim</code> counts dimensions, and its <code>dtype</code> controls representation and supported numeric behavior. Unlike a nested Python list, an array supports elementwise operations and axis-aware reductions.</p>
+<p>Vectorization expresses work as array operations implemented in optimized compiled loops. Broadcasting compares shapes from the right and virtually expands dimensions of length one or missing leading dimensions. It avoids manual loops, but a broadcastable expression can still be semantically wrong; always state what each axis represents.</p>
+<h5 id="learner--cell-3--vocabulary">Vocabulary<a class="heading-anchor" href="#learner--cell-3--vocabulary" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>array:</strong> a multidimensional homogeneous data container.</li>
+<li><strong>shape:</strong> the length of every array dimension.</li>
+<li><strong>dtype:</strong> the stored scalar representation, such as <code>int64</code> or <code>float64</code>.</li>
+<li><strong>axis:</strong> a dimension along which an operation is applied.</li>
+<li><strong>vectorization:</strong> expressing elementwise work as array operations.</li>
+<li><strong>broadcasting:</strong> NumPy&#x27;s rule for combining compatible unequal shapes.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<p>For a shape <code>(rows, columns)</code> array, <code>values.mean(axis=0)</code> collapses the row axis and returns one mean per column; <code>axis=1</code> collapses columns and returns one mean per row. In <code>matrix - column_means</code>, shapes <code>(r, c)</code> and <code>(c,)</code> align from the right, so the one-dimensional vector is used across every row.</p>
+<h5 id="learner--cell-4--worked-example-1-inspect-shape-before-calculating">Worked example 1 — Inspect shape before calculating<a class="heading-anchor" href="#learner--cell-4--worked-example-1-inspect-shape-before-calculating" aria-label="Link to this section">#</a></h5>
+<p>Give each dimension a meaning and compare axis reductions. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import numpy as np</span>
+<span> </span>
+<span>scores = np.array([[8, 6, 10], [4, 9, 8]])</span>
+<span>{</span>
+<span>    &quot;shape&quot;: scores.shape,</span>
+<span>    &quot;per_column&quot;: scores.mean(axis=0).tolist(),</span>
+<span>    &quot;per_row&quot;: scores.mean(axis=1).tolist(),</span>
+<span>}</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> <code>{&#x27;shape&#x27;: (2, 3), &#x27;per_column&#x27;: [6.0, 7.5, 9.0], &#x27;per_row&#x27;: [8.0, 7.0]}</code>.</p>
+<p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
+<h5 id="learner--cell-6--worked-example-2-center-every-column-through-broadcasting">Worked example 2 — Center every column through broadcasting<a class="heading-anchor" href="#learner--cell-6--worked-example-2-center-every-column-through-broadcasting" aria-label="Link to this section">#</a></h5>
+<p>A length-three vector applies to the three columns of every row. Predict first; then run the next cell.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>column_means = scores.mean(axis=0)</span>
+<span>centered = scores - column_means</span>
+<span>(centered.tolist(), centered.mean(axis=0).round(10).tolist())</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> The centered rows are displayed and every column mean is <code>[0.0, 0.0, 0.0]</code> up to floating-point precision.</p>
+<h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
+<p>When evidence differs from your prediction, use this order:</p>
+<ol>
+<li>Print <code>.shape</code>, <code>.dtype</code>, and a small slice before diagnosing an array calculation.</li>
+<li>Name axis meanings in prose before choosing <code>axis=0</code> or <code>axis=1</code>.</li>
+<li>When broadcasting fails, align shapes from the right and insert an explicit singleton dimension if needed.</li>
+<li>Distinguish a view from a copy before mutating a slice.</li>
+</ol>
+<p><strong>Alternative to compare:</strong> Use Python lists for small heterogeneous general-purpose data; use arrays for rectangular numeric computation.</p>
+<p><strong>Boundary to test:</strong> Empty axes, integer overflow, NaN propagation, boolean-mask shape mismatch, and accidental view mutation need deliberate handling.</p>
+<p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import numpy as np</span>
 <span>a = np.array([1,2,3], dtype=np.int64)</span>
 <span>b = np.array([0.1,0.2,0.3], dtype=np.float64)</span>
 <span>a.dtype, b.dtype, a.shape, b.shape</span>
@@ -408,63 +595,143 @@ assert np.allclose(centered.mean(axis=0), 0.0)</code></pre>
 <span>M + v</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--common-operations">Common operations<a class="heading-anchor" href="#learner--cell-3--common-operations" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--common-operations">Common operations<a class="heading-anchor" href="#learner--cell-10--common-operations" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Slicing, views vs copies.</li>
 <li>Aggregations and axis param.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>Z = np.arange(12).reshape(3,4)</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>Z = np.arange(12).reshape(3,4)</span>
 <span>Z, Z[:, 1:3], Z.sum(axis=0), Z.mean(axis=1)</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-5--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-5--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h4 id="learner--cell-12--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-12--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Create a <code>1000 x 1000</code> matrix and compute row means without Python loops. <strong>Hint:</strong> verify the result has 1,000 values and choose the axis that removes columns.</li>
-<li>Normalize each column to <code>[0, 1]</code> with broadcasting. <strong>Hint:</strong> compute column-wise minima and ranges separately; decide what a zero-range column should become.</li>
-<li>Show how changing a slice can change its source, then prevent that behavior. <strong>Hint:</strong> check <code>np.shares_memory</code> and compare a basic slice with <code>.copy()</code>.</li>
+<li>Create a 3×4 array containing integers 0 through 11, then compute row sums, column means, and the maximum of each row. <strong>Expected behavior:</strong> shapes are <code>(3, 4)</code>, <code>(3,)</code>, <code>(4,)</code>, and <code>(3,)</code> for the original and three results. <strong>Constraint:</strong> use vectorized reductions with explicit axes, not Python loops. <strong>Verify:</strong> assert both shapes and exact values.</li>
 </ol>
-<p>Use a seeded generator (<code>np.random.default_rng(42)</code>) if you generate data so results remain deterministic.</p>
-<h5 id="learner--cell-5--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-5--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Generate two deterministic arrays with <code>np.random.default_rng(42)</code>, perform elementwise addition/multiplication, matrix multiplication where shapes permit, and boolean-mask selection. <strong>Constraints:</strong> write the shape equation before <code>@</code> and do not use the legacy global random state. <strong>Verify:</strong> rerunning from a fresh kernel produces identical arrays and results.</li>
+</ol>
+<ol>
+<li>Demonstrate broadcasting by standardizing each column of a small 2-D array. <strong>Expected behavior:</strong> each standardized column has mean approximately 0 and standard deviation approximately 1. <strong>Constraints:</strong> keep means/stds as <code>(columns,)</code>, reject zero-standard-deviation columns, and assert the final shape equals the input shape. <strong>Verify:</strong> Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy.</li>
+</ol>
+<h5 id="learner--cell-12--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-12--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Reason about shape, axis, dtype, and view/copy semantics before applying vectorized operations. Verify results with small arrays.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict the shape and values of a <code>(2, 3)</code> array plus a <code>(3,)</code> array, then explain broadcasting alignment. <strong>Progressive hint:</strong> Broadcasting compares dimensions from the right.</li>
-<li><strong>Tracing:</strong> Trace <code>array.sum(axis=0)</code> and <code>array.sum(axis=1)</code> by naming which dimension is removed and what each output element represents. <strong>Progressive hint:</strong> The named axis is the dimension reduced.</li>
-<li><strong>Implementation:</strong> Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. <strong>Progressive hint:</strong> Replace a zero standard deviation with a safe denominator.</li>
-<li><strong>Debugging:</strong> Repair code that mutates an original array through a slice when an independent working array was intended. <strong>Progressive hint:</strong> Use <code>.copy()</code> at the ownership boundary.</li>
-<li><strong>Edge case and explanation:</strong> Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic. <strong>Progressive hint:</strong> The array dtype, not Python&#x27;s unbounded integer behavior, controls storage.</li>
+<li><strong>Prediction:</strong> Predict the shape and values of a <code>(2, 3)</code> array plus a <code>(3,)</code> array, then explain broadcasting alignment. <strong>Progressive hint:</strong> Broadcasting compares dimensions from the right. <strong>Verify:</strong> Assert the <code>(2, 3) + (3,)</code> result shape and exact values; write which right-aligned dimension proves the broadcast is valid.</li>
+<li><strong>Tracing:</strong> Trace <code>array.sum(axis=0)</code> and <code>array.sum(axis=1)</code> by naming which dimension is removed and what each output element represents. <strong>Progressive hint:</strong> The named axis is the dimension reduced. <strong>Verify:</strong> Calculate both reductions by hand and assert <code>axis=0</code> removes rows into one value per column while <code>axis=1</code> removes columns into one per row.</li>
+<li><strong>Implementation:</strong> Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. <strong>Progressive hint:</strong> Replace a zero standard deviation with a safe denominator. <strong>Verify:</strong> Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved.</li>
+<li><strong>Debugging:</strong> Repair code that mutates an original array through a slice when an independent working array was intended. <strong>Progressive hint:</strong> Use <code>.copy()</code> at the ownership boundary. <strong>Verify:</strong> Record <code>np.shares_memory</code> before repair, mutate the working slice, and assert <code>.copy()</code> keeps the original array unchanged.</li>
+<li><strong>Edge case and explanation:</strong> Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic. <strong>Progressive hint:</strong> The array dtype, not Python&#x27;s unbounded integer behavior, controls storage. <strong>Verify:</strong> Show the small-dtype wrapped result, repeat after casting to a sufficiently wide dtype, and assert the widened arithmetic matches Python&#x27;s expected integer.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Predict first. Then write small code and assertions below each label.</span>
-<span># Keep the official solution closed until you have tested an honest attempt.</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Create a 3×4 array containing integers 0 through 11, then compute row sums, column means, and the maximum of each row. <strong>Expected behavior:</strong> shapes are <code>(3, 4)</code>, <code>(3,)</code>, <code>(4,)</code>, and <code>(3,)</code> for the original and three results. <strong>Constraint:</strong> use vectorized reductions with explicit axes, not Python loops. <strong>Verify:</strong> assert both shapes and exact values.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
+<span># Short contract: Create a 3×4 array containing integers 0 through 11, then compute row sums, column means, and the maximum of each row. shapes are `(3, 4)`, `(3,)`, `(4,)`, and `(3,)` for the or...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 4 — Prediction</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Generate two deterministic arrays with <code>np.random.default_rng(42)</code>, perform elementwise addition/multiplication, matrix multiplication where shapes permit, and boolean-mask selection. <strong>Constraints:</strong> write the shape equation before <code>@</code> and do not use the legacy global random state. <strong>Verify:</strong> rerunning from a fresh kernel produces identical arrays and results.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
+<span># Short contract: Generate two deterministic arrays with `np.random.default_rng(42)`, perform elementwise addition/multiplication, matrix multiplication where shapes permit, and boolean-mask sele...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 5 — Tracing</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Demonstrate broadcasting by standardizing each column of a small 2-D array. <strong>Expected behavior:</strong> each standardized column has mean approximately 0 and standard deviation approximately 1. <strong>Constraints:</strong> keep means/stds as <code>(columns,)</code>, reject zero-standard-deviation columns, and assert the final shape equals the input shape. <strong>Verify:</strong> Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
+<span># Short contract: Demonstrate broadcasting by standardizing each column of a small 2-D array. each standardized column has mean approximately 0 and standard deviation approximately 1. keep means/...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 6 — Implementation</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict the shape and values of a <code>(2, 3)</code> array plus a <code>(3,)</code> array, then explain broadcasting alignment. <strong>Progressive hint:</strong> Broadcasting compares dimensions from the right. <strong>Verify:</strong> Assert the <code>(2, 3) + (3,)</code> result shape and exact values; write which right-aligned dimension proves the broadcast is valid.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
+<span># Short contract: Predict the shape and values of a `(2, 3)` array plus a `(3,)` array, then explain broadcasting alignment. Broadcasting compares dimensions from the right. Assert the `(2, 3) +...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 7 — Debugging</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace <code>array.sum(axis=0)</code> and <code>array.sum(axis=1)</code> by naming which dimension is removed and what each output element represents. <strong>Progressive hint:</strong> The named axis is the dimension reduced. <strong>Verify:</strong> Calculate both reductions by hand and assert <code>axis=0</code> removes rows into one value per column while <code>axis=1</code> removes columns into one per row.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
+<span># Short contract: Trace `array.sum(axis=0)` and `array.sum(axis=1)` by naming which dimension is removed and what each output element represents. The named axis is the dimension reduced. Calculat...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 8 — Edge case and explanation</span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. <strong>Progressive hint:</strong> Replace a zero standard deviation with a safe denominator. <strong>Verify:</strong> Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
+<span># Short contract: Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. Replace a zero standard deviation with a safe denominator. Assert noncon...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 15</div><h5 id="learner--cell-25--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-25--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair code that mutates an original array through a slice when an independent working array was intended. <strong>Progressive hint:</strong> Use <code>.copy()</code> at the ownership boundary. <strong>Verify:</strong> Record <code>np.shares_memory</code> before repair, mutate the working slice, and assert <code>.copy()</code> keeps the original array unchanged.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
+<span># Short contract: Repair code that mutates an original array through a slice when an independent working array was intended. Use `.copy()` at the ownership boundary. Record `np.shares_memory` bef...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 16</div><h5 id="learner--cell-27--practice-8-prediction-attempt-and-evidence">Practice 8 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-27--practice-8-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic. <strong>Progressive hint:</strong> The array dtype, not Python&#x27;s unbounded integer behavior, controls storage. <strong>Verify:</strong> Show the small-dtype wrapped result, repeat after casting to a sufficiently wide dtype, and assert the widened arithmetic matches Python&#x27;s expected integer.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 12</div><pre class="source-code language-python"><code><span># Practice 8 — your work</span>
+<span># Short contract: Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic. The array dtype, not Python&#x27;s unbounded integer behavior, co...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -488,78 +755,99 @@ assert np.allclose(centered.mean(axis=0), 0.0)</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-16-solutions-numpy-fundamentals">Day 16 — Solutions: NumPy Fundamentals<a class="heading-anchor" href="#solution-1--day-16-solutions-numpy-fundamentals" aria-label="Link to this section">#</a></h3>
-<p>We compute row-wise means without Python loops, normalize columns with broadcasting, and demonstrate view vs copy.</p>
-<p>Contents</p>
+<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
+<p>These worked answers demonstrate <strong>NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
+<p>A NumPy array is a rectangular, usually homogeneous block of values. Its <code>shape</code> states the length of each dimension, its <code>ndim</code> counts dimensions, and its <code>dtype</code> controls representation and supported numeric behavior. Unlike a nested Python list, an array supports elementwise operations and axis-aware reductions.</p>
+<p>Vectorization expresses work as array operations implemented in optimized compiled loops. Broadcasting compares shapes from the right and virtually expands dimensions of length one or missing leading dimensions. It avoids manual loops, but a broadcastable expression can still be semantically wrong; always state what each axis represents.</p>
+<h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
-<li>Exercise 1: Row-wise means (no Python loops)</li>
-<li>Exercise 2: Column-wise 0–1 normalization with broadcasting</li>
-<li>Exercise 3: View vs copy demo</li>
+<li><strong>array:</strong> a multidimensional homogeneous data container.</li>
+<li><strong>shape:</strong> the length of every array dimension.</li>
+<li><strong>dtype:</strong> the stored scalar representation, such as <code>int64</code> or <code>float64</code>.</li>
+<li><strong>axis:</strong> a dimension along which an operation is applied.</li>
+<li><strong>vectorization:</strong> expressing elementwise work as array operations.</li>
+<li><strong>broadcasting:</strong> NumPy&#x27;s rule for combining compatible unequal shapes.</li>
 </ul>
-<hr>
-<p>Exercise 1 — Row-wise means</p>
+<h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
+<p>For this lesson&#x27;s <strong>NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Create a 3×4 array containing integers 0 through 11, then compute row sums, column means, and the maximum of each row. <strong>Expected behavior:</strong> shapes are <code>(3, 4)</code>, <code>(3,)</code>, <code>(4,)</code>, and <code>(3,)</code> for the original and three results. <strong>Constraint:</strong> use vectorized reductions with explicit axes, not Python loops. <strong>Verify:</strong> assert both shapes and exact values.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Create a 3×4 array containing integers 0 through 11, then compute row sums, column means, and the maximum of each row. Expected behavior: shapes are <code>(3, 4)</code>, <code>(3,)</code>, <code>(4,)</code>, and <code>(3,)</code> for the original and three results. Constraint: use vectorized reductions with explicit axes, not Python loops. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert both shapes and exact values. That connects the answer to NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.</p>
 <pre><code class="language-python">import numpy as np
 
-A = np.arange(12).reshape(3, 4)
-row_means = A.mean(axis=1)           # shape (3,)
-assert np.allclose(row_means, np.array([1.5, 5.5, 9.5]))</code></pre>
-<p>Why: mean with axis=1 reduces columns, giving one mean per row.</p>
-<hr>
-<p>Exercise 2 — Normalize each column to [0, 1]</p>
-<pre><code class="language-python">X = np.array([[1.0, 10.0], [3.0, 5.0], [5.0, 0.0]])
-mins = X.min(axis=0)                 # shape (2,)
-ranges = X.max(axis=0) - mins        # shape (2,)
-X_norm = (X - mins) / ranges         # broadcasting subtracts mins row-wise</code></pre>
-<p>Notes</p>
-<ul>
-<li>Broadcasting aligns shapes right-to-left; (3,2) minus (2,) works.</li>
-<li>Beware division by zero when a column is constant; guard with <code>np.where(ranges==0, 1, ranges)</code>.</li>
-</ul>
-<hr>
-<p>Exercise 3 — View vs copy</p>
-<pre><code class="language-python">Z = np.arange(12).reshape(3,4)
-sub = Z[:, 1:3]      # view (shares memory)
-sub[:] = -1          # writes into original
-assert (Z[:, 1:3] == -1).all()
+array = np.arange(12).reshape(3, 4)
+row_sums = array.sum(axis=1)
+column_means = array.mean(axis=0)
+row_maximums = array.max(axis=1)
 
-# Safe copy when isolating
-Z2 = Z[:, 1:3].copy()
-Z2[:] = 99
-assert not (Z[:, 1:3] == 99).any()</code></pre>
-<p>Takeaway</p>
-<ul>
-<li>Slices are usually views; use .copy() when you intend independence.</li>
-</ul>
-<hr>
-<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
-<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Create a <code>1000 x 1000</code> matrix and compute row means without Python loops. <strong>Hint:</strong> verify the result has 1,000 values and choose the axis that removes columns.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Normalize each column to <code>[0, 1]</code> with broadcasting. <strong>Hint:</strong> compute column-wise minima and ranges separately; decide what a zero-range column should become.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Show how changing a slice can change its source, then prevent that behavior. <strong>Hint:</strong> check <code>np.shares_memory</code> and compare a basic slice with <code>.copy()</code>. Use a seeded generator (<code>np.random.default_rng(42)</code>) if you generate data so results remain deterministic.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-4-prediction">Exercise 4 — Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Predict the shape and values of a <code>(2, 3)</code> array plus a <code>(3,)</code> array, then explain broadcasting alignment.</p>
-<p><strong>Reasoning checkpoint:</strong> Broadcasting compares dimensions from the right. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-5-tracing">Exercise 5 — Tracing<a class="heading-anchor" href="#solution-1--exercise-5-tracing" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Trace <code>array.sum(axis=0)</code> and <code>array.sum(axis=1)</code> by naming which dimension is removed and what each output element represents.</p>
-<p><strong>Reasoning checkpoint:</strong> The named axis is the dimension reduced. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-6-implementation">Exercise 6 — Implementation<a class="heading-anchor" href="#solution-1--exercise-6-implementation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero.</p>
-<p><strong>Reasoning checkpoint:</strong> Replace a zero standard deviation with a safe denominator. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-7-debugging">Exercise 7 — Debugging<a class="heading-anchor" href="#solution-1--exercise-7-debugging" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Repair code that mutates an original array through a slice when an independent working array was intended.</p>
-<p><strong>Reasoning checkpoint:</strong> Use <code>.copy()</code> at the ownership boundary. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-8-edge-case-and-explanation">Exercise 8 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-8-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic.</p>
-<p><strong>Reasoning checkpoint:</strong> The array dtype, not Python&#x27;s unbounded integer behavior, controls storage. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+assert array.shape == (3, 4)
+assert row_sums.tolist() == [6, 22, 38]
+assert column_means.tolist() == [4.0, 5.0, 6.0, 7.0]
+assert row_maximums.tolist() == [3, 7, 11]</code></pre>
+<p><strong>Verification evidence:</strong> assert both shapes and exact values.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Generate two deterministic arrays with <code>np.random.default_rng(42)</code>, perform elementwise addition/multiplication, matrix multiplication where shapes permit, and boolean-mask selection. <strong>Constraints:</strong> write the shape equation before <code>@</code> and do not use the legacy global random state. <strong>Verify:</strong> rerunning from a fresh kernel produces identical arrays and results.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Generate two deterministic arrays with <code>np.random.default_rng(42)</code>, perform elementwise addition/multiplication, matrix multiplication where shapes permit, and boolean-mask selection. Constraints: write the shape equation before <code>@</code> and do not use the legacy global random state. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: rerunning from a fresh kernel produces identical arrays and results. That connects the answer to NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.</p>
+<pre><code class="language-python">import numpy as np
+
+rng = np.random.default_rng(42)
+left = rng.integers(0, 10, size=(2, 3))
+right = rng.integers(0, 10, size=(2, 3))
+matrix = rng.integers(0, 5, size=(3, 2))
+
+assert (left + right).shape == (2, 3)
+assert (left * right).shape == (2, 3)
+assert (left @ matrix).shape == (2, 2)
+selected = left[left &gt;= 5]
+assert selected.ndim == 1</code></pre>
+<p>Recreating the generator with seed 42 reproduces the fixture.</p>
+<p><strong>Verification evidence:</strong> rerunning from a fresh kernel produces identical arrays and results.</p>
+<h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Demonstrate broadcasting by standardizing each column of a small 2-D array. <strong>Expected behavior:</strong> each standardized column has mean approximately 0 and standard deviation approximately 1. <strong>Constraints:</strong> keep means/stds as <code>(columns,)</code>, reject zero-standard-deviation columns, and assert the final shape equals the input shape. <strong>Verify:</strong> Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Demonstrate broadcasting by standardizing each column of a small 2-D array. Expected behavior: each standardized column has mean approximately 0 and standard deviation approximately 1. Constraints: keep means/stds as <code>(columns,)</code>, reject zero-standard-deviation columns, and assert the final shape equals the input shape. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy. That connects the answer to NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.</p>
+<pre><code class="language-python">import numpy as np
+
+
+def standardize_columns(values: np.ndarray) -&gt; np.ndarray:
+    means = values.mean(axis=0)
+    standard_deviations = values.std(axis=0)
+    if np.any(standard_deviations == 0):
+        raise ValueError(&quot;every column must vary&quot;)
+    return (values - means) / standard_deviations
+
+
+values = np.array([[1.0, 10.0], [2.0, 20.0], [3.0, 30.0]])
+standardized = standardize_columns(values)
+assert standardized.shape == values.shape
+assert np.allclose(standardized.mean(axis=0), 0)
+assert np.allclose(standardized.std(axis=0), 1)</code></pre>
+<p><strong>Verification evidence:</strong> Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy.</p>
+<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict the shape and values of a <code>(2, 3)</code> array plus a <code>(3,)</code> array, then explain broadcasting alignment. <strong>Progressive hint:</strong> Broadcasting compares dimensions from the right. <strong>Verify:</strong> Assert the <code>(2, 3) + (3,)</code> result shape and exact values; write which right-aligned dimension proves the broadcast is valid.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict the shape and values of a <code>(2, 3)</code> array plus a <code>(3,)</code> array, then explain broadcasting alignment. Progressive hint: Broadcasting compares dimensions from the right. Then compare the prediction with this proof target: Assert the <code>(2, 3) + (3,)</code> result shape and exact values; write which right-aligned dimension proves the broadcast is valid. This makes NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting observable instead of relying on intuition.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert the <code>(2, 3) + (3,)</code> result shape and exact values; write which right-aligned dimension proves the broadcast is valid.</p>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace <code>array.sum(axis=0)</code> and <code>array.sum(axis=1)</code> by naming which dimension is removed and what each output element represents. <strong>Progressive hint:</strong> The named axis is the dimension reduced. <strong>Verify:</strong> Calculate both reductions by hand and assert <code>axis=0</code> removes rows into one value per column while <code>axis=1</code> removes columns into one per row.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace <code>array.sum(axis=0)</code> and <code>array.sum(axis=1)</code> by naming which dimension is removed and what each output element represents. Progressive hint: The named axis is the dimension reduced. Record the named value, shape, label, or iterator position needed to establish: Calculate both reductions by hand and assert <code>axis=0</code> removes rows into one value per column while <code>axis=1</code> removes columns into one per row. The trace exposes NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Calculate both reductions by hand and assert <code>axis=0</code> removes rows into one value per column while <code>axis=1</code> removes columns into one per row.</p>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. <strong>Progressive hint:</strong> Replace a zero standard deviation with a safe denominator. <strong>Verify:</strong> Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. Progressive hint: Replace a zero standard deviation with a safe denominator. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved. That connects the answer to NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair code that mutates an original array through a slice when an independent working array was intended. <strong>Progressive hint:</strong> Use <code>.copy()</code> at the ownership boundary. <strong>Verify:</strong> Record <code>np.shares_memory</code> before repair, mutate the working slice, and assert <code>.copy()</code> keeps the original array unchanged.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair code that mutates an original array through a slice when an independent working array was intended. Progressive hint: Use <code>.copy()</code> at the ownership boundary. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Record <code>np.shares_memory</code> before repair, mutate the working slice, and assert <code>.copy()</code> keeps the original array unchanged. The diagnosis depends on NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Record <code>np.shares_memory</code> before repair, mutate the working slice, and assert <code>.copy()</code> keeps the original array unchanged.</p>
+<h5 id="solution-1--exercise-8-answer-contract">Exercise 8 — answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic. <strong>Progressive hint:</strong> The array dtype, not Python&#x27;s unbounded integer behavior, controls storage. <strong>Verify:</strong> Show the small-dtype wrapped result, repeat after casting to a sufficiently wide dtype, and assert the widened arithmetic matches Python&#x27;s expected integer.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic. Progressive hint: The array dtype, not Python&#x27;s unbounded integer behavior, controls storage. Values below, at, and above the named boundary must produce the evidence Show the small-dtype wrapped result, repeat after casting to a sufficiently wide dtype, and assert the widened arithmetic matches Python&#x27;s expected integer. Those cases show how NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting behaves at its edge.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Show the small-dtype wrapped result, repeat after casting to a sufficiently wide dtype, and assert the widened arithmetic matches Python&#x27;s expected integer.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Reason about shape, axis, dtype, and view/copy semantics before applying vectorized operations. Verify results with small arrays.</p>
-<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
-<h5 id="solution-1--practices-1-2-shape-and-axes">Practices 1–2 — Shape and axes<a class="heading-anchor" href="#solution-1--practices-1-2-shape-and-axes" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-4-5-shape-and-axes">Shared implementation for Exercises 4–5 — Shape and axes<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-4-5-shape-and-axes" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">import numpy as np
 
 matrix = np.array([[1, 2, 3], [10, 20, 30]])
@@ -567,7 +855,7 @@ offset = np.array([100, 200, 300])
 assert (matrix + offset).tolist() == [[101, 202, 303], [110, 220, 330]]
 assert matrix.sum(axis=0).tolist() == [11, 22, 33]  # Reduce rows.
 assert matrix.sum(axis=1).tolist() == [6, 60]       # Reduce columns.</code></pre>
-<h5 id="solution-1--practices-3-5-stable-standardization-copies-and-dtype-choice">Practices 3–5 — Stable standardization, copies, and dtype choice<a class="heading-anchor" href="#solution-1--practices-3-5-stable-standardization-copies-and-dtype-choice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-6-8-stable-standardization-copies-and-dtype-choice">Shared implementation for Exercises 6–8 — Stable standardization, copies, and dtype choice<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-8-stable-standardization-copies-and-dtype-choice" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">def standardize_columns(values: np.ndarray) -&gt; np.ndarray:
     &quot;&quot;&quot;Return float z-scores; constant columns become all zeros.&quot;&quot;&quot;
 
@@ -592,7 +880,7 @@ wide = small.astype(np.int64) + 20
 assert int(overflowed[0]) != 140
 assert int(wide[0]) == 140</code></pre></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -600,7 +888,7 @@ assert int(wide[0]) == 140</code></pre></div>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -709,7 +997,38 @@ assert int(wide[0]) == 140</code></pre></div>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-16`
+(Day 16 — NumPy Arrays, Vectorization, and Broadcasting). Direct catalog prerequisites: `python-15`.
+I have completed the direct prerequisites: `python-15`. Emphasize NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
+Read `python/ds-60day/companion-guides/day16_numpy_fundamentals.md` and use the learner notebook
+`python/ds-60day/notebooks/day16_numpy_fundamentals.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-15.html"><small>Previous lesson</small><strong>python-15</strong><span>CLI Project</span></a>
@@ -801,6 +1120,23 @@ assert int(wide[0]) == 140</code></pre></div>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

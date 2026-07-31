@@ -10,7 +10,12 @@ activated shell:
 
 ```powershell
 # Windows PowerShell
-.\.venv\Scripts\python.exe scripts\course.py catalog
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+& $CoursePython scripts\course.py catalog
 ```
 
 ```bash

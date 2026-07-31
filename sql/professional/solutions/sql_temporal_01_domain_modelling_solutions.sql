@@ -17,61 +17,70 @@ BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
 CREATE SCHEMA pro_temporal_lab;
 
-CREATE TABLE pro_temporal_lab.facts (
-    fact_version_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    subject_key text NOT NULL,
+CREATE TABLE pro_temporal_lab.customer_terms (
+    term_version_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    customer_key text NOT NULL,
     valid_period daterange NOT NULL,
     system_period tstzrange NOT NULL,
-    value text NOT NULL,
+    monthly_rate numeric(10, 2) NOT NULL CHECK (monthly_rate >= 0),
+    recorded_reason text NOT NULL CHECK (btrim(recorded_reason) <> ''),
     CHECK (NOT isempty(valid_period)),
     CHECK (NOT isempty(system_period))
 );
 
 -- Initial and March correction.
-INSERT INTO pro_temporal_lab.facts (
-    subject_key, valid_period, system_period, value
+INSERT INTO pro_temporal_lab.customer_terms (
+    customer_key,
+    valid_period,
+    system_period,
+    monthly_rate,
+    recorded_reason
 )
 VALUES
     (
-        'SUB-1',
+        'CUS-100',
         daterange(DATE '2026-01-01', DATE '2026-04-01', '[)'),
         tstzrange(
             TIMESTAMPTZ '2026-03-01 00:00+00',
             TIMESTAMPTZ '2026-03-10 00:00+00',
             '[)'
         ),
-        'value-10'
+        10.00,
+        'initial value'
     ),
     (
-        'SUB-1',
+        'CUS-100',
         daterange(DATE '2026-01-01', DATE '2026-04-01', '[)'),
         tstzrange(
             TIMESTAMPTZ '2026-03-10 00:00+00',
             TIMESTAMPTZ '2026-04-01 00:00+00',
             '[)'
         ),
-        'value-12'
+        12.00,
+        'March correction'
     ),
     -- Exercise 1: retroactive correction recorded April 1.
     (
-        'SUB-1',
+        'CUS-100',
         daterange(DATE '2026-01-01', DATE '2026-04-01', '[)'),
         tstzrange(TIMESTAMPTZ '2026-04-01 00:00+00', NULL, '[)'),
-        'value-11'
+        11.00,
+        'retroactive correction recorded April 1'
     );
 
 SELECT
     DATE '2026-02-15' AS valid_on,
     query.system_as_of,
-    f.fact_version_id,
-    f.value
+    f.term_version_id,
+    f.monthly_rate,
+    f.recorded_reason
 FROM (
     VALUES
         (TIMESTAMPTZ '2026-03-15 00:00+00'),
         (TIMESTAMPTZ '2026-04-02 00:00+00')
 ) AS query(system_as_of)
-JOIN pro_temporal_lab.facts AS f
-  ON f.subject_key = 'SUB-1'
+JOIN pro_temporal_lab.customer_terms AS f
+  ON f.customer_key = 'CUS-100'
  AND f.valid_period @> DATE '2026-02-15'
  AND f.system_period @> query.system_as_of
 ORDER BY query.system_as_of;
@@ -80,9 +89,11 @@ ORDER BY query.system_as_of;
 -- negate exactly one prior entry, and each entry may be reversed only once.
 CREATE TABLE pro_temporal_lab.ledger (
     entry_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    subject_key text NOT NULL,
     idempotency_key text NOT NULL UNIQUE,
     event_kind text NOT NULL,
     amount numeric(12, 2) NOT NULL,
+    currency text NOT NULL CHECK (currency ~ '^[A-Z]{3}$'),
     reverses_entry_id bigint UNIQUE
         REFERENCES pro_temporal_lab.ledger (entry_id)
 );
@@ -95,13 +106,15 @@ SET search_path = pg_catalog
 AS $function$
 DECLARE
     reversed_amount numeric(12, 2);
+    reversed_subject_key text;
+    reversed_currency text;
 BEGIN
     IF NEW.reverses_entry_id IS NULL THEN
         RETURN NEW;
     END IF;
 
-    SELECT l.amount
-    INTO reversed_amount
+    SELECT l.amount, l.subject_key, l.currency
+    INTO reversed_amount, reversed_subject_key, reversed_currency
     FROM pro_temporal_lab.ledger AS l
     WHERE l.entry_id = NEW.reverses_entry_id
     FOR KEY SHARE;
@@ -112,10 +125,11 @@ BEGIN
             USING ERRCODE = 'foreign_key_violation';
     END IF;
 
-    IF NEW.amount + reversed_amount <> 0 THEN
+    IF NEW.subject_key IS DISTINCT FROM reversed_subject_key
+       OR NEW.currency IS DISTINCT FROM reversed_currency
+       OR NEW.amount + reversed_amount <> 0 THEN
         RAISE EXCEPTION
-            'reversal amount % must negate prior amount %',
-            NEW.amount,
+            'reversal must negate prior amount % for the same subject/currency',
             reversed_amount
             USING ERRCODE = 'check_violation';
     END IF;
@@ -146,33 +160,69 @@ BEFORE UPDATE OR DELETE ON pro_temporal_lab.ledger
 FOR EACH ROW
 EXECUTE FUNCTION pro_temporal_lab.reject_ledger_mutation();
 
-INSERT INTO pro_temporal_lab.ledger (
-    idempotency_key, event_kind, amount
-)
-VALUES ('L-1', 'credit', 5.00);
+-- The learner uses the domain name `change_ledger`; this automatically
+-- updatable view exposes that name and the more descriptive identity column
+-- while the base table retains the focused immutability trigger used below.
+CREATE VIEW pro_temporal_lab.change_ledger AS
+SELECT
+    l.entry_id AS ledger_entry_id,
+    l.subject_key,
+    l.idempotency_key,
+    l.event_kind,
+    l.amount,
+    l.currency,
+    l.reverses_entry_id
+FROM pro_temporal_lab.ledger AS l;
 
-INSERT INTO pro_temporal_lab.ledger (
-    idempotency_key, event_kind, amount, reverses_entry_id
+INSERT INTO pro_temporal_lab.change_ledger (
+    subject_key, idempotency_key, event_kind, amount, currency
 )
-SELECT 'L-2', 'credit.reversal', -5.00, l.entry_id
-FROM pro_temporal_lab.ledger AS l
-WHERE l.idempotency_key = 'L-1';
+VALUES ('CUS-100', 'LEDGER-100', 'credit', 5.00, 'USD');
 
-INSERT INTO pro_temporal_lab.ledger (
-    idempotency_key, event_kind, amount, reverses_entry_id
+INSERT INTO pro_temporal_lab.change_ledger (
+    subject_key,
+    idempotency_key,
+    event_kind,
+    amount,
+    currency,
+    reverses_entry_id
 )
-SELECT 'L-3', 'reversal.corrected', 5.00, l.entry_id
-FROM pro_temporal_lab.ledger AS l
-WHERE l.idempotency_key = 'L-2';
+SELECT
+    l.subject_key,
+    'LEDGER-101',
+    'credit.reversal',
+    -5.00,
+    l.currency,
+    l.ledger_entry_id
+FROM pro_temporal_lab.change_ledger AS l
+WHERE l.idempotency_key = 'LEDGER-100';
+
+INSERT INTO pro_temporal_lab.change_ledger (
+    subject_key,
+    idempotency_key,
+    event_kind,
+    amount,
+    currency,
+    reverses_entry_id
+)
+SELECT
+    l.subject_key,
+    'LEDGER-102',
+    'reversal.corrected',
+    5.00,
+    l.currency,
+    l.ledger_entry_id
+FROM pro_temporal_lab.change_ledger AS l
+WHERE l.idempotency_key = 'LEDGER-101';
 
 -- These negative controls prove the guarantees, rather than merely describing
 -- them. Each inner block rolls back its failed statement automatically.
 DO $ledger_negative_controls$
 BEGIN
     BEGIN
-        UPDATE pro_temporal_lab.ledger
+        UPDATE pro_temporal_lab.change_ledger
         SET amount = 0
-        WHERE idempotency_key = 'L-1';
+        WHERE idempotency_key = 'LEDGER-100';
         RAISE EXCEPTION 'ledger UPDATE unexpectedly succeeded';
     EXCEPTION
         WHEN check_violation THEN
@@ -180,8 +230,8 @@ BEGIN
     END;
 
     BEGIN
-        DELETE FROM pro_temporal_lab.ledger
-        WHERE idempotency_key = 'L-1';
+        DELETE FROM pro_temporal_lab.change_ledger
+        WHERE idempotency_key = 'LEDGER-100';
         RAISE EXCEPTION 'ledger DELETE unexpectedly succeeded';
     EXCEPTION
         WHEN check_violation THEN
@@ -189,10 +239,16 @@ BEGIN
     END;
 
     BEGIN
-        INSERT INTO pro_temporal_lab.ledger (
-            idempotency_key, event_kind, amount
+        INSERT INTO pro_temporal_lab.change_ledger (
+            subject_key, idempotency_key, event_kind, amount, currency
         )
-        VALUES ('L-1', 'duplicate.retry', 5.00);
+        VALUES (
+            'CUS-100',
+            'LEDGER-100',
+            'duplicate.retry',
+            5.00,
+            'USD'
+        );
         RAISE EXCEPTION 'duplicate idempotency key unexpectedly succeeded';
     EXCEPTION
         WHEN unique_violation THEN
@@ -200,15 +256,23 @@ BEGIN
     END;
 
     BEGIN
-        INSERT INTO pro_temporal_lab.ledger (
+        INSERT INTO pro_temporal_lab.change_ledger (
+            subject_key,
             idempotency_key,
             event_kind,
             amount,
+            currency,
             reverses_entry_id
         )
-        SELECT 'L-BAD', 'invalid.reversal', -4.00, l.entry_id
-        FROM pro_temporal_lab.ledger AS l
-        WHERE l.idempotency_key = 'L-3';
+        SELECT
+            l.subject_key,
+            'LEDGER-BAD',
+            'invalid.reversal',
+            -4.00,
+            l.currency,
+            l.ledger_entry_id
+        FROM pro_temporal_lab.change_ledger AS l
+        WHERE l.idempotency_key = 'LEDGER-102';
         RAISE EXCEPTION 'invalid reversal amount unexpectedly succeeded';
     EXCEPTION
         WHEN check_violation THEN
@@ -218,13 +282,15 @@ END
 $ledger_negative_controls$;
 
 SELECT
-    l.entry_id,
+    l.ledger_entry_id,
+    l.subject_key,
     l.idempotency_key,
     l.event_kind,
     l.amount,
+    l.currency,
     l.reverses_entry_id
-FROM pro_temporal_lab.ledger AS l
-ORDER BY l.entry_id;
+FROM pro_temporal_lab.change_ledger AS l
+ORDER BY l.ledger_entry_id;
 
 -- Exercise 5: immutable, idempotent decision log for hold release/review.
 -- Eligibility remains a report; no fixture row is physically deleted.
@@ -476,7 +542,7 @@ DO $solution$
 BEGIN
     IF (
         SELECT COUNT(*)
-        FROM pro_temporal_lab.facts AS f
+        FROM pro_temporal_lab.customer_terms AS f
         WHERE f.valid_period @> DATE '2026-02-15'
           AND f.system_period @> TIMESTAMPTZ '2026-04-02 00:00+00'
     ) <> 1 THEN
@@ -543,12 +609,12 @@ SELECT
     p.probe_id,
     p.valid_on,
     p.known_at,
-    COUNT(f.fact_version_id) AS matching_versions,
+    COUNT(f.term_version_id) AS matching_versions,
     p.expected_matches,
-    COUNT(f.fact_version_id) = p.expected_matches AS matches_expectation
+    COUNT(f.term_version_id) = p.expected_matches AS matches_expectation
 FROM probes AS p
-LEFT JOIN pro_temporal_lab.facts AS f
-  ON f.subject_key = 'SUB-1'
+LEFT JOIN pro_temporal_lab.customer_terms AS f
+  ON f.customer_key = 'CUS-100'
  AND f.valid_period @> p.valid_on
  AND f.system_period @> p.known_at
 GROUP BY p.probe_id, p.valid_on, p.known_at, p.expected_matches
@@ -585,10 +651,10 @@ BEGIN
                 p.valid_on,
                 p.known_at,
                 p.expected_matches,
-                COUNT(f.fact_version_id) AS matching_versions
+                COUNT(f.term_version_id) AS matching_versions
             FROM probes AS p
-            LEFT JOIN pro_temporal_lab.facts AS f
-              ON f.subject_key = 'SUB-1'
+            LEFT JOIN pro_temporal_lab.customer_terms AS f
+              ON f.customer_key = 'CUS-100'
              AND f.valid_period @> p.valid_on
              AND f.system_period @> p.known_at
             GROUP BY p.valid_on, p.known_at, p.expected_matches

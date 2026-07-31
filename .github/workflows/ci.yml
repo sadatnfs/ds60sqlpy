@@ -109,7 +109,8 @@ jobs:
         run: |
           uv run --no-sync python -m ipykernel install --user `
             --name ds60sqlpy --display-name "Python (ds60sqlpy)"
-          .\scripts\start_ds60.ps1 `
+          powershell.exe -NoProfile -ExecutionPolicy Bypass `
+            -File .\scripts\start_ds60.ps1 `
             -DiagnosticsOnly -NonInteractive -SkipPostgreSql
       - name: Offline notebook smoke execution
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
@@ -134,7 +135,10 @@ jobs:
       - name: Exercise the Windows discovery bootstrap
         if: runner.os == 'Windows'
         shell: pwsh
-        run: .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -WhatIf
+        run: >-
+          powershell.exe -NoProfile -ExecutionPolicy Bypass
+          -File .\scripts\bootstrap_windows.ps1
+          -SkipPostgreSql -WhatIf
       - name: Run the Windows learner setup
         if: runner.os == 'Windows'
         shell: pwsh

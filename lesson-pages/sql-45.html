@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-45/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-45-phase-3-optimization-project">Day 45 — Phase 3 Optimization Project<a class="heading-anchor" href="#guide--day-45-phase-3-optimization-project" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -285,6 +384,48 @@
 <li><strong>Prerequisites:</strong> <a href="sql-44.html#guide">Day 44 — monitoring and diagnostics</a> and the complete performance sequence from Days 31–44</li>
 <li><strong>Artifacts:</strong> <a href="sql-45.html#learner">learner SQL</a> · <a href="sql-45.html#solution-1">solution reasoning</a> · <a href="sql-45.html#solution-2">executable solution</a></li>
 </ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-45 — Phase3 Optimization Project</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-45/lesson/workspace/sql/postgres-60day/day45_phase3_optimization_project.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day45_phase3_optimization_project.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/day45_phase3_optimization_project.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Experimental control, Buffer evidence, Regression check. Its worked SQL reads or creates <code>customers</code>, <code>orders</code>, <code>order_items</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: Capture the function-wrapped date baseline, rewrite it as a raw half-open range, and add one candidate index inside the rollback transaction. Run both forms several times, reconcile country/unit results, and calculate percentage change from comparable observations without promising 70%. The first runnable example has a concrete contract: Example 1 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its <code>country</code> key set and row count over <code>customers</code>, <code>orders</code>, and <code>order_items</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan. Its final projection is <code>country</code>. Run the underlying query without <code>EXPLAIN</code> first; preserve its keys and row count, then compare estimates with actual rows × loops and read buffer/timing evidence without requiring one fixed node type. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day45_phase3_optimization_project.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">EXPLAIN ANALYZE
+SELECT c.country, SUM(oi.quantity)
+FROM customers c
+JOIN orders o ON o.customer_id = c.customer_id
+JOIN order_items oi ON oi.order_id = o.order_id
+WHERE date_trunc(&#x27;day&#x27;, o.order_date) &gt;= date_trunc(&#x27;day&#x27;, now() - interval &#x27;180 days&#x27;)
+GROUP BY c.country
+ORDER BY 2 DESC;</code></pre>
+<p><strong>How to read it:</strong> Example 1 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.</p>
+<p><strong>Expected result/shape:</strong> Example 1 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its <code>country</code> key set and row count over <code>customers</code>, <code>orders</code>, and <code>order_items</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">CREATE INDEX IF NOT EXISTS idx_orders_order_date_only ON orders(order_date);</code></pre>
+<p><strong>How to read it:</strong> Example 2 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
+<p><strong>Expected result/shape:</strong> Example 2 must print the expected DDL command tag for <code>idx_orders_order_date_only</code>, and <code>orders</code>. Verify the object in <code>pg_catalog.pg_index</code>, and <code>pg_catalog.pg_indexes</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Run a controlled optimization experiment with comparable plans and outputs.</li>
@@ -301,14 +442,22 @@
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <p>Complete these in the <a href="sql-45.html#learner">learner SQL</a>:</p>
 <ol>
-<li>Predict the effect of replacing the non-sargable timestamp expression.</li>
-<li>Capture/compare JSON plans for baseline and rewrite.</li>
-<li>Prove direct and pre-aggregated results equivalent with two-way <code>EXCEPT</code>.</li>
-<li>Test an empty-window boundary.</li>
-<li>Design and justify one workload-specific index.</li>
-<li>Write an optimization report separating semantics, plans, and timing.</li>
+<li>Predict the effect of replacing the non-sargable timestamp expression. <strong>Inputs/evidence:</strong> For sql-45 Exercise 1, run the underlying read-only query over <code>orders</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison. <strong>Expected result/shape:</strong> For sql-45 Exercise 1, expected output: one row per <code>order_id</code>. The final columns are <code>order_id</code>. <strong>Verify:</strong> For sql-45 Exercise 1, run the underlying query without <code>EXPLAIN</code> and preserve its <code>order_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li>Capture/compare JSON plans for baseline and rewrite. <strong>Inputs/evidence:</strong> For sql-45 Exercise 2, run the underlying read-only query over <code>orders</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison. <strong>Expected result/shape:</strong> For sql-45 Exercise 2, expected output: one row per <code>customer_id</code>. The final columns are <code>customer_id</code>, and <code>revenue</code>. <strong>Verify:</strong> For sql-45 Exercise 2, run the underlying query without <code>EXPLAIN</code> and preserve its <code>customer_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li>Prove direct and pre-aggregated results equivalent with two-way <code>EXCEPT</code>. <strong>Inputs/evidence:</strong> For sql-45 Exercise 3, read from <code>orders</code>, <code>customers</code>, and <code>order_items</code>. Build the answer toward <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code>; keep <code>order_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-45 Exercise 3, expected output: one row per <code>order_id</code>. The final columns are <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code>. <strong>Verify:</strong> For sql-45 Exercise 3, project <code>order_id</code> plus the raw source columns from <code>orders</code>, <code>customers</code>, and <code>order_items</code> at each join stage; record row count and distinct <code>order_id</code>, then assert the final <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code> values match those staged rows without unintended fanout or loss. Add one source row with a new <code>order_id</code>; verify the result gains exactly one row carrying that <code>order_id</code> value.</li>
+<li>Test an empty-window boundary. <strong>Inputs/evidence:</strong> For sql-45 Exercise 4, read from <code>orders</code>. Build the answer toward <code>impossible_window_rows</code>; keep <code>order_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-45 Exercise 4, expected output: one row per <code>order_id</code>. The final columns are <code>impossible_window_rows</code>. <strong>Verify:</strong> For sql-45 Exercise 4, run an anti-check that counts rows where NOT ((order_date &gt;= timestamptz &#x27;1900-01-01 00:00:00+00&#x27; AND order_date &lt; timestamptz &#x27;1900-01-02 00:00:00+00&#x27;)); require unique <code>order_id</code> where the expected grain is one row per key and confirm the projected <code>impossible_window_rows</code> against <code>orders</code>. Insert rows immediately before, exactly at, and immediately after <code>order_date &gt;= timestamptz &#x27;1900-01-01 00:00:00+00&#x27;</code>, and <code>order_date &lt; timestamptz &#x27;1900-01-02 00:00:00+00&#x27;</code>; identify which rows pass each inclusive or exclusive comparison.</li>
+<li>Design and justify one workload-specific index. <strong>Inputs/evidence:</strong> For sql-45 Exercise 5, read from <code>pg_indexes</code>. Build the answer toward <code>indexname</code>, and <code>indexdef</code>; keep <code>indexname</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-45 Exercise 5, expected output: one row per <code>indexname</code>. The final columns are <code>indexname</code>, and <code>indexdef</code>. The final order is <code>indexname</code>. <strong>Verify:</strong> For sql-45 Exercise 5, run an anti-check that counts rows where NOT ((schemaname = &#x27;training&#x27; AND indexname LIKE &#x27;%solution&#x27;)); require unique <code>indexname</code> where the expected grain is one row per key and confirm the projected <code>indexname</code>, and <code>indexdef</code> against <code>pg_indexes</code>. Add one row for which <code>(schemaname = &#x27;training&#x27; AND indexname LIKE &#x27;%solution&#x27;)</code> is true and one for which it is false; verify only the matching <code>indexname</code> value is returned.</li>
+<li>Write an optimization report separating semantics, plans, and timing. <strong>Inputs/evidence:</strong> For sql-45 Exercise 6, complete the write an optimization report separating semantics plans and  written analysis and support its claims with read-only evidence from <code>customers</code>, <code>orders</code>, and <code>order_items</code>. Mark unverified assumptions explicitly. <strong>Expected result/shape:</strong> For sql-45 Exercise 6, expected output: a completed the write an optimization report separating semantics plans and  written analysis with explicit <code>decision</code>, <code>evidence</code>, <code>owner</code>, <code>failure_response</code>, <code>fallback</code>, and <code>rollback_limit</code> fields. The final columns are <code>decision</code>, <code>evidence</code>, <code>owner</code>, <code>failure_response</code>, <code>fallback</code>, and <code>rollback_limit</code>. <strong>Verify:</strong> For sql-45 Exercise 6, check the write an optimization report separating semantics plans and  written analysis against <code>decision</code>, <code>evidence</code>, <code>owner</code>, <code>failure_response</code>, <code>fallback</code>, and <code>rollback_limit</code>. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which <code>fallback</code> and <code>rollback_limit</code> entries govern it.</li>
 </ol>
 <p>Produce a decision record covering plan, buffers, correctness, index cost, and whether the candidate should proceed.</p>
+<h4 id="guide--common-mistakes-and-how-to-recover">Common mistakes and how to recover<a class="heading-anchor" href="#guide--common-mistakes-and-how-to-recover" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Lesson-specific semantic mistake:</strong> Do not skip this worked-model requirement: Capture the function-wrapped date baseline, rewrite it as a raw half-open range, and add one candidate index inside the rollback transaction. Run both forms several times, reconcile country/unit results, and calculate percentage change from comparable observations without promising 70%.</li>
+<li><strong>Unexpected row count:</strong> display keys before aggregates, count rows after each join/filter stage, and find the first stage whose grain differs from the contract. Do not hide fanout with <code>DISTINCT</code>.</li>
+<li><strong>Unexpected <code>NULL</code> or missing row:</strong> decide whether the fact is unknown, inapplicable, zero, or absent before using <code>COALESCE</code>; inspect outer-join predicate placement and empty-input aggregate behavior.</li>
+<li><strong>Unstable top/first/last output:</strong> add <code>ORDER BY</code> with a unique final tie-breaker before <code>LIMIT</code> or order-sensitive windows/aggregates.</li>
+<li><strong><code>psql</code> stops on an error:</strong> fix the first error shown by <code>ON_ERROR_STOP</code>, restore the declared transaction/setup state, and rerun the complete file. A later successful statement does not validate a partial run.</li>
+</ul>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Are result keys and totals identical before performance is discussed?</li>
@@ -347,17 +496,45 @@
 <p>Production index creation requires a separate reviewed migration and may need <code>CREATE INDEX CONCURRENTLY</code>; the tutorial transaction intentionally persists nothing.</p>
 <h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
 <p>The six explicit prompts make this a measured project instead of a single rewrite. Begin with a prediction, capture JSON plans, and prove equivalence with two-way <code>EXCEPT</code> before comparing performance. JSON makes the root execution time and buffer fields machine-readable, but repeated trials and environment notes are still required.</p>
-<p>Test the empty-window boundary and document any proposed index as a workload tradeoff, not free speed. The final report must keep three claims separate: same result semantics, observed planner evidence, and timing that may change on different hardware, cache state, cardinality, or PostgreSQL versions.</p></div>
+<p>Test the empty-window boundary and document any proposed index as a workload tradeoff, not free speed. The final report must keep three claims separate: same result semantics, observed planner evidence, and timing that may change on different hardware, cache state, cardinality, or PostgreSQL versions.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-45 — Phase3 Optimization Project.
+
+I have completed the direct catalog prerequisite: `sql-44`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day45_phase3_optimization_project.md
+- Answer-free learner SQL: sql/postgres-60day/day45_phase3_optimization_project.sql
+
+Key terms to teach in context: Experimental control, Buffer evidence, Regression check. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Capture the function-wrapped date baseline, rewrite it as a raw half-open range, and add one candidate index inside the rollback transaction. Run both forms several times, reconcile country/unit results, and calculate percentage change from comparable observations without promising 70%.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-45/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -374,13 +551,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 45: Phase 3 Project - Performance Optimization</span>
+<span>-- BEGINNER WORKFLOW — sql-45: Phase3 Optimization Project</span>
+<span>-- Guide: sql/postgres-60day/companion-guides/day45_phase3_optimization_project.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-45/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: customers, orders, order_items.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
@@ -427,29 +621,53 @@
 <span>-- Exercises</span>
 <span>-- 1. Prediction: identify which baseline expression is non-sargable and predict</span>
 <span>--    how the half-open timestamp range changes index eligibility.</span>
+<span>--    Inputs: For sql-45 Exercise 1, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
+<span>--    Expected result/shape: For sql-45 Exercise 1, expected output: one row per `order_id`. The final columns are `order_id`.</span>
+<span>--    Verify: For sql-45 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
+<span>--    Hint ladder, rung 1: For sql-45 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.</span>
 <span>-- 2. Construction: capture EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) for the</span>
 <span>--    baseline and rewrite, then compare root-node execution time and buffers.</span>
+<span>--    Inputs: For sql-45 Exercise 2, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
+<span>--    Expected result/shape: For sql-45 Exercise 2, expected output: one row per `customer_id`. The final columns are `customer_id`, and `revenue`.</span>
+<span>--    Verify: For sql-45 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
+<span>--    Hint ladder, rung 1: For sql-45 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows.</span>
 <span>-- 3. Debugging: prove that the pre-aggregated rewrite returns the same country</span>
 <span>--    totals as the direct join by comparing them with EXCEPT in both directions.</span>
+<span>--    Inputs: For sql-45 Exercise 3, read from `orders`, `customers`, and `order_items`. Build the answer toward `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-45 Exercise 3, expected output: one row per `order_id`. The final columns are `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`.</span>
+<span>--    Verify: For sql-45 Exercise 3, project `order_id` plus the raw source columns from `orders`, `customers`, and `order_items` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `customer_id`, `order_date`, `status`, and `total_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span>
+<span>--    Hint ladder, rung 1: For sql-45 Exercise 3, run `direct`, `items`, and `preaggregated` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span>
 <span>-- 4. Edge case: test a date window with zero matching orders and ensure every</span>
 <span>--    rewrite returns the same empty result rather than an invented zero row.</span>
+<span>--    Inputs: For sql-45 Exercise 4, read from `orders`. Build the answer toward `impossible_window_rows`; keep `order_id` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-45 Exercise 4, expected output: one row per `order_id`. The final columns are `impossible_window_rows`.</span>
+<span>--    Verify: For sql-45 Exercise 4, run an anti-check that counts rows where NOT ((order_date &gt;= timestamptz &#x27;1900-01-01 00:00:00+00&#x27; AND order_date &lt; timestamptz &#x27;1900-01-02 00:00:00+00&#x27;)); require unique `order_id` where the expected grain is one row per key and confirm the projected `impossible_window_rows` against `orders`. Insert rows immediately before, exactly at, and immediately after `order_date &gt;= timestamptz &#x27;1900-01-01 00:00:00+00&#x27;`, and `order_date &lt; timestamptz &#x27;1900-01-02 00:00:00+00&#x27;`; identify which rows pass each inclusive or exclusive comparison.</span>
+<span>--    Hint ladder, rung 1: For sql-45 Exercise 4, inspect the source keys that survive `WHERE`.</span>
 <span>-- 5. Design: propose one composite or covering index, state the exact query it</span>
 <span>--    serves, and explain its write/storage tradeoff.</span>
+<span>--    Inputs: For sql-45 Exercise 5, read from `pg_indexes`. Build the answer toward `indexname`, and `indexdef`; keep `indexname` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-45 Exercise 5, expected output: one row per `indexname`. The final columns are `indexname`, and `indexdef`. The final order is `indexname`.</span>
+<span>--    Verify: For sql-45 Exercise 5, run an anti-check that counts rows where NOT ((schemaname = &#x27;training&#x27; AND indexname LIKE &#x27;%solution&#x27;)); require unique `indexname` where the expected grain is one row per key and confirm the projected `indexname`, and `indexdef` against `pg_indexes`. Add one row for which `(schemaname = &#x27;training&#x27; AND indexname LIKE &#x27;%solution&#x27;)` is true and one for which it is false; verify only the matching `indexname` value is returned.</span>
+<span>--    Hint ladder, rung 1: For sql-45 Exercise 5, inspect the source keys that survive `WHERE`; then check `indexname` before applying the row cap.</span>
 <span>-- 6. Explanation: write a short optimization report separating semantic</span>
 <span>--    equivalence, planner evidence, and environment-dependent timing.</span>
+<span>--    Inputs: For sql-45 Exercise 6, complete the write an optimization report separating semantics plans and  written analysis and support its claims with read-only evidence from `customers`, `orders`, and `order_items`. Mark unverified assumptions explicitly.</span>
+<span>--    Expected result/shape: For sql-45 Exercise 6, expected output: a completed the write an optimization report separating semantics plans and  written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.</span>
+<span>--    Verify: For sql-45 Exercise 6, check the write an optimization report separating semantics plans and  written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.</span>
+<span>--    Hint ladder, rung 1: For sql-45 Exercise 6, check the write an optimization report separating semantics plans and  written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -473,6 +691,26 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-45-solution-performance-optimization-project">Day 45 Solution — Performance Optimization Project<a class="heading-anchor" href="#solution-1--day-45-solution-performance-optimization-project" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day45_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day45_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are Experimental control, Buffer evidence, Regression check. Its worked-model focus is: Capture the function-wrapped date baseline, rewrite it as a raw half-open range, and add one candidate index inside the rollback transaction. Run both forms several times, reconcile country/unit results, and calculate percentage change from comparable observations without promising 70%.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>The deliverable is evidence, not merely a rewritten query: capture a baseline, add plausible indexes, use a sargable predicate and set-based aggregation, then compare actual plans. The executable project answer is <a href="sql-45.html#solution-2"><code>day45_solutions.sql</code></a>.</p>
 <h4 id="solution-1--baseline-and-optimized-candidate">Baseline and optimized candidate<a class="heading-anchor" href="#solution-1--baseline-and-optimized-candidate" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-sql">BEGIN;
@@ -536,18 +774,78 @@ ROLLBACK;</code></pre>
 </ul>
 <h4 id="solution-1--exercise-1-make-the-timestamp-predicate-sargable">Exercise 1 — Make the timestamp predicate sargable<a class="heading-anchor" href="#solution-1--exercise-1-make-the-timestamp-predicate-sargable" aria-label="Link to this section">#</a></h4>
 <p>The direct half-open range leaves <code>order_date</code> unwrapped, making the B-tree eligible while preserving a clear time boundary.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-45 Exercise 1, run the underlying read-only query over <code>orders</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</li>
+<li><strong>Expected result/shape:</strong> For sql-45 Exercise 1, expected output: one row per <code>order_id</code>. The final columns are <code>order_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-45 Exercise 1, run the underlying query without <code>EXPLAIN</code> and preserve its <code>order_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li><strong>Intermediate relation check:</strong> For sql-45 Exercise 1, run the underlying query without <code>EXPLAIN</code> and preserve its <code>order_id</code> rows.</li>
+<li><strong>Clause check:</strong> For sql-45 Exercise 1, the solution actually uses <code>FROM</code>, <code>WHERE</code>, and <code>SELECT</code>. Read only those operations: begin at <code>orders</code>, preserve one row per <code>order_id</code>, and finish with <code>order_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-45 Exercise 1, the chosen form is justified by this lesson-specific rationale: The direct half-open range leaves <code>order_date</code> unwrapped, making the B-tree eligible while preserving a clear time boundary. Evaluate another form against the concrete expected result (one row per <code>order_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+</ul>
 <h4 id="solution-1--exercise-2-capture-structured-evidence">Exercise 2 — Capture structured evidence<a class="heading-anchor" href="#solution-1--exercise-2-capture-structured-evidence" aria-label="Link to this section">#</a></h4>
 <p><code>FORMAT JSON</code> keeps plan nodes, estimates, actual rows, buffers, and timing machine-readable. It still describes only this run and environment.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-45 Exercise 2, run the underlying read-only query over <code>orders</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</li>
+<li><strong>Expected result/shape:</strong> For sql-45 Exercise 2, expected output: one row per <code>customer_id</code>. The final columns are <code>customer_id</code>, and <code>revenue</code>.</li>
+<li><strong>Independent verification:</strong> For sql-45 Exercise 2, run the underlying query without <code>EXPLAIN</code> and preserve its <code>customer_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li><strong>Intermediate relation check:</strong> For sql-45 Exercise 2, run the underlying query without <code>EXPLAIN</code> and preserve its <code>customer_id</code> rows.</li>
+<li><strong>Clause check:</strong> For sql-45 Exercise 2, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>GROUP BY</code>, and <code>SELECT</code>. Read only those operations: begin at <code>orders</code>, preserve one row per <code>customer_id</code>, and finish with <code>customer_id</code>, and <code>revenue</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-45 Exercise 2, the chosen form is justified by this lesson-specific rationale: <code>FORMAT JSON</code> keeps plan nodes, estimates, actual rows, buffers, and timing machine-readable. Evaluate another form against the concrete expected result (one row per <code>customer_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+</ul>
 <h4 id="solution-1--exercise-3-prove-semantic-equivalence">Exercise 3 — Prove semantic equivalence<a class="heading-anchor" href="#solution-1--exercise-3-prove-semantic-equivalence" aria-label="Link to this section">#</a></h4>
 <p>Direct and pre-aggregated country totals are compared with <code>EXCEPT</code> in both directions. Both difference sets must be empty before performance matters.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-45 Exercise 3, read from <code>orders</code>, <code>customers</code>, and <code>order_items</code>. Build the answer toward <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code>; keep <code>order_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-45 Exercise 3, expected output: one row per <code>order_id</code>. The final columns are <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code>.</li>
+<li><strong>Independent verification:</strong> For sql-45 Exercise 3, project <code>order_id</code> plus the raw source columns from <code>orders</code>, <code>customers</code>, and <code>order_items</code> at each join stage; record row count and distinct <code>order_id</code>, then assert the final <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code> values match those staged rows without unintended fanout or loss. Add one source row with a new <code>order_id</code>; verify the result gains exactly one row carrying that <code>order_id</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-45 Exercise 3, run <code>direct</code>, <code>items</code>, and <code>preaggregated</code> one at a time. Record each CTE&#x27;s row count and <code>order_id</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-45 Exercise 3, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>WHERE</code>, <code>GROUP BY</code>, and <code>SELECT</code>. Read only those operations: begin at <code>orders</code>, <code>customers</code>, and <code>order_items</code>, preserve one row per <code>order_id</code>, and finish with <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-45 Exercise 3, the chosen form is justified by this lesson-specific rationale: Direct and pre-aggregated country totals are compared with <code>EXCEPT</code> in both directions. Evaluate another form against the concrete expected result (one row per <code>order_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>order_id</code>; verify the result gains exactly one row carrying that <code>order_id</code> value.</li>
+</ul>
 <h4 id="solution-1--exercise-4-test-the-empty-window-boundary">Exercise 4 — Test the empty-window boundary<a class="heading-anchor" href="#solution-1--exercise-4-test-the-empty-window-boundary" aria-label="Link to this section">#</a></h4>
 <p>An impossible historical window should return no rows for every equivalent shape. An optimization must not manufacture a zero-valued group.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-45 Exercise 4, read from <code>orders</code>. Build the answer toward <code>impossible_window_rows</code>; keep <code>order_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-45 Exercise 4, expected output: one row per <code>order_id</code>. The final columns are <code>impossible_window_rows</code>.</li>
+<li><strong>Independent verification:</strong> For sql-45 Exercise 4, run an anti-check that counts rows where NOT ((order_date &gt;= timestamptz &#x27;1900-01-01 00:00:00+00&#x27; AND order_date &lt; timestamptz &#x27;1900-01-02 00:00:00+00&#x27;)); require unique <code>order_id</code> where the expected grain is one row per key and confirm the projected <code>impossible_window_rows</code> against <code>orders</code>. Insert rows immediately before, exactly at, and immediately after <code>order_date &gt;= timestamptz &#x27;1900-01-01 00:00:00+00&#x27;</code>, and <code>order_date &lt; timestamptz &#x27;1900-01-02 00:00:00+00&#x27;</code>; identify which rows pass each inclusive or exclusive comparison.</li>
+<li><strong>Intermediate relation check:</strong> For sql-45 Exercise 4, inspect the source keys that survive <code>WHERE</code>.</li>
+<li><strong>Clause check:</strong> For sql-45 Exercise 4, the solution actually uses <code>FROM</code>, <code>WHERE</code>, and <code>SELECT</code>. Read only those operations: begin at <code>orders</code>, preserve one row per <code>order_id</code>, and finish with <code>impossible_window_rows</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-45 Exercise 4, the chosen form is justified by this lesson-specific rationale: An impossible historical window should return no rows for every equivalent shape. Evaluate another form against the concrete expected result (one row per <code>order_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Insert rows immediately before, exactly at, and immediately after <code>order_date &gt;= timestamptz &#x27;1900-01-01 00:00:00+00&#x27;</code>, and <code>order_date &lt; timestamptz &#x27;1900-01-02 00:00:00+00&#x27;</code>; identify which rows pass each inclusive or exclusive comparison.</li>
+</ul>
 <h4 id="solution-1--exercise-5-document-index-tradeoffs">Exercise 5 — Document index tradeoffs<a class="heading-anchor" href="#solution-1--exercise-5-document-index-tradeoffs" aria-label="Link to this section">#</a></h4>
 <p>The candidate serves date-bounded customer work but consumes storage and makes writes more expensive. Production creation needs a reviewed migration.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-45 Exercise 5, read from <code>pg_indexes</code>. Build the answer toward <code>indexname</code>, and <code>indexdef</code>; keep <code>indexname</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-45 Exercise 5, expected output: one row per <code>indexname</code>. The final columns are <code>indexname</code>, and <code>indexdef</code>. The final order is <code>indexname</code>.</li>
+<li><strong>Independent verification:</strong> For sql-45 Exercise 5, run an anti-check that counts rows where NOT ((schemaname = &#x27;training&#x27; AND indexname LIKE &#x27;%solution&#x27;)); require unique <code>indexname</code> where the expected grain is one row per key and confirm the projected <code>indexname</code>, and <code>indexdef</code> against <code>pg_indexes</code>. Add one row for which <code>(schemaname = &#x27;training&#x27; AND indexname LIKE &#x27;%solution&#x27;)</code> is true and one for which it is false; verify only the matching <code>indexname</code> value is returned.</li>
+<li><strong>Intermediate relation check:</strong> For sql-45 Exercise 5, inspect the source keys that survive <code>WHERE</code>; then check <code>indexname</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-45 Exercise 5, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>pg_indexes</code>, preserve one row per <code>indexname</code>, and finish with <code>indexname</code>, and <code>indexdef</code> ordered by <code>indexname</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-45 Exercise 5, the chosen form is justified by this lesson-specific rationale: The candidate serves date-bounded customer work but consumes storage and makes writes more expensive. Evaluate another form against the concrete expected result (one row per <code>indexname</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row for which <code>(schemaname = &#x27;training&#x27; AND indexname LIKE &#x27;%solution&#x27;)</code> is true and one for which it is false; verify only the matching <code>indexname</code> value is returned.</li>
+</ul>
 <h4 id="solution-1--exercise-6-write-the-decision-record">Exercise 6 — Write the decision record<a class="heading-anchor" href="#solution-1--exercise-6-write-the-decision-record" aria-label="Link to this section">#</a></h4>
-<p>Report correctness, plan evidence, observed timing, operational cost, and limits as separate claims. The compact seed cannot support a universal speed promise.</p></div>
+<p>Report correctness, plan evidence, observed timing, operational cost, and limits as separate claims. The compact seed cannot support a universal speed promise.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-45 Exercise 6, complete the write an optimization report separating semantics plans and  written analysis and support its claims with read-only evidence from <code>customers</code>, <code>orders</code>, and <code>order_items</code>. Mark unverified assumptions explicitly.</li>
+<li><strong>Expected result/shape:</strong> For sql-45 Exercise 6, expected output: a completed the write an optimization report separating semantics plans and  written analysis with explicit <code>decision</code>, <code>evidence</code>, <code>owner</code>, <code>failure_response</code>, <code>fallback</code>, and <code>rollback_limit</code> fields. The final columns are <code>decision</code>, <code>evidence</code>, <code>owner</code>, <code>failure_response</code>, <code>fallback</code>, and <code>rollback_limit</code>.</li>
+<li><strong>Independent verification:</strong> For sql-45 Exercise 6, check the write an optimization report separating semantics plans and  written analysis against <code>decision</code>, <code>evidence</code>, <code>owner</code>, <code>failure_response</code>, <code>fallback</code>, and <code>rollback_limit</code>. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which <code>fallback</code> and <code>rollback_limit</code> entries govern it.</li>
+<li><strong>Intermediate relation check:</strong> For sql-45 Exercise 6, check the write an optimization report separating semantics plans and  written analysis against <code>decision</code>, <code>evidence</code>, <code>owner</code>, <code>failure_response</code>, <code>fallback</code>, and <code>rollback_limit</code>.</li>
+<li><strong>Clause check:</strong> For sql-45 Exercise 6, the solution actually uses <code>WITH</code>, and <code>FROM</code>. Read only those operations: begin at <code>customers</code>, <code>orders</code>, and <code>order_items</code>, preserve one row per <code>customer_id</code>, and finish with <code>decision</code>, <code>evidence</code>, <code>owner</code>, <code>failure_response</code>, <code>fallback</code>, and <code>rollback_limit</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-45 Exercise 6, the chosen form is justified by this lesson-specific rationale: Report correctness, plan evidence, observed timing, operational cost, and limits as separate claims. Evaluate another form against the concrete expected result (a completed the write an optimization report separating semantics plans and  written analysis with explicit <code>decision</code>, <code>evidence</code>, <code>owner</code>, <code>failure_response</code>, <code>fallback</code>, and <code>rollback_limit</code> fields) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one counterexample that invalidates the preferred decision and show which <code>fallback</code> and <code>rollback_limit</code> entries govern it.</li>
+</ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -555,7 +853,7 @@ ROLLBACK;</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -579,6 +877,19 @@ ROLLBACK;</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 45 solution: optimization project</span>
+<span>-- SOLUTION READING MAP — sql-45: Phase3 Optimization Project</span>
+<span>-- Explanation: sql/postgres-60day/solutions/day45_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day45_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
@@ -684,7 +995,50 @@ ROLLBACK;</code></pre>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-45 — Phase3 Optimization Project.
+
+I have completed the direct catalog prerequisite: `sql-44`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day45_phase3_optimization_project.md
+- Answer-free learner SQL: sql/postgres-60day/day45_phase3_optimization_project.sql
+
+Key terms to teach in context: Experimental control, Buffer evidence, Regression check. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Capture the function-wrapped date baseline, rewrite it as a raw half-open range, and add one candidate index inside the rollback transaction. Run both forms several times, reconcile country/unit results, and calculate percentage change from comparable observations without promising 70%.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-45/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-44.html"><small>Previous lesson</small><strong>sql-44</strong><span>Monitoring Diagnostics</span></a>
@@ -776,6 +1130,23 @@ ROLLBACK;</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

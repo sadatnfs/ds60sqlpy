@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-57-security-privacy-and-ethics">Day 57 — Security, Privacy, and Ethics<a class="heading-anchor" href="#guide--day-57-security-privacy-and-ethics" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-57</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
 <p>Security, privacy, and ethical analysis are requirements throughout a data project, not a checklist applied after modeling. This lesson offers lightweight technical practice; actual obligations require organizational policy, legal review, domain expertise, and affected-stakeholder input.</p>
@@ -348,7 +387,6 @@ PHONE = re.compile(
     r&quot;(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}&quot;
 )
 
-
 def detected_kinds(text: str) -&gt; set[str]:
     kinds: set[str] = set()
     if EMAIL.search(text):
@@ -358,13 +396,116 @@ def detected_kinds(text: str) -&gt; set[str]:
     return kinds</code></pre>
 <p>Regex has false positives and false negatives across languages and formats. A scanner should route suspected content for controlled handling; it must not certify that undetected text is safe.</p>
 <p>The notebook uses a hard-coded salt only to make a deterministic demo. A real pseudonymization key belongs in an approved secret manager, must be rotated under policy, and should use a keyed construction such as HMAC—not a public, reused repository constant.</p>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Open the Day 57 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
+<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
+<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
+<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
+</ol>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
+<h4 id="guide--concept-deep-dive-data-minimization-privacy-boundaries-fairness-evidence-and-accountable-controls">Concept deep dive — data minimization, privacy boundaries, fairness evidence, and accountable controls<a class="heading-anchor" href="#guide--concept-deep-dive-data-minimization-privacy-boundaries-fairness-evidence-and-accountable-controls" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
+<p>Security asks how systems resist misuse; privacy asks whether collection, use, access, retention, and disclosure of data are justified; ethics asks who benefits or is harmed and how decisions remain accountable. These overlap but are not interchangeable.</p>
+<p>Direct identifiers can name a person; quasi-identifiers can re-identify in combination. Redaction removes visibility, while pseudonymization retains linkability and is therefore still personal data. Fairness metrics require a relevant decision, group definitions, denominators, uncertainty, and harm analysis—not a single parity number.</p>
+<h5 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>allowlist output fields:</strong> starts from data that is necessary rather than trying to detect every sensitive field after collection.</li>
+<li><strong>detection → review → action:</strong> treats regex/PII scanners as bounded signals with false positives and false negatives.</li>
+<li><strong>group metric + support:</strong> reports numerator/denominator and uncertainty so tiny groups do not create confident-looking claims.</li>
+</ul>
+<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
+<h5 id="guide--focused-example-a-minimize-a-record-through-an-allowlist">Focused example A — minimize a record through an allowlist<a class="heading-anchor" href="#guide--focused-example-a-minimize-a-record-through-an-allowlist" aria-label="Link to this section">#</a></h5>
+<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
+<pre><code class="language-python">raw_record = {
+    &quot;record_id&quot;: &quot;row-17&quot;,
+    &quot;email&quot;: &quot;learner@example.invalid&quot;,
+    &quot;age_band&quot;: &quot;35-44&quot;,
+    &quot;prediction&quot;: 0.72,
+    &quot;free_text&quot;: &quot;not required for this report&quot;,
+}
+allowed_fields = {&quot;record_id&quot;, &quot;age_band&quot;, &quot;prediction&quot;}
+minimized = {key: raw_record[key] for key in allowed_fields}
+print(minimized)
+assert &quot;email&quot; not in minimized and &quot;free_text&quot; not in minimized</code></pre>
+<p><strong>Expected observation:</strong> Only fields required for the stated report cross the boundary; unnecessary raw text and contact data do not.</p>
+<p><strong>Assumption to name:</strong> The purpose and access model justify each allowed field, including the opaque record ID.</p>
+<h5 id="guide--focused-example-b-attach-sample-support-to-group-error-rates">Focused example B — attach sample support to group error rates<a class="heading-anchor" href="#guide--focused-example-b-attach-sample-support-to-group-error-rates" aria-label="Link to this section">#</a></h5>
+<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
+<pre><code class="language-python">groups = {
+    &quot;group_a&quot;: {&quot;false_negatives&quot;: 8, &quot;actual_positives&quot;: 80},
+    &quot;group_b&quot;: {&quot;false_negatives&quot;: 1, &quot;actual_positives&quot;: 5},
+}
+report = {
+    name: {
+        &quot;false_negative_rate&quot;: values[&quot;false_negatives&quot;] / values[&quot;actual_positives&quot;],
+        &quot;support&quot;: values[&quot;actual_positives&quot;],
+    }
+    for name, values in groups.items()
+}
+print(report)
+assert report[&quot;group_b&quot;][&quot;support&quot;] == 5</code></pre>
+<p><strong>Expected observation:</strong> Group B&#x27;s 20% rate rests on only five positive cases, so uncertainty and collection context are central.</p>
+<p><strong>Assumption to name:</strong> The group definitions are lawful, meaningful for the decision, and measured consistently.</p>
+<h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>What to do</th>
+<th>Evidence to keep</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define data minimization, privacy boundaries, fairness evidence, and accountable controls in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<h5 id="guide--common-mistake-and-debugging-path">Common mistake and debugging path<a class="heading-anchor" href="#guide--common-mistake-and-debugging-path" aria-label="Link to this section">#</a></h5>
+<p><strong>Mistake:</strong> Calling hashed identifiers anonymous, treating a regex scan as complete protection, or optimizing parity without decision context.</p>
+<p><strong>Debug it deliberately:</strong> Build a data-flow inventory: source, purpose, lawful/ethical basis, fields, access, retention, logs/artifacts, deletion, owners, and incident route.</p>
+<p><strong>Stop condition:</strong> Do not expose real sensitive data in a lesson, log, screenshot, model artifact, prompt, or group report without explicit authorization and minimization.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Build a DataFrame PII scanner covering column names and free text.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — data minimization, privacy boundaries, fairness evidence, and accountable controls — run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.</p>
+<ol>
 <li>Add a function that masks email addresses and phone numbers in text.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — data minimization, privacy boundaries, fairness evidence, and accountable controls — assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.</p>
+<ol>
 <li>Simulate subgroup precision and recall for a classifier and compare groups.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 3 — data minimization, privacy boundaries, fairness evidence, and accountable controls — for each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.</p>
+<ol>
 <li>Draft a one-page data-ethics checklist for your project.</li>
 </ol>
+<p><strong>Verify:</strong> Practice 4 — data minimization, privacy boundaries, fairness evidence, and accountable controls — save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Return finding type, row identifier, column, and a safe count—do not log the raw matched value. Test false-positive and missed-format cases.</li>
@@ -377,10 +518,20 @@ def detected_kinds(text: str) -&gt; set[str]:
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Threat modeling:</strong> Create a data-flow diagram for collection, notebook, artifacts, API, logs, and backups. For each boundary, identify asset, actor, threat, control, residual risk, and owner. <strong>Progressive hint:</strong> Include accidental exposure and insider misuse, not only external attackers. Trace data copies and retention through every stage.</li>
+</ol>
+<p><strong>Verify:</strong> Threat modeling — save a data-flow diagram/table covering collection, notebook, artifacts, API, logs, and backups; each boundary must name asset, actor, threat, preventive/detective control, residual risk, owner, and verification test.</p>
+<ol>
 <li><strong>Re-identification reasoning:</strong> Generalize a small dataset to satisfy a chosen k-anonymity target, then demonstrate why k-anonymity does not prevent attribute disclosure or attacks using outside information. <strong>Progressive hint:</strong> Group quasi-identifiers, inspect equivalence-class sizes and sensitive value diversity, and measure utility loss.</li>
+</ol>
+<p><strong>Verify:</strong> Re-identification reasoning — print equivalence-class sizes proving the chosen k target, then construct a homogeneous sensitive-attribute class and an outside-information linkage example that still discloses information.</p>
+<ol>
 <li><strong>Fairness uncertainty:</strong> Bootstrap subgroup precision and recall, show confidence intervals and support, and compare a gap with a ratio. Explain what to do when one group&#x27;s denominator is nearly zero. <strong>Progressive hint:</strong> Resample at the independent entity level when rows repeat. Undefined metrics should remain undefined rather than being forced to zero.</li>
+</ol>
+<p><strong>Verify:</strong> Fairness uncertainty — with declared bootstrap seed/resamples, print subgroup TP/FP/FN, support, precision/recall intervals, gap and ratio; when a denominator is near zero, return an insufficient-support warning instead of an unstable rank.</p>
+<ol>
 <li><strong>Incident response:</strong> Simulate discovering raw emails in a committed notebook output. Write the containment, notification, credential review, history cleanup decision, verification, and prevention steps. <strong>Progressive hint:</strong> Preserve a restricted incident record, stop further sharing, and assume copied history may exist. Redaction from the latest commit alone is insufficient.</li>
 </ol>
+<p><strong>Verify:</strong> Incident response — produce a timestamped incident record with containment, notification owner, credential assessment, history-rewrite decision, post-clean scan/hash, and prevention test; verify the raw email sentinel no longer appears in current artifacts.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -434,17 +585,46 @@ def detected_kinds(text: str) -&gt; set[str]:
 <li>Work in the <a href="python-57.html#learner">Day 57 learner notebook</a>.</li>
 <li>Then review the <a href="python-57.html#solution-1">Day 57 solution</a>.</li>
 <li>Continue to <a href="python-58.html#guide">Day 58 — Review and Refactoring</a>.</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<pre><code class="language-text">Tutor me through `python-57` — Day 57 — Security, Privacy, and Ethics.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize data minimization, privacy boundaries, fairness evidence, and accountable controls. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day57_security_privacy_ethics.md`
+- learner artifact: `python/ds-60day/notebooks/day57_security_privacy_ethics.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-56`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -461,12 +641,12 @@ def detected_kinds(text: str) -&gt; set[str]:
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-57-security-data-privacy-ethical-considerations">Day 57 — Security, data privacy &amp; ethical considerations<a class="heading-anchor" href="#learner--cell-1--day-57-security-data-privacy-ethical-considerations" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -522,38 +702,142 @@ def detected_kinds(text: str) -&gt; set[str]:
 <span>redacted</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-7--fairness-and-bias-brief">Fairness and bias (brief)<a class="heading-anchor" href="#learner--cell-7--fairness-and-bias-brief" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-7--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-7--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
+<h4 id="learner--cell-7--concept-lab-data-minimization-privacy-boundaries-fairness-evidence-and-accountable-controls">Concept lab — data minimization, privacy boundaries, fairness evidence, and accountable controls<a class="heading-anchor" href="#learner--cell-7--concept-lab-data-minimization-privacy-boundaries-fairness-evidence-and-accountable-controls" aria-label="Link to this section">#</a></h4>
+<h5 id="learner--cell-7--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-7--mental-model" aria-label="Link to this section">#</a></h5>
+<p>Security asks how systems resist misuse; privacy asks whether collection, use, access, retention, and disclosure of data are justified; ethics asks who benefits or is harmed and how decisions remain accountable. These overlap but are not interchangeable.</p>
+<p>Direct identifiers can name a person; quasi-identifiers can re-identify in combination. Redaction removes visibility, while pseudonymization retains linkability and is therefore still personal data. Fairness metrics require a relevant decision, group definitions, denominators, uncertainty, and harm analysis—not a single parity number.</p>
+<h5 id="learner--cell-7--read-the-api-before-running-it">Read the API before running it<a class="heading-anchor" href="#learner--cell-7--read-the-api-before-running-it" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>allowlist output fields:</strong> starts from data that is necessary rather than trying to detect every sensitive field after collection.</li>
+<li><strong>detection → review → action:</strong> treats regex/PII scanners as bounded signals with false positives and false negatives.</li>
+<li><strong>group metric + support:</strong> reports numerator/denominator and uncertainty so tiny groups do not create confident-looking claims.</li>
+</ul>
+<p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-8--focused-example-a-minimize-a-record-through-an-allowlist">Focused example A — minimize a record through an allowlist<a class="heading-anchor" href="#learner--cell-8--focused-example-a-minimize-a-record-through-an-allowlist" aria-label="Link to this section">#</a></h5>
+<p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
+<p><strong>Assumption:</strong> The purpose and access model justify each allowed field, including the opaque record ID.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>raw_record = {</span>
+<span>    &quot;record_id&quot;: &quot;row-17&quot;,</span>
+<span>    &quot;email&quot;: &quot;learner@example.invalid&quot;,</span>
+<span>    &quot;age_band&quot;: &quot;35-44&quot;,</span>
+<span>    &quot;prediction&quot;: 0.72,</span>
+<span>    &quot;free_text&quot;: &quot;not required for this report&quot;,</span>
+<span>}</span>
+<span>allowed_fields = {&quot;record_id&quot;, &quot;age_band&quot;, &quot;prediction&quot;}</span>
+<span>minimized = {key: raw_record[key] for key in allowed_fields}</span>
+<span>print(minimized)</span>
+<span>assert &quot;email&quot; not in minimized and &quot;free_text&quot; not in minimized</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> Only fields required for the stated report cross the boundary; unnecessary raw text and contact data do not.</p>
+<p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h5 id="learner--cell-11--focused-example-b-attach-sample-support-to-group-error-rates">Focused example B — attach sample support to group error rates<a class="heading-anchor" href="#learner--cell-11--focused-example-b-attach-sample-support-to-group-error-rates" aria-label="Link to this section">#</a></h5>
+<p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
+<p><strong>Assumption:</strong> The group definitions are lawful, meaningful for the decision, and measured consistently.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span>groups = {</span>
+<span>    &quot;group_a&quot;: {&quot;false_negatives&quot;: 8, &quot;actual_positives&quot;: 80},</span>
+<span>    &quot;group_b&quot;: {&quot;false_negatives&quot;: 1, &quot;actual_positives&quot;: 5},</span>
+<span>}</span>
+<span>report = {</span>
+<span>    name: {</span>
+<span>        &quot;false_negative_rate&quot;: values[&quot;false_negatives&quot;] / values[&quot;actual_positives&quot;],</span>
+<span>        &quot;support&quot;: values[&quot;actual_positives&quot;],</span>
+<span>    }</span>
+<span>    for name, values in groups.items()</span>
+<span>}</span>
+<span>print(report)</span>
+<span>assert report[&quot;group_b&quot;][&quot;support&quot;] == 5</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><p><strong>Expected observation:</strong> Group B&#x27;s 20% rate rests on only five positive cases, so uncertainty and collection context are central.</p>
+<h5 id="learner--cell-13--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-13--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Calling hashed identifiers anonymous, treating a regex scan as complete protection, or optimizing parity without decision context.</p>
+<p><strong>Diagnostic:</strong> Build a data-flow inventory: source, purpose, lawful/ethical basis, fields, access, retention, logs/artifacts, deletion, owners, and incident route.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>Action</th>
+<th>Evidence</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define data minimization, privacy boundaries, fairness evidence, and accountable controls in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<p><strong>Stop condition:</strong> Do not expose real sensitive data in a lesson, log, screenshot, model artifact, prompt, or group report without explicit authorization and minimization.</p>
+<p>Continue to the numbered practice only after you can explain both examples without rereading their code.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h4 id="learner--cell-14--fairness-and-bias-brief">Fairness and bias (brief)<a class="heading-anchor" href="#learner--cell-14--fairness-and-bias-brief" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Check subgroup performance metrics (e.g., by sex, race, age bucket).</li>
 <li>Avoid using protected attributes directly unless justified; document rationale.</li>
 <li>Consider disparate impact, calibration across groups.</li>
 <li>Provide model cards and data statements.</li>
 </ul>
-<h4 id="learner--cell-7--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-7--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<h4 id="learner--cell-14--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-14--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Build a DataFrame PII scanner covering column names and free text.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — data minimization, privacy boundaries, fairness evidence, and accountable controls — run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.</p>
+<ol>
 <li>Add a function that masks email addresses and phone numbers in text.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — data minimization, privacy boundaries, fairness evidence, and accountable controls — assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.</p>
+<ol>
 <li>Simulate subgroup precision and recall for a classifier and compare groups.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 3 — data minimization, privacy boundaries, fairness evidence, and accountable controls — for each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.</p>
+<ol>
 <li>Draft a one-page data-ethics checklist for your project.</li>
 </ol>
-<h5 id="learner--cell-7--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-7--progressive-hints" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 4 — data minimization, privacy boundaries, fairness evidence, and accountable controls — save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.</p>
+<h5 id="learner--cell-14--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-14--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Return finding type, row identifier, column, and a safe count—do not log the raw matched value. Test false-positive and missed-format cases.</li>
 <li>Preserve only the minimum structure needed for debugging and ensure repeated substitutions do not reveal the original.</li>
 <li>Include group support and positive-label counts beside metrics. Avoid a conclusion when groups are too small for a stable estimate.</li>
 <li>Name intended use, excluded use, affected people, owners, data rights, retention, access, monitoring, appeals, and incident response.</li>
 </ol>
-<h5 id="learner--cell-7--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-7--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="learner--cell-14--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-14--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Combine data minimization, access control, threat modeling, privacy limits, fairness uncertainty, and incident response. Detection or masking alone is not protection.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Threat modeling:</strong> Create a data-flow diagram for collection, notebook, artifacts, API, logs, and backups. For each boundary, identify asset, actor, threat, control, residual risk, and owner. <strong>Progressive hint:</strong> Include accidental exposure and insider misuse, not only external attackers. Trace data copies and retention through every stage.</li>
+</ol>
+<p><strong>Verify:</strong> Threat modeling — save a data-flow diagram/table covering collection, notebook, artifacts, API, logs, and backups; each boundary must name asset, actor, threat, preventive/detective control, residual risk, owner, and verification test.</p>
+<ol>
 <li><strong>Re-identification reasoning:</strong> Generalize a small dataset to satisfy a chosen k-anonymity target, then demonstrate why k-anonymity does not prevent attribute disclosure or attacks using outside information. <strong>Progressive hint:</strong> Group quasi-identifiers, inspect equivalence-class sizes and sensitive value diversity, and measure utility loss.</li>
+</ol>
+<p><strong>Verify:</strong> Re-identification reasoning — print equivalence-class sizes proving the chosen k target, then construct a homogeneous sensitive-attribute class and an outside-information linkage example that still discloses information.</p>
+<ol>
 <li><strong>Fairness uncertainty:</strong> Bootstrap subgroup precision and recall, show confidence intervals and support, and compare a gap with a ratio. Explain what to do when one group&#x27;s denominator is nearly zero. <strong>Progressive hint:</strong> Resample at the independent entity level when rows repeat. Undefined metrics should remain undefined rather than being forced to zero.</li>
+</ol>
+<p><strong>Verify:</strong> Fairness uncertainty — with declared bootstrap seed/resamples, print subgroup TP/FP/FN, support, precision/recall intervals, gap and ratio; when a denominator is near zero, return an insufficient-support warning instead of an unstable rank.</p>
+<ol>
 <li><strong>Incident response:</strong> Simulate discovering raw emails in a committed notebook output. Write the containment, notification, credential review, history cleanup decision, verification, and prevention steps. <strong>Progressive hint:</strong> Preserve a restricted incident record, stop further sharing, and assume copied history may exist. Redaction from the latest commit alone is insufficient.</li>
 </ol>
+<p><strong>Verify:</strong> Incident response — produce a timestamped incident record with containment, notification owner, credential assessment, history-rewrite decision, post-clean scan/hash, and prevention test; verify the raw email sentinel no longer appears in current artifacts.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
 <span>#</span>
 <span># Keep the official solution closed until you have attempted each task.</span>
 <span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
@@ -571,15 +855,15 @@ def detected_kinds(text: str) -&gt; set[str]:
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -611,7 +895,7 @@ def detected_kinds(text: str) -&gt; set[str]:
 <li>Exercise 3: Model card template</li>
 </ul>
 <hr>
-<p>Exercise 1 — Data classification matrix</p>
+<p>Worked reference for Exercise 1 — Data classification matrix</p>
 <pre><code class="language-markdown">| Data class | Examples | Storage | Access | Retention |
 |-----------:|----------|---------|--------|-----------|
 | Public     | docs, FAQs | public repo | everyone | indefinite |
@@ -623,7 +907,7 @@ def detected_kinds(text: str) -&gt; set[str]:
 <li>Define classes, storage locations, encryption, access controls, retention periods</li>
 </ul>
 <hr>
-<p>Exercise 2 — Group metrics</p>
+<p>Worked reference for Exercise 2 — Group metrics</p>
 <pre><code class="language-python">import numpy as np, pandas as pd
 from sklearn.metrics import precision_score, recall_score
 
@@ -651,7 +935,7 @@ print({&#x27;precision_gap&#x27;: prec_gap, &#x27;recall_gap&#x27;: rec_gap})</c
 <li>For imbalanced data, compare PR curves per group; consider equalized odds/TPR parity goals</li>
 </ul>
 <hr>
-<p>Exercise 3 — Model card template</p>
+<p>Worked reference for Exercise 3 — Model card template</p>
 <pre><code class="language-markdown"># Model Card — &lt;model name&gt;
 
 ## Overview
@@ -681,50 +965,74 @@ print({&#x27;precision_gap&#x27;: prec_gap, &#x27;recall_gap&#x27;: rec_gap})</c
 - Versioning, monitoring, rollback plan
 - Contact for incidents</code></pre>
 <hr>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong>allowlist output fields:</strong> starts from data that is necessary rather than trying to detect every sensitive field after collection.</li>
+<li><strong>detection → review → action:</strong> treats regex/PII scanners as bounded signals with false positives and false negatives.</li>
+<li><strong>group metric + support:</strong> reports numerator/denominator and uncertainty so tiny groups do not create confident-looking claims.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> Minimization reduces exposure at the boundary, while support-aware evaluation and governance make remaining risk visible and accountable.</p>
+<p><strong>Useful alternative:</strong> Aggregation, tokenization, differential privacy, or not collecting the field may reduce risk; each changes analytical utility and guarantees.</p>
+<p><strong>Trade-off:</strong> More detailed data can improve diagnostics while increasing re-identification, misuse, access, retention, and breach consequences.</p>
+<p><strong>Edge case to test:</strong> Small groups, intersectional re-identification, proxy variables, deletion across derived artifacts, and model inversion require review beyond regexes.</p>
+<p><strong>Evidence of correctness:</strong> Prove forbidden fields never cross the boundary, test scanner misses/false hits, report group numerators/denominators and uncertainty, and assign owners/retention/incident actions.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a DataFrame PII scanner covering column names and free text.</p>
 <p><strong>How to reason about it:</strong> A PII scanner should return finding type, safe row identifier, column, and count—not the matched secret. Test false positives, missed formats, Unicode, nulls, and nested/free-text fields.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1 — data minimization, privacy boundaries, fairness evidence, and accountable controls — run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add a function that masks email addresses and phone numbers in text.</p>
 <p><strong>How to reason about it:</strong> Masking must preserve only the minimum structure needed for the stated purpose and be idempotent. Regex is incomplete, so pair it with minimization, access controls, retention, and review.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2 — data minimization, privacy boundaries, fairness evidence, and accountable controls — assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Simulate subgroup precision and recall for a classifier and compare groups.</p>
 <p><strong>How to reason about it:</strong> Subgroup precision/recall requires support, positive counts, uncertainty, and consistent thresholds. Avoid conclusions for tiny groups and distinguish observed disparity from a causal explanation.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 3 — data minimization, privacy boundaries, fairness evidence, and accountable controls — for each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.</p>
 <h5 id="solution-1--exercise-4-original-lesson-practice">Exercise 4 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-4-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Draft a one-page data-ethics checklist for your project.</p>
 <p><strong>How to reason about it:</strong> An ethics checklist names intended use, excluded use, stakeholders, harms, data rights, fairness evaluation, human oversight, monitoring, appeals, owners, and stop/rollback criteria.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 4 — data minimization, privacy boundaries, fairness evidence, and accountable controls — save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.</p>
 <h5 id="solution-1--exercise-5-threat-modeling">Exercise 5 — Threat modeling<a class="heading-anchor" href="#solution-1--exercise-5-threat-modeling" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a data-flow diagram for collection, notebook, artifacts, API, logs, and backups. For each boundary, identify asset, actor, threat, control, residual risk, and owner.</p>
 <p><strong>Reasoning before implementation:</strong> Include accidental exposure and insider misuse, not only external attackers. Trace data copies and retention through every stage.</p>
 <p>Prioritize threats by credible impact and likelihood, then connect each control to a verification step: access review, secret scan, encryption check, retention deletion test, redacted-log test, or incident drill.</p>
 <p>A diagram is not a security guarantee. Record residual risk and an accountable owner; risks beyond the project&#x27;s authority require escalation rather than a checkbox marked complete.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Threat modeling — save a data-flow diagram/table covering collection, notebook, artifacts, API, logs, and backups; each boundary must name asset, actor, threat, preventive/detective control, residual risk, owner, and verification test.</p>
 <h5 id="solution-1--exercise-6-re-identification-reasoning">Exercise 6 — Re-identification reasoning<a class="heading-anchor" href="#solution-1--exercise-6-re-identification-reasoning" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Generalize a small dataset to satisfy a chosen k-anonymity target, then demonstrate why k-anonymity does not prevent attribute disclosure or attacks using outside information.</p>
 <p><strong>Reasoning before implementation:</strong> Group quasi-identifiers, inspect equivalence-class sizes and sensitive value diversity, and measure utility loss.</p>
 <p>k-anonymity limits uniqueness under the selected quasi-identifiers, but a group whose members all share one sensitive value can still reveal that value. Unmodeled external data can also re-identify records.</p>
 <p>Use the exercise to understand limits, not to certify a dataset as safe. Privacy review may require stronger techniques, restricted access, synthetic data, or differential privacy with an explicit threat model and privacy budget.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Re-identification reasoning — print equivalence-class sizes proving the chosen k target, then construct a homogeneous sensitive-attribute class and an outside-information linkage example that still discloses information.</p>
 <h5 id="solution-1--exercise-7-fairness-uncertainty">Exercise 7 — Fairness uncertainty<a class="heading-anchor" href="#solution-1--exercise-7-fairness-uncertainty" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Bootstrap subgroup precision and recall, show confidence intervals and support, and compare a gap with a ratio. Explain what to do when one group&#x27;s denominator is nearly zero.</p>
 <p><strong>Reasoning before implementation:</strong> Resample at the independent entity level when rows repeat. Undefined metrics should remain undefined rather than being forced to zero.</p>
 <p>Report the distribution of gaps/ratios, not only point estimates. Wide intervals signal insufficient evidence, which may require more representative data or a safer deployment constraint. A zero predicted-positive denominator makes precision undefined and must be surfaced.</p>
 <p>Metric parity choices can conflict and depend on base rates and harm. Select the monitored criterion with affected stakeholders and domain/legal review, not by whichever metric looks most favorable.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Fairness uncertainty — with declared bootstrap seed/resamples, print subgroup TP/FP/FN, support, precision/recall intervals, gap and ratio; when a denominator is near zero, return an insufficient-support warning instead of an unstable rank.</p>
 <h5 id="solution-1--exercise-8-incident-response">Exercise 8 — Incident response<a class="heading-anchor" href="#solution-1--exercise-8-incident-response" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Simulate discovering raw emails in a committed notebook output. Write the containment, notification, credential review, history cleanup decision, verification, and prevention steps.</p>
 <p><strong>Reasoning before implementation:</strong> Preserve a restricted incident record, stop further sharing, and assume copied history may exist. Redaction from the latest commit alone is insufficient.</p>
 <p>Follow the organization&#x27;s incident process and involve repository/security owners before rewriting shared history. Remove outputs from current artifacts, rotate exposed credentials if any, assess clones/releases/caches, and notify affected parties according to policy.</p>
 <p>Add preventive controls: clean-output notebook validation, secret/PII scans, synthetic fixtures, <code>.gitignore</code>, review checks, and least-privilege data access. Do not reproduce the sensitive value in tickets or logs.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></div>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Incident response — produce a timestamped incident record with containment, notification owner, credential assessment, history-rewrite decision, post-clean scan/hash, and prevention test; verify the raw email sentinel no longer appears in current artifacts.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -732,7 +1040,7 @@ print({&#x27;precision_gap&#x27;: prec_gap, &#x27;recall_gap&#x27;: rec_gap})</c
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -765,7 +1073,7 @@ print({&#x27;precision_gap&#x27;: prec_gap, &#x27;recall_gap&#x27;: rec_gap})</c
 <li>Exercise 3: Model card template</li>
 </ul>
 <hr>
-<p>Exercise 1 — Data classification matrix</p>
+<p>Worked reference for Exercise 1 — Data classification matrix</p>
 <pre><code class="language-markdown">| Data class | Examples | Storage | Access | Retention |
 |-----------:|----------|---------|--------|-----------|
 | Public     | docs, FAQs | public repo | everyone | indefinite |
@@ -777,7 +1085,7 @@ print({&#x27;precision_gap&#x27;: prec_gap, &#x27;recall_gap&#x27;: rec_gap})</c
 <li>Define classes, storage locations, encryption, access controls, retention periods</li>
 </ul>
 <hr>
-<p>Exercise 2 — Group metrics</p>
+<p>Worked reference for Exercise 2 — Group metrics</p>
 <blockquote><p>Generated from <code>python/ds-60day/solutions/day57_security_privacy_ethics/day57_solutions.md</code> by <code>scripts/build_solution_notebooks.py</code>. Edit the Markdown source, then regenerate this notebook.</p></blockquote></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import numpy as np, pandas as pd</span>
 <span>from sklearn.metrics import precision_score, recall_score</span>
@@ -808,7 +1116,7 @@ print({&#x27;precision_gap&#x27;: prec_gap, &#x27;recall_gap&#x27;: rec_gap})</c
 <li>For imbalanced data, compare PR curves per group; consider equalized odds/TPR parity goals</li>
 </ul>
 <hr>
-<p>Exercise 3 — Model card template</p>
+<p>Worked reference for Exercise 3 — Model card template</p>
 <pre><code class="language-markdown"># Model Card — &lt;model name&gt;
 
 ## Overview
@@ -838,50 +1146,118 @@ print({&#x27;precision_gap&#x27;: prec_gap, &#x27;recall_gap&#x27;: rec_gap})</c
 - Versioning, monitoring, rollback plan
 - Contact for incidents</code></pre>
 <hr>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-2--cell-3--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-3--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong>allowlist output fields:</strong> starts from data that is necessary rather than trying to detect every sensitive field after collection.</li>
+<li><strong>detection → review → action:</strong> treats regex/PII scanners as bounded signals with false positives and false negatives.</li>
+<li><strong>group metric + support:</strong> reports numerator/denominator and uncertainty so tiny groups do not create confident-looking claims.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> Minimization reduces exposure at the boundary, while support-aware evaluation and governance make remaining risk visible and accountable.</p>
+<p><strong>Useful alternative:</strong> Aggregation, tokenization, differential privacy, or not collecting the field may reduce risk; each changes analytical utility and guarantees.</p>
+<p><strong>Trade-off:</strong> More detailed data can improve diagnostics while increasing re-identification, misuse, access, retention, and breach consequences.</p>
+<p><strong>Edge case to test:</strong> Small groups, intersectional re-identification, proxy variables, deletion across derived artifacts, and model inversion require review beyond regexes.</p>
+<p><strong>Evidence of correctness:</strong> Prove forbidden fields never cross the boundary, test scanner misses/false hits, report group numerators/denominators and uncertainty, and assign owners/retention/incident actions.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-3--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-3--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-3--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a DataFrame PII scanner covering column names and free text.</p>
 <p><strong>How to reason about it:</strong> A PII scanner should return finding type, safe row identifier, column, and count—not the matched secret. Test false positives, missed formats, Unicode, nulls, and nested/free-text fields.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1 — data minimization, privacy boundaries, fairness evidence, and accountable controls — run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.</p>
 <h5 id="solution-2--cell-3--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add a function that masks email addresses and phone numbers in text.</p>
 <p><strong>How to reason about it:</strong> Masking must preserve only the minimum structure needed for the stated purpose and be idempotent. Regex is incomplete, so pair it with minimization, access controls, retention, and review.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2 — data minimization, privacy boundaries, fairness evidence, and accountable controls — assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.</p>
 <h5 id="solution-2--cell-3--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Simulate subgroup precision and recall for a classifier and compare groups.</p>
 <p><strong>How to reason about it:</strong> Subgroup precision/recall requires support, positive counts, uncertainty, and consistent thresholds. Avoid conclusions for tiny groups and distinguish observed disparity from a causal explanation.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 3 — data minimization, privacy boundaries, fairness evidence, and accountable controls — for each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.</p>
 <h5 id="solution-2--cell-3--exercise-4-original-lesson-practice">Exercise 4 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-4-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Draft a one-page data-ethics checklist for your project.</p>
 <p><strong>How to reason about it:</strong> An ethics checklist names intended use, excluded use, stakeholders, harms, data rights, fairness evaluation, human oversight, monitoring, appeals, owners, and stop/rollback criteria.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 4 — data minimization, privacy boundaries, fairness evidence, and accountable controls — save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.</p>
 <h5 id="solution-2--cell-3--exercise-5-threat-modeling">Exercise 5 — Threat modeling<a class="heading-anchor" href="#solution-2--cell-3--exercise-5-threat-modeling" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a data-flow diagram for collection, notebook, artifacts, API, logs, and backups. For each boundary, identify asset, actor, threat, control, residual risk, and owner.</p>
 <p><strong>Reasoning before implementation:</strong> Include accidental exposure and insider misuse, not only external attackers. Trace data copies and retention through every stage.</p>
 <p>Prioritize threats by credible impact and likelihood, then connect each control to a verification step: access review, secret scan, encryption check, retention deletion test, redacted-log test, or incident drill.</p>
 <p>A diagram is not a security guarantee. Record residual risk and an accountable owner; risks beyond the project&#x27;s authority require escalation rather than a checkbox marked complete.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Threat modeling — save a data-flow diagram/table covering collection, notebook, artifacts, API, logs, and backups; each boundary must name asset, actor, threat, preventive/detective control, residual risk, owner, and verification test.</p>
 <h5 id="solution-2--cell-3--exercise-6-re-identification-reasoning">Exercise 6 — Re-identification reasoning<a class="heading-anchor" href="#solution-2--cell-3--exercise-6-re-identification-reasoning" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Generalize a small dataset to satisfy a chosen k-anonymity target, then demonstrate why k-anonymity does not prevent attribute disclosure or attacks using outside information.</p>
 <p><strong>Reasoning before implementation:</strong> Group quasi-identifiers, inspect equivalence-class sizes and sensitive value diversity, and measure utility loss.</p>
 <p>k-anonymity limits uniqueness under the selected quasi-identifiers, but a group whose members all share one sensitive value can still reveal that value. Unmodeled external data can also re-identify records.</p>
 <p>Use the exercise to understand limits, not to certify a dataset as safe. Privacy review may require stronger techniques, restricted access, synthetic data, or differential privacy with an explicit threat model and privacy budget.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Re-identification reasoning — print equivalence-class sizes proving the chosen k target, then construct a homogeneous sensitive-attribute class and an outside-information linkage example that still discloses information.</p>
 <h5 id="solution-2--cell-3--exercise-7-fairness-uncertainty">Exercise 7 — Fairness uncertainty<a class="heading-anchor" href="#solution-2--cell-3--exercise-7-fairness-uncertainty" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Bootstrap subgroup precision and recall, show confidence intervals and support, and compare a gap with a ratio. Explain what to do when one group&#x27;s denominator is nearly zero.</p>
 <p><strong>Reasoning before implementation:</strong> Resample at the independent entity level when rows repeat. Undefined metrics should remain undefined rather than being forced to zero.</p>
 <p>Report the distribution of gaps/ratios, not only point estimates. Wide intervals signal insufficient evidence, which may require more representative data or a safer deployment constraint. A zero predicted-positive denominator makes precision undefined and must be surfaced.</p>
 <p>Metric parity choices can conflict and depend on base rates and harm. Select the monitored criterion with affected stakeholders and domain/legal review, not by whichever metric looks most favorable.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Fairness uncertainty — with declared bootstrap seed/resamples, print subgroup TP/FP/FN, support, precision/recall intervals, gap and ratio; when a denominator is near zero, return an insufficient-support warning instead of an unstable rank.</p>
 <h5 id="solution-2--cell-3--exercise-8-incident-response">Exercise 8 — Incident response<a class="heading-anchor" href="#solution-2--cell-3--exercise-8-incident-response" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Simulate discovering raw emails in a committed notebook output. Write the containment, notification, credential review, history cleanup decision, verification, and prevention steps.</p>
 <p><strong>Reasoning before implementation:</strong> Preserve a restricted incident record, stop further sharing, and assume copied history may exist. Redaction from the latest commit alone is insufficient.</p>
 <p>Follow the organization&#x27;s incident process and involve repository/security owners before rewriting shared history. Remove outputs from current artifacts, rotate exposed credentials if any, assess clones/releases/caches, and notify affected parties according to policy.</p>
 <p>Add preventive controls: clean-output notebook validation, secret/PII scans, synthetic fixtures, <code>.gitignore</code>, review checks, and least-privilege data access. Do not reproduce the sensitive value in tickets or logs.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></article></div>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Incident response — produce a timestamped incident record with containment, notification owner, credential assessment, history-rewrite decision, post-clean scan/hash, and prevention test; verify the raw email sentinel no longer appears in current artifacts.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-57` — Day 57 — Security, Privacy, and Ethics.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize data minimization, privacy boundaries, fairness evidence, and accountable controls. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day57_security_privacy_ethics.md`
+- learner artifact: `python/ds-60day/notebooks/day57_security_privacy_ethics.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-56`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-56.html"><small>Previous lesson</small><strong>python-56</strong><span>Orchestration Prefect Intro</span></a>
@@ -973,6 +1349,23 @@ print({&#x27;precision_gap&#x27;: prec_gap, &#x27;recall_gap&#x27;: rec_gap})</c
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

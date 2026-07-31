@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this Python file from the repository environment</h2>
           <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>bridge/lessons/day07_async_bounded_concurrency.py</code>.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,12 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
-          
+
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,16 +311,26 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--bridge-day-7-async-i-o-and-bounded-concurrency">Bridge Day 7 — Async I/O and bounded concurrency<a class="heading-anchor" href="#guide--bridge-day-7-async-i-o-and-bounded-concurrency" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Advanced <strong>Prerequisite:</strong> <a href="bridge-06.html#guide">Bridge Day 6</a></p>
 <h4 id="guide--why-this-matters">Why this matters<a class="heading-anchor" href="#guide--why-this-matters" aria-label="Link to this section">#</a></h4>
 <p><code>asyncio</code> can overlap waiting, but it does not make database capacity infinite. Starting one task per input without a bound can exhaust a connection pool, increase latency, and overwhelm PostgreSQL. Structured concurrency, explicit limits, and async-aware resource cleanup make failure and cancellation predictable.</p>
+<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Start at the repository root. The answer-free starter is deliberately safe to run: it prints orientation text and does not call unfinished functions or contact PostgreSQL.</p>
+<pre><code class="language-powershell"># Windows PowerShell
+.\.venv\Scripts\python.exe bridge\lessons\day07_async_bounded_concurrency.py
+.\.venv\Scripts\python.exe -m pytest bridge\tests -q</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python bridge/lessons/day07_async_bounded_concurrency.py
+.venv/bin/python -m pytest bridge/tests -q</code></pre>
+<p>Read this guide first, implement one boundary at a time in <code>bridge/lessons/day07_async_bounded_concurrency.py</code>, and use small fakes or recording doubles for the default evidence path. Any PostgreSQL step is optional, explicitly gated, and restricted to <code>DS60_DATABASE_URL</code> plus the disposable <code>advanced_sql_training</code> database. Never place a credential in source, notebook output, test fixtures, or logs. &lt;!-- END BRIDGE ENRICHMENT: HOW TO RUN --&gt;</p>
 <h4 id="guide--objectives">Objectives<a class="heading-anchor" href="#guide--objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end, you can:</p>
 <ul>
@@ -326,9 +375,6 @@
 <td>A request for a running coroutine to stop and clean up</td>
 </tr>
 </tbody></table></div>
-<h4 id="guide--run-the-starter">Run the starter<a class="heading-anchor" href="#guide--run-the-starter" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe bridge\lessons\day07_async_bounded_concurrency.py</code></pre>
-<pre><code class="language-bash">.venv/bin/python bridge/lessons/day07_async_bounded_concurrency.py</code></pre>
 <h4 id="guide--worked-example-concurrency-needs-a-measurable-limit">Worked example: concurrency needs a measurable limit<a class="heading-anchor" href="#guide--worked-example-concurrency-needs-a-measurable-limit" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-python">semaphore = asyncio.Semaphore(limit)
 
@@ -338,6 +384,36 @@ async def guarded(item: str) -&gt; Result:
         return await operation(item)</code></pre>
 <p>The semaphore caps operations inside its context. <code>asyncio.TaskGroup</code> owns the tasks: it waits for all on success and cancels siblings when one fails.</p>
 <p>Do not put <code>time.sleep()</code>, synchronous HTTP, or a synchronous Psycopg call inside an async function. Those block the event loop. Use an async API or deliberately move blocking work to a thread when the library is thread-safe.</p>
+<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: DEEP DIVE --&gt;</p>
+<h4 id="guide--mental-model-concurrency-is-owned-bounded-waiting">Mental model: concurrency is owned, bounded waiting<a class="heading-anchor" href="#guide--mental-model-concurrency-is-owned-bounded-waiting" aria-label="Link to this section">#</a></h4>
+<p>Async code helps when tasks spend time waiting for I/O. It does not make CPU work faster, create database capacity, or remove transaction ownership. The parent scope must still know which tasks exist, how many may enter the scarce operation, what happens on failure, and when cleanup is complete.</p>
+<p><code>TaskGroup</code> provides structured ownership: children cannot silently outlive the group. A semaphore bounds the number currently inside an operation. These are related but different controls. Creating one task per million inputs and placing a semaphore inside each task still creates a million task objects; a fixed worker queue is the bounded design at that scale.</p>
+<p>You can test active concurrency without a wall-clock assertion:</p>
+<pre><code class="language-python">import asyncio
+
+
+async def demo() -&gt; int:
+    semaphore = asyncio.Semaphore(2)
+    active = 0
+    peak = 0
+
+    async def one() -&gt; None:
+        nonlocal active, peak
+        async with semaphore:
+            active += 1
+            peak = max(peak, active)
+            await asyncio.sleep(0)
+            active -= 1
+
+    async with asyncio.TaskGroup() as group:
+        for _ in range(5):
+            group.create_task(one())
+    return peak
+
+
+assert asyncio.run(demo()) == 2</code></pre>
+<p>Preserving input order is also an explicit policy. Store each result by input index rather than appending in completion order. If low-latency streaming needs completion order, return a different abstraction and document it.</p>
+<p>Cancellation is a failure path. An async connection manager should await rollback and close before cancellation crosses the ownership boundary. When several children fail, Python may report an <code>ExceptionGroup</code>; do not catch a broad exception merely to make the group disappear. Database concurrency must respect pool and server limits, and concurrent operations should not share a cursor or transaction unless the driver and application design explicitly support that ownership. &lt;!-- END BRIDGE ENRICHMENT: DEEP DIVE --&gt;</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--practice-contract">Practice contract<a class="heading-anchor" href="#guide--practice-contract" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -351,84 +427,98 @@ async def guarded(item: str) -&gt; Result:
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Mirror the synchronous state machine with awaited lifecycle calls.</li>
+<li><strong>Verify:</strong> Assert async success events are <code>acquire, body, commit, close</code>; failure events are <code>acquire, body, rollback, close</code>; all lifecycle calls are awaited and the body error escapes.</li>
 </ul>
 <ol>
 <li><strong>Concurrency:</strong> Implement <code>map_bounded()</code> with <code>asyncio.Semaphore</code> and <code>TaskGroup</code>, reject limits below one, and preserve input order.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Associate each task with its original index rather than append-on-completion order.</li>
+<li><strong>Verify:</strong> Assert limits below one raise <code>ValueError</code>; with limit two, peak active operations is at most two and returned results remain in input order.</li>
 </ul>
 <ol>
 <li><strong>Testing:</strong> Measure active fake operations and assert maximum concurrency never exceeds the configured limit.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Increment before an await point and decrement in <code>finally</code>.</li>
+<li><strong>Verify:</strong> Use an active-counter fake guarded by <code>try/finally</code>; for limits one, two, and four, assert the recorded peak never exceeds the requested limit and returns to zero.</li>
 </ul>
 <ol>
 <li><strong>Ordering:</strong> Use different fake completion delays to prove output order follows input order rather than completion order.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Choose a completion schedule that visibly differs from the input.</li>
+<li><strong>Verify:</strong> Give later inputs shorter completion waits; assert completion log differs from input order while the returned list still matches input order.</li>
 </ul>
 <ol>
 <li><strong>Async SQL:</strong> Define <code>AsyncReadCursor</code> and implement one query using <code>customer_id = ANY(%s)</code> with the Python ID list as one bound parameter.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> The parameter sequence is a one-element tuple containing the list.</li>
+<li><strong>Verify:</strong> Inspect one awaited cursor call: SQL contains <code>customer_id = ANY(%s)</code>, parameters equal <code>([id1, id2],)</code>, and fetched rows map to the expected ID-to-name dictionary.</li>
 </ul>
 <ol>
 <li><strong>Validation:</strong> Return early for empty customer IDs without touching the cursor and reject any non-positive ID.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Validate the complete collection before the first database effect.</li>
+<li><strong>Verify:</strong> Assert an empty ID sequence returns <code>{}</code> with zero cursor calls and any zero/negative ID raises <code>ValueError</code> before execute.</li>
 </ul>
 <ol>
 <li><strong>Scale design:</strong> Explain why a semaphore still creates one task per item and design a fixed-worker queue for a million inputs.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Separate active-operation bounds from task-count and memory bounds.</li>
+<li><strong>Verify:</strong> For one million inputs, calculate one-million-task semaphore memory versus a fixed worker count; diagram producer, bounded queue, workers, sentinel shutdown, and result policy.</li>
 </ul>
 <ol>
 <li><strong>Cancellation:</strong> Cancel a task inside <code>managed_async_connection()</code> and verify rollback/close happen before cancellation escapes.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Never translate <code>CancelledError</code> into an empty or successful result.</li>
+<li><strong>Verify:</strong> Cancel inside the managed body; assert awaited rollback and close finish before <code>CancelledError</code> reaches the parent.</li>
 </ul>
 <ol>
 <li><strong>Failure analysis:</strong> Trigger two concurrent task failures and inspect <code>ExceptionGroup</code> behavior from <code>TaskGroup</code>.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Structured concurrency cancels siblings and reports grouped failures.</li>
+<li><strong>Verify:</strong> Synchronize two child failures, catch the resulting <code>ExceptionGroup</code>, and assert both configured exception types are inspectable after sibling cancellation cleanup.</li>
 </ul>
 <ol>
 <li><strong>Empty work:</strong> Test <code>map_bounded([], operation, limit=1)</code> and prove the operation is never called.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> An empty collection is a successful no-op, not an invalid concurrency request.</li>
+<li><strong>Verify:</strong> Call <code>map_bounded([], operation, limit=1)</code>; assert result <code>[]</code> and operation call count zero.</li>
 </ul>
 <ol>
 <li><strong>Duplicates:</strong> Define whether duplicate customer IDs are preserved, deduplicated, or rejected and test the chosen contract.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Input-order promises and dictionary outputs have different duplicate semantics.</li>
+<li><strong>Verify:</strong> Document one duplicate-ID policy and test <code>[2, 2, 3]</code> against it, including exact query parameters and returned keys/order.</li>
 </ul>
 <ol>
 <li><strong>Architecture:</strong> Compare a semaphore-per-item design with the worker queue on fairness, memory, cancellation, and complexity.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Choose based on workload scale rather than treating one pattern as universally superior.</li>
+<li><strong>Verify:</strong> Provide a comparison table with task count, peak memory, fairness, cancellation path, ordering policy, and implementation complexity for semaphore and worker-queue designs.</li>
 </ul>
 <ol>
 <li><strong>Database ownership:</strong> Decide whether concurrent operations may share one connection/cursor or require a pool-acquired resource per worker.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Driver concurrency guarantees and transaction scope determine the safe choice.</li>
+<li><strong>Verify:</strong> Record resource IDs under concurrent work; assert each worker owns a pool-acquired connection/cursor and no unsafe cursor is entered concurrently.</li>
 </ul>
 <ol>
 <li><strong>Deterministic testing:</strong> Replace timing-based async assertions with events/barriers and explain why wall-clock sleeps make tests flaky.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Coordinate state transitions directly instead of hoping a scheduler runs in time.</li>
+<li><strong>Verify:</strong> Coordinate workers with <code>Event</code>/barrier objects, assert peak and order from recorded state, and remove pass/fail dependence on elapsed wall-clock sleep duration.</li>
 </ul>
 <h5 id="guide--before-opening-the-solution">Before opening the solution<a class="heading-anchor" href="#guide--before-opening-the-solution" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -466,18 +556,49 @@ finally:
 <li><strong>Sharing one connection across concurrent transactions:</strong> transaction state and cursor use can interfere.</li>
 <li><strong>Swallowing cancellation:</strong> resources may remain open and shutdown hangs.</li>
 </ul>
+<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: ASK CODEX --&gt;</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Use the checked-in <code>guide-ds60sqlpy-learning</code> skill as a tutor, not as an answer generator. The direct catalog prerequisites are <code>bridge-06</code>. The prompt below deliberately names exact paths so a new Codex task can orient itself without guessing.</p>
+<pre><code class="language-text">Tutor me through stable lesson ID bridge-07: Async Bounded Concurrency.
+Direct catalog prerequisites: bridge-06. Assume I completed exactly those
+prerequisites, then begin with one short Retrieval question that connects each
+prerequisite to this lesson.
+
+Use repository skill guide-ds60sqlpy-learning.
+Companion guide: bridge/companion-guides/day07_async_bounded_concurrency.md
+Learner artifact: bridge/lessons/day07_async_bounded_concurrency.py
+
+Do not open, quote, summarize, or copy anything under solutions/ until I
+explicitly say I have finished my attempt and ask to compare.
+
+Use these coaching phases in order:
+1. Predict — ask what I expect before I run or change code.
+2. Attempt — let me implement or explain one numbered exercise at a time.
+3. Hint — give the smallest useful conceptual hint, never a finished answer.
+4. Evidence — ask for the exact return value, exception type, recorded calls,
+   query plus bound parameters, or written decision required by that exercise.
+5. Retrieval — close with two no-notes questions and one transfer problem.
+
+Keep the default path offline and fake-first. If the lesson has an optional
+PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the
+disposable advanced_sql_training database; never ask me to paste the URL.
+
+Done when every numbered exercise has its own evidence, normal/edge/failure
+behavior is explained in my words, the relevant offline tests pass, and I can
+solve the final transfer problem without opening solutions/.</code></pre>
+<p>&lt;!-- END BRIDGE ENRICHMENT: ASK CODEX --&gt;</p>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p><a href="bridge-08.html#guide">Day 8</a> assembles configuration, adapters, idempotency, tests, batches, and observability into a restartable job. See <a href="bridge-07.html#solution-1">the Day 7 solution notes</a> after attempting the exercises.</p></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -494,12 +615,12 @@ finally:
               type="button"
               data-launch-artifact="Python source file"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Bridge Day 7: asyncio, bounded concurrency, and async database patterns.</span>
 <span> </span>
 <span>Prerequisite: Bridge Day 6.</span>
@@ -567,46 +688,77 @@ finally:
 <span># 1. [Implementation] Implement `managed_async_connection()` with awaited factory, one yield,</span>
 <span>#    commit on success, rollback on failure, and close on every path.</span>
 <span>#    Hint: Mirror the synchronous state machine with awaited lifecycle calls.</span>
+<span>#    Verify: Assert async success events are `acquire, body, commit, close`; failure events are</span>
+<span>#    `acquire, body, rollback, close`; all lifecycle calls are awaited and the body error</span>
+<span>#    escapes.</span>
 <span># 2. [Concurrency] Implement `map_bounded()` with `asyncio.Semaphore` and `TaskGroup`, reject</span>
 <span>#    limits below one, and preserve input order.</span>
 <span>#    Hint: Associate each task with its original index rather than append-on-completion order.</span>
+<span>#    Verify: Assert limits below one raise `ValueError`; with limit two, peak active operations</span>
+<span>#    is at most two and returned results remain in input order.</span>
 <span># 3. [Testing] Measure active fake operations and assert maximum concurrency never exceeds the</span>
 <span>#    configured limit.</span>
 <span>#    Hint: Increment before an await point and decrement in `finally`.</span>
+<span>#    Verify: Use an active-counter fake guarded by `try/finally`; for limits one, two, and four,</span>
+<span>#    assert the recorded peak never exceeds the requested limit and returns to zero.</span>
 <span># 4. [Ordering] Use different fake completion delays to prove output order follows input order</span>
 <span>#    rather than completion order.</span>
 <span>#    Hint: Choose a completion schedule that visibly differs from the input.</span>
+<span>#    Verify: Give later inputs shorter completion waits; assert completion log differs from</span>
+<span>#    input order while the returned list still matches input order.</span>
 <span># 5. [Async SQL] Define `AsyncReadCursor` and implement one query using `customer_id = ANY(%s)`</span>
 <span>#    with the Python ID list as one bound parameter.</span>
 <span>#    Hint: The parameter sequence is a one-element tuple containing the list.</span>
+<span>#    Verify: Inspect one awaited cursor call: SQL contains `customer_id = ANY(%s)`, parameters</span>
+<span>#    equal `([id1, id2],)`, and fetched rows map to the expected ID-to-name dictionary.</span>
 <span># 6. [Validation] Return early for empty customer IDs without touching the cursor and reject any</span>
 <span>#    non-positive ID.</span>
 <span>#    Hint: Validate the complete collection before the first database effect.</span>
+<span>#    Verify: Assert an empty ID sequence returns `{}` with zero cursor calls and any</span>
+<span>#    zero/negative ID raises `ValueError` before execute.</span>
 <span># 7. [Scale design] Explain why a semaphore still creates one task per item and design a</span>
 <span>#    fixed-worker queue for a million inputs.</span>
 <span>#    Hint: Separate active-operation bounds from task-count and memory bounds.</span>
+<span>#    Verify: For one million inputs, calculate one-million-task semaphore memory versus a fixed</span>
+<span>#    worker count; diagram producer, bounded queue, workers, sentinel shutdown, and result</span>
+<span>#    policy.</span>
 <span># 8. [Cancellation] Cancel a task inside `managed_async_connection()` and verify rollback/close</span>
 <span>#    happen before cancellation escapes.</span>
 <span>#    Hint: Never translate `CancelledError` into an empty or successful result.</span>
+<span>#    Verify: Cancel inside the managed body; assert awaited rollback and close finish before</span>
+<span>#    `CancelledError` reaches the parent.</span>
 <span># 9. [Failure analysis] Trigger two concurrent task failures and inspect `ExceptionGroup`</span>
 <span>#    behavior from `TaskGroup`.</span>
 <span>#    Hint: Structured concurrency cancels siblings and reports grouped failures.</span>
+<span>#    Verify: Synchronize two child failures, catch the resulting `ExceptionGroup`, and assert</span>
+<span>#    both configured exception types are inspectable after sibling cancellation cleanup.</span>
 <span># 10. [Empty work] Test `map_bounded([], operation, limit=1)` and prove the operation is never</span>
 <span>#    called.</span>
 <span>#    Hint: An empty collection is a successful no-op, not an invalid concurrency request.</span>
+<span>#    Verify: Call `map_bounded([], operation, limit=1)`; assert result `[]` and operation call</span>
+<span>#    count zero.</span>
 <span># 11. [Duplicates] Define whether duplicate customer IDs are preserved, deduplicated, or</span>
 <span>#    rejected and test the chosen contract.</span>
 <span>#    Hint: Input-order promises and dictionary outputs have different duplicate semantics.</span>
+<span>#    Verify: Document one duplicate-ID policy and test `[2, 2, 3]` against it, including exact</span>
+<span>#    query parameters and returned keys/order.</span>
 <span># 12. [Architecture] Compare a semaphore-per-item design with the worker queue on fairness,</span>
 <span>#    memory, cancellation, and complexity.</span>
 <span>#    Hint: Choose based on workload scale rather than treating one pattern as universally</span>
 <span>#    superior.</span>
+<span>#    Verify: Provide a comparison table with task count, peak memory, fairness, cancellation</span>
+<span>#    path, ordering policy, and implementation complexity for semaphore and worker-queue</span>
+<span>#    designs.</span>
 <span># 13. [Database ownership] Decide whether concurrent operations may share one connection/cursor</span>
 <span>#    or require a pool-acquired resource per worker.</span>
 <span>#    Hint: Driver concurrency guarantees and transaction scope determine the safe choice.</span>
+<span>#    Verify: Record resource IDs under concurrent work; assert each worker owns a pool-acquired</span>
+<span>#    connection/cursor and no unsafe cursor is entered concurrently.</span>
 <span># 14. [Deterministic testing] Replace timing-based async assertions with events/barriers and</span>
 <span>#    explain why wall-clock sleeps make tests flaky.</span>
 <span>#    Hint: Coordinate state transitions directly instead of hoping a scheduler runs in time.</span>
+<span>#    Verify: Coordinate workers with `Event`/barrier objects, assert peak and order from</span>
+<span>#    recorded state, and remove pass/fail dependence on elapsed wall-clock sleep duration.</span>
 <span> </span>
 <span> </span>
 <span>def main() -&gt; int:</span>
@@ -620,15 +772,15 @@ finally:
 <span>    raise SystemExit(main())</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -668,6 +820,21 @@ finally:
 <li>Connection-pool capacity should usually be the same as or lower than the database concurrency limit. More tasks do not create more database capacity.</li>
 </ul>
 <p>Tests measure maximum active operations and resource events with <code>asyncio.run()</code>, fakes, and <code>asyncio.sleep(0)</code>. They require neither a network nor an async test plugin.</p>
+<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE --&gt;</p>
+<h4 id="solution-1--small-executable-check">Small executable check<a class="heading-anchor" href="#solution-1--small-executable-check" aria-label="Link to this section">#</a></h4>
+<p>The concurrency helper works with a local coroutine and preserves input order:</p>
+<pre><code class="language-python">import asyncio
+
+from bridge.solutions.day07_solution import map_bounded
+
+
+async def double(value: int) -&gt; int:
+    await asyncio.sleep(0)
+    return value * 2
+
+
+assert asyncio.run(map_bounded([3, 1, 2], double, limit=2)) == [6, 2, 4]</code></pre>
+<p>&lt;!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE --&gt;</p>
 <h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
 <p>These walkthroughs align one-for-one with the learner and guide. The executable reference is <code>bridge/solutions/day07_solution.py</code>; use it only after an honest attempt.</p>
 <p><strong>Shared failure rule:</strong> Blocking calls, shared unsafe cursors, swallowed cancellation, and unbounded task creation turn async code into a reliability hazard.</p>
@@ -675,74 +842,74 @@ finally:
 <p><strong>Prompt:</strong> Implement <code>managed_async_connection()</code> with awaited factory, one yield, commit on success, rollback on failure, and close on every path.</p>
 <p><strong>Approach:</strong> Await acquisition, yield inside <code>try</code>, await commit after normal return, await rollback on failure, re-raise, and await close in <code>finally</code>.</p>
 <p><strong>Why this boundary matters:</strong> Mirror the synchronous state machine with awaited lifecycle calls.</p>
-<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<p><strong>Verification evidence:</strong> Assert async success events are <code>acquire, body, commit, close</code>; failure events are <code>acquire, body, rollback, close</code>; all lifecycle calls are awaited and the body error escapes.</p>
 <h5 id="solution-1--exercise-2-concurrency">Exercise 2 — Concurrency<a class="heading-anchor" href="#solution-1--exercise-2-concurrency" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement <code>map_bounded()</code> with <code>asyncio.Semaphore</code> and <code>TaskGroup</code>, reject limits below one, and preserve input order.</p>
 <p><strong>Approach:</strong> Preallocate indexed result slots, have each task acquire the semaphore before calling the operation, store at its index, and rebuild the typed list after the <code>TaskGroup</code> exits.</p>
 <p><strong>Why this boundary matters:</strong> Associate each task with its original index rather than append-on-completion order.</p>
-<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<p><strong>Verification evidence:</strong> Assert limits below one raise <code>ValueError</code>; with limit two, peak active operations is at most two and returned results remain in input order.</p>
 <h5 id="solution-1--exercise-3-testing">Exercise 3 — Testing<a class="heading-anchor" href="#solution-1--exercise-3-testing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Measure active fake operations and assert maximum concurrency never exceeds the configured limit.</p>
 <p><strong>Approach:</strong> Use an in-memory counter and <code>await asyncio.sleep(0)</code> only as a deterministic scheduling yield. Assert the measured maximum is at most the limit and all counters return to zero.</p>
 <p><strong>Why this boundary matters:</strong> Increment before an await point and decrement in <code>finally</code>.</p>
-<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<p><strong>Verification evidence:</strong> Use an active-counter fake guarded by <code>try/finally</code>; for limits one, two, and four, assert the recorded peak never exceeds the requested limit and returns to zero.</p>
 <h5 id="solution-1--exercise-4-ordering">Exercise 4 — Ordering<a class="heading-anchor" href="#solution-1--exercise-4-ordering" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Use different fake completion delays to prove output order follows input order rather than completion order.</p>
 <p><strong>Approach:</strong> Return values after controlled events/delays, then assert the final list maps one-for-one to the original sequence. Indexed storage makes scheduling irrelevant.</p>
 <p><strong>Why this boundary matters:</strong> Choose a completion schedule that visibly differs from the input.</p>
-<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<p><strong>Verification evidence:</strong> Give later inputs shorter completion waits; assert completion log differs from input order while the returned list still matches input order.</p>
 <h5 id="solution-1--exercise-5-async-sql">Exercise 5 — Async SQL<a class="heading-anchor" href="#solution-1--exercise-5-async-sql" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Define <code>AsyncReadCursor</code> and implement one query using <code>customer_id = ANY(%s)</code> with the Python ID list as one bound parameter.</p>
 <p><strong>Approach:</strong> Await one static query with <code>(list(customer_ids),)</code>, await <code>fetchall</code>, convert rows to an ID/name mapping, and never interpolate IDs into SQL.</p>
 <p><strong>Why this boundary matters:</strong> The parameter sequence is a one-element tuple containing the list.</p>
-<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<p><strong>Verification evidence:</strong> Inspect one awaited cursor call: SQL contains <code>customer_id = ANY(%s)</code>, parameters equal <code>([id1, id2],)</code>, and fetched rows map to the expected ID-to-name dictionary.</p>
 <h5 id="solution-1--exercise-6-validation">Exercise 6 — Validation<a class="heading-anchor" href="#solution-1--exercise-6-validation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Return early for empty customer IDs without touching the cursor and reject any non-positive ID.</p>
 <p><strong>Approach:</strong> An empty sequence returns <code>{}</code> and leaves the recording cursor untouched. Scan all IDs first and raise before execute if any value is non-positive.</p>
 <p><strong>Why this boundary matters:</strong> Validate the complete collection before the first database effect.</p>
-<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<p><strong>Verification evidence:</strong> Assert an empty ID sequence returns <code>{}</code> with zero cursor calls and any zero/negative ID raises <code>ValueError</code> before execute.</p>
 <h5 id="solution-1--exercise-7-scale-design">Exercise 7 — Scale design<a class="heading-anchor" href="#solution-1--exercise-7-scale-design" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Explain why a semaphore still creates one task per item and design a fixed-worker queue for a million inputs.</p>
 <p><strong>Approach:</strong> Create a bounded <code>asyncio.Queue</code>, start exactly N workers, feed indexed items with backpressure, collect indexed results, then send sentinels and join workers. This bounds both active work and task creation.</p>
 <p><strong>Why this boundary matters:</strong> Separate active-operation bounds from task-count and memory bounds.</p>
-<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<p><strong>Verification evidence:</strong> For one million inputs, calculate one-million-task semaphore memory versus a fixed worker count; diagram producer, bounded queue, workers, sentinel shutdown, and result policy.</p>
 <h5 id="solution-1--exercise-8-cancellation">Exercise 8 — Cancellation<a class="heading-anchor" href="#solution-1--exercise-8-cancellation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Cancel a task inside <code>managed_async_connection()</code> and verify rollback/close happen before cancellation escapes.</p>
 <p><strong>Approach:</strong> Use events to pause inside the body, cancel it, and assert lifecycle ordering. Cleanup completes (subject to shielding policy), then the original cancellation propagates.</p>
 <p><strong>Why this boundary matters:</strong> Never translate <code>CancelledError</code> into an empty or successful result.</p>
-<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<p><strong>Verification evidence:</strong> Cancel inside the managed body; assert awaited rollback and close finish before <code>CancelledError</code> reaches the parent.</p>
 <h5 id="solution-1--exercise-9-failure-analysis">Exercise 9 — Failure analysis<a class="heading-anchor" href="#solution-1--exercise-9-failure-analysis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Trigger two concurrent task failures and inspect <code>ExceptionGroup</code> behavior from <code>TaskGroup</code>.</p>
 <p><strong>Approach:</strong> Catch only in the test with <code>except*</code> to inspect expected types; production code should not flatten multiple failures into one misleading success or discard cancellation context.</p>
 <p><strong>Why this boundary matters:</strong> Structured concurrency cancels siblings and reports grouped failures.</p>
-<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<p><strong>Verification evidence:</strong> Synchronize two child failures, catch the resulting <code>ExceptionGroup</code>, and assert both configured exception types are inspectable after sibling cancellation cleanup.</p>
 <h5 id="solution-1--exercise-10-empty-work">Exercise 10 — Empty work<a class="heading-anchor" href="#solution-1--exercise-10-empty-work" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Test <code>map_bounded([], operation, limit=1)</code> and prove the operation is never called.</p>
 <p><strong>Approach:</strong> Return <code>[]</code> after validating the positive limit; a spy operation should have zero calls and no event loop resources should leak.</p>
 <p><strong>Why this boundary matters:</strong> An empty collection is a successful no-op, not an invalid concurrency request.</p>
-<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<p><strong>Verification evidence:</strong> Call <code>map_bounded([], operation, limit=1)</code>; assert result <code>[]</code> and operation call count zero.</p>
 <h5 id="solution-1--exercise-11-duplicates">Exercise 11 — Duplicates<a class="heading-anchor" href="#solution-1--exercise-11-duplicates" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Define whether duplicate customer IDs are preserved, deduplicated, or rejected and test the chosen contract.</p>
 <p><strong>Approach:</strong> <code>map_bounded</code> preserves duplicate inputs and outputs. For <code>fetch_customer_names</code>, validate/deduplicate IDs before the query if desired and document that the returned dictionary naturally has one value per ID.</p>
 <p><strong>Why this boundary matters:</strong> Input-order promises and dictionary outputs have different duplicate semantics.</p>
-<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<p><strong>Verification evidence:</strong> Document one duplicate-ID policy and test <code>[2, 2, 3]</code> against it, including exact query parameters and returned keys/order.</p>
 <h5 id="solution-1--exercise-12-architecture">Exercise 12 — Architecture<a class="heading-anchor" href="#solution-1--exercise-12-architecture" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare a semaphore-per-item design with the worker queue on fairness, memory, cancellation, and complexity.</p>
 <p><strong>Approach:</strong> Semaphore tasks are concise for bounded small inputs; workers bound task count and provide queue backpressure for large streams. Both require cancellation-safe cleanup and indexed results for ordering.</p>
 <p><strong>Why this boundary matters:</strong> Choose based on workload scale rather than treating one pattern as universally superior.</p>
-<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<p><strong>Verification evidence:</strong> Provide a comparison table with task count, peak memory, fairness, cancellation path, ordering policy, and implementation complexity for semaphore and worker-queue designs.</p>
 <h5 id="solution-1--exercise-13-database-ownership">Exercise 13 — Database ownership<a class="heading-anchor" href="#solution-1--exercise-13-database-ownership" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Decide whether concurrent operations may share one connection/cursor or require a pool-acquired resource per worker.</p>
 <p><strong>Approach:</strong> Do not share a cursor concurrently. Prefer a bounded pool resource per worker or serialize statements on one connection when they belong to one transaction; keep pool size aligned with the concurrency limit.</p>
 <p><strong>Why this boundary matters:</strong> Driver concurrency guarantees and transaction scope determine the safe choice.</p>
-<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p>
+<p><strong>Verification evidence:</strong> Record resource IDs under concurrent work; assert each worker owns a pool-acquired connection/cursor and no unsafe cursor is entered concurrently.</p>
 <h5 id="solution-1--exercise-14-deterministic-testing">Exercise 14 — Deterministic testing<a class="heading-anchor" href="#solution-1--exercise-14-deterministic-testing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Replace timing-based async assertions with events/barriers and explain why wall-clock sleeps make tests flaky.</p>
 <p><strong>Approach:</strong> Use <code>asyncio.Event</code> objects to hold and release operations at known points, inspect active counts while blocked, and avoid thresholds tied to machine speed.</p>
 <p><strong>Why this boundary matters:</strong> Coordinate state transitions directly instead of hoping a scheduler runs in time.</p>
-<p><strong>Evidence:</strong> Capture exact calls, returned values, exception types, and cleanup order. Re-run the case and require the same fake-backed result; keep live PostgreSQL evidence separately labeled and opt-in.</p></div>
+<p><strong>Verification evidence:</strong> Coordinate workers with <code>Event</code>/barrier objects, assert peak and order from recorded state, and remove pass/fail dependence on elapsed wall-clock sleep duration.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -750,7 +917,7 @@ finally:
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -869,7 +1036,51 @@ finally:
 <span>    return {int(cast(int, row[0])): str(row[1]) for row in await cursor.fetchall()}</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through stable lesson ID bridge-07: Async Bounded Concurrency.
+Direct catalog prerequisites: bridge-06. Assume I completed exactly those
+prerequisites, then begin with one short Retrieval question that connects each
+prerequisite to this lesson.
+
+Use repository skill guide-ds60sqlpy-learning.
+Companion guide: bridge/companion-guides/day07_async_bounded_concurrency.md
+Learner artifact: bridge/lessons/day07_async_bounded_concurrency.py
+
+Do not open, quote, summarize, or copy anything under solutions/ until I
+explicitly say I have finished my attempt and ask to compare.
+
+Use these coaching phases in order:
+1. Predict — ask what I expect before I run or change code.
+2. Attempt — let me implement or explain one numbered exercise at a time.
+3. Hint — give the smallest useful conceptual hint, never a finished answer.
+4. Evidence — ask for the exact return value, exception type, recorded calls,
+   query plus bound parameters, or written decision required by that exercise.
+5. Retrieval — close with two no-notes questions and one transfer problem.
+
+Keep the default path offline and fake-first. If the lesson has an optional
+PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the
+disposable advanced_sql_training database; never ask me to paste the URL.
+
+Done when every numbered exercise has its own evidence, normal/edge/failure
+behavior is explained in my words, the relevant offline tests pass, and I can
+solve the final transfer problem without opening solutions/.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="bridge-06.html"><small>Previous lesson</small><strong>bridge-06</strong><span>Bulk ETL Validation</span></a>
@@ -961,6 +1172,23 @@ finally:
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

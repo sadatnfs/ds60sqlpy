@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-59/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-59-final-capstone-part-2-stakeholder-analytics">Day 59 — Final Capstone, Part 2: Stakeholder Analytics<a class="heading-anchor" href="#guide--day-59-final-capstone-part-2-stakeholder-analytics" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -285,9 +384,127 @@
 <li><strong>Prerequisites:</strong> <a href="sql-58.html#guide">Day 58 — capstone ingestion and data quality</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-59.html#learner">learner SQL</a> · <a href="sql-59.html#solution-1">solution reasoning</a> · <a href="sql-59.html#solution-2">executable solution</a></li>
 </ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-59 — Final Capstone Part2</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-59/lesson/workspace/sql/postgres-60day/day59_final_capstone_part2.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day59_final_capstone_part2.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/day59_final_capstone_part2.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is KPI contract, Funnel denominator, Scale hypothesis. Its worked SQL reads or creates <code>orders</code>, <code>order_items</code>, <code>customers</code>, <code>events</code>, <code>products</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: Choose one KPI and write its contract before SQL. Build its lowest stable grain, add dimensions only after reconciliation, and return numerator/denominator beside any rate. Present the stakeholder table together with its control total and a limitation; repeat that evidence pattern for Finance and Marketing. The first runnable example has a concrete contract: Example 1 returns one grouped row per <code>customer_id</code>, <code>order_id</code>, and <code>order_date</code>, capped at 100 rows with columns <code>customer_id</code>, <code>order_id</code>, <code>order_value</code>, <code>order_date</code>, <code>first_order_month</code>, and <code>ltv</code> from <code>orders</code>, <code>order_items</code>, and <code>customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>segment</code>, <code>cohort_month</code>, <code>avg_ltv</code>, and <code>customers</code>. Independently group <code>orders</code>, <code>order_items</code>, <code>order_values</code>, <code>customers</code>, and <code>ltv</code> by the shown grouping expressions and compare every displayed aggregate at that exact grain. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day59_final_capstone_part2.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">WITH order_values AS (
+  SELECT o.customer_id, o.order_id,
+         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_value,
+         o.order_date
+  FROM orders o
+  JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY o.customer_id, o.order_id, o.order_date
+), ltv AS (
+  SELECT customer_id,
+         date_trunc(&#x27;month&#x27;, MIN(order_date))::date AS first_order_month,
+         SUM(order_value) AS ltv
+  FROM order_values
+  GROUP BY customer_id
+), cohort AS (
+  SELECT c.customer_id,
+         date_trunc(&#x27;month&#x27;, c.created_at)::date AS cohort_month,
+         COALESCE(c.segment,&#x27;standard&#x27;) AS segment
+  FROM customers c
+)
+SELECT cohort.segment,
+       cohort.cohort_month,
+       ROUND(AVG(ltv.ltv),2) AS avg_ltv,
+       COUNT(*) AS customers
+FROM ltv
+JOIN cohort ON cohort.customer_id = ltv.customer_id
+GROUP BY cohort.segment, cohort.cohort_month
+ORDER BY cohort.cohort_month DESC, avg_ltv DESC
+LIMIT 100;</code></pre>
+<p><strong>How to read it:</strong> Example 1: Start with <code>orders</code>, <code>order_items</code>, and <code>customers</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>segment</code>, <code>cohort_month</code>, <code>avg_ltv</code>, and <code>customers</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 100</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>customer_id</code>, <code>order_id</code>, and <code>order_date</code>, capped at 100 rows with columns <code>customer_id</code>, <code>order_id</code>, <code>order_value</code>, <code>order_date</code>, <code>first_order_month</code>, and <code>ltv</code> from <code>orders</code>, <code>order_items</code>, and <code>customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">WITH viewed_stage AS (
+  SELECT c.customer_id,
+         MIN(e.event_time) FILTER (
+           WHERE e.event_type = &#x27;page_view&#x27;
+         ) AS viewed_at
+  FROM customers c
+  LEFT JOIN events e
+    ON e.customer_id = c.customer_id
+   AND e.event_time &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;
+  GROUP BY c.customer_id
+), added_stage AS (
+  SELECT viewed.customer_id,
+         viewed.viewed_at,
+         MIN(event.event_time) AS added_at
+  FROM viewed_stage viewed
+  LEFT JOIN events event
+    ON event.customer_id = viewed.customer_id
+   AND event.event_type = &#x27;add_to_cart&#x27;
+   AND event.event_time &gt;= viewed.viewed_at
+  GROUP BY viewed.customer_id, viewed.viewed_at
+), checkout_stage AS (
+  SELECT added.customer_id,
+         added.viewed_at,
+         added.added_at,
+         MIN(event.event_time) AS checkout_at
+  FROM added_stage added
+  LEFT JOIN events event
+    ON event.customer_id = added.customer_id
+   AND event.event_type = &#x27;checkout&#x27;
+   AND event.event_time &gt;= added.added_at
+  GROUP BY added.customer_id, added.viewed_at, added.added_at
+), purchase_stage AS (
+  SELECT checkout.customer_id,
+         checkout.viewed_at,
+         checkout.added_at,
+         checkout.checkout_at,
+         MIN(customer_order.order_date) AS purchased_at
+  FROM checkout_stage checkout
+  LEFT JOIN orders customer_order
+    ON customer_order.customer_id = checkout.customer_id
+   AND customer_order.order_date &gt;= checkout.checkout_at
+   AND customer_order.order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;
+  GROUP BY checkout.customer_id, checkout.viewed_at,
+           checkout.added_at, checkout.checkout_at
+), activity AS (
+  SELECT customer_id,
+         viewed_at IS NOT NULL AS viewed,
+         added_at IS NOT NULL AND added_at &gt;= viewed_at AS added,
+         checkout_at IS NOT NULL AND checkout_at &gt;= added_at AS checked_out,
+         purchased_at IS NOT NULL AND purchased_at &gt;= checkout_at AS bought
+  FROM purchase_stage
+)
+SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,
+       COUNT(*) FILTER (WHERE added) AS adders,
+       COUNT(*) FILTER (WHERE checked_out) AS checkouts,
+       COUNT(*) FILTER (WHERE bought) AS buyers
+FROM activity;</code></pre>
+<p><strong>How to read it:</strong> <code>viewed_stage</code> retains one row per customer and records the earliest recent page view. Each later <code>LEFT JOIN</code> searches only at or after its prior timestamp. A customer who checks out before adding to cart therefore does not enter the ordered checkout population. <code>activity</code> turns the four timestamps into nested Boolean populations, and aggregate <code>FILTER</code> returns one summary row. This is different from independently asking whether each event happened at any time; independent reach can increase between stages and is not a funnel.</p>
+<p><strong>Expected result/shape:</strong> Exactly one row with <code>viewers</code>, <code>adders</code>, <code>checkouts</code>, and <code>buyers</code>. The invariant is <code>buyers &lt;= checkouts &lt;= adders &lt;= viewers</code>. Inspect one customer&#x27;s four timestamps before trusting the aggregate, and add a counterexample whose checkout precedes add-to-cart; that checkout must not count.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
-<li>Deliver stakeholder-specific metrics with documented grain, denominator, scope, and reconciliation.</li>
+<li>Deliver stakeholder-specific metrics with an explicit row grain, denominator, scope, and reconciliation.</li>
 <li>Pair performance recommendations with representative evidence and operational ownership.</li>
 </ul>
 <h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
@@ -301,16 +518,24 @@
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <p>Complete these in the <a href="sql-59.html#learner">learner SQL</a>:</p>
 <ol>
-<li>State every LTV CTE&#x27;s grain and its grain transition.</li>
-<li>Add funnel conversion rates and retain buyers without events.</li>
-<li>Reconcile order totals, line revenue, and payments before KPI selection.</li>
-<li>Add direct attribution and reconcile purchases.</li>
-<li>Compare customer/date and date/customer index orders.</li>
-<li>Write a complete metric contract for one KPI.</li>
-<li>Publish product-pair support, confidence, and lift with a minimum count.</li>
-<li>Assemble named cross-domain control totals for stakeholder sign-off.</li>
+<li>State every LTV CTE&#x27;s grain and its grain transition. <strong>Inputs/evidence:</strong> For sql-59 Exercise 1, read from the inline <code>VALUES</code> fixture. Build the answer toward <code>step_name</code>, <code>row_grain</code>, and <code>key_columns</code>; keep <code>step_name</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-59 Exercise 1, expected output: one row per <code>step_name</code>. The final columns are <code>step_name</code>, <code>row_grain</code>, and <code>key_columns</code>. <strong>Verify:</strong> For sql-59 Exercise 1, reselect the returned keys directly from the source; require unique <code>step_name</code> where the expected grain is one row per key and confirm the projected <code>step_name</code>, <code>row_grain</code>, and <code>key_columns</code> against the inline <code>VALUES</code> fixture. Add one source row with a new <code>step_name</code>; verify the result gains exactly one row carrying that <code>step_name</code> value.</li>
+<li>Add funnel conversion rates and retain buyers without events. <strong>Inputs/evidence:</strong> For sql-59 Exercise 2, derive <code>viewed_at</code>, <code>added_at</code>, <code>checkout_at</code>, and <code>purchased_at</code> per customer over the same trailing-90-day window. <strong>Expected result/shape:</strong> For sql-59 Exercise 2, expected output: exactly one summary row with ordered stage counts, <code>buyers_without_view</code>, and three conversion rates whose denominators are the preceding ordered populations. <strong>Verify:</strong> For sql-59 Exercise 2, require <code>added_at &gt;= viewed_at</code>, <code>checkout_at &gt;= added_at</code>, and <code>purchased_at &gt;= checkout_at</code>. Prove <code>buyers &lt;= checkouts &lt;= adders &lt;= viewers</code>; every nonzero stage rate must be between zero and one.</li>
+<li>Reconcile order totals, line revenue, and payments before KPI selection. <strong>Inputs/evidence:</strong> For sql-59 Exercise 3, read from <code>order_items</code>, <code>payments</code>, and <code>orders</code>. Build the answer toward <code>order_id</code>, <code>stored_order_total</code>, <code>line_revenue</code>, <code>paid_amount</code>, <code>header_minus_lines</code>, and <code>paid_minus_header</code>; keep <code>order_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-59 Exercise 3, expected output: at most 50 rows keyed by <code>order_id</code>. The final columns are <code>order_id</code>, <code>stored_order_total</code>, <code>line_revenue</code>, <code>paid_amount</code>, <code>header_minus_lines</code>, and <code>paid_minus_header</code>. The final order is <code>o.order_id</code>. <strong>Verify:</strong> For sql-59 Exercise 3, assert no more than 50 rows, no duplicate <code>order_id</code>, and no adjacent pair that violates <code>o.order_id</code>. Rejoin the returned keys to <code>order_items</code>, <code>payments</code>, and <code>orders</code> to confirm <code>order_id</code>, <code>stored_order_total</code>, <code>line_revenue</code>, <code>paid_amount</code>, <code>header_minus_lines</code>, and <code>paid_minus_header</code> came from the same source rows. Run with 50 minus one and 50 plus one eligible rows; require the output cap of 50 while retaining <code>o.order_id</code>.</li>
+<li>Add direct attribution and reconcile purchases. <strong>Inputs/evidence:</strong> For sql-59 Exercise 4, start from <code>orders</code> and choose at most one event whose <code>event_type</code> is in the declared marketing-touch whitelist (<code>page_view</code>, <code>add_to_cart</code>, <code>checkout</code>), whose campaign metadata is present, and whose timestamp is in the preceding seven-day half-open window. <strong>Expected result/shape:</strong> For sql-59 Exercise 4, expected output: one row per <code>attribution_bucket</code>, with <code>purchases</code>; every order contributes to exactly one campaign bucket or <code>(direct)</code>. The final order is <code>purchases DESC, attribution_bucket</code>. <strong>Verify:</strong> For sql-59 Exercise 4, assert that <code>SUM(purchases)</code> equals <code>COUNT(*)</code> from <code>orders</code>. Add a tagged non-touch event and prove the attribution result is unchanged; then add two qualifying touches for one order and prove the latest timestamp, with <code>event_id</code> as tie-breaker, wins exactly once.</li>
+<li>Compare customer/date and date/customer index orders. <strong>Inputs/evidence:</strong> For sql-59 Exercise 5, run the underlying read-only query over <code>orders</code>, and <code>idx_orders_date_customer_day59_solution</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison. <strong>Expected result/shape:</strong> For sql-59 Exercise 5, expected output: one row per <code>customer_id</code>. The final columns are <code>customer_id</code>, and <code>revenue</code>. <strong>Verify:</strong> For sql-59 Exercise 5, run the underlying query without <code>EXPLAIN</code> and preserve its <code>customer_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li>Write a complete metric contract for one KPI. <strong>Inputs/evidence:</strong> For sql-59 Exercise 6, read from the inline <code>VALUES</code> fixture. Build the answer toward <code>metric_name</code>, <code>grain</code>, <code>numerator</code>, <code>denominator</code>, <code>time_window</code>, <code>null_policy</code>, <code>exclusions</code>, and <code>owner</code>; keep <code>metric_name</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-59 Exercise 6, expected output: one row per <code>metric_name</code>. The final columns are <code>metric_name</code>, <code>grain</code>, <code>numerator</code>, <code>denominator</code>, <code>time_window</code>, <code>null_policy</code>, <code>exclusions</code>, and <code>owner</code>. <strong>Verify:</strong> For sql-59 Exercise 6, reselect the returned keys directly from the source; require unique <code>metric_name</code> where the expected grain is one row per key and confirm the projected <code>metric_name</code>, <code>grain</code>, <code>numerator</code>, <code>denominator</code>, <code>time_window</code>, <code>null_policy</code>, <code>exclusions</code>, and <code>owner</code> against the inline <code>VALUES</code> fixture. Add one source row with a new <code>metric_name</code>; verify the result gains exactly one row carrying that <code>metric_name</code> value.</li>
+<li>Publish product-pair support, confidence, and lift with a minimum count. <strong>Inputs/evidence:</strong> For sql-59 Exercise 7, read from <code>order_items</code>. Build the answer toward <code>product_a</code>, <code>product_b</code>, <code>together</code>, <code>support</code>, <code>confidence_a_to_b</code>, and <code>lift</code>; keep <code>order_item_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-59 Exercise 7, expected output: at most 20 rows keyed by <code>order_item_id</code>. The final columns are <code>product_a</code>, <code>product_b</code>, <code>together</code>, <code>support</code>, <code>confidence_a_to_b</code>, and <code>lift</code>. The final order is <code>lift DESC, together DESC, product_a, product_b</code>. <strong>Verify:</strong> For sql-59 Exercise 7, assert no more than 20 rows, no duplicate <code>order_item_id</code>, and no adjacent pair that violates <code>lift DESC, together DESC, product_a, product_b</code>. Rejoin the returned keys to <code>order_items</code> to confirm <code>product_a</code>, <code>product_b</code>, <code>together</code>, <code>support</code>, <code>confidence_a_to_b</code>, and <code>lift</code> came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining <code>lift DESC, together DESC, product_a, product_b</code>.</li>
+<li>Assemble named cross-domain control totals for stakeholder sign-off. <strong>Inputs/evidence:</strong> For sql-59 Exercise 8, read from <code>customers</code>, <code>orders</code>, <code>order_items</code>, and <code>payments</code>. Build the answer toward <code>control_name</code>, and <code>observed_value</code>; keep <code>customer_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-59 Exercise 8, expected output: one row per <code>customer_id</code>. The final columns are <code>control_name</code>, and <code>observed_value</code>. The final order is <code>control_name</code>. <strong>Verify:</strong> For sql-59 Exercise 8, reselect the returned keys directly from the source; require unique <code>customer_id</code> where the expected grain is one row per key and confirm the projected <code>control_name</code>, and <code>observed_value</code> against <code>customers</code>, <code>orders</code>, <code>order_items</code>, and <code>payments</code>. Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
 </ol>
 <p>Add a one-page metric dictionary and before/after evidence table.</p>
+<h4 id="guide--common-mistakes-and-how-to-recover">Common mistakes and how to recover<a class="heading-anchor" href="#guide--common-mistakes-and-how-to-recover" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Lesson-specific semantic mistake:</strong> Do not skip this worked-model requirement: Choose one KPI and write its contract before SQL. Build its lowest stable grain, add dimensions only after reconciliation, and return numerator/denominator beside any rate. Present the stakeholder table together with its control total and a limitation; repeat that evidence pattern for Finance and Marketing.</li>
+<li><strong>Unexpected row count:</strong> display keys before aggregates, count rows after each join/filter stage, and find the first stage whose grain differs from the contract. Do not hide fanout with <code>DISTINCT</code>.</li>
+<li><strong>Unexpected <code>NULL</code> or missing row:</strong> decide whether the fact is unknown, inapplicable, zero, or absent before using <code>COALESCE</code>; inspect outer-join predicate placement and empty-input aggregate behavior.</li>
+<li><strong>Unstable top/first/last output:</strong> add <code>ORDER BY</code> with a unique final tie-breaker before <code>LIMIT</code> or order-sensitive windows/aggregates.</li>
+<li><strong><code>psql</code> stops on an error:</strong> fix the first error shown by <code>ON_ERROR_STOP</code>, restore the declared transaction/setup state, and rerun the complete file. A later successful statement does not validate a partial run.</li>
+</ul>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Can another analyst reproduce every KPI from its written contract?</li>
@@ -331,23 +556,51 @@
 <h4 id="guide--deliverable-3-stakeholder-outputs">Deliverable 3 — Stakeholder outputs<a class="heading-anchor" href="#guide--deliverable-3-stakeholder-outputs" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Finance: current-year budget, actual expense, and variance by category.</li>
-<li>Marketing: campaign touches within seven days before each customer&#x27;s first order, counted as distinct assisted customers.</li>
+<li>Marketing: campaign touches within seven days before each customer&#x27;s first order, counted as distinct assisted customers. Only the declared touch types (<code>page_view</code>, <code>add_to_cart</code>, and <code>checkout</code>) qualify; a campaign tag on an unrelated event must not create marketing credit.</li>
 </ul>
 <p>The marketing definition differs from Day 48&#x27;s all-purchase event attribution. Multiple campaigns can assist one customer, so campaign rows are not additive.</p>
 <h4 id="guide--deliverable-4-large-scale-design-note">Deliverable 4 — Large-scale design note<a class="heading-anchor" href="#guide--deliverable-4-large-scale-design-note" aria-label="Link to this section">#</a></h4>
 <p>For a hypothetical 100M-row workload, identify candidate time partitions for orders/events, prove partition-key filters for pruning, describe local/partial indexes, and assign retention/maintenance ownership. Do not claim a benefit without a representative plan.</p>
 <h4 id="guide--sign-off-limits">Sign-off limits<a class="heading-anchor" href="#guide--sign-off-limits" aria-label="Link to this section">#</a></h4>
-<p>Record metric grain, time window, exclusions, reconciliation, and consumer for every KPI. All candidate DDL rolls back; production changes require a separate reviewed migration.</p></div>
+<p>Record metric grain, time window, exclusions, reconciliation, and consumer for every KPI. All candidate DDL rolls back; production changes require a separate reviewed migration.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-59 — Final Capstone Part2.
+
+I have completed the direct catalog prerequisite: `sql-58`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day59_final_capstone_part2.md
+- Answer-free learner SQL: sql/postgres-60day/day59_final_capstone_part2.sql
+
+Key terms to teach in context: KPI contract, Funnel denominator, Scale hypothesis. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Choose one KPI and write its contract before SQL. Build its lowest stable grain, add dimensions only after reconciliation, and return numerator/denominator beside any rate. Present the stakeholder table together with its control total and a limitation; repeat that evidence pattern for Finance and Marketing.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-59/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -364,13 +617,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 59: Final Capstone - Integrated Data Challenge (Part 2)</span>
+<span>-- BEGINNER WORKFLOW — sql-59: Final Capstone Part2</span>
+<span>-- Guide: sql/postgres-60day/companion-guides/day59_final_capstone_part2.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-59/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: orders, order_items, customers, events, products.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>-- Focus: Complex business logic, performance requirements, stakeholder queries</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
@@ -406,26 +676,66 @@
 <span>ORDER BY cohort.cohort_month DESC, avg_ltv DESC</span>
 <span>LIMIT 100;</span>
 <span> </span>
-<span>-- b) Conversion funnel from events -&gt; orders (last 90 days)</span>
-<span>WITH ev AS (</span>
-<span>  SELECT e.customer_id,</span>
-<span>         MAX(CASE WHEN e.event_type=&#x27;page_view&#x27;  THEN 1 ELSE 0 END) AS page_view,</span>
-<span>         MAX(CASE WHEN e.event_type=&#x27;add_to_cart&#x27; THEN 1 ELSE 0 END) AS add_to_cart,</span>
-<span>         MAX(CASE WHEN e.event_type=&#x27;checkout&#x27;   THEN 1 ELSE 0 END) AS checkout</span>
-<span>  FROM events e</span>
-<span>  WHERE e.event_time &gt;= now() - interval &#x27;90 days&#x27;</span>
-<span>  GROUP BY e.customer_id</span>
-<span>), buyers AS (</span>
-<span>  SELECT DISTINCT o.customer_id</span>
-<span>  FROM orders o</span>
-<span>  WHERE o.order_date &gt;= now() - interval &#x27;90 days&#x27;</span>
+<span>-- b) Ordered conversion funnel from events -&gt; orders (last 90 days).</span>
+<span>-- First collect the earliest page view. Each later CTE can only choose a</span>
+<span>-- timestamp at or after the timestamp supplied by its previous stage.</span>
+<span>WITH viewed_stage AS (</span>
+<span>  SELECT c.customer_id,</span>
+<span>         MIN(e.event_time) FILTER (</span>
+<span>           WHERE e.event_type = &#x27;page_view&#x27;</span>
+<span>         ) AS viewed_at</span>
+<span>  FROM customers c</span>
+<span>  LEFT JOIN events e</span>
+<span>    ON e.customer_id = c.customer_id</span>
+<span>   AND e.event_time &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;</span>
+<span>  GROUP BY c.customer_id</span>
+<span>), added_stage AS (</span>
+<span>  SELECT viewed.customer_id,</span>
+<span>         viewed.viewed_at,</span>
+<span>         MIN(event.event_time) AS added_at</span>
+<span>  FROM viewed_stage viewed</span>
+<span>  LEFT JOIN events event</span>
+<span>    ON event.customer_id = viewed.customer_id</span>
+<span>   AND event.event_type = &#x27;add_to_cart&#x27;</span>
+<span>   AND event.event_time &gt;= viewed.viewed_at</span>
+<span>  GROUP BY viewed.customer_id, viewed.viewed_at</span>
+<span>), checkout_stage AS (</span>
+<span>  SELECT added.customer_id,</span>
+<span>         added.viewed_at,</span>
+<span>         added.added_at,</span>
+<span>         MIN(event.event_time) AS checkout_at</span>
+<span>  FROM added_stage added</span>
+<span>  LEFT JOIN events event</span>
+<span>    ON event.customer_id = added.customer_id</span>
+<span>   AND event.event_type = &#x27;checkout&#x27;</span>
+<span>   AND event.event_time &gt;= added.added_at</span>
+<span>  GROUP BY added.customer_id, added.viewed_at, added.added_at</span>
+<span>), purchase_stage AS (</span>
+<span>  SELECT checkout.customer_id,</span>
+<span>         checkout.viewed_at,</span>
+<span>         checkout.added_at,</span>
+<span>         checkout.checkout_at,</span>
+<span>         MIN(customer_order.order_date) AS purchased_at</span>
+<span>  FROM checkout_stage checkout</span>
+<span>  LEFT JOIN orders customer_order</span>
+<span>    ON customer_order.customer_id = checkout.customer_id</span>
+<span>   AND customer_order.order_date &gt;= checkout.checkout_at</span>
+<span>   AND customer_order.order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;</span>
+<span>  GROUP BY checkout.customer_id, checkout.viewed_at,</span>
+<span>           checkout.added_at, checkout.checkout_at</span>
+<span>), activity AS (</span>
+<span>  SELECT customer_id,</span>
+<span>         viewed_at IS NOT NULL AS viewed,</span>
+<span>         added_at IS NOT NULL AND added_at &gt;= viewed_at AS added,</span>
+<span>         checkout_at IS NOT NULL AND checkout_at &gt;= added_at AS checked_out,</span>
+<span>         purchased_at IS NOT NULL AND purchased_at &gt;= checkout_at AS bought</span>
+<span>  FROM purchase_stage</span>
 <span>)</span>
-<span>SELECT </span>
-<span>  SUM(page_view)    AS viewers,</span>
-<span>  SUM(add_to_cart)  AS adders,</span>
-<span>  SUM(checkout)     AS checkouts,</span>
-<span>  (SELECT COUNT(*) FROM buyers) AS buyers</span>
-<span>FROM ev;</span>
+<span>SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,</span>
+<span>       COUNT(*) FILTER (WHERE added) AS adders,</span>
+<span>       COUNT(*) FILTER (WHERE checked_out) AS checkouts,</span>
+<span>       COUNT(*) FILTER (WHERE bought) AS buyers</span>
+<span>FROM activity;</span>
 <span> </span>
 <span>-- c) Top product pairs by co-occurrence (market basket)</span>
 <span>WITH items AS (</span>
@@ -489,8 +799,13 @@
 <span>  FROM orders o</span>
 <span>  GROUP BY o.customer_id</span>
 <span>), touch AS (</span>
-<span>  SELECT e.customer_id, e.event_time, COALESCE(e.metadata-&gt;&gt;&#x27;campaign&#x27;,&#x27;none&#x27;) AS campaign</span>
+<span>  SELECT e.customer_id,</span>
+<span>         e.event_time,</span>
+<span>         e.metadata-&gt;&gt;&#x27;campaign&#x27; AS campaign</span>
 <span>  FROM events e</span>
+<span>  WHERE e.event_type IN (&#x27;page_view&#x27;, &#x27;add_to_cart&#x27;, &#x27;checkout&#x27;)</span>
+<span>    AND e.metadata ? &#x27;campaign&#x27;</span>
+<span>    AND NULLIF(trim(e.metadata-&gt;&gt;&#x27;campaign&#x27;), &#x27;&#x27;) IS NOT NULL</span>
 <span>)</span>
 <span>SELECT t.campaign,</span>
 <span>       COUNT(DISTINCT t.customer_id) AS assisted_customers</span>
@@ -508,34 +823,66 @@
 <span>-- Exercises</span>
 <span>-- 1. Prediction: state the grain of every CTE in the LTV query and identify the</span>
 <span>--    exact step where order-grain values become customer-grain values.</span>
+<span>--    Inputs: For sql-59 Exercise 1, read from the inline `VALUES` fixture. Build the answer toward `step_name`, `row_grain`, and `key_columns`; keep `step_name` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-59 Exercise 1, expected output: one row per `step_name`. The final columns are `step_name`, `row_grain`, and `key_columns`.</span>
+<span>--    Verify: For sql-59 Exercise 1, reselect the returned keys directly from the source; require unique `step_name` where the expected grain is one row per key and confirm the projected `step_name`, `row_grain`, and `key_columns` against the inline `VALUES` fixture. Add one source row with a new `step_name`; verify the result gains exactly one row carrying that `step_name` value.</span>
+<span>--    Hint ladder, rung 1: For sql-59 Exercise 1, select `step_name` from the inline `VALUES` fixture before adding derived columns.</span>
 <span>-- 2. Construction: turn the funnel counts into step-to-step and overall</span>
 <span>--    conversion rates while preserving customers who purchased without a</span>
 <span>--    recorded event.</span>
+<span>--    Inputs: For sql-59 Exercise 2, derive `viewed_at`, `added_at`, `checkout_at`, and `purchased_at` per customer over the same trailing-90-day window.</span>
+<span>--    Expected result/shape: For sql-59 Exercise 2, expected output: exactly one summary row with ordered stage counts, `buyers_without_view`, and three conversion rates whose denominators are the preceding ordered populations.</span>
+<span>--    Verify: For sql-59 Exercise 2, require `added_at &gt;= viewed_at`, `checkout_at &gt;= added_at`, and `purchased_at &gt;= checkout_at`. Prove `buyers &lt;= checkouts &lt;= adders &lt;= viewers`; every nonzero stage rate must be between zero and one.</span>
+<span>--    Hint ladder, rung 1: Inspect the four stage CTEs before reducing timestamps to nested boolean populations.</span>
 <span>-- 3. Debugging: reconcile stored order totals, calculated line revenue, and</span>
 <span>--    payments before choosing which measure each stakeholder KPI should use.</span>
+<span>--    Inputs: For sql-59 Exercise 3, read from `order_items`, `payments`, and `orders`. Build the answer toward `order_id`, `stored_order_total`, `line_revenue`, `paid_amount`, `header_minus_lines`, and `paid_minus_header`; keep `order_id` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-59 Exercise 3, expected output: at most 50 rows keyed by `order_id`. The final columns are `order_id`, `stored_order_total`, `line_revenue`, `paid_amount`, `header_minus_lines`, and `paid_minus_header`. The final order is `o.order_id`.</span>
+<span>--    Verify: For sql-59 Exercise 3, assert no more than 50 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_id`. Rejoin the returned keys to `order_items`, `payments`, and `orders` to confirm `order_id`, `stored_order_total`, `line_revenue`, `paid_amount`, `header_minus_lines`, and `paid_minus_header` came from the same source rows. Run with 50 minus one and 50 plus one eligible rows; require the output cap of 50 while retaining `o.order_id`.</span>
+<span>--    Hint ladder, rung 1: For sql-59 Exercise 3, run `lines`, and `paid` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span>
 <span>-- 4. Edge case: assign purchases with no qualifying campaign touch to a</span>
 <span>--    &#x27;(direct)&#x27; bucket and prove attribution counts reconcile to purchases.</span>
+<span>--    Inputs: For sql-59 Exercise 4, start from `orders` and choose at most one event whose `event_type` is in the declared marketing-touch whitelist (`page_view`, `add_to_cart`, `checkout`), whose campaign metadata is present, and whose timestamp is in the preceding seven-day half-open window.</span>
+<span>--    Expected result/shape: For sql-59 Exercise 4, expected output: one row per `attribution_bucket`, with `purchases`; every order contributes to exactly one campaign bucket or `(direct)`. The final order is `purchases DESC, attribution_bucket`.</span>
+<span>--    Verify: For sql-59 Exercise 4, assert that `SUM(purchases)` equals `COUNT(*)` from `orders`. Add a tagged non-touch event and prove the attribution result is unchanged; then add two qualifying touches for one order and prove the latest timestamp, with `event_id` as tie-breaker, wins exactly once.</span>
+<span>--    Hint ladder, rung 1: For sql-59 Exercise 4, start with the first relation in `orders`, and `events`; after each join, record total rows and distinct `attribution_bucket`, and `purchases` so the exact fanout or loss is visible.</span>
 <span>-- 5. Performance: compare the customer/date index with a date/customer index</span>
 <span>--    for the date-bounded aggregation; explain the leftmost-column tradeoff.</span>
+<span>--    Inputs: For sql-59 Exercise 5, run the underlying read-only query over `orders`, and `idx_orders_date_customer_day59_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
+<span>--    Expected result/shape: For sql-59 Exercise 5, expected output: one row per `customer_id`. The final columns are `customer_id`, and `revenue`.</span>
+<span>--    Verify: For sql-59 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
+<span>--    Hint ladder, rung 1: For sql-59 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows.</span>
 <span>-- 6. Explanation: write a metric contract for one KPI covering name, grain,</span>
 <span>--    numerator, denominator, time zone, NULL policy, exclusions, and owner.</span>
+<span>--    Inputs: For sql-59 Exercise 6, read from the inline `VALUES` fixture. Build the answer toward `metric_name`, `grain`, `numerator`, `denominator`, `time_window`, `null_policy`, `exclusions`, and `owner`; keep `metric_name` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-59 Exercise 6, expected output: one row per `metric_name`. The final columns are `metric_name`, `grain`, `numerator`, `denominator`, `time_window`, `null_policy`, `exclusions`, and `owner`.</span>
+<span>--    Verify: For sql-59 Exercise 6, reselect the returned keys directly from the source; require unique `metric_name` where the expected grain is one row per key and confirm the projected `metric_name`, `grain`, `numerator`, `denominator`, `time_window`, `null_policy`, `exclusions`, and `owner` against the inline `VALUES` fixture. Add one source row with a new `metric_name`; verify the result gains exactly one row carrying that `metric_name` value.</span>
+<span>--    Hint ladder, rung 1: For sql-59 Exercise 6, select `metric_name` from the inline `VALUES` fixture before adding derived columns.</span>
 <span>-- 7. Construction: produce a stakeholder-safe product-pair report with support,</span>
 <span>--    confidence, lift, minimum basket count, and deterministic ordering.</span>
+<span>--    Inputs: For sql-59 Exercise 7, read from `order_items`. Build the answer toward `product_a`, `product_b`, `together`, `support`, `confidence_a_to_b`, and `lift`; keep `order_item_id` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-59 Exercise 7, expected output: at most 20 rows keyed by `order_item_id`. The final columns are `product_a`, `product_b`, `together`, `support`, `confidence_a_to_b`, and `lift`. The final order is `lift DESC, together DESC, product_a, product_b`.</span>
+<span>--    Verify: For sql-59 Exercise 7, assert no more than 20 rows, no duplicate `order_item_id`, and no adjacent pair that violates `lift DESC, together DESC, product_a, product_b`. Rejoin the returned keys to `order_items` to confirm `product_a`, `product_b`, `together`, `support`, `confidence_a_to_b`, and `lift` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `lift DESC, together DESC, product_a, product_b`.</span>
+<span>--    Hint ladder, rung 1: For sql-59 Exercise 7, run `baskets`, `totals`, `product_baskets`, and `pairs` one at a time. Record each CTE&#x27;s row count and `order_item_id` uniqueness before the next stage uses it.</span>
 <span>-- 8. Sign-off: assemble one result set that reconciles the customer, finance,</span>
 <span>--    funnel, attribution, and market-basket outputs to named control totals.</span>
+<span>--    Inputs: For sql-59 Exercise 8, read from `customers`, `orders`, `order_items`, and `payments`. Build the answer toward `control_name`, and `observed_value`; keep `customer_id` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-59 Exercise 8, expected output: one row per `customer_id`. The final columns are `control_name`, and `observed_value`. The final order is `control_name`.</span>
+<span>--    Verify: For sql-59 Exercise 8, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `control_name`, and `observed_value` against `customers`, `orders`, `order_items`, and `payments`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.</span>
+<span>--    Hint ladder, rung 1: For sql-59 Exercise 8, check `control_name` before applying the row cap.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -559,6 +906,26 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-59-solution-integrated-stakeholder-analytics">Day 59 Solution — Integrated Stakeholder Analytics<a class="heading-anchor" href="#solution-1--day-59-solution-integrated-stakeholder-analytics" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day59_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day59_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are KPI contract, Funnel denominator, Scale hypothesis. Its worked-model focus is: Choose one KPI and write its contract before SQL. Build its lowest stable grain, add dimensions only after reconciliation, and return numerator/denominator beside any rate. Present the stakeholder table together with its control total and a limitation; repeat that evidence pattern for Finance and Marketing.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>Day 59 is a capstone checkpoint, not a pair of discrete exercises. Its deliverables are a reconciled KPI suite, performance evidence, stakeholder queries, and a large-scale design note. The canonical executable checkpoint is <a href="sql-59.html#solution-2"><code>day59_solutions.sql</code></a>.</p>
 <h4 id="solution-1--deliverable-1-business-kpi-suite">Deliverable 1 — Business KPI suite<a class="heading-anchor" href="#solution-1--deliverable-1-business-kpi-suite" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--ltv-by-signup-cohort-and-segment">LTV by signup cohort and segment<a class="heading-anchor" href="#solution-1--ltv-by-signup-cohort-and-segment" aria-label="Link to this section">#</a></h5>
@@ -586,22 +953,49 @@ ORDER BY cohort_month DESC, total_ltv DESC;</code></pre>
 <h5 id="solution-1--ninety-day-conversion-funnel">Ninety-day conversion funnel<a class="heading-anchor" href="#solution-1--ninety-day-conversion-funnel" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-sql">SET search_path TO training, public;
 
-WITH activity AS (
+WITH viewed_stage AS (
   SELECT c.customer_id,
-         BOOL_OR(e.event_type = &#x27;page_view&#x27;) AS viewed,
-         BOOL_OR(e.event_type = &#x27;add_to_cart&#x27;) AS added,
-         BOOL_OR(e.event_type = &#x27;checkout&#x27;) AS checked_out,
-         EXISTS (
-           SELECT 1
-           FROM orders o
-           WHERE o.customer_id = c.customer_id
-             AND o.order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;
-         ) AS bought
+         MIN(e.event_time) FILTER (
+           WHERE e.event_type = &#x27;page_view&#x27;
+         ) AS viewed_at
   FROM customers c
   LEFT JOIN events e
     ON e.customer_id = c.customer_id
    AND e.event_time &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;
   GROUP BY c.customer_id
+), added_stage AS (
+  SELECT v.customer_id, v.viewed_at, MIN(e.event_time) AS added_at
+  FROM viewed_stage v
+  LEFT JOIN events e
+    ON e.customer_id = v.customer_id
+   AND e.event_type = &#x27;add_to_cart&#x27;
+   AND e.event_time &gt;= v.viewed_at
+  GROUP BY v.customer_id, v.viewed_at
+), checkout_stage AS (
+  SELECT a.customer_id, a.viewed_at, a.added_at,
+         MIN(e.event_time) AS checkout_at
+  FROM added_stage a
+  LEFT JOIN events e
+    ON e.customer_id = a.customer_id
+   AND e.event_type = &#x27;checkout&#x27;
+   AND e.event_time &gt;= a.added_at
+  GROUP BY a.customer_id, a.viewed_at, a.added_at
+), purchase_stage AS (
+  SELECT ch.customer_id, ch.viewed_at, ch.added_at, ch.checkout_at,
+         MIN(o.order_date) AS purchased_at
+  FROM checkout_stage ch
+  LEFT JOIN orders o
+    ON o.customer_id = ch.customer_id
+   AND o.order_date &gt;= ch.checkout_at
+   AND o.order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;
+  GROUP BY ch.customer_id, ch.viewed_at, ch.added_at, ch.checkout_at
+), activity AS (
+  SELECT customer_id,
+         viewed_at IS NOT NULL AS viewed,
+         added_at IS NOT NULL AND added_at &gt;= viewed_at AS added,
+         checkout_at IS NOT NULL AND checkout_at &gt;= added_at AS checked_out,
+         purchased_at IS NOT NULL AND purchased_at &gt;= checkout_at AS bought
+  FROM purchase_stage
 )
 SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,
        COUNT(*) FILTER (WHERE added) AS adders,
@@ -613,7 +1007,7 @@ SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,
          4
        ) AS viewer_to_buyer_rate
 FROM activity;</code></pre>
-<p>Expected shape: one row. Every funnel stage is measured at customer grain, but the synthetic data does not enforce strict stage ordering.</p>
+<p>Expected shape: one row. Every later funnel population is a subset of the preceding population because its timestamp must follow the prior stage.</p>
 <h5 id="solution-1--product-pair-affinity">Product-pair affinity<a class="heading-anchor" href="#solution-1--product-pair-affinity" aria-label="Link to this section">#</a></h5>
 <p>The learner script already supplies the runnable market-basket query. Its deliverable is the 20 most frequent distinct product pairs. Deduplicate <code>(order_id, product_id)</code> first and enforce <code>a.product_id &lt; b.product_id</code>; this prevents self-pairs and reversed duplicates. The metric is co-occurrence count, despite the starter comment saying “revenue.”</p>
 <h4 id="solution-1--deliverable-2-performance-evidence">Deliverable 2 — Performance evidence<a class="heading-anchor" href="#solution-1--deliverable-2-performance-evidence" aria-label="Link to this section">#</a></h4>
@@ -657,7 +1051,7 @@ FULL OUTER JOIN budget b USING (category)
 ORDER BY category;</code></pre>
 <p>Expected grain: one row per category found in actuals or budget.</p>
 <h5 id="solution-1--marketing-campaign-assisted-purchases">Marketing: campaign-assisted purchases<a class="heading-anchor" href="#solution-1--marketing-campaign-assisted-purchases" aria-label="Link to this section">#</a></h5>
-<p>The learner query anchors on each customer&#x27;s first order and counts distinct customers with a campaign touch in the preceding seven days. Document that definition: it is first-purchase assistance, not all-purchase event attribution from Day 48. Multiple campaigns can assist one customer, so campaign rows are not additive.</p>
+<p>The learner query anchors on each customer&#x27;s first order and counts distinct customers with a campaign touch in the preceding seven days. The touch whitelist is <code>page_view</code>, <code>add_to_cart</code>, and <code>checkout</code>; campaign metadata on a different event type does not qualify. Document that definition: it is first-purchase assistance, not all-purchase event attribution from Day 48. Multiple campaigns can assist one customer, so campaign rows are not additive.</p>
 <h4 id="solution-1--deliverable-4-large-scale-design-note">Deliverable 4 — Large-scale design note<a class="heading-anchor" href="#solution-1--deliverable-4-large-scale-design-note" aria-label="Link to this section">#</a></h4>
 <p>For a hypothetical 100M-row deployment, record:</p>
 <ul>
@@ -675,22 +1069,102 @@ ORDER BY category;</code></pre>
 </ul>
 <h4 id="solution-1--exercise-1-make-every-grain-transition-explicit">Exercise 1 — Make every grain transition explicit<a class="heading-anchor" href="#solution-1--exercise-1-make-every-grain-transition-explicit" aria-label="Link to this section">#</a></h4>
 <p>The executable <code>grain_map</code> states the key and row meaning for order values, customer LTV, and cohort/segment summary. A lower-grain join after aggregation would invalidate the metric.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-59 Exercise 1, read from the inline <code>VALUES</code> fixture. Build the answer toward <code>step_name</code>, <code>row_grain</code>, and <code>key_columns</code>; keep <code>step_name</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-59 Exercise 1, expected output: one row per <code>step_name</code>. The final columns are <code>step_name</code>, <code>row_grain</code>, and <code>key_columns</code>.</li>
+<li><strong>Independent verification:</strong> For sql-59 Exercise 1, reselect the returned keys directly from the source; require unique <code>step_name</code> where the expected grain is one row per key and confirm the projected <code>step_name</code>, <code>row_grain</code>, and <code>key_columns</code> against the inline <code>VALUES</code> fixture. Add one source row with a new <code>step_name</code>; verify the result gains exactly one row carrying that <code>step_name</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-59 Exercise 1, select <code>step_name</code> from the inline <code>VALUES</code> fixture before adding derived columns.</li>
+<li><strong>Clause check:</strong> For sql-59 Exercise 1, the solution actually uses <code>FROM</code>, and <code>SELECT</code>. Read only those operations: begin at the inline <code>VALUES</code> fixture, preserve one row per <code>step_name</code>, and finish with <code>step_name</code>, <code>row_grain</code>, and <code>key_columns</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-59 Exercise 1, the chosen form is justified by this lesson-specific rationale: The executable <code>grain_map</code> states the key and row meaning for order values, customer LTV, and cohort/segment summary. Evaluate another form against the concrete expected result (one row per <code>step_name</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>step_name</code>; verify the result gains exactly one row carrying that <code>step_name</code> value.</li>
+</ul>
 <h4 id="solution-1--exercise-2-calculate-funnel-rates-with-a-stable-population">Exercise 2 — Calculate funnel rates with a stable population<a class="heading-anchor" href="#solution-1--exercise-2-calculate-funnel-rates-with-a-stable-population" aria-label="Link to this section">#</a></h4>
-<p>Start from all customers, left-join recent events, and use EXISTS for recent purchases. Buyers without a page-view stay visible. Each rate divides by the preceding stage with <code>NULLIF</code> protection.</p>
+<p>Start from all customers and derive the first valid timestamp at each ordered stage. A later event counts only when it occurs at or after the prior stage. Keep an independent buyer-without-view diagnostic, but do not mix it into the ordered conversion numerators.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-59 Exercise 2, derive <code>viewed_at</code>, <code>added_at</code>, <code>checkout_at</code>, and <code>purchased_at</code> per customer over the same trailing-90-day window.</li>
+<li><strong>Expected result/shape:</strong> For sql-59 Exercise 2, expected output: exactly one summary row with ordered stage counts, <code>buyers_without_view</code>, and three conversion rates whose denominators are the preceding ordered populations.</li>
+<li><strong>Independent verification:</strong> For sql-59 Exercise 2, require <code>added_at &gt;= viewed_at</code>, <code>checkout_at &gt;= added_at</code>, and <code>purchased_at &gt;= checkout_at</code>. Prove <code>buyers &lt;= checkouts &lt;= adders &lt;= viewers</code>; every nonzero stage rate must be between zero and one.</li>
+<li><strong>Intermediate relation check:</strong> For sql-59 Exercise 2, inspect one customer in each of <code>viewed_stage</code>, <code>added_stage</code>, <code>checkout_stage</code>, and <code>purchase_stage</code> before reducing to booleans and counts.</li>
+<li><strong>Clause check:</strong> For sql-59 Exercise 2, each staged <code>LEFT JOIN</code> retains the all-customer population while its timestamp predicate conditions the next stage on the previous one; aggregate <code>FILTER</code> then counts nested booleans.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-59 Exercise 2, the chosen form is justified by this lesson-specific rationale: Start from all customers, left-join recent events, and use EXISTS for recent purchases. Evaluate another form against the concrete expected result (one row per <code>order_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add checkout and purchase events that occur before add-to-cart; they must not count as ordered checkout or purchase stages.</li>
+</ul>
 <h4 id="solution-1--exercise-3-reconcile-candidate-money-measures">Exercise 3 — Reconcile candidate money measures<a class="heading-anchor" href="#solution-1--exercise-3-reconcile-candidate-money-measures" aria-label="Link to this section">#</a></h4>
 <p>Line values and payments each aggregate to <code>order_id</code> before joining orders. The answer retains stored total, calculated line total, paid amount, and both differences so stakeholders can choose a named measure.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-59 Exercise 3, read from <code>order_items</code>, <code>payments</code>, and <code>orders</code>. Build the answer toward <code>order_id</code>, <code>stored_order_total</code>, <code>line_revenue</code>, <code>paid_amount</code>, <code>header_minus_lines</code>, and <code>paid_minus_header</code>; keep <code>order_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-59 Exercise 3, expected output: at most 50 rows keyed by <code>order_id</code>. The final columns are <code>order_id</code>, <code>stored_order_total</code>, <code>line_revenue</code>, <code>paid_amount</code>, <code>header_minus_lines</code>, and <code>paid_minus_header</code>. The final order is <code>o.order_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-59 Exercise 3, assert no more than 50 rows, no duplicate <code>order_id</code>, and no adjacent pair that violates <code>o.order_id</code>. Rejoin the returned keys to <code>order_items</code>, <code>payments</code>, and <code>orders</code> to confirm <code>order_id</code>, <code>stored_order_total</code>, <code>line_revenue</code>, <code>paid_amount</code>, <code>header_minus_lines</code>, and <code>paid_minus_header</code> came from the same source rows. Run with 50 minus one and 50 plus one eligible rows; require the output cap of 50 while retaining <code>o.order_id</code>.</li>
+<li><strong>Intermediate relation check:</strong> For sql-59 Exercise 3, run <code>lines</code>, and <code>paid</code> one at a time. Record each CTE&#x27;s row count and <code>order_id</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-59 Exercise 3, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>GROUP BY</code>, <code>SELECT</code>, <code>ORDER BY</code>, and <code>LIMIT</code>. Read only those operations: begin at <code>order_items</code>, <code>payments</code>, and <code>orders</code>, preserve one row per <code>order_id</code>, and finish with <code>order_id</code>, <code>stored_order_total</code>, <code>line_revenue</code>, <code>paid_amount</code>, <code>header_minus_lines</code>, and <code>paid_minus_header</code> ordered by <code>o.order_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-59 Exercise 3, the chosen form is justified by this lesson-specific rationale: Line values and payments each aggregate to <code>order_id</code> before joining orders. Evaluate another form against the concrete expected result (at most 50 rows keyed by <code>order_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Run with 50 minus one and 50 plus one eligible rows; require the output cap of 50 while retaining <code>o.order_id</code>.</li>
+</ul>
 <h4 id="solution-1--exercise-4-include-direct-attribution">Exercise 4 — Include direct attribution<a class="heading-anchor" href="#solution-1--exercise-4-include-direct-attribution" aria-label="Link to this section">#</a></h4>
 <p>Start from purchases and choose at most one latest qualifying touch with a LATERAL query. Missing touches become <code>(direct)</code>, so attribution counts reconcile to the purchase population.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-59 Exercise 4, start from <code>orders</code> and choose at most one event whose <code>event_type</code> is in the declared marketing-touch whitelist (<code>page_view</code>, <code>add_to_cart</code>, <code>checkout</code>), whose campaign metadata is present, and whose timestamp is in the preceding seven-day half-open window.</li>
+<li><strong>Expected result/shape:</strong> For sql-59 Exercise 4, expected output: one row per <code>attribution_bucket</code>, with <code>purchases</code>; every order contributes to exactly one campaign bucket or <code>(direct)</code>. The final order is <code>purchases DESC, attribution_bucket</code>.</li>
+<li><strong>Independent verification:</strong> For sql-59 Exercise 4, assert that <code>SUM(purchases)</code> equals <code>COUNT(*)</code> from <code>orders</code>. Add a tagged non-touch event and prove the attribution result is unchanged; then add two qualifying touches for one order and prove the latest timestamp, with <code>event_id</code> as tie-breaker, wins exactly once.</li>
+<li><strong>Intermediate relation check:</strong> For sql-59 Exercise 4, start with the first relation in <code>orders</code>, and <code>events</code>; after each join, record total rows and distinct <code>attribution_bucket</code>, and <code>purchases</code> so the exact fanout or loss is visible.</li>
+<li><strong>Clause check:</strong> For sql-59 Exercise 4, the solution actually uses <code>FROM</code>, <code>JOIN ... ON</code>, <code>WHERE</code>, <code>GROUP BY</code>, <code>SELECT</code>, <code>ORDER BY</code>, and <code>LIMIT</code>. Read only those operations: begin at <code>orders</code>, and <code>events</code>, preserve one row per <code>attribution_bucket</code>, and <code>purchases</code>, and finish with <code>attribution_bucket</code>, and <code>purchases</code> ordered by <code>purchases DESC, attribution_bucket</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-59 Exercise 4, the chosen form is justified by this lesson-specific rationale: Start from purchases and choose at most one latest qualifying touch with a LATERAL query. Evaluate another form against the concrete expected result (one row per <code>attribution_bucket</code>, and <code>purchases</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>row_count</code> for the existing <code>attribution_bucket</code>, and <code>purchases</code> tuple and verify the new tuple appears exactly once.</li>
+</ul>
 <h4 id="solution-1--exercise-5-compare-index-column-order">Exercise 5 — Compare index column order<a class="heading-anchor" href="#solution-1--exercise-5-compare-index-column-order" aria-label="Link to this section">#</a></h4>
 <p><code>(customer_id, order_date)</code> supports one customer&#x27;s history; <code>(order_date, customer_id)</code> better anchors a global date-bound scan. EXPLAIN evidence is environment-specific and both indexes add write cost.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-59 Exercise 5, run the underlying read-only query over <code>orders</code>, and <code>idx_orders_date_customer_day59_solution</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</li>
+<li><strong>Expected result/shape:</strong> For sql-59 Exercise 5, expected output: one row per <code>customer_id</code>. The final columns are <code>customer_id</code>, and <code>revenue</code>.</li>
+<li><strong>Independent verification:</strong> For sql-59 Exercise 5, run the underlying query without <code>EXPLAIN</code> and preserve its <code>customer_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li><strong>Intermediate relation check:</strong> For sql-59 Exercise 5, run the underlying query without <code>EXPLAIN</code> and preserve its <code>customer_id</code> rows.</li>
+<li><strong>Clause check:</strong> For sql-59 Exercise 5, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>GROUP BY</code>, and <code>SELECT</code>. Read only those operations: begin at <code>orders</code>, and <code>idx_orders_date_customer_day59_solution</code>, preserve one row per <code>customer_id</code>, and finish with <code>customer_id</code>, and <code>revenue</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-59 Exercise 5, the chosen form is justified by this lesson-specific rationale: <code>(customer_id, order_date)</code> supports one customer&#x27;s history; <code>(order_date, customer_id)</code> better anchors a global date-bound scan. Evaluate another form against the concrete expected result (one row per <code>customer_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+</ul>
 <h4 id="solution-1--exercise-6-publish-a-metric-contract">Exercise 6 — Publish a metric contract<a class="heading-anchor" href="#solution-1--exercise-6-publish-a-metric-contract" aria-label="Link to this section">#</a></h4>
 <p>The answer records metric name, grain, numerator, denominator, UTC window, NULL policy, exclusions, and owner as queryable values. This prevents silent semantic changes between teams.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-59 Exercise 6, read from the inline <code>VALUES</code> fixture. Build the answer toward <code>metric_name</code>, <code>grain</code>, <code>numerator</code>, <code>denominator</code>, <code>time_window</code>, <code>null_policy</code>, <code>exclusions</code>, and <code>owner</code>; keep <code>metric_name</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-59 Exercise 6, expected output: one row per <code>metric_name</code>. The final columns are <code>metric_name</code>, <code>grain</code>, <code>numerator</code>, <code>denominator</code>, <code>time_window</code>, <code>null_policy</code>, <code>exclusions</code>, and <code>owner</code>.</li>
+<li><strong>Independent verification:</strong> For sql-59 Exercise 6, reselect the returned keys directly from the source; require unique <code>metric_name</code> where the expected grain is one row per key and confirm the projected <code>metric_name</code>, <code>grain</code>, <code>numerator</code>, <code>denominator</code>, <code>time_window</code>, <code>null_policy</code>, <code>exclusions</code>, and <code>owner</code> against the inline <code>VALUES</code> fixture. Add one source row with a new <code>metric_name</code>; verify the result gains exactly one row carrying that <code>metric_name</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-59 Exercise 6, select <code>metric_name</code> from the inline <code>VALUES</code> fixture before adding derived columns.</li>
+<li><strong>Clause check:</strong> For sql-59 Exercise 6, the solution actually uses <code>WITH</code>, <code>FROM</code>, and <code>SELECT</code>. Read only those operations: begin at the inline <code>VALUES</code> fixture, preserve one row per <code>metric_name</code>, and finish with <code>metric_name</code>, <code>grain</code>, <code>numerator</code>, <code>denominator</code>, <code>time_window</code>, <code>null_policy</code>, <code>exclusions</code>, and <code>owner</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-59 Exercise 6, the chosen form is justified by this lesson-specific rationale: The answer records metric name, grain, numerator, denominator, UTC window, NULL policy, exclusions, and owner as queryable values. Evaluate another form against the concrete expected result (one row per <code>metric_name</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>metric_name</code>; verify the result gains exactly one row carrying that <code>metric_name</code> value.</li>
+</ul>
 <h4 id="solution-1--exercise-7-publish-defensible-basket-metrics">Exercise 7 — Publish defensible basket metrics<a class="heading-anchor" href="#solution-1--exercise-7-publish-defensible-basket-metrics" aria-label="Link to this section">#</a></h4>
 <p>Distinct baskets feed support, confidence, and lift. A minimum pair count limits noise, and product IDs resolve ordering ties deterministically.</p>
+<h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-59 Exercise 7, read from <code>order_items</code>. Build the answer toward <code>product_a</code>, <code>product_b</code>, <code>together</code>, <code>support</code>, <code>confidence_a_to_b</code>, and <code>lift</code>; keep <code>order_item_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-59 Exercise 7, expected output: at most 20 rows keyed by <code>order_item_id</code>. The final columns are <code>product_a</code>, <code>product_b</code>, <code>together</code>, <code>support</code>, <code>confidence_a_to_b</code>, and <code>lift</code>. The final order is <code>lift DESC, together DESC, product_a, product_b</code>.</li>
+<li><strong>Independent verification:</strong> For sql-59 Exercise 7, assert no more than 20 rows, no duplicate <code>order_item_id</code>, and no adjacent pair that violates <code>lift DESC, together DESC, product_a, product_b</code>. Rejoin the returned keys to <code>order_items</code> to confirm <code>product_a</code>, <code>product_b</code>, <code>together</code>, <code>support</code>, <code>confidence_a_to_b</code>, and <code>lift</code> came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining <code>lift DESC, together DESC, product_a, product_b</code>.</li>
+<li><strong>Intermediate relation check:</strong> For sql-59 Exercise 7, run <code>baskets</code>, <code>totals</code>, <code>product_baskets</code>, and <code>pairs</code> one at a time. Record each CTE&#x27;s row count and <code>order_item_id</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-59 Exercise 7, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>WHERE</code>, <code>GROUP BY</code>, <code>SELECT</code>, <code>ORDER BY</code>, and <code>LIMIT</code>. Read only those operations: begin at <code>order_items</code>, preserve one row per <code>order_item_id</code>, and finish with <code>product_a</code>, <code>product_b</code>, <code>together</code>, <code>support</code>, <code>confidence_a_to_b</code>, and <code>lift</code> ordered by <code>lift DESC, together DESC, product_a, product_b</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-59 Exercise 7, the chosen form is justified by this lesson-specific rationale: Distinct baskets feed support, confidence, and lift. Evaluate another form against the concrete expected result (at most 20 rows keyed by <code>order_item_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining <code>lift DESC, together DESC, product_a, product_b</code>.</li>
+</ul>
 <h4 id="solution-1--exercise-8-assemble-cross-domain-controls">Exercise 8 — Assemble cross-domain controls<a class="heading-anchor" href="#solution-1--exercise-8-assemble-cross-domain-controls" aria-label="Link to this section">#</a></h4>
-<p>Named counts and money totals provide a small sign-off surface for customer, order, line, and payment domains. Any non-equivalence must be explained by a declared metric definition rather than hidden.</p></div>
+<p>Named counts and money totals provide a small sign-off surface for customer, order, line, and payment domains. Any non-equivalence must be explained by a declared metric definition rather than hidden.</p>
+<h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-59 Exercise 8, read from <code>customers</code>, <code>orders</code>, <code>order_items</code>, and <code>payments</code>. Build the answer toward <code>control_name</code>, and <code>observed_value</code>; keep <code>customer_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-59 Exercise 8, expected output: one row per <code>customer_id</code>. The final columns are <code>control_name</code>, and <code>observed_value</code>. The final order is <code>control_name</code>.</li>
+<li><strong>Independent verification:</strong> For sql-59 Exercise 8, reselect the returned keys directly from the source; require unique <code>customer_id</code> where the expected grain is one row per key and confirm the projected <code>control_name</code>, and <code>observed_value</code> against <code>customers</code>, <code>orders</code>, <code>order_items</code>, and <code>payments</code>. Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-59 Exercise 8, check <code>control_name</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-59 Exercise 8, the solution actually uses <code>FROM</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>customers</code>, <code>orders</code>, <code>order_items</code>, and <code>payments</code>, preserve one row per <code>customer_id</code>, and finish with <code>control_name</code>, and <code>observed_value</code> ordered by <code>control_name</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-59 Exercise 8, the chosen form is justified by this lesson-specific rationale: Named counts and money totals provide a small sign-off surface for customer, order, line, and payment domains. Evaluate another form against the concrete expected result (one row per <code>customer_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
+</ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -698,7 +1172,7 @@ ORDER BY category;</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -722,6 +1196,19 @@ ORDER BY category;</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 59 solution: integrated stakeholder analytics</span>
+<span>-- SOLUTION READING MAP — sql-59: Final Capstone Part2</span>
+<span>-- Explanation: sql/postgres-60day/solutions/day59_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day59_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
@@ -745,23 +1232,60 @@ ORDER BY category;</code></pre>
 <span>GROUP BY cohort_month, segment</span>
 <span>ORDER BY cohort_month DESC, total_ltv DESC;</span>
 <span> </span>
-<span>-- Conversion funnel with rates and a stable customer denominator.</span>
-<span>WITH activity AS (</span>
+<span>-- Ordered conversion funnel with rates and a stable customer denominator.</span>
+<span>-- A later action counts only after the same customer completed the prior one;</span>
+<span>-- independent reach counts are useful diagnostics, but are not conversions.</span>
+<span>WITH viewed_stage AS (</span>
 <span>  SELECT c.customer_id,</span>
-<span>         BOOL_OR(e.event_type = &#x27;page_view&#x27;) AS viewed,</span>
-<span>         BOOL_OR(e.event_type = &#x27;add_to_cart&#x27;) AS added,</span>
-<span>         BOOL_OR(e.event_type = &#x27;checkout&#x27;) AS checked_out,</span>
-<span>         EXISTS (</span>
-<span>           SELECT 1</span>
-<span>           FROM orders o</span>
-<span>           WHERE o.customer_id = c.customer_id</span>
-<span>             AND o.order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;</span>
-<span>         ) AS bought</span>
+<span>         MIN(e.event_time) FILTER (</span>
+<span>           WHERE e.event_type = &#x27;page_view&#x27;</span>
+<span>         ) AS viewed_at</span>
 <span>  FROM customers c</span>
 <span>  LEFT JOIN events e</span>
 <span>    ON e.customer_id = c.customer_id</span>
 <span>   AND e.event_time &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;</span>
 <span>  GROUP BY c.customer_id</span>
+<span>), added_stage AS (</span>
+<span>  SELECT viewed.customer_id,</span>
+<span>         viewed.viewed_at,</span>
+<span>         MIN(event.event_time) AS added_at</span>
+<span>  FROM viewed_stage viewed</span>
+<span>  LEFT JOIN events event</span>
+<span>    ON event.customer_id = viewed.customer_id</span>
+<span>   AND event.event_type = &#x27;add_to_cart&#x27;</span>
+<span>   AND event.event_time &gt;= viewed.viewed_at</span>
+<span>  GROUP BY viewed.customer_id, viewed.viewed_at</span>
+<span>), checkout_stage AS (</span>
+<span>  SELECT added.customer_id,</span>
+<span>         added.viewed_at,</span>
+<span>         added.added_at,</span>
+<span>         MIN(event.event_time) AS checkout_at</span>
+<span>  FROM added_stage added</span>
+<span>  LEFT JOIN events event</span>
+<span>    ON event.customer_id = added.customer_id</span>
+<span>   AND event.event_type = &#x27;checkout&#x27;</span>
+<span>   AND event.event_time &gt;= added.added_at</span>
+<span>  GROUP BY added.customer_id, added.viewed_at, added.added_at</span>
+<span>), purchase_stage AS (</span>
+<span>  SELECT checkout.customer_id,</span>
+<span>         checkout.viewed_at,</span>
+<span>         checkout.added_at,</span>
+<span>         checkout.checkout_at,</span>
+<span>         MIN(customer_order.order_date) AS purchased_at</span>
+<span>  FROM checkout_stage checkout</span>
+<span>  LEFT JOIN orders customer_order</span>
+<span>    ON customer_order.customer_id = checkout.customer_id</span>
+<span>   AND customer_order.order_date &gt;= checkout.checkout_at</span>
+<span>   AND customer_order.order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;</span>
+<span>  GROUP BY checkout.customer_id, checkout.viewed_at,</span>
+<span>           checkout.added_at, checkout.checkout_at</span>
+<span>), activity AS (</span>
+<span>  SELECT customer_id,</span>
+<span>         viewed_at IS NOT NULL AS viewed,</span>
+<span>         added_at IS NOT NULL AND added_at &gt;= viewed_at AS added,</span>
+<span>         checkout_at IS NOT NULL AND checkout_at &gt;= added_at AS checked_out,</span>
+<span>         purchased_at IS NOT NULL AND purchased_at &gt;= checkout_at AS bought</span>
+<span>  FROM purchase_stage</span>
 <span>)</span>
 <span>SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,</span>
 <span>       COUNT(*) FILTER (WHERE added) AS adders,</span>
@@ -818,29 +1342,71 @@ ORDER BY category;</code></pre>
 <span>     &#x27;cohort_month + segment&#x27;)</span>
 <span>) AS grain_map(step_name, row_grain, key_columns);</span>
 <span> </span>
-<span>-- Exercise 2: start with every customer so buyers without matching event</span>
-<span>-- records remain visible. Each denominator is the preceding funnel population.</span>
-<span>WITH activity AS (</span>
+<span>-- Exercise 2: require each later stage to occur at or after the prior stage.</span>
+<span>-- Independent reach counts are not funnel conversions and can exceed 100%.</span>
+<span>WITH viewed_stage AS (</span>
 <span>  SELECT c.customer_id,</span>
-<span>         BOOL_OR(e.event_type = &#x27;page_view&#x27;) AS viewed,</span>
-<span>         BOOL_OR(e.event_type = &#x27;add_to_cart&#x27;) AS added,</span>
-<span>         BOOL_OR(e.event_type = &#x27;checkout&#x27;) AS checked_out,</span>
-<span>         EXISTS (</span>
-<span>           SELECT 1 FROM orders o</span>
-<span>           WHERE o.customer_id = c.customer_id</span>
-<span>             AND o.order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;</span>
-<span>         ) AS bought</span>
+<span>         MIN(e.event_time) FILTER (</span>
+<span>           WHERE e.event_type = &#x27;page_view&#x27;</span>
+<span>         ) AS viewed_at</span>
 <span>  FROM customers c</span>
 <span>  LEFT JOIN events e</span>
 <span>    ON e.customer_id = c.customer_id</span>
 <span>   AND e.event_time &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;</span>
 <span>  GROUP BY c.customer_id</span>
+<span>), added_stage AS (</span>
+<span>  SELECT viewed.customer_id,</span>
+<span>         viewed.viewed_at,</span>
+<span>         MIN(event.event_time) AS added_at</span>
+<span>  FROM viewed_stage viewed</span>
+<span>  LEFT JOIN events event</span>
+<span>    ON event.customer_id = viewed.customer_id</span>
+<span>   AND event.event_type = &#x27;add_to_cart&#x27;</span>
+<span>   AND event.event_time &gt;= viewed.viewed_at</span>
+<span>  GROUP BY viewed.customer_id, viewed.viewed_at</span>
+<span>), checkout_stage AS (</span>
+<span>  SELECT added.customer_id,</span>
+<span>         added.viewed_at,</span>
+<span>         added.added_at,</span>
+<span>         MIN(event.event_time) AS checkout_at</span>
+<span>  FROM added_stage added</span>
+<span>  LEFT JOIN events event</span>
+<span>    ON event.customer_id = added.customer_id</span>
+<span>   AND event.event_type = &#x27;checkout&#x27;</span>
+<span>   AND event.event_time &gt;= added.added_at</span>
+<span>  GROUP BY added.customer_id, added.viewed_at, added.added_at</span>
+<span>), purchase_stage AS (</span>
+<span>  SELECT checkout.customer_id,</span>
+<span>         checkout.viewed_at,</span>
+<span>         checkout.added_at,</span>
+<span>         checkout.checkout_at,</span>
+<span>         MIN(customer_order.order_date) AS purchased_at</span>
+<span>  FROM checkout_stage checkout</span>
+<span>  LEFT JOIN orders customer_order</span>
+<span>    ON customer_order.customer_id = checkout.customer_id</span>
+<span>   AND customer_order.order_date &gt;= checkout.checkout_at</span>
+<span>   AND customer_order.order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;</span>
+<span>  GROUP BY checkout.customer_id, checkout.viewed_at,</span>
+<span>           checkout.added_at, checkout.checkout_at</span>
+<span>), activity AS (</span>
+<span>  SELECT customer_id,</span>
+<span>         viewed_at IS NOT NULL AS viewed,</span>
+<span>         added_at IS NOT NULL AND added_at &gt;= viewed_at AS added,</span>
+<span>         checkout_at IS NOT NULL AND checkout_at &gt;= added_at AS checked_out,</span>
+<span>         purchased_at IS NOT NULL AND purchased_at &gt;= checkout_at AS bought,</span>
+<span>         EXISTS (</span>
+<span>           SELECT 1</span>
+<span>           FROM orders any_order</span>
+<span>           WHERE any_order.customer_id = purchase_stage.customer_id</span>
+<span>             AND any_order.order_date &gt;= CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;</span>
+<span>         ) AND viewed_at IS NULL AS buyer_without_view</span>
+<span>  FROM purchase_stage</span>
 <span>), counts AS (</span>
 <span>  SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,</span>
 <span>         COUNT(*) FILTER (WHERE added) AS adders,</span>
 <span>         COUNT(*) FILTER (WHERE checked_out) AS checkouts,</span>
 <span>         COUNT(*) FILTER (WHERE bought) AS buyers,</span>
-<span>         COUNT(*) FILTER (WHERE bought AND NOT viewed) AS buyers_without_view</span>
+<span>         COUNT(*) FILTER (WHERE buyer_without_view) AS buyers_without_view</span>
 <span>  FROM activity</span>
 <span>)</span>
 <span>SELECT *,</span>
@@ -880,6 +1446,7 @@ ORDER BY category;</code></pre>
 <span>  SELECT e.metadata-&gt;&gt;&#x27;campaign&#x27; AS campaign</span>
 <span>  FROM events e</span>
 <span>  WHERE e.customer_id = o.customer_id</span>
+<span>    AND e.event_type IN (&#x27;page_view&#x27;, &#x27;add_to_cart&#x27;, &#x27;checkout&#x27;)</span>
 <span>    AND e.event_time &gt;= o.order_date - interval &#x27;7 days&#x27;</span>
 <span>    AND e.event_time &lt; o.order_date</span>
 <span>    AND e.metadata ? &#x27;campaign&#x27;</span>
@@ -962,7 +1529,50 @@ ORDER BY category;</code></pre>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-59 — Final Capstone Part2.
+
+I have completed the direct catalog prerequisite: `sql-58`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day59_final_capstone_part2.md
+- Answer-free learner SQL: sql/postgres-60day/day59_final_capstone_part2.sql
+
+Key terms to teach in context: KPI contract, Funnel denominator, Scale hypothesis. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Choose one KPI and write its contract before SQL. Build its lowest stable grain, add dimensions only after reconciliation, and return numerator/denominator beside any rate. Present the stakeholder table together with its control total and a limitation; repeat that evidence pattern for Finance and Marketing.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-59/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-58.html"><small>Previous lesson</small><strong>sql-58</strong><span>Final Capstone Part1</span></a>
@@ -1054,6 +1664,23 @@ ORDER BY category;</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

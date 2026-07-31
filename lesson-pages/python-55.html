@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-55-containerizing-a-fastapi-service">Day 55 — Containerizing a FastAPI Service<a class="heading-anchor" href="#guide--day-55-containerizing-a-fastapi-service" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-55</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>production</code> · <strong>Network:</strong> offline</p>
 <p>A container image packages application files, runtime dependencies, and startup configuration. It improves portability, but it is not a virtual machine, security boundary, or substitute for tests and observability.</p>
@@ -362,12 +401,123 @@ curl -X POST http://127.0.0.1:8000/predict \
 $body = @{ features = @(5.1, 3.5, 1.4, 0.2) } | ConvertTo-Json
 Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; `
   -ContentType &#x27;application/json&#x27; -Body $body</code></pre>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Open the Day 55 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
+<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
+<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
+<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
+</ol>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
+<h4 id="guide--concept-deep-dive-container-build-boundaries-minimal-images-and-health-semantics">Concept deep dive — container build boundaries, minimal images, and health semantics<a class="heading-anchor" href="#guide--concept-deep-dive-container-build-boundaries-minimal-images-and-health-semantics" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
+<p>A container image is a versioned filesystem plus process configuration; a container is one running process created from that image. Docker builds layers from a <strong>build context</strong>, so <code>.dockerignore</code> controls what can be sent to the builder. Multi-stage or ordered builds copy only the runtime artifacts needed after dependency installation.</p>
+<p>Liveness asks whether the process is functioning; readiness asks whether it should receive traffic. Packaging does not add application security, trusted artifacts, secret management, network policy, or safe defaults automatically.</p>
+<h5 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>FROM</code> / pinned base:</strong> establishes operating-system and Python dependencies; pin and scan rather than trusting <code>latest</code>.</li>
+<li><strong><code>COPY</code> and <code>.dockerignore</code>:</strong> define which local files enter the build context and image layers.</li>
+<li><strong><code>CMD</code> / <code>HEALTHCHECK</code>:</strong> define the main process and probe command without replacing service-level readiness policy.</li>
+</ul>
+<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
+<h5 id="guide--focused-example-a-audit-build-context-inclusion-before-docker-runs">Focused example A — audit build-context inclusion before Docker runs<a class="heading-anchor" href="#guide--focused-example-a-audit-build-context-inclusion-before-docker-runs" aria-label="Link to this section">#</a></h5>
+<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
+<pre><code class="language-python">from fnmatch import fnmatch
+
+files = [
+    &quot;app.py&quot;,
+    &quot;requirements.txt&quot;,
+    &quot;.env&quot;,
+    &quot;.venv/lib/package.py&quot;,
+    &quot;artifacts/model.joblib&quot;,
+]
+ignore_patterns = [&quot;.env&quot;, &quot;.venv/*&quot;]
+included = [
+    path for path in files
+    if not any(fnmatch(path, pattern) for pattern in ignore_patterns)
+]
+print(included)
+assert &quot;.env&quot; not in included and not any(p.startswith(&quot;.venv/&quot;) for p in included)</code></pre>
+<p><strong>Expected observation:</strong> The environment file and local virtual environment are excluded while explicit runtime assets remain.</p>
+<p><strong>Assumption to name:</strong> This simplified matcher demonstrates review logic; Docker&#x27;s complete ignore semantics and the real context still need inspection.</p>
+<h5 id="guide--focused-example-b-distinguish-process-health-from-traffic-readiness">Focused example B — distinguish process health from traffic readiness<a class="heading-anchor" href="#guide--focused-example-b-distinguish-process-health-from-traffic-readiness" aria-label="Link to this section">#</a></h5>
+<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
+<pre><code class="language-python">def probe(*, process_running, model_loaded, dependency_ready, draining):
+    return {
+        &quot;healthy&quot;: process_running,
+        &quot;ready&quot;: (
+            process_running
+            and model_loaded
+            and dependency_ready
+            and not draining
+        ),
+    }
+
+during_dependency_outage = probe(
+    process_running=True,
+    model_loaded=True,
+    dependency_ready=False,
+    draining=False,
+)
+print(during_dependency_outage)
+assert during_dependency_outage == {&quot;healthy&quot;: True, &quot;ready&quot;: False}</code></pre>
+<p><strong>Expected observation:</strong> A running process can remain live while correctly refusing new traffic during a dependency outage.</p>
+<p><strong>Assumption to name:</strong> Restarting the healthy process would not repair the external dependency and could amplify the incident.</p>
+<h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>What to do</th>
+<th>Evidence to keep</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define container build boundaries, minimal images, and health semantics in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<h5 id="guide--common-mistake-and-debugging-path">Common mistake and debugging path<a class="heading-anchor" href="#guide--common-mistake-and-debugging-path" aria-label="Link to this section">#</a></h5>
+<p><strong>Mistake:</strong> Copying the whole repository into an image, baking credentials into layers, or binding a development server publicly.</p>
+<p><strong>Debug it deliberately:</strong> Inspect build context, image history/SBOM, user, exposed ports, process signals, environment, artifact hash, and health/readiness responses.</p>
+<p><strong>Stop condition:</strong> Do not publish an image until secrets, base/dependency provenance, non-root runtime, probes, resource limits, and rollback are reviewed.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Create a slim dependency file containing only direct API runtime needs.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — container build boundaries, minimal images, and health semantics — build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.</p>
+<ol>
 <li>Add <code>GET /health</code> returning <code>{&quot;status&quot;: &quot;ok&quot;}</code>.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — container build boundaries, minimal images, and health semantics — with TestClient and the running container, assert GET /health returns status 200 and exactly {&#x27;status&#x27;: &#x27;ok&#x27;}; distinguish liveness from readiness by testing a missing/tampered model artifact.</p>
+<ol>
 <li>Optionally push the image to a registry if you intentionally use a connected account.</li>
 </ol>
+<p><strong>Verify:</strong> Practice 3 — container build boundaries, minimal images, and health semantics — keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Trace imports from <code>app.py</code> and the serialized pipeline. Rebuild in a clean image and run both endpoints.</li>
@@ -379,9 +529,16 @@ Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; `
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Layer and secret audit:</strong> Create a <code>.dockerignore</code>, inspect image history, and prove that <code>.env</code>, Git metadata, notebooks, caches, and local artifacts are absent. <strong>Progressive hint:</strong> The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.</li>
+</ol>
+<p><strong>Verify:</strong> Layer and secret audit — build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.</p>
+<ol>
 <li><strong>Least-privilege runtime:</strong> Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions. <strong>Progressive hint:</strong> Create the user in the image, set ownership only where needed, and write transient files under an intentionally mounted/temp path.</li>
+</ol>
+<p><strong>Verify:</strong> Least-privilege runtime — inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.</p>
+<ol>
 <li><strong>Health semantics:</strong> Implement separate <code>/live</code> and <code>/ready</code> checks and a startup failure when the model manifest is incompatible. Test all three states. <strong>Progressive hint:</strong> Liveness answers whether the process can respond; readiness answers whether it can safely serve the declared model contract.</li>
 </ol>
+<p><strong>Verify:</strong> Health semantics — assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -429,17 +586,46 @@ Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; `
 <li>Work in the <a href="python-55.html#learner">Day 55 learner notebook</a>.</li>
 <li>Then consult the <a href="python-55.html#solution-1">Day 55 solution</a>.</li>
 <li>Continue to <a href="python-56.html#guide">Day 56 — Prefect</a>.</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<pre><code class="language-text">Tutor me through `python-55` — Day 55 — Containerizing a FastAPI Service.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize container build boundaries, minimal images, and health semantics. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day55_apis_containerization_docker.md`
+- learner artifact: `python/ds-60day/notebooks/day55_apis_containerization_docker.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-54`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -456,12 +642,12 @@ Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; `
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-55-apis-containerization-dockerize-a-prediction-service">Day 55 — APIs &amp; Containerization: Dockerize a prediction service<a class="heading-anchor" href="#learner--cell-1--day-55-apis-containerization-dockerize-a-prediction-service" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -502,28 +688,137 @@ docker run --rm -p 8000:8000 ds-60day-api</code></pre>
 <p>PowerShell:</p>
 <pre><code class="language-powershell">$body = @{ features = @(5.1, 3.5, 1.4, 0.2) } | ConvertTo-Json
 Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; -ContentType &#x27;application/json&#x27; -Body $body</code></pre></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h4 id="learner--cell-5--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-5--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h4 id="learner--cell-5--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-5--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
+<h4 id="learner--cell-5--concept-lab-container-build-boundaries-minimal-images-and-health-semantics">Concept lab — container build boundaries, minimal images, and health semantics<a class="heading-anchor" href="#learner--cell-5--concept-lab-container-build-boundaries-minimal-images-and-health-semantics" aria-label="Link to this section">#</a></h4>
+<h5 id="learner--cell-5--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-5--mental-model" aria-label="Link to this section">#</a></h5>
+<p>A container image is a versioned filesystem plus process configuration; a container is one running process created from that image. Docker builds layers from a <strong>build context</strong>, so <code>.dockerignore</code> controls what can be sent to the builder. Multi-stage or ordered builds copy only the runtime artifacts needed after dependency installation.</p>
+<p>Liveness asks whether the process is functioning; readiness asks whether it should receive traffic. Packaging does not add application security, trusted artifacts, secret management, network policy, or safe defaults automatically.</p>
+<h5 id="learner--cell-5--read-the-api-before-running-it">Read the API before running it<a class="heading-anchor" href="#learner--cell-5--read-the-api-before-running-it" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>FROM</code> / pinned base:</strong> establishes operating-system and Python dependencies; pin and scan rather than trusting <code>latest</code>.</li>
+<li><strong><code>COPY</code> and <code>.dockerignore</code>:</strong> define which local files enter the build context and image layers.</li>
+<li><strong><code>CMD</code> / <code>HEALTHCHECK</code>:</strong> define the main process and probe command without replacing service-level readiness policy.</li>
+</ul>
+<p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><h5 id="learner--cell-6--focused-example-a-audit-build-context-inclusion-before-docker-runs">Focused example A — audit build-context inclusion before Docker runs<a class="heading-anchor" href="#learner--cell-6--focused-example-a-audit-build-context-inclusion-before-docker-runs" aria-label="Link to this section">#</a></h5>
+<p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
+<p><strong>Assumption:</strong> This simplified matcher demonstrates review logic; Docker&#x27;s complete ignore semantics and the real context still need inspection.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from fnmatch import fnmatch</span>
+<span> </span>
+<span>files = [</span>
+<span>    &quot;app.py&quot;,</span>
+<span>    &quot;requirements.txt&quot;,</span>
+<span>    &quot;.env&quot;,</span>
+<span>    &quot;.venv/lib/package.py&quot;,</span>
+<span>    &quot;artifacts/model.joblib&quot;,</span>
+<span>]</span>
+<span>ignore_patterns = [&quot;.env&quot;, &quot;.venv/*&quot;]</span>
+<span>included = [</span>
+<span>    path for path in files</span>
+<span>    if not any(fnmatch(path, pattern) for pattern in ignore_patterns)</span>
+<span>]</span>
+<span>print(included)</span>
+<span>assert &quot;.env&quot; not in included and not any(p.startswith(&quot;.venv/&quot;) for p in included)</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><p><strong>Expected observation:</strong> The environment file and local virtual environment are excluded while explicit runtime assets remain.</p>
+<p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-9--focused-example-b-distinguish-process-health-from-traffic-readiness">Focused example B — distinguish process health from traffic readiness<a class="heading-anchor" href="#learner--cell-9--focused-example-b-distinguish-process-health-from-traffic-readiness" aria-label="Link to this section">#</a></h5>
+<p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
+<p><strong>Assumption:</strong> Restarting the healthy process would not repair the external dependency and could amplify the incident.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>def probe(*, process_running, model_loaded, dependency_ready, draining):</span>
+<span>    return {</span>
+<span>        &quot;healthy&quot;: process_running,</span>
+<span>        &quot;ready&quot;: (</span>
+<span>            process_running</span>
+<span>            and model_loaded</span>
+<span>            and dependency_ready</span>
+<span>            and not draining</span>
+<span>        ),</span>
+<span>    }</span>
+<span> </span>
+<span>during_dependency_outage = probe(</span>
+<span>    process_running=True,</span>
+<span>    model_loaded=True,</span>
+<span>    dependency_ready=False,</span>
+<span>    draining=False,</span>
+<span>)</span>
+<span>print(during_dependency_outage)</span>
+<span>assert during_dependency_outage == {&quot;healthy&quot;: True, &quot;ready&quot;: False}</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><p><strong>Expected observation:</strong> A running process can remain live while correctly refusing new traffic during a dependency outage.</p>
+<h5 id="learner--cell-11--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-11--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Copying the whole repository into an image, baking credentials into layers, or binding a development server publicly.</p>
+<p><strong>Diagnostic:</strong> Inspect build context, image history/SBOM, user, exposed ports, process signals, environment, artifact hash, and health/readiness responses.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>Action</th>
+<th>Evidence</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define container build boundaries, minimal images, and health semantics in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<p><strong>Stop condition:</strong> Do not publish an image until secrets, base/dependency provenance, non-root runtime, probes, resource limits, and rollback are reviewed.</p>
+<p>Continue to the numbered practice only after you can explain both examples without rereading their code.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h4 id="learner--cell-12--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-12--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Create a slim dependency file containing only direct API runtime needs.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — container build boundaries, minimal images, and health semantics — build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.</p>
+<ol>
 <li>Add <code>GET /health</code> returning <code>{&quot;status&quot;: &quot;ok&quot;}</code>.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — container build boundaries, minimal images, and health semantics — with TestClient and the running container, assert GET /health returns status 200 and exactly {&#x27;status&#x27;: &#x27;ok&#x27;}; distinguish liveness from readiness by testing a missing/tampered model artifact.</p>
+<ol>
 <li>Optionally push the image to a registry if you intentionally use a connected account.</li>
 </ol>
-<h5 id="learner--cell-5--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-5--progressive-hints" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3 — container build boundaries, minimal images, and health semantics — keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.</p>
+<h5 id="learner--cell-12--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-12--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Trace imports from <code>app.py</code> and the serialized pipeline. Rebuild in a clean image and run both endpoints.</li>
 <li>Keep liveness cheap. A Docker <code>HEALTHCHECK</code> can use Python&#x27;s standard <code>urllib.request</code> so a slim image does not need <code>curl</code>.</li>
 <li>Use a non-secret image name/tag, authenticate through the registry&#x27;s supported credential flow, scan the image, and never embed credentials in a layer. Registry upload is optional and networked.</li>
 </ol>
-<h5 id="learner--cell-5--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-5--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="learner--cell-12--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-12--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Containerize a minimal, testable service without embedding secrets or privileged assumptions. Build, readiness, and runtime health have distinct contracts.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Layer and secret audit:</strong> Create a <code>.dockerignore</code>, inspect image history, and prove that <code>.env</code>, Git metadata, notebooks, caches, and local artifacts are absent. <strong>Progressive hint:</strong> The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.</li>
+</ol>
+<p><strong>Verify:</strong> Layer and secret audit — build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.</p>
+<ol>
 <li><strong>Least-privilege runtime:</strong> Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions. <strong>Progressive hint:</strong> Create the user in the image, set ownership only where needed, and write transient files under an intentionally mounted/temp path.</li>
+</ol>
+<p><strong>Verify:</strong> Least-privilege runtime — inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.</p>
+<ol>
 <li><strong>Health semantics:</strong> Implement separate <code>/live</code> and <code>/ready</code> checks and a startup failure when the model manifest is incompatible. Test all three states. <strong>Progressive hint:</strong> Liveness answers whether the process can respond; readiness answers whether it can safely serve the declared model contract.</li>
 </ol>
+<p><strong>Verify:</strong> Health semantics — assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
 <span>#</span>
 <span># Keep the official solution closed until you have attempted each task.</span>
 <span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
@@ -538,15 +833,15 @@ Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; -C
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -578,7 +873,7 @@ Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; -C
 <li>Exercise 3: Optimize image with multi‑stage builds</li>
 </ul>
 <hr>
-<p>Exercise 1 — Minimal FastAPI app and Dockerfile</p>
+<p>Worked reference for Exercise 1 — Minimal FastAPI app and Dockerfile</p>
 <pre><code class="language-python"># app.py
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -608,7 +903,7 @@ uvicorn&gt;=0.30,&lt;1</code></pre>
 <pre><code class="language-bash">docker build -t ds-fastapi:latest .
 docker run -p 8000:8000 ds-fastapi:latest</code></pre>
 <hr>
-<p>Exercise 2 — Health endpoint and HEALTHCHECK</p>
+<p>Worked reference for Exercise 2 — Health endpoint and HEALTHCHECK</p>
 <pre><code class="language-python"># app.py addition
 @app.get(&quot;/health&quot;)
 def health() -&gt; dict[str, str]:
@@ -626,7 +921,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
 <li>Keep the endpoint fast and dependency-light; use a separate readiness check when needed</li>
 </ul>
 <hr>
-<p>Exercise 3 — Multi‑stage build</p>
+<p>Worked reference for Exercise 3 — Multi‑stage build</p>
 <pre><code class="language-dockerfile"># Stage 1: build dependencies in an isolated virtual environment.
 FROM python:3.12-slim AS builder
 ENV VIRTUAL_ENV=/opt/venv
@@ -657,40 +952,62 @@ CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0
 <li>For compiled packages, install compilers only in the builder stage</li>
 </ul>
 <hr>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong><code>FROM</code> / pinned base:</strong> establishes operating-system and Python dependencies; pin and scan rather than trusting <code>latest</code>.</li>
+<li><strong><code>COPY</code> and <code>.dockerignore</code>:</strong> define which local files enter the build context and image layers.</li>
+<li><strong><code>CMD</code> / <code>HEALTHCHECK</code>:</strong> define the main process and probe command without replacing service-level readiness policy.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> A narrow context and reproducible image package only the intended runtime; distinct probes and tests then establish service behavior.</p>
+<p><strong>Useful alternative:</strong> A host process or managed buildpack may be simpler; orchestration platforms add deployment controls but do not fix application contracts.</p>
+<p><strong>Trade-off:</strong> Smaller images reduce attack surface and transfer time, while aggressive minimization can make debugging and native dependencies harder.</p>
+<p><strong>Edge case to test:</strong> Architecture mismatch, missing system libraries, read-only filesystem, signal handling, corrupt model artifact, and absent Docker daemon require checks.</p>
+<p><strong>Evidence of correctness:</strong> Inspect context and image history, scan dependencies, run as non-root, test valid/invalid requests and signals, distinguish health/readiness, and rebuild deterministically.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a slim dependency file containing only direct API runtime needs.</p>
 <p><strong>How to reason about it:</strong> Trace direct imports from the service and serialized pipeline, install only runtime needs, and rebuild from a clean context. Keep development notebooks, tests, datasets, and credentials out of the image.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1 — container build boundaries, minimal images, and health semantics — build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add <code>GET /health</code> returning <code>{&quot;status&quot;: &quot;ok&quot;}</code>.</p>
 <p><strong>How to reason about it:</strong> A liveness endpoint is cheap and local; a readiness endpoint verifies the artifact/schema is loaded. Test both and use a standard-library probe when a slim image does not contain curl.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2 — container build boundaries, minimal images, and health semantics — with TestClient and the running container, assert GET /health returns status 200 and exactly {&#x27;status&#x27;: &#x27;ok&#x27;}; distinguish liveness from readiness by testing a missing/tampered model artifact.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Optionally push the image to a registry if you intentionally use a connected account.</p>
 <p><strong>How to reason about it:</strong> Registry upload is optional and networked. Use the registry&#x27;s credential flow, a non-secret versioned tag/digest, image scanning, and never place tokens in Dockerfile instructions or build arguments.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 3 — container build boundaries, minimal images, and health semantics — keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.</p>
 <h5 id="solution-1--exercise-4-layer-and-secret-audit">Exercise 4 — Layer and secret audit<a class="heading-anchor" href="#solution-1--exercise-4-layer-and-secret-audit" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a <code>.dockerignore</code>, inspect image history, and prove that <code>.env</code>, Git metadata, notebooks, caches, and local artifacts are absent.</p>
 <p><strong>Reasoning before implementation:</strong> The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.</p>
 <p>Allow only the service source, locked dependency metadata, and approved model artifact into the context. Use runtime secret injection for connected extensions; the portable lesson should require no credential.</p>
 <p>Inspect final files as a non-root user and scan both source and image. If a secret ever entered a built/pushed layer, rotate it—removing the file from the latest layer is not sufficient.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Layer and secret audit — build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.</p>
 <h5 id="solution-1--exercise-5-least-privilege-runtime">Exercise 5 — Least-privilege runtime<a class="heading-anchor" href="#solution-1--exercise-5-least-privilege-runtime" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions.</p>
 <p><strong>Reasoning before implementation:</strong> Create the user in the image, set ownership only where needed, and write transient files under an intentionally mounted/temp path.</p>
 <p>The model artifact and application code should be read-only at runtime. Logging should go to stdout/stderr rather than a mutable file beside source. If a framework requires a cache, configure a bounded writable temp directory and document its lifecycle.</p>
 <p>Bind to an unprivileged port such as 8000. Dropping root reduces impact but does not replace dependency updates, network policy, or input validation.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Least-privilege runtime — inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.</p>
 <h5 id="solution-1--exercise-6-health-semantics">Exercise 6 — Health semantics<a class="heading-anchor" href="#solution-1--exercise-6-health-semantics" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement separate <code>/live</code> and <code>/ready</code> checks and a startup failure when the model manifest is incompatible. Test all three states.</p>
 <p><strong>Reasoning before implementation:</strong> Liveness answers whether the process can respond; readiness answers whether it can safely serve the declared model contract.</p>
 <p><code>/live</code> should avoid dependency fan-out that could cause restart loops. <code>/ready</code> can require successful artifact load, schema validation, and critical local resources. A malformed artifact should fail startup or keep readiness false, not return an “ok” response with later prediction failures.</p>
 <p>Tests should simulate absent and mismatched artifacts without requiring Docker or a network, then add one container smoke test for the packaged path.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></div>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Health semantics — assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -698,7 +1015,7 @@ CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -731,7 +1048,7 @@ CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0
 <li>Exercise 3: Optimize image with multi‑stage builds</li>
 </ul>
 <hr>
-<p>Exercise 1 — Minimal FastAPI app and Dockerfile</p>
+<p>Worked reference for Exercise 1 — Minimal FastAPI app and Dockerfile</p>
 <blockquote><p>Generated from <code>python/ds-60day/solutions/day55_apis_containerization_docker/day55_solutions.md</code> by <code>scripts/build_solution_notebooks.py</code>. Edit the Markdown source, then regenerate this notebook.</p></blockquote></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># app.py</span>
 <span>from fastapi import FastAPI</span>
@@ -764,7 +1081,7 @@ uvicorn&gt;=0.30,&lt;1</code></pre>
 <pre><code class="language-bash">docker build -t ds-fastapi:latest .
 docker run -p 8000:8000 ds-fastapi:latest</code></pre>
 <hr>
-<p>Exercise 2 — Health endpoint and HEALTHCHECK</p></article>
+<p>Worked reference for Exercise 2 — Health endpoint and HEALTHCHECK</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># app.py addition</span>
 <span>@app.get(&quot;/health&quot;)</span>
 <span>def health() -&gt; dict[str, str]:</span>
@@ -784,7 +1101,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
 <li>Keep the endpoint fast and dependency-light; use a separate readiness check when needed</li>
 </ul>
 <hr>
-<p>Exercise 3 — Multi‑stage build</p>
+<p>Worked reference for Exercise 3 — Multi‑stage build</p>
 <pre><code class="language-dockerfile"># Stage 1: build dependencies in an isolated virtual environment.
 FROM python:3.12-slim AS builder
 ENV VIRTUAL_ENV=/opt/venv
@@ -815,40 +1132,106 @@ CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0
 <li>For compiled packages, install compilers only in the builder stage</li>
 </ul>
 <hr>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-2--cell-5--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-5--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong><code>FROM</code> / pinned base:</strong> establishes operating-system and Python dependencies; pin and scan rather than trusting <code>latest</code>.</li>
+<li><strong><code>COPY</code> and <code>.dockerignore</code>:</strong> define which local files enter the build context and image layers.</li>
+<li><strong><code>CMD</code> / <code>HEALTHCHECK</code>:</strong> define the main process and probe command without replacing service-level readiness policy.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> A narrow context and reproducible image package only the intended runtime; distinct probes and tests then establish service behavior.</p>
+<p><strong>Useful alternative:</strong> A host process or managed buildpack may be simpler; orchestration platforms add deployment controls but do not fix application contracts.</p>
+<p><strong>Trade-off:</strong> Smaller images reduce attack surface and transfer time, while aggressive minimization can make debugging and native dependencies harder.</p>
+<p><strong>Edge case to test:</strong> Architecture mismatch, missing system libraries, read-only filesystem, signal handling, corrupt model artifact, and absent Docker daemon require checks.</p>
+<p><strong>Evidence of correctness:</strong> Inspect context and image history, scan dependencies, run as non-root, test valid/invalid requests and signals, distinguish health/readiness, and rebuild deterministically.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-5--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-5--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-5--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-5--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a slim dependency file containing only direct API runtime needs.</p>
 <p><strong>How to reason about it:</strong> Trace direct imports from the service and serialized pipeline, install only runtime needs, and rebuild from a clean context. Keep development notebooks, tests, datasets, and credentials out of the image.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1 — container build boundaries, minimal images, and health semantics — build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.</p>
 <h5 id="solution-2--cell-5--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-5--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add <code>GET /health</code> returning <code>{&quot;status&quot;: &quot;ok&quot;}</code>.</p>
 <p><strong>How to reason about it:</strong> A liveness endpoint is cheap and local; a readiness endpoint verifies the artifact/schema is loaded. Test both and use a standard-library probe when a slim image does not contain curl.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2 — container build boundaries, minimal images, and health semantics — with TestClient and the running container, assert GET /health returns status 200 and exactly {&#x27;status&#x27;: &#x27;ok&#x27;}; distinguish liveness from readiness by testing a missing/tampered model artifact.</p>
 <h5 id="solution-2--cell-5--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-5--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Optionally push the image to a registry if you intentionally use a connected account.</p>
 <p><strong>How to reason about it:</strong> Registry upload is optional and networked. Use the registry&#x27;s credential flow, a non-secret versioned tag/digest, image scanning, and never place tokens in Dockerfile instructions or build arguments.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 3 — container build boundaries, minimal images, and health semantics — keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.</p>
 <h5 id="solution-2--cell-5--exercise-4-layer-and-secret-audit">Exercise 4 — Layer and secret audit<a class="heading-anchor" href="#solution-2--cell-5--exercise-4-layer-and-secret-audit" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a <code>.dockerignore</code>, inspect image history, and prove that <code>.env</code>, Git metadata, notebooks, caches, and local artifacts are absent.</p>
 <p><strong>Reasoning before implementation:</strong> The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.</p>
 <p>Allow only the service source, locked dependency metadata, and approved model artifact into the context. Use runtime secret injection for connected extensions; the portable lesson should require no credential.</p>
 <p>Inspect final files as a non-root user and scan both source and image. If a secret ever entered a built/pushed layer, rotate it—removing the file from the latest layer is not sufficient.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Layer and secret audit — build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.</p>
 <h5 id="solution-2--cell-5--exercise-5-least-privilege-runtime">Exercise 5 — Least-privilege runtime<a class="heading-anchor" href="#solution-2--cell-5--exercise-5-least-privilege-runtime" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions.</p>
 <p><strong>Reasoning before implementation:</strong> Create the user in the image, set ownership only where needed, and write transient files under an intentionally mounted/temp path.</p>
 <p>The model artifact and application code should be read-only at runtime. Logging should go to stdout/stderr rather than a mutable file beside source. If a framework requires a cache, configure a bounded writable temp directory and document its lifecycle.</p>
 <p>Bind to an unprivileged port such as 8000. Dropping root reduces impact but does not replace dependency updates, network policy, or input validation.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Least-privilege runtime — inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.</p>
 <h5 id="solution-2--cell-5--exercise-6-health-semantics">Exercise 6 — Health semantics<a class="heading-anchor" href="#solution-2--cell-5--exercise-6-health-semantics" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement separate <code>/live</code> and <code>/ready</code> checks and a startup failure when the model manifest is incompatible. Test all three states.</p>
 <p><strong>Reasoning before implementation:</strong> Liveness answers whether the process can respond; readiness answers whether it can safely serve the declared model contract.</p>
 <p><code>/live</code> should avoid dependency fan-out that could cause restart loops. <code>/ready</code> can require successful artifact load, schema validation, and critical local resources. A malformed artifact should fail startup or keep readiness false, not return an “ok” response with later prediction failures.</p>
 <p>Tests should simulate absent and mismatched artifacts without requiring Docker or a network, then add one container smoke test for the packaged path.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></article></div>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Health semantics — assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-55` — Day 55 — Containerizing a FastAPI Service.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize container build boundaries, minimal images, and health semantics. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day55_apis_containerization_docker.md`
+- learner artifact: `python/ds-60day/notebooks/day55_apis_containerization_docker.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-54`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-54.html"><small>Previous lesson</small><strong>python-54</strong><span>Monitoring Model Governance</span></a>
@@ -940,6 +1323,23 @@ CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

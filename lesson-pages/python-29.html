@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-29-data-validation-with-schemas">Day 29 — Data Validation with Schemas<a class="heading-anchor" href="#guide--day-29-data-validation-with-schemas" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
 <p>A schema turns assumptions about columns, types, ranges, and uniqueness into an executable boundary contract. Validation detects problems; it does not decide how to clean them.</p>
@@ -292,6 +331,94 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 28 (<code>python-28</code>) and the typed cleaner from Day 18 (<code>python-18</code>). Pandera is in the <code>data</code> dependency group. Pydantic is an optional object-validation tool in the advanced <code>production</code> group.</p>
+<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<ol>
+<li>Confirm the course environment before changing it:</li>
+</ol>
+<pre><code class="language-powershell">   # Windows PowerShell
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   &amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash">   # macOS/Linux
+   .venv/bin/python scripts/course.py doctor</code></pre>
+<ol>
+<li>Read <code>python/ds-60day/companion-guides/day29_data_validation_schemas.md</code>, then open <code>python/ds-60day/notebooks/day29_data_validation_schemas.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
+<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
+<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
+<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+</ol>
+<p><strong>Lesson outcome:</strong> use day 29 — data validation with schemas to practice turning data contracts into executable schemas and informative failures and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
+<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
+<p>A data schema describes more than column names: required presence, dtypes, nullability, ranges, allowed categories, uniqueness, and cross-field rules. Derive constraints from domain/business meaning and declared interfaces, not merely from values observed in one sample.</p>
+<p>Validation should sit immediately before a boundary that depends on the contract, especially saving or handing data to a model. Coercion changes compatible representations; validation checks the resulting state. Treat a failure as blocked output with actionable evidence. Test one valid fixture and one deliberately invalid fixture for every important rule.</p>
+<h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>schema:</strong> an executable description of data fields and constraints.</li>
+<li><strong>constraint:</strong> a rule values or records must satisfy.</li>
+<li><strong>nullability:</strong> whether absence is allowed.</li>
+<li><strong>coercion:</strong> conversion toward a declared representation.</li>
+<li><strong>validation:</strong> checking actual data against a contract.</li>
+<li><strong>failure report:</strong> structured evidence identifying violated rules and locations.</li>
+</ul>
+<h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<p>In Pandera, <code>pa.Column(float, checks=pa.Check.ge(0), nullable=False)</code> states representation, a non-negative constraint, and missing policy. <code>schema.validate(frame, lazy=True)</code> collects multiple failures before raising a <code>SchemaErrors</code> report. Coercion, if enabled, occurs before checks and must not be mistaken for silently repairing invalid meaning.</p>
+<h5 id="guide--worked-example-1-validate-a-small-table-against-explicit-rules">Worked example 1 — Validate a small table against explicit rules<a class="heading-anchor" href="#guide--worked-example-1-validate-a-small-table-against-explicit-rules" aria-label="Link to this section">#</a></h5>
+<p>A good fixture makes the accepted contract easy to see. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">import pandas as pd
+import pandera.pandas as pa
+
+schema = pa.DataFrameSchema({
+    &quot;quantity&quot;: pa.Column(int, checks=pa.Check.ge(0)),
+    &quot;price&quot;: pa.Column(float, checks=pa.Check.ge(0), coerce=True),
+    &quot;status&quot;: pa.Column(str, checks=pa.Check.isin([&quot;open&quot;, &quot;closed&quot;])),
+})
+valid = pd.DataFrame({
+    &quot;quantity&quot;: [1, 0],
+    &quot;price&quot;: [2.5, 0.0],
+    &quot;status&quot;: [&quot;open&quot;, &quot;closed&quot;],
+})
+checked = schema.validate(valid)
+checked.to_dict(&quot;records&quot;)</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">The two records are returned after successful validation; `price` follows the declared floating representation.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--worked-example-2-show-that-validation-guards-persistence">Worked example 2 — Show that validation guards persistence<a class="heading-anchor" href="#guide--worked-example-2-show-that-validation-guards-persistence" aria-label="Link to this section">#</a></h5>
+<p>Only data returned from validation should continue to a write boundary. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">def validated_for_output(frame: pd.DataFrame) -&gt; pd.DataFrame:
+    checked = schema.validate(frame, lazy=True)
+    return checked.copy()
+
+output_ready = validated_for_output(valid)
+(len(output_ready), output_ready[&quot;quantity&quot;].min())</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`(2, 0)`. An invalid frame would raise before any output-writing code is reached.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
+<p>When the output differs from your prediction, use this order:</p>
+<ol>
+<li>Write the business meaning and exact boundary values before encoding a check.</li>
+<li>Separate cleaning/coercion from validation and count values changed by coercion.</li>
+<li>Use lazy validation during diagnosis to see multiple rule failures together.</li>
+<li>Do not catch and discard schema errors or save before validation.</li>
+</ol>
+<h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
+<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
+<ol>
+<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
+<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
+<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
+<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
+<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
+</ol>
+<p><strong>Useful alternative:</strong> Use Pydantic for individual Python records/configuration and Pandera for DataFrame-wide column/index checks; database constraints protect stored relational data.</p>
+<p><strong>Boundary to remember:</strong> Nulls, infinities, dtype coercion, duplicate composite keys, unexpected categories, empty frames, and cross-column rules need fixtures. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Schema:</strong> executable description of expected data shape and constraints.</li>
@@ -306,7 +433,6 @@
 import pandera.pandas as pa
 from pandera.typing import Series
 
-
 class ReadingSchema(pa.DataFrameModel):
     sensor_id: Series[int] = pa.Field(ge=1, unique=True)
     status: Series[str] = pa.Field(isin=[&quot;ok&quot;, &quot;warning&quot;])
@@ -315,26 +441,28 @@ class ReadingSchema(pa.DataFrameModel):
     class Config:
         coerce = True
 
-
 readings = pd.DataFrame(
     {&quot;sensor_id&quot;: [1, 2], &quot;status&quot;: [&quot;ok&quot;, &quot;warning&quot;], &quot;value&quot;: [2.5, 4.0]}
 )
 validated = ReadingSchema.validate(readings)</code></pre>
 <p>Coercion is explicit; inspect source anomalies before relying on coercion as cleaning.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Add range and allowed-category constraints to a schema. <strong>Hint:</strong> start from written business rules, include boundary values, and create one invalid fixture per rule.</li>
-<li>Validate the cleaned Day 18 DataFrame before saving. <strong>Hint:</strong> perform cleaning, validate the returned frame, then write only the validated result; preserve the failure report when validation stops the write.</li>
+<li>Extend a Pandera schema with documented inclusive/exclusive ranges, allowed categories, nullability, and key uniqueness. <strong>Constraints:</strong> derive each rule from written business meaning and include exact boundary values. <strong>Verify:</strong> one valid fixture passes and a separate invalid fixture for each rule fails with the expected column/check evidence.</li>
+</ol>
+<ol>
+<li>Validate the cleaned Day 18 DataFrame immediately before saving. <strong>Sequence:</strong> clean → validate returned frame → write only validated output → re-read/reconcile. <strong>Expected behavior:</strong> a deliberately invalid fixture blocks the write and preserves a useful failure report. <strong>Constraint:</strong> do not catch and discard <code>SchemaError</code>/<code>SchemaErrors</code>. <strong>Verify:</strong> Use a temporary output path to prove valid data writes/reloads, while an invalid fixture raises before the file exists.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Translate business rules into executable boundary contracts and prove both acceptance and informative failure before persisting data.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict the difference between coercing a value to the schema dtype and validating it without coercion. <strong>Progressive hint:</strong> Coercion transforms compatible representations; validation checks a state.</li>
-<li><strong>Tracing:</strong> Trace a row through cleaning, schema validation, and saving. At which boundary must failure stop the write? <strong>Progressive hint:</strong> Validate the actual final frame immediately before persistence.</li>
-<li><strong>Implementation:</strong> Create a Pandera schema with non-negative quantity, finite price, and an allowed status set, then validate one good fixture. <strong>Progressive hint:</strong> Derive constraints from stated business rules, not observed values alone.</li>
-<li><strong>Debugging:</strong> Repair a pipeline that writes output before validating it or catches and discards every schema error. <strong>Progressive hint:</strong> Validation failure is a blocked output, not a warning-only event.</li>
-<li><strong>Edge case and explanation:</strong> Create invalid fixtures for null, range, category, duplicate-key, and dtype rules; use lazy validation to inspect multiple failures. <strong>Progressive hint:</strong> One failure fixture per rule makes contract coverage auditable.</li>
+<li><strong>Prediction:</strong> Predict the difference between coercing a value to the schema dtype and validating it without coercion. <strong>Progressive hint:</strong> Coercion transforms compatible representations; validation checks a state. <strong>Verify:</strong> Validate numeric text with/without coercion and assert the coerced dtype/value versus the strict failure; record what changed rather than calling it mere validation.</li>
+<li><strong>Tracing:</strong> Trace a row through cleaning, schema validation, and saving. At which boundary must failure stop the write? <strong>Progressive hint:</strong> Validate the actual final frame immediately before persistence. <strong>Verify:</strong> Use a temporary path and event log; assert valid rows reach save only after validation and invalid rows raise before any file/write event.</li>
+<li><strong>Implementation:</strong> Create a Pandera schema with non-negative quantity, finite price, and an allowed status set, then validate one good fixture. <strong>Progressive hint:</strong> Derive constraints from stated business rules, not observed values alone. <strong>Verify:</strong> Assert one good fixture returns unchanged meaning, then independently fail negative quantity, nonfinite price, and unknown status with named checks.</li>
+<li><strong>Debugging:</strong> Repair a pipeline that writes output before validating it or catches and discards every schema error. <strong>Progressive hint:</strong> Validation failure is a blocked output, not a warning-only event. <strong>Verify:</strong> Reorder the pipeline and assert invalid data leaves no output file; retain and inspect the schema failure instead of converting it to a warning.</li>
+<li><strong>Edge case and explanation:</strong> Create invalid fixtures for null, range, category, duplicate-key, and dtype rules; use lazy validation to inspect multiple failures. <strong>Progressive hint:</strong> One failure fixture per rule makes contract coverage auditable. <strong>Verify:</strong> Run lazy validation on fixtures violating all five rule families and assert the failure cases include each expected column/check category.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -358,17 +486,33 @@ validated = ReadingSchema.validate(readings)</code></pre>
 <li><a href="python-29.html#learner">Open the learner notebook</a></li>
 <li><a href="python-29.html#solution-1">Check the separate solution</a></li>
 <li><a href="python-30.html#guide">Next: Day 30 — EDA and preprocessing project</a></li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-29`
+(Day 29 — Data Validation with Schemas). Direct catalog prerequisites: `python-28`.
+I have completed the direct prerequisites: `python-28`. Emphasize turning data contracts into executable schemas and informative failures.
+Read `python/ds-60day/companion-guides/day29_data_validation_schemas.md` and use the learner notebook
+`python/ds-60day/notebooks/day29_data_validation_schemas.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -385,12 +529,12 @@ validated = ReadingSchema.validate(readings)</code></pre>
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-29-data-validation-schemas-pandera-pydantic">Day 29 — Data validation &amp; schemas (pandera/pydantic)<a class="heading-anchor" href="#learner--cell-1--day-29-data-validation-schemas-pandera-pydantic" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -399,7 +543,67 @@ validated = ReadingSchema.validate(readings)</code></pre>
 <li>Validate inputs and raise clear errors.</li>
 <li>Use in pipelines to enforce contracts.</li>
 </ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
+<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>This is the editable learner artifact for <code>python-29</code>. Read <code>python/ds-60day/companion-guides/day29_data_validation_schemas.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
+<p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
+<p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--core-mental-model">Core mental model<a class="heading-anchor" href="#learner--cell-3--core-mental-model" aria-label="Link to this section">#</a></h4>
+<p>A data schema describes more than column names: required presence, dtypes, nullability, ranges, allowed categories, uniqueness, and cross-field rules. Derive constraints from domain/business meaning and declared interfaces, not merely from values observed in one sample.</p>
+<p>Validation should sit immediately before a boundary that depends on the contract, especially saving or handing data to a model. Coercion changes compatible representations; validation checks the resulting state. Treat a failure as blocked output with actionable evidence. Test one valid fixture and one deliberately invalid fixture for every important rule.</p>
+<h5 id="learner--cell-3--vocabulary">Vocabulary<a class="heading-anchor" href="#learner--cell-3--vocabulary" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>schema:</strong> an executable description of data fields and constraints.</li>
+<li><strong>constraint:</strong> a rule values or records must satisfy.</li>
+<li><strong>nullability:</strong> whether absence is allowed.</li>
+<li><strong>coercion:</strong> conversion toward a declared representation.</li>
+<li><strong>validation:</strong> checking actual data against a contract.</li>
+<li><strong>failure report:</strong> structured evidence identifying violated rules and locations.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<p>In Pandera, <code>pa.Column(float, checks=pa.Check.ge(0), nullable=False)</code> states representation, a non-negative constraint, and missing policy. <code>schema.validate(frame, lazy=True)</code> collects multiple failures before raising a <code>SchemaErrors</code> report. Coercion, if enabled, occurs before checks and must not be mistaken for silently repairing invalid meaning.</p>
+<h5 id="learner--cell-4--worked-example-1-validate-a-small-table-against-explicit-rules">Worked example 1 — Validate a small table against explicit rules<a class="heading-anchor" href="#learner--cell-4--worked-example-1-validate-a-small-table-against-explicit-rules" aria-label="Link to this section">#</a></h5>
+<p>A good fixture makes the accepted contract easy to see. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import pandas as pd</span>
+<span>import pandera.pandas as pa</span>
+<span> </span>
+<span>schema = pa.DataFrameSchema({</span>
+<span>    &quot;quantity&quot;: pa.Column(int, checks=pa.Check.ge(0)),</span>
+<span>    &quot;price&quot;: pa.Column(float, checks=pa.Check.ge(0), coerce=True),</span>
+<span>    &quot;status&quot;: pa.Column(str, checks=pa.Check.isin([&quot;open&quot;, &quot;closed&quot;])),</span>
+<span>})</span>
+<span>valid = pd.DataFrame({</span>
+<span>    &quot;quantity&quot;: [1, 0],</span>
+<span>    &quot;price&quot;: [2.5, 0.0],</span>
+<span>    &quot;status&quot;: [&quot;open&quot;, &quot;closed&quot;],</span>
+<span>})</span>
+<span>checked = schema.validate(valid)</span>
+<span>checked.to_dict(&quot;records&quot;)</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> The two records are returned after successful validation; <code>price</code> follows the declared floating representation.</p>
+<p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
+<h5 id="learner--cell-6--worked-example-2-show-that-validation-guards-persistence">Worked example 2 — Show that validation guards persistence<a class="heading-anchor" href="#learner--cell-6--worked-example-2-show-that-validation-guards-persistence" aria-label="Link to this section">#</a></h5>
+<p>Only data returned from validation should continue to a write boundary. Predict first; then run the next cell.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>def validated_for_output(frame: pd.DataFrame) -&gt; pd.DataFrame:</span>
+<span>    checked = schema.validate(frame, lazy=True)</span>
+<span>    return checked.copy()</span>
+<span> </span>
+<span>output_ready = validated_for_output(valid)</span>
+<span>(len(output_ready), output_ready[&quot;quantity&quot;].min())</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>(2, 0)</code>. An invalid frame would raise before any output-writing code is reached.</p>
+<h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
+<p>When evidence differs from your prediction, use this order:</p>
+<ol>
+<li>Write the business meaning and exact boundary values before encoding a check.</li>
+<li>Separate cleaning/coercion from validation and count values changed by coercion.</li>
+<li>Use lazy validation during diagnosis to see multiple rule failures together.</li>
+<li>Do not catch and discard schema errors or save before validation.</li>
+</ol>
+<p><strong>Alternative to compare:</strong> Use Pydantic for individual Python records/configuration and Pandera for DataFrame-wide column/index checks; database constraints protect stored relational data.</p>
+<p><strong>Boundary to test:</strong> Nulls, infinities, dtype coercion, duplicate composite keys, unexpected categories, empty frames, and cross-column rules need fixtures.</p>
+<p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import pandas as pd</span>
 <span>import pandera.pandas as pa</span>
 <span>from pandera.typing import DataFrame, Series</span>
 <span> </span>
@@ -415,52 +619,119 @@ validated = ReadingSchema.validate(readings)</code></pre>
 <span>add_ab(df)</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Add range and allowed-category constraints to a schema. <strong>Hint:</strong> start from written business rules, include boundary values, and create one invalid fixture per rule.</li>
-<li>Validate the cleaned Day 18 DataFrame before saving. <strong>Hint:</strong> perform cleaning, validate the returned frame, then write only the validated result; preserve the failure report when validation stops the write.</li>
+<li>Extend a Pandera schema with documented inclusive/exclusive ranges, allowed categories, nullability, and key uniqueness. <strong>Constraints:</strong> derive each rule from written business meaning and include exact boundary values. <strong>Verify:</strong> one valid fixture passes and a separate invalid fixture for each rule fails with the expected column/check evidence.</li>
 </ol>
-<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Validate the cleaned Day 18 DataFrame immediately before saving. <strong>Sequence:</strong> clean → validate returned frame → write only validated output → re-read/reconcile. <strong>Expected behavior:</strong> a deliberately invalid fixture blocks the write and preserves a useful failure report. <strong>Constraint:</strong> do not catch and discard <code>SchemaError</code>/<code>SchemaErrors</code>. <strong>Verify:</strong> Use a temporary output path to prove valid data writes/reloads, while an invalid fixture raises before the file exists.</li>
+</ol>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Translate business rules into executable boundary contracts and prove both acceptance and informative failure before persisting data.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict the difference between coercing a value to the schema dtype and validating it without coercion. <strong>Progressive hint:</strong> Coercion transforms compatible representations; validation checks a state.</li>
-<li><strong>Tracing:</strong> Trace a row through cleaning, schema validation, and saving. At which boundary must failure stop the write? <strong>Progressive hint:</strong> Validate the actual final frame immediately before persistence.</li>
-<li><strong>Implementation:</strong> Create a Pandera schema with non-negative quantity, finite price, and an allowed status set, then validate one good fixture. <strong>Progressive hint:</strong> Derive constraints from stated business rules, not observed values alone.</li>
-<li><strong>Debugging:</strong> Repair a pipeline that writes output before validating it or catches and discards every schema error. <strong>Progressive hint:</strong> Validation failure is a blocked output, not a warning-only event.</li>
-<li><strong>Edge case and explanation:</strong> Create invalid fixtures for null, range, category, duplicate-key, and dtype rules; use lazy validation to inspect multiple failures. <strong>Progressive hint:</strong> One failure fixture per rule makes contract coverage auditable.</li>
+<li><strong>Prediction:</strong> Predict the difference between coercing a value to the schema dtype and validating it without coercion. <strong>Progressive hint:</strong> Coercion transforms compatible representations; validation checks a state. <strong>Verify:</strong> Validate numeric text with/without coercion and assert the coerced dtype/value versus the strict failure; record what changed rather than calling it mere validation.</li>
+<li><strong>Tracing:</strong> Trace a row through cleaning, schema validation, and saving. At which boundary must failure stop the write? <strong>Progressive hint:</strong> Validate the actual final frame immediately before persistence. <strong>Verify:</strong> Use a temporary path and event log; assert valid rows reach save only after validation and invalid rows raise before any file/write event.</li>
+<li><strong>Implementation:</strong> Create a Pandera schema with non-negative quantity, finite price, and an allowed status set, then validate one good fixture. <strong>Progressive hint:</strong> Derive constraints from stated business rules, not observed values alone. <strong>Verify:</strong> Assert one good fixture returns unchanged meaning, then independently fail negative quantity, nonfinite price, and unknown status with named checks.</li>
+<li><strong>Debugging:</strong> Repair a pipeline that writes output before validating it or catches and discards every schema error. <strong>Progressive hint:</strong> Validation failure is a blocked output, not a warning-only event. <strong>Verify:</strong> Reorder the pipeline and assert invalid data leaves no output file; retain and inspect the schema failure instead of converting it to a warning.</li>
+<li><strong>Edge case and explanation:</strong> Create invalid fixtures for null, range, category, duplicate-key, and dtype rules; use lazy validation to inspect multiple failures. <strong>Progressive hint:</strong> One failure fixture per rule makes contract coverage auditable. <strong>Verify:</strong> Run lazy validation on fixtures violating all five rule families and assert the failure cases include each expected column/check category.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Predict first. Then write small code and assertions below each label.</span>
-<span># Keep the official solution closed until you have tested an honest attempt.</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Extend a Pandera schema with documented inclusive/exclusive ranges, allowed categories, nullability, and key uniqueness. <strong>Constraints:</strong> derive each rule from written business meaning and include exact boundary values. <strong>Verify:</strong> one valid fixture passes and a separate invalid fixture for each rule fails with the expected column/check evidence.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
+<span># Short contract: Extend a Pandera schema with documented inclusive/exclusive ranges, allowed categories, nullability, and key uniqueness. derive each rule from written business meaning and inclu...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 3 — Prediction</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Validate the cleaned Day 18 DataFrame immediately before saving. <strong>Sequence:</strong> clean → validate returned frame → write only validated output → re-read/reconcile. <strong>Expected behavior:</strong> a deliberately invalid fixture blocks the write and preserves a useful failure report. <strong>Constraint:</strong> do not catch and discard <code>SchemaError</code>/<code>SchemaErrors</code>. <strong>Verify:</strong> Use a temporary output path to prove valid data writes/reloads, while an invalid fixture raises before the file exists.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
+<span># Short contract: Validate the cleaned Day 18 DataFrame immediately before saving. clean → validate returned frame → write only validated output → re-read/reconcile. a deliberately invalid fixtur...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 4 — Tracing</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict the difference between coercing a value to the schema dtype and validating it without coercion. <strong>Progressive hint:</strong> Coercion transforms compatible representations; validation checks a state. <strong>Verify:</strong> Validate numeric text with/without coercion and assert the coerced dtype/value versus the strict failure; record what changed rather than calling it mere validation.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
+<span># Short contract: Predict the difference between coercing a value to the schema dtype and validating it without coercion. Coercion transforms compatible representations; validation checks a state...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 5 — Implementation</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace a row through cleaning, schema validation, and saving. At which boundary must failure stop the write? <strong>Progressive hint:</strong> Validate the actual final frame immediately before persistence. <strong>Verify:</strong> Use a temporary path and event log; assert valid rows reach save only after validation and invalid rows raise before any file/write event.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
+<span># Short contract: Trace a row through cleaning, schema validation, and saving. At which boundary must failure stop the write? Validate the actual final frame immediately before persistence. Use a...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 6 — Debugging</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Create a Pandera schema with non-negative quantity, finite price, and an allowed status set, then validate one good fixture. <strong>Progressive hint:</strong> Derive constraints from stated business rules, not observed values alone. <strong>Verify:</strong> Assert one good fixture returns unchanged meaning, then independently fail negative quantity, nonfinite price, and unknown status with named checks.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
+<span># Short contract: Create a Pandera schema with non-negative quantity, finite price, and an allowed status set, then validate one good fixture. Derive constraints from stated business rules, not o...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 7 — Edge case and explanation</span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair a pipeline that writes output before validating it or catches and discards every schema error. <strong>Progressive hint:</strong> Validation failure is a blocked output, not a warning-only event. <strong>Verify:</strong> Reorder the pipeline and assert invalid data leaves no output file; retain and inspect the schema failure instead of converting it to a warning.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
+<span># Short contract: Repair a pipeline that writes output before validating it or catches and discards every schema error. Validation failure is a blocked output, not a warning-only event. Reorder t...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Create invalid fixtures for null, range, category, duplicate-key, and dtype rules; use lazy validation to inspect multiple failures. <strong>Progressive hint:</strong> One failure fixture per rule makes contract coverage auditable. <strong>Verify:</strong> Run lazy validation on fixtures violating all five rule families and assert the failure cases include each expected column/check category.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
+<span># Short contract: Create invalid fixtures for null, range, category, duplicate-key, and dtype rules; use lazy validation to inspect multiple failures. One failure fixture per rule makes contract...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -484,74 +755,199 @@ validated = ReadingSchema.validate(readings)</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-29-solutions-data-validation-schemas-pandera-pydantic">Day 29 — Solutions: Data Validation &amp; Schemas (Pandera/Pydantic)<a class="heading-anchor" href="#solution-1--day-29-solutions-data-validation-schemas-pandera-pydantic" aria-label="Link to this section">#</a></h3>
-<p>We add constraints and validate a cleaned DataFrame prior to saving.</p>
-<p>Contents</p>
+<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
+<p>These worked answers demonstrate <strong>turning data contracts into executable schemas and informative failures</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
+<p>A data schema describes more than column names: required presence, dtypes, nullability, ranges, allowed categories, uniqueness, and cross-field rules. Derive constraints from domain/business meaning and declared interfaces, not merely from values observed in one sample.</p>
+<p>Validation should sit immediately before a boundary that depends on the contract, especially saving or handing data to a model. Coercion changes compatible representations; validation checks the resulting state. Treat a failure as blocked output with actionable evidence. Test one valid fixture and one deliberately invalid fixture for every important rule.</p>
+<h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
-<li>Exercise 1: Add column constraints (ranges, categories)</li>
-<li>Exercise 2: Validate a cleaned DataFrame before saving</li>
+<li><strong>schema:</strong> an executable description of data fields and constraints.</li>
+<li><strong>constraint:</strong> a rule values or records must satisfy.</li>
+<li><strong>nullability:</strong> whether absence is allowed.</li>
+<li><strong>coercion:</strong> conversion toward a declared representation.</li>
+<li><strong>validation:</strong> checking actual data against a contract.</li>
+<li><strong>failure report:</strong> structured evidence identifying violated rules and locations.</li>
 </ul>
-<hr>
-<p>Exercise 1 — Column constraints</p>
-<pre><code class="language-python">import pandas as pd
+<h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
+<p>For this lesson&#x27;s <strong>turning data contracts into executable schemas and informative failures</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Extend a Pandera schema with documented inclusive/exclusive ranges, allowed categories, nullability, and key uniqueness. <strong>Constraints:</strong> derive each rule from written business meaning and include exact boundary values. <strong>Verify:</strong> one valid fixture passes and a separate invalid fixture for each rule fails with the expected column/check evidence.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Extend a Pandera schema with documented inclusive/exclusive ranges, allowed categories, nullability, and key uniqueness. Constraints: derive each rule from written business meaning and include exact boundary values. Values below, at, and above the named boundary must produce the evidence one valid fixture passes and a separate invalid fixture for each rule fails with the expected column/check evidence. Those cases show how turning data contracts into executable schemas and informative failures behaves at its edge.</p>
+<pre><code class="language-python">import numpy as np
+import pandas as pd
 import pandera.pandas as pa
-import pandera.typing as pat
 
-class Cleaned(pa.DataFrameModel):
-    id: pat.Series[int] = pa.Field(ge=1, unique=True)
-    city: pat.Series[str] = pa.Field(isin=[&#x27;NY&#x27;,&#x27;SF&#x27;,&#x27;LA&#x27;,&#x27;SEA&#x27;])
-    price: pat.Series[float] = pa.Field(ge=0)
-    qty: pat.Series[int] = pa.Field(ge=0)
+# Business meaning:
+# - order_id is the unique non-null business key.
+# - quantity may be zero: inclusive range [0, infinity).
+# - price uses inclusive lower and exclusive upper bounds: [0, 10_000).
+# - status is a required controlled category; note is optional.
+schema = pa.DataFrameSchema(
+    {
+        &quot;order_id&quot;: pa.Column(int, unique=True, nullable=False),
+        &quot;quantity&quot;: pa.Column(int, checks=pa.Check.ge(0), nullable=False),
+        &quot;price&quot;: pa.Column(
+            float,
+            checks=[
+                pa.Check.ge(0),
+                pa.Check.lt(10_000),
+                pa.Check(
+                    lambda values: np.isfinite(values),
+                    name=&quot;finite_price&quot;,
+                ),
+            ],
+            nullable=False,
+            coerce=True,
+        ),
+        &quot;status&quot;: pa.Column(
+            str,
+            checks=pa.Check.isin([&quot;open&quot;, &quot;closed&quot;]),
+            nullable=False,
+        ),
+        &quot;note&quot;: pa.Column(&quot;string&quot;, nullable=True, coerce=True),
+    },
+    strict=True,
+)
+valid = pd.DataFrame({
+    &quot;order_id&quot;: [100, 101],
+    &quot;quantity&quot;: [0, 1],
+    &quot;price&quot;: [0.0, 9_999.99],
+    &quot;status&quot;: [&quot;closed&quot;, &quot;open&quot;],
+    &quot;note&quot;: [None, &quot;priority&quot;],
+})
+assert schema.validate(valid).shape == (2, 5)
 
-    class Config:
-        coerce = True   # coerce types where possible
-
-# Example data
-clean = pd.DataFrame({&#x27;id&#x27;:[1,2,3], &#x27;city&#x27;:[&#x27;NY&#x27;,&#x27;SF&#x27;,&#x27;LA&#x27;], &#x27;price&#x27;:[9.5, 12.0, 0.0], &#x27;qty&#x27;:[1,2,3]})
-validated = Cleaned.validate(clean)
-print(validated.dtypes)</code></pre>
-<p>Exercise 2 — Validate before saving</p>
+invalid_fixtures = {
+    &quot;quantity&quot;: valid.assign(quantity=[-1, 1]),
+    &quot;price_lower_bound&quot;: valid.assign(price=[-0.01, 4.5]),
+    &quot;price_upper_bound&quot;: valid.assign(price=[10_000.0, 4.5]),
+    &quot;price_finite&quot;: valid.assign(price=[np.inf, 4.5]),
+    &quot;status&quot;: valid.assign(status=[&quot;unknown&quot;, &quot;open&quot;]),
+    &quot;required_key&quot;: valid.assign(order_id=[None, 101]),
+    &quot;unique_key&quot;: valid.assign(order_id=[100, 100]),
+}
+for expected_evidence, invalid in invalid_fixtures.items():
+    try:
+        schema.validate(invalid, lazy=True)
+    except pa.errors.SchemaErrors as error:
+        evidence = error.failure_cases.to_string()
+        if expected_evidence == &quot;price_lower_bound&quot;:
+            assert &quot;greater_than_or_equal_to(0)&quot; in evidence
+        elif expected_evidence == &quot;price_upper_bound&quot;:
+            assert &quot;less_than(10000)&quot; in evidence
+        elif expected_evidence == &quot;price_finite&quot;:
+            assert &quot;finite_price&quot; in evidence
+        elif expected_evidence == &quot;unique_key&quot;:
+            assert &quot;field_uniqueness&quot; in evidence
+        elif expected_evidence == &quot;required_key&quot;:
+            assert &quot;not_nullable&quot; in evidence or &quot;coerce_dtype&quot; in evidence
+        else:
+            assert expected_evidence in evidence
+    else:
+        raise AssertionError(
+            f&quot;{expected_evidence} fixture should fail validation&quot;
+        )</code></pre>
+<p>The valid fixture includes the exact inclusive lower boundaries and a value immediately below the exclusive upper boundary. Every rule gets its own invalid fixture so a learner can identify which check failed.</p>
+<p><strong>Verification evidence:</strong> one valid fixture passes and a separate invalid fixture for each rule fails with the expected column/check evidence.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Validate the cleaned Day 18 DataFrame immediately before saving. <strong>Sequence:</strong> clean → validate returned frame → write only validated output → re-read/reconcile. <strong>Expected behavior:</strong> a deliberately invalid fixture blocks the write and preserves a useful failure report. <strong>Constraint:</strong> do not catch and discard <code>SchemaError</code>/<code>SchemaErrors</code>. <strong>Verify:</strong> Use a temporary output path to prove valid data writes/reloads, while an invalid fixture raises before the file exists.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Validate the cleaned Day 18 DataFrame immediately before saving. Sequence: clean → validate returned frame → write only validated output → re-read/reconcile. Expected behavior: a deliberately invalid fixture blocks the write and preserves a useful failure report. Constraint: do not catch and discard <code>SchemaError</code>/<code>SchemaErrors</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Use a temporary output path to prove valid data writes/reloads, while an invalid fixture raises before the file exists. That connects the answer to turning data contracts into executable schemas and informative failures.</p>
 <pre><code class="language-python">from pathlib import Path
+import tempfile
 
-def save_validated(df: pd.DataFrame, path: Path) -&gt; None:
-    Cleaned.validate(df)           # raises detailed errors when invalid
-    df.to_parquet(path, index=False)
 
-# save_validated(validated, Path(&#x27;clean.parquet&#x27;))</code></pre>
-<p>Notes</p>
-<ul>
-<li>Prefer fail-fast; catch data issues early with clear messages</li>
-<li>For row-wise validation, Pydantic models can validate dict records</li>
-</ul>
-<hr>
-<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
-<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Add range and allowed-category constraints to a schema. <strong>Hint:</strong> start from written business rules, include boundary values, and create one invalid fixture per rule.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Validate the cleaned Day 18 DataFrame before saving. <strong>Hint:</strong> perform cleaning, validate the returned frame, then write only the validated result; preserve the failure report when validation stops the write.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-3-prediction">Exercise 3 — Prediction<a class="heading-anchor" href="#solution-1--exercise-3-prediction" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Predict the difference between coercing a value to the schema dtype and validating it without coercion.</p>
-<p><strong>Reasoning checkpoint:</strong> Coercion transforms compatible representations; validation checks a state. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-4-tracing">Exercise 4 — Tracing<a class="heading-anchor" href="#solution-1--exercise-4-tracing" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Trace a row through cleaning, schema validation, and saving. At which boundary must failure stop the write?</p>
-<p><strong>Reasoning checkpoint:</strong> Validate the actual final frame immediately before persistence. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-5-implementation">Exercise 5 — Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Create a Pandera schema with non-negative quantity, finite price, and an allowed status set, then validate one good fixture.</p>
-<p><strong>Reasoning checkpoint:</strong> Derive constraints from stated business rules, not observed values alone. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-6-debugging">Exercise 6 — Debugging<a class="heading-anchor" href="#solution-1--exercise-6-debugging" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Repair a pipeline that writes output before validating it or catches and discards every schema error.</p>
-<p><strong>Reasoning checkpoint:</strong> Validation failure is a blocked output, not a warning-only event. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-7-edge-case-and-explanation">Exercise 7 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-7-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Create invalid fixtures for null, range, category, duplicate-key, and dtype rules; use lazy validation to inspect multiple failures.</p>
-<p><strong>Reasoning checkpoint:</strong> One failure fixture per rule makes contract coverage auditable. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+def clean_day18(raw_frame: pd.DataFrame) -&gt; pd.DataFrame:
+    result = raw_frame.copy()
+    result.columns = [column.strip().lower() for column in result]
+    result[&quot;name&quot;] = result[&quot;name&quot;].astype(&quot;string&quot;).str.strip()
+    result[&quot;quantity&quot;] = pd.to_numeric(
+        result[&quot;quantity&quot;], errors=&quot;coerce&quot;
+    ).astype(&quot;Int64&quot;)
+    result[&quot;event_time&quot;] = pd.to_datetime(
+        result[&quot;event_time&quot;], errors=&quot;coerce&quot;, utc=True
+    )
+    return result.drop_duplicates().reset_index(drop=True)
+
+
+day18_schema = pa.DataFrameSchema(
+    {
+        &quot;name&quot;: pa.Column(&quot;string&quot;, nullable=False),
+        &quot;quantity&quot;: pa.Column(&quot;Int64&quot;, checks=pa.Check.ge(0), nullable=False),
+        &quot;event_time&quot;: pa.Column(
+            pd.DatetimeTZDtype(unit=&quot;ns&quot;, tz=&quot;UTC&quot;),
+            nullable=False,
+        ),
+    },
+    strict=True,
+)
+
+
+def validate_then_save(frame: pd.DataFrame, path: Path) -&gt; pd.DataFrame:
+    checked = day18_schema.validate(frame, lazy=True)
+    checked.to_csv(path, index=False)
+    return checked
+
+
+raw_day18 = pd.DataFrame(
+    {
+        &quot;Name&quot;: [&quot; Ada &quot;, &quot;Lin&quot;],
+        &quot;Quantity&quot;: [&quot;2&quot;, &quot;0&quot;],
+        &quot;Event_Time&quot;: [
+            &quot;2025-01-01T00:00:00Z&quot;,
+            &quot;2025-01-02T00:00:00Z&quot;,
+        ],
+    }
+)
+cleaned_day18 = clean_day18(raw_day18)
+with tempfile.TemporaryDirectory() as folder:
+    output = Path(folder) / &quot;valid.csv&quot;
+    checked = validate_then_save(cleaned_day18, output)
+    assert output.exists()
+    reloaded = pd.read_csv(output)
+    assert reloaded.columns.tolist() == checked.columns.tolist()
+    assert reloaded[&quot;quantity&quot;].sum() == checked[&quot;quantity&quot;].sum()
+
+    invalid_output = Path(folder) / &quot;invalid.csv&quot;
+    invalid = cleaned_day18.assign(quantity=[-1, 0])
+    try:
+        validate_then_save(invalid, invalid_output)
+    except pa.errors.SchemaErrors as error:
+        failure_report = error.failure_cases
+        assert not failure_report.empty
+        assert &quot;quantity&quot; in failure_report.to_string()
+    else:
+        raise AssertionError(&quot;invalid data should fail&quot;)
+    assert not invalid_output.exists()</code></pre>
+<p>The order is explicit: clean, validate the returned frame, save only that validated object, reopen, and reconcile. The invalid path keeps Pandera&#x27;s failure cases for diagnosis and proves no file was created.</p>
+<p><strong>Verification evidence:</strong> Use a temporary output path to prove valid data writes/reloads, while an invalid fixture raises before the file exists.</p>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict the difference between coercing a value to the schema dtype and validating it without coercion. <strong>Progressive hint:</strong> Coercion transforms compatible representations; validation checks a state. <strong>Verify:</strong> Validate numeric text with/without coercion and assert the coerced dtype/value versus the strict failure; record what changed rather than calling it mere validation.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict the difference between coercing a value to the schema dtype and validating it without coercion. Progressive hint: Coercion transforms compatible representations; validation checks a state. Then compare the prediction with this proof target: Validate numeric text with/without coercion and assert the coerced dtype/value versus the strict failure; record what changed rather than calling it mere validation. This makes turning data contracts into executable schemas and informative failures observable instead of relying on intuition.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Validate numeric text with/without coercion and assert the coerced dtype/value versus the strict failure; record what changed rather than calling it mere validation.</p>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace a row through cleaning, schema validation, and saving. At which boundary must failure stop the write? <strong>Progressive hint:</strong> Validate the actual final frame immediately before persistence. <strong>Verify:</strong> Use a temporary path and event log; assert valid rows reach save only after validation and invalid rows raise before any file/write event.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace a row through cleaning, schema validation, and saving. At which boundary must failure stop the write? Progressive hint: Validate the actual final frame immediately before persistence. Record the named value, shape, label, or iterator position needed to establish: Use a temporary path and event log; assert valid rows reach save only after validation and invalid rows raise before any file/write event. The trace exposes turning data contracts into executable schemas and informative failures directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Use a temporary path and event log; assert valid rows reach save only after validation and invalid rows raise before any file/write event.</p>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Implementation:</strong> Create a Pandera schema with non-negative quantity, finite price, and an allowed status set, then validate one good fixture. <strong>Progressive hint:</strong> Derive constraints from stated business rules, not observed values alone. <strong>Verify:</strong> Assert one good fixture returns unchanged meaning, then independently fail negative quantity, nonfinite price, and unknown status with named checks.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Create a Pandera schema with non-negative quantity, finite price, and an allowed status set, then validate one good fixture. Progressive hint: Derive constraints from stated business rules, not observed values alone. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert one good fixture returns unchanged meaning, then independently fail negative quantity, nonfinite price, and unknown status with named checks. That connects the answer to turning data contracts into executable schemas and informative failures.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert one good fixture returns unchanged meaning, then independently fail negative quantity, nonfinite price, and unknown status with named checks.</p>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a pipeline that writes output before validating it or catches and discards every schema error. <strong>Progressive hint:</strong> Validation failure is a blocked output, not a warning-only event. <strong>Verify:</strong> Reorder the pipeline and assert invalid data leaves no output file; retain and inspect the schema failure instead of converting it to a warning.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a pipeline that writes output before validating it or catches and discards every schema error. Progressive hint: Validation failure is a blocked output, not a warning-only event. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Reorder the pipeline and assert invalid data leaves no output file; retain and inspect the schema failure instead of converting it to a warning. The diagnosis depends on turning data contracts into executable schemas and informative failures.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Reorder the pipeline and assert invalid data leaves no output file; retain and inspect the schema failure instead of converting it to a warning.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Create invalid fixtures for null, range, category, duplicate-key, and dtype rules; use lazy validation to inspect multiple failures. <strong>Progressive hint:</strong> One failure fixture per rule makes contract coverage auditable. <strong>Verify:</strong> Run lazy validation on fixtures violating all five rule families and assert the failure cases include each expected column/check category.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Create invalid fixtures for null, range, category, duplicate-key, and dtype rules; use lazy validation to inspect multiple failures. Progressive hint: One failure fixture per rule makes contract coverage auditable. Values below, at, and above the named boundary must produce the evidence Run lazy validation on fixtures violating all five rule families and assert the failure cases include each expected column/check category. Those cases show how turning data contracts into executable schemas and informative failures behaves at its edge.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Run lazy validation on fixtures violating all five rule families and assert the failure cases include each expected column/check category.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Translate business rules into executable boundary contracts and prove both acceptance and informative failure before persisting data.</p>
-<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
-<h5 id="solution-1--practices-1-2-transform-versus-assert">Practices 1–2 — Transform versus assert<a class="heading-anchor" href="#solution-1--practices-1-2-transform-versus-assert" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-transform-versus-assert">Shared implementation for Exercises 3–4 — Transform versus assert<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-transform-versus-assert" aria-label="Link to this section">#</a></h5>
 <p>Coercion can turn compatible text such as <code>&quot;2&quot;</code> into integer <code>2</code>; it should not silently invent a value for incompatible text. The final cleaned frame must validate before any destination is replaced.</p>
-<h5 id="solution-1--practices-3-5-executable-business-rules">Practices 3–5 — Executable business rules<a class="heading-anchor" href="#solution-1--practices-3-5-executable-business-rules" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-executable-business-rules">Shared implementation for Exercises 5–7 — Executable business rules<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-executable-business-rules" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">import pandas as pd
 import pandera.pandas as pa
 
@@ -593,7 +989,7 @@ else:
     raise AssertionError(&quot;invalid rows should fail the schema&quot;)</code></pre>
 <p>A production save function should write only <code>checked</code>. If validation fails, surface the report and leave any previous valid destination untouched.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -601,7 +997,7 @@ else:
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -724,7 +1120,38 @@ else:
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>A production save function should write only <code>checked</code>. If validation fails, surface the report and leave any previous valid destination untouched.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-29`
+(Day 29 — Data Validation with Schemas). Direct catalog prerequisites: `python-28`.
+I have completed the direct prerequisites: `python-28`. Emphasize turning data contracts into executable schemas and informative failures.
+Read `python/ds-60day/companion-guides/day29_data_validation_schemas.md` and use the learner notebook
+`python/ds-60day/notebooks/day29_data_validation_schemas.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-28.html"><small>Previous lesson</small><strong>python-28</strong><span>Feature Engineering</span></a>
@@ -816,6 +1243,23 @@ else:
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

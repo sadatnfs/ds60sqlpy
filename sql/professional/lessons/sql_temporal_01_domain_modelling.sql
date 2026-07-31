@@ -449,7 +449,7 @@ ORDER BY rr.record_key;
 --    valid-period overlap. Compare it with the advisory-lock trigger fallback.
 --    Inputs: For sql-temporal-01 Exercise 3, Use the read-only `pg_available_extensions` result, the existing advisory-lock trigger, and a written (not executed) `btree_gist` exclusion constraint design for `customer_key WITH =, valid_period WITH &&`.
 --    Expected result/shape: For sql-temporal-01 Exercise 3, One comparison row per enforcement approach, with `approach`, `enforcement_mechanism`, `assumption_or_limit`, and `concurrent_failure_behavior`.
---    Verify: For sql-temporal-01 Exercise 3, Explain which writes each approach locks or constrains, how a conflicting concurrent transaction fails, and what happens if an application writer bypasses the agreed advisory-lock protocol.
+--    Verify: For sql-temporal-01 Exercise 3, The comparison output records which writes each approach locks or constrains, how a conflicting concurrent transaction fails, and what happens if an application writer bypasses the agreed advisory-lock protocol.
 -- 4. Add a correction ledger entry that reverses LEDGER-101 without updating
 --    history. Verify idempotency keys and reversal references.
 --    Inputs: For sql-temporal-01 Exercise 4, Append `LEDGER-102` to `pro_temporal_lab.change_ledger` as the exact same-subject, same-currency negation of `LEDGER-101`; set `reverses_entry_id` from the referenced row instead of hard-coding it.
@@ -471,7 +471,7 @@ ORDER BY rr.record_key;
 --    times, and explain why a bare timestamp or fixed UTC offset is insufficient.
 --    Inputs: For sql-temporal-01 Exercise 7, Use three keyed civil-time cases in `America/Los_Angeles`: spring `2026-03-08 02:30`, fall `2026-11-01 01:30`, and one ordinary time. Round-trip candidate UTC instants rather than trusting one silent `AT TIME ZONE` default.
 --    Expected result/shape: For sql-temporal-01 Exercise 7, One row per `case_id`, with `local_time`, `zone_name`, `civil_time_status`, candidate instants, PostgreSQL's default interpreted instant, and `resolution_policy`, ordered by `case_id`.
---    Verify: For sql-temporal-01 Exercise 7, Require exactly one `nonexistent`, one `ambiguous`, and one `ordinary` case. A nonexistent time has zero round-trip candidates; an ambiguous time has more than one and requires explicit disambiguation.
+--    Verify: For sql-temporal-01 Exercise 7, The result contains exactly one `nonexistent`, one `ambiguous`, and one `ordinary` case. A nonexistent time has zero round-trip candidates; an ambiguous time has more than one and requires explicit disambiguation.
 -- 8. Distinguish event time, ingestion time, and processing time for late data.
 --    Define a watermark and allowed lateness, then show how a late event changes
 --    a previously published aggregate and how the correction is communicated.

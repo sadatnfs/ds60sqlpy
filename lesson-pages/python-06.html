@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-6-lists-tuples-sets-and-dictionaries">Day 6 — Lists, Tuples, Sets, and Dictionaries<a class="heading-anchor" href="#guide--day-6-lists-tuples-sets-and-dictionaries" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>Choose a data structure from the operations you need, not from habit.</p>
@@ -291,6 +330,86 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 5 (<code>python-05</code>): functions, collection annotations, and contracts.</p>
+<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<ol>
+<li>Confirm the course environment before changing it:</li>
+</ol>
+<pre><code class="language-powershell">   # Windows PowerShell
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   &amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash">   # macOS/Linux
+   .venv/bin/python scripts/course.py doctor</code></pre>
+<ol>
+<li>Read <code>python/ds-60day/companion-guides/day06_data_structures.md</code>, then open <code>python/ds-60day/notebooks/day06_data_structures.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
+<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
+<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
+<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+</ol>
+<p><strong>Lesson outcome:</strong> use day 6 — lists, tuples, sets, and dictionaries to practice choosing lists, tuples, sets, and dictionaries by semantics and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
+<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
+<p>Python&#x27;s core collections answer different questions. A list keeps ordered, possibly repeated values and can change. A tuple is an ordered fixed record-like sequence. A set represents unique hashable members and makes membership tests fast. A dictionary maps unique hashable keys to values.</p>
+<p>“Mutable” means an object can change in place; “hashable” means it has a stable hash suitable for a set member or dictionary key. Copying a collection is also about reference depth: a shallow copy creates a new outer container but still points to the same nested objects. Choose a structure from the meaning of order, duplicates, lookup, and mutation, not simply from familiar syntax.</p>
+<h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>sequence:</strong> an ordered collection addressable by position.</li>
+<li><strong>mapping:</strong> a collection that associates keys with values.</li>
+<li><strong>mutable:</strong> able to change in place after creation.</li>
+<li><strong>hashable:</strong> having a stable hash and equality behavior while stored.</li>
+<li><strong>membership:</strong> the question whether a value is present.</li>
+<li><strong>shallow copy:</strong> a new outer container that shares referenced inner objects.</li>
+</ul>
+<h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<p><code>counts[key] = counts.get(key, 0) + amount</code> first asks the dictionary for <code>key</code>, substitutes <code>0</code> only when it is absent, adds <code>amount</code>, and writes the new total back. <code>value in seen</code> is a membership expression; for a set or dictionary it is normally much cheaper than scanning a long list.</p>
+<h5 id="guide--worked-example-1-preserve-order-while-removing-repeats">Worked example 1 — Preserve order while removing repeats<a class="heading-anchor" href="#guide--worked-example-1-preserve-order-while-removing-repeats" aria-label="Link to this section">#</a></h5>
+<p>Use one structure for fast membership and another for ordered output. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">values = [&quot;a&quot;, &quot;b&quot;, &quot;a&quot;, &quot;c&quot;, &quot;b&quot;]
+seen = set()
+unique_in_order = []
+for value in values:
+    if value not in seen:
+        seen.add(value)
+        unique_in_order.append(value)
+unique_in_order</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`[&#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;]`. Converting straight to a set would represent uniqueness but would not express first-seen order.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--worked-example-2-aggregate-pairs-into-a-dictionary">Worked example 2 — Aggregate pairs into a dictionary<a class="heading-anchor" href="#guide--worked-example-2-aggregate-pairs-into-a-dictionary" aria-label="Link to this section">#</a></h5>
+<p>Make the missing-key starting value explicit. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">purchases = [(&quot;tea&quot;, 2), (&quot;coffee&quot;, 1), (&quot;tea&quot;, 3)]
+totals = {}
+for product, quantity in purchases:
+    totals[product] = totals.get(product, 0) + quantity
+totals</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`{&#x27;tea&#x27;: 5, &#x27;coffee&#x27;: 1}`. Tuple unpacking gives names to the two fields in each pair.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
+<p>When the output differs from your prediction, use this order:</p>
+<ol>
+<li>When an unhashable-type error appears, inspect the set member or dictionary key and ask whether its identity can be a tuple.</li>
+<li>When nested data changes through a copy, determine whether the copy was shallow.</li>
+<li>Do not depend on a set&#x27;s display order; sort only when presentation needs a deterministic order.</li>
+<li>Use <code>.get</code>, <code>setdefault</code>, <code>defaultdict</code>, or <code>Counter</code> according to the missing-key behavior you want.</li>
+</ol>
+<h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
+<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
+<ol>
+<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
+<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
+<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
+<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
+<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
+</ol>
+<p><strong>Useful alternative:</strong> <code>dict.fromkeys(values)</code> is a compact stable de-duplication technique for hashable values, while an explicit loop adapts to a derived key.</p>
+<p><strong>Boundary to remember:</strong> Nested mutable values, unhashable records, missing keys, empty inputs, and repeated records with the same identity expose collection-policy choices. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>List:</strong> mutable, ordered sequence that permits duplicates.</li>
@@ -312,19 +431,22 @@ can_edit = &quot;editor&quot; in allowed_roles
 user_name = user_by_id[7]</code></pre>
 <p>The structures express different guarantees: ordered mutable stages, a fixed coordinate pair, unique role membership, and keyed user lookup.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Implement stable de-duplication that preserves the first occurrence. <strong>Hint:</strong> keep one structure for membership checks and another for ordered output.</li>
-<li>Aggregate key-value pairs by key. Try collecting values, unique values, and numeric totals. <strong>Hint:</strong> decide what a missing key should start with before processing the pair.</li>
+<li>Implement <code>stable_unique(values)</code> for <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;, &#x27;a&#x27;]</code>. <strong>Expected result:</strong> <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;c&#x27;]</code>. <strong>Constraints:</strong> preserve the first occurrence, leave the input unchanged, use a set for membership and a list for output, and state that items must be hashable. <strong>Verify:</strong> test the example, an empty list, and a list with no duplicates.</li>
+</ol>
+<ol>
+<li>Given <code>[(&#x27;east&#x27;, 4), (&#x27;west&#x27;, 2), (&#x27;east&#x27;, 3)]</code>, build three mappings: region to list of all values, region to set of unique values, and region to numeric total. <strong>Expected totals:</strong> <code>{&#x27;east&#x27;: 7, &#x27;west&#x27;: 2}</code>. <strong>Constraints:</strong> make the missing-key initial value explicit and preserve encounter order in the list version. <strong>Verify:</strong> assert all three outputs.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Choose structures by semantics—ordering, uniqueness, lookup, and mutability—not by habit. State what duplicates and missing keys mean.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict the length and membership behavior of <code>{3, 1, 3, 2}</code>. Why must display order not be treated as a sorting guarantee? <strong>Progressive hint:</strong> Sets enforce uniqueness and optimize membership, not presentation order.</li>
-<li><strong>Tracing:</strong> Trace shallow copying for <code>original = [[1], [2]]; copied = original.copy(); copied[0].append(9)</code>. <strong>Progressive hint:</strong> The outer lists differ but still refer to the same inner lists.</li>
-<li><strong>Implementation:</strong> Implement <code>invert_multimap(mapping)</code> so values become keys and each new key maps to a list of original keys in encounter order. <strong>Progressive hint:</strong> Use <code>setdefault</code> or <code>defaultdict(list)</code>.</li>
-<li><strong>Debugging:</strong> Repair code that attempts to use a list as a dictionary key. Explain hashability and choose a tuple when the sequence is an identity. <strong>Progressive hint:</strong> Dictionary keys must have a stable hash while stored.</li>
-<li><strong>Edge case and explanation:</strong> Extend stable de-duplication to records using a <code>key</code> function, then test repeated dictionaries whose IDs match but other fields differ. <strong>Progressive hint:</strong> Store hashable derived keys while returning original records.</li>
+<li><strong>Prediction:</strong> Predict the length and membership behavior of <code>{3, 1, 3, 2}</code>. Why must display order not be treated as a sorting guarantee? <strong>Progressive hint:</strong> Sets enforce uniqueness and optimize membership, not presentation order. <strong>Verify:</strong> Assert the set has length <code>3</code> and contains <code>1</code>, <code>2</code>, and <code>3</code>; compare values as a set rather than asserting display iteration order.</li>
+<li><strong>Tracing:</strong> Trace shallow copying for <code>original = [[1], [2]]; copied = original.copy(); copied[0].append(9)</code>. <strong>Progressive hint:</strong> The outer lists differ but still refer to the same inner lists. <strong>Verify:</strong> Assert <code>original is not copied</code> but <code>original[0] is copied[0]</code>, then confirm appending through the copy appears in both nested lists.</li>
+<li><strong>Implementation:</strong> Implement <code>invert_multimap(mapping)</code> so values become keys and each new key maps to a list of original keys in encounter order. <strong>Progressive hint:</strong> Use <code>setdefault</code> or <code>defaultdict(list)</code>. <strong>Verify:</strong> Assert exact output lists and encounter order for a mapping where two original keys share a value; also test an empty mapping.</li>
+<li><strong>Debugging:</strong> Repair code that attempts to use a list as a dictionary key. Explain hashability and choose a tuple when the sequence is an identity. <strong>Progressive hint:</strong> Dictionary keys must have a stable hash while stored. <strong>Verify:</strong> Show the list-key version raises <code>TypeError</code>, then assert the tuple-key replacement retrieves the intended value and remains unmodified.</li>
+<li><strong>Edge case and explanation:</strong> Extend stable de-duplication to records using a <code>key</code> function, then test repeated dictionaries whose IDs match but other fields differ. <strong>Progressive hint:</strong> Store hashable derived keys while returning original records. <strong>Verify:</strong> Use repeated record dictionaries with the same ID; assert the first complete record is returned once, input order is preserved, and the input remains unchanged.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -348,17 +470,33 @@ user_name = user_by_id[7]</code></pre>
 <li><a href="python-06.html#learner">Open the learner notebook</a></li>
 <li><a href="python-06.html#solution-1">Check the separate solution</a></li>
 <li><a href="python-07.html#guide">Next: Day 7 — Strings, regex, and paths</a></li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-06`
+(Day 6 — Lists, Tuples, Sets, and Dictionaries). Direct catalog prerequisites: `python-05`.
+I have completed the direct prerequisites: `python-05`. Emphasize choosing lists, tuples, sets, and dictionaries by semantics.
+Read `python/ds-60day/companion-guides/day06_data_structures.md` and use the learner notebook
+`python/ds-60day/notebooks/day06_data_structures.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -375,12 +513,12 @@ user_name = user_by_id[7]</code></pre>
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-6-data-structures-list-tuple-set-dict">Day 6 — Data structures: list, tuple, set, dict<a class="heading-anchor" href="#learner--cell-1--day-6-data-structures-list-tuple-set-dict" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -389,7 +527,59 @@ user_name = user_by_id[7]</code></pre>
 <li>Choose the right structure for the task.</li>
 <li>Common patterns: frequency count, dedupe, grouping.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from collections import Counter, defaultdict</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
+<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>This is the editable learner artifact for <code>python-06</code>. Read <code>python/ds-60day/companion-guides/day06_data_structures.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
+<p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
+<p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--core-mental-model">Core mental model<a class="heading-anchor" href="#learner--cell-3--core-mental-model" aria-label="Link to this section">#</a></h4>
+<p>Python&#x27;s core collections answer different questions. A list keeps ordered, possibly repeated values and can change. A tuple is an ordered fixed record-like sequence. A set represents unique hashable members and makes membership tests fast. A dictionary maps unique hashable keys to values.</p>
+<p>“Mutable” means an object can change in place; “hashable” means it has a stable hash suitable for a set member or dictionary key. Copying a collection is also about reference depth: a shallow copy creates a new outer container but still points to the same nested objects. Choose a structure from the meaning of order, duplicates, lookup, and mutation, not simply from familiar syntax.</p>
+<h5 id="learner--cell-3--vocabulary">Vocabulary<a class="heading-anchor" href="#learner--cell-3--vocabulary" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>sequence:</strong> an ordered collection addressable by position.</li>
+<li><strong>mapping:</strong> a collection that associates keys with values.</li>
+<li><strong>mutable:</strong> able to change in place after creation.</li>
+<li><strong>hashable:</strong> having a stable hash and equality behavior while stored.</li>
+<li><strong>membership:</strong> the question whether a value is present.</li>
+<li><strong>shallow copy:</strong> a new outer container that shares referenced inner objects.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<p><code>counts[key] = counts.get(key, 0) + amount</code> first asks the dictionary for <code>key</code>, substitutes <code>0</code> only when it is absent, adds <code>amount</code>, and writes the new total back. <code>value in seen</code> is a membership expression; for a set or dictionary it is normally much cheaper than scanning a long list.</p>
+<h5 id="learner--cell-4--worked-example-1-preserve-order-while-removing-repeats">Worked example 1 — Preserve order while removing repeats<a class="heading-anchor" href="#learner--cell-4--worked-example-1-preserve-order-while-removing-repeats" aria-label="Link to this section">#</a></h5>
+<p>Use one structure for fast membership and another for ordered output. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>values = [&quot;a&quot;, &quot;b&quot;, &quot;a&quot;, &quot;c&quot;, &quot;b&quot;]</span>
+<span>seen = set()</span>
+<span>unique_in_order = []</span>
+<span>for value in values:</span>
+<span>    if value not in seen:</span>
+<span>        seen.add(value)</span>
+<span>        unique_in_order.append(value)</span>
+<span>unique_in_order</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> <code>[&#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;]</code>. Converting straight to a set would represent uniqueness but would not express first-seen order.</p>
+<p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
+<h5 id="learner--cell-6--worked-example-2-aggregate-pairs-into-a-dictionary">Worked example 2 — Aggregate pairs into a dictionary<a class="heading-anchor" href="#learner--cell-6--worked-example-2-aggregate-pairs-into-a-dictionary" aria-label="Link to this section">#</a></h5>
+<p>Make the missing-key starting value explicit. Predict first; then run the next cell.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>purchases = [(&quot;tea&quot;, 2), (&quot;coffee&quot;, 1), (&quot;tea&quot;, 3)]</span>
+<span>totals = {}</span>
+<span>for product, quantity in purchases:</span>
+<span>    totals[product] = totals.get(product, 0) + quantity</span>
+<span>totals</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>{&#x27;tea&#x27;: 5, &#x27;coffee&#x27;: 1}</code>. Tuple unpacking gives names to the two fields in each pair.</p>
+<h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
+<p>When evidence differs from your prediction, use this order:</p>
+<ol>
+<li>When an unhashable-type error appears, inspect the set member or dictionary key and ask whether its identity can be a tuple.</li>
+<li>When nested data changes through a copy, determine whether the copy was shallow.</li>
+<li>Do not depend on a set&#x27;s display order; sort only when presentation needs a deterministic order.</li>
+<li>Use <code>.get</code>, <code>setdefault</code>, <code>defaultdict</code>, or <code>Counter</code> according to the missing-key behavior you want.</li>
+</ol>
+<p><strong>Alternative to compare:</strong> <code>dict.fromkeys(values)</code> is a compact stable de-duplication technique for hashable values, while an explicit loop adapts to a derived key.</p>
+<p><strong>Boundary to test:</strong> Nested mutable values, unhashable records, missing keys, empty inputs, and repeated records with the same identity expose collection-policy choices.</p>
+<p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from collections import Counter, defaultdict</span>
 <span>words = &#x27;this is a test this is&#x27;.split()</span>
 <span>Counter(words)</span>
 <span> </span>
@@ -404,52 +594,119 @@ user_name = user_by_id[7]</code></pre>
 <span>dict(groups)</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Implement stable de-duplication that preserves the first occurrence. <strong>Hint:</strong> keep one structure for membership checks and another for ordered output.</li>
-<li>Aggregate key-value pairs by key. Try collecting values, unique values, and numeric totals. <strong>Hint:</strong> decide what a missing key should start with before processing the pair.</li>
+<li>Implement <code>stable_unique(values)</code> for <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;, &#x27;a&#x27;]</code>. <strong>Expected result:</strong> <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;c&#x27;]</code>. <strong>Constraints:</strong> preserve the first occurrence, leave the input unchanged, use a set for membership and a list for output, and state that items must be hashable. <strong>Verify:</strong> test the example, an empty list, and a list with no duplicates.</li>
 </ol>
-<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Given <code>[(&#x27;east&#x27;, 4), (&#x27;west&#x27;, 2), (&#x27;east&#x27;, 3)]</code>, build three mappings: region to list of all values, region to set of unique values, and region to numeric total. <strong>Expected totals:</strong> <code>{&#x27;east&#x27;: 7, &#x27;west&#x27;: 2}</code>. <strong>Constraints:</strong> make the missing-key initial value explicit and preserve encounter order in the list version. <strong>Verify:</strong> assert all three outputs.</li>
+</ol>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Choose structures by semantics—ordering, uniqueness, lookup, and mutability—not by habit. State what duplicates and missing keys mean.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict the length and membership behavior of <code>{3, 1, 3, 2}</code>. Why must display order not be treated as a sorting guarantee? <strong>Progressive hint:</strong> Sets enforce uniqueness and optimize membership, not presentation order.</li>
-<li><strong>Tracing:</strong> Trace shallow copying for <code>original = [[1], [2]]; copied = original.copy(); copied[0].append(9)</code>. <strong>Progressive hint:</strong> The outer lists differ but still refer to the same inner lists.</li>
-<li><strong>Implementation:</strong> Implement <code>invert_multimap(mapping)</code> so values become keys and each new key maps to a list of original keys in encounter order. <strong>Progressive hint:</strong> Use <code>setdefault</code> or <code>defaultdict(list)</code>.</li>
-<li><strong>Debugging:</strong> Repair code that attempts to use a list as a dictionary key. Explain hashability and choose a tuple when the sequence is an identity. <strong>Progressive hint:</strong> Dictionary keys must have a stable hash while stored.</li>
-<li><strong>Edge case and explanation:</strong> Extend stable de-duplication to records using a <code>key</code> function, then test repeated dictionaries whose IDs match but other fields differ. <strong>Progressive hint:</strong> Store hashable derived keys while returning original records.</li>
+<li><strong>Prediction:</strong> Predict the length and membership behavior of <code>{3, 1, 3, 2}</code>. Why must display order not be treated as a sorting guarantee? <strong>Progressive hint:</strong> Sets enforce uniqueness and optimize membership, not presentation order. <strong>Verify:</strong> Assert the set has length <code>3</code> and contains <code>1</code>, <code>2</code>, and <code>3</code>; compare values as a set rather than asserting display iteration order.</li>
+<li><strong>Tracing:</strong> Trace shallow copying for <code>original = [[1], [2]]; copied = original.copy(); copied[0].append(9)</code>. <strong>Progressive hint:</strong> The outer lists differ but still refer to the same inner lists. <strong>Verify:</strong> Assert <code>original is not copied</code> but <code>original[0] is copied[0]</code>, then confirm appending through the copy appears in both nested lists.</li>
+<li><strong>Implementation:</strong> Implement <code>invert_multimap(mapping)</code> so values become keys and each new key maps to a list of original keys in encounter order. <strong>Progressive hint:</strong> Use <code>setdefault</code> or <code>defaultdict(list)</code>. <strong>Verify:</strong> Assert exact output lists and encounter order for a mapping where two original keys share a value; also test an empty mapping.</li>
+<li><strong>Debugging:</strong> Repair code that attempts to use a list as a dictionary key. Explain hashability and choose a tuple when the sequence is an identity. <strong>Progressive hint:</strong> Dictionary keys must have a stable hash while stored. <strong>Verify:</strong> Show the list-key version raises <code>TypeError</code>, then assert the tuple-key replacement retrieves the intended value and remains unmodified.</li>
+<li><strong>Edge case and explanation:</strong> Extend stable de-duplication to records using a <code>key</code> function, then test repeated dictionaries whose IDs match but other fields differ. <strong>Progressive hint:</strong> Store hashable derived keys while returning original records. <strong>Verify:</strong> Use repeated record dictionaries with the same ID; assert the first complete record is returned once, input order is preserved, and the input remains unchanged.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Predict first. Then write small code and assertions below each label.</span>
-<span># Keep the official solution closed until you have tested an honest attempt.</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Implement <code>stable_unique(values)</code> for <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;, &#x27;a&#x27;]</code>. <strong>Expected result:</strong> <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;c&#x27;]</code>. <strong>Constraints:</strong> preserve the first occurrence, leave the input unchanged, use a set for membership and a list for output, and state that items must be hashable. <strong>Verify:</strong> test the example, an empty list, and a list with no duplicates.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
+<span># Short contract: Implement `stable_unique(values)` for `[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;, &#x27;a&#x27;]`. `[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;c&#x27;]`. preserve the first occurrence, leave the input unchanged, use a set for membership and a li...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 3 — Prediction</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Given <code>[(&#x27;east&#x27;, 4), (&#x27;west&#x27;, 2), (&#x27;east&#x27;, 3)]</code>, build three mappings: region to list of all values, region to set of unique values, and region to numeric total. <strong>Expected totals:</strong> <code>{&#x27;east&#x27;: 7, &#x27;west&#x27;: 2}</code>. <strong>Constraints:</strong> make the missing-key initial value explicit and preserve encounter order in the list version. <strong>Verify:</strong> assert all three outputs.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
+<span># Short contract: Given `[(&#x27;east&#x27;, 4), (&#x27;west&#x27;, 2), (&#x27;east&#x27;, 3)]`, build three mappings: region to list of all values, region to set of unique values, and region to numeric total. `{&#x27;east&#x27;: 7, &#x27;w...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 4 — Tracing</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict the length and membership behavior of <code>{3, 1, 3, 2}</code>. Why must display order not be treated as a sorting guarantee? <strong>Progressive hint:</strong> Sets enforce uniqueness and optimize membership, not presentation order. <strong>Verify:</strong> Assert the set has length <code>3</code> and contains <code>1</code>, <code>2</code>, and <code>3</code>; compare values as a set rather than asserting display iteration order.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
+<span># Short contract: Predict the length and membership behavior of `{3, 1, 3, 2}`. Why must display order not be treated as a sorting guarantee? Sets enforce uniqueness and optimize membership, not...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 5 — Implementation</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace shallow copying for <code>original = [[1], [2]]; copied = original.copy(); copied[0].append(9)</code>. <strong>Progressive hint:</strong> The outer lists differ but still refer to the same inner lists. <strong>Verify:</strong> Assert <code>original is not copied</code> but <code>original[0] is copied[0]</code>, then confirm appending through the copy appears in both nested lists.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
+<span># Short contract: Trace shallow copying for `original = [[1], [2]]; copied = original.copy(); copied[0].append(9)`. The outer lists differ but still refer to the same inner lists. Assert `origina...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 6 — Debugging</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement <code>invert_multimap(mapping)</code> so values become keys and each new key maps to a list of original keys in encounter order. <strong>Progressive hint:</strong> Use <code>setdefault</code> or <code>defaultdict(list)</code>. <strong>Verify:</strong> Assert exact output lists and encounter order for a mapping where two original keys share a value; also test an empty mapping.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
+<span># Short contract: Implement `invert_multimap(mapping)` so values become keys and each new key maps to a list of original keys in encounter order. Use `setdefault` or `defaultdict(list)`. Assert e...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 7 — Edge case and explanation</span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair code that attempts to use a list as a dictionary key. Explain hashability and choose a tuple when the sequence is an identity. <strong>Progressive hint:</strong> Dictionary keys must have a stable hash while stored. <strong>Verify:</strong> Show the list-key version raises <code>TypeError</code>, then assert the tuple-key replacement retrieves the intended value and remains unmodified.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
+<span># Short contract: Repair code that attempts to use a list as a dictionary key. Explain hashability and choose a tuple when the sequence is an identity. Dictionary keys must have a stable hash whi...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Extend stable de-duplication to records using a <code>key</code> function, then test repeated dictionaries whose IDs match but other fields differ. <strong>Progressive hint:</strong> Store hashable derived keys while returning original records. <strong>Verify:</strong> Use repeated record dictionaries with the same ID; assert the first complete record is returned once, input order is preserved, and the input remains unchanged.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
+<span># Short contract: Extend stable de-duplication to records using a `key` function, then test repeated dictionaries whose IDs match but other fields differ. Store hashable derived keys while return...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -473,116 +730,94 @@ user_name = user_by_id[7]</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-06-solutions-lists-tuples-sets-dicts">Day 06 — Solutions: Lists, Tuples, Sets, Dicts<a class="heading-anchor" href="#solution-1--day-06-solutions-lists-tuples-sets-dicts" aria-label="Link to this section">#</a></h3>
-<p>We implement order-preserving dedupe and key-based aggregation with clear explanations.</p>
-<p>Contents</p>
+<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
+<p>These worked answers demonstrate <strong>choosing lists, tuples, sets, and dictionaries by semantics</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
+<p>Python&#x27;s core collections answer different questions. A list keeps ordered, possibly repeated values and can change. A tuple is an ordered fixed record-like sequence. A set represents unique hashable members and makes membership tests fast. A dictionary maps unique hashable keys to values.</p>
+<p>“Mutable” means an object can change in place; “hashable” means it has a stable hash suitable for a set member or dictionary key. Copying a collection is also about reference depth: a shallow copy creates a new outer container but still points to the same nested objects. Choose a structure from the meaning of order, duplicates, lookup, and mutation, not simply from familiar syntax.</p>
+<h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
-<li>Exercise 1: Stable dedupe (preserve first occurrence order)</li>
-<li>Exercise 2: Aggregate by key (→ list, set, sum/max)</li>
+<li><strong>sequence:</strong> an ordered collection addressable by position.</li>
+<li><strong>mapping:</strong> a collection that associates keys with values.</li>
+<li><strong>mutable:</strong> able to change in place after creation.</li>
+<li><strong>hashable:</strong> having a stable hash and equality behavior while stored.</li>
+<li><strong>membership:</strong> the question whether a value is present.</li>
+<li><strong>shallow copy:</strong> a new outer container that shares referenced inner objects.</li>
 </ul>
-<hr>
-<p>Exercise 1 — Stable dedupe</p>
-<pre><code class="language-python">from typing import Iterable, TypeVar, List
-T = TypeVar(&#x27;T&#x27;)
+<h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
+<p>For this lesson&#x27;s <strong>choosing lists, tuples, sets, and dictionaries by semantics</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Implement <code>stable_unique(values)</code> for <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;, &#x27;a&#x27;]</code>. <strong>Expected result:</strong> <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;c&#x27;]</code>. <strong>Constraints:</strong> preserve the first occurrence, leave the input unchanged, use a set for membership and a list for output, and state that items must be hashable. <strong>Verify:</strong> test the example, an empty list, and a list with no duplicates.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implement <code>stable_unique(values)</code> for <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;, &#x27;a&#x27;]</code>. Expected result: <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;c&#x27;]</code>. Constraints: preserve the first occurrence, leave the input unchanged, use a set for membership and a list for output, and state that items must be hashable. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: test the example, an empty list, and a list with no duplicates. That connects the answer to choosing lists, tuples, sets, and dictionaries by semantics.</p>
+<pre><code class="language-python">from collections.abc import Hashable, Iterable
+from typing import TypeVar
 
-def dedupe_stable(xs: Iterable[T]) -&gt; List[T]:
-    &quot;&quot;&quot;Return items from xs with first occurrences preserved.
-
-    Implementation keeps a set of seen items and appends unseen ones to output.
-    &quot;&quot;&quot;
-    seen: set[T] = set()                 # 1) track items we&#x27;ve seen
-    out: list[T] = []                    # 2) ordered result
-    for x in xs:                         # 3) one pass (O(n))
-        if x not in seen:                # 4) O(1) average membership
-            seen.add(x)                  # 5) remember it
-            out.append(x)                # 6) keep first occurrence
-    return out
-
-# Demo
-assert dedupe_stable([1,2,2,3,3,3,1]) == [1,2,3]</code></pre>
-<p>Notes</p>
-<ul>
-<li>Requires elements to be hashable for set membership (numbers, strings, tuples). For unhashable items, use a key function or serialize.</li>
-</ul>
-<hr>
-<p>Exercise 2 — Aggregate by key Given pairs like [(&quot;a&quot;,1),(&quot;b&quot;,2),(&quot;a&quot;,3)], build structures grouped by key.</p>
-<p>→ dict of lists</p>
-<pre><code class="language-python">from collections import defaultdict
-from typing import Dict, List, Tuple, Hashable
-
-Pair = Tuple[Hashable, T]
-
-def group_list(pairs: Iterable[Pair]) -&gt; Dict[Hashable, List[T]]:
-    groups: defaultdict[Hashable, list[T]] = defaultdict(list)
-    for k, v in pairs:
-        groups[k].append(v)              # append preserves input order per key
-    return dict(groups)</code></pre>
-<p>→ dict of sets (unique values per key)</p>
-<pre><code class="language-python">def group_set(pairs: Iterable[Pair]) -&gt; Dict[Hashable, set[T]]:
-    groups: defaultdict[Hashable, set[T]] = defaultdict(set)
-    for k, v in pairs:
-        groups[k].add(v)                 # set ensures uniqueness
-    return dict(groups)</code></pre>
-<p>→ aggregate to a single value per key (sum / max)</p>
-<pre><code class="language-python">def aggregate_sum(pairs: Iterable[tuple[Hashable, float]]) -&gt; dict[Hashable, float]:
-    totals: dict[Hashable, float] = {}
-    for k, v in pairs:
-        totals[k] = totals.get(k, 0.0) + float(v)
-    return totals
+T = TypeVar(&quot;T&quot;, bound=Hashable)
 
 
-def aggregate_max(pairs: Iterable[tuple[Hashable, float]]) -&gt; dict[Hashable, float]:
-    best: dict[Hashable, float] = {}
-    for k, v in pairs:
-        v = float(v)
-        best[k] = v if k not in best else max(best[k], v)
-    return best
+def stable_unique(values: Iterable[T]) -&gt; list[T]:
+    seen: set[T] = set()
+    result: list[T] = []
+    for value in values:
+        if value not in seen:
+            seen.add(value)
+            result.append(value)
+    return result
 
-# Demo
-pairs = [(&quot;a&quot;,1),(&quot;b&quot;,2),(&quot;a&quot;,3)]
-assert group_list(pairs) == {&quot;a&quot;:[1,3],&quot;b&quot;:[2]}
-assert group_set(pairs) == {&quot;a&quot;:{1,3},&quot;b&quot;:{2}}
-assert aggregate_sum(pairs) == {&quot;a&quot;:4.0, &quot;b&quot;:2.0}
-assert aggregate_max(pairs) == {&quot;a&quot;:3.0, &quot;b&quot;:2.0}</code></pre>
-<p>Tips</p>
-<ul>
-<li>defaultdict eliminates KeyError checks and keeps code compact.</li>
-<li>Choose list vs set based on whether order/duplicates matter for your task.</li>
-</ul>
-<hr>
-<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
-<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Implement stable de-duplication that preserves the first occurrence. <strong>Hint:</strong> keep one structure for membership checks and another for ordered output.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Aggregate key-value pairs by key. Try collecting values, unique values, and numeric totals. <strong>Hint:</strong> decide what a missing key should start with before processing the pair.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-3-prediction">Exercise 3 — Prediction<a class="heading-anchor" href="#solution-1--exercise-3-prediction" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Predict the length and membership behavior of <code>{3, 1, 3, 2}</code>. Why must display order not be treated as a sorting guarantee?</p>
-<p><strong>Reasoning checkpoint:</strong> Sets enforce uniqueness and optimize membership, not presentation order. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-4-tracing">Exercise 4 — Tracing<a class="heading-anchor" href="#solution-1--exercise-4-tracing" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Trace shallow copying for <code>original = [[1], [2]]; copied = original.copy(); copied[0].append(9)</code>.</p>
-<p><strong>Reasoning checkpoint:</strong> The outer lists differ but still refer to the same inner lists. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-5-implementation">Exercise 5 — Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Implement <code>invert_multimap(mapping)</code> so values become keys and each new key maps to a list of original keys in encounter order.</p>
-<p><strong>Reasoning checkpoint:</strong> Use <code>setdefault</code> or <code>defaultdict(list)</code>. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-6-debugging">Exercise 6 — Debugging<a class="heading-anchor" href="#solution-1--exercise-6-debugging" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Repair code that attempts to use a list as a dictionary key. Explain hashability and choose a tuple when the sequence is an identity.</p>
-<p><strong>Reasoning checkpoint:</strong> Dictionary keys must have a stable hash while stored. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-7-edge-case-and-explanation">Exercise 7 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-7-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Extend stable de-duplication to records using a <code>key</code> function, then test repeated dictionaries whose IDs match but other fields differ.</p>
-<p><strong>Reasoning checkpoint:</strong> Store hashable derived keys while returning original records. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+
+source = [&quot;b&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;a&quot;]
+assert stable_unique(source) == [&quot;b&quot;, &quot;a&quot;, &quot;c&quot;]
+assert source == [&quot;b&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;a&quot;]
+assert stable_unique([]) == []</code></pre>
+<p><strong>Verification evidence:</strong> test the example, an empty list, and a list with no duplicates.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Given <code>[(&#x27;east&#x27;, 4), (&#x27;west&#x27;, 2), (&#x27;east&#x27;, 3)]</code>, build three mappings: region to list of all values, region to set of unique values, and region to numeric total. <strong>Expected totals:</strong> <code>{&#x27;east&#x27;: 7, &#x27;west&#x27;: 2}</code>. <strong>Constraints:</strong> make the missing-key initial value explicit and preserve encounter order in the list version. <strong>Verify:</strong> assert all three outputs.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Given <code>[(&#x27;east&#x27;, 4), (&#x27;west&#x27;, 2), (&#x27;east&#x27;, 3)]</code>, build three mappings: region to list of all values, region to set of unique values, and region to numeric total. Expected totals: <code>{&#x27;east&#x27;: 7, &#x27;west&#x27;: 2}</code>. Constraints: make the missing-key initial value explicit and preserve encounter order in the list version. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert all three outputs. That connects the answer to choosing lists, tuples, sets, and dictionaries by semantics.</p>
+<pre><code class="language-python">pairs = [(&quot;east&quot;, 4), (&quot;west&quot;, 2), (&quot;east&quot;, 3)]
+all_values: dict[str, list[int]] = {}
+unique_values: dict[str, set[int]] = {}
+totals: dict[str, int] = {}
+for key, value in pairs:
+    all_values.setdefault(key, []).append(value)
+    unique_values.setdefault(key, set()).add(value)
+    totals[key] = totals.get(key, 0) + value
+
+assert all_values == {&quot;east&quot;: [4, 3], &quot;west&quot;: [2]}
+assert unique_values == {&quot;east&quot;: {3, 4}, &quot;west&quot;: {2}}
+assert totals == {&quot;east&quot;: 7, &quot;west&quot;: 2}</code></pre>
+<p><strong>Verification evidence:</strong> assert all three outputs.</p>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict the length and membership behavior of <code>{3, 1, 3, 2}</code>. Why must display order not be treated as a sorting guarantee? <strong>Progressive hint:</strong> Sets enforce uniqueness and optimize membership, not presentation order. <strong>Verify:</strong> Assert the set has length <code>3</code> and contains <code>1</code>, <code>2</code>, and <code>3</code>; compare values as a set rather than asserting display iteration order.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict the length and membership behavior of <code>{3, 1, 3, 2}</code>. Why must display order not be treated as a sorting guarantee? Progressive hint: Sets enforce uniqueness and optimize membership, not presentation order. Then compare the prediction with this proof target: Assert the set has length <code>3</code> and contains <code>1</code>, <code>2</code>, and <code>3</code>; compare values as a set rather than asserting display iteration order. This makes choosing lists, tuples, sets, and dictionaries by semantics observable instead of relying on intuition.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert the set has length <code>3</code> and contains <code>1</code>, <code>2</code>, and <code>3</code>; compare values as a set rather than asserting display iteration order.</p>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace shallow copying for <code>original = [[1], [2]]; copied = original.copy(); copied[0].append(9)</code>. <strong>Progressive hint:</strong> The outer lists differ but still refer to the same inner lists. <strong>Verify:</strong> Assert <code>original is not copied</code> but <code>original[0] is copied[0]</code>, then confirm appending through the copy appears in both nested lists.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace shallow copying for <code>original = [[1], [2]]; copied = original.copy(); copied[0].append(9)</code>. Progressive hint: The outer lists differ but still refer to the same inner lists. Record the named value, shape, label, or iterator position needed to establish: Assert <code>original is not copied</code> but <code>original[0] is copied[0]</code>, then confirm appending through the copy appears in both nested lists. The trace exposes choosing lists, tuples, sets, and dictionaries by semantics directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert <code>original is not copied</code> but <code>original[0] is copied[0]</code>, then confirm appending through the copy appears in both nested lists.</p>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement <code>invert_multimap(mapping)</code> so values become keys and each new key maps to a list of original keys in encounter order. <strong>Progressive hint:</strong> Use <code>setdefault</code> or <code>defaultdict(list)</code>. <strong>Verify:</strong> Assert exact output lists and encounter order for a mapping where two original keys share a value; also test an empty mapping.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement <code>invert_multimap(mapping)</code> so values become keys and each new key maps to a list of original keys in encounter order. Progressive hint: Use <code>setdefault</code> or <code>defaultdict(list)</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert exact output lists and encounter order for a mapping where two original keys share a value; also test an empty mapping. That connects the answer to choosing lists, tuples, sets, and dictionaries by semantics.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert exact output lists and encounter order for a mapping where two original keys share a value; also test an empty mapping.</p>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair code that attempts to use a list as a dictionary key. Explain hashability and choose a tuple when the sequence is an identity. <strong>Progressive hint:</strong> Dictionary keys must have a stable hash while stored. <strong>Verify:</strong> Show the list-key version raises <code>TypeError</code>, then assert the tuple-key replacement retrieves the intended value and remains unmodified.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair code that attempts to use a list as a dictionary key. Explain hashability and choose a tuple when the sequence is an identity. Progressive hint: Dictionary keys must have a stable hash while stored. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Show the list-key version raises <code>TypeError</code>, then assert the tuple-key replacement retrieves the intended value and remains unmodified. The diagnosis depends on choosing lists, tuples, sets, and dictionaries by semantics.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Show the list-key version raises <code>TypeError</code>, then assert the tuple-key replacement retrieves the intended value and remains unmodified.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Extend stable de-duplication to records using a <code>key</code> function, then test repeated dictionaries whose IDs match but other fields differ. <strong>Progressive hint:</strong> Store hashable derived keys while returning original records. <strong>Verify:</strong> Use repeated record dictionaries with the same ID; assert the first complete record is returned once, input order is preserved, and the input remains unchanged.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Extend stable de-duplication to records using a <code>key</code> function, then test repeated dictionaries whose IDs match but other fields differ. Progressive hint: Store hashable derived keys while returning original records. Values below, at, and above the named boundary must produce the evidence Use repeated record dictionaries with the same ID; assert the first complete record is returned once, input order is preserved, and the input remains unchanged. Those cases show how choosing lists, tuples, sets, and dictionaries by semantics behaves at its edge.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Use repeated record dictionaries with the same ID; assert the first complete record is returned once, input order is preserved, and the input remains unchanged.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Choose structures by semantics—ordering, uniqueness, lookup, and mutability—not by habit. State what duplicates and missing keys mean.</p>
-<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
-<h5 id="solution-1--practices-1-2-set-and-copy-semantics">Practices 1–2 — Set and copy semantics<a class="heading-anchor" href="#solution-1--practices-1-2-set-and-copy-semantics" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-set-and-copy-semantics">Shared implementation for Exercises 3–4 — Set and copy semantics<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-set-and-copy-semantics" aria-label="Link to this section">#</a></h5>
 <p><code>{3, 1, 3, 2}</code> contains three unique integers. Membership is the contract; iteration order is not a portable sorting rule. A shallow list copy duplicates only the outer container, so both versions still share the nested lists.</p>
 <pre><code class="language-python">original = [[1], [2]]
 copied = original.copy()
 copied[0].append(9)
 assert original == [[1, 9], [2]]
 assert copied is not original and copied[0] is original[0]</code></pre>
-<h5 id="solution-1--practices-3-5-multimaps-hashable-identities-and-keyed-de-duplication">Practices 3–5 — Multimaps, hashable identities, and keyed de-duplication<a class="heading-anchor" href="#solution-1--practices-3-5-multimaps-hashable-identities-and-keyed-de-duplication" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-multimaps-hashable-identities-and-keyed-de-duplication">Shared implementation for Exercises 5–7 — Multimaps, hashable identities, and keyed de-duplication<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-multimaps-hashable-identities-and-keyed-de-duplication" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">from collections import defaultdict
 from collections.abc import Callable, Hashable, Iterable, Mapping
 from typing import TypeVar
@@ -623,7 +858,7 @@ records = [{&quot;id&quot;: 1, &quot;name&quot;: &quot;first&quot;}, {&quot;id&q
 assert dedupe_by(records, key=lambda row: row[&quot;id&quot;]) == [records[0], records[2]]
 assert invert_multimap({&quot;a&quot;: 1, &quot;b&quot;: 2, &quot;c&quot;: 1}) == {1: [&quot;a&quot;, &quot;c&quot;], 2: [&quot;b&quot;]}</code></pre></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -631,7 +866,7 @@ assert invert_multimap({&quot;a&quot;: 1, &quot;b&quot;: 2, &quot;c&quot;: 1}) =
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -783,7 +1018,38 @@ assert invert_multimap({&quot;a&quot;: 1, &quot;b&quot;: 2, &quot;c&quot;: 1}) =
 <span> </span></code></pre>
 </article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-06`
+(Day 6 — Lists, Tuples, Sets, and Dictionaries). Direct catalog prerequisites: `python-05`.
+I have completed the direct prerequisites: `python-05`. Emphasize choosing lists, tuples, sets, and dictionaries by semantics.
+Read `python/ds-60day/companion-guides/day06_data_structures.md` and use the learner notebook
+`python/ds-60day/notebooks/day06_data_structures.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-05.html"><small>Previous lesson</small><strong>python-05</strong><span>Functions Type Hints</span></a>
@@ -875,6 +1141,23 @@ assert invert_multimap({&quot;a&quot;: 1, &quot;b&quot;: 2, &quot;c&quot;: 1}) =
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

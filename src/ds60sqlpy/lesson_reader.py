@@ -33,6 +33,7 @@ COURSE_GUIDE_REFERENCE_PATHS = (
     "docs/curriculum-design-references.md",
     "docs/curriculum-map.md",
     "docs/guided-sql-notebooks.md",
+    "docs/lesson-readers.md",
     "docs/learning-portal.md",
     "docs/learning-with-codex.md",
     "docs/professional-paths.md",
@@ -52,6 +53,12 @@ _LINK_OR_CODE_RE = re.compile(
     r"|(?P<image>!)?\[(?P<label>[^\]]*)\]\((?P<target>[^)]+)\)"
 )
 _SAFE_ID_RE = re.compile(r"[^a-z0-9]+")
+
+
+def _clean_generated_html(document: str) -> str:
+    """Return deterministic HTML with one newline and no trailing whitespace."""
+
+    return "\n".join(line.rstrip() for line in document.splitlines()) + "\n"
 
 
 @dataclass(frozen=True, slots=True)
@@ -1789,7 +1796,9 @@ def build_reader_files(catalog: Catalog) -> dict[str, str]:
 
     targets = rendered_targets(catalog)
     return {
-        reader_relative_path(lesson.id): build_lesson_html(catalog, lesson, targets=targets)
+        reader_relative_path(lesson.id): _clean_generated_html(
+            build_lesson_html(catalog, lesson, targets=targets)
+        )
         for lesson in catalog
     }
 
@@ -1800,10 +1809,12 @@ def build_reference_files(catalog: Catalog) -> dict[str, str]:
     sources = reference_source_paths(catalog)
     targets = rendered_targets(catalog)
     return {
-        reference_relative_path(source.relative_to(catalog.repo_root)): build_reference_html(
-            catalog,
-            source,
-            targets=targets,
+        reference_relative_path(source.relative_to(catalog.repo_root)): _clean_generated_html(
+            build_reference_html(
+                catalog,
+                source,
+                targets=targets,
+            )
         )
         for source in sources
     }

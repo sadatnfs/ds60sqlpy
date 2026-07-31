@@ -129,7 +129,9 @@
 <ul>
 <li>Keep notebooks valid <code>nbformat</code> documents with the repository kernelspec.</li>
 <li>Prefer small, purposeful cells. Introduce one idea at a time.</li>
-<li>A lesson should contain objectives, explanation, runnable examples, exercises, self-checks, and next steps.</li>
+<li>Historical Day 1–60 learner notebooks must contain at least eight purposeful cells, including at least three runnable code cells and enough explanatory Markdown to teach the lesson without an agent. These are minimums, not a reason to split prose or add filler.</li>
+<li>A lesson must contain objectives, a mental model and vocabulary, syntax anatomy, at least two runnable examples with predicted and observed behavior, guided and independent exercises, explicit expected/verify lines, common-error diagnosis, self-checks, and next steps.</li>
+<li>End every companion guide with the copy-ready, lesson-specific <code>## Ask Codex about this lesson</code> contract defined in <code>docs/content-authoring.md</code>. The material before it must remain self-sufficient.</li>
 <li>Each cataloged lesson must meet its immutable <code>curriculum/practice_baseline.json</code> target on the learner notebook, guide, and explanatory solution. Count distinct numbered prompts, not hint or answer-step inflation.</li>
 <li>Keep full worked answers in <code>solutions/</code>, not directly below learner exercises.</li>
 <li>Clear incidental execution outputs before committing unless an output is intentionally instructional.</li>
@@ -161,7 +163,8 @@
 <h3 id="validation">Validation<a class="heading-anchor" href="#validation" aria-label="Link to this section">#</a></h3>
 <p>Run:</p>
 <pre><code class="language-text">python scripts/course.py validate
-python scripts/audit_practice.py</code></pre>
+python scripts/audit_practice.py
+python scripts/audit_lesson_depth.py</code></pre>
 <p>For a changed lesson, also verify:</p>
 <ul>
 <li>Notebook parses and opens.</li>

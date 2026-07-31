@@ -173,6 +173,8 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 <li>Ask for one progressive hint at a time.</li>
 <li>Open a <strong>Solution</strong> tab only after the attempt, then explain the difference.</li>
 </ol>
+<p>Every Python, SQL, and bridge companion guide ends with <strong>Ask Codex about this lesson</strong>. That block is not a generic “explain this” prompt: it carries the stable lesson ID, exact guide and learner paths, prerequisite boundary, topic-specific goals, safe run boundary, no-solutions rule, evidence loop, and mastery condition. The rendered reader presents the same contract in a dedicated copy panel, and the <code>START_HERE.html</code> lesson selector embeds that exact guide-authored prompt as well. Prefer that lesson prompt over rewriting file paths and context by hand.</p>
+<p>The prompt is intentionally last. Read the definitions, examples, expected observations, exercises, and troubleshooting first. If the lesson itself does not make sense without Codex, report that as a curriculum defect; the coach is there to adapt questions and hints, not to supply missing course material.</p>
 <p>In private mode, the reader&#x27;s buttons resolve only that stable lesson ID and its cataloged files. For a Python notebook, choose <strong>Open this notebook in JupyterLab</strong> or open it in VS Code and select <code>Python (ds60sqlpy)</code>. For a Python source lesson, open the exact <code>.py</code> file in VS Code and run it with the repository interpreter.</p>
 <p>For a normal SQL lesson, choose <strong>Create/open guided SQL notebook</strong>. The launcher creates an ignored notebook plus editable SQL copy under <code>.learning/sql/&lt;lesson-id&gt;/</code> and opens that exact notebook in JupyterLab. It preserves existing learner edits. The notebook runs the complete course script through a fixed, non-shell <code>psql -f</code> path so <code>psql</code> meta-commands continue to work; database preparation remains a separate, explicitly confirmed reset of only <code>advanced_sql_training</code>. Use <code>bridge-jupyter-01</code> instead when the learning objective is short JupySQL <code>%sql</code>/<code>%%sql</code> exploration. See <a href="guided-sql-notebooks.md.html">Guided SQL lesson notebooks</a>.</p>
 <h3 id="use-the-tutor-skill">Use the tutor skill<a class="heading-anchor" href="#use-the-tutor-skill" aria-label="Link to this section">#</a></h3>
@@ -184,8 +186,9 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to start the Python/PostgreSQL bridge. Verify
 that I am ready, use fakes before a live database, and make me explain each
 transaction boundary.</code></pre>
-<pre><code class="language-text">Use $guide-ds60sqlpy-learning to start sql-found-01 before SQL Day 1. Make me
-state the grain and invariants before I write DDL.</code></pre>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to start SQL Day 1 as a complete beginner. Teach
+table, row, column, result set, row grain, SELECT, WHERE, and deterministic
+ORDER BY before asking me to write a query.</code></pre>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to guide bridge-jupyter-01. Verify the selected
 kernel and disposable database, keep my connection secret, and make me explain
 bound parameters versus Jinja SQL rendering.</code></pre>
@@ -196,6 +199,7 @@ catalog based on demonstrated prerequisites rather than the lesson number.</code
 <h3 id="a-good-tutoring-session">A good tutoring session<a class="heading-anchor" href="#a-good-tutoring-session" aria-label="Link to this section">#</a></h3>
 <p>The expected flow is:</p>
 <ol>
+<li>Paste the lesson&#x27;s own <strong>Ask Codex about this lesson</strong> prompt.</li>
 <li>Identify your operating system, track, experience, and current lesson.</li>
 <li>Run or interpret <code>python scripts/course.py doctor</code>.</li>
 <li>Read only the relevant catalog entry, guide, and learner artifact.</li>

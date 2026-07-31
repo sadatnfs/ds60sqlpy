@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-31-probability-basics">Day 31 — Probability Basics<a class="heading-anchor" href="#guide--day-31-probability-basics" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-31</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
 <p>Probability gives you a language for uncertainty. This lesson is a practical refresh: simulate distributions, compare samples with theoretical behavior, and reason about a diagnostic test without treating a probability as a certainty.</p>
@@ -350,13 +389,114 @@ print(f&quot;first 10 average: {running_mean[9]:.3f}&quot;)
 print(f&quot;final average:    {running_mean[-1]:.3f}&quot;)</code></pre>
 <p>The running average should finish near <code>0.6</code>, but it may move away from <code>0.6</code> for short stretches. The law of large numbers describes eventual convergence; it does not promise a smooth path or an exact answer in a finite sample.</p>
 <p>For a Binomial variable, the theoretical mean is \(np\) and the variance is \(np(1-p)\). Compare those values with a large simulated sample as a diagnostic, not as a replacement for the formulas.</p>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Open the Day 31 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
+<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
+<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
+<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
+</ol>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
+<h4 id="guide--concept-deep-dive-probability-models-conditional-evidence-and-simulation-error">Concept deep dive — probability models, conditional evidence, and simulation error<a class="heading-anchor" href="#guide--concept-deep-dive-probability-models-conditional-evidence-and-simulation-error" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
+<p>Probability separates a <strong>model</strong> from one observed dataset. A random variable specifies which numeric outcome is recorded; a distribution assigns probability to those outcomes; a sample is one finite set of draws. The expected value is a property of the model, while a sample mean is an estimate that changes across samples.</p>
+<p>Conditional probability changes the denominator. <code>P(A | B)</code> asks what fraction of the cases where <code>B</code> occurred also satisfy <code>A</code>. Bayes&#x27; theorem reverses a condition by accounting for every route into the observed evidence. Simulation is a useful numerical check, but its accuracy depends on the number and independence of simulated runs.</p>
+<h5 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>rng = np.random.default_rng(seed)</code>:</strong> creates an isolated reproducible random-number generator; the seed is an experiment input.</li>
+<li><strong><code>rng.binomial(n, p, size)</code>:</strong> returns <code>size</code> independent counts, each between zero and <code>n</code>, under constant success probability <code>p</code>.</li>
+<li><strong><code>event.mean()</code>:</strong> estimates a probability only when the Boolean or 0/1 array represents the event at the intended experimental grain.</li>
+</ul>
+<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
+<h5 id="guide--focused-example-a-solve-an-at-least-one-event-by-its-complement">Focused example A — solve an at-least-one event by its complement<a class="heading-anchor" href="#guide--focused-example-a-solve-an-at-least-one-event-by-its-complement" aria-label="Link to this section">#</a></h5>
+<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
+<pre><code class="language-python">import numpy as np
+
+event_probability = 0.002
+opportunities = 1_000
+analytic = 1 - (1 - event_probability) ** opportunities
+
+rng = np.random.default_rng(3101)
+counts = rng.binomial(opportunities, event_probability, size=20_000)
+simulated = np.mean(counts &gt;= 1)
+print({&quot;analytic&quot;: analytic, &quot;simulated&quot;: simulated})
+assert abs(simulated - analytic) &lt; 0.02</code></pre>
+<p><strong>Expected observation:</strong> Both values are near 0.865; they are close rather than exactly equal.</p>
+<p><strong>Assumption to name:</strong> The 1,000 opportunities are independent and all use the same event probability.</p>
+<h5 id="guide--focused-example-b-make-the-bayes-denominator-visible-with-counts">Focused example B — make the Bayes denominator visible with counts<a class="heading-anchor" href="#guide--focused-example-b-make-the-bayes-denominator-visible-with-counts" aria-label="Link to this section">#</a></h5>
+<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
+<pre><code class="language-python">population = 10_000
+prevalence = 0.01
+sensitivity = 0.95
+specificity = 0.90
+
+diseased = population * prevalence
+healthy = population - diseased
+true_positives = diseased * sensitivity
+false_positives = healthy * (1 - specificity)
+positive_predictive_value = true_positives / (true_positives + false_positives)
+print({&quot;true_positive&quot;: true_positives,
+       &quot;false_positive&quot;: false_positives,
+       &quot;P(disease|positive)&quot;: positive_predictive_value})
+assert 0 &lt; positive_predictive_value &lt; sensitivity</code></pre>
+<p><strong>Expected observation:</strong> False positives greatly outnumber true positives, so the posterior is about 8.8%, not 95%.</p>
+<p><strong>Assumption to name:</strong> Sensitivity and specificity apply to this population and the stated prevalence is credible.</p>
+<h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>What to do</th>
+<th>Evidence to keep</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define probability models, conditional evidence, and simulation error in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<h5 id="guide--common-mistake-and-debugging-path">Common mistake and debugging path<a class="heading-anchor" href="#guide--common-mistake-and-debugging-path" aria-label="Link to this section">#</a></h5>
+<p><strong>Mistake:</strong> Using sensitivity as <code>P(disease | positive)</code> reverses the condition and ignores the base rate.</p>
+<p><strong>Debug it deliberately:</strong> Draw a two-by-two count table for a concrete population and verify that true and false positives both appear in the denominator.</p>
+<p><strong>Stop condition:</strong> Do not interpret a probability until the event, denominator, independence assumption, and simulation grain are explicit.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Complete these in the learner notebook:</p>
 <ol>
 <li>Simulate <code>Binomial(n=10, p=0.3)</code> 10,000 times and plot a histogram.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — probability models, conditional evidence, and simulation error — with seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.</p>
+<ol>
 <li>Generate <code>Normal(0, 1)</code> values, compute their mean and variance, and overlay the probability density function. The standard-library formula is enough; SciPy is optional.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — probability models, conditional evidence, and simulation error — with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| &lt; 0.05 and |variance - 1| &lt; 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.</p>
+<ol>
 <li>Given sensitivity <code>0.95</code>, specificity <code>0.90</code>, and prevalence <code>0.01</code>, compute \(P(\text{disease}\mid\text{positive})\).</li>
 </ol>
+<p><strong>Verify:</strong> Practice 3 — probability models, conditional evidence, and simulation error — show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>A single Binomial draw is already a count from 0 through 10. Choose histogram bins that keep those integer outcomes visually separate.</li>
@@ -368,9 +508,16 @@ print(f&quot;final average:    {running_mean[-1]:.3f}&quot;)</code></pre>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Prediction and uncertainty:</strong> For an event with probability 0.002 observed in 1,000 independent trials, predict the chance of at least one occurrence, simulate it 20,000 times, and quantify Monte Carlo uncertainty. <strong>Progressive hint:</strong> Compute 1-(1-p)**n first. Treat each simulated experiment as one Bernoulli outcome and use sqrt(p_hat*(1-p_hat)/runs) for its standard error.</li>
+</ol>
+<p><strong>Verify:</strong> Prediction and uncertainty — show the analytic probability 1 - (1 - 0.002)^1000 (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.</p>
+<ol>
 <li><strong>Implementation:</strong> Estimate P(A|B) from two Boolean arrays without using a probability library. Return both the estimate and the denominator so a caller can judge support. <strong>Progressive hint:</strong> Count rows where B is true, then count rows where A and B are both true. Decide explicitly what happens when B never occurs.</li>
+</ol>
+<p><strong>Verify:</strong> Implementation — for A=[True, True, False, True] and B=[True, False, True, True], return estimate 2/3 and denominator 3; assert unequal lengths fail and a zero-true B denominator raises the documented exception.</p>
+<ol>
 <li><strong>Debugging and boundaries:</strong> Design and test a Binomial-parameter validator. Include n=0, p=0, p=1, a negative n, a fractional n, and probabilities just outside the valid interval. <strong>Progressive hint:</strong> n is a nonnegative integer and p is a finite number in [0, 1]. Remember that bool is a subclass of int in Python.</li>
 </ol>
+<p><strong>Verify:</strong> Debugging and boundaries — assert (n,p) values (0,0), (0,1), and (10,0.5) pass; negative/fractional n and p just below 0 or above 1 must raise named ValueErrors, while booleans are rejected as integer/probability inputs.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -417,17 +564,46 @@ print(f&quot;final average:    {running_mean[-1]:.3f}&quot;)</code></pre>
 <li>Work in the <a href="python-31.html#learner">Day 31 learner notebook</a>.</li>
 <li>After attempting every exercise, compare reasoning with the <a href="python-31.html#solution-1">separate solution</a>.</li>
 <li>Continue to <a href="python-32.html#guide">Day 32 — Statistical Inference</a>.</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<pre><code class="language-text">Tutor me through `python-31` — Day 31 — Probability Basics.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize probability models, conditional evidence, and simulation error. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day31_probability_basics.md`
+- learner artifact: `python/ds-60day/notebooks/day31_probability_basics.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-30`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -444,12 +620,12 @@ print(f&quot;final average:    {running_mean[-1]:.3f}&quot;)</code></pre>
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-31-probability-refresh">Day 31 — Probability refresh<a class="heading-anchor" href="#learner--cell-1--day-31-probability-refresh" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -469,29 +645,128 @@ print(f&quot;final average:    {running_mean[-1]:.3f}&quot;)</code></pre>
 <span>plt.plot(cum_mean); plt.axhline(p,color=&#x27;r&#x27;); plt.title(&#x27;Convergence to p&#x27;); plt.show()</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-3--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
+<h4 id="learner--cell-3--concept-lab-probability-models-conditional-evidence-and-simulation-error">Concept lab — probability models, conditional evidence, and simulation error<a class="heading-anchor" href="#learner--cell-3--concept-lab-probability-models-conditional-evidence-and-simulation-error" aria-label="Link to this section">#</a></h4>
+<h5 id="learner--cell-3--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-3--mental-model" aria-label="Link to this section">#</a></h5>
+<p>Probability separates a <strong>model</strong> from one observed dataset. A random variable specifies which numeric outcome is recorded; a distribution assigns probability to those outcomes; a sample is one finite set of draws. The expected value is a property of the model, while a sample mean is an estimate that changes across samples.</p>
+<p>Conditional probability changes the denominator. <code>P(A | B)</code> asks what fraction of the cases where <code>B</code> occurred also satisfy <code>A</code>. Bayes&#x27; theorem reverses a condition by accounting for every route into the observed evidence. Simulation is a useful numerical check, but its accuracy depends on the number and independence of simulated runs.</p>
+<h5 id="learner--cell-3--read-the-api-before-running-it">Read the API before running it<a class="heading-anchor" href="#learner--cell-3--read-the-api-before-running-it" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>rng = np.random.default_rng(seed)</code>:</strong> creates an isolated reproducible random-number generator; the seed is an experiment input.</li>
+<li><strong><code>rng.binomial(n, p, size)</code>:</strong> returns <code>size</code> independent counts, each between zero and <code>n</code>, under constant success probability <code>p</code>.</li>
+<li><strong><code>event.mean()</code>:</strong> estimates a probability only when the Boolean or 0/1 array represents the event at the intended experimental grain.</li>
+</ul>
+<p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-solve-an-at-least-one-event-by-its-complement">Focused example A — solve an at-least-one event by its complement<a class="heading-anchor" href="#learner--cell-4--focused-example-a-solve-an-at-least-one-event-by-its-complement" aria-label="Link to this section">#</a></h5>
+<p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
+<p><strong>Assumption:</strong> The 1,000 opportunities are independent and all use the same event probability.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>import numpy as np</span>
+<span> </span>
+<span>event_probability = 0.002</span>
+<span>opportunities = 1_000</span>
+<span>analytic = 1 - (1 - event_probability) ** opportunities</span>
+<span> </span>
+<span>rng = np.random.default_rng(3101)</span>
+<span>counts = rng.binomial(opportunities, event_probability, size=20_000)</span>
+<span>simulated = np.mean(counts &gt;= 1)</span>
+<span>print({&quot;analytic&quot;: analytic, &quot;simulated&quot;: simulated})</span>
+<span>assert abs(simulated - analytic) &lt; 0.02</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> Both values are near 0.865; they are close rather than exactly equal.</p>
+<p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-make-the-bayes-denominator-visible-with-counts">Focused example B — make the Bayes denominator visible with counts<a class="heading-anchor" href="#learner--cell-7--focused-example-b-make-the-bayes-denominator-visible-with-counts" aria-label="Link to this section">#</a></h5>
+<p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
+<p><strong>Assumption:</strong> Sensitivity and specificity apply to this population and the stated prevalence is credible.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>population = 10_000</span>
+<span>prevalence = 0.01</span>
+<span>sensitivity = 0.95</span>
+<span>specificity = 0.90</span>
+<span> </span>
+<span>diseased = population * prevalence</span>
+<span>healthy = population - diseased</span>
+<span>true_positives = diseased * sensitivity</span>
+<span>false_positives = healthy * (1 - specificity)</span>
+<span>positive_predictive_value = true_positives / (true_positives + false_positives)</span>
+<span>print({&quot;true_positive&quot;: true_positives,</span>
+<span>       &quot;false_positive&quot;: false_positives,</span>
+<span>       &quot;P(disease|positive)&quot;: positive_predictive_value})</span>
+<span>assert 0 &lt; positive_predictive_value &lt; sensitivity</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> False positives greatly outnumber true positives, so the posterior is about 8.8%, not 95%.</p>
+<h5 id="learner--cell-9--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-9--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Using sensitivity as <code>P(disease | positive)</code> reverses the condition and ignores the base rate.</p>
+<p><strong>Diagnostic:</strong> Draw a two-by-two count table for a concrete population and verify that true and false positives both appear in the denominator.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>Action</th>
+<th>Evidence</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define probability models, conditional evidence, and simulation error in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<p><strong>Stop condition:</strong> Do not interpret a probability until the event, denominator, independence assumption, and simulation grain are explicit.</p>
+<p>Continue to the numbered practice only after you can explain both examples without rereading their code.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Complete these in the learner notebook:</p>
 <ol>
 <li>Simulate <code>Binomial(n=10, p=0.3)</code> 10,000 times and plot a histogram.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — probability models, conditional evidence, and simulation error — with seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.</p>
+<ol>
 <li>Generate <code>Normal(0, 1)</code> values, compute their mean and variance, and overlay the probability density function. The standard-library formula is enough; SciPy is optional.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — probability models, conditional evidence, and simulation error — with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| &lt; 0.05 and |variance - 1| &lt; 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.</p>
+<ol>
 <li>Given sensitivity <code>0.95</code>, specificity <code>0.90</code>, and prevalence <code>0.01</code>, compute \(P(\text{disease}\mid\text{positive})\).</li>
 </ol>
-<h5 id="learner--cell-3--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-3--progressive-hints" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3 — probability models, conditional evidence, and simulation error — show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.</p>
+<h5 id="learner--cell-10--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-10--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>A single Binomial draw is already a count from 0 through 10. Choose histogram bins that keep those integer outcomes visually separate.</li>
 <li>Use <code>density=True</code> for a histogram that can be compared with a density curve. Check the empirical values against 0 and 1 before worrying about the plot.</li>
 <li>Imagine 10,000 people. Separate true positives from false positives before dividing by everyone who tested positive.</li>
 </ol>
-<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Move between probability models, seeded simulation, and diagnostics. A simulation is useful only when its sample space and uncertainty are explicit.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Prediction and uncertainty:</strong> For an event with probability 0.002 observed in 1,000 independent trials, predict the chance of at least one occurrence, simulate it 20,000 times, and quantify Monte Carlo uncertainty. <strong>Progressive hint:</strong> Compute 1-(1-p)**n first. Treat each simulated experiment as one Bernoulli outcome and use sqrt(p_hat*(1-p_hat)/runs) for its standard error.</li>
+</ol>
+<p><strong>Verify:</strong> Prediction and uncertainty — show the analytic probability 1 - (1 - 0.002)^1000 (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.</p>
+<ol>
 <li><strong>Implementation:</strong> Estimate P(A|B) from two Boolean arrays without using a probability library. Return both the estimate and the denominator so a caller can judge support. <strong>Progressive hint:</strong> Count rows where B is true, then count rows where A and B are both true. Decide explicitly what happens when B never occurs.</li>
+</ol>
+<p><strong>Verify:</strong> Implementation — for A=[True, True, False, True] and B=[True, False, True, True], return estimate 2/3 and denominator 3; assert unequal lengths fail and a zero-true B denominator raises the documented exception.</p>
+<ol>
 <li><strong>Debugging and boundaries:</strong> Design and test a Binomial-parameter validator. Include n=0, p=0, p=1, a negative n, a fractional n, and probabilities just outside the valid interval. <strong>Progressive hint:</strong> n is a nonnegative integer and p is a finite number in [0, 1]. Remember that bool is a subclass of int in Python.</li>
 </ol>
+<p><strong>Verify:</strong> Debugging and boundaries — assert (n,p) values (0,0), (0,1), and (10,0.5) pass; negative/fractional n and p just below 0 or above 1 must raise named ValueErrors, while booleans are rejected as integer/probability inputs.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
 <span>#</span>
 <span># Keep the official solution closed until you have attempted each task.</span>
 <span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
@@ -506,15 +781,15 @@ print(f&quot;final average:    {running_mean[-1]:.3f}&quot;)</code></pre>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -551,7 +826,7 @@ print(f&quot;final average:    {running_mean[-1]:.3f}&quot;)</code></pre>
 import matplotlib.pyplot as plt
 from math import sqrt, pi, exp
 rng = np.random.default_rng(42)</code></pre>
-<p>Exercise 1 — Binomial histogram</p>
+<p>Worked reference for Exercise 1 — Binomial histogram</p>
 <pre><code class="language-python">n, p, trials = 10, 0.3, 10_000
 samples = rng.binomial(n=n, p=p, size=trials)
 
@@ -571,7 +846,7 @@ emp_mean, th_mean, emp_var, th_var</code></pre>
 <li>Compare empirical mean/var to theoretical n p and n p (1-p)</li>
 </ul>
 <hr>
-<p>Exercise 2 — Normal(0,1) stats and PDF overlay</p>
+<p>Worked reference for Exercise 2 — Normal(0,1) stats and PDF overlay</p>
 <pre><code class="language-python">x = rng.normal(loc=0.0, scale=1.0, size=50_000)
 mu, var = x.mean(), x.var()
 
@@ -595,7 +870,7 @@ plt.legend(); plt.tight_layout(); plt.show()</code></pre>
 <li>For higher fidelity, use SciPy if available to get pdf directly</li>
 </ul>
 <hr>
-<p>Exercise 3 — Bayes: P(disease | positive) Given sensitivity=0.95, specificity=0.90, prevalence=0.01.</p>
+<p>Worked reference for Exercise 3 — Bayes: P(disease | positive) Given sensitivity=0.95, specificity=0.90, prevalence=0.01.</p>
 <pre><code class="language-python">sens = 0.95        # P(+|D)
 spec = 0.90        # P(-|~D)
 prev = 0.01        # P(D)
@@ -612,20 +887,39 @@ posterior</code></pre>
 <li>Increasing specificity improves PPV when prevalence is low</li>
 </ul>
 <hr>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong><code>rng = np.random.default_rng(seed)</code>:</strong> creates an isolated reproducible random-number generator; the seed is an experiment input.</li>
+<li><strong><code>rng.binomial(n, p, size)</code>:</strong> returns <code>size</code> independent counts, each between zero and <code>n</code>, under constant success probability <code>p</code>.</li>
+<li><strong><code>event.mean()</code>:</strong> estimates a probability only when the Boolean or 0/1 array represents the event at the intended experimental grain.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> Analytic probability establishes the target; seeded simulation then measures approximation error without replacing the derivation.</p>
+<p><strong>Useful alternative:</strong> For rare-event approximations, a Poisson model can be useful when its assumptions are stated and checked.</p>
+<p><strong>Trade-off:</strong> More simulation runs reduce Monte Carlo error but do not repair a wrong probability model.</p>
+<p><strong>Edge case to test:</strong> A condition with zero observed support makes empirical conditional probability undefined, not zero.</p>
+<p><strong>Evidence of correctness:</strong> Probabilities must remain in [0, 1], analytic and seeded simulation results should agree within a stated tolerance, and every conditional estimate must report its denominator.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Simulate <code>Binomial(n=10, p=0.3)</code> 10,000 times and plot a histogram.</p>
 <p><strong>How to reason about it:</strong> A Binomial draw is a count, so the possible values are the integers 0 through n. Use integer-centered bins, a seeded generator, and compare the empirical mean and variance with n<em>p and n</em>p*(1-p); a visually smooth histogram alone does not validate the simulation.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1 — probability models, conditional evidence, and simulation error — with seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Generate <code>Normal(0, 1)</code> values, compute their mean and variance, and overlay the probability density function. The standard-library formula is enough; SciPy is optional.</p>
 <p><strong>How to reason about it:</strong> A density histogram must use density=True before its height can be compared with a probability-density curve. Check the sample mean and variance numerically as well, and state whether variance uses the population convention (ddof=0) or an unbiased sample estimate.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2 — probability models, conditional evidence, and simulation error — with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| &lt; 0.05 and |variance - 1| &lt; 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Given sensitivity <code>0.95</code>, specificity <code>0.90</code>, and prevalence <code>0.01</code>, compute \(P(\text{disease}\mid\text{positive})\).</p>
 <p><strong>How to reason about it:</strong> Bayes&#x27; denominator includes both true positives and false positives. Write every term with a conditional-probability label before inserting numbers; this prevents confusing specificity with the false-positive rate.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 3 — probability models, conditional evidence, and simulation error — show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.</p>
 <h5 id="solution-1--exercise-4-prediction-and-uncertainty">Exercise 4 — Prediction and uncertainty<a class="heading-anchor" href="#solution-1--exercise-4-prediction-and-uncertainty" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> For an event with probability 0.002 observed in 1,000 independent trials, predict the chance of at least one occurrence, simulate it 20,000 times, and quantify Monte Carlo uncertainty.</p>
 <p><strong>Reasoning before implementation:</strong> Compute 1-(1-p)**n first. Treat each simulated experiment as one Bernoulli outcome and use sqrt(p_hat*(1-p_hat)/runs) for its standard error.</p>
@@ -646,12 +940,12 @@ monte_carlo_se = math.sqrt(estimate * (1.0 - estimate) / runs)
 assert abs(estimate - expected) &lt; 4 * monte_carlo_se</code></pre>
 <p>The four-standard-error comparison is a simulation diagnostic, not a proof that every seeded run must match the analytic value exactly. Independence is an assumption; clustered events would require another model.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Prediction and uncertainty — show the analytic probability 1 - (1 - 0.002)^1000 (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.</p>
 <h5 id="solution-1--exercise-5-implementation">Exercise 5 — Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Estimate P(A|B) from two Boolean arrays without using a probability library. Return both the estimate and the denominator so a caller can judge support.</p>
 <p><strong>Reasoning before implementation:</strong> Count rows where B is true, then count rows where A and B are both true. Decide explicitly what happens when B never occurs.</p>
 <p>Conditional probability is a ratio over the rows satisfying the condition. Returning support prevents a precise-looking fraction based on almost no data.</p>
 <pre><code class="language-python">import numpy as np
-
 
 def empirical_conditional(
     event_a: np.ndarray, event_b: np.ndarray
@@ -664,7 +958,6 @@ def empirical_conditional(
     numerator = int(np.count_nonzero(event_a &amp; event_b))
     return numerator / denominator, denominator
 
-
 estimate, support = empirical_conditional(
     np.array([True, False, True, True]),
     np.array([True, True, False, True]),
@@ -672,12 +965,12 @@ estimate, support = empirical_conditional(
 assert (estimate, support) == (2 / 3, 3)</code></pre>
 <p>Returning NaN is an alternative for vectorized reporting, but silently returning zero would incorrectly claim evidence of no association.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Implementation — for A=[True, True, False, True] and B=[True, False, True, True], return estimate 2/3 and denominator 3; assert unequal lengths fail and a zero-true B denominator raises the documented exception.</p>
 <h5 id="solution-1--exercise-6-debugging-and-boundaries">Exercise 6 — Debugging and boundaries<a class="heading-anchor" href="#solution-1--exercise-6-debugging-and-boundaries" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design and test a Binomial-parameter validator. Include n=0, p=0, p=1, a negative n, a fractional n, and probabilities just outside the valid interval.</p>
 <p><strong>Reasoning before implementation:</strong> n is a nonnegative integer and p is a finite number in [0, 1]. Remember that bool is a subclass of int in Python.</p>
 <p>The degenerate cases <code>n=0</code>, <code>p=0</code>, and <code>p=1</code> are valid; they should not be rejected merely because their distributions have no spread.</p>
 <pre><code class="language-python">import math
-
 
 def validate_binomial(n: int, p: float) -&gt; tuple[int, float]:
     if isinstance(n, bool) or not isinstance(n, int) or n &lt; 0:
@@ -689,13 +982,13 @@ def validate_binomial(n: int, p: float) -&gt; tuple[int, float]:
         raise ValueError(&quot;p must be finite and within [0, 1]&quot;)
     return n, probability
 
-
 assert validate_binomial(0, 0) == (0, 0.0)
 assert validate_binomial(4, 1) == (4, 1.0)</code></pre>
 <p>Use targeted exception tests for <code>-1</code>, <code>2.5</code>, <code>True</code>, <code>-1e-9</code>, <code>1.000000001</code>, and NaN. Clipping invalid probabilities would hide upstream data errors.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></div>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Debugging and boundaries — assert (n,p) values (0,0), (0,1), and (10,0.5) pass; negative/fractional n and p just below 0 or above 1 must raise named ValueErrors, while booleans are rejected as integer/probability inputs.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -703,7 +996,7 @@ assert validate_binomial(4, 1) == (4, 1.0)</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -855,7 +1148,51 @@ assert validate_binomial(4, 1) == (4, 1.0)</code></pre>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><p>Use targeted exception tests for <code>-1</code>, <code>2.5</code>, <code>True</code>, <code>-1e-9</code>, <code>1.000000001</code>, and NaN. Clipping invalid probabilities would hide upstream data errors.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-31` — Day 31 — Probability Basics.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize probability models, conditional evidence, and simulation error. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day31_probability_basics.md`
+- learner artifact: `python/ds-60day/notebooks/day31_probability_basics.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-30`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-30.html"><small>Previous lesson</small><strong>python-30</strong><span>Project EDA Preprocessing</span></a>
@@ -947,6 +1284,23 @@ assert validate_binomial(4, 1) == (4, 1.0)</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

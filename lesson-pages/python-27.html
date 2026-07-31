@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-27-geospatial-or-domain-specific-visualization">Day 27 — Geospatial or Domain-Specific Visualization<a class="heading-anchor" href="#guide--day-27-geospatial-or-domain-specific-visualization" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
 <p>Geospatial work adds coordinate reference systems and map layers. The offline alternative uses NetworkX to visualize a domain relationship graph.</p>
@@ -297,6 +336,88 @@
 <pre><code class="language-powershell">powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced</code></pre>
 <p>macOS/Linux:</p>
 <pre><code class="language-bash">bash scripts/setup.sh --advanced</code></pre>
+<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<ol>
+<li>Confirm the course environment before changing it:</li>
+</ol>
+<pre><code class="language-powershell">   # Windows PowerShell
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   &amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash">   # macOS/Linux
+   .venv/bin/python scripts/course.py doctor</code></pre>
+<ol>
+<li>Read <code>python/ds-60day/companion-guides/day27_geospatial_or_domain_viz.md</code>, then open <code>python/ds-60day/notebooks/day27_geospatial_or_domain_viz.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
+<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
+<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
+<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+</ol>
+<p><strong>Lesson outcome:</strong> use day 27 — geospatial or domain-specific visualization to practice geospatial semantics, coordinate reference systems, valid geometry, and offline fallback and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
+<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
+<p>Geospatial data combines ordinary attributes with geometry and a coordinate reference system (CRS). A coordinate pair is conventionally <code>(x, y)</code>—longitude then latitude for geographic coordinates. Values can look numerically valid while being semantically swapped, so record source order and bounds.</p>
+<p>A CRS defines what coordinates mean and their units. Layers cannot be overlaid or spatially joined honestly until their CRSs are known and compatible. Reprojection transforms coordinates; assigning a CRS merely labels existing coordinates and is not a substitute. Inspect validity, emptiness, bounds, provenance, and offline availability before plotting.</p>
+<h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>geometry:</strong> a spatial object such as point, line, or polygon.</li>
+<li><strong>CRS:</strong> coordinate reference system defining coordinate meaning and units.</li>
+<li><strong>reprojection:</strong> transforming geometry coordinates from one CRS to another.</li>
+<li><strong>longitude:</strong> east-west angular coordinate, used as x in geographic pairs.</li>
+<li><strong>latitude:</strong> north-south angular coordinate, used as y in geographic pairs.</li>
+<li><strong>spatial join:</strong> matching records by a geometric relationship such as within or intersects.</li>
+</ul>
+<h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<p><code>GeoDataFrame(data, geometry=..., crs=&quot;EPSG:4326&quot;)</code> declares that the supplied longitude/latitude coordinates already use WGS 84. <code>.to_crs(&quot;EPSG:3857&quot;)</code> transforms them to Web Mercator meters. In contrast, <code>.set_crs(...)</code> labels coordinates without moving them and should be used only when the original CRS is known but missing.</p>
+<h5 id="guide--worked-example-1-create-known-geographic-points-and-inspect-bounds">Worked example 1 — Create known geographic points and inspect bounds<a class="heading-anchor" href="#guide--worked-example-1-create-known-geographic-points-and-inspect-bounds" aria-label="Link to this section">#</a></h5>
+<p>Constructed geometry avoids any network or external file. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">import geopandas as gpd
+from shapely.geometry import Point
+
+places = gpd.GeoDataFrame(
+    {&quot;name&quot;: [&quot;A&quot;, &quot;B&quot;]},
+    geometry=[Point(-122.4, 37.8), Point(-73.9, 40.7)],
+    crs=&quot;EPSG:4326&quot;,
+)
+(str(places.crs), places.total_bounds.round(1).tolist())</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">The CRS is WGS 84/EPSG:4326 and bounds are approximately `[-122.4, 37.8, -73.9, 40.7]` in longitude/latitude degrees.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--worked-example-2-reproject-rather-than-relabel">Worked example 2 — Reproject rather than relabel<a class="heading-anchor" href="#guide--worked-example-2-reproject-rather-than-relabel" aria-label="Link to this section">#</a></h5>
+<p>Projected coordinates use different units while representing the same places. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">projected = places.to_crs(&quot;EPSG:3857&quot;)
+{
+    &quot;same_rows&quot;: len(projected) == len(places),
+    &quot;projected_crs&quot;: str(projected.crs),
+    &quot;x_units_are_not_degrees&quot;: abs(projected.geometry.x.iloc[0]) &gt; 1_000,
+}</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">All checks are true; the coordinates are transformed to meter-like Web Mercator values.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
+<p>When the output differs from your prediction, use this order:</p>
+<ol>
+<li>Inspect <code>.crs</code>, geometry types, <code>.is_valid</code>, <code>.is_empty</code>, and <code>.total_bounds</code> before plotting.</li>
+<li>Verify coordinate order with known places or realistic bounds.</li>
+<li>Use <code>.to_crs</code> to transform; use <code>.set_crs</code> only to label coordinates whose source CRS is known.</li>
+<li>Keep an offline analytical layer or domain-graph alternative when basemap data is unavailable.</li>
+</ol>
+<h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
+<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
+<ol>
+<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
+<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
+<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
+<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
+<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
+</ol>
+<p><strong>Useful alternative:</strong> When location is not central or source geometry is unavailable, a deterministic domain/network visualization can teach graph structure without a misleading map.</p>
+<p><strong>Boundary to remember:</strong> Missing CRS, invalid/self-intersecting geometry, dateline crossing, swapped axes, empty geometry, and remote basemap failure need policy. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Geometry:</strong> point, line, or polygon associated with a row.</li>
@@ -329,19 +450,22 @@ ax.set(title=&quot;Example city coordinates&quot;, xlabel=&quot;Longitude&quot;,
 <h4 id="guide--download-cache-note">Download/cache note<a class="heading-anchor" href="#guide--download-cache-note" aria-label="Link to this section">#</a></h4>
 <p>The notebook&#x27;s <code>geodatasets.get_path(...)</code> example downloads and caches Natural Earth data on first use. <code>contextily</code> basemaps also require tile-network access unless separately cached. Prime approved caches while online, use a local GeoJSON file, or choose the NetworkX exercise for fully offline work.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Plot local city/country boundaries when a local or cached source is available. <strong>Hint:</strong> inspect <code>.crs</code>, geometry validity, and bounds before plotting; reproject data and basemap to a common CRS.</li>
-<li>Alternatively, visualize a domain graph with NetworkX. <strong>Hint:</strong> define what nodes/edges mean, use a fixed layout seed, and encode only a small number of meaningful attributes.</li>
+<li>Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. <strong>Before plotting:</strong> record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. <strong>Constraints:</strong> transform all layers to one appropriate CRS and never use <code>set_crs</code> as if it reprojected coordinates. <strong>Verify:</strong> check a known location/bounds and confirm entity count survives reprojection.</li>
+</ol>
+<ol>
+<li>Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. <strong>Constraints:</strong> use a fixed layout seed, encode at most a few meaningful attributes, provide labels/legend, and do not require network data. <strong>Verify:</strong> reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Treat coordinate reference system, coordinate order, source provenance, geometry validity, and network/cache behavior as part of the visualization.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. <strong>Progressive hint:</strong> Layers must use compatible coordinate reference systems (CRSs).</li>
-<li><strong>Tracing:</strong> Trace one point represented as <code>(longitude, latitude)</code> and explain why swapping values can still create a valid but wrong location. <strong>Progressive hint:</strong> Both numbers may fall in legal ranges, so semantic order matters.</li>
-<li><strong>Implementation:</strong> Implement a longitude/latitude bounding-box validator with clear ordering and range checks. <strong>Progressive hint:</strong> Require west ≤ east, south ≤ north, and geographic bounds.</li>
-<li><strong>Debugging:</strong> Repair a spatial join or overlay attempted before CRS comparison and reprojection. <strong>Progressive hint:</strong> Inspect <code>.crs</code>; transform one layer to the other&#x27;s CRS.</li>
-<li><strong>Edge case and explanation:</strong> Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. <strong>Progressive hint:</strong> A missing basemap should not erase the analytical data layer.</li>
+<li><strong>Prediction:</strong> Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. <strong>Progressive hint:</strong> Layers must use compatible coordinate reference systems (CRSs). <strong>Verify:</strong> Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent.</li>
+<li><strong>Tracing:</strong> Trace one point represented as <code>(longitude, latitude)</code> and explain why swapping values can still create a valid but wrong location. <strong>Progressive hint:</strong> Both numbers may fall in legal ranges, so semantic order matters. <strong>Verify:</strong> Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks—not only numeric ranges—detect the wrong location.</li>
+<li><strong>Implementation:</strong> Implement a longitude/latitude bounding-box validator with clear ordering and range checks. <strong>Progressive hint:</strong> Require west ≤ east, south ≤ north, and geographic bounds. <strong>Verify:</strong> Assert a valid box passes and separately reject west&gt;east, south&gt;north, longitude outside ±180, and latitude outside ±90.</li>
+<li><strong>Debugging:</strong> Repair a spatial join or overlay attempted before CRS comparison and reprojection. <strong>Progressive hint:</strong> Inspect <code>.crs</code>; transform one layer to the other&#x27;s CRS. <strong>Verify:</strong> Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities.</li>
+<li><strong>Edge case and explanation:</strong> Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. <strong>Progressive hint:</strong> A missing basemap should not erase the analytical data layer. <strong>Verify:</strong> Feed missing/invalid geometry and unavailable basemap fixtures; assert analytical records remain represented by the documented local layer or graph fallback.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -365,17 +489,33 @@ ax.set(title=&quot;Example city coordinates&quot;, xlabel=&quot;Longitude&quot;,
 <li><a href="python-27.html#learner">Open the learner notebook</a></li>
 <li><a href="python-27.html#solution-1">Check the separate solution</a></li>
 <li><a href="python-28.html#guide">Next: Day 28 — Feature engineering</a></li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-27`
+(Day 27 — Geospatial or Domain-Specific Visualization). Direct catalog prerequisites: `python-26`.
+I have completed the direct prerequisites: `python-26`. Emphasize geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
+Read `python/ds-60day/companion-guides/day27_geospatial_or_domain_viz.md` and use the learner notebook
+`python/ds-60day/notebooks/day27_geospatial_or_domain_viz.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -392,12 +532,12 @@ ax.set(title=&quot;Example city coordinates&quot;, xlabel=&quot;Longitude&quot;,
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-27-geospatial-basics-geopandas-or-domain-specific-viz">Day 27 — Geospatial basics (GeoPandas) or domain-specific viz<a class="heading-anchor" href="#learner--cell-1--day-27-geospatial-basics-geopandas-or-domain-specific-viz" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -405,7 +545,61 @@ ax.set(title=&quot;Example city coordinates&quot;, xlabel=&quot;Longitude&quot;,
 <li>If GeoPandas available, plot simple geospatial data.</li>
 <li>Otherwise, pick a domain visualization (e.g., networkx). Note: GeoPandas may require system dependencies; code below is illustrative.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># This optional example downloads and caches Natural Earth data on first use.</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
+<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>This is the editable learner artifact for <code>python-27</code>. Read <code>python/ds-60day/companion-guides/day27_geospatial_or_domain_viz.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
+<p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
+<p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--core-mental-model">Core mental model<a class="heading-anchor" href="#learner--cell-3--core-mental-model" aria-label="Link to this section">#</a></h4>
+<p>Geospatial data combines ordinary attributes with geometry and a coordinate reference system (CRS). A coordinate pair is conventionally <code>(x, y)</code>—longitude then latitude for geographic coordinates. Values can look numerically valid while being semantically swapped, so record source order and bounds.</p>
+<p>A CRS defines what coordinates mean and their units. Layers cannot be overlaid or spatially joined honestly until their CRSs are known and compatible. Reprojection transforms coordinates; assigning a CRS merely labels existing coordinates and is not a substitute. Inspect validity, emptiness, bounds, provenance, and offline availability before plotting.</p>
+<h5 id="learner--cell-3--vocabulary">Vocabulary<a class="heading-anchor" href="#learner--cell-3--vocabulary" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>geometry:</strong> a spatial object such as point, line, or polygon.</li>
+<li><strong>CRS:</strong> coordinate reference system defining coordinate meaning and units.</li>
+<li><strong>reprojection:</strong> transforming geometry coordinates from one CRS to another.</li>
+<li><strong>longitude:</strong> east-west angular coordinate, used as x in geographic pairs.</li>
+<li><strong>latitude:</strong> north-south angular coordinate, used as y in geographic pairs.</li>
+<li><strong>spatial join:</strong> matching records by a geometric relationship such as within or intersects.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<p><code>GeoDataFrame(data, geometry=..., crs=&quot;EPSG:4326&quot;)</code> declares that the supplied longitude/latitude coordinates already use WGS 84. <code>.to_crs(&quot;EPSG:3857&quot;)</code> transforms them to Web Mercator meters. In contrast, <code>.set_crs(...)</code> labels coordinates without moving them and should be used only when the original CRS is known but missing.</p>
+<h5 id="learner--cell-4--worked-example-1-create-known-geographic-points-and-inspect-bounds">Worked example 1 — Create known geographic points and inspect bounds<a class="heading-anchor" href="#learner--cell-4--worked-example-1-create-known-geographic-points-and-inspect-bounds" aria-label="Link to this section">#</a></h5>
+<p>Constructed geometry avoids any network or external file. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import geopandas as gpd</span>
+<span>from shapely.geometry import Point</span>
+<span> </span>
+<span>places = gpd.GeoDataFrame(</span>
+<span>    {&quot;name&quot;: [&quot;A&quot;, &quot;B&quot;]},</span>
+<span>    geometry=[Point(-122.4, 37.8), Point(-73.9, 40.7)],</span>
+<span>    crs=&quot;EPSG:4326&quot;,</span>
+<span>)</span>
+<span>(str(places.crs), places.total_bounds.round(1).tolist())</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> The CRS is WGS 84/EPSG:4326 and bounds are approximately <code>[-122.4, 37.8, -73.9, 40.7]</code> in longitude/latitude degrees.</p>
+<p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
+<h5 id="learner--cell-6--worked-example-2-reproject-rather-than-relabel">Worked example 2 — Reproject rather than relabel<a class="heading-anchor" href="#learner--cell-6--worked-example-2-reproject-rather-than-relabel" aria-label="Link to this section">#</a></h5>
+<p>Projected coordinates use different units while representing the same places. Predict first; then run the next cell.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>projected = places.to_crs(&quot;EPSG:3857&quot;)</span>
+<span>{</span>
+<span>    &quot;same_rows&quot;: len(projected) == len(places),</span>
+<span>    &quot;projected_crs&quot;: str(projected.crs),</span>
+<span>    &quot;x_units_are_not_degrees&quot;: abs(projected.geometry.x.iloc[0]) &gt; 1_000,</span>
+<span>}</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> All checks are true; the coordinates are transformed to meter-like Web Mercator values.</p>
+<h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
+<p>When evidence differs from your prediction, use this order:</p>
+<ol>
+<li>Inspect <code>.crs</code>, geometry types, <code>.is_valid</code>, <code>.is_empty</code>, and <code>.total_bounds</code> before plotting.</li>
+<li>Verify coordinate order with known places or realistic bounds.</li>
+<li>Use <code>.to_crs</code> to transform; use <code>.set_crs</code> only to label coordinates whose source CRS is known.</li>
+<li>Keep an offline analytical layer or domain-graph alternative when basemap data is unavailable.</li>
+</ol>
+<p><strong>Alternative to compare:</strong> When location is not central or source geometry is unavailable, a deterministic domain/network visualization can teach graph structure without a misleading map.</p>
+<p><strong>Boundary to test:</strong> Missing CRS, invalid/self-intersecting geometry, dateline crossing, swapped axes, empty geometry, and remote basemap failure need policy.</p>
+<p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># This optional example downloads and caches Natural Earth data on first use.</span>
 <span>try:</span>
 <span>    import geopandas as gpd</span>
 <span>    from geodatasets import get_path</span>
@@ -416,52 +610,119 @@ ax.set(title=&quot;Example city coordinates&quot;, xlabel=&quot;Longitude&quot;,
 <span>    print(&#x27;Install the geo dependency group to run this optional example.&#x27;)</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Plot local city/country boundaries when a local or cached source is available. <strong>Hint:</strong> inspect <code>.crs</code>, geometry validity, and bounds before plotting; reproject data and basemap to a common CRS.</li>
-<li>Alternatively, visualize a domain graph with NetworkX. <strong>Hint:</strong> define what nodes/edges mean, use a fixed layout seed, and encode only a small number of meaningful attributes.</li>
+<li>Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. <strong>Before plotting:</strong> record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. <strong>Constraints:</strong> transform all layers to one appropriate CRS and never use <code>set_crs</code> as if it reprojected coordinates. <strong>Verify:</strong> check a known location/bounds and confirm entity count survives reprojection.</li>
 </ol>
-<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. <strong>Constraints:</strong> use a fixed layout seed, encode at most a few meaningful attributes, provide labels/legend, and do not require network data. <strong>Verify:</strong> reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer.</li>
+</ol>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Treat coordinate reference system, coordinate order, source provenance, geometry validity, and network/cache behavior as part of the visualization.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. <strong>Progressive hint:</strong> Layers must use compatible coordinate reference systems (CRSs).</li>
-<li><strong>Tracing:</strong> Trace one point represented as <code>(longitude, latitude)</code> and explain why swapping values can still create a valid but wrong location. <strong>Progressive hint:</strong> Both numbers may fall in legal ranges, so semantic order matters.</li>
-<li><strong>Implementation:</strong> Implement a longitude/latitude bounding-box validator with clear ordering and range checks. <strong>Progressive hint:</strong> Require west ≤ east, south ≤ north, and geographic bounds.</li>
-<li><strong>Debugging:</strong> Repair a spatial join or overlay attempted before CRS comparison and reprojection. <strong>Progressive hint:</strong> Inspect <code>.crs</code>; transform one layer to the other&#x27;s CRS.</li>
-<li><strong>Edge case and explanation:</strong> Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. <strong>Progressive hint:</strong> A missing basemap should not erase the analytical data layer.</li>
+<li><strong>Prediction:</strong> Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. <strong>Progressive hint:</strong> Layers must use compatible coordinate reference systems (CRSs). <strong>Verify:</strong> Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent.</li>
+<li><strong>Tracing:</strong> Trace one point represented as <code>(longitude, latitude)</code> and explain why swapping values can still create a valid but wrong location. <strong>Progressive hint:</strong> Both numbers may fall in legal ranges, so semantic order matters. <strong>Verify:</strong> Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks—not only numeric ranges—detect the wrong location.</li>
+<li><strong>Implementation:</strong> Implement a longitude/latitude bounding-box validator with clear ordering and range checks. <strong>Progressive hint:</strong> Require west ≤ east, south ≤ north, and geographic bounds. <strong>Verify:</strong> Assert a valid box passes and separately reject west&gt;east, south&gt;north, longitude outside ±180, and latitude outside ±90.</li>
+<li><strong>Debugging:</strong> Repair a spatial join or overlay attempted before CRS comparison and reprojection. <strong>Progressive hint:</strong> Inspect <code>.crs</code>; transform one layer to the other&#x27;s CRS. <strong>Verify:</strong> Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities.</li>
+<li><strong>Edge case and explanation:</strong> Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. <strong>Progressive hint:</strong> A missing basemap should not erase the analytical data layer. <strong>Verify:</strong> Feed missing/invalid geometry and unavailable basemap fixtures; assert analytical records remain represented by the documented local layer or graph fallback.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Predict first. Then write small code and assertions below each label.</span>
-<span># Keep the official solution closed until you have tested an honest attempt.</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. <strong>Before plotting:</strong> record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. <strong>Constraints:</strong> transform all layers to one appropriate CRS and never use <code>set_crs</code> as if it reprojected coordinates. <strong>Verify:</strong> check a known location/bounds and confirm entity count survives reprojection.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
+<span># Short contract: Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. transfo...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 3 — Prediction</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. <strong>Constraints:</strong> use a fixed layout seed, encode at most a few meaningful attributes, provide labels/legend, and do not require network data. <strong>Verify:</strong> reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
+<span># Short contract: Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. use a fixed layout seed, encode at most a few meaningful attr...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 4 — Tracing</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. <strong>Progressive hint:</strong> Layers must use compatible coordinate reference systems (CRSs). <strong>Verify:</strong> Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
+<span># Short contract: Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. Layers must use compatible coordinate reference systems (CRSs)...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 5 — Implementation</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace one point represented as <code>(longitude, latitude)</code> and explain why swapping values can still create a valid but wrong location. <strong>Progressive hint:</strong> Both numbers may fall in legal ranges, so semantic order matters. <strong>Verify:</strong> Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks—not only numeric ranges—detect the wrong location.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
+<span># Short contract: Trace one point represented as `(longitude, latitude)` and explain why swapping values can still create a valid but wrong location. Both numbers may fall in legal ranges, so sem...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 6 — Debugging</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement a longitude/latitude bounding-box validator with clear ordering and range checks. <strong>Progressive hint:</strong> Require west ≤ east, south ≤ north, and geographic bounds. <strong>Verify:</strong> Assert a valid box passes and separately reject west&gt;east, south&gt;north, longitude outside ±180, and latitude outside ±90.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
+<span># Short contract: Implement a longitude/latitude bounding-box validator with clear ordering and range checks. Require west ≤ east, south ≤ north, and geographic bounds. Assert a valid box passes...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 7 — Edge case and explanation</span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair a spatial join or overlay attempted before CRS comparison and reprojection. <strong>Progressive hint:</strong> Inspect <code>.crs</code>; transform one layer to the other&#x27;s CRS. <strong>Verify:</strong> Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
+<span># Short contract: Repair a spatial join or overlay attempted before CRS comparison and reprojection. Inspect `.crs`; transform one layer to the other&#x27;s CRS. Show the pre-reprojection CRS mismatch...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. <strong>Progressive hint:</strong> A missing basemap should not erase the analytical data layer. <strong>Verify:</strong> Feed missing/invalid geometry and unavailable basemap fixtures; assert analytical records remain represented by the documented local layer or graph fallback.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
+<span># Short contract: Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. A missing basemap should not erase the analytical d...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -485,71 +746,128 @@ ax.set(title=&quot;Example city coordinates&quot;, xlabel=&quot;Longitude&quot;,
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-27-solutions-geospatial-or-domain-specific-visualization">Day 27 — Solutions: Geospatial or Domain-specific Visualization<a class="heading-anchor" href="#solution-1--day-27-solutions-geospatial-or-domain-specific-visualization" aria-label="Link to this section">#</a></h3>
-<p>Two tracks depending on environment: GeoPandas map or a domain visualization with networkx.</p>
-<p>Contents</p>
+<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
+<p>These worked answers demonstrate <strong>geospatial semantics, coordinate reference systems, valid geometry, and offline fallback</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
+<p>Geospatial data combines ordinary attributes with geometry and a coordinate reference system (CRS). A coordinate pair is conventionally <code>(x, y)</code>—longitude then latitude for geographic coordinates. Values can look numerically valid while being semantically swapped, so record source order and bounds.</p>
+<p>A CRS defines what coordinates mean and their units. Layers cannot be overlaid or spatially joined honestly until their CRSs are known and compatible. Reprojection transforms coordinates; assigning a CRS merely labels existing coordinates and is not a substitute. Inspect validity, emptiness, bounds, provenance, and offline availability before plotting.</p>
+<h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
-<li>Exercise 1: Plot city/country boundaries (GeoPandas)</li>
-<li>Exercise 2: Alternative domain visualization (network graph)</li>
+<li><strong>geometry:</strong> a spatial object such as point, line, or polygon.</li>
+<li><strong>CRS:</strong> coordinate reference system defining coordinate meaning and units.</li>
+<li><strong>reprojection:</strong> transforming geometry coordinates from one CRS to another.</li>
+<li><strong>longitude:</strong> east-west angular coordinate, used as x in geographic pairs.</li>
+<li><strong>latitude:</strong> north-south angular coordinate, used as y in geographic pairs.</li>
+<li><strong>spatial join:</strong> matching records by a geometric relationship such as within or intersects.</li>
 </ul>
-<hr>
-<p>Track A — Geospatial (GeoPandas)</p>
-<pre><code class="language-python"># Requires: geopandas, contextily, geodatasets
-import contextily as cx
-import geopandas as gpd
-from geodatasets import get_path
+<h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
+<p>For this lesson&#x27;s <strong>geospatial semantics, coordinate reference systems, valid geometry, and offline fallback</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. <strong>Before plotting:</strong> record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. <strong>Constraints:</strong> transform all layers to one appropriate CRS and never use <code>set_crs</code> as if it reprojected coordinates. <strong>Verify:</strong> check a known location/bounds and confirm entity count survives reprojection.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. Before plotting: record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. Constraints: transform all layers to one appropriate CRS and never use <code>set_crs</code> as if it reprojected coordinates. Values below, at, and above the named boundary must produce the evidence check a known location/bounds and confirm entity count survives reprojection. Those cases show how geospatial semantics, coordinate reference systems, valid geometry, and offline fallback behaves at its edge.</p>
+<pre><code class="language-python">import geopandas as gpd
+from shapely.geometry import Point
 
-world = gpd.read_file(get_path(&#x27;naturalearth.land&#x27;)).to_crs(3857)
-ax = world.plot(figsize=(8, 6), alpha=0.6, edgecolor=&#x27;k&#x27;)
-cx.add_basemap(ax, source=cx.providers.OpenStreetMap.Mapnik)
-ax.set(title=&#x27;World basemap (Web Mercator)&#x27;)</code></pre>
-<p>Track B — Domain viz (NetworkX)</p>
-<pre><code class="language-python">import networkx as nx
-import matplotlib.pyplot as plt
+places = gpd.GeoDataFrame(
+    {&quot;name&quot;: [&quot;San Francisco&quot;, &quot;New York&quot;]},
+    geometry=[Point(-122.4, 37.8), Point(-73.9, 40.7)],
+    crs=&quot;EPSG:4326&quot;,
+)
+spatial_profile = {
+    &quot;provenance&quot;: &quot;constructed course points&quot;,
+    &quot;license&quot;: &quot;course-authored fixture; unrestricted educational reuse&quot;,
+    &quot;crs&quot;: places.crs.to_string(),
+    &quot;geometry_types&quot;: sorted(places.geom_type.unique().tolist()),
+    &quot;invalid_count&quot;: int((~places.geometry.is_valid).sum()),
+    &quot;empty_count&quot;: int(places.geometry.is_empty.sum()),
+    &quot;bounds&quot;: places.total_bounds.tolist(),
+}
+assert places.crs is not None
+assert places.geometry.is_valid.all()
+assert spatial_profile[&quot;geometry_types&quot;] == [&quot;Point&quot;]
+assert spatial_profile[&quot;bounds&quot;][0] &lt; -122
+assert places.loc[
+    places[&quot;name&quot;].eq(&quot;San Francisco&quot;), &quot;geometry&quot;
+].iloc[0].x == -122.4
+projected = places.to_crs(&quot;EPSG:3857&quot;)
+assert len(projected) == len(places)
+assert projected.crs == &quot;EPSG:3857&quot;
+assert not projected.geometry.equals(places.geometry)
+ax = projected.plot()
+assert len(ax.collections) &gt;= 1</code></pre>
+<p>This constructed local fixture needs no basemap or network source. <code>to_crs</code> transforms coordinates; <code>set_crs</code> would only relabel their meaning and would be incorrect here.</p>
+<p><strong>Verification evidence:</strong> check a known location/bounds and confirm entity count survives reprojection.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. <strong>Constraints:</strong> use a fixed layout seed, encode at most a few meaningful attributes, provide labels/legend, and do not require network data. <strong>Verify:</strong> reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. Constraints: use a fixed layout seed, encode at most a few meaningful attributes, provide labels/legend, and do not require network data. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer. That connects the answer to geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.</p>
+<pre><code class="language-python">import matplotlib.pyplot as plt
+import networkx as nx
 
-G = nx.Graph()
-G.add_edge(&#x27;ingest&#x27;,&#x27;clean&#x27;); G.add_edge(&#x27;clean&#x27;,&#x27;validate&#x27;); G.add_edge(&#x27;validate&#x27;,&#x27;model&#x27;)
-G.add_edge(&#x27;model&#x27;,&#x27;serve&#x27;); G.add_edge(&#x27;serve&#x27;,&#x27;monitor&#x27;)
+graph = nx.Graph()
+graph.add_nodes_from([
+    (&quot;source&quot;, {&quot;role&quot;: &quot;input&quot;}),
+    (&quot;clean&quot;, {&quot;role&quot;: &quot;transform&quot;}),
+    (&quot;report&quot;, {&quot;role&quot;: &quot;output&quot;}),
+])
+graph.add_edges_from([
+    (&quot;source&quot;, &quot;clean&quot;, {&quot;meaning&quot;: &quot;feeds&quot;}),
+    (&quot;clean&quot;, &quot;report&quot;, {&quot;meaning&quot;: &quot;produces&quot;}),
+])
+positions = nx.spring_layout(graph, seed=42)
+fig, ax = plt.subplots(figsize=(5, 3))
+role_shapes = {&quot;input&quot;: &quot;s&quot;, &quot;transform&quot;: &quot;o&quot;, &quot;output&quot;: &quot;^&quot;}
+for role, shape in role_shapes.items():
+    nodes = [
+        node for node, attributes in graph.nodes(data=True)
+        if attributes[&quot;role&quot;] == role
+    ]
+    nx.draw_networkx_nodes(
+        graph,
+        positions,
+        nodelist=nodes,
+        node_shape=shape,
+        label=role,
+        ax=ax,
+    )
+nx.draw_networkx_edges(graph, positions, ax=ax)
+nx.draw_networkx_labels(graph, positions, ax=ax)
+ax.legend(title=&quot;Node role&quot;)
+ax.set_axis_off()
 
-pos = nx.spring_layout(G, seed=42)
-plt.figure(figsize=(6,4))
-nx.draw(G, pos, with_labels=True, node_color=&#x27;lightblue&#x27;, node_size=1200)
-plt.title(&#x27;Pipeline Stages (Network Graph)&#x27;); plt.tight_layout(); plt.show()</code></pre>
-<p>Notes</p>
-<ul>
-<li>For maps, ensure CRS is consistent; reproject to 3857 for web tiles</li>
-<li><code>geodatasets</code> and contextily tiles download/cache data on first use</li>
-<li>For network graphs, layout algorithms (spring, kamada_kawai) affect readability</li>
-</ul>
-<hr>
-<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
-<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Plot local city/country boundaries when a local or cached source is available. <strong>Hint:</strong> inspect <code>.crs</code>, geometry validity, and bounds before plotting; reproject data and basemap to a common CRS.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Alternatively, visualize a domain graph with NetworkX. <strong>Hint:</strong> define what nodes/edges mean, use a fixed layout seed, and encode only a small number of meaningful attributes.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-3-prediction">Exercise 3 — Prediction<a class="heading-anchor" href="#solution-1--exercise-3-prediction" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters.</p>
-<p><strong>Reasoning checkpoint:</strong> Layers must use compatible coordinate reference systems (CRSs). The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-4-tracing">Exercise 4 — Tracing<a class="heading-anchor" href="#solution-1--exercise-4-tracing" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Trace one point represented as <code>(longitude, latitude)</code> and explain why swapping values can still create a valid but wrong location.</p>
-<p><strong>Reasoning checkpoint:</strong> Both numbers may fall in legal ranges, so semantic order matters. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-5-implementation">Exercise 5 — Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Implement a longitude/latitude bounding-box validator with clear ordering and range checks.</p>
-<p><strong>Reasoning checkpoint:</strong> Require west ≤ east, south ≤ north, and geographic bounds. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-6-debugging">Exercise 6 — Debugging<a class="heading-anchor" href="#solution-1--exercise-6-debugging" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Repair a spatial join or overlay attempted before CRS comparison and reprojection.</p>
-<p><strong>Reasoning checkpoint:</strong> Inspect <code>.crs</code>; transform one layer to the other&#x27;s CRS. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-7-edge-case-and-explanation">Exercise 7 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-7-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative.</p>
-<p><strong>Reasoning checkpoint:</strong> A missing basemap should not erase the analytical data layer. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+assert graph.number_of_nodes() == 3
+assert graph.number_of_edges() == 2
+assert set(positions) == set(graph)
+assert sum(len(collection.get_offsets()) for collection in ax.collections[:3]) == 3
+plt.close(fig)</code></pre>
+<p>A deterministic graph can show dependency relationships offline, but it cannot answer geographic distance, containment, or coordinate questions because its layout encodes readability, not physical space.</p>
+<p><strong>Verification evidence:</strong> reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer.</p>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. <strong>Progressive hint:</strong> Layers must use compatible coordinate reference systems (CRSs). <strong>Verify:</strong> Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. Progressive hint: Layers must use compatible coordinate reference systems (CRSs). Then compare the prediction with this proof target: Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent. This makes geospatial semantics, coordinate reference systems, valid geometry, and offline fallback observable instead of relying on intuition.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent.</p>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace one point represented as <code>(longitude, latitude)</code> and explain why swapping values can still create a valid but wrong location. <strong>Progressive hint:</strong> Both numbers may fall in legal ranges, so semantic order matters. <strong>Verify:</strong> Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks—not only numeric ranges—detect the wrong location.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace one point represented as <code>(longitude, latitude)</code> and explain why swapping values can still create a valid but wrong location. Progressive hint: Both numbers may fall in legal ranges, so semantic order matters. Record the named value, shape, label, or iterator position needed to establish: Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks—not only numeric ranges—detect the wrong location. The trace exposes geospatial semantics, coordinate reference systems, valid geometry, and offline fallback directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks—not only numeric ranges—detect the wrong location.</p>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement a longitude/latitude bounding-box validator with clear ordering and range checks. <strong>Progressive hint:</strong> Require west ≤ east, south ≤ north, and geographic bounds. <strong>Verify:</strong> Assert a valid box passes and separately reject west&gt;east, south&gt;north, longitude outside ±180, and latitude outside ±90.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement a longitude/latitude bounding-box validator with clear ordering and range checks. Progressive hint: Require west ≤ east, south ≤ north, and geographic bounds. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert a valid box passes and separately reject west&gt;east, south&gt;north, longitude outside ±180, and latitude outside ±90. That connects the answer to geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert a valid box passes and separately reject west&gt;east, south&gt;north, longitude outside ±180, and latitude outside ±90.</p>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a spatial join or overlay attempted before CRS comparison and reprojection. <strong>Progressive hint:</strong> Inspect <code>.crs</code>; transform one layer to the other&#x27;s CRS. <strong>Verify:</strong> Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a spatial join or overlay attempted before CRS comparison and reprojection. Progressive hint: Inspect <code>.crs</code>; transform one layer to the other&#x27;s CRS. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities. The diagnosis depends on geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. <strong>Progressive hint:</strong> A missing basemap should not erase the analytical data layer. <strong>Verify:</strong> Feed missing/invalid geometry and unavailable basemap fixtures; assert analytical records remain represented by the documented local layer or graph fallback.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. Progressive hint: A missing basemap should not erase the analytical data layer. Values below, at, and above the named boundary must produce the evidence Feed missing/invalid geometry and unavailable basemap fixtures; assert analytical records remain represented by the documented local layer or graph fallback. Those cases show how geospatial semantics, coordinate reference systems, valid geometry, and offline fallback behaves at its edge.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Feed missing/invalid geometry and unavailable basemap fixtures; assert analytical records remain represented by the documented local layer or graph fallback.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Treat coordinate reference system, coordinate order, source provenance, geometry validity, and network/cache behavior as part of the visualization.</p>
-<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
-<h5 id="solution-1--practices-1-2-crs-and-coordinate-order">Practices 1–2 — CRS and coordinate order<a class="heading-anchor" href="#solution-1--practices-1-2-crs-and-coordinate-order" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-crs-and-coordinate-order">Shared implementation for Exercises 3–4 — CRS and coordinate order<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-crs-and-coordinate-order" aria-label="Link to this section">#</a></h5>
 <p>Longitude/latitude data are commonly stored as <code>(x, y) = (longitude, latitude)</code>. Swapping them may still produce numbers inside valid ranges but a wrong place. Degrees and projected meters cannot be overlaid without reprojection.</p>
-<h5 id="solution-1--practices-3-5-validate-spatial-boundaries-and-degrade-gracefully">Practices 3–5 — Validate spatial boundaries and degrade gracefully<a class="heading-anchor" href="#solution-1--practices-3-5-validate-spatial-boundaries-and-degrade-gracefully" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-validate-spatial-boundaries-and-degrade-gracefully">Shared implementation for Exercises 5–7 — Validate spatial boundaries and degrade gracefully<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-validate-spatial-boundaries-and-degrade-gracefully" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">from dataclasses import dataclass
 
 
@@ -578,7 +896,7 @@ assert bounds.contains(longitude=-122.4, latitude=37.8)
 assert not bounds.contains(longitude=37.8, latitude=-122.4)</code></pre>
 <p>Before a GeoPandas operation, reject unknown CRSs and call <code>to_crs</code> so both layers match. Filter/report empty or invalid geometries rather than silently dropping them. If a cached basemap is unavailable, plot the local geometry alone; if no geometry dependency is installed, a deterministic NetworkX graph can teach domain topology without pretending it is a geographic map.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -586,7 +904,7 @@ assert not bounds.contains(longitude=37.8, latitude=-122.4)</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -691,7 +1009,38 @@ assert not bounds.contains(longitude=37.8, latitude=-122.4)</code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Before a GeoPandas operation, reject unknown CRSs and call <code>to_crs</code> so both layers match. Filter/report empty or invalid geometries rather than silently dropping them. If a cached basemap is unavailable, plot the local geometry alone; if no geometry dependency is installed, a deterministic NetworkX graph can teach domain topology without pretending it is a geographic map.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-27`
+(Day 27 — Geospatial or Domain-Specific Visualization). Direct catalog prerequisites: `python-26`.
+I have completed the direct prerequisites: `python-26`. Emphasize geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
+Read `python/ds-60day/companion-guides/day27_geospatial_or_domain_viz.md` and use the learner notebook
+`python/ds-60day/notebooks/day27_geospatial_or_domain_viz.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-26.html"><small>Previous lesson</small><strong>python-26</strong><span>Visualization Plotly Altair</span></a>
@@ -783,6 +1132,23 @@ assert not bounds.contains(longitude=37.8, latitude=-122.4)</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

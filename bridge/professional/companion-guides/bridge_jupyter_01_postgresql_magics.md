@@ -20,7 +20,14 @@ Install the course profiles before going offline:
 
 ```powershell
 # Windows PowerShell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+& .\scripts\bootstrap_windows.ps1 -Profile Advanced
+
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
 ```
 
 ```bash
@@ -63,7 +70,7 @@ JupyterLab is also supported:
 
 ```powershell
 # Windows PowerShell, after setting DS60_DATABASE_URL
-.\.venv\Scripts\python.exe -m jupyter lab
+& $CoursePython -m jupyter lab
 ```
 
 ```bash
@@ -79,7 +86,7 @@ output, or commit a credential file.
 ## How to run this lesson
 
 1. From the repository root, complete the Windows-first advanced setup with
-   `powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced`
+   `& .\scripts\bootstrap_windows.ps1 -Profile Advanced`
    (or `bash scripts/setup.sh --advanced` on macOS/Linux).
 2. Start PostgreSQL only for the live cells, reset the disposable
    `advanced_sql_training` database, and set `DS60_DATABASE_URL` in the same
@@ -144,20 +151,46 @@ whole remaining cell. See the
 
 ### 2. Build the engine without displaying its URL
 
-Read the URL from `os.environ`, parse it with `sqlalchemy.engine.make_url()`,
-validate the PostgreSQL backend and exact disposable database name, then select
-the Psycopg 3 driver:
+Read the target from `os.environ` and pass it through the same
+`validate_course_database_target()` boundary used by the course's guided SQL
+notebooks and `psql` runner. It accepts only `advanced_sql_training` through a
+native local socket or loopback host (`localhost`, `127.0.0.1`, or `::1`). It
+rejects a remote or multi-host authority, key-value DSN, fragment, and every
+query parameter except `sslmode`; that blocks `host`, `hostaddr`, `service`,
+`servicefile`, `passfile`, and other routing or file-reading overrides before
+SQLAlchemy can create an engine.
+
+After validation, normalize the literal database-name form to a local-socket
+URL, parse it with `sqlalchemy.engine.make_url()`, and select the Psycopg 3
+driver:
 
 ```python
+import os
+
+from ds60sqlpy.sql_notebook import (
+    COURSE_DATABASE_NAME,
+    validate_course_database_target,
+)
+from sqlalchemy import create_engine
+from sqlalchemy.engine import make_url
+
 raw_database_url = os.environ["DS60_DATABASE_URL"]
-course_url = make_url(raw_database_url)
+validated_database_target = validate_course_database_target(raw_database_url)
+if validated_database_target == COURSE_DATABASE_NAME:
+    validated_database_target = f"postgresql:///{COURSE_DATABASE_NAME}"
+
+course_url = make_url(validated_database_target)
 psycopg_url = course_url.set(drivername="postgresql+psycopg")
 engine = create_engine(psycopg_url, pool_pre_ping=True)
+
+assert engine.url.drivername == "postgresql+psycopg"
+assert course_url.database == COURSE_DATABASE_NAME
 ```
 
-Do not evaluate `raw_database_url`, `course_url`, `psycopg_url`, or `engine` as
-the last expression in a notebook cell. Notebook display can reveal more than
-intended. The lesson ends the cell with a safe assertion.
+Do not evaluate `raw_database_url`, `validated_database_target`, `course_url`,
+`psycopg_url`, or `engine` as the last expression in a notebook cell. Notebook
+display can reveal more than intended. The lesson ends the cell with safe,
+non-secret assertions.
 
 SQLAlchemy documents `postgresql+psycopg` as the synchronous Psycopg 3 dialect.
 The unqualified PostgreSQL URL may otherwise select a different default driver.
@@ -366,9 +399,9 @@ where critical production behavior exists.
    - **Verify:** Run `%sql --connections`, close alias `ds60-course`, dispose the engine, and assert the final saved notebook has no connection URL, rendered credential, or non-empty output.
 10. **Setup review:** Trace how the environment URL becomes a SQLAlchemy engine without ever
    being displayed and identify every validation step.
-   - **Progressive hint:** Validate scheme, driver, host/database target, and display settings
-     before connecting.
-   - **Verify:** Trace `DS60_DATABASE_URL` to `make_url`, PostgreSQL/database-name validation, `postgresql+psycopg`, `create_engine`, and `%sql engine`; assert no step prints or evaluates the URL/engine as the final cell expression.
+   - **Progressive hint:** Run the shared course-target validator before `make_url`; distinguish
+     allowed local transports from remote, multi-host, and connection-override routes.
+   - **Verify:** Trace `DS60_DATABASE_URL` through `validate_course_database_target`, optional literal-name normalization, `make_url`, `postgresql+psycopg`, `create_engine`, and `%sql engine`; name the local transports it accepts and the redirect controls it rejects, then assert no step prints or evaluates the URL/engine as the final cell expression.
 11. **Prediction:** Predict the difference between a `%sql` line assignment and a `%%sql` cell
    when both return the same rows.
    - **Progressive hint:** Compare Python assignment syntax, multi-line readability, and result

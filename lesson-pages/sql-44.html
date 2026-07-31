@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-44/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-44-monitoring-and-diagnostics">Day 44 — Monitoring and Diagnostics<a class="heading-anchor" href="#guide--day-44-monitoring-and-diagnostics" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -285,6 +384,52 @@
 <li><strong>Prerequisites:</strong> <a href="sql-43.html#guide">Day 43 — logical backup and recovery</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-44.html#learner">learner SQL</a> · <a href="sql-44.html#solution-1">solution reasoning</a> · <a href="sql-44.html#solution-2">executable solution</a></li>
 </ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-44 — Monitoring Diagnostics</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-44/lesson/workspace/sql/postgres-60day/day44_monitoring_diagnostics.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day44_monitoring_diagnostics.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/day44_monitoring_diagnostics.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Wait event, Backend PID, Normalized statement. Its worked SQL reads or creates <code>order_items</code>, <code>products</code>, <code>orders</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: Query pgstatactivity, exclude pgbackendpid(), and calculate runtime only for active statements. For one row, read user, state, wait type/event, and query together; a long duration alone does not prove a fault or authorize termination. The first runnable example has a concrete contract: Example 1 returns one row per <code>pid</code>, <code>usename</code>, and <code>datname</code>, capped at 20 rows with columns <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>state</code>, <code>query_start</code>, and <code>running_for</code> from <code>pg_stat_activity</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>state</code>, <code>query_start</code>, <code>running_for</code>, and <code>query</code>. Reselect the returned key columns from <code>pg_stat_activity</code>, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day44_monitoring_diagnostics.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">SELECT pid, usename, datname, state, query_start, NOW() - query_start AS running_for, left(query, 120) AS query
+FROM pg_stat_activity
+WHERE state &lt;&gt; &#x27;idle&#x27;
+ORDER BY running_for DESC
+LIMIT 20;</code></pre>
+<p><strong>How to read it:</strong> Example 1: Start with <code>pg_stat_activity</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows. The final <code>SELECT</code> displays <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>state</code>, <code>query_start</code>, <code>running_for</code>, and <code>query</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 20</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>pid</code>, <code>usename</code>, and <code>datname</code>, capped at 20 rows with columns <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>state</code>, <code>query_start</code>, and <code>running_for</code> from <code>pg_stat_activity</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">EXPLAIN ANALYZE
+SELECT p.category, SUM(oi.quantity) AS qty
+FROM order_items oi
+JOIN products p ON p.product_id = oi.product_id
+JOIN orders o ON o.order_id = oi.order_id
+WHERE o.order_date &gt;= now() - interval &#x27;180 days&#x27;
+GROUP BY p.category
+ORDER BY qty DESC;</code></pre>
+<p><strong>How to read it:</strong> Example 2 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.</p>
+<p><strong>Expected result/shape:</strong> Example 2 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its <code>category</code> key set and row count over <code>order_items</code>, <code>products</code>, and <code>orders</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Distinguish active session state from aggregated statement history.</li>
@@ -301,14 +446,22 @@
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <p>Complete these in the <a href="sql-44.html#learner">learner SQL</a>:</p>
 <ol>
-<li>Identify longest-running active statements.</li>
-<li>Conditionally rank <code>pg_stat_statements</code> by mean and total time.</li>
-<li>Compare statement age with transaction age.</li>
-<li>Summarize connections by database, user, and state.</li>
-<li>Repair a report that ranks only mean duration.</li>
-<li>Identify and explain idle-in-transaction sessions.</li>
+<li>Identify longest-running active statements. <strong>Inputs/evidence:</strong> For sql-44 Exercise 1, take a read-only snapshot of <code>pg_stat_activity</code>. Build the answer toward <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>state</code>, <code>runtime</code>, <code>wait_event_type</code>, <code>wait_event</code>, and <code>query</code>; keep <code>pid</code> visible because the output grain is one backend session. <strong>Expected result/shape:</strong> For sql-44 Exercise 1, expected output: zero or more currently active sessions, excluding the monitoring query itself. A long runtime can be normal; inspect wait events, locks, and the operation&#x27;s purpose before intervening. The final columns are <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>state</code>, <code>runtime</code>, <code>wait_event_type</code>, <code>wait_event</code>, and <code>query</code>. The final order is <code>runtime DESC NULLS LAST</code>. <strong>Verify:</strong> For sql-44 Exercise 1, run an anti-check that counts rows where NOT (<code>state = &#x27;active&#x27; AND pid &lt;&gt; pg_backend_pid()</code>); require unique <code>pid</code> and compare the projected <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>state</code>, <code>runtime</code>, <code>wait_event_type</code>, <code>wait_event</code>, and <code>query</code> with a second read-only snapshot of <code>pg_stat_activity</code>. When practical, open a controlled second <code>psql</code> session that runs <code>SELECT pg_sleep(...)</code>, observe it as active, then confirm it disappears after the statement finishes; do not cancel or terminate a session as part of this exercise.</li>
+<li>Conditionally rank <code>pg_stat_statements</code> by mean and total time. <strong>Inputs/evidence:</strong> For sql-44 Exercise 2, inspect <code>to_regclass(&#x27;public.pg_stat_statements&#x27;)</code>, then read the optional <code>public.pg_stat_statements</code> view into the course-owned temporary <code>top_statement_stats</code> table. Build <code>ranking</code>, <code>rank_position</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>, <code>query</code>, <code>calls</code>, <code>mean_exec_time</code>, and <code>total_exec_time</code>; do not install the extension or reset shared statistics. <strong>Expected result/shape:</strong> For sql-44 Exercise 2, expected output: up to 20 rows when <code>pg_stat_statements</code> is installed and loaded, with at most 10 rows per ranking label (<code>total_exec_time</code> and <code>mean_exec_time</code>); otherwise emit an explanatory notice and return an empty result. Each row is one statement within a ranking, identified by (<code>ranking</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>). The final columns are <code>ranking</code>, <code>rank_position</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>, <code>query</code>, <code>calls</code>, <code>mean_exec_time</code>, and <code>total_exec_time</code>. The final order is <code>ranking, rank_position</code>. <strong>Verify:</strong> For sql-44 Exercise 2, if the optional view is absent or raises <code>object_not_in_prerequisite_state</code> because the module was not preloaded, require an explanatory notice and an empty result. If it is readable, require only the <code>total_exec_time</code> and <code>mean_exec_time</code> labels, at most 10 rows per label, unique (<code>ranking</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>), consecutive <code>rank_position</code> values from 1 through N, nonincreasing <code>total_exec_time</code> order for its label, nonincreasing <code>mean_exec_time</code> order for its label, and values that match a fresh read of <code>public.pg_stat_statements</code>.</li>
+<li>Compare statement age with transaction age. <strong>Inputs/evidence:</strong> For sql-44 Exercise 3, take a read-only snapshot of <code>pg_stat_activity</code>. Build the answer toward <code>pid</code>, <code>usename</code>, <code>state</code>, <code>transaction_age</code>, and <code>statement_age</code>; keep <code>pid</code> visible because the output grain is one backend session. <strong>Expected result/shape:</strong> For sql-44 Exercise 3, expected output: one row per <code>pid</code>. The final columns are <code>pid</code>, <code>usename</code>, <code>state</code>, <code>transaction_age</code>, and <code>statement_age</code>. The final order is <code>transaction_age DESC NULLS LAST</code>. <strong>Verify:</strong> For sql-44 Exercise 3, run an anti-check that counts rows where NOT (<code>pid &lt;&gt; pg_backend_pid() AND state &lt;&gt; &#x27;idle&#x27;</code>); require unique <code>pid</code> and compare <code>pid</code>, <code>usename</code>, <code>state</code>, <code>transaction_age</code>, and <code>statement_age</code> with <code>pg_stat_activity</code>. Require nonnegative ages for non-NULL timestamps and <code>transaction_age &gt;= statement_age</code> when both exist. When practical, use a controlled second <code>psql</code> session with <code>BEGIN</code>, wait, and then a long-running query to observe both clocks; finish that session with <code>ROLLBACK</code>.</li>
+<li>Summarize connections by database, user, and state. <strong>Inputs/evidence:</strong> For sql-44 Exercise 4, take a read-only snapshot of <code>pg_stat_activity</code>. Group by <code>datname</code>, <code>usename</code>, and <code>state</code>, and calculate <code>connections</code>; keep the complete three-column group key visible. <strong>Expected result/shape:</strong> For sql-44 Exercise 4, expected output: one row per <code>datname</code>, <code>usename</code>, and <code>state</code>. The final columns are <code>datname</code>, <code>usename</code>, <code>state</code>, and <code>connections</code>. The final order is <code>datname, usename, state</code>. <strong>Verify:</strong> For sql-44 Exercise 4, independently aggregate <code>pg_stat_activity</code> by <code>datname</code>, <code>usename</code>, and <code>state</code>; require one output row for every distinct tuple and compare <code>connections</code> tuple by tuple, using <code>IS NOT DISTINCT FROM</code> when matching nullable catalog values. Also require <code>SUM(connections)</code> to equal <code>COUNT(*)</code> from the same source snapshot and require the output tuples to be unique.</li>
+<li>Repair a report that ranks only mean duration. <strong>Inputs/evidence:</strong> For sql-44 Exercise 5, read the course-owned temporary <code>top_statement_stats</code> table without changing the monitored server statistics. Build the answer toward <code>ranking</code>, <code>rank_position</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>, <code>query</code>, <code>calls</code>, <code>mean_exec_time</code>, and <code>total_exec_time</code>; keep the complete statement-within-ranking key visible. <strong>Expected result/shape:</strong> For sql-44 Exercise 5, expected output: one row per (<code>ranking</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>), so each ranking label can contain multiple statements. The final columns are <code>ranking</code>, <code>rank_position</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>, <code>query</code>, <code>calls</code>, <code>mean_exec_time</code>, and <code>total_exec_time</code>. The final order is <code>ranking, rank_position</code>. <strong>Verify:</strong> For sql-44 Exercise 5, require one row per (<code>ranking</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>) and compare <code>rank_position</code>, <code>query</code>, <code>calls</code>, <code>mean_exec_time</code>, and <code>total_exec_time</code> with <code>top_statement_stats</code>. When the optional source is available, require both ranking labels, at most 10 rows per label, consecutive <code>rank_position</code> values, <code>total_exec_time</code> order for that ranking, and <code>mean_exec_time</code> order for that ranking; <code>ranking</code> alone is deliberately non-unique.</li>
+<li>Identify and explain idle-in-transaction sessions. <strong>Inputs/evidence:</strong> For sql-44 Exercise 6, take a read-only snapshot of <code>pg_stat_activity</code>. Build the answer toward <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>transaction_age</code>, <code>wait_event_type</code>, and <code>wait_event</code>; keep <code>pid</code> visible because the output grain is one backend session. <strong>Expected result/shape:</strong> For sql-44 Exercise 6, expected output: one row per <code>pid</code> whose state is <code>idle in transaction</code>. The final columns are <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>transaction_age</code>, <code>wait_event_type</code>, and <code>wait_event</code>. The final order is <code>transaction_age DESC NULLS LAST</code>. <strong>Verify:</strong> For sql-44 Exercise 6, run an anti-check for any row whose state is not <code>idle in transaction</code>; require unique <code>pid</code>, non-NULL transaction starts, and nonnegative <code>transaction_age</code>, and compare every projected value with <code>pg_stat_activity</code>. When practical, open a controlled second <code>psql</code> session, run <code>BEGIN</code>, wait without committing, observe the session, then run <code>ROLLBACK</code> and confirm that it disappears from this result.</li>
 </ol>
 <p>If the extension is unavailable, document that boundary without changing server configuration.</p>
+<h4 id="guide--common-mistakes-and-how-to-recover">Common mistakes and how to recover<a class="heading-anchor" href="#guide--common-mistakes-and-how-to-recover" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Lesson-specific semantic mistake:</strong> Do not skip this worked-model requirement: Query pgstatactivity, exclude pgbackendpid(), and calculate runtime only for active statements. For one row, read user, state, wait type/event, and query together; a long duration alone does not prove a fault or authorize termination.</li>
+<li><strong>Unexpected row count:</strong> display keys before aggregates, count rows after each join/filter stage, and find the first stage whose grain differs from the contract. Do not hide fanout with <code>DISTINCT</code>.</li>
+<li><strong>Unexpected <code>NULL</code> or missing row:</strong> decide whether the fact is unknown, inapplicable, zero, or absent before using <code>COALESCE</code>; inspect outer-join predicate placement and empty-input aggregate behavior.</li>
+<li><strong>Unstable top/first/last output:</strong> add <code>ORDER BY</code> with a unique final tie-breaker before <code>LIMIT</code> or order-sensitive windows/aggregates.</li>
+<li><strong><code>psql</code> stops on an error:</strong> fix the first error shown by <code>ON_ERROR_STOP</code>, restore the declared transaction/setup state, and rerun the complete file. A later successful statement does not validate a partial run.</li>
+</ul>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Can you tell whether evidence describes a current session or historical aggregates?</li>
@@ -325,33 +478,65 @@
 </ul>
 <h4 id="guide--how-the-learner-script-works">How the learner script works<a class="heading-anchor" href="#guide--how-the-learner-script-works" aria-label="Link to this section">#</a></h4>
 <p>The starter queries <code>pg_stat_activity</code>, then runs <code>EXPLAIN ANALYZE</code> on recent category units. Its <code>pg_stat_statements</code> query is commented because the extension may require server configuration and elevated access.</p>
-<p>For PostgreSQL 16, the relevant extension columns include <code>calls</code>, <code>total_exec_time</code>, and <code>mean_exec_time</code>. Use the current <code>_exec_time</code> names rather than column names from older PostgreSQL examples.</p>
-<h4 id="guide--practice-match-the-learner-prompts-exactly">Practice — match the learner prompts exactly<a class="heading-anchor" href="#guide--practice-match-the-learner-prompts-exactly" aria-label="Link to this section">#</a></h4>
+<p>There are three distinct states to reason about:</p>
 <ol>
-<li>List the longest-running sessions whose state is <code>active</code>, excluding your monitoring query with <code>pid &lt;&gt; pg_backend_pid()</code>. Include runtime and wait event columns.</li>
-<li>If <code>pg_stat_statements</code> is installed and loaded, list the top ten statements by total execution time and expose mean execution time as well.</li>
+<li><strong>Absent:</strong> <code>to_regclass(&#x27;public.pg_stat_statements&#x27;)</code> is NULL.</li>
+<li><strong>Installed but not loaded:</strong> the view exists, but reading it raises <code>object_not_in_prerequisite_state</code> because <code>shared_preload_libraries</code> did not load the module at server startup.</li>
+<li><strong>Installed and loaded:</strong> the view is readable and can be ranked.</li>
 </ol>
+<p>The portable solution treats the first two states as an explained empty optional result. It catches only the known not-preloaded condition; unrelated SQL errors still stop the script and must be diagnosed.</p>
+<p>For PostgreSQL 16, the relevant extension columns include <code>calls</code>, <code>total_exec_time</code>, and <code>mean_exec_time</code>. Use the current <code>_exec_time</code> names rather than column names from older PostgreSQL examples.</p>
+<h4 id="guide--practice-map">Practice map<a class="heading-anchor" href="#guide--practice-map" aria-label="Link to this section">#</a></h4>
+<p>Use the numbered <strong>Exercises</strong> section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.</p>
 <h4 id="guide--interpretation-and-safety">Interpretation and safety<a class="heading-anchor" href="#guide--interpretation-and-safety" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>A long-running query can be legitimate; inspect owner, purpose, wait state, locks, and plan before intervening.</li>
 <li><code>pg_stat_statements</code> aggregates normalized statement history; it is not a list of currently active sessions.</li>
 <li>Statistics reset, server restarts, and extension availability affect the observation window.</li>
 <li>Never install extensions, change <code>shared_preload_libraries</code>, reset statistics, cancel queries, or terminate backends merely to complete this lesson.</li>
-<li>The executable solution can remain portable by checking for the extension view and using dynamic SQL only when it exists.</li>
+<li>The executable solution remains portable by checking for the extension view, using dynamic SQL only when it exists, and catching only the defined installed-but-not-preloaded SQLSTATE around that optional read.</li>
 </ul>
 <h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
 <p>Prompts 3–6 build read-only operational judgment. <code>query_start</code> measures the current statement while <code>xact_start</code> measures the enclosing transaction; show both because long idle transactions can retain locks and old snapshots.</p>
-<p>Aggregate connection counts instead of exposing full SQL text in a shared report. For historical workload, examine both <code>mean_exec_time</code> and <code>total_exec_time</code>: one reveals expensive calls, the other cumulative load. Never cancel a session as part of this practice.</p></div>
+<p>Aggregate connection counts instead of exposing full SQL text in a shared report. For historical workload, examine both <code>mean_exec_time</code> and <code>total_exec_time</code>: one reveals expensive calls, the other cumulative load. Never cancel a session as part of this practice.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-44 — Monitoring Diagnostics.
+
+I have completed the direct catalog prerequisite: `sql-43`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day44_monitoring_diagnostics.md
+- Answer-free learner SQL: sql/postgres-60day/day44_monitoring_diagnostics.sql
+
+Key terms to teach in context: Wait event, Backend PID, Normalized statement. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Query pgstatactivity, exclude pgbackendpid(), and calculate runtime only for active statements. For one row, read user, state, wait type/event, and query together; a long duration alone does not prove a fault or authorize termination.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-44/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -368,13 +553,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 44: Monitoring &amp; Diagnostics</span>
+<span>-- BEGINNER WORKFLOW — sql-44: Monitoring Diagnostics</span>
+<span>-- Guide: sql/postgres-60day/companion-guides/day44_monitoring_diagnostics.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-44/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: order_items, products, orders.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
@@ -385,8 +587,13 @@
 <span>ORDER BY running_for DESC</span>
 <span>LIMIT 20;</span>
 <span> </span>
-<span>-- If pg_stat_statements is enabled (recommended), inspect top queries</span>
-<span>-- Note: enabling requires CREATE EXTENSION pg_stat_statements; (may need superuser)</span>
+<span>-- pg_stat_statements has three relevant states:</span>
+<span>--   1. absent: its view does not exist;</span>
+<span>--   2. installed but unusable: the view exists, but the server was not started</span>
+<span>--      with pg_stat_statements in shared_preload_libraries;</span>
+<span>--   3. installed and loaded: the view is readable.</span>
+<span>-- Treat the first two as an explained empty optional result. Do not install the</span>
+<span>-- extension or change server startup settings from this monitoring lesson.</span>
 <span>-- SELECT queryid, calls, total_exec_time, mean_exec_time, rows, left(query, 120) AS q</span>
 <span>-- FROM pg_stat_statements</span>
 <span>-- ORDER BY total_exec_time DESC</span>
@@ -404,28 +611,52 @@
 <span> </span>
 <span>-- Exercises</span>
 <span>-- 1. Identify the longest-running active queries on your system.</span>
+<span>--    Inputs: For sql-44 Exercise 1, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query`; keep `pid` visible because the output grain is one backend session.</span>
+<span>--    Expected result/shape: For sql-44 Exercise 1, expected output: zero or more currently active sessions, excluding the monitoring query itself. A long runtime can be normal; inspect wait events, locks, and the operation&#x27;s purpose before intervening. The final columns are `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query`. The final order is `runtime DESC NULLS LAST`.</span>
+<span>--    Verify: For sql-44 Exercise 1, run an anti-check that counts rows where NOT (`state = &#x27;active&#x27; AND pid &lt;&gt; pg_backend_pid()`); require unique `pid` and compare the projected `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query` with a second read-only snapshot of `pg_stat_activity`. When practical, open a controlled second `psql` session that runs `SELECT pg_sleep(...)`, observe it as active, then confirm it disappears after the statement finishes; do not cancel or terminate a session as part of this exercise.</span>
+<span>--    Hint ladder, rung 1: For sql-44 Exercise 1, inspect the source keys that survive `WHERE`; then check `runtime DESC NULLS LAST` before applying the row cap.</span>
 <span>-- 2. If pg_stat_statements is available, list top 10 queries by mean_exec_time and total time.</span>
+<span>--    Inputs: For sql-44 Exercise 2, inspect `to_regclass(&#x27;public.pg_stat_statements&#x27;)`, then read the optional `public.pg_stat_statements` view into the course-owned temporary `top_statement_stats` table. Build `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`; do not install the extension or reset shared statistics.</span>
+<span>--    Expected result/shape: For sql-44 Exercise 2, expected output: up to 20 rows when `pg_stat_statements` is installed and loaded, with at most 10 rows per ranking label (`total_exec_time` and `mean_exec_time`); otherwise emit an explanatory notice and return an empty result. Each row is one statement within a ranking, identified by (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`). The final columns are `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`. The final order is `ranking, rank_position`.</span>
+<span>--    Verify: For sql-44 Exercise 2, if the optional view is absent or raises `object_not_in_prerequisite_state` because the module was not preloaded, require an explanatory notice and an empty result. If it is readable, require only the `total_exec_time` and `mean_exec_time` labels, at most 10 rows per label, unique (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`), consecutive `rank_position` values from 1 through N, nonincreasing `total_exec_time` order for its label, nonincreasing `mean_exec_time` order for its label, and values that match a fresh read of `public.pg_stat_statements`.</span>
+<span>--    Hint ladder, rung 1: For sql-44 Exercise 2, first prove whether the optional view exists. Then rank the same snapshot twice with deterministic tie-breakers and keep the monitored statistics unchanged.</span>
 <span>-- 3. Prediction: explain why query_start is not the same as transaction start,</span>
 <span>--    then display both ages for non-idle sessions.</span>
+<span>--    Inputs: For sql-44 Exercise 3, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `state`, `transaction_age`, and `statement_age`; keep `pid` visible because the output grain is one backend session.</span>
+<span>--    Expected result/shape: For sql-44 Exercise 3, expected output: one row per `pid`. The final columns are `pid`, `usename`, `state`, `transaction_age`, and `statement_age`. The final order is `transaction_age DESC NULLS LAST`.</span>
+<span>--    Verify: For sql-44 Exercise 3, run an anti-check that counts rows where NOT (`pid &lt;&gt; pg_backend_pid() AND state &lt;&gt; &#x27;idle&#x27;`); require unique `pid` and compare `pid`, `usename`, `state`, `transaction_age`, and `statement_age` with `pg_stat_activity`. Require nonnegative ages for non-NULL timestamps and `transaction_age &gt;= statement_age` when both exist. When practical, use a controlled second `psql` session with `BEGIN`, wait, and then a long-running query to observe both clocks; finish that session with `ROLLBACK`.</span>
+<span>--    Hint ladder, rung 1: For sql-44 Exercise 3, inspect the source keys that survive `WHERE`; then check `transaction_age DESC NULLS LAST` before applying the row cap.</span>
 <span>-- 4. Construction: summarize current connections by database, user, and state</span>
 <span>--    without exposing complete SQL text.</span>
+<span>--    Inputs: For sql-44 Exercise 4, take a read-only snapshot of `pg_stat_activity`. Group by `datname`, `usename`, and `state`, and calculate `connections`; keep the complete three-column group key visible.</span>
+<span>--    Expected result/shape: For sql-44 Exercise 4, expected output: one row per `datname`, `usename`, and `state`. The final columns are `datname`, `usename`, `state`, and `connections`. The final order is `datname, usename, state`.</span>
+<span>--    Verify: For sql-44 Exercise 4, independently aggregate `pg_stat_activity` by `datname`, `usename`, and `state`; require one output row for every distinct tuple and compare `connections` tuple by tuple, using `IS NOT DISTINCT FROM` when matching nullable catalog values. Also require `SUM(connections)` to equal `COUNT(*)` from the same source snapshot and require the output tuples to be unique.</span>
+<span>--    Hint ladder, rung 1: For sql-44 Exercise 4, confirm the groups are `datname`, `usename`, and `state`; then check `datname, usename, state` before applying the row cap.</span>
 <span>-- 5. Debugging: repair a “slow query” report that sorts only by mean time even</span>
 <span>--    though one rarely executed outlier should not outrank total workload cost.</span>
+<span>--    Inputs: For sql-44 Exercise 5, read the course-owned temporary `top_statement_stats` table without changing the monitored server statistics. Build the answer toward `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`; keep the complete statement-within-ranking key visible.</span>
+<span>--    Expected result/shape: For sql-44 Exercise 5, expected output: one row per (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`), so each ranking label can contain multiple statements. The final columns are `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`. The final order is `ranking, rank_position`.</span>
+<span>--    Verify: For sql-44 Exercise 5, require one row per (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`) and compare `rank_position`, `query`, `calls`, `mean_exec_time`, and `total_exec_time` with `top_statement_stats`. When the optional source is available, require both ranking labels, at most 10 rows per label, consecutive `rank_position` values, `total_exec_time` order for that ranking, and `mean_exec_time` order for that ranking; `ranking` alone is deliberately non-unique.</span>
+<span>--    Hint ladder, rung 1: For sql-44 Exercise 5, compare statements only within the ranking that produced them, and use `rank_position` rather than re-sorting both lists by one metric.</span>
 <span>-- 6. Edge case: identify sessions that are idle in transaction and explain why</span>
 <span>--    they can retain locks or old snapshots even while no statement is running.</span>
+<span>--    Inputs: For sql-44 Exercise 6, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `datname`, `transaction_age`, `wait_event_type`, and `wait_event`; keep `pid` visible because the output grain is one backend session.</span>
+<span>--    Expected result/shape: For sql-44 Exercise 6, expected output: one row per `pid` whose state is `idle in transaction`. The final columns are `pid`, `usename`, `datname`, `transaction_age`, `wait_event_type`, and `wait_event`. The final order is `transaction_age DESC NULLS LAST`.</span>
+<span>--    Verify: For sql-44 Exercise 6, run an anti-check for any row whose state is not `idle in transaction`; require unique `pid`, non-NULL transaction starts, and nonnegative `transaction_age`, and compare every projected value with `pg_stat_activity`. When practical, open a controlled second `psql` session, run `BEGIN`, wait without committing, observe the session, then run `ROLLBACK` and confirm that it disappears from this result.</span>
+<span>--    Hint ladder, rung 1: For sql-44 Exercise 6, inspect the source keys that survive `WHERE`; then check `transaction_age DESC NULLS LAST` before applying the row cap.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -449,7 +680,27 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-44-solutions-monitoring-and-diagnostics">Day 44 Solutions — Monitoring and Diagnostics<a class="heading-anchor" href="#solution-1--day-44-solutions-monitoring-and-diagnostics" aria-label="Link to this section">#</a></h3>
-<p>The two deliverables inspect active work and, when available, <code>pg_stat_statements</code>. The solution remains runnable on a fresh PostgreSQL installation where that optional extension is absent. See <a href="sql-44.html#solution-2"><code>day44_solutions.sql</code></a>.</p>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day44_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day44_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are Wait event, Backend PID, Normalized statement. Its worked-model focus is: Query pgstatactivity, exclude pgbackendpid(), and calculate runtime only for active statements. For one row, read user, state, wait type/event, and query together; a long duration alone does not prove a fault or authorize termination.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
+<p>The two deliverables inspect active work and, when available, <code>pg_stat_statements</code>. The solution remains runnable on a fresh PostgreSQL installation where that optional extension is absent or installed without its shared-memory module being loaded at server startup. See <a href="sql-44.html#solution-2"><code>day44_solutions.sql</code></a>.</p>
 <h4 id="solution-1--exercise-1-longest-running-active-statements">Exercise 1 — Longest-running active statements<a class="heading-anchor" href="#solution-1--exercise-1-longest-running-active-statements" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-sql">SET search_path TO training, public;
 
@@ -466,11 +717,27 @@ WHERE state = &#x27;active&#x27;
   AND pid &lt;&gt; pg_backend_pid()
 ORDER BY runtime DESC NULLS LAST;</code></pre>
 <p>Expected shape: zero or more currently active sessions, excluding the monitoring query itself. A long runtime can be normal; inspect wait events, locks, and the operation&#x27;s purpose before intervening.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-44 Exercise 1, take a read-only snapshot of <code>pg_stat_activity</code>. Build the answer toward <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>state</code>, <code>runtime</code>, <code>wait_event_type</code>, <code>wait_event</code>, and <code>query</code>; keep <code>pid</code> visible because the output grain is one backend session.</li>
+<li><strong>Expected result/shape:</strong> For sql-44 Exercise 1, expected output: zero or more currently active sessions, excluding the monitoring query itself. A long runtime can be normal; inspect wait events, locks, and the operation&#x27;s purpose before intervening. The final columns are <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>state</code>, <code>runtime</code>, <code>wait_event_type</code>, <code>wait_event</code>, and <code>query</code>. The final order is <code>runtime DESC NULLS LAST</code>.</li>
+<li><strong>Independent verification:</strong> For sql-44 Exercise 1, run an anti-check that counts rows where NOT (<code>state = &#x27;active&#x27; AND pid &lt;&gt; pg_backend_pid()</code>); require unique <code>pid</code> and compare the projected <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>state</code>, <code>runtime</code>, <code>wait_event_type</code>, <code>wait_event</code>, and <code>query</code> with a second read-only snapshot of <code>pg_stat_activity</code>. When practical, open a controlled second <code>psql</code> session that runs <code>SELECT pg_sleep(...)</code>, observe it as active, then confirm it disappears after the statement finishes; do not cancel or terminate a session as part of this exercise.</li>
+<li><strong>Intermediate relation check:</strong> For sql-44 Exercise 1, inspect the source keys that survive <code>WHERE</code>; then check <code>runtime DESC NULLS LAST</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-44 Exercise 1, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>pg_stat_activity</code>, preserve one row per <code>pid</code>, and finish with <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>state</code>, <code>runtime</code>, <code>wait_event_type</code>, <code>wait_event</code>, and <code>query</code> ordered by <code>runtime DESC NULLS LAST</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-44 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected shape: zero or more currently active sessions, excluding the monitoring query itself. Evaluate another form against the concrete expected result (zero or more currently active sessions, excluding the monitoring query itself. A long runtime can be normal; inspect wait events, locks, and the operation&#x27;s purpose before intervening) and the verification above.</li>
+<li><strong>Edge case:</strong> A quiet local database can correctly return zero rows. Use a controlled <code>pg_sleep</code> session when you need a positive observation, and never manufacture a row in a system view.</li>
+</ul>
 <h4 id="solution-1--exercise-2-optional-top-statement-statistics">Exercise 2 — Optional top statement statistics<a class="heading-anchor" href="#solution-1--exercise-2-optional-top-statement-statistics" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-sql">BEGIN;
 SET search_path TO training, public;
 
 CREATE TEMP TABLE top_statement_stats (
+  ranking text,
+  rank_position integer,
+  userid oid,
+  dbid oid,
+  toplevel boolean,
+  queryid bigint,
   query text,
   calls bigint,
   mean_exec_time double precision,
@@ -480,13 +747,51 @@ CREATE TEMP TABLE top_statement_stats (
 DO $optional_pg_stat_statements$
 BEGIN
   IF to_regclass(&#x27;public.pg_stat_statements&#x27;) IS NOT NULL THEN
-    EXECUTE $query$
-      INSERT INTO top_statement_stats
-      SELECT left(query, 200), calls, mean_exec_time, total_exec_time
-      FROM public.pg_stat_statements
-      ORDER BY total_exec_time DESC
-      LIMIT 10
-    $query$;
+    BEGIN
+      EXECUTE $by_total$
+        INSERT INTO top_statement_stats
+        SELECT &#x27;total_exec_time&#x27;,
+               row_number() OVER (
+                 ORDER BY total_exec_time DESC,
+                          userid, dbid, toplevel, queryid
+               )::integer,
+               userid,
+               dbid,
+               toplevel,
+               queryid,
+               left(query, 200),
+               calls,
+               mean_exec_time,
+               total_exec_time
+        FROM public.pg_stat_statements
+        ORDER BY total_exec_time DESC, userid, dbid, toplevel, queryid
+        LIMIT 10
+      $by_total$;
+      EXECUTE $by_mean$
+        INSERT INTO top_statement_stats
+        SELECT &#x27;mean_exec_time&#x27;,
+               row_number() OVER (
+                 ORDER BY mean_exec_time DESC,
+                          userid, dbid, toplevel, queryid
+               )::integer,
+               userid,
+               dbid,
+               toplevel,
+               queryid,
+               left(query, 200),
+               calls,
+               mean_exec_time,
+               total_exec_time
+        FROM public.pg_stat_statements
+        ORDER BY mean_exec_time DESC, userid, dbid, toplevel, queryid
+        LIMIT 10
+      $by_mean$;
+    EXCEPTION
+      WHEN object_not_in_prerequisite_state THEN
+        TRUNCATE top_statement_stats;
+        RAISE NOTICE
+          &#x27;pg_stat_statements exists but is not loaded via shared_preload_libraries; optional result is empty&#x27;;
+    END;
   ELSE
     RAISE NOTICE &#x27;pg_stat_statements is not installed; optional result is empty&#x27;;
   END IF;
@@ -495,10 +800,21 @@ $optional_pg_stat_statements$;
 
 SELECT *
 FROM top_statement_stats
-ORDER BY total_exec_time DESC;
+ORDER BY ranking, rank_position;
 
 ROLLBACK;</code></pre>
-<p>Expected shape: up to ten rows when <code>pg_stat_statements</code> is installed and loaded; otherwise an explanatory notice and an empty result.</p>
+<p>Expected shape: up to twenty rows when <code>pg_stat_statements</code> is installed and loaded—at most ten for each ranking label. Otherwise the block emits an explanatory notice and the final query returns an empty result.</p>
+<p>An existence check is necessary but not sufficient. PostgreSQL can install the extension&#x27;s view without loading its shared-memory module at server startup. The nested block catches only that documented <code>object_not_in_prerequisite_state</code> condition. PL/pgSQL rolls back either partial ranking inside the nested block, and <code>TRUNCATE</code> makes the empty-result contract explicit. Any unrelated error still propagates.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-44 Exercise 2, inspect <code>to_regclass(&#x27;public.pg_stat_statements&#x27;)</code>, then read the optional <code>public.pg_stat_statements</code> view into the course-owned temporary <code>top_statement_stats</code> table. Build <code>ranking</code>, <code>rank_position</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>, <code>query</code>, <code>calls</code>, <code>mean_exec_time</code>, and <code>total_exec_time</code>; do not install the extension or reset shared statistics.</li>
+<li><strong>Expected result/shape:</strong> For sql-44 Exercise 2, expected output: up to 20 rows when <code>pg_stat_statements</code> is installed and loaded, with at most 10 rows per ranking label (<code>total_exec_time</code> and <code>mean_exec_time</code>); otherwise emit an explanatory notice and return an empty result. Each row is one statement within a ranking, identified by (<code>ranking</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>). The final columns are <code>ranking</code>, <code>rank_position</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>, <code>query</code>, <code>calls</code>, <code>mean_exec_time</code>, and <code>total_exec_time</code>. The final order is <code>ranking, rank_position</code>.</li>
+<li><strong>Independent verification:</strong> For sql-44 Exercise 2, if the optional view is absent or raises <code>object_not_in_prerequisite_state</code> because the module was not preloaded, require an explanatory notice and an empty result. If it is readable, require only the <code>total_exec_time</code> and <code>mean_exec_time</code> labels, at most 10 rows per label, unique (<code>ranking</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>), consecutive <code>rank_position</code> values from 1 through N, nonincreasing <code>total_exec_time</code> order for its label, nonincreasing <code>mean_exec_time</code> order for its label, and values that match a fresh read of <code>public.pg_stat_statements</code>.</li>
+<li><strong>Intermediate relation check:</strong> For sql-44 Exercise 2, inspect the existence check first, then compare the by-total and by-mean selections separately before reading the combined temporary relation.</li>
+<li><strong>Clause check:</strong> For sql-44 Exercise 2, the solution uses dynamic <code>SELECT</code>, window <code>OVER</code>, <code>FROM</code>, <code>ORDER BY</code>, and <code>LIMIT</code> clauses. Each branch preserves one statement per (<code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>) within its <code>ranking</code>, assigns <code>rank_position</code>, and limits that ranking to ten rows.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-44 Exercise 2, the chosen form is justified by this lesson-specific rationale: Expected shape: up to ten rows when <code>pg_stat_statements</code> is installed and loaded; otherwise an explanatory notice and an empty result. Evaluate another form against the concrete expected result (up to ten rows when <code>pg_stat_statements</code> is installed and loaded; otherwise an explanatory notice and an empty result) and the verification above.</li>
+<li><strong>Edge case:</strong> The optional view can be absent, installed but not preloaded, readable but empty, or contain fewer than ten statements. All are valid optional-source states and leave the monitored statistics unchanged.</li>
+</ul>
 <h4 id="solution-1--reasoning-safety-and-pitfalls">Reasoning, safety, and pitfalls<a class="heading-anchor" href="#solution-1--reasoning-safety-and-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><code>state = &#x27;active&#x27;</code> is more precise than <code>state &lt;&gt; &#x27;idle&#x27;</code> for the requested active-query list.</li>
@@ -508,14 +824,54 @@ ROLLBACK;</code></pre>
 </ul>
 <h4 id="solution-1--exercise-3-separate-query-and-transaction-age">Exercise 3 — Separate query and transaction age<a class="heading-anchor" href="#solution-1--exercise-3-separate-query-and-transaction-age" aria-label="Link to this section">#</a></h4>
 <p><code>query_start</code> belongs to the current statement; <code>xact_start</code> belongs to its transaction. The latter can reveal long-lived snapshots hidden behind a short or currently idle statement.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-44 Exercise 3, take a read-only snapshot of <code>pg_stat_activity</code>. Build the answer toward <code>pid</code>, <code>usename</code>, <code>state</code>, <code>transaction_age</code>, and <code>statement_age</code>; keep <code>pid</code> visible because the output grain is one backend session.</li>
+<li><strong>Expected result/shape:</strong> For sql-44 Exercise 3, expected output: one row per <code>pid</code>. The final columns are <code>pid</code>, <code>usename</code>, <code>state</code>, <code>transaction_age</code>, and <code>statement_age</code>. The final order is <code>transaction_age DESC NULLS LAST</code>.</li>
+<li><strong>Independent verification:</strong> For sql-44 Exercise 3, run an anti-check that counts rows where NOT (<code>pid &lt;&gt; pg_backend_pid() AND state &lt;&gt; &#x27;idle&#x27;</code>); require unique <code>pid</code> and compare <code>pid</code>, <code>usename</code>, <code>state</code>, <code>transaction_age</code>, and <code>statement_age</code> with <code>pg_stat_activity</code>. Require nonnegative ages for non-NULL timestamps and <code>transaction_age &gt;= statement_age</code> when both exist. When practical, use a controlled second <code>psql</code> session with <code>BEGIN</code>, wait, and then a long-running query to observe both clocks; finish that session with <code>ROLLBACK</code>.</li>
+<li><strong>Intermediate relation check:</strong> For sql-44 Exercise 3, inspect the source keys that survive <code>WHERE</code>; then check <code>transaction_age DESC NULLS LAST</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-44 Exercise 3, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>pg_stat_activity</code>, preserve one row per <code>pid</code>, and finish with <code>pid</code>, <code>usename</code>, <code>state</code>, <code>transaction_age</code>, and <code>statement_age</code> ordered by <code>transaction_age DESC NULLS LAST</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-44 Exercise 3, the chosen form is justified by this lesson-specific rationale: <code>query_start</code> belongs to the current statement; <code>xact_start</code> belongs to its transaction. Evaluate another form against the concrete expected result (one row per <code>pid</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> A backend outside an explicit transaction can have a NULL <code>xact_start</code>; preserve that NULL rather than converting it to a misleading zero duration.</li>
+</ul>
 <h4 id="solution-1--exercise-4-summarize-connections-safely">Exercise 4 — Summarize connections safely<a class="heading-anchor" href="#solution-1--exercise-4-summarize-connections-safely" aria-label="Link to this section">#</a></h4>
 <p>Grouping by database, user, and state supports capacity triage without exposing complete SQL text in a broadly shared report.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-44 Exercise 4, take a read-only snapshot of <code>pg_stat_activity</code>. Group by <code>datname</code>, <code>usename</code>, and <code>state</code>, and calculate <code>connections</code>; keep the complete three-column group key visible.</li>
+<li><strong>Expected result/shape:</strong> For sql-44 Exercise 4, expected output: one row per <code>datname</code>, <code>usename</code>, and <code>state</code>. The final columns are <code>datname</code>, <code>usename</code>, <code>state</code>, and <code>connections</code>. The final order is <code>datname, usename, state</code>.</li>
+<li><strong>Independent verification:</strong> For sql-44 Exercise 4, independently aggregate <code>pg_stat_activity</code> by <code>datname</code>, <code>usename</code>, and <code>state</code>; require one output row for every distinct tuple and compare <code>connections</code> tuple by tuple, using <code>IS NOT DISTINCT FROM</code> when matching nullable catalog values. Also require <code>SUM(connections)</code> to equal <code>COUNT(*)</code> from the same source snapshot and require the output tuples to be unique.</li>
+<li><strong>Intermediate relation check:</strong> For sql-44 Exercise 4, confirm the groups are <code>datname</code>, <code>usename</code>, and <code>state</code>; then check <code>datname, usename, state</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-44 Exercise 4, the solution actually uses <code>FROM</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>pg_stat_activity</code>, preserve one row per <code>datname</code>, <code>usename</code>, and <code>state</code>, and finish with <code>datname</code>, <code>usename</code>, <code>state</code>, and <code>connections</code> ordered by <code>datname, usename, state</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-44 Exercise 4, the chosen form is justified by this lesson-specific rationale: Grouping by database, user, and state supports capacity triage without exposing complete SQL text in a broadly shared report. Evaluate another form against the concrete expected result (one row per <code>datname</code>, <code>usename</code>, and <code>state</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Background workers can expose NULL database or user values; grouped NULLs are legitimate categories and must survive verification.</li>
+</ul>
 <h4 id="solution-1--exercise-5-retain-mean-and-total-workload-views">Exercise 5 — Retain mean and total workload views<a class="heading-anchor" href="#solution-1--exercise-5-retain-mean-and-total-workload-views" aria-label="Link to this section">#</a></h4>
 <p>Mean duration highlights individually expensive calls; total execution time highlights cumulative cost. The answer keeps both rather than declaring one universal “slow query” ranking.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-44 Exercise 5, read the course-owned temporary <code>top_statement_stats</code> table without changing the monitored server statistics. Build the answer toward <code>ranking</code>, <code>rank_position</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>, <code>query</code>, <code>calls</code>, <code>mean_exec_time</code>, and <code>total_exec_time</code>; keep the complete statement-within-ranking key visible.</li>
+<li><strong>Expected result/shape:</strong> For sql-44 Exercise 5, expected output: one row per (<code>ranking</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>), so each ranking label can contain multiple statements. The final columns are <code>ranking</code>, <code>rank_position</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>, <code>query</code>, <code>calls</code>, <code>mean_exec_time</code>, and <code>total_exec_time</code>. The final order is <code>ranking, rank_position</code>.</li>
+<li><strong>Independent verification:</strong> For sql-44 Exercise 5, require one row per (<code>ranking</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>) and compare <code>rank_position</code>, <code>query</code>, <code>calls</code>, <code>mean_exec_time</code>, and <code>total_exec_time</code> with <code>top_statement_stats</code>. When the optional source is available, require both ranking labels, at most 10 rows per label, consecutive <code>rank_position</code> values, <code>total_exec_time</code> order for that ranking, and <code>mean_exec_time</code> order for that ranking; <code>ranking</code> alone is deliberately non-unique.</li>
+<li><strong>Intermediate relation check:</strong> For sql-44 Exercise 5, inspect each ranking label separately and verify that its stored <code>rank_position</code> still matches the metric that produced the list.</li>
+<li><strong>Clause check:</strong> For sql-44 Exercise 5, the solution uses <code>FROM</code>, <code>SELECT</code>, and <code>ORDER BY</code>: it preserves one row per (<code>ranking</code>, <code>userid</code>, <code>dbid</code>, <code>toplevel</code>, <code>queryid</code>) and displays the two lists in <code>ranking, rank_position</code> order.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-44 Exercise 5, the chosen form is justified by this lesson-specific rationale: Mean duration highlights individually expensive calls; total execution time highlights cumulative cost. Evaluate another form against the concrete statement-within-ranking grain and the verification above.</li>
+<li><strong>Edge case:</strong> The same statement can appear once in each ranking. That is expected because <code>ranking</code> is part of the identity; it is not a duplicate to remove.</li>
+</ul>
 <h4 id="solution-1--exercise-6-identify-idle-in-transaction-sessions">Exercise 6 — Identify idle-in-transaction sessions<a class="heading-anchor" href="#solution-1--exercise-6-identify-idle-in-transaction-sessions" aria-label="Link to this section">#</a></h4>
-<p>The read-only diagnostic returns age and wait fields. It does not cancel a backend; ownership and operational impact must be confirmed first.</p></div>
+<p>The read-only diagnostic returns age and wait fields. It does not cancel a backend; ownership and operational impact must be confirmed first.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-44 Exercise 6, take a read-only snapshot of <code>pg_stat_activity</code>. Build the answer toward <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>transaction_age</code>, <code>wait_event_type</code>, and <code>wait_event</code>; keep <code>pid</code> visible because the output grain is one backend session.</li>
+<li><strong>Expected result/shape:</strong> For sql-44 Exercise 6, expected output: one row per <code>pid</code> whose state is <code>idle in transaction</code>. The final columns are <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>transaction_age</code>, <code>wait_event_type</code>, and <code>wait_event</code>. The final order is <code>transaction_age DESC NULLS LAST</code>.</li>
+<li><strong>Independent verification:</strong> For sql-44 Exercise 6, run an anti-check for any row whose state is not <code>idle in transaction</code>; require unique <code>pid</code>, non-NULL transaction starts, and nonnegative <code>transaction_age</code>, and compare every projected value with <code>pg_stat_activity</code>. When practical, open a controlled second <code>psql</code> session, run <code>BEGIN</code>, wait without committing, observe the session, then run <code>ROLLBACK</code> and confirm that it disappears from this result.</li>
+<li><strong>Intermediate relation check:</strong> For sql-44 Exercise 6, inspect the source keys that survive <code>WHERE</code>; then check <code>transaction_age DESC NULLS LAST</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-44 Exercise 6, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>pg_stat_activity</code>, preserve one row per <code>pid</code>, and finish with <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>transaction_age</code>, <code>wait_event_type</code>, and <code>wait_event</code> ordered by <code>transaction_age DESC NULLS LAST</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-44 Exercise 6, the chosen form is justified by this lesson-specific rationale: The read-only diagnostic returns age and wait fields. Evaluate another form against the concrete expected result (one row per <code>pid</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> A correct result may be empty. Create the state only in a controlled second session, then cleanly roll it back.</li>
+</ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -523,7 +879,7 @@ ROLLBACK;</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -547,6 +903,19 @@ ROLLBACK;</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 44 solutions: monitoring and diagnostics</span>
+<span>-- SOLUTION READING MAP — sql-44: Monitoring Diagnostics</span>
+<span>-- Explanation: sql/postgres-60day/solutions/day44_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day44_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
@@ -568,6 +937,11 @@ ROLLBACK;</code></pre>
 <span>-- runnable when the extension is not installed.</span>
 <span>CREATE TEMP TABLE top_statement_stats (</span>
 <span>  ranking text,</span>
+<span>  rank_position integer,</span>
+<span>  userid oid,</span>
+<span>  dbid oid,</span>
+<span>  toplevel boolean,</span>
+<span>  queryid bigint,</span>
 <span>  query text,</span>
 <span>  calls bigint,</span>
 <span>  mean_exec_time double precision,</span>
@@ -577,20 +951,54 @@ ROLLBACK;</code></pre>
 <span>DO $optional_pg_stat_statements$</span>
 <span>BEGIN</span>
 <span>  IF to_regclass(&#x27;public.pg_stat_statements&#x27;) IS NOT NULL THEN</span>
-<span>    EXECUTE $by_total$</span>
-<span>      INSERT INTO top_statement_stats</span>
-<span>      SELECT &#x27;total_exec_time&#x27;, left(query, 200), calls, mean_exec_time, total_exec_time</span>
-<span>      FROM public.pg_stat_statements</span>
-<span>      ORDER BY total_exec_time DESC</span>
-<span>      LIMIT 10</span>
-<span>    $by_total$;</span>
-<span>    EXECUTE $by_mean$</span>
-<span>      INSERT INTO top_statement_stats</span>
-<span>      SELECT &#x27;mean_exec_time&#x27;, left(query, 200), calls, mean_exec_time, total_exec_time</span>
-<span>      FROM public.pg_stat_statements</span>
-<span>      ORDER BY mean_exec_time DESC</span>
-<span>      LIMIT 10</span>
-<span>    $by_mean$;</span>
+<span>    BEGIN</span>
+<span>      EXECUTE $by_total$</span>
+<span>        INSERT INTO top_statement_stats</span>
+<span>        SELECT &#x27;total_exec_time&#x27;,</span>
+<span>               row_number() OVER (</span>
+<span>                 ORDER BY total_exec_time DESC,</span>
+<span>                          userid, dbid, toplevel, queryid</span>
+<span>               )::integer,</span>
+<span>               userid,</span>
+<span>               dbid,</span>
+<span>               toplevel,</span>
+<span>               queryid,</span>
+<span>               left(query, 200),</span>
+<span>               calls,</span>
+<span>               mean_exec_time,</span>
+<span>               total_exec_time</span>
+<span>        FROM public.pg_stat_statements</span>
+<span>        ORDER BY total_exec_time DESC, userid, dbid, toplevel, queryid</span>
+<span>        LIMIT 10</span>
+<span>      $by_total$;</span>
+<span>      EXECUTE $by_mean$</span>
+<span>        INSERT INTO top_statement_stats</span>
+<span>        SELECT &#x27;mean_exec_time&#x27;,</span>
+<span>               row_number() OVER (</span>
+<span>                 ORDER BY mean_exec_time DESC,</span>
+<span>                          userid, dbid, toplevel, queryid</span>
+<span>               )::integer,</span>
+<span>               userid,</span>
+<span>               dbid,</span>
+<span>               toplevel,</span>
+<span>               queryid,</span>
+<span>               left(query, 200),</span>
+<span>               calls,</span>
+<span>               mean_exec_time,</span>
+<span>               total_exec_time</span>
+<span>        FROM public.pg_stat_statements</span>
+<span>        ORDER BY mean_exec_time DESC, userid, dbid, toplevel, queryid</span>
+<span>        LIMIT 10</span>
+<span>      $by_mean$;</span>
+<span>    EXCEPTION</span>
+<span>      WHEN object_not_in_prerequisite_state THEN</span>
+<span>        -- The extension can be installed (so its view exists) without being</span>
+<span>        -- loaded at server startup. Roll back either partial ranking and</span>
+<span>        -- preserve the same empty optional-result contract as absence.</span>
+<span>        TRUNCATE top_statement_stats;</span>
+<span>        RAISE NOTICE</span>
+<span>          &#x27;pg_stat_statements exists but is not loaded via shared_preload_libraries; optional result is empty&#x27;;</span>
+<span>    END;</span>
 <span>  ELSE</span>
 <span>    RAISE NOTICE &#x27;pg_stat_statements is not installed; optional result is empty&#x27;;</span>
 <span>  END IF;</span>
@@ -599,7 +1007,7 @@ ROLLBACK;</code></pre>
 <span> </span>
 <span>SELECT *</span>
 <span>FROM top_statement_stats</span>
-<span>ORDER BY ranking, total_exec_time DESC;</span>
+<span>ORDER BY ranking, rank_position;</span>
 <span> </span>
 <span>-- Exercise 3: transaction age can exceed statement age, especially for</span>
 <span>-- idle-in-transaction sessions.</span>
@@ -619,9 +1027,18 @@ ROLLBACK;</code></pre>
 <span> </span>
 <span>-- Exercise 5: retain both rankings. Mean identifies costly calls; total time</span>
 <span>-- captures cumulative workload impact.</span>
-<span>SELECT ranking, query, calls, mean_exec_time, total_exec_time</span>
+<span>SELECT ranking,</span>
+<span>       rank_position,</span>
+<span>       userid,</span>
+<span>       dbid,</span>
+<span>       toplevel,</span>
+<span>       queryid,</span>
+<span>       query,</span>
+<span>       calls,</span>
+<span>       mean_exec_time,</span>
+<span>       total_exec_time</span>
 <span>FROM top_statement_stats</span>
-<span>ORDER BY ranking, total_exec_time DESC, mean_exec_time DESC;</span>
+<span>ORDER BY ranking, rank_position;</span>
 <span> </span>
 <span>-- Exercise 6: this is diagnostic only; do not cancel or terminate sessions.</span>
 <span>SELECT pid, usename, datname,</span>
@@ -634,7 +1051,50 @@ ROLLBACK;</code></pre>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-44 — Monitoring Diagnostics.
+
+I have completed the direct catalog prerequisite: `sql-43`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day44_monitoring_diagnostics.md
+- Answer-free learner SQL: sql/postgres-60day/day44_monitoring_diagnostics.sql
+
+Key terms to teach in context: Wait event, Backend PID, Normalized statement. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Query pgstatactivity, exclude pgbackendpid(), and calculate runtime only for active statements. For one row, read user, state, wait type/event, and query together; a long duration alone does not prove a fault or authorize termination.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-44/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-43.html"><small>Previous lesson</small><strong>sql-43</strong><span>Backup Recovery</span></a>
@@ -726,6 +1186,23 @@ ROLLBACK;</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

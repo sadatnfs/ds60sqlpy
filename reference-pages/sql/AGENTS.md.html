@@ -136,7 +136,7 @@
 <li>Multi-part projects need an idempotent fixture or explicit, validated persistence instructions.</li>
 <li>Days 52–54 are the declared stateful warehouse sequence: Day 52 resets and commits the course-owned <code>dwh</code> schema, then Days 53 and 54 run in order.</li>
 <li>Superuser-only operations must be optional and labeled.</li>
-<li>The two <code>sql-found-*</code> modules precede SQL Day 1. Other named modules under <code>sql/professional/</code> extend the track without renumbering established days.</li>
+<li><code>sql-found-01</code> follows SQL Day 15 and is the direct prerequisite for Day 16. <code>sql-found-02</code> follows Day 39 and precedes schema-evolution and operational modules. Other named modules under <code>sql/professional/</code> extend the track without renumbering established days; a new SQL learner still starts at <code>sql-01</code>.</li>
 <li>Role administration, extensions, physical recovery, and replication need a capability check plus a useful default path when the local server cannot perform the optional operation.</li>
 </ul>
 <h3 id="lesson-sql">Lesson SQL<a class="heading-anchor" href="#lesson-sql" aria-label="Link to this section">#</a></h3>
@@ -153,6 +153,11 @@
 <ul>
 <li>Keep the lesson script, companion guide, Markdown solution, executable solution when present, catalog-builder inputs, and generated catalog entry aligned.</li>
 <li>Use Markdown solutions for explanation and <code>.sql</code> solutions for executable coverage.</li>
+<li>Assume the learner has never used a database client. Every companion guide must lead with <code>## How to run this lesson</code>, name the disposable <code>advanced_sql_training</code> database, explain the private reader&#x27;s <strong>Create/open guided SQL notebook</strong> action, and include a repository-root <code>psql -X -v ON_ERROR_STOP=1</code> fallback.</li>
+<li>Explain every new clause and the query&#x27;s logical row-shaping sequence. Worked examples must state the starting row grain, expected columns/rows, NULL and ordering assumptions, and what evidence proves the query behaved correctly.</li>
+<li>In every exercise contract, name the actual identity columns for the outer row grain and list projected columns explicitly. Do not use <code>*</code>, unnamed-key placeholders, a measure as a supposed unique identity, or a nested window/subquery clause as the final <code>ORDER BY</code>.</li>
+<li>Markdown solutions must explain each clause or statement, intermediate row shape, tempting wrong approaches, verification queries, and rollback or persistence behavior instead of only displaying a final query.</li>
+<li>End every guide with the copy-ready, lesson-specific <code>## Ask Codex about this lesson</code> block defined in <code>docs/content-authoring.md</code>; coaching is optional and may not compensate for missing course prose.</li>
 <li>Do not claim an executable solution exists when only prose is present.</li>
 <li>Use repository-root commands in documentation.</li>
 <li>Provide PowerShell-safe alternatives for pipes, file redirection, and API examples.</li>
@@ -165,7 +170,8 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_ver
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
 <p>Then run:</p>
 <pre><code class="language-text">python scripts/course.py validate
-python scripts/audit_practice.py</code></pre>
+python scripts/audit_practice.py
+python scripts/audit_lesson_depth.py</code></pre>
 <p>Verify that:</p>
 <ul>
 <li>Setup completes without ignored errors.</li>

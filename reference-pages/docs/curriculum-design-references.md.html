@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Curriculum design references · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Curriculum design references</h1>
+      <p class="source-path">Generated from <code>docs/curriculum-design-references.md</code></p>
+    </header>
+    <article class="document"><h2 id="curriculum-design-references">Curriculum design references<a class="heading-anchor" href="#curriculum-design-references" aria-label="Link to this section">#</a></h2>
+<p>This course is original material, but its teaching structure should learn from successful beginner resources. The sources below were reviewed on 2026-07-30. They are design references, not content to copy. DS60 remains PostgreSQL 16+, Python 3.11–3.12, local-first, Windows-friendly, and runnable after one connected bootstrap.</p>
+<h3 id="patterns-adopted-from-established-tutorials">Patterns adopted from established tutorials<a class="heading-anchor" href="#patterns-adopted-from-established-tutorials" aria-label="Link to this section">#</a></h3>
+<h4 id="python-s-official-tutorial-explain-run-observe-contrast">Python&#x27;s official tutorial: explain, run, observe, contrast<a class="heading-anchor" href="#python-s-official-tutorial-explain-run-observe-contrast" aria-label="Link to this section">#</a></h4>
+<p>The <a href="https://docs.python.org/3/tutorial/controlflow.html">Python control-flow tutorial</a> introduces a construct with a small runnable example, shows the actual output, then immediately explains a boundary or contrast. Its <code>for</code> section, for example, contrasts Python iteration with index-oriented loops, warns about mutating a collection during iteration, shows several <code>range</code> boundaries, and explains why a <code>range</code> object is iterable rather than a stored list.</p>
+<p>DS60 applies that pattern by requiring:</p>
+<ul>
+<li>a plain-language definition before syntax;</li>
+<li>a bounded example and expected output;</li>
+<li>a second example that changes one meaningful condition;</li>
+<li>an explicit edge case or nearby concept comparison; and</li>
+<li>an explanation of the runtime or memory behavior when it matters.</li>
+</ul>
+<p>The official tutorial documents the current Python release, while DS60 targets Python 3.11–3.12. Authors must verify that adopted syntax exists in the course baseline rather than copying version-current examples blindly.</p>
+<h4 id="cs50p-concrete-setup-progressive-revision-and-evidence">CS50P: concrete setup, progressive revision, and evidence<a class="heading-anchor" href="#cs50p-concrete-setup-progressive-revision-and-evidence" aria-label="Link to this section">#</a></h4>
+<p><a href="https://cs50.harvard.edu/python/">CS50&#x27;s Introduction to Programming with Python</a> separates lectures, short focused explanations, source code, problem sets, and a final project. Its <a href="https://cs50.harvard.edu/python/notes/2/">loop notes</a> begin with repeated statements, expose an infinite-loop failure, explain how to interrupt it, and revise the program in small steps. Its problem specifications provide concrete files, commands, assumptions, sample behavior, and tests rather than only a topic label.</p>
+<p>DS60 applies that pattern by requiring:</p>
+<ul>
+<li>exact “where to type and how to run” instructions;</li>
+<li>a progression from a deliberately limited first version to a better one;</li>
+<li>error symptoms and recovery, including how to stop unsafe or stuck work;</li>
+<li>exercises with supplied inputs, constraints, expected behavior, and verification cases;</li>
+<li>separate solutions revealed after an honest attempt; and</li>
+<li>cumulative projects that assess correctness, design, explanation, and testing rather than syntax recall alone.</li>
+</ul>
+<h4 id="postgresql-s-official-tutorial-start-from-the-system-and-show-results">PostgreSQL&#x27;s official tutorial: start from the system and show results<a class="heading-anchor" href="#postgresql-s-official-tutorial-start-from-the-system-and-show-results" aria-label="Link to this section">#</a></h4>
+<p>The <a href="https://www.postgresql.org/docs/current/tutorial.html">PostgreSQL tutorial</a> puts installation, architecture, database creation, and database access before query syntax. Its <a href="https://www.postgresql.org/docs/current/tutorial-select.html">querying chapter</a> names the parts of <code>SELECT</code>, shows commands and tabular results, explains aliases and predicates, and calls out nondeterministic ordering. Its <a href="https://www.postgresql.org/docs/current/tutorial-join.html">join chapter</a> explains the row-pairing mental model, displays unmatched-row behavior, then distinguishes that conceptual model from the physical implementation.</p>
+<p>DS60 applies that pattern by requiring:</p>
+<ul>
+<li>a visible database/client/server mental model before lesson queries;</li>
+<li>the disposable <code>advanced_sql_training</code> safety boundary in every run path;</li>
+<li>query anatomy and logical row grain before clause-by-clause detail;</li>
+<li>expected result columns, representative rows, or invariant counts;</li>
+<li>explicit treatment of <code>NULL</code>, ties, ordering, time zones, and transactions;</li>
+<li>conceptual explanations labeled as models rather than universal physical execution claims; and</li>
+<li>a guided notebook that keeps the SQL source, <code>psql</code> transcript, reset confirmation, and recovery steps in one learner workspace.</li>
+</ul>
+<h4 id="sqlbolt-concept-and-practice-on-the-same-page">SQLBolt: concept and practice on the same page<a class="heading-anchor" href="#sqlbolt-concept-and-practice-on-the-same-page" aria-label="Link to this section">#</a></h4>
+<p><a href="https://sqlbolt.com/lesson/select_queries_introduction">SQLBolt</a> places a brief table/row mental model, a syntax shape, and interactive exercises on the same lesson page. It also keeps the next lesson gated behind active work.</p>
+<p>DS60 cannot safely turn a static <code>file://</code> page into a database client, so it adapts the useful part of that pattern:</p>
+<ul>
+<li>the rendered reader keeps the guide, learner preview, and optional solution together;</li>
+<li>the private portal adds a fixed <strong>Create/open guided SQL notebook</strong> action;</li>
+<li>the generated notebook preserves an editable learner copy and runs it through a catalog-restricted <code>psql -f</code> path; and</li>
+<li>completion means explaining and demonstrating the objective, not merely opening the page.</li>
+</ul>
+<h4 id="exercism-concept-scope-prerequisites-stubs-tests-and-hints">Exercism: concept scope, prerequisites, stubs, tests, and hints<a class="heading-anchor" href="#exercism-concept-scope-prerequisites-stubs-tests-and-hints" aria-label="Link to this section">#</a></h4>
+<p>The <a href="https://exercism.org/docs/building/tracks/concept-exercises">Exercism concept-exercise specification</a> separates a concept introduction, task instructions, hints, starter implementation, tests, exemplar, and maintainer-facing design notes. Its <a href="https://exercism.org/docs/building/tracks/syllabus">syllabus guidance</a> organizes focused concept exercises by prerequisite relationships and distinguishes learning a concept from later fluency practice.</p>
+<p>DS60 applies that pattern by:</p>
+<ul>
+<li>keeping stable prerequisites in the catalog instead of assuming day-number proximity;</li>
+<li>separating guides, answer-free learner artifacts, hints, and explanatory solutions;</li>
+<li>giving exercises a starter input or scaffold plus an independent verification method;</li>
+<li>naming what a lesson teaches and what remains out of scope; and</li>
+<li>following concept introduction with additional debugging, edge-case, and transfer practice rather than treating the first passing answer as fluency.</li>
+</ul>
+<h4 id="the-carpentries-align-objectives-practice-and-formative-evidence">The Carpentries: align objectives, practice, and formative evidence<a class="heading-anchor" href="#the-carpentries-align-objectives-practice-and-formative-evidence" aria-label="Link to this section">#</a></h4>
+<p>The Carpentries&#x27; <a href="https://carpentries.github.io/lesson-development-training/instructor/key-points.html">lesson-development guidance</a> uses objectives to focus and chunk a lesson, aligns exercises with those objectives, and treats formative assessment as feedback about both learner progress and misconceptions. Its <a href="https://carpentries.github.io/lesson-development-training/instructor/formative-assessment.html">exercise-design guidance</a> emphasizes selecting an exercise format that actually demonstrates the stated objective rather than counting activity for its own sake.</p>
+<p>DS60 therefore requires:</p>
+<ul>
+<li>observable objectives using actions such as trace, implement, compare, diagnose, and justify;</li>
+<li>a topic-specific expected result or verification contract for each exercise;</li>
+<li>prediction and evidence checkpoints during the lesson, not only a final solution reveal;</li>
+<li>debugging tasks that expose likely misconceptions; and</li>
+<li>human review for alignment, because word, example, and exercise counts cannot prove that an assessment measures the intended skill.</li>
+</ul>
+<h4 id="official-codex-guidance-goal-context-boundaries-and-done">Official Codex guidance: goal, context, boundaries, and done<a class="heading-anchor" href="#official-codex-guidance-goal-context-boundaries-and-done" aria-label="Link to this section">#</a></h4>
+<p>The <a href="https://learn.chatgpt.com/docs/prompting">Codex prompting guide</a> recommends giving a clear goal, relevant context, desired output, and important boundaries. The <a href="https://learn.chatgpt.com/docs/agent-configuration/agents-md">Codex <code>AGENTS.md</code> guide</a> explains that repository and nested instruction files provide durable, scope-specific guidance. Repeated workflows belong in a skill rather than in an ever-longer one-off prompt.</p>
+<p>Every DS60 lesson therefore includes an optional <strong>Ask Codex about this lesson</strong> prompt that:</p>
+<ul>
+<li>identifies the stable lesson ID and exact guide and learner-artifact paths;</li>
+<li>invokes the checked-in <code>guide-ds60sqlpy-learning</code> tutoring skill;</li>
+<li>names the lesson outcome and assumed prerequisite boundary;</li>
+<li>keeps <code>solutions/</code> closed until the learner asks or completes an attempt;</li>
+<li>requests explanation, prediction, learner evidence, progressive hints, and retrieval practice; and</li>
+<li>defines success as a runnable attempt plus an explanation in the learner&#x27;s own words.</li>
+</ul>
+<p>The prompt is a convenience, not missing curriculum. A learner must be able to complete the lesson without Codex or an internet connection.</p>
+<h3 id="ds60-lesson-sequence">DS60 lesson sequence<a class="heading-anchor" href="#ds60-lesson-sequence" aria-label="Link to this section">#</a></h3>
+<p>Each Python and SQL lesson now follows this default sequence:</p>
+<ol>
+<li><strong>Orient</strong> — outcome, motivation, prerequisites, and run location.</li>
+<li><strong>Model</strong> — vocabulary, mental model, syntax or query anatomy.</li>
+<li><strong>Observe</strong> — first runnable example and expected output/result shape.</li>
+<li><strong>Contrast</strong> — second example, boundary, common mistake, or alternative.</li>
+<li><strong>Predict</strong> — state what will happen before execution.</li>
+<li><strong>Practice</strong> — guided change, independent construction, debugging, edge case, and transfer.</li>
+<li><strong>Verify</strong> — assertions, test cases, row-grain/count checks, or bounded expected output.</li>
+<li><strong>Explain</strong> — retrieval questions and a short learner explanation.</li>
+<li><strong>Extend</strong> — next lesson, optional reference, or Codex coaching prompt.</li>
+</ol>
+<p>This sequence is enforced partly by <code>scripts/audit_lesson_depth.py</code>. The audit is deliberately only a floor. It cannot determine whether an analogy is accurate, an example is illuminating, or six exercises are genuinely distinct; human review and execution remain required.</p></article>
+  </main>
+</body>
+</html>

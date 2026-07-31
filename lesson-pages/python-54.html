@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-54-monitoring-and-model-governance">Day 54 — Monitoring and Model Governance<a class="heading-anchor" href="#guide--day-54-monitoring-and-model-governance" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-54</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
 <p>Deployment changes the question from “How did the model score once?” to “Is the whole decision system still behaving acceptably?” Monitoring provides evidence; governance assigns ownership and defines what happens next.</p>
@@ -338,7 +377,6 @@
 <h4 id="guide--worked-example-treat-psi-as-a-defined-calculation">Worked example: treat PSI as a defined calculation<a class="heading-anchor" href="#guide--worked-example-treat-psi-as-a-defined-calculation" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-python">import numpy as np
 
-
 def psi(reference: np.ndarray, current: np.ndarray, bins: int = 10) -&gt; float:
     edges = np.quantile(reference, np.linspace(0, 1, bins + 1))
     edges[0], edges[-1] = -np.inf, np.inf
@@ -353,12 +391,114 @@ def psi(reference: np.ndarray, current: np.ndarray, bins: int = 10) -&gt; float:
         )
     )</code></pre>
 <p>Quantile edges are learned from the reference and extended to infinity so current out-of-range observations are counted. Duplicated quantiles, missing values, and tiny samples need explicit handling in real code.</p>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Open the Day 54 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
+<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
+<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
+<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
+</ol>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
+<h4 id="guide--concept-deep-dive-monitoring-layers-drift-signals-delayed-labels-and-governance-decisions">Concept deep dive — monitoring layers, drift signals, delayed labels, and governance decisions<a class="heading-anchor" href="#guide--concept-deep-dive-monitoring-layers-drift-signals-delayed-labels-and-governance-decisions" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
+<p>Production monitoring has several layers. Data-quality checks ask whether inputs are valid. Data drift compares input distributions. Performance and calibration require outcomes, which may arrive later. Service telemetry measures availability, latency, errors, and saturation. One green layer cannot substitute for another.</p>
+<p>Population Stability Index (PSI) compares binned reference and current proportions. Its value depends on binning and sample size and is a triage signal, not a diagnosis or universal threshold. Governance adds owners, review cadence, acceptance gates, rollback evidence, privacy, and an incident path.</p>
+<h5 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>fixed reference bins:</strong> keep comparison semantics stable; recomputing bins on current data changes the question.</li>
+<li><strong><code>(actual - expected) * log(actual / expected)</code>:</strong> accumulates PSI contributions after a declared zero-count smoothing policy.</li>
+<li><strong>monitor → investigate → decide:</strong> separates automated signal detection from causal diagnosis and authorized action.</li>
+</ul>
+<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
+<h5 id="guide--focused-example-a-calculate-psi-with-fixed-reference-quantile-bins">Focused example A — calculate PSI with fixed reference quantile bins<a class="heading-anchor" href="#guide--focused-example-a-calculate-psi-with-fixed-reference-quantile-bins" aria-label="Link to this section">#</a></h5>
+<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
+<pre><code class="language-python">import numpy as np
+
+reference = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=float)
+current = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10, 11], dtype=float)
+edges = np.quantile(reference, [0, 0.25, 0.5, 0.75, 1.0])
+edges[0], edges[-1] = -np.inf, np.inf
+expected, _ = np.histogram(reference, bins=edges)
+actual, _ = np.histogram(current, bins=edges)
+expected = np.clip(expected / expected.sum(), 1e-6, None)
+actual = np.clip(actual / actual.sum(), 1e-6, None)
+psi = np.sum((actual - expected) * np.log(actual / expected))
+print({&quot;edges&quot;: edges.tolist(), &quot;psi&quot;: float(psi)})
+assert psi &gt;= 0</code></pre>
+<p><strong>Expected observation:</strong> The shifted current sample produces a positive PSI under bins fixed from the reference sample.</p>
+<p><strong>Assumption to name:</strong> Reference quantiles, smoothing, population, and sample window are documented and remain comparable.</p>
+<h5 id="guide--focused-example-b-keep-label-available-and-label-delayed-evidence-separate">Focused example B — keep label-available and label-delayed evidence separate<a class="heading-anchor" href="#guide--focused-example-b-keep-label-available-and-label-delayed-evidence-separate" aria-label="Link to this section">#</a></h5>
+<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
+<pre><code class="language-python">monitoring_snapshot = {
+    &quot;requests&quot;: 10_000,
+    &quot;valid_input_rate&quot;: 0.998,
+    &quot;score_mean&quot;: 0.44,
+    &quot;outcomes_available&quot;: 1_200,
+    &quot;labeled_roc_auc&quot;: 0.86,
+}
+label_coverage = (
+    monitoring_snapshot[&quot;outcomes_available&quot;] / monitoring_snapshot[&quot;requests&quot;]
+)
+print({&quot;label_coverage&quot;: label_coverage,
+       &quot;performance_estimate&quot;: monitoring_snapshot[&quot;labeled_roc_auc&quot;]})
+assert label_coverage == 0.12</code></pre>
+<p><strong>Expected observation:</strong> The performance metric covers only 12% of requests, so label selection and delay must accompany the score.</p>
+<p><strong>Assumption to name:</strong> Available outcomes are representative enough for the scoped estimate; otherwise the metric may be selection-biased.</p>
+<h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>What to do</th>
+<th>Evidence to keep</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define monitoring layers, drift signals, delayed labels, and governance decisions in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<h5 id="guide--common-mistake-and-debugging-path">Common mistake and debugging path<a class="heading-anchor" href="#guide--common-mistake-and-debugging-path" aria-label="Link to this section">#</a></h5>
+<p><strong>Mistake:</strong> Treating a PSI threshold as automatic proof of performance degradation or retraining need.</p>
+<p><strong>Debug it deliberately:</strong> Break the alert into data window, reference, bins, counts, slices, label coverage, service changes, and upstream incidents; reproduce the statistic independently.</p>
+<p><strong>Stop condition:</strong> Do not retrain or roll back from one unexplained alert without owner, evidence gate, and impact assessment.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Compute PSI for multiple features or score windows over time.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — monitoring layers, drift signals, delayed labels, and governance decisions — for each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.</p>
+<ol>
 <li>Build a small pandas/Matplotlib dashboard of weekly AUC and PSI.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — monitoring layers, drift signals, delayed labels, and governance decisions — save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.</p>
+<ol>
 <li>Draft a governance policy covering roles, approvals, alerts, and rollback.</li>
 </ol>
+<p><strong>Verify:</strong> Practice 3 — monitoring layers, drift signals, delayed labels, and governance decisions — produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Freeze each feature&#x27;s reference bin edges and record sample counts beside PSI. Test “no shift,” mean shift, and variance shift.</li>
@@ -370,9 +510,16 @@ def psi(reference: np.ndarray, current: np.ndarray, bins: int = 10) -&gt; float:
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Label-delay analysis:</strong> Simulate labels arriving 14–30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts. <strong>Progressive hint:</strong> Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.</li>
+</ol>
+<p><strong>Verify:</strong> Label-delay analysis — print prediction week, label-available date, immediate-health metrics/support, and matured-cohort AUC/support; assert immature weeks show unavailable performance rather than zero or forward-filled values.</p>
+<ol>
 <li><strong>Alert hysteresis:</strong> Design warning and critical thresholds that require persistence or multiple windows, then show how hysteresis prevents alert flapping. <strong>Progressive hint:</strong> Use different enter and clear conditions, minimum support, and a cooldown. Preserve raw measurements for audit.</li>
+</ol>
+<p><strong>Verify:</strong> Alert hysteresis — feed a declared metric sequence around warning/critical thresholds, print alert state by window, and assert persistence opens an alert while the lower recovery threshold prevents one-window flapping.</p>
+<ol>
 <li><strong>Rollback drill:</strong> Write and rehearse a rollback from model version B to A, including trigger, authority, artifact verification, traffic switch, smoke test, communication, and post-incident evidence. <strong>Progressive hint:</strong> A rollback is complete only when the prior artifact, schema, and dependencies remain loadable and the recovery check passes.</li>
 </ol>
+<p><strong>Verify:</strong> Rollback drill — record version-B trigger, authorized actor, verified version-A hash, traffic switch, health/predict smoke results, communication timestamp, and final state; inject a bad rollback artifact and assert the switch stops.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -426,17 +573,46 @@ def psi(reference: np.ndarray, current: np.ndarray, bins: int = 10) -&gt; float:
 <li>Work in the <a href="python-54.html#learner">Day 54 learner notebook</a>.</li>
 <li>Then review the <a href="python-54.html#solution-1">Day 54 solution</a>.</li>
 <li>Continue to <a href="python-55.html#guide">Day 55 — Docker</a>.</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<pre><code class="language-text">Tutor me through `python-54` — Day 54 — Monitoring and Model Governance.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize monitoring layers, drift signals, delayed labels, and governance decisions. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day54_monitoring_model_governance.md`
+- learner artifact: `python/ds-60day/notebooks/day54_monitoring_model_governance.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-53`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -453,12 +629,12 @@ def psi(reference: np.ndarray, current: np.ndarray, bins: int = 10) -&gt; float:
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-54-monitoring-model-governance">Day 54 — Monitoring &amp; model governance<a class="heading-anchor" href="#learner--cell-1--day-54-monitoring-model-governance" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -500,35 +676,135 @@ def psi(reference: np.ndarray, current: np.ndarray, bins: int = 10) -&gt; float:
 <span>psi_value</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-6--governance-checklist">Governance checklist<a class="heading-anchor" href="#learner--cell-6--governance-checklist" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-6--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-6--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
+<h4 id="learner--cell-6--concept-lab-monitoring-layers-drift-signals-delayed-labels-and-governance-decisions">Concept lab — monitoring layers, drift signals, delayed labels, and governance decisions<a class="heading-anchor" href="#learner--cell-6--concept-lab-monitoring-layers-drift-signals-delayed-labels-and-governance-decisions" aria-label="Link to this section">#</a></h4>
+<h5 id="learner--cell-6--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-6--mental-model" aria-label="Link to this section">#</a></h5>
+<p>Production monitoring has several layers. Data-quality checks ask whether inputs are valid. Data drift compares input distributions. Performance and calibration require outcomes, which may arrive later. Service telemetry measures availability, latency, errors, and saturation. One green layer cannot substitute for another.</p>
+<p>Population Stability Index (PSI) compares binned reference and current proportions. Its value depends on binning and sample size and is a triage signal, not a diagnosis or universal threshold. Governance adds owners, review cadence, acceptance gates, rollback evidence, privacy, and an incident path.</p>
+<h5 id="learner--cell-6--read-the-api-before-running-it">Read the API before running it<a class="heading-anchor" href="#learner--cell-6--read-the-api-before-running-it" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>fixed reference bins:</strong> keep comparison semantics stable; recomputing bins on current data changes the question.</li>
+<li><strong><code>(actual - expected) * log(actual / expected)</code>:</strong> accumulates PSI contributions after a declared zero-count smoothing policy.</li>
+<li><strong>monitor → investigate → decide:</strong> separates automated signal detection from causal diagnosis and authorized action.</li>
+</ul>
+<p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h5 id="learner--cell-7--focused-example-a-calculate-psi-with-fixed-reference-quantile-bins">Focused example A — calculate PSI with fixed reference quantile bins<a class="heading-anchor" href="#learner--cell-7--focused-example-a-calculate-psi-with-fixed-reference-quantile-bins" aria-label="Link to this section">#</a></h5>
+<p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
+<p><strong>Assumption:</strong> Reference quantiles, smoothing, population, and sample window are documented and remain comparable.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>import numpy as np</span>
+<span> </span>
+<span>reference = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=float)</span>
+<span>current = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10, 11], dtype=float)</span>
+<span>edges = np.quantile(reference, [0, 0.25, 0.5, 0.75, 1.0])</span>
+<span>edges[0], edges[-1] = -np.inf, np.inf</span>
+<span>expected, _ = np.histogram(reference, bins=edges)</span>
+<span>actual, _ = np.histogram(current, bins=edges)</span>
+<span>expected = np.clip(expected / expected.sum(), 1e-6, None)</span>
+<span>actual = np.clip(actual / actual.sum(), 1e-6, None)</span>
+<span>psi = np.sum((actual - expected) * np.log(actual / expected))</span>
+<span>print({&quot;edges&quot;: edges.tolist(), &quot;psi&quot;: float(psi)})</span>
+<span>assert psi &gt;= 0</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> The shifted current sample produces a positive PSI under bins fixed from the reference sample.</p>
+<p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><h5 id="learner--cell-10--focused-example-b-keep-label-available-and-label-delayed-evidence-separate">Focused example B — keep label-available and label-delayed evidence separate<a class="heading-anchor" href="#learner--cell-10--focused-example-b-keep-label-available-and-label-delayed-evidence-separate" aria-label="Link to this section">#</a></h5>
+<p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
+<p><strong>Assumption:</strong> Available outcomes are representative enough for the scoped estimate; otherwise the metric may be selection-biased.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span>monitoring_snapshot = {</span>
+<span>    &quot;requests&quot;: 10_000,</span>
+<span>    &quot;valid_input_rate&quot;: 0.998,</span>
+<span>    &quot;score_mean&quot;: 0.44,</span>
+<span>    &quot;outcomes_available&quot;: 1_200,</span>
+<span>    &quot;labeled_roc_auc&quot;: 0.86,</span>
+<span>}</span>
+<span>label_coverage = (</span>
+<span>    monitoring_snapshot[&quot;outcomes_available&quot;] / monitoring_snapshot[&quot;requests&quot;]</span>
+<span>)</span>
+<span>print({&quot;label_coverage&quot;: label_coverage,</span>
+<span>       &quot;performance_estimate&quot;: monitoring_snapshot[&quot;labeled_roc_auc&quot;]})</span>
+<span>assert label_coverage == 0.12</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><p><strong>Expected observation:</strong> The performance metric covers only 12% of requests, so label selection and delay must accompany the score.</p>
+<h5 id="learner--cell-12--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-12--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Treating a PSI threshold as automatic proof of performance degradation or retraining need.</p>
+<p><strong>Diagnostic:</strong> Break the alert into data window, reference, bins, counts, slices, label coverage, service changes, and upstream incidents; reproduce the statistic independently.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>Action</th>
+<th>Evidence</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define monitoring layers, drift signals, delayed labels, and governance decisions in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<p><strong>Stop condition:</strong> Do not retrain or roll back from one unexplained alert without owner, evidence gate, and impact assessment.</p>
+<p>Continue to the numbered practice only after you can explain both examples without rereading their code.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h4 id="learner--cell-13--governance-checklist">Governance checklist<a class="heading-anchor" href="#learner--cell-13--governance-checklist" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Register models in a Model Registry (MLflow, SageMaker, etc.).</li>
 <li>Record: training data snapshot/hash, code version (git sha), hyperparams, metrics.</li>
 <li>Approval workflow for promotion to production (staging → prod).</li>
 <li>Periodic re-validation; drift + performance alerts.</li>
 </ul>
-<h4 id="learner--cell-6--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-6--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<h4 id="learner--cell-13--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-13--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Compute PSI for multiple features or score windows over time.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — monitoring layers, drift signals, delayed labels, and governance decisions — for each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.</p>
+<ol>
 <li>Build a small pandas/Matplotlib dashboard of weekly AUC and PSI.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — monitoring layers, drift signals, delayed labels, and governance decisions — save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.</p>
+<ol>
 <li>Draft a governance policy covering roles, approvals, alerts, and rollback.</li>
 </ol>
-<h5 id="learner--cell-6--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-6--progressive-hints" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3 — monitoring layers, drift signals, delayed labels, and governance decisions — produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.</p>
+<h5 id="learner--cell-13--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-13--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Freeze each feature&#x27;s reference bin edges and record sample counts beside PSI. Test “no shift,” mean shift, and variance shift.</li>
 <li>Use one row per week with observation count, label coverage, AUC, PSI, and model version. Mark missing/delayed labels instead of filling fake metrics.</li>
 <li>For every threshold, name an owner, review clock, evidence source, action, escalation path, and recovery test.</li>
 </ol>
-<h5 id="learner--cell-6--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-6--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="learner--cell-13--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-13--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Design monitoring around observable data, delayed truth, action thresholds, ownership, and rehearsed recovery—not dashboards that merely display numbers.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Label-delay analysis:</strong> Simulate labels arriving 14–30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts. <strong>Progressive hint:</strong> Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.</li>
+</ol>
+<p><strong>Verify:</strong> Label-delay analysis — print prediction week, label-available date, immediate-health metrics/support, and matured-cohort AUC/support; assert immature weeks show unavailable performance rather than zero or forward-filled values.</p>
+<ol>
 <li><strong>Alert hysteresis:</strong> Design warning and critical thresholds that require persistence or multiple windows, then show how hysteresis prevents alert flapping. <strong>Progressive hint:</strong> Use different enter and clear conditions, minimum support, and a cooldown. Preserve raw measurements for audit.</li>
+</ol>
+<p><strong>Verify:</strong> Alert hysteresis — feed a declared metric sequence around warning/critical thresholds, print alert state by window, and assert persistence opens an alert while the lower recovery threshold prevents one-window flapping.</p>
+<ol>
 <li><strong>Rollback drill:</strong> Write and rehearse a rollback from model version B to A, including trigger, authority, artifact verification, traffic switch, smoke test, communication, and post-incident evidence. <strong>Progressive hint:</strong> A rollback is complete only when the prior artifact, schema, and dependencies remain loadable and the recovery check passes.</li>
 </ol>
+<p><strong>Verify:</strong> Rollback drill — record version-B trigger, authorized actor, verified version-A hash, traffic switch, health/predict smoke results, communication timestamp, and final state; inject a bad rollback artifact and assert the switch stops.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
 <span>#</span>
 <span># Keep the official solution closed until you have attempted each task.</span>
 <span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
@@ -543,15 +819,15 @@ def psi(reference: np.ndarray, current: np.ndarray, bins: int = 10) -&gt; float:
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -583,7 +859,7 @@ def psi(reference: np.ndarray, current: np.ndarray, bins: int = 10) -&gt; float:
 <li>Exercise 3: Propose an approval flow for new model versions</li>
 </ul>
 <hr>
-<p>Exercise 1 — PSI implementation</p>
+<p>Worked reference for Exercise 1 — PSI implementation</p>
 <pre><code class="language-python">import numpy as np, pandas as pd
 import matplotlib.pyplot as plt
 
@@ -617,7 +893,7 @@ plot_dist(data_train, data_prod)</code></pre>
 <li>Compute per‑feature PSI and rank to prioritize checks</li>
 </ul>
 <hr>
-<p>Exercise 2 — Logging schema</p>
+<p>Worked reference for Exercise 2 — Logging schema</p>
 <pre><code class="language-json">{
   &quot;timestamp&quot;: &quot;2024-01-01T12:34:56Z&quot;,
   &quot;model&quot;: {&quot;name&quot;: &quot;rf-churn&quot;, &quot;version&quot;: &quot;2.1.0&quot;, &quot;git_sha&quot;: &quot;abc123&quot;},
@@ -633,7 +909,7 @@ plot_dist(data_train, data_prod)</code></pre>
 <li>Store to an append‑only sink (e.g., Kafka → data lake) with retention</li>
 </ul>
 <hr>
-<p>Exercise 3 — Approval flow</p>
+<p>Worked reference for Exercise 3 — Approval flow</p>
 <ul>
 <li>PR merges to main trigger CI: unit tests, data contract tests, reproducible training</li>
 <li>Register candidate model to Registry as Staging; run shadow deployment A/B tests</li>
@@ -641,40 +917,62 @@ plot_dist(data_train, data_prod)</code></pre>
 <li>Promote to Production with change record; set up monitoring alerts and rollback plan</li>
 </ul>
 <hr>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong>fixed reference bins:</strong> keep comparison semantics stable; recomputing bins on current data changes the question.</li>
+<li><strong><code>(actual - expected) * log(actual / expected)</code>:</strong> accumulates PSI contributions after a declared zero-count smoothing policy.</li>
+<li><strong>monitor → investigate → decide:</strong> separates automated signal detection from causal diagnosis and authorized action.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> Layered monitoring identifies which contract changed, while governance converts evidence into accountable and reversible decisions.</p>
+<p><strong>Useful alternative:</strong> Kolmogorov-Smirnov, Jensen-Shannon, calibration, or model-based drift checks answer different questions; none removes the need for labels and domain review.</p>
+<p><strong>Trade-off:</strong> Sensitive alerts detect changes sooner but increase false alarms; long windows stabilize metrics while delaying response.</p>
+<p><strong>Edge case to test:</strong> Zero-count bins, tiny slices, delayed/missing labels, seasonality, upstream schema changes, and changed model versions can create misleading trends.</p>
+<p><strong>Evidence of correctness:</strong> Freeze reference/bins and recompute PSI, report counts/windows/slices/label coverage, connect alerts to owners/actions, and rehearse rollback with artifact evidence.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compute PSI for multiple features or score windows over time.</p>
 <p><strong>How to reason about it:</strong> Freeze reference bins, include support, and test no shift plus controlled mean/variance shifts. PSI depends on binning and is a heuristic signal, not proof of performance degradation.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1 — monitoring layers, drift signals, delayed labels, and governance decisions — for each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a small pandas/Matplotlib dashboard of weekly AUC and PSI.</p>
 <p><strong>How to reason about it:</strong> A weekly dashboard should retain model/data version, score volume, label coverage, AUC uncertainty, PSI, and missingness. Mark delayed labels rather than inventing or forward-filling performance.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2 — monitoring layers, drift signals, delayed labels, and governance decisions — save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Draft a governance policy covering roles, approvals, alerts, and rollback.</p>
 <p><strong>How to reason about it:</strong> Every governance threshold needs an owner, evidence source, review clock, action, escalation, and recovery test. Separate automated alerts from human approval for promotion/rollback.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 3 — monitoring layers, drift signals, delayed labels, and governance decisions — produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.</p>
 <h5 id="solution-1--exercise-4-label-delay-analysis">Exercise 4 — Label-delay analysis<a class="heading-anchor" href="#solution-1--exercise-4-label-delay-analysis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Simulate labels arriving 14–30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts.</p>
 <p><strong>Reasoning before implementation:</strong> Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.</p>
 <p>Current-week AUC is not available when outcomes arrive later. Operational signals such as schema failures, missingness, score distribution, latency, and volume can be monitored immediately. Performance metrics belong to matured prediction cohorts with explicit cutoff dates.</p>
 <p>Late or selectively missing labels can bias results. Compare coverage across slices and investigate the label process rather than treating unlabeled rows as negatives.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Label-delay analysis — print prediction week, label-available date, immediate-health metrics/support, and matured-cohort AUC/support; assert immature weeks show unavailable performance rather than zero or forward-filled values.</p>
 <h5 id="solution-1--exercise-5-alert-hysteresis">Exercise 5 — Alert hysteresis<a class="heading-anchor" href="#solution-1--exercise-5-alert-hysteresis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design warning and critical thresholds that require persistence or multiple windows, then show how hysteresis prevents alert flapping.</p>
 <p><strong>Reasoning before implementation:</strong> Use different enter and clear conditions, minimum support, and a cooldown. Preserve raw measurements for audit.</p>
 <p>For example, enter warning after PSI exceeds a reviewed threshold for two consecutive supported windows, but clear only after it stays below a lower threshold for two windows. Critical conditions can bypass the delay when a hard safety constraint fails.</p>
 <p>Thresholds are policy, not universal PSI constants. Validate them on historical incidents and false-alarm cost, assign ownership, and version changes.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Alert hysteresis — feed a declared metric sequence around warning/critical thresholds, print alert state by window, and assert persistence opens an alert while the lower recovery threshold prevents one-window flapping.</p>
 <h5 id="solution-1--exercise-6-rollback-drill">Exercise 6 — Rollback drill<a class="heading-anchor" href="#solution-1--exercise-6-rollback-drill" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write and rehearse a rollback from model version B to A, including trigger, authority, artifact verification, traffic switch, smoke test, communication, and post-incident evidence.</p>
 <p><strong>Reasoning before implementation:</strong> A rollback is complete only when the prior artifact, schema, and dependencies remain loadable and the recovery check passes.</p>
 <p>Run the drill in a disposable/local environment and time each step. Verify artifact hashes and input compatibility before switching. After rollback, confirm health, prediction shape, representative fixture outputs, and monitoring recovery.</p>
 <p>Keep version B and incident evidence for investigation; do not overwrite or delete the failed artifact as part of the emergency path.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></div>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Rollback drill — record version-B trigger, authorized actor, verified version-A hash, traffic switch, health/predict smoke results, communication timestamp, and final state; inject a bad rollback artifact and assert the switch stops.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -682,7 +980,7 @@ plot_dist(data_train, data_prod)</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -715,7 +1013,7 @@ plot_dist(data_train, data_prod)</code></pre>
 <li>Exercise 3: Propose an approval flow for new model versions</li>
 </ul>
 <hr>
-<p>Exercise 1 — PSI implementation</p>
+<p>Worked reference for Exercise 1 — PSI implementation</p>
 <blockquote><p>Generated from <code>python/ds-60day/solutions/day54_monitoring_model_governance/day54_solutions.md</code> by <code>scripts/build_solution_notebooks.py</code>. Edit the Markdown source, then regenerate this notebook.</p></blockquote></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import numpy as np, pandas as pd</span>
 <span>import matplotlib.pyplot as plt</span>
@@ -752,7 +1050,7 @@ plot_dist(data_train, data_prod)</code></pre>
 <li>Compute per‑feature PSI and rank to prioritize checks</li>
 </ul>
 <hr>
-<p>Exercise 2 — Logging schema</p>
+<p>Worked reference for Exercise 2 — Logging schema</p>
 <pre><code class="language-json">{
   &quot;timestamp&quot;: &quot;2024-01-01T12:34:56Z&quot;,
   &quot;model&quot;: {&quot;name&quot;: &quot;rf-churn&quot;, &quot;version&quot;: &quot;2.1.0&quot;, &quot;git_sha&quot;: &quot;abc123&quot;},
@@ -768,7 +1066,7 @@ plot_dist(data_train, data_prod)</code></pre>
 <li>Store to an append‑only sink (e.g., Kafka → data lake) with retention</li>
 </ul>
 <hr>
-<p>Exercise 3 — Approval flow</p>
+<p>Worked reference for Exercise 3 — Approval flow</p>
 <ul>
 <li>PR merges to main trigger CI: unit tests, data contract tests, reproducible training</li>
 <li>Register candidate model to Registry as Staging; run shadow deployment A/B tests</li>
@@ -776,40 +1074,106 @@ plot_dist(data_train, data_prod)</code></pre>
 <li>Promote to Production with change record; set up monitoring alerts and rollback plan</li>
 </ul>
 <hr>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-2--cell-3--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-3--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong>fixed reference bins:</strong> keep comparison semantics stable; recomputing bins on current data changes the question.</li>
+<li><strong><code>(actual - expected) * log(actual / expected)</code>:</strong> accumulates PSI contributions after a declared zero-count smoothing policy.</li>
+<li><strong>monitor → investigate → decide:</strong> separates automated signal detection from causal diagnosis and authorized action.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> Layered monitoring identifies which contract changed, while governance converts evidence into accountable and reversible decisions.</p>
+<p><strong>Useful alternative:</strong> Kolmogorov-Smirnov, Jensen-Shannon, calibration, or model-based drift checks answer different questions; none removes the need for labels and domain review.</p>
+<p><strong>Trade-off:</strong> Sensitive alerts detect changes sooner but increase false alarms; long windows stabilize metrics while delaying response.</p>
+<p><strong>Edge case to test:</strong> Zero-count bins, tiny slices, delayed/missing labels, seasonality, upstream schema changes, and changed model versions can create misleading trends.</p>
+<p><strong>Evidence of correctness:</strong> Freeze reference/bins and recompute PSI, report counts/windows/slices/label coverage, connect alerts to owners/actions, and rehearse rollback with artifact evidence.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-3--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-3--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-3--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compute PSI for multiple features or score windows over time.</p>
 <p><strong>How to reason about it:</strong> Freeze reference bins, include support, and test no shift plus controlled mean/variance shifts. PSI depends on binning and is a heuristic signal, not proof of performance degradation.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1 — monitoring layers, drift signals, delayed labels, and governance decisions — for each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.</p>
 <h5 id="solution-2--cell-3--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a small pandas/Matplotlib dashboard of weekly AUC and PSI.</p>
 <p><strong>How to reason about it:</strong> A weekly dashboard should retain model/data version, score volume, label coverage, AUC uncertainty, PSI, and missingness. Mark delayed labels rather than inventing or forward-filling performance.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2 — monitoring layers, drift signals, delayed labels, and governance decisions — save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.</p>
 <h5 id="solution-2--cell-3--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Draft a governance policy covering roles, approvals, alerts, and rollback.</p>
 <p><strong>How to reason about it:</strong> Every governance threshold needs an owner, evidence source, review clock, action, escalation, and recovery test. Separate automated alerts from human approval for promotion/rollback.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 3 — monitoring layers, drift signals, delayed labels, and governance decisions — produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.</p>
 <h5 id="solution-2--cell-3--exercise-4-label-delay-analysis">Exercise 4 — Label-delay analysis<a class="heading-anchor" href="#solution-2--cell-3--exercise-4-label-delay-analysis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Simulate labels arriving 14–30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts.</p>
 <p><strong>Reasoning before implementation:</strong> Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.</p>
 <p>Current-week AUC is not available when outcomes arrive later. Operational signals such as schema failures, missingness, score distribution, latency, and volume can be monitored immediately. Performance metrics belong to matured prediction cohorts with explicit cutoff dates.</p>
 <p>Late or selectively missing labels can bias results. Compare coverage across slices and investigate the label process rather than treating unlabeled rows as negatives.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Label-delay analysis — print prediction week, label-available date, immediate-health metrics/support, and matured-cohort AUC/support; assert immature weeks show unavailable performance rather than zero or forward-filled values.</p>
 <h5 id="solution-2--cell-3--exercise-5-alert-hysteresis">Exercise 5 — Alert hysteresis<a class="heading-anchor" href="#solution-2--cell-3--exercise-5-alert-hysteresis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design warning and critical thresholds that require persistence or multiple windows, then show how hysteresis prevents alert flapping.</p>
 <p><strong>Reasoning before implementation:</strong> Use different enter and clear conditions, minimum support, and a cooldown. Preserve raw measurements for audit.</p>
 <p>For example, enter warning after PSI exceeds a reviewed threshold for two consecutive supported windows, but clear only after it stays below a lower threshold for two windows. Critical conditions can bypass the delay when a hard safety constraint fails.</p>
 <p>Thresholds are policy, not universal PSI constants. Validate them on historical incidents and false-alarm cost, assign ownership, and version changes.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Alert hysteresis — feed a declared metric sequence around warning/critical thresholds, print alert state by window, and assert persistence opens an alert while the lower recovery threshold prevents one-window flapping.</p>
 <h5 id="solution-2--cell-3--exercise-6-rollback-drill">Exercise 6 — Rollback drill<a class="heading-anchor" href="#solution-2--cell-3--exercise-6-rollback-drill" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write and rehearse a rollback from model version B to A, including trigger, authority, artifact verification, traffic switch, smoke test, communication, and post-incident evidence.</p>
 <p><strong>Reasoning before implementation:</strong> A rollback is complete only when the prior artifact, schema, and dependencies remain loadable and the recovery check passes.</p>
 <p>Run the drill in a disposable/local environment and time each step. Verify artifact hashes and input compatibility before switching. After rollback, confirm health, prediction shape, representative fixture outputs, and monitoring recovery.</p>
 <p>Keep version B and incident evidence for investigation; do not overwrite or delete the failed artifact as part of the emergency path.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></article></div>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Rollback drill — record version-B trigger, authorized actor, verified version-A hash, traffic switch, health/predict smoke results, communication timestamp, and final state; inject a bad rollback artifact and assert the switch stops.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-54` — Day 54 — Monitoring and Model Governance.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize monitoring layers, drift signals, delayed labels, and governance decisions. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day54_monitoring_model_governance.md`
+- learner artifact: `python/ds-60day/notebooks/day54_monitoring_model_governance.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-53`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-53.html"><small>Previous lesson</small><strong>python-53</strong><span>MLOps MLflow Experiment Tracking</span></a>
@@ -901,6 +1265,23 @@ plot_dist(data_train, data_prod)</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

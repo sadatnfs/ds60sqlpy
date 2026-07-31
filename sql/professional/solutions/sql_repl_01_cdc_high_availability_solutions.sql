@@ -17,7 +17,7 @@ BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
 CREATE SCHEMA pro_replication_lab;
 
-CREATE TABLE pro_replication_lab.outbox (
+CREATE TABLE pro_replication_lab.outbox_events (
     event_id text PRIMARY KEY,
     aggregate_key text NOT NULL,
     aggregate_version integer NOT NULL CHECK (aggregate_version > 0),
@@ -41,7 +41,7 @@ CREATE TABLE pro_replication_lab.projection (
     PRIMARY KEY (consumer_name, aggregate_key)
 );
 
-INSERT INTO pro_replication_lab.outbox
+INSERT INTO pro_replication_lab.outbox_events
 VALUES
     ('E-v1', 'ORDER-1', 1, '{"status":"open"}', false),
     ('E-v2', 'ORDER-1', 2, '{"status":"paid"}', false),
@@ -55,12 +55,12 @@ LANGUAGE plpgsql
 SECURITY INVOKER
 AS $procedure$
 DECLARE
-    e pro_replication_lab.outbox%ROWTYPE;
+    e pro_replication_lab.outbox_events%ROWTYPE;
     event_payload_sha256 text;
 BEGIN
     SELECT o.*
     INTO STRICT e
-    FROM pro_replication_lab.outbox AS o
+    FROM pro_replication_lab.outbox_events AS o
     WHERE o.event_id = p_event_id
     FOR UPDATE;
 
@@ -117,7 +117,7 @@ LANGUAGE plpgsql
 SECURITY INVOKER
 AS $procedure$
 BEGIN
-    UPDATE pro_replication_lab.outbox AS o
+    UPDATE pro_replication_lab.outbox_events AS o
     SET published = true
     WHERE o.event_id = p_event_id;
 
@@ -148,7 +148,7 @@ WITH source_versions AS (
         o.aggregate_key,
         array_agg(o.aggregate_version ORDER BY o.aggregate_version)
             AS expected_versions
-    FROM pro_replication_lab.outbox AS o
+    FROM pro_replication_lab.outbox_events AS o
     GROUP BY o.aggregate_key
 ),
 accepted_versions AS (
@@ -157,7 +157,7 @@ accepted_versions AS (
         array_agg(o.aggregate_version ORDER BY o.aggregate_version)
             AS accepted_versions
     FROM pro_replication_lab.inbox AS i
-    JOIN pro_replication_lab.outbox AS o
+    JOIN pro_replication_lab.outbox_events AS o
       ON o.event_id = i.event_id
     WHERE i.consumer_name = 'projection'
     GROUP BY o.aggregate_key
@@ -199,7 +199,7 @@ BEGIN
     END IF;
     IF NOT EXISTS (
         SELECT 1
-        FROM pro_replication_lab.outbox AS source_event
+        FROM pro_replication_lab.outbox_events AS source_event
         WHERE source_event.aggregate_key = 'ORDER-1'
           AND source_event.aggregate_version = 1
           AND NOT EXISTS (
@@ -220,7 +220,7 @@ SELECT
     o.event_id,
     o.aggregate_key,
     o.aggregate_version
-FROM pro_replication_lab.outbox AS o
+FROM pro_replication_lab.outbox_events AS o
 WHERE NOT o.published
 ORDER BY o.aggregate_key, o.aggregate_version;
 

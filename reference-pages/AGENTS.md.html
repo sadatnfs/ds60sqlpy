@@ -129,12 +129,15 @@
 <h3 id="sources-of-truth">Sources of truth<a class="heading-anchor" href="#sources-of-truth" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Lesson artifacts and <code>src/ds60sqlpy/catalog_builder.py</code>: inputs for lesson identity, ordering, prerequisites, dependency groups, network behavior, and artifact availability</li>
+<li><code>src/ds60sqlpy/catalog.py</code>: catalog loading and learner-facing ordering; named modules can use an explicit order override to appear at their prerequisite milestone without renumbering the historical day tracks</li>
 <li><code>curriculum/catalog.json</code>: checked-in generated index consumed by tools; regenerate it rather than editing it by hand</li>
 <li><code>README.md</code>: learner entry point</li>
 <li><code>docs/setup/</code>: operating-system setup</li>
 <li><code>docs/content-authoring.md</code>: lesson contract</li>
+<li><code>docs/curriculum-design-references.md</code>: source-backed teaching patterns and the rationale for the repository&#x27;s lesson sequence</li>
 <li><code>docs/validation.md</code>: verification policy</li>
 <li><code>curriculum/practice_baseline.json</code> and <code>scripts/audit_practice.py</code>: immutable pre-enrichment counts and the per-surface exercise-doubling gate</li>
+<li><code>scripts/audit_lesson_depth.py</code> and <code>docs/lesson-depth-report.md</code>: structural minimums for self-contained beginner explanations, runnable examples, exercise contracts, explanatory solutions, historical Python notebook depth, and per-lesson Codex prompts across all three tracks</li>
 <li><code>scripts/build_course_guide.py</code>: source for generated <code>START_HERE.html</code>; never hand-edit the HTML</li>
 <li><code>src/ds60sqlpy/lesson_reader.py</code> and <code>scripts/build_lesson_readers.py</code>: sources for generated <code>lesson-pages/&lt;lesson-id&gt;.html</code> and linked <code>reference-pages/&lt;source&gt;.html</code>; never hand-edit those readers</li>
 <li><code>src/ds60sqlpy/sql_notebook.py</code> and <code>scripts/build_sql_lesson_notebook.py</code>: catalog-restricted generator and runner for learner-local SQL notebooks under <code>.learning/sql/</code>; never check generated workspaces into Git</li>
@@ -159,6 +162,7 @@
 <ul>
 <li>Assume no prior programming or database experience unless the learner says otherwise.</li>
 <li>Explain new terms before relying on them.</li>
+<li>Make the checked-in lesson sufficient on its own. Codex coaching is an optional practice aid, never a substitute for definitions, syntax anatomy, examples, expected observations, or troubleshooting in the lesson.</li>
 <li>Ask the learner to predict behavior and attempt exercises.</li>
 <li>Give progressive hints before opening or reproducing official solutions.</li>
 <li>Use the sequence <strong>guide → prediction → learner attempt → progressive hints → solution comparison</strong>. Opening a file or checking a box is not evidence of mastery.</li>
@@ -194,6 +198,9 @@
 <li>Update documentation when commands or behavior change.</li>
 <li>Meet the audited practice target on the learner, guide, and every explanatory-solution artifact: at least <code>max(6, 2 × baseline)</code>, using distinct prompts rather than relabeled answer steps.</li>
 <li>Regenerate both navigation layers after artifact or catalog changes: <code>START_HERE.html</code> and every affected <code>lesson-pages/&lt;lesson-id&gt;.html</code>.</li>
+<li>Meet <code>docs/content-authoring.md</code> and <code>scripts/audit_lesson_depth.py</code>: define the mental model, explain syntax or query anatomy, include at least two topic-specific runnable examples, label the expected result or verification for every numbered exercise, explain common mistakes, and end every guide with <code>## Ask Codex about this lesson</code>.</li>
+<li>Make that Codex prompt copy-ready and lesson-specific. It must name the stable lesson ID, exact guide and learner paths, the <code>guide-ds60sqlpy-learning</code> skill, the <code>solutions/</code> boundary, and the explain → predict → attempt → one hint → evidence → retrieval loop. The guide&#x27;s fenced prompt is the source used by both the lesson reader and <code>START_HERE.html</code>; do not maintain separate prompt prose in generated HTML.</li>
+<li>Make each <code>Expected</code>/<code>Verify</code> contract independently inspectable. It may not merely restate the exercise or apply a generic checklist unrelated to that exercise&#x27;s mechanism.</li>
 </ol>
 <p>Do not expand the curriculum merely to increase lesson count. Add content only when it closes a documented learning gap.</p>
 <h3 id="validation">Validation<a class="heading-anchor" href="#validation" aria-label="Link to this section">#</a></h3>
@@ -202,10 +209,11 @@
 python scripts/course.py catalog
 python scripts/course.py validate
 python scripts/audit_practice.py
+python scripts/audit_lesson_depth.py
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check
 python scripts/scan_secrets.py --history
-python -m pytest tests/test_course_guide.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py</code></pre>
+python -m pytest tests/test_course_guide.py tests/test_lesson_depth_audit.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py</code></pre>
 <p>SQL commands must use:</p>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 ...</code></pre>
 <p>Definition of done:</p>
@@ -220,6 +228,7 @@ python -m pytest tests/test_course_guide.py tests/test_lesson_reader.py tests/te
 <li>Offline behavior is preserved.</li>
 <li>Windows and POSIX instructions remain valid.</li>
 <li>Generated artifacts, caches, credentials, and unrelated diffs are absent.</li>
+<li><code>docs/practice-coverage.md</code> and <code>docs/lesson-depth-report.md</code> match their generators, and all cataloged Python and SQL lessons pass both gates.</li>
 </ul>
 <p>Portal changes must retain both delivery modes. <code>START_HERE.html</code> remains self-contained and useful over <code>file://</code>; launcher mode binds only to <code>127.0.0.1</code>, authenticates mutations with an in-memory session token, permits no cross-origin writes, requires the exact Host on every request, serves only generated guide/lesson/reference HTML, and maps explicit clicks to a fixed VS Code/Jupyter action allowlist. Never add arbitrary shell text, arbitrary path launch, remote binding, CORS, or a credential to the portal. <code>--no-launches</code> must continue to provide file-backed progress without native process actions.</p>
 <p>If a heavy or external prerequisite prevents a check, report the exact unverified surface.</p>

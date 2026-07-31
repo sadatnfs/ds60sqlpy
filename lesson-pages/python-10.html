@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-10-testing-with-pytest">Day 10 — Testing with pytest<a class="heading-anchor" href="#guide--day-10-testing-with-pytest" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>Tests are executable examples of a contract. A useful test fails for one clear reason and tells you what behavior changed.</p>
@@ -292,6 +331,86 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 9 (<code>python-09</code>): importable functions and package structure.</p>
+<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<ol>
+<li>Confirm the course environment before changing it:</li>
+</ol>
+<pre><code class="language-powershell">   # Windows PowerShell
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   &amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash">   # macOS/Linux
+   .venv/bin/python scripts/course.py doctor</code></pre>
+<ol>
+<li>Read <code>python/ds-60day/companion-guides/day10_testing_pytest.md</code>, then open <code>python/ds-60day/notebooks/day10_testing_pytest.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
+<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
+<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
+<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+</ol>
+<p><strong>Lesson outcome:</strong> use day 10 — testing with pytest to practice tests as executable contracts and useful failure reports and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
+<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
+<p>A test is a small executable example of observable behavior. Arrange the inputs, act once, then assert the output or failure. Tests do not prove a program has no bugs; they make chosen contracts repeatable and reveal when later changes violate them.</p>
+<p>Good cases cover a normal path, exact boundaries, and invalid input. Keep each test focused enough that its name and failure identify the broken behavior. Fixtures own reusable setup and teardown. Parametrized tests express the same contract across several inputs without hiding which case failed.</p>
+<h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>test case:</strong> one named example with inputs and expected behavior.</li>
+<li><strong>assertion:</strong> a claim that must be true for the test to pass.</li>
+<li><strong>fixture:</strong> reusable setup data or a managed resource supplied to tests.</li>
+<li><strong>parametrization:</strong> running one test contract with multiple named inputs.</li>
+<li><strong>regression:</strong> behavior that used to work but was later broken.</li>
+<li><strong>test isolation:</strong> the property that one test does not depend on another&#x27;s state or order.</li>
+</ul>
+<h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<p>In <code>assert actual == expected</code>, pytest can display both values and their difference. <code>with pytest.raises(ValueError, match=&quot;positive&quot;):</code> states that the indented call must raise that exact failure and optionally match a stable message fragment. The test name should state behavior, such as <code>test_safe_divide_rejects_zero_denominator</code>.</p>
+<h5 id="guide--worked-example-1-test-a-pure-calculation-with-plain-assertions">Worked example 1 — Test a pure calculation with plain assertions<a class="heading-anchor" href="#guide--worked-example-1-test-a-pure-calculation-with-plain-assertions" aria-label="Link to this section">#</a></h5>
+<p>Direct equality makes failures explain the two values. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">def subtotal(prices: list[float]) -&gt; float:
+    return sum(prices)
+
+assert subtotal([2.5, 3.0]) == 5.5
+assert subtotal([]) == 0
+&quot;two subtotal contracts passed&quot;</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`&#x27;two subtotal contracts passed&#x27;`. If an assertion fails, execution stops at the violated contract.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--worked-example-2-represent-cases-as-data">Worked example 2 — Represent cases as data<a class="heading-anchor" href="#guide--worked-example-2-represent-cases-as-data" aria-label="Link to this section">#</a></h5>
+<p>The same behavior can be checked across several boundaries. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">def is_valid_percentage(value: float) -&gt; bool:
+    return 0 &lt;= value &lt;= 100
+
+cases = [(0, True), (100, True), (-0.1, False), (100.1, False)]
+results = [(value, is_valid_percentage(value) == expected)
+           for value, expected in cases]
+results</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`[(0, True), (100, True), (-0.1, True), (100.1, True)]`. Each tuple reports that its expectation matched.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
+<p>When the output differs from your prediction, use this order:</p>
+<ol>
+<li>Read the first failing assertion and reproduce that smallest case before scanning later failures.</li>
+<li>Assert directly on useful values rather than wrapping them in an opaque helper returning only <code>True</code>/<code>False</code>.</li>
+<li>Make fixtures create and clean up only state owned by the test.</li>
+<li>If a test passes alone but fails in the suite, look for shared mutable state, order dependence, time, or randomness.</li>
+</ol>
+<h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
+<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
+<ol>
+<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
+<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
+<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
+<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
+<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
+</ol>
+<p><strong>Useful alternative:</strong> A doctest can suit tiny documentation examples, while pytest is clearer for fixtures, parametrization, exceptions, and larger behavior contracts.</p>
+<p><strong>Boundary to remember:</strong> Empty input, exact bounds, malformed values, repeated calls, and cleanup after an exception reveal weak tests. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Test case:</strong> one scenario with a defined expected result.</li>
@@ -305,18 +424,15 @@
 <h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-python">import pytest
 
-
 def normalize_age(raw: str) -&gt; int:
     age = int(raw)
     if age &lt; 0:
         raise ValueError(&quot;age must be non-negative&quot;)
     return age
 
-
 @pytest.mark.parametrize((&quot;raw&quot;, &quot;expected&quot;), [(&quot;0&quot;, 0), (&quot;42&quot;, 42)])
 def test_normalize_age(raw: str, expected: int) -&gt; None:
     assert normalize_age(raw) == expected
-
 
 def test_normalize_age_rejects_negative() -&gt; None:
     with pytest.raises(ValueError, match=&quot;non-negative&quot;):
@@ -327,19 +443,22 @@ def test_normalize_age_rejects_negative() -&gt; None:
 <p>macOS/Linux:</p>
 <pre><code class="language-bash">.venv/bin/python -m pytest</code></pre>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Write tests for <code>safe_divide</code> and <code>validate_email</code>. <strong>Hint:</strong> list the contract&#x27;s normal, boundary, and invalid cases before writing test code.</li>
-<li>Add a negative test using <code>pytest.raises</code>. <strong>Hint:</strong> assert the narrow exception type and, when stable, a meaningful part of its message.</li>
+<li>Write pytest tests for <code>safe_divide(numerator, denominator)</code> and <code>validate_email(text)</code>. <strong>Coverage:</strong> one ordinary result, negative values, zero denominator, one accepted bounded email example, and several rejected near misses. <strong>Constraints:</strong> name each behavior clearly and compare observable return values directly. <strong>Verify:</strong> run the test file from the repository root and confirm all intended cases are collected.</li>
+</ol>
+<ol>
+<li>Add negative tests with <code>pytest.raises</code> for the narrow exception types documented by both functions. <strong>Constraints:</strong> keep only the expected failing call inside each context manager and match one stable, useful message fragment. <strong>Verify:</strong> temporarily change the expected exception once to observe a meaningful failure, then restore it.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Test observable contracts across normal, boundary, and invalid inputs. A good failure explains which behavior changed.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict how pytest reports <code>assert actual == expected</code> compared with <code>assert check(actual)</code> when the values differ. <strong>Progressive hint:</strong> Direct comparisons usually produce more useful assertion introspection.</li>
-<li><strong>Tracing:</strong> Trace fixture setup, test execution, and teardown when the test passes and when it raises. <strong>Progressive hint:</strong> A yielding fixture resumes after <code>yield</code> for cleanup in both paths.</li>
-<li><strong>Implementation:</strong> Write parameterized tests for a slug function covering ordinary text, extra whitespace, punctuation, and empty text. <strong>Progressive hint:</strong> Each parameter row should communicate one behavior.</li>
-<li><strong>Debugging:</strong> Repair a test whose <code>pytest.raises(Exception)</code> would accept unrelated bugs and whose protected block contains several operations. <strong>Progressive hint:</strong> Assert a narrow exception around one operation.</li>
-<li><strong>Edge case and explanation:</strong> Test floating-point output and <code>NaN</code> correctly. Explain why direct equality is inappropriate for each. <strong>Progressive hint:</strong> Use <code>pytest.approx</code> for tolerance and <code>math.isnan</code> for NaN.</li>
+<li><strong>Prediction:</strong> Predict how pytest reports <code>assert actual == expected</code> compared with <code>assert check(actual)</code> when the values differ. <strong>Progressive hint:</strong> Direct comparisons usually produce more useful assertion introspection. <strong>Verify:</strong> Run both deliberately failing assertions once and compare pytest&#x27;s messages; record which report exposes actual/expected values directly.</li>
+<li><strong>Tracing:</strong> Trace fixture setup, test execution, and teardown when the test passes and when it raises. <strong>Progressive hint:</strong> A yielding fixture resumes after <code>yield</code> for cleanup in both paths. <strong>Verify:</strong> Append events from setup, test, and teardown for pass and raise cases; assert teardown is the final event in both traces.</li>
+<li><strong>Implementation:</strong> Write parameterized tests for a slug function covering ordinary text, extra whitespace, punctuation, and empty text. <strong>Progressive hint:</strong> Each parameter row should communicate one behavior. <strong>Verify:</strong> Confirm pytest reports a separate named case for ordinary, whitespace, punctuation, and empty inputs and that all match the written slug contract.</li>
+<li><strong>Debugging:</strong> Repair a test whose <code>pytest.raises(Exception)</code> would accept unrelated bugs and whose protected block contains several operations. <strong>Progressive hint:</strong> Assert a narrow exception around one operation. <strong>Verify:</strong> Prove the narrow expected error passes, then trigger an unrelated error and confirm the test fails instead of accepting it.</li>
+<li><strong>Edge case and explanation:</strong> Test floating-point output and <code>NaN</code> correctly. Explain why direct equality is inappropriate for each. <strong>Progressive hint:</strong> Use <code>pytest.approx</code> for tolerance and <code>math.isnan</code> for NaN. <strong>Verify:</strong> Assert one computed float passes with <code>pytest.approx</code>, assert <code>math.isnan(value)</code> is true for NaN, and record that <code>value == value</code> is false.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -363,17 +482,33 @@ def test_normalize_age_rejects_negative() -&gt; None:
 <li><a href="python-10.html#learner">Open the learner notebook</a></li>
 <li><a href="python-10.html#solution-1">Check the separate solution</a></li>
 <li><a href="python-11.html#guide">Next: Day 11 — Debugging, logging, and profiling</a></li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-10`
+(Day 10 — Testing with pytest). Direct catalog prerequisites: `python-09`.
+I have completed the direct prerequisites: `python-09`. Emphasize tests as executable contracts and useful failure reports.
+Read `python/ds-60day/companion-guides/day10_testing_pytest.md` and use the learner notebook
+`python/ds-60day/notebooks/day10_testing_pytest.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -390,12 +525,12 @@ def test_normalize_age_rejects_negative() -&gt; None:
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-10-testing-with-pytest">Day 10 — Testing with pytest<a class="heading-anchor" href="#learner--cell-1--day-10-testing-with-pytest" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -404,7 +539,59 @@ def test_normalize_age_rejects_negative() -&gt; None:
 <li>Use assertions and parametrize.</li>
 <li>Structure tests for utilities created earlier.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># Example function</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
+<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>This is the editable learner artifact for <code>python-10</code>. Read <code>python/ds-60day/companion-guides/day10_testing_pytest.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
+<p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
+<p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--core-mental-model">Core mental model<a class="heading-anchor" href="#learner--cell-3--core-mental-model" aria-label="Link to this section">#</a></h4>
+<p>A test is a small executable example of observable behavior. Arrange the inputs, act once, then assert the output or failure. Tests do not prove a program has no bugs; they make chosen contracts repeatable and reveal when later changes violate them.</p>
+<p>Good cases cover a normal path, exact boundaries, and invalid input. Keep each test focused enough that its name and failure identify the broken behavior. Fixtures own reusable setup and teardown. Parametrized tests express the same contract across several inputs without hiding which case failed.</p>
+<h5 id="learner--cell-3--vocabulary">Vocabulary<a class="heading-anchor" href="#learner--cell-3--vocabulary" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>test case:</strong> one named example with inputs and expected behavior.</li>
+<li><strong>assertion:</strong> a claim that must be true for the test to pass.</li>
+<li><strong>fixture:</strong> reusable setup data or a managed resource supplied to tests.</li>
+<li><strong>parametrization:</strong> running one test contract with multiple named inputs.</li>
+<li><strong>regression:</strong> behavior that used to work but was later broken.</li>
+<li><strong>test isolation:</strong> the property that one test does not depend on another&#x27;s state or order.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<p>In <code>assert actual == expected</code>, pytest can display both values and their difference. <code>with pytest.raises(ValueError, match=&quot;positive&quot;):</code> states that the indented call must raise that exact failure and optionally match a stable message fragment. The test name should state behavior, such as <code>test_safe_divide_rejects_zero_denominator</code>.</p>
+<h5 id="learner--cell-4--worked-example-1-test-a-pure-calculation-with-plain-assertions">Worked example 1 — Test a pure calculation with plain assertions<a class="heading-anchor" href="#learner--cell-4--worked-example-1-test-a-pure-calculation-with-plain-assertions" aria-label="Link to this section">#</a></h5>
+<p>Direct equality makes failures explain the two values. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>def subtotal(prices: list[float]) -&gt; float:</span>
+<span>    return sum(prices)</span>
+<span> </span>
+<span>assert subtotal([2.5, 3.0]) == 5.5</span>
+<span>assert subtotal([]) == 0</span>
+<span>&quot;two subtotal contracts passed&quot;</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> <code>&#x27;two subtotal contracts passed&#x27;</code>. If an assertion fails, execution stops at the violated contract.</p>
+<p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
+<h5 id="learner--cell-6--worked-example-2-represent-cases-as-data">Worked example 2 — Represent cases as data<a class="heading-anchor" href="#learner--cell-6--worked-example-2-represent-cases-as-data" aria-label="Link to this section">#</a></h5>
+<p>The same behavior can be checked across several boundaries. Predict first; then run the next cell.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>def is_valid_percentage(value: float) -&gt; bool:</span>
+<span>    return 0 &lt;= value &lt;= 100</span>
+<span> </span>
+<span>cases = [(0, True), (100, True), (-0.1, False), (100.1, False)]</span>
+<span>results = [(value, is_valid_percentage(value) == expected)</span>
+<span>           for value, expected in cases]</span>
+<span>results</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>[(0, True), (100, True), (-0.1, True), (100.1, True)]</code>. Each tuple reports that its expectation matched.</p>
+<h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
+<p>When evidence differs from your prediction, use this order:</p>
+<ol>
+<li>Read the first failing assertion and reproduce that smallest case before scanning later failures.</li>
+<li>Assert directly on useful values rather than wrapping them in an opaque helper returning only <code>True</code>/<code>False</code>.</li>
+<li>Make fixtures create and clean up only state owned by the test.</li>
+<li>If a test passes alone but fails in the suite, look for shared mutable state, order dependence, time, or randomness.</li>
+</ol>
+<p><strong>Alternative to compare:</strong> A doctest can suit tiny documentation examples, while pytest is clearer for fixtures, parametrization, exceptions, and larger behavior contracts.</p>
+<p><strong>Boundary to test:</strong> Empty input, exact bounds, malformed values, repeated calls, and cleanup after an exception reveal weak tests.</p>
+<p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># Example function</span>
 <span>def add(a, b):</span>
 <span>    return a + b</span>
 <span> </span>
@@ -418,52 +605,119 @@ def test_normalize_age_rejects_negative() -&gt; None:
 <span>assert add(2,3) == 5</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Write tests for <code>safe_divide</code> and <code>validate_email</code>. <strong>Hint:</strong> list the contract&#x27;s normal, boundary, and invalid cases before writing test code.</li>
-<li>Add a negative test using <code>pytest.raises</code>. <strong>Hint:</strong> assert the narrow exception type and, when stable, a meaningful part of its message.</li>
+<li>Write pytest tests for <code>safe_divide(numerator, denominator)</code> and <code>validate_email(text)</code>. <strong>Coverage:</strong> one ordinary result, negative values, zero denominator, one accepted bounded email example, and several rejected near misses. <strong>Constraints:</strong> name each behavior clearly and compare observable return values directly. <strong>Verify:</strong> run the test file from the repository root and confirm all intended cases are collected.</li>
 </ol>
-<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Add negative tests with <code>pytest.raises</code> for the narrow exception types documented by both functions. <strong>Constraints:</strong> keep only the expected failing call inside each context manager and match one stable, useful message fragment. <strong>Verify:</strong> temporarily change the expected exception once to observe a meaningful failure, then restore it.</li>
+</ol>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Test observable contracts across normal, boundary, and invalid inputs. A good failure explains which behavior changed.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict how pytest reports <code>assert actual == expected</code> compared with <code>assert check(actual)</code> when the values differ. <strong>Progressive hint:</strong> Direct comparisons usually produce more useful assertion introspection.</li>
-<li><strong>Tracing:</strong> Trace fixture setup, test execution, and teardown when the test passes and when it raises. <strong>Progressive hint:</strong> A yielding fixture resumes after <code>yield</code> for cleanup in both paths.</li>
-<li><strong>Implementation:</strong> Write parameterized tests for a slug function covering ordinary text, extra whitespace, punctuation, and empty text. <strong>Progressive hint:</strong> Each parameter row should communicate one behavior.</li>
-<li><strong>Debugging:</strong> Repair a test whose <code>pytest.raises(Exception)</code> would accept unrelated bugs and whose protected block contains several operations. <strong>Progressive hint:</strong> Assert a narrow exception around one operation.</li>
-<li><strong>Edge case and explanation:</strong> Test floating-point output and <code>NaN</code> correctly. Explain why direct equality is inappropriate for each. <strong>Progressive hint:</strong> Use <code>pytest.approx</code> for tolerance and <code>math.isnan</code> for NaN.</li>
+<li><strong>Prediction:</strong> Predict how pytest reports <code>assert actual == expected</code> compared with <code>assert check(actual)</code> when the values differ. <strong>Progressive hint:</strong> Direct comparisons usually produce more useful assertion introspection. <strong>Verify:</strong> Run both deliberately failing assertions once and compare pytest&#x27;s messages; record which report exposes actual/expected values directly.</li>
+<li><strong>Tracing:</strong> Trace fixture setup, test execution, and teardown when the test passes and when it raises. <strong>Progressive hint:</strong> A yielding fixture resumes after <code>yield</code> for cleanup in both paths. <strong>Verify:</strong> Append events from setup, test, and teardown for pass and raise cases; assert teardown is the final event in both traces.</li>
+<li><strong>Implementation:</strong> Write parameterized tests for a slug function covering ordinary text, extra whitespace, punctuation, and empty text. <strong>Progressive hint:</strong> Each parameter row should communicate one behavior. <strong>Verify:</strong> Confirm pytest reports a separate named case for ordinary, whitespace, punctuation, and empty inputs and that all match the written slug contract.</li>
+<li><strong>Debugging:</strong> Repair a test whose <code>pytest.raises(Exception)</code> would accept unrelated bugs and whose protected block contains several operations. <strong>Progressive hint:</strong> Assert a narrow exception around one operation. <strong>Verify:</strong> Prove the narrow expected error passes, then trigger an unrelated error and confirm the test fails instead of accepting it.</li>
+<li><strong>Edge case and explanation:</strong> Test floating-point output and <code>NaN</code> correctly. Explain why direct equality is inappropriate for each. <strong>Progressive hint:</strong> Use <code>pytest.approx</code> for tolerance and <code>math.isnan</code> for NaN. <strong>Verify:</strong> Assert one computed float passes with <code>pytest.approx</code>, assert <code>math.isnan(value)</code> is true for NaN, and record that <code>value == value</code> is false.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Predict first. Then write small code and assertions below each label.</span>
-<span># Keep the official solution closed until you have tested an honest attempt.</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Write pytest tests for <code>safe_divide(numerator, denominator)</code> and <code>validate_email(text)</code>. <strong>Coverage:</strong> one ordinary result, negative values, zero denominator, one accepted bounded email example, and several rejected near misses. <strong>Constraints:</strong> name each behavior clearly and compare observable return values directly. <strong>Verify:</strong> run the test file from the repository root and confirm all intended cases are collected.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
+<span># Short contract: Write pytest tests for `safe_divide(numerator, denominator)` and `validate_email(text)`. one ordinary result, negative values, zero denominator, one accepted bounded email examp...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 3 — Prediction</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Add negative tests with <code>pytest.raises</code> for the narrow exception types documented by both functions. <strong>Constraints:</strong> keep only the expected failing call inside each context manager and match one stable, useful message fragment. <strong>Verify:</strong> temporarily change the expected exception once to observe a meaningful failure, then restore it.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
+<span># Short contract: Add negative tests with `pytest.raises` for the narrow exception types documented by both functions. keep only the expected failing call inside each context manager and match on...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 4 — Tracing</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict how pytest reports <code>assert actual == expected</code> compared with <code>assert check(actual)</code> when the values differ. <strong>Progressive hint:</strong> Direct comparisons usually produce more useful assertion introspection. <strong>Verify:</strong> Run both deliberately failing assertions once and compare pytest&#x27;s messages; record which report exposes actual/expected values directly.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
+<span># Short contract: Predict how pytest reports `assert actual == expected` compared with `assert check(actual)` when the values differ. Direct comparisons usually produce more useful assertion intr...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 5 — Implementation</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace fixture setup, test execution, and teardown when the test passes and when it raises. <strong>Progressive hint:</strong> A yielding fixture resumes after <code>yield</code> for cleanup in both paths. <strong>Verify:</strong> Append events from setup, test, and teardown for pass and raise cases; assert teardown is the final event in both traces.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
+<span># Short contract: Trace fixture setup, test execution, and teardown when the test passes and when it raises. A yielding fixture resumes after `yield` for cleanup in both paths. Append events from...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 6 — Debugging</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Write parameterized tests for a slug function covering ordinary text, extra whitespace, punctuation, and empty text. <strong>Progressive hint:</strong> Each parameter row should communicate one behavior. <strong>Verify:</strong> Confirm pytest reports a separate named case for ordinary, whitespace, punctuation, and empty inputs and that all match the written slug contract.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
+<span># Short contract: Write parameterized tests for a slug function covering ordinary text, extra whitespace, punctuation, and empty text. Each parameter row should communicate one behavior. Confirm...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 7 — Edge case and explanation</span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair a test whose <code>pytest.raises(Exception)</code> would accept unrelated bugs and whose protected block contains several operations. <strong>Progressive hint:</strong> Assert a narrow exception around one operation. <strong>Verify:</strong> Prove the narrow expected error passes, then trigger an unrelated error and confirm the test fails instead of accepting it.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
+<span># Short contract: Repair a test whose `pytest.raises(Exception)` would accept unrelated bugs and whose protected block contains several operations. Assert a narrow exception around one operation....</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Test floating-point output and <code>NaN</code> correctly. Explain why direct equality is inappropriate for each. <strong>Progressive hint:</strong> Use <code>pytest.approx</code> for tolerance and <code>math.isnan</code> for NaN. <strong>Verify:</strong> Assert one computed float passes with <code>pytest.approx</code>, assert <code>math.isnan(value)</code> is true for NaN, and record that <code>value == value</code> is false.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
+<span># Short contract: Test floating-point output and `NaN` correctly. Explain why direct equality is inappropriate for each. Use `pytest.approx` for tolerance and `math.isnan` for NaN. Assert one com...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -487,94 +741,101 @@ def test_normalize_age_rejects_negative() -&gt; None:
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-10-solutions-testing-with-pytest">Day 10 — Solutions: Testing with Pytest<a class="heading-anchor" href="#solution-1--day-10-solutions-testing-with-pytest" aria-label="Link to this section">#</a></h3>
-<p>We write tests for <code>safe_divide</code> and <code>validate_email</code> (from earlier days) and include a negative test using <code>pytest.raises</code>.</p>
-<p>Contents</p>
+<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
+<p>These worked answers demonstrate <strong>tests as executable contracts and useful failure reports</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
+<p>A test is a small executable example of observable behavior. Arrange the inputs, act once, then assert the output or failure. Tests do not prove a program has no bugs; they make chosen contracts repeatable and reveal when later changes violate them.</p>
+<p>Good cases cover a normal path, exact boundaries, and invalid input. Keep each test focused enough that its name and failure identify the broken behavior. Fixtures own reusable setup and teardown. Parametrized tests express the same contract across several inputs without hiding which case failed.</p>
+<h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
-<li>Exercise 1: Install pytest; write tests for <code>safe_divide</code> and <code>validate_email</code></li>
-<li>Exercise 2: Negative test expecting exceptions</li>
+<li><strong>test case:</strong> one named example with inputs and expected behavior.</li>
+<li><strong>assertion:</strong> a claim that must be true for the test to pass.</li>
+<li><strong>fixture:</strong> reusable setup data or a managed resource supplied to tests.</li>
+<li><strong>parametrization:</strong> running one test contract with multiple named inputs.</li>
+<li><strong>regression:</strong> behavior that used to work but was later broken.</li>
+<li><strong>test isolation:</strong> the property that one test does not depend on another&#x27;s state or order.</li>
 </ul>
-<hr>
-<p>Prereq functions (from Day 3; include here for context/tests)</p>
-<pre><code class="language-python">def safe_divide(a: float, b: float) -&gt; float:
-    if b == 0:
-        raise ZeroDivisionError(&#x27;b must not be 0&#x27;)
-    return a / b
+<h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
+<p>For this lesson&#x27;s <strong>tests as executable contracts and useful failure reports</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Write pytest tests for <code>safe_divide(numerator, denominator)</code> and <code>validate_email(text)</code>. <strong>Coverage:</strong> one ordinary result, negative values, zero denominator, one accepted bounded email example, and several rejected near misses. <strong>Constraints:</strong> name each behavior clearly and compare observable return values directly. <strong>Verify:</strong> run the test file from the repository root and confirm all intended cases are collected.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Write pytest tests for <code>safe_divide(numerator, denominator)</code> and <code>validate_email(text)</code>. Coverage: one ordinary result, negative values, zero denominator, one accepted bounded email example, and several rejected near misses. Constraints: name each behavior clearly and compare observable return values directly. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: run the test file from the repository root and confirm all intended cases are collected. That connects the answer to tests as executable contracts and useful failure reports.</p>
+<pre><code class="language-python">import re
 
-class InvalidEmailError(ValueError):
-    pass
 
-def validate_email(email: str) -&gt; None:
-    if &#x27;@&#x27; not in email:
-        raise InvalidEmailError(&#x27;Missing @ in email&#x27;)</code></pre>
-<p>Install pytest (in your venv)</p>
-<pre><code>pip install pytest</code></pre>
-<p>Project layout</p>
-<pre><code>project/
-  src/
-    mymod.py              # optional location for your functions
-  tests/
-    test_core.py</code></pre>
-<p>tests/test_core.py</p>
+def safe_divide(left: float, right: float) -&gt; float:
+    if right == 0:
+        raise ZeroDivisionError(&quot;right operand must be nonzero&quot;)
+    return left / right
+
+
+def validate_email(text: str) -&gt; bool:
+    if not isinstance(text, str):
+        raise TypeError(&quot;email text must be a string&quot;)
+    return re.fullmatch(r&quot;[^@\s]+@[^@\s]+\.[^@\s]+&quot;, text) is not None</code></pre>
 <pre><code class="language-python">import pytest
 
-from mymod import safe_divide, validate_email, InvalidEmailError
 
-@pytest.mark.parametrize(&#x27;a,b,exp&#x27;, [
-    (10, 2, 5.0),
-    (3, 2, 1.5),
-    (-6, 3, -2.0),
-])
-def test_safe_divide_happy(a, b, exp):
-    assert safe_divide(a, b) == exp
+def test_safe_divide_contract() -&gt; None:
+    assert safe_divide(9, 3) == 3
+    assert safe_divide(-9, 3) == -3
 
-def test_safe_divide_raises():
-    with pytest.raises(ZeroDivisionError):
+
+def test_safe_divide_zero_denominator() -&gt; None:
+    with pytest.raises(ZeroDivisionError, match=&quot;nonzero&quot;):
+        safe_divide(9, 0)
+
+
+@pytest.mark.parametrize(
+    (&quot;text&quot;, &quot;expected&quot;),
+    [(&quot;ada@example.com&quot;, True), (&quot;missing-at.example.com&quot;, False), (&quot;a@b&quot;, False)],
+)
+def test_validate_email(text: str, expected: bool) -&gt; None:
+    assert validate_email(text) is expected</code></pre>
+<p><strong>Verification evidence:</strong> run the test file from the repository root and confirm all intended cases are collected.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Add negative tests with <code>pytest.raises</code> for the narrow exception types documented by both functions. <strong>Constraints:</strong> keep only the expected failing call inside each context manager and match one stable, useful message fragment. <strong>Verify:</strong> temporarily change the expected exception once to observe a meaningful failure, then restore it.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Add negative tests with <code>pytest.raises</code> for the narrow exception types documented by both functions. Constraints: keep only the expected failing call inside each context manager and match one stable, useful message fragment. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: temporarily change the expected exception once to observe a meaningful failure, then restore it. That connects the answer to tests as executable contracts and useful failure reports.</p>
+<pre><code class="language-python">import pytest
+
+
+def test_safe_divide_rejects_zero() -&gt; None:
+    with pytest.raises(ZeroDivisionError, match=&quot;nonzero&quot;):
         safe_divide(1, 0)
 
-def test_validate_email_ok():
-    validate_email(&#x27;user@example.com&#x27;)  # no exception
 
-def test_validate_email_bad():
-    with pytest.raises(InvalidEmailError):
-        validate_email(&#x27;not-an-email&#x27;)</code></pre>
-<p>Run tests</p>
-<pre><code>pytest -q</code></pre>
-<p>Notes</p>
-<ul>
-<li>Use parametrize to cover multiple cases succinctly.</li>
-<li>Use <code>with pytest.raises(...)</code> to assert the exact exception type.</li>
-<li>Keep business logic and tests separate; import the functions under test.</li>
-</ul>
-<hr>
-<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
-<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Write tests for <code>safe_divide</code> and <code>validate_email</code>. <strong>Hint:</strong> list the contract&#x27;s normal, boundary, and invalid cases before writing test code.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Add a negative test using <code>pytest.raises</code>. <strong>Hint:</strong> assert the narrow exception type and, when stable, a meaningful part of its message.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-3-prediction">Exercise 3 — Prediction<a class="heading-anchor" href="#solution-1--exercise-3-prediction" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Predict how pytest reports <code>assert actual == expected</code> compared with <code>assert check(actual)</code> when the values differ.</p>
-<p><strong>Reasoning checkpoint:</strong> Direct comparisons usually produce more useful assertion introspection. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-4-tracing">Exercise 4 — Tracing<a class="heading-anchor" href="#solution-1--exercise-4-tracing" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Trace fixture setup, test execution, and teardown when the test passes and when it raises.</p>
-<p><strong>Reasoning checkpoint:</strong> A yielding fixture resumes after <code>yield</code> for cleanup in both paths. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-5-implementation">Exercise 5 — Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Write parameterized tests for a slug function covering ordinary text, extra whitespace, punctuation, and empty text.</p>
-<p><strong>Reasoning checkpoint:</strong> Each parameter row should communicate one behavior. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-6-debugging">Exercise 6 — Debugging<a class="heading-anchor" href="#solution-1--exercise-6-debugging" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Repair a test whose <code>pytest.raises(Exception)</code> would accept unrelated bugs and whose protected block contains several operations.</p>
-<p><strong>Reasoning checkpoint:</strong> Assert a narrow exception around one operation. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-7-edge-case-and-explanation">Exercise 7 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-7-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Test floating-point output and <code>NaN</code> correctly. Explain why direct equality is inappropriate for each.</p>
-<p><strong>Reasoning checkpoint:</strong> Use <code>pytest.approx</code> for tolerance and <code>math.isnan</code> for NaN. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+def test_validate_email_rejects_non_text() -&gt; None:
+    with pytest.raises(TypeError, match=&quot;must be a string&quot;):
+        validate_email(42)  # type: ignore[arg-type]</code></pre>
+<p>Each context manager encloses only the call expected to fail. Changing either exception class temporarily demonstrates that pytest reports the actual type and stable message before the test is restored.</p>
+<p><strong>Verification evidence:</strong> temporarily change the expected exception once to observe a meaningful failure, then restore it.</p>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict how pytest reports <code>assert actual == expected</code> compared with <code>assert check(actual)</code> when the values differ. <strong>Progressive hint:</strong> Direct comparisons usually produce more useful assertion introspection. <strong>Verify:</strong> Run both deliberately failing assertions once and compare pytest&#x27;s messages; record which report exposes actual/expected values directly.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict how pytest reports <code>assert actual == expected</code> compared with <code>assert check(actual)</code> when the values differ. Progressive hint: Direct comparisons usually produce more useful assertion introspection. Then compare the prediction with this proof target: Run both deliberately failing assertions once and compare pytest&#x27;s messages; record which report exposes actual/expected values directly. This makes tests as executable contracts and useful failure reports observable instead of relying on intuition.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Run both deliberately failing assertions once and compare pytest&#x27;s messages; record which report exposes actual/expected values directly.</p>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace fixture setup, test execution, and teardown when the test passes and when it raises. <strong>Progressive hint:</strong> A yielding fixture resumes after <code>yield</code> for cleanup in both paths. <strong>Verify:</strong> Append events from setup, test, and teardown for pass and raise cases; assert teardown is the final event in both traces.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace fixture setup, test execution, and teardown when the test passes and when it raises. Progressive hint: A yielding fixture resumes after <code>yield</code> for cleanup in both paths. Record the named value, shape, label, or iterator position needed to establish: Append events from setup, test, and teardown for pass and raise cases; assert teardown is the final event in both traces. The trace exposes tests as executable contracts and useful failure reports directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Append events from setup, test, and teardown for pass and raise cases; assert teardown is the final event in both traces.</p>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Implementation:</strong> Write parameterized tests for a slug function covering ordinary text, extra whitespace, punctuation, and empty text. <strong>Progressive hint:</strong> Each parameter row should communicate one behavior. <strong>Verify:</strong> Confirm pytest reports a separate named case for ordinary, whitespace, punctuation, and empty inputs and that all match the written slug contract.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Write parameterized tests for a slug function covering ordinary text, extra whitespace, punctuation, and empty text. Progressive hint: Each parameter row should communicate one behavior. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Confirm pytest reports a separate named case for ordinary, whitespace, punctuation, and empty inputs and that all match the written slug contract. That connects the answer to tests as executable contracts and useful failure reports.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Confirm pytest reports a separate named case for ordinary, whitespace, punctuation, and empty inputs and that all match the written slug contract.</p>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a test whose <code>pytest.raises(Exception)</code> would accept unrelated bugs and whose protected block contains several operations. <strong>Progressive hint:</strong> Assert a narrow exception around one operation. <strong>Verify:</strong> Prove the narrow expected error passes, then trigger an unrelated error and confirm the test fails instead of accepting it.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a test whose <code>pytest.raises(Exception)</code> would accept unrelated bugs and whose protected block contains several operations. Progressive hint: Assert a narrow exception around one operation. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Prove the narrow expected error passes, then trigger an unrelated error and confirm the test fails instead of accepting it. The diagnosis depends on tests as executable contracts and useful failure reports.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Prove the narrow expected error passes, then trigger an unrelated error and confirm the test fails instead of accepting it.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Test floating-point output and <code>NaN</code> correctly. Explain why direct equality is inappropriate for each. <strong>Progressive hint:</strong> Use <code>pytest.approx</code> for tolerance and <code>math.isnan</code> for NaN. <strong>Verify:</strong> Assert one computed float passes with <code>pytest.approx</code>, assert <code>math.isnan(value)</code> is true for NaN, and record that <code>value == value</code> is false.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Test floating-point output and <code>NaN</code> correctly. Explain why direct equality is inappropriate for each. Progressive hint: Use <code>pytest.approx</code> for tolerance and <code>math.isnan</code> for NaN. Values below, at, and above the named boundary must produce the evidence Assert one computed float passes with <code>pytest.approx</code>, assert <code>math.isnan(value)</code> is true for NaN, and record that <code>value == value</code> is false. Those cases show how tests as executable contracts and useful failure reports behaves at its edge.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert one computed float passes with <code>pytest.approx</code>, assert <code>math.isnan(value)</code> is true for NaN, and record that <code>value == value</code> is false.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Test observable contracts across normal, boundary, and invalid inputs. A good failure explains which behavior changed.</p>
-<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
-<h5 id="solution-1--practices-1-2-readable-failures-and-reliable-cleanup">Practices 1–2 — Readable failures and reliable cleanup<a class="heading-anchor" href="#solution-1--practices-1-2-readable-failures-and-reliable-cleanup" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-readable-failures-and-reliable-cleanup">Shared implementation for Exercises 3–4 — Readable failures and reliable cleanup<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-readable-failures-and-reliable-cleanup" aria-label="Link to this section">#</a></h5>
 <p>Direct value comparisons let pytest display the differing values. A yielding fixture&#x27;s code after <code>yield</code> behaves like a <code>finally</code> cleanup step.</p>
-<h5 id="solution-1--practices-3-5-focused-tests">Practices 3–5 — Focused tests<a class="heading-anchor" href="#solution-1--practices-3-5-focused-tests" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-focused-tests">Shared implementation for Exercises 5–7 — Focused tests<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-focused-tests" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">import math
 import re
 
@@ -616,7 +877,7 @@ def test_float_and_nan_semantics() -&gt; None:
     assert math.isnan(missing)</code></pre>
 <p><code>NaN != NaN</code> by IEEE floating-point design, so equality cannot recognize it. Tolerance checks should use a scale appropriate to the domain rather than a randomly large allowance.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -624,7 +885,7 @@ def test_float_and_nan_semantics() -&gt; None:
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -750,7 +1011,38 @@ def test_float_and_nan_semantics() -&gt; None:
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><code>NaN != NaN</code> by IEEE floating-point design, so equality cannot recognize it. Tolerance checks should use a scale appropriate to the domain rather than a randomly large allowance.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-10`
+(Day 10 — Testing with pytest). Direct catalog prerequisites: `python-09`.
+I have completed the direct prerequisites: `python-09`. Emphasize tests as executable contracts and useful failure reports.
+Read `python/ds-60day/companion-guides/day10_testing_pytest.md` and use the learner notebook
+`python/ds-60day/notebooks/day10_testing_pytest.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-09.html"><small>Previous lesson</small><strong>python-09</strong><span>Modules Packages</span></a>
@@ -842,6 +1134,23 @@ def test_float_and_nan_semantics() -&gt; None:
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

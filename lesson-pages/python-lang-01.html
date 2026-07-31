@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this Python file from the repository environment</h2>
           <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_lang_01_typing_data_model.py</code>.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,12 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
-          
+
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--advanced-typing-and-the-python-data-model">Advanced typing and the Python data model<a class="heading-anchor" href="#guide--advanced-typing-and-the-python-data-model" aria-label="Link to this section">#</a></h3>
 <p><strong>Stable ID:</strong> <code>python-lang-01</code></p>
 <p><strong>Level:</strong> advanced</p>
@@ -333,52 +372,122 @@ NonBlankText      -&gt; descriptor class/instance access
 ApiRecord         -&gt; cooperative super() through its MRO
 Handler           -&gt; __init_subclass__ registry</code></pre>
 <p>Static checking catches impossible uses before execution. Runtime code still validates text, schemas, transaction state, and descriptor assignments.</p>
+<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_lang_01_typing_data_model.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_lang_01_typing_data_model.py</code></pre>
+<p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
+<h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
+<p>Type hints describe contracts for static tools and readers; they do not automatically validate runtime data. A Protocol is structural: a class satisfies it by providing required members, without inheritance. Covariance is safe for values a container only produces; mutable read/write containers are generally invariant.</p>
+<p>Python syntax such as iteration, context management, attribute access, and <code>super()</code> is powered by data-model protocols. Implementing these hooks means honoring their full lifecycle: <code>StopIteration</code>, exception propagation and cleanup, descriptor class/instance access, and cooperative method-resolution order.</p>
+<ul>
+<li><strong><code>Protocol</code> + <code>TypeVar</code>:</strong> expresses the smallest structural interface and its variance from producer/consumer behavior.</li>
+<li><strong><code>@overload</code> signatures + one implementation:</strong> gives static callers precise return types while runtime code still validates the discriminant.</li>
+<li><strong><code><strong>iter</strong></code> / <code><strong>next</strong></code> / <code><strong>enter</strong></code> / <code><strong>exit</strong></code>:</strong> participates in Python-managed lifecycle and must honor exhaustion, cleanup, and exception rules.</li>
+</ul>
+<h5 id="guide--micro-example-a-show-structural-compatibility-without-inheritance">Micro-example A — show structural compatibility without inheritance<a class="heading-anchor" href="#guide--micro-example-a-show-structural-compatibility-without-inheritance" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">from typing import Protocol
+
+
+class Named(Protocol):
+    @property
+    def name(self) -&gt; str: ...
+
+
+class PlainRecord:
+    def __init__(self, name):
+        self.name = name
+
+
+def label(value: Named) -&gt; str:
+    return value.name.upper()
+
+
+print(label(PlainRecord(&quot;ada&quot;)))
+assert label(PlainRecord(&quot;ada&quot;)) == &quot;ADA&quot;</code></pre>
+<p><strong>Expected observation:</strong> <code>PlainRecord</code> never inherits from <code>Named</code>; static structural matching uses its available member.</p>
+<p><strong>Why it matters:</strong> At runtime, the provided <code>name</code> is actually a string; the Protocol alone does not validate decoded input.</p>
+<h5 id="guide--micro-example-b-honor-iterator-exhaustion-and-partial-batches">Micro-example B — honor iterator exhaustion and partial batches<a class="heading-anchor" href="#guide--micro-example-b-honor-iterator-exhaustion-and-partial-batches" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">iterator = iter([(&quot;a&quot;, &quot;b&quot;), (&quot;c&quot;,)])
+assert next(iterator) == (&quot;a&quot;, &quot;b&quot;)
+assert next(iterator) == (&quot;c&quot;,)
+try:
+    next(iterator)
+except StopIteration:
+    print(&quot;iterator exhausted exactly once input ended&quot;)</code></pre>
+<p><strong>Expected observation:</strong> The final partial batch is a valid value; only the following call signals exhaustion.</p>
+<p><strong>Why it matters:</strong> Empty and partial batches are part of the iterator&#x27;s documented contract.</p>
+<h5 id="guide--debugging-and-transfer">Debugging and transfer<a class="heading-anchor" href="#guide--debugging-and-transfer" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Assuming <code>isinstance</code> with a runtime Protocol validates generic arguments or decoded field types.</p>
+<p><strong>Diagnostic:</strong> Run mypy/pyright on intended and intentionally invalid uses, then separately test runtime boundary validation and every data-model lifecycle edge.</p>
+<p><strong>Transfer question:</strong> How would a read-only covariant repository change if it gained a <code>save(value)</code> method?</p>
+<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--1-complete-and-type-the-overloaded-parser">1. Complete and type the overloaded parser<a class="heading-anchor" href="#guide--1-complete-and-type-the-overloaded-parser" aria-label="Link to this section">#</a></h5>
 <p>Implement the three promised return behaviors. Reject boolean text other than <code>true</code> and <code>false</code>. In VS Code, inspect the inferred type of:</p>
 <pre><code class="language-python">number = parse_scalar(&quot;12&quot;, &quot;int&quot;)
 flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <p>Passing a variable typed as arbitrary <code>str</code> needs a broader overload or prior narrowing; overloads do not inspect future runtime text.</p>
+<p><strong>Verify:</strong> Complete and type the overloaded parser — assert parse_scalar(&#x27;12&#x27;,&#x27;int&#x27;) returns int 12, parse_scalar(&#x27;true&#x27;,&#x27;bool&#x27;) returns bool True, and the float case has its declared type; invalid Boolean text raises ValueError and mypy reveals the two Literal-call result types without errors.</p>
 <h5 id="guide--2-implement-the-iterator-protocol">2. Implement the iterator protocol<a class="heading-anchor" href="#guide--2-implement-the-iterator-protocol" aria-label="Link to this section">#</a></h5>
 <p>Complete <code>Batches.<strong>next</strong></code>. Return tuples, advance the offset, and raise <code>StopIteration</code> only after exhaustion. Test empty input and a final partial batch.</p>
+<p><strong>Verify:</strong> Implement the iterator protocol — assert list(Batches([],2)) == [] and list(Batches([1,2,3],2)) == [(1,2),(3,)]; after exhaustion, another next() must raise StopIteration without changing the stored offset.</p>
 <h5 id="guide--3-reason-about-variance">3. Reason about variance<a class="heading-anchor" href="#guide--3-reason-about-variance" aria-label="Link to this section">#</a></h5>
 <p>Assign <code>SequenceReader[str]</code> to <code>Reader[object]</code>; this is safe because callers only read. Explain why a mutable repository of strings cannot be treated as a repository of objects: a caller might store an integer into it.</p>
+<p><strong>Verify:</strong> Reason about variance — save a mypy transcript where SequenceReader[str] is accepted as Reader[object] and a mutable string repository is rejected as a mutable object repository; include the concrete unsafe integer-write counterexample.</p>
 <h5 id="guide--4-model-events-with-typeddict">4. Model events with TypedDict<a class="heading-anchor" href="#guide--4-model-events-with-typeddict" aria-label="Link to this section">#</a></h5>
 <p>Add a third event with a unique literal <code>kind</code>. Update <code>describe_event</code> and let the checker identify unhandled or invalid fields. Add runtime validation at the JSON boundary; TypedDict alone does not validate decoded data.</p>
+<p><strong>Verify:</strong> Model events with TypedDict — mypy must reject one missing/invalid field and accept all three literal-kind events after exhaustive dispatch; runtime validation returns immutable domain data for valid JSON and a named error for an unknown kind.</p>
 <h5 id="guide--5-exercise-context-manager-failure">5. Exercise context-manager failure<a class="heading-anchor" href="#guide--5-exercise-context-manager-failure" aria-label="Link to this section">#</a></h5>
 <p>Append inside <code>Transaction</code>, then raise. Verify the target remains unchanged and the exception propagates. Returning true from <code><strong>exit</strong></code> would suppress it; this implementation deliberately returns false.</p>
+<p><strong>Verify:</strong> Exercise context-manager failure — start with target [&#x27;before&#x27;], append inside Transaction, and raise a sentinel RuntimeError; assert the target remains [&#x27;before&#x27;] and the same exception object/message reaches the caller.</p>
 <h5 id="guide--6-trace-descriptor-lookup">6. Trace descriptor lookup<a class="heading-anchor" href="#guide--6-trace-descriptor-lookup" aria-label="Link to this section">#</a></h5>
 <p>Compare <code>Customer.name</code> with <code>Customer(&quot;Ada&quot;).name</code>. Explain why the descriptor returns itself for class access. Corrupt the private field deliberately and observe the runtime type guard.</p>
+<p><strong>Verify:</strong> Trace descriptor lookup — assert Customer.name returns the descriptor object, Customer(&#x27;Ada&#x27;).name returns &#x27;Ada&#x27;, and corrupting the private storage with a non-string makes instance access raise the declared TypeError.</p>
 <h5 id="guide--7-draw-the-mro">7. Draw the MRO<a class="heading-anchor" href="#guide--7-draw-the-mro" aria-label="Link to this section">#</a></h5>
 <p>Print <code>ApiRecord.<strong>mro</strong></code>. Predict the label before calling it. Every mixin uses cooperative <code>super()</code>; directly naming a parent would skip or duplicate work.</p>
+<p><strong>Verify:</strong> Draw the MRO — record the predicted label and ApiRecord.<strong>mro</strong> before invocation, then assert the observed label matches and every expected mixin/class appears once in MRO order.</p>
 <h5 id="guide--8-bound-metaclass-use">8. Bound metaclass use<a class="heading-anchor" href="#guide--8-bound-metaclass-use" aria-label="Link to this section">#</a></h5>
 <p>Add a second <code>Handler</code> with <code><strong>init_subclass</strong></code>. Survey how a metaclass could enforce the same rule, then state why the hook is preferable here. Use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.</p>
+<p><strong>Verify:</strong> Bound metaclass use — add a second Handler with init subclass; survey how a metaclass could enforce the same rule, then state why the hook is preferable here; use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.</p>
 <h5 id="guide--extended-professional-practice">Extended professional practice<a class="heading-anchor" href="#guide--extended-professional-practice" aria-label="Link to this section">#</a></h5>
 <p>These exercises move from prediction and implementation through debugging, operational trade-offs, and review. Keep the default path deterministic and offline; optional connected behavior must remain explicit.</p>
 <h5 id="guide--exercise-9-design-a-structural-protocol">Exercise 9 — design a structural Protocol<a class="heading-anchor" href="#guide--exercise-9-design-a-structural-protocol" aria-label="Link to this section">#</a></h5>
 <p>Define a minimal generic <code>Serializer[T]</code> Protocol and implement JSON and text serializers without inheritance. Add a consumer and let mypy reject one incompatible implementation.</p>
 <p><strong>Progressive hint:</strong> Protocol methods express only what the consumer needs. Use a 3.11-compatible TypeVar and abstract collection input types.</p>
+<p><strong>Verify:</strong> design a structural Protocol — run mypy positive cases for JSON/text Serializer implementations and one negative implementation with the wrong return type; the consumer must work without inheritance and the negative fixture must fail at the protocol boundary.</p>
 <h5 id="guide--exercise-10-preserve-signatures-with-paramspec">Exercise 10 — preserve signatures with ParamSpec<a class="heading-anchor" href="#guide--exercise-10-preserve-signatures-with-paramspec" aria-label="Link to this section">#</a></h5>
 <p>Write a timing decorator that preserves arbitrary positional/keyword parameters and return type, injects a log sink/clock for tests, and re-raises the wrapped exception unchanged.</p>
 <p><strong>Progressive hint:</strong> Use <code>ParamSpec</code>, a return <code>TypeVar</code>, <code>Callable[P, R]</code>, and <code>functools.wraps</code>.</p>
+<p><strong>Verify:</strong> preserve signatures with ParamSpec — mypy must preserve the wrapped positional/keyword signature and return type; injected fake clock/sink tests assert one duration record, functools.wraps metadata, return-value parity, and unchanged exception propagation.</p>
 <h5 id="guide--exercise-11-narrow-decoded-data-safely">Exercise 11 — narrow decoded data safely<a class="heading-anchor" href="#guide--exercise-11-narrow-decoded-data-safely" aria-label="Link to this section">#</a></h5>
 <p>Implement a <code>TypeGuard</code> that validates a decoded JSON object as a specific TypedDict, including exact required keys, value types, and the bool-versus-int edge case.</p>
 <p><strong>Progressive hint:</strong> <code>isinstance(True, int)</code> is true. Test bool explicitly before accepting integer fields, and reject unknown keys if the boundary is strict.</p>
+<p><strong>Verify:</strong> narrow decoded data safely — assert the TypeGuard accepts exactly the required-key/type fixture and rejects missing, extra, wrong-type, and bool-in-an-int-field fixtures; inside the accepted branch mypy must narrow to the TypedDict.</p>
 <h5 id="guide--exercise-12-choose-frozen-slots-and-hash-semantics">Exercise 12 — choose frozen, slots, and hash semantics<a class="heading-anchor" href="#guide--exercise-12-choose-frozen-slots-and-hash-semantics" aria-label="Link to this section">#</a></h5>
 <p>Create a small value-object dataclass and compare mutable, frozen, slotted, and <code>unsafe_hash</code> choices. Use it as a dictionary key and show which combinations preserve hash invariants.</p>
 <p><strong>Progressive hint:</strong> Hashable keys must not change equality-relevant fields while stored. <code>unsafe_hash</code> does not make mutation safe.</p>
+<p><strong>Verify:</strong> choose frozen, slots, and hash semantics — print equality/hash behavior for mutable, frozen, slotted, and unsafe_hash variants; assert only a value whose equality fields cannot mutate remains a retrievable dictionary key after attempted mutation.</p>
 <h5 id="guide--exercise-13-implement-cooperative-equality">Exercise 13 — implement cooperative equality<a class="heading-anchor" href="#guide--exercise-13-implement-cooperative-equality" aria-label="Link to this section">#</a></h5>
 <p>Implement <code><strong>eq</strong></code> for a value type so unrelated types receive <code>NotImplemented</code>, subclasses behave deliberately, and hashing remains consistent. Contrast this with returning <code>False</code> immediately.</p>
 <p><strong>Progressive hint:</strong> <code>NotImplemented</code> lets Python try the reflected comparison and then fall back appropriately; it is not the same object as <code>NotImplementedError</code>.</p>
+<p><strong>Verify:</strong> implement cooperative equality — assert equal values have equal hashes, unequal values compare false, direct <strong>eq</strong> with an unrelated type returns NotImplemented, and one reflected-comparison fixture demonstrates why returning False immediately differs.</p>
 <h5 id="guide--exercise-14-evolve-a-typed-serialization-boundary">Exercise 14 — evolve a typed serialization boundary<a class="heading-anchor" href="#guide--exercise-14-evolve-a-typed-serialization-boundary" aria-label="Link to this section">#</a></h5>
 <p>Version a discriminated TypedDict union, add an optional field to one event, and parse old/new payloads into immutable domain objects. Define unknown-version and unknown-kind failures.</p>
 <p><strong>Progressive hint:</strong> Narrow on literal version/kind only after runtime validation. Keep wire payloads separate from trusted domain types.</p>
+<p><strong>Verify:</strong> evolve a typed serialization boundary — parse one old and one new payload into the expected immutable objects; assert the optional field default, round-trip version/kind, and named unknown-version and unknown-kind errors.</p>
 <h5 id="guide--exercise-15-trace-weak-references-and-caches">Exercise 15 — trace weak references and caches<a class="heading-anchor" href="#guide--exercise-15-trace-weak-references-and-caches" aria-label="Link to this section">#</a></h5>
 <p>Compare a normal dictionary cache with <code>WeakValueDictionary</code> for objects that support weak references. Drop strong references, force collection only as an observation, and state when cache disappearance is acceptable.</p>
 <p><strong>Progressive hint:</strong> Weak caches do not own values. Slotted classes need weak-reference support explicitly, and collection timing is not a business deadline.</p>
+<p><strong>Verify:</strong> trace weak references and caches — after dropping the only strong reference, assert the normal cache still owns its value while WeakValueDictionary may lose it after collection; test a slotted class with and without weak-reference support.</p>
 <h5 id="guide--exercise-16-review-typing-compatibility">Exercise 16 — review typing compatibility<a class="heading-anchor" href="#guide--exercise-16-review-typing-compatibility" aria-label="Link to this section">#</a></h5>
 <p>Change a public function from accepting <code>Sequence[str]</code> to <code>list[str]</code>, and another return from <code>list[str]</code> to <code>Sequence[str]</code>. Analyze source compatibility for callers and implement a deprecation-safe alternative.</p>
 <p><strong>Progressive hint:</strong> Parameter types are consumer inputs; narrowing them breaks callers. Return types can often become more specific, not arbitrarily more abstract.</p>
+<p><strong>Verify:</strong> review typing compatibility — save mypy caller fixtures showing the Sequence[str]-to-list[str] parameter narrowing breaks a valid tuple caller and analyze the return change separately; test the compatibility wrapper and its deprecation warning.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>All examples parse on Python 3.11.</li>
@@ -408,17 +517,46 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <li><strong>A metaclass solves ordinary validation:</strong> a descriptor or subclass hook is usually simpler.</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Apply these boundaries to <code>python-test-01</code>, <code>python-svc-01</code>, and the engineering bridge. For deeper study, add a typed async context manager and compare static checker diagnostics with explicit runtime validation.</p></div>
+<p>Apply these boundaries to <code>python-test-01</code>, <code>python-svc-01</code>, and the engineering bridge. For deeper study, add a typed async context manager and compare static checker diagnostics with explicit runtime validation.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<pre><code class="language-text">Tutor me through `python-lang-01` — Advanced typing and the Python data model.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize static type contracts, structural protocols, overloads, and Python data-model hooks. Use exactly these maintained learner materials:
+- guide: `python/professional/companion-guides/py_lang_01_typing_data_model.md`
+- learner artifact: `python/professional/lessons/py_lang_01_typing_data_model.py`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-12`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -435,13 +573,74 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
               type="button"
               data-launch-artifact="Python source file"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-lang-01 learner lab: typing and the Python data model.&quot;&quot;&quot;</span>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-lang-01 learner lab: typing and the Python data model.</span>
+<span> </span>
+<span>Professional learner deep dive (python-lang-01)</span>
+<span>------------------------------------------------</span>
+<span> </span>
+<span>Mental model:</span>
+<span>Type hints describe contracts for static tools and readers; they do not automatically validate</span>
+<span>runtime data. A Protocol is structural: a class satisfies it by providing required members,</span>
+<span>without inheritance. Covariance is safe for values a container only produces; mutable read/write</span>
+<span>containers are generally invariant.  Python syntax such as iteration, context management,</span>
+<span>attribute access, and `super()` is powered by data-model protocols. Implementing these hooks</span>
+<span>means honoring their full lifecycle: `StopIteration`, exception propagation and cleanup,</span>
+<span>descriptor class/instance access, and cooperative method-resolution order.</span>
+<span> </span>
+<span>API/boundary anatomy:</span>
+<span>* `Protocol` + `TypeVar`: expresses the smallest structural interface and its variance from</span>
+<span>  producer/consumer behavior.</span>
+<span>* `@overload` signatures + one implementation: gives static callers precise return types while</span>
+<span>  runtime code still validates the discriminant.</span>
+<span>* `__iter__` / `__next__` / `__enter__` / `__exit__`: participates in Python-managed lifecycle</span>
+<span>  and must honor exhaustion, cleanup, and exception rules.</span>
+<span> </span>
+<span>Micro-example A — show structural compatibility without inheritance::</span>
+<span> </span>
+<span>    from typing import Protocol</span>
+<span> </span>
+<span>    class Named(Protocol):</span>
+<span>        @property</span>
+<span>        def name(self) -&gt; str: ...</span>
+<span> </span>
+<span>    class PlainRecord:</span>
+<span>        def __init__(self, name):</span>
+<span>            self.name = name</span>
+<span> </span>
+<span>    def label(value: Named) -&gt; str:</span>
+<span>        return value.name.upper()</span>
+<span> </span>
+<span>    print(label(PlainRecord(&quot;ada&quot;)))</span>
+<span>    assert label(PlainRecord(&quot;ada&quot;)) == &quot;ADA&quot;</span>
+<span> </span>
+<span>Expected: `PlainRecord` never inherits from `Named`; static structural matching uses its</span>
+<span>          available member.</span>
+<span> </span>
+<span>Micro-example B — honor iterator exhaustion and partial batches::</span>
+<span> </span>
+<span>    iterator = iter([(&quot;a&quot;, &quot;b&quot;), (&quot;c&quot;,)])</span>
+<span>    assert next(iterator) == (&quot;a&quot;, &quot;b&quot;)</span>
+<span>    assert next(iterator) == (&quot;c&quot;,)</span>
+<span>    try:</span>
+<span>        next(iterator)</span>
+<span>    except StopIteration:</span>
+<span>        print(&quot;iterator exhausted exactly once input ended&quot;)</span>
+<span> </span>
+<span>Expected: The final partial batch is a valid value; only the following call signals exhaustion.</span>
+<span> </span>
+<span>Debugging rule: Run mypy/pyright on intended and intentionally invalid uses, then separately</span>
+<span>                test runtime boundary validation and every data-model lifecycle edge.</span>
+<span> </span>
+<span>The snippets demonstrate mechanics only. They do not complete the</span>
+<span>numbered TODOs below; implement those from their stated contracts and</span>
+<span>prove normal, boundary, and failure behavior.</span>
+<span>&quot;&quot;&quot;</span>
 <span> </span>
 <span>from __future__ import annotations</span>
 <span> </span>
@@ -515,96 +714,96 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <span># `true` and `false`. In VS Code, inspect the inferred types of</span>
 <span># `parse_scalar(&quot;12&quot;, &quot;int&quot;)` and `parse_scalar(&quot;true&quot;, &quot;bool&quot;)`. A variable typed as</span>
 <span># arbitrary `str` needs a broader overload or prior narrowing.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 2 — Implement the iterator protocol</span>
 <span># Prompt: Complete `Batches.__next__`. Return tuples, advance the offset, and raise</span>
 <span># `StopIteration` only after exhaustion. Test empty input and a final partial batch.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 3 — Reason about variance</span>
 <span># Prompt: Assign `SequenceReader[str]` to `Reader[object]`; this is safe because callers</span>
 <span># only read. Explain why a mutable repository of strings cannot be treated as a repository</span>
 <span># of objects: a caller might store an integer into it.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 4 — Model events with TypedDict</span>
 <span># Prompt: Add a third event with a unique literal `kind`. Update `describe_event` and let</span>
 <span># the checker identify unhandled or invalid fields. Add runtime validation at the JSON</span>
 <span># boundary; TypedDict alone does not validate decoded data.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 5 — Exercise context-manager failure</span>
 <span># Prompt: Append inside `Transaction`, then raise. Verify the target remains unchanged and</span>
 <span># the exception propagates. Returning true from `__exit__` would suppress it; this</span>
 <span># implementation deliberately returns false.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 6 — Trace descriptor lookup</span>
 <span># Prompt: Compare `Customer.name` with `Customer(&quot;Ada&quot;).name`. Explain why the descriptor</span>
 <span># returns itself for class access. Corrupt the private field deliberately and observe the</span>
 <span># runtime type guard.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 7 — Draw the MRO</span>
 <span># Prompt: Print `ApiRecord.__mro__`. Predict the label before calling it. Every mixin uses</span>
 <span># cooperative `super()`; directly naming a parent would skip or duplicate work.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 8 — Bound metaclass use</span>
 <span># Prompt: Add a second `Handler` with `__init_subclass__`. Survey how a metaclass could</span>
 <span># enforce the same rule, then state why the hook is preferable here. Use a metaclass only</span>
 <span># when class-creation behavior cannot be expressed by descriptors, decorators, or subclass</span>
 <span># hooks.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 9 — design a structural Protocol</span>
 <span># Prompt: Define a minimal generic `Serializer[T]` Protocol and implement JSON and text</span>
 <span># serializers without inheritance. Add a consumer and let mypy reject one incompatible</span>
 <span># implementation.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 10 — preserve signatures with ParamSpec</span>
 <span># Prompt: Write a timing decorator that preserves arbitrary positional/keyword parameters</span>
 <span># and return type, injects a log sink/clock for tests, and re-raises the wrapped exception</span>
 <span># unchanged.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 11 — narrow decoded data safely</span>
 <span># Prompt: Implement a `TypeGuard` that validates a decoded JSON object as a specific</span>
 <span># TypedDict, including exact required keys, value types, and the bool-versus-int edge</span>
 <span># case.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 12 — choose frozen, slots, and hash semantics</span>
 <span># Prompt: Create a small value-object dataclass and compare mutable, frozen, slotted, and</span>
 <span># `unsafe_hash` choices. Use it as a dictionary key and show which combinations preserve</span>
 <span># hash invariants.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 13 — implement cooperative equality</span>
 <span># Prompt: Implement `__eq__` for a value type so unrelated types receive `NotImplemented`,</span>
 <span># subclasses behave deliberately, and hashing remains consistent. Contrast this with</span>
 <span># returning `False` immediately.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 14 — evolve a typed serialization boundary</span>
 <span># Prompt: Version a discriminated TypedDict union, add an optional field to one event, and</span>
 <span># parse old/new payloads into immutable domain objects. Define unknown-version and</span>
 <span># unknown-kind failures.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 15 — trace weak references and caches</span>
 <span># Prompt: Compare a normal dictionary cache with `WeakValueDictionary` for objects that</span>
 <span># support weak references. Drop strong references, force collection only as an</span>
 <span># observation, and state when cache disappearance is acceptable.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 16 — review typing compatibility</span>
 <span># Prompt: Change a public function from accepting `Sequence[str]` to `list[str]`, and</span>
 <span># another return from `list[str]` to `Sequence[str]`. Analyze source compatibility for</span>
 <span># callers and implement a deprecation-safe alternative.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># === End numbered professional practice ===</span>
 <span> </span>
@@ -612,15 +811,15 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <span>    self_check()</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -651,6 +850,43 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <p>Metaclasses can customize class creation, but they complicate inheritance and tooling. The solution uses <code><strong>init_subclass</strong></code> for a small registry, which is usually sufficient. Metaclasses remain appropriate for framework-level class construction when simpler hooks cannot express the invariant.</p>
 <p>Edge cases include exhausted iterators, zero batch sizes, exceptions inside a transaction, corrupted descriptor storage, conflicting mixin order, and a runtime object that has a <code>name</code> attribute of the wrong semantic type.</p>
 <hr>
+<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-1--reasoning-before-implementation">Reasoning before implementation<a class="heading-anchor" href="#solution-1--reasoning-before-implementation" aria-label="Link to this section">#</a></h4>
+<p>The solution aligns each static promise with explicit runtime behavior and implements Python hooks through their observable protocol.</p>
+<ol>
+<li><strong><code>Protocol</code> + <code>TypeVar</code>:</strong> expresses the smallest structural interface and its variance from producer/consumer behavior.</li>
+<li><strong><code>@overload</code> signatures + one implementation:</strong> gives static callers precise return types while runtime code still validates the discriminant.</li>
+<li><strong><code><strong>iter</strong></code> / <code><strong>next</strong></code> / <code><strong>enter</strong></code> / <code><strong>exit</strong></code>:</strong> participates in Python-managed lifecycle and must honor exhaustion, cleanup, and exception rules.</li>
+<li><strong>Prove the failure boundary:</strong> Exercise one normal case, one boundary case, and one injected failure without relying on hidden state.</li>
+</ol>
+<p><strong>Alternative:</strong> Abstract base classes provide nominal inheritance and shared implementation; concrete types may be clearer when substitution is not needed.</p>
+<p><strong>Trade-off:</strong> Precise generics/overloads improve editor and review guarantees but increase API complexity and maintenance when runtime behavior is broad.</p>
+<p><strong>Failure boundary:</strong> <code>bool</code> as <code>int</code>, <code>NotImplemented</code> versus <code>False</code>, descriptor class access, exception suppression, MRO cooperation, and mutable variance require tests.</p>
+<p><strong>Verification:</strong> Run static positive/negative cases, validate decoded data at runtime, test iterator/context/descriptor boundaries, and trace MRO plus cleanup under exceptions.</p>
+<h5 id="solution-1--verification-micro-example">Verification micro-example<a class="heading-anchor" href="#solution-1--verification-micro-example" aria-label="Link to this section">#</a></h5>
+<p>Run this small, deterministic case before adapting the reference to a larger system. It gives the reasoning above an executable anchor:</p>
+<pre><code class="language-python">from typing import Protocol
+
+
+class Named(Protocol):
+    @property
+    def name(self) -&gt; str: ...
+
+
+class PlainRecord:
+    def __init__(self, name):
+        self.name = name
+
+
+def label(value: Named) -&gt; str:
+    return value.name.upper()
+
+
+print(label(PlainRecord(&quot;ada&quot;)))
+assert label(PlainRecord(&quot;ada&quot;)) == &quot;ADA&quot;</code></pre>
+<p><strong>Expected observation:</strong> <code>PlainRecord</code> never inherits from <code>Named</code>; static structural matching uses its available member.</p>
+<p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
+<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-lang-01.html#solution-2"><code>py_lang_01_typing_data_model_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
 <h5 id="solution-1--exercise-1-complete-and-type-the-overloaded-parser">Exercise 1 — Complete and type the overloaded parser<a class="heading-anchor" href="#solution-1--exercise-1-complete-and-type-the-overloaded-parser" aria-label="Link to this section">#</a></h5>
@@ -658,41 +894,49 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <p><strong>Reference reasoning:</strong> Static types describe public contracts while Python&#x27;s runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Complete and type the overloaded parser — assert parse_scalar(&#x27;12&#x27;,&#x27;int&#x27;) returns int 12, parse_scalar(&#x27;true&#x27;,&#x27;bool&#x27;) returns bool True, and the float case has its declared type; invalid Boolean text raises ValueError and mypy reveals the two Literal-call result types without errors.</p>
 <h5 id="solution-1--exercise-2-implement-the-iterator-protocol">Exercise 2 — Implement the iterator protocol<a class="heading-anchor" href="#solution-1--exercise-2-implement-the-iterator-protocol" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Complete <code>Batches.<strong>next</strong></code>. Return tuples, advance the offset, and raise <code>StopIteration</code> only after exhaustion. Test empty input and a final partial batch.</p>
 <p><strong>Reference reasoning:</strong> Static types describe public contracts while Python&#x27;s runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Implement the iterator protocol — assert list(Batches([],2)) == [] and list(Batches([1,2,3],2)) == [(1,2),(3,)]; after exhaustion, another next() must raise StopIteration without changing the stored offset.</p>
 <h5 id="solution-1--exercise-3-reason-about-variance">Exercise 3 — Reason about variance<a class="heading-anchor" href="#solution-1--exercise-3-reason-about-variance" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Assign <code>SequenceReader[str]</code> to <code>Reader[object]</code>; this is safe because callers only read. Explain why a mutable repository of strings cannot be treated as a repository of objects: a caller might store an integer into it.</p>
 <p><strong>Reference reasoning:</strong> Static types describe public contracts while Python&#x27;s runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Reason about variance — save a mypy transcript where SequenceReader[str] is accepted as Reader[object] and a mutable string repository is rejected as a mutable object repository; include the concrete unsafe integer-write counterexample.</p>
 <h5 id="solution-1--exercise-4-model-events-with-typeddict">Exercise 4 — Model events with TypedDict<a class="heading-anchor" href="#solution-1--exercise-4-model-events-with-typeddict" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Add a third event with a unique literal <code>kind</code>. Update <code>describe_event</code> and let the checker identify unhandled or invalid fields. Add runtime validation at the JSON boundary; TypedDict alone does not validate decoded data.</p>
 <p><strong>Reference reasoning:</strong> Static types describe public contracts while Python&#x27;s runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Model events with TypedDict — mypy must reject one missing/invalid field and accept all three literal-kind events after exhaustive dispatch; runtime validation returns immutable domain data for valid JSON and a named error for an unknown kind.</p>
 <h5 id="solution-1--exercise-5-exercise-context-manager-failure">Exercise 5 — Exercise context-manager failure<a class="heading-anchor" href="#solution-1--exercise-5-exercise-context-manager-failure" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Append inside <code>Transaction</code>, then raise. Verify the target remains unchanged and the exception propagates. Returning true from <code><strong>exit</strong></code> would suppress it; this implementation deliberately returns false.</p>
 <p><strong>Reference reasoning:</strong> Static types describe public contracts while Python&#x27;s runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Exercise context-manager failure — start with target [&#x27;before&#x27;], append inside Transaction, and raise a sentinel RuntimeError; assert the target remains [&#x27;before&#x27;] and the same exception object/message reaches the caller.</p>
 <h5 id="solution-1--exercise-6-trace-descriptor-lookup">Exercise 6 — Trace descriptor lookup<a class="heading-anchor" href="#solution-1--exercise-6-trace-descriptor-lookup" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Compare <code>Customer.name</code> with <code>Customer(&quot;Ada&quot;).name</code>. Explain why the descriptor returns itself for class access. Corrupt the private field deliberately and observe the runtime type guard.</p>
 <p><strong>Reference reasoning:</strong> Static types describe public contracts while Python&#x27;s runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Trace descriptor lookup — assert Customer.name returns the descriptor object, Customer(&#x27;Ada&#x27;).name returns &#x27;Ada&#x27;, and corrupting the private storage with a non-string makes instance access raise the declared TypeError.</p>
 <h5 id="solution-1--exercise-7-draw-the-mro">Exercise 7 — Draw the MRO<a class="heading-anchor" href="#solution-1--exercise-7-draw-the-mro" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Print <code>ApiRecord.<strong>mro</strong></code>. Predict the label before calling it. Every mixin uses cooperative <code>super()</code>; directly naming a parent would skip or duplicate work.</p>
 <p><strong>Reference reasoning:</strong> Static types describe public contracts while Python&#x27;s runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Draw the MRO — record the predicted label and ApiRecord.<strong>mro</strong> before invocation, then assert the observed label matches and every expected mixin/class appears once in MRO order.</p>
 <h5 id="solution-1--exercise-8-bound-metaclass-use">Exercise 8 — Bound metaclass use<a class="heading-anchor" href="#solution-1--exercise-8-bound-metaclass-use" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Add a second <code>Handler</code> with <code><strong>init_subclass</strong></code>. Survey how a metaclass could enforce the same rule, then state why the hook is preferable here. Use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.</p>
 <p><strong>Reference reasoning:</strong> Static types describe public contracts while Python&#x27;s runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Bound metaclass use — add a second Handler with init subclass; survey how a metaclass could enforce the same rule, then state why the hook is preferable here; use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.</p>
 <h5 id="solution-1--exercise-9-design-a-structural-protocol">Exercise 9 — design a structural Protocol<a class="heading-anchor" href="#solution-1--exercise-9-design-a-structural-protocol" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Define a minimal generic <code>Serializer[T]</code> Protocol and implement JSON and text serializers without inheritance. Add a consumer and let mypy reject one incompatible implementation.</p>
 <p><strong>Reasoning path:</strong> Protocol methods express only what the consumer needs. Use a 3.11-compatible TypeVar and abstract collection input types.</p>
@@ -700,6 +944,7 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <p>Avoid <code>runtime_checkable</code> unless runtime <code>isinstance</code> is truly required; it checks attribute presence, not full generic signatures or semantic behavior.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> design a structural Protocol — run mypy positive cases for JSON/text Serializer implementations and one negative implementation with the wrong return type; the consumer must work without inheritance and the negative fixture must fail at the protocol boundary.</p>
 <h5 id="solution-1--exercise-10-preserve-signatures-with-paramspec">Exercise 10 — preserve signatures with ParamSpec<a class="heading-anchor" href="#solution-1--exercise-10-preserve-signatures-with-paramspec" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Write a timing decorator that preserves arbitrary positional/keyword parameters and return type, injects a log sink/clock for tests, and re-raises the wrapped exception unchanged.</p>
 <p><strong>Reasoning path:</strong> Use <code>ParamSpec</code>, a return <code>TypeVar</code>, <code>Callable[P, R]</code>, and <code>functools.wraps</code>.</p>
@@ -707,6 +952,7 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <p>Use an injected monotonic clock for deterministic tests. Mypy should reveal the same signature and return type at decorated call sites.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> preserve signatures with ParamSpec — mypy must preserve the wrapped positional/keyword signature and return type; injected fake clock/sink tests assert one duration record, functools.wraps metadata, return-value parity, and unchanged exception propagation.</p>
 <h5 id="solution-1--exercise-11-narrow-decoded-data-safely">Exercise 11 — narrow decoded data safely<a class="heading-anchor" href="#solution-1--exercise-11-narrow-decoded-data-safely" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Implement a <code>TypeGuard</code> that validates a decoded JSON object as a specific TypedDict, including exact required keys, value types, and the bool-versus-int edge case.</p>
 <p><strong>Reasoning path:</strong> <code>isinstance(True, int)</code> is true. Test bool explicitly before accepting integer fields, and reject unknown keys if the boundary is strict.</p>
@@ -714,6 +960,7 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <p>For richer errors, a parser returning a validated dataclass or raising a typed exception is often better than a Boolean guard. TypedDict alone performs no runtime validation.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> narrow decoded data safely — assert the TypeGuard accepts exactly the required-key/type fixture and rejects missing, extra, wrong-type, and bool-in-an-int-field fixtures; inside the accepted branch mypy must narrow to the TypedDict.</p>
 <h5 id="solution-1--exercise-12-choose-frozen-slots-and-hash-semantics">Exercise 12 — choose frozen, slots, and hash semantics<a class="heading-anchor" href="#solution-1--exercise-12-choose-frozen-slots-and-hash-semantics" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Create a small value-object dataclass and compare mutable, frozen, slotted, and <code>unsafe_hash</code> choices. Use it as a dictionary key and show which combinations preserve hash invariants.</p>
 <p><strong>Reasoning path:</strong> Hashable keys must not change equality-relevant fields while stored. <code>unsafe_hash</code> does not make mutation safe.</p>
@@ -721,6 +968,7 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <p>Do not use frozen as a security boundary: contained mutable objects can still change. Validate fields in <code><strong>post_init</strong></code> with <code>object.<strong>setattr</strong></code> only for carefully documented normalization.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> choose frozen, slots, and hash semantics — print equality/hash behavior for mutable, frozen, slotted, and unsafe_hash variants; assert only a value whose equality fields cannot mutate remains a retrievable dictionary key after attempted mutation.</p>
 <h5 id="solution-1--exercise-13-implement-cooperative-equality">Exercise 13 — implement cooperative equality<a class="heading-anchor" href="#solution-1--exercise-13-implement-cooperative-equality" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Implement <code><strong>eq</strong></code> for a value type so unrelated types receive <code>NotImplemented</code>, subclasses behave deliberately, and hashing remains consistent. Contrast this with returning <code>False</code> immediately.</p>
 <p><strong>Reasoning path:</strong> <code>NotImplemented</code> lets Python try the reflected comparison and then fall back appropriately; it is not the same object as <code>NotImplementedError</code>.</p>
@@ -728,6 +976,7 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <p>Test both operand orders, an unrelated object, and subclass behavior. Avoid raising merely because comparison is unsupported.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> implement cooperative equality — assert equal values have equal hashes, unequal values compare false, direct <strong>eq</strong> with an unrelated type returns NotImplemented, and one reflected-comparison fixture demonstrates why returning False immediately differs.</p>
 <h5 id="solution-1--exercise-14-evolve-a-typed-serialization-boundary">Exercise 14 — evolve a typed serialization boundary<a class="heading-anchor" href="#solution-1--exercise-14-evolve-a-typed-serialization-boundary" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Version a discriminated TypedDict union, add an optional field to one event, and parse old/new payloads into immutable domain objects. Define unknown-version and unknown-kind failures.</p>
 <p><strong>Reasoning path:</strong> Narrow on literal version/kind only after runtime validation. Keep wire payloads separate from trusted domain types.</p>
@@ -735,6 +984,7 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <p>Exhaustive <code>assert_never</code> helps the checker find an unhandled trusted union variant, but it cannot replace validation of arbitrary decoded JSON.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> evolve a typed serialization boundary — parse one old and one new payload into the expected immutable objects; assert the optional field default, round-trip version/kind, and named unknown-version and unknown-kind errors.</p>
 <h5 id="solution-1--exercise-15-trace-weak-references-and-caches">Exercise 15 — trace weak references and caches<a class="heading-anchor" href="#solution-1--exercise-15-trace-weak-references-and-caches" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Compare a normal dictionary cache with <code>WeakValueDictionary</code> for objects that support weak references. Drop strong references, force collection only as an observation, and state when cache disappearance is acceptable.</p>
 <p><strong>Reasoning path:</strong> Weak caches do not own values. Slotted classes need weak-reference support explicitly, and collection timing is not a business deadline.</p>
@@ -742,15 +992,17 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <p>Never base correctness on immediate garbage collection. Explicit lifecycle or bounded LRU/TTL policy is preferable for resources and deterministic eviction.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> trace weak references and caches — after dropping the only strong reference, assert the normal cache still owns its value while WeakValueDictionary may lose it after collection; test a slotted class with and without weak-reference support.</p>
 <h5 id="solution-1--exercise-16-review-typing-compatibility">Exercise 16 — review typing compatibility<a class="heading-anchor" href="#solution-1--exercise-16-review-typing-compatibility" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Change a public function from accepting <code>Sequence[str]</code> to <code>list[str]</code>, and another return from <code>list[str]</code> to <code>Sequence[str]</code>. Analyze source compatibility for callers and implement a deprecation-safe alternative.</p>
 <p><strong>Reasoning path:</strong> Parameter types are consumer inputs; narrowing them breaks callers. Return types can often become more specific, not arbitrarily more abstract.</p>
 <p>Requiring <code>list</code> rejects tuple and other valid sequence callers, so retain the abstract <code>Sequence</code> unless mutation is required; if mutation is required, introduce a new API or copy internally. Changing a promised concrete list return to arbitrary Sequence can break callers that append.</p>
 <p>Use checker fixtures representing downstream calls, runtime tests, and a documented migration window. Type-checker compatibility and runtime semantics must both be preserved.</p>
 <p><strong>Common trap:</strong> A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.</p>
-<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p></div>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> review typing compatibility — save mypy caller fixtures showing the Sequence[str]-to-list[str] parameter narrowing breaks a valid tuple caller and analyze the return change separately; test the compatibility wrapper and its deprecation warning.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -758,7 +1010,7 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -1053,7 +1305,51 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
 <span>    raise SystemExit(main())</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-lang-01` — Advanced typing and the Python data model.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize static type contracts, structural protocols, overloads, and Python data-model hooks. Use exactly these maintained learner materials:
+- guide: `python/professional/companion-guides/py_lang_01_typing_data_model.md`
+- learner artifact: `python/professional/lessons/py_lang_01_typing_data_model.py`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-12`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-test-01.html"><small>Previous lesson</small><strong>python-test-01</strong><span>Test Architecture, Doubles, and Generative Testing</span></a>
@@ -1145,6 +1441,23 @@ flag = parse_scalar(&quot;true&quot;, &quot;bool&quot;)</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

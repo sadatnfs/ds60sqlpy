@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-10/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-10-dml-with-subqueries-insert-update-delete-upsert-companion-guide">Day 10 — DML with Subqueries: INSERT/UPDATE/DELETE/UPSERT (Companion Guide)<a class="heading-anchor" href="#guide--day-10-dml-with-subqueries-insert-update-delete-upsert-companion-guide" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -285,6 +384,47 @@
 <li><strong>Prerequisites:</strong> <a href="sql-09.html#guide">Day 09 — correlated subqueries and EXISTS</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-10.html#learner">learner SQL</a> · <a href="sql-10.html#solution-1">solution reasoning</a> · <a href="sql-10.html#solution-2">executable solution</a></li>
 </ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-10 — DML with Subqueries</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-10/lesson/workspace/sql/postgres-60day/day10_dml_with_subqueries.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day10_dml_with_subqueries.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/day10_dml_with_subqueries.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is DML, Upsert, Idempotent. Its worked SQL reads or creates <code>tmp_category_revenue</code>, <code>order_items</code>, <code>products</code>, <code>employees</code>, <code>departments</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: Run the candidate-selection SELECT before the matching UPDATE. Compare its keys with UPDATE ... RETURNING, verify the affected count, and leave the course transaction at ROLLBACK. This preview/modify/reconcile pattern is safer than starting with an unbounded write. The expected contract is that One temporary row per product category. Predict keys, row count, <code>NULL</code> behavior, and ordering before running. Afterwards, compare keys/counts/totals with an independent control. A blank string, SQL <code>NULL</code>, numeric zero, and a missing row are different facts; use <code>COALESCE</code> only after choosing which meaning the business question requires.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day10_dml_with_subqueries.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">CREATE TEMP TABLE tmp_category_revenue AS
+SELECT p.category, ROUND(SUM(oi.unit_price*oi.quantity*(1-oi.discount)),2) AS revenue
+FROM order_items oi
+JOIN products p ON p.product_id = oi.product_id
+GROUP BY p.category;</code></pre>
+<p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
+<p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>category</code> with columns <code>category</code>, and <code>revenue</code> from <code>order_items</code>, and <code>products</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">SELECT category, revenue
+FROM tmp_category_revenue
+ORDER BY revenue DESC, category;</code></pre>
+<p><strong>How to read it:</strong> Example 2: Start with <code>tmp_category_revenue</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>category</code>, and <code>revenue</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 2 returns one row per <code>category</code> with columns <code>category</code>, and <code>revenue</code> from <code>tmp_category_revenue</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Modify a precisely selected row set and inspect affected rows with <code>RETURNING</code>.</li>
@@ -309,13 +449,21 @@
 <p>Modify only reviewed row sets, inspect writes with <code>RETURNING</code>, and make repeat behavior explicit through constraints and rollback-safe tests.</p>
 <p>Attempt each prompt in a scratch SQL file before opening the solution. For every result, write its row grain and expected shape first.</p>
 <ol>
-<li><strong>Query writing:</strong> Materialize category net revenue into a temporary table with <code>INSERT ... SELECT</code>. <strong>Progressive hint:</strong> Declare the temporary schema and aggregate source rows before inserting. <strong>Expected shape:</strong> One temporary row per product category.</li>
-<li><strong>Query writing:</strong> Give Sales and Engineering employees a 5% demonstration raise and return affected rows. <strong>Progressive hint:</strong> Select departments by key, round exact numeric salary, and inspect <code>RETURNING</code>. <strong>Expected shape:</strong> Affected employee rows only; no change persists.</li>
-<li><strong>Query writing:</strong> Delete orders older than one year only when no payment exists, returning candidate keys. <strong>Progressive hint:</strong> Use correlated <code>NOT EXISTS</code>; foreign-key cascades remain rollback-protected. <strong>Expected shape:</strong> Deleted-candidate order rows, then fully restored state.</li>
-<li><strong>Prediction:</strong> Run an upsert twice against a temporary key-value table and prove only one row exists for the key. <strong>Progressive hint:</strong> A primary key supplies the conflict target; the second statement updates rather than inserts. <strong>Expected shape:</strong> One row for <code>source_a</code> with the second value.</li>
-<li><strong>Debugging:</strong> Preview and update a bounded product set while reconciling selected and returned key counts. <strong>Progressive hint:</strong> Store candidate keys in a temporary table and update only through that reviewed set. <strong>Expected shape:</strong> One summary row with equal candidate and updated counts.</li>
-<li><strong>Extension:</strong> Stage product prices and update only rows whose incoming price is nonnegative and actually differs. <strong>Progressive hint:</strong> Use <code>UPDATE ... FROM</code>, validate the stage predicate, and compare with <code>IS DISTINCT FROM</code>. <strong>Expected shape:</strong> Returned rows only for valid changed products.</li>
+<li><strong>Query writing:</strong> Materialize category net revenue into a temporary table with <code>INSERT ... SELECT</code>. <strong>Progressive hint:</strong> Declare the temporary schema and aggregate source rows before inserting. <strong>Inputs/evidence:</strong> For sql-10 Exercise 1, read the target keys from <code>exercise_category_revenue</code>, <code>order_items</code>, and <code>products</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values. <strong>Expected result/shape:</strong> For sql-10 Exercise 1, expected output: One temporary row per product category. The final columns are <code>category</code>. The final order is <code>revenue DESC, category</code>. <strong>Verify:</strong> For sql-10 Exercise 1, materialize the intended <code>category</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>exercise_category_revenue</code>, <code>order_items</code>, and <code>products</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>category</code> values in both cases.</li>
+<li><strong>Query writing:</strong> Give Sales and Engineering employees a 5% demonstration raise and return affected rows. <strong>Progressive hint:</strong> Select departments by key, round exact numeric salary, and inspect <code>RETURNING</code>. <strong>Inputs/evidence:</strong> For sql-10 Exercise 2, read the target keys from <code>employees</code>, and <code>departments</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values. <strong>Expected result/shape:</strong> For sql-10 Exercise 2, expected output: Affected employee rows only; no change persists. The final columns are <code>returning</code>, <code>update</code>, <code>from</code>, and <code>where</code>. <strong>Verify:</strong> For sql-10 Exercise 2, materialize the intended <code>employee_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>employees</code>, and <code>departments</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>employee_id</code> values in both cases.</li>
+<li><strong>Query writing:</strong> Delete orders older than one year only when no payment exists, returning candidate keys. <strong>Progressive hint:</strong> Use correlated <code>NOT EXISTS</code>; foreign-key cascades remain rollback-protected. <strong>Inputs/evidence:</strong> For sql-10 Exercise 3, read the target keys from <code>orders</code>, and <code>payments</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values. <strong>Expected result/shape:</strong> For sql-10 Exercise 3, expected output: Deleted-candidate order rows, then fully restored state. The final columns are <code>from</code>, <code>where</code>, and <code>returning</code>. <strong>Verify:</strong> For sql-10 Exercise 3, materialize the intended <code>order_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>orders</code>, and <code>payments</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>order_id</code> values in both cases.</li>
+<li><strong>Prediction:</strong> Run an upsert twice against a temporary key-value table and prove only one row exists for the key. <strong>Progressive hint:</strong> A primary key supplies the conflict target; the second statement updates rather than inserts. <strong>Inputs/evidence:</strong> For sql-10 Exercise 4, read the target keys from <code>exercise_feed</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values. <strong>Expected result/shape:</strong> For sql-10 Exercise 4, expected output: One row for <code>source_a</code> with the second value. The final columns are <code>source_key</code>, and <code>source_value</code>. The final order is <code>source_key</code>. <strong>Verify:</strong> For sql-10 Exercise 4, materialize the intended <code>source_key</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>exercise_feed</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>source_key</code> values in both cases.</li>
+<li><strong>Debugging:</strong> Preview and update a bounded product set while reconciling selected and returned key counts. <strong>Progressive hint:</strong> Store candidate keys in a temporary table and update only through that reviewed set. <strong>Inputs/evidence:</strong> For sql-10 Exercise 5, read the target keys from <code>products</code>, and <code>exercise_product_candidates</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values. <strong>Expected result/shape:</strong> For sql-10 Exercise 5, expected output: One summary row with equal candidate and updated counts. The final columns are <code>product_id</code>. The final order is <code>p.product_id</code>. <strong>Verify:</strong> For sql-10 Exercise 5, materialize the intended <code>product_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>products</code>, and <code>exercise_product_candidates</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>product_id</code> values in both cases.</li>
+<li><strong>Extension:</strong> Stage product prices and update only rows whose incoming price is nonnegative and actually differs. <strong>Progressive hint:</strong> Use <code>UPDATE ... FROM</code>, validate the stage predicate, and compare with <code>IS DISTINCT FROM</code>. <strong>Inputs/evidence:</strong> For sql-10 Exercise 6, read the target keys from <code>exercise_price_stage</code>, <code>products</code>, and <code>stage.new_price</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values. <strong>Expected result/shape:</strong> For sql-10 Exercise 6, expected output: Returned rows only for valid changed products. The final columns are <code>product_id</code>. The final order is <code>p.product_id</code>. <strong>Verify:</strong> For sql-10 Exercise 6, materialize the intended <code>product_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>exercise_price_stage</code>, <code>products</code>, and <code>stage.new_price</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>product_id</code> values in both cases.</li>
 </ol>
+<h4 id="guide--common-mistakes-and-how-to-recover">Common mistakes and how to recover<a class="heading-anchor" href="#guide--common-mistakes-and-how-to-recover" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Lesson-specific semantic mistake:</strong> Never run an unbounded UPDATE or DELETE; preview candidate keys and do not treat ON CONFLICT as safe without naming its unique key.</li>
+<li><strong>Unexpected row count:</strong> display keys before aggregates, count rows after each join/filter stage, and find the first stage whose grain differs from the contract. Do not hide fanout with <code>DISTINCT</code>.</li>
+<li><strong>Unexpected <code>NULL</code> or missing row:</strong> decide whether the fact is unknown, inapplicable, zero, or absent before using <code>COALESCE</code>; inspect outer-join predicate placement and empty-input aggregate behavior.</li>
+<li><strong>Unstable top/first/last output:</strong> add <code>ORDER BY</code> with a unique final tie-breaker before <code>LIMIT</code> or order-sensitive windows/aggregates.</li>
+<li><strong><code>psql</code> stops on an error:</strong> fix the first error shown by <code>ON_ERROR_STOP</code>, restore the declared transaction/setup state, and rerun the complete file. A later successful statement does not validate a partial run.</li>
+</ul>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Is every write bounded by reviewed keys or a deliberate predicate?</li>
@@ -358,17 +506,45 @@
 <li>INSERT: https://www.postgresql.org/docs/current/sql-insert.html</li>
 <li>UPDATE: https://www.postgresql.org/docs/current/sql-update.html</li>
 <li>UPSERT: https://www.postgresql.org/docs/current/sql-insert.html#SQL-ON-CONFLICT</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-10 — DML with Subqueries.
+
+I have completed the direct catalog prerequisite: `sql-09`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day10_dml_with_subqueries.md
+- Answer-free learner SQL: sql/postgres-60day/day10_dml_with_subqueries.sql
+
+Key terms to teach in context: DML, Upsert, Idempotent. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Run the candidate-selection SELECT before the matching UPDATE. Compare its keys with UPDATE ... RETURNING, verify the affected count, and leave the course transaction at ROLLBACK. This preview/modify/reconcile pattern is safer than starting with an unbounded write.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-10/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -385,13 +561,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 10: INSERT/UPDATE/DELETE with Subqueries (safe via ROLLBACK)</span>
+<span>-- BEGINNER WORKFLOW — sql-10: DML with Subqueries</span>
+<span>-- Guide: sql/postgres-60day/companion-guides/day10_dml_with_subqueries.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-10/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: tmp_category_revenue, order_items, products, employees, departments.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
@@ -450,29 +643,53 @@
 <span>-- Keep answers in your own scratch file; this learner script remains answer-free.</span>
 <span>-- 1. [Query writing] Materialize category net revenue into a temporary table with `INSERT ... SELECT`.</span>
 <span>--    Hint: Declare the temporary schema and aggregate source rows before inserting.</span>
+<span>--    Inputs: For sql-10 Exercise 1, read the target keys from `exercise_category_revenue`, `order_items`, and `products` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
+<span>--    Expected result/shape: For sql-10 Exercise 1, expected output: One temporary row per product category. The final columns are `category`. The final order is `revenue DESC, category`.</span>
+<span>--    Verify: For sql-10 Exercise 1, materialize the intended `category` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_category_revenue`, `order_items`, and `products` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `category` values in both cases.</span>
+<span>--    Hint ladder, rung 1: For sql-10 Exercise 1, start with the first relation in `exercise_category_revenue`, `order_items`, and `products`; after each join, record total rows and distinct `category` so the exact fanout or loss is visible.</span>
 <span>-- 2. [Query writing] Give Sales and Engineering employees a 5% demonstration raise and return affected rows.</span>
 <span>--    Hint: Select departments by key, round exact numeric salary, and inspect `RETURNING`.</span>
+<span>--    Inputs: For sql-10 Exercise 2, read the target keys from `employees`, and `departments` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
+<span>--    Expected result/shape: For sql-10 Exercise 2, expected output: Affected employee rows only; no change persists. The final columns are `returning`, `update`, `from`, and `where`.</span>
+<span>--    Verify: For sql-10 Exercise 2, materialize the intended `employee_id` target set first; require the command tag/`RETURNING` set to match it, then query `employees`, and `departments` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `employee_id` values in both cases.</span>
+<span>--    Hint ladder, rung 1: For sql-10 Exercise 2, materialize the intended `employee_id` target set first; require the command tag/`RETURNING` set to match it, then query `employees`, and `departments` again and prove rollback or idempotent retry.</span>
 <span>-- 3. [Query writing] Delete orders older than one year only when no payment exists, returning candidate keys.</span>
 <span>--    Hint: Use correlated `NOT EXISTS`; foreign-key cascades remain rollback-protected.</span>
+<span>--    Inputs: For sql-10 Exercise 3, read the target keys from `orders`, and `payments` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
+<span>--    Expected result/shape: For sql-10 Exercise 3, expected output: Deleted-candidate order rows, then fully restored state. The final columns are `from`, `where`, and `returning`.</span>
+<span>--    Verify: For sql-10 Exercise 3, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, and `payments` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.</span>
+<span>--    Hint ladder, rung 1: For sql-10 Exercise 3, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, and `payments` again and prove rollback or idempotent retry.</span>
 <span>-- 4. [Prediction] Run an upsert twice against a temporary key-value table and prove only one row exists for the key.</span>
 <span>--    Hint: A primary key supplies the conflict target; the second statement updates rather than inserts.</span>
+<span>--    Inputs: For sql-10 Exercise 4, read the target keys from `exercise_feed` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
+<span>--    Expected result/shape: For sql-10 Exercise 4, expected output: One row for `source_a` with the second value. The final columns are `source_key`, and `source_value`. The final order is `source_key`.</span>
+<span>--    Verify: For sql-10 Exercise 4, materialize the intended `source_key` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_feed` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `source_key` values in both cases.</span>
+<span>--    Hint ladder, rung 1: For sql-10 Exercise 4, materialize the intended `source_key` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_feed` again and prove rollback or idempotent retry.</span>
 <span>-- 5. [Debugging] Preview and update a bounded product set while reconciling selected and returned key counts.</span>
 <span>--    Hint: Store candidate keys in a temporary table and update only through that reviewed set.</span>
+<span>--    Inputs: For sql-10 Exercise 5, read the target keys from `products`, and `exercise_product_candidates` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
+<span>--    Expected result/shape: For sql-10 Exercise 5, expected output: One summary row with equal candidate and updated counts. The final columns are `product_id`. The final order is `p.product_id`.</span>
+<span>--    Verify: For sql-10 Exercise 5, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `products`, and `exercise_product_candidates` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.</span>
+<span>--    Hint ladder, rung 1: For sql-10 Exercise 5, run `updated` one at a time. Record each CTE&#x27;s row count and `product_id` uniqueness before the next stage uses it.</span>
 <span>-- 6. [Extension] Stage product prices and update only rows whose incoming price is nonnegative and actually differs.</span>
 <span>--    Hint: Use `UPDATE ... FROM`, validate the stage predicate, and compare with `IS DISTINCT FROM`.</span>
+<span>--    Inputs: For sql-10 Exercise 6, read the target keys from `exercise_price_stage`, `products`, and `stage.new_price` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
+<span>--    Expected result/shape: For sql-10 Exercise 6, expected output: Returned rows only for valid changed products. The final columns are `product_id`. The final order is `p.product_id`.</span>
+<span>--    Verify: For sql-10 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_price_stage`, `products`, and `stage.new_price` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.</span>
+<span>--    Hint ladder, rung 1: For sql-10 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_price_stage`, `products`, and `stage.new_price` again and prove rollback or idempotent retry.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -496,6 +713,26 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-10-solutions-dml-with-subqueries-insert-update-delete-upsert">Day 10 solutions — DML with Subqueries: INSERT/UPDATE/DELETE/UPSERT<a class="heading-anchor" href="#solution-1--day-10-solutions-dml-with-subqueries-insert-update-delete-upsert" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day10_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day10_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are DML, Upsert, Idempotent. Its worked-model focus is: Run the candidate-selection SELECT before the matching UPDATE. Compare its keys with UPDATE ... RETURNING, verify the affected count, and leave the course transaction at ROLLBACK. This preview/modify/reconcile pattern is safer than starting with an unbounded write.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>These answers align one-for-one with <a href="sql-10.html#learner">day10_dml_with_subqueries.sql</a>. Run only against the disposable <code>advanced_sql_training</code> database. The executable companion wraps every answer in <code>BEGIN</code>/<code>ROLLBACK</code>. The snippets below assume the lesson&#x27;s <code>SET search_path TO training, public;</code> statement. Run the complete executable companion when you want a self-contained check.</p>
 <h4 id="solution-1--reading-contract">Reading contract<a class="heading-anchor" href="#solution-1--reading-contract" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -536,6 +773,16 @@ ORDER BY revenue DESC, category;
 ROLLBACK TO SAVEPOINT exercise_1;</code></pre>
 <p><strong>Expected shape:</strong> One temporary row per product category.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-10 Exercise 1, read the target keys from <code>exercise_category_revenue</code>, <code>order_items</code>, and <code>products</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values.</li>
+<li><strong>Expected result/shape:</strong> For sql-10 Exercise 1, expected output: One temporary row per product category. The final columns are <code>category</code>. The final order is <code>revenue DESC, category</code>.</li>
+<li><strong>Independent verification:</strong> For sql-10 Exercise 1, materialize the intended <code>category</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>exercise_category_revenue</code>, <code>order_items</code>, and <code>products</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>category</code> values in both cases.</li>
+<li><strong>Intermediate relation check:</strong> For sql-10 Exercise 1, start with the first relation in <code>exercise_category_revenue</code>, <code>order_items</code>, and <code>products</code>; after each join, record total rows and distinct <code>category</code> so the exact fanout or loss is visible.</li>
+<li><strong>Clause check:</strong> For sql-10 Exercise 1, the solution actually uses <code>FROM</code>, <code>JOIN ... ON</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>exercise_category_revenue</code>, <code>order_items</code>, and <code>products</code>, preserve one row per <code>category</code>, and finish with <code>category</code> ordered by <code>revenue DESC, category</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-10 Exercise 1, the chosen form is justified by this lesson-specific rationale: Declare the temporary schema and aggregate source rows before inserting. Evaluate another form against the concrete expected result (One temporary row per product category) and the verification above.</li>
+<li><strong>Edge case:</strong> Use an empty target set and a multi-row target set; reconcile the affected <code>category</code> values in both cases.</li>
+</ul>
 <h4 id="solution-1--exercise-2-query-writing">Exercise 2 — Query writing<a class="heading-anchor" href="#solution-1--exercise-2-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Give Sales and Engineering employees a 5% demonstration raise and return affected rows.</p>
 <p><strong>Reasoning:</strong> Select departments by key, round exact numeric salary, and inspect <code>RETURNING</code>.</p>
@@ -560,6 +807,16 @@ RETURNING e.employee_id, e.full_name, e.salary;
 ROLLBACK TO SAVEPOINT exercise_2;</code></pre>
 <p><strong>Expected shape:</strong> Affected employee rows only; no change persists.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-10 Exercise 2, read the target keys from <code>employees</code>, and <code>departments</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values.</li>
+<li><strong>Expected result/shape:</strong> For sql-10 Exercise 2, expected output: Affected employee rows only; no change persists. The final columns are <code>returning</code>, <code>update</code>, <code>from</code>, and <code>where</code>.</li>
+<li><strong>Independent verification:</strong> For sql-10 Exercise 2, materialize the intended <code>employee_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>employees</code>, and <code>departments</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>employee_id</code> values in both cases.</li>
+<li><strong>Intermediate relation check:</strong> For sql-10 Exercise 2, materialize the intended <code>employee_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>employees</code>, and <code>departments</code> again and prove rollback or idempotent retry.</li>
+<li><strong>Clause check:</strong> For sql-10 Exercise 2, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, and <code>RETURNING</code>. Read only those operations: begin at <code>employees</code>, and <code>departments</code>, preserve one row per <code>employee_id</code>, and finish with <code>returning</code>, <code>update</code>, <code>from</code>, and <code>where</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-10 Exercise 2, the chosen form is justified by this lesson-specific rationale: Select departments by key, round exact numeric salary, and inspect <code>RETURNING</code>. Evaluate another form against the concrete expected result (Affected employee rows only; no change persists) and the verification above.</li>
+<li><strong>Edge case:</strong> Use an empty target set and a multi-row target set; reconcile the affected <code>employee_id</code> values in both cases.</li>
+</ul>
 <h4 id="solution-1--exercise-3-query-writing">Exercise 3 — Query writing<a class="heading-anchor" href="#solution-1--exercise-3-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Delete orders older than one year only when no payment exists, returning candidate keys.</p>
 <p><strong>Reasoning:</strong> Use correlated <code>NOT EXISTS</code>; foreign-key cascades remain rollback-protected.</p>
@@ -584,6 +841,16 @@ RETURNING o.order_id, o.customer_id, o.order_date;
 ROLLBACK TO SAVEPOINT exercise_3;</code></pre>
 <p><strong>Expected shape:</strong> Deleted-candidate order rows, then fully restored state.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-10 Exercise 3, read the target keys from <code>orders</code>, and <code>payments</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values.</li>
+<li><strong>Expected result/shape:</strong> For sql-10 Exercise 3, expected output: Deleted-candidate order rows, then fully restored state. The final columns are <code>from</code>, <code>where</code>, and <code>returning</code>.</li>
+<li><strong>Independent verification:</strong> For sql-10 Exercise 3, materialize the intended <code>order_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>orders</code>, and <code>payments</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>order_id</code> values in both cases.</li>
+<li><strong>Intermediate relation check:</strong> For sql-10 Exercise 3, materialize the intended <code>order_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>orders</code>, and <code>payments</code> again and prove rollback or idempotent retry.</li>
+<li><strong>Clause check:</strong> For sql-10 Exercise 3, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, and <code>RETURNING</code>. Read only those operations: begin at <code>orders</code>, and <code>payments</code>, preserve one row per <code>order_id</code>, and finish with <code>from</code>, <code>where</code>, and <code>returning</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-10 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use correlated <code>NOT EXISTS</code>; foreign-key cascades remain rollback-protected. Evaluate another form against the concrete expected result (Deleted-candidate order rows, then fully restored state) and the verification above.</li>
+<li><strong>Edge case:</strong> Use an empty target set and a multi-row target set; reconcile the affected <code>order_id</code> values in both cases.</li>
+</ul>
 <h4 id="solution-1--exercise-4-prediction">Exercise 4 — Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Run an upsert twice against a temporary key-value table and prove only one row exists for the key.</p>
 <p><strong>Reasoning:</strong> A primary key supplies the conflict target; the second statement updates rather than inserts.</p>
@@ -617,6 +884,16 @@ ORDER BY source_key;
 ROLLBACK TO SAVEPOINT exercise_4;</code></pre>
 <p><strong>Expected shape:</strong> One row for <code>source_a</code> with the second value.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-10 Exercise 4, read the target keys from <code>exercise_feed</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values.</li>
+<li><strong>Expected result/shape:</strong> For sql-10 Exercise 4, expected output: One row for <code>source_a</code> with the second value. The final columns are <code>source_key</code>, and <code>source_value</code>. The final order is <code>source_key</code>.</li>
+<li><strong>Independent verification:</strong> For sql-10 Exercise 4, materialize the intended <code>source_key</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>exercise_feed</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>source_key</code> values in both cases.</li>
+<li><strong>Intermediate relation check:</strong> For sql-10 Exercise 4, materialize the intended <code>source_key</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>exercise_feed</code> again and prove rollback or idempotent retry.</li>
+<li><strong>Clause check:</strong> For sql-10 Exercise 4, the solution actually uses <code>FROM</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>exercise_feed</code>, preserve one row per <code>source_key</code>, and finish with <code>source_key</code>, and <code>source_value</code> ordered by <code>source_key</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-10 Exercise 4, the chosen form is justified by this lesson-specific rationale: A primary key supplies the conflict target; the second statement updates rather than inserts. Evaluate another form against the concrete expected result (One row for <code>source_a</code> with the second value) and the verification above.</li>
+<li><strong>Edge case:</strong> Use an empty target set and a multi-row target set; reconcile the affected <code>source_key</code> values in both cases.</li>
+</ul>
 <h4 id="solution-1--exercise-5-debugging">Exercise 5 — Debugging<a class="heading-anchor" href="#solution-1--exercise-5-debugging" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Preview and update a bounded product set while reconciling selected and returned key counts.</p>
 <p><strong>Reasoning:</strong> Store candidate keys in a temporary table and update only through that reviewed set.</p>
@@ -655,6 +932,16 @@ FROM updated;
 ROLLBACK TO SAVEPOINT exercise_5;</code></pre>
 <p><strong>Expected shape:</strong> One summary row with equal candidate and updated counts.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-10 Exercise 5, read the target keys from <code>products</code>, and <code>exercise_product_candidates</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values.</li>
+<li><strong>Expected result/shape:</strong> For sql-10 Exercise 5, expected output: One summary row with equal candidate and updated counts. The final columns are <code>product_id</code>. The final order is <code>p.product_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-10 Exercise 5, materialize the intended <code>product_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>products</code>, and <code>exercise_product_candidates</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>product_id</code> values in both cases.</li>
+<li><strong>Intermediate relation check:</strong> For sql-10 Exercise 5, run <code>updated</code> one at a time. Record each CTE&#x27;s row count and <code>product_id</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-10 Exercise 5, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, <code>ORDER BY</code>, <code>LIMIT</code>, and <code>RETURNING</code>. Read only those operations: begin at <code>products</code>, and <code>exercise_product_candidates</code>, preserve one row per <code>product_id</code>, and finish with <code>product_id</code> ordered by <code>p.product_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-10 Exercise 5, the chosen form is justified by this lesson-specific rationale: Store candidate keys in a temporary table and update only through that reviewed set. Evaluate another form against the concrete expected result (One summary row with equal candidate and updated counts) and the verification above.</li>
+<li><strong>Edge case:</strong> Use an empty target set and a multi-row target set; reconcile the affected <code>product_id</code> values in both cases.</li>
+</ul>
 <h4 id="solution-1--exercise-6-extension">Exercise 6 — Extension<a class="heading-anchor" href="#solution-1--exercise-6-extension" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Stage product prices and update only rows whose incoming price is nonnegative and actually differs.</p>
 <p><strong>Reasoning:</strong> Use <code>UPDATE ... FROM</code>, validate the stage predicate, and compare with <code>IS DISTINCT FROM</code>.</p>
@@ -692,6 +979,16 @@ RETURNING p.product_id, p.price;
 ROLLBACK TO SAVEPOINT exercise_6;</code></pre>
 <p><strong>Expected shape:</strong> Returned rows only for valid changed products.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-10 Exercise 6, read the target keys from <code>exercise_price_stage</code>, <code>products</code>, and <code>stage.new_price</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values.</li>
+<li><strong>Expected result/shape:</strong> For sql-10 Exercise 6, expected output: Returned rows only for valid changed products. The final columns are <code>product_id</code>. The final order is <code>p.product_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-10 Exercise 6, materialize the intended <code>product_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>exercise_price_stage</code>, <code>products</code>, and <code>stage.new_price</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>product_id</code> values in both cases.</li>
+<li><strong>Intermediate relation check:</strong> For sql-10 Exercise 6, materialize the intended <code>product_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>exercise_price_stage</code>, <code>products</code>, and <code>stage.new_price</code> again and prove rollback or idempotent retry.</li>
+<li><strong>Clause check:</strong> For sql-10 Exercise 6, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, <code>ORDER BY</code>, <code>LIMIT</code>, and <code>RETURNING</code>. Read only those operations: begin at <code>exercise_price_stage</code>, <code>products</code>, and <code>stage.new_price</code>, preserve one row per <code>product_id</code>, and finish with <code>product_id</code> ordered by <code>p.product_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-10 Exercise 6, the chosen form is justified by this lesson-specific rationale: Use <code>UPDATE ... FROM</code>, validate the stage predicate, and compare with <code>IS DISTINCT FROM</code>. Evaluate another form against the concrete expected result (Returned rows only for valid changed products) and the verification above.</li>
+<li><strong>Edge case:</strong> Use an empty target set and a multi-row target set; reconcile the affected <code>product_id</code> values in both cases.</li>
+</ul>
 <h4 id="solution-1--final-self-check">Final self-check<a class="heading-anchor" href="#solution-1--final-self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Can you explain the logical grain before and after every aggregation?</li>
@@ -701,7 +998,7 @@ ROLLBACK TO SAVEPOINT exercise_6;</code></pre>
 <li>Does the complete executable solution finish with <code>ROLLBACK</code>?</li>
 </ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -709,7 +1006,7 @@ ROLLBACK TO SAVEPOINT exercise_6;</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -733,6 +1030,19 @@ ROLLBACK TO SAVEPOINT exercise_6;</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 10 executable solutions</span>
+<span>-- SOLUTION READING MAP — sql-10: DML with Subqueries</span>
+<span>-- Explanation: sql/postgres-60day/solutions/day10_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day10_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span>
 <span>-- ON_ERROR_STOP is supplied by the documented psql command.</span>
 <span> </span>
@@ -942,7 +1252,50 @@ ROLLBACK TO SAVEPOINT exercise_6;</code></pre>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-10 — DML with Subqueries.
+
+I have completed the direct catalog prerequisite: `sql-09`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day10_dml_with_subqueries.md
+- Answer-free learner SQL: sql/postgres-60day/day10_dml_with_subqueries.sql
+
+Key terms to teach in context: DML, Upsert, Idempotent. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Run the candidate-selection SELECT before the matching UPDATE. Compare its keys with UPDATE ... RETURNING, verify the affected count, and leave the course transaction at ROLLBACK. This preview/modify/reconcile pattern is safer than starting with an unbounded write.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-10/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-09.html"><small>Previous lesson</small><strong>sql-09</strong><span>Correlated Subqueries</span></a>
@@ -1034,6 +1387,23 @@ ROLLBACK TO SAVEPOINT exercise_6;</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

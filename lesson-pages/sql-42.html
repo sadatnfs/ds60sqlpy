@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-42/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-42-data-quality-and-validation">Day 42 — Data Quality and Validation<a class="heading-anchor" href="#guide--day-42-data-quality-and-validation" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -285,6 +384,49 @@
 <li><strong>Prerequisites:</strong> <a href="sql-41.html#guide">Day 41 — complex aggregations</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-42.html#learner">learner SQL</a> · <a href="sql-42.html#solution-1">solution reasoning</a> · <a href="sql-42.html#solution-2">executable solution</a></li>
 </ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-42 — Data Quality Validation</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-42/lesson/workspace/sql/postgres-60day/day42_data_quality_validation.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day42_data_quality_validation.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/day42_data_quality_validation.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Invariant, Orphan, DQ result grain. Its worked SQL reads or creates <code>customers</code>, <code>order_items</code>, <code>orders</code>, <code>payments</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: Normalize email with lower(trim(email)), group it, and return groups with COUNT() &gt; 1. Keep the raw emails in a separate detail query: the summary counts duplicate groups, while remediation needs the member records. The first runnable example has a concrete contract: Example 1 returns exactly one summary row with columns <code>rows</code>, <code>null_emails</code>, and <code>null_country</code> from <code>customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>table</code>, <code>rows</code>, <code>null_emails</code>, and <code>null_country</code>. Recompute each displayed aggregate with a single-purpose query over <code>customers</code>; require the documented summary-row count. Where this query can emit <code>NULL</code>, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day42_data_quality_validation.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">SELECT &#x27;customers&#x27; AS table,
+       COUNT(*) AS rows,
+       SUM(CASE WHEN email IS NULL THEN 1 ELSE 0 END) AS null_emails,
+       SUM(CASE WHEN country IS NULL THEN 1 ELSE 0 END) AS null_country
+FROM customers;</code></pre>
+<p><strong>How to read it:</strong> Example 1: Start with <code>customers</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>table</code>, <code>rows</code>, <code>null_emails</code>, and <code>null_country</code>. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 1 returns exactly one summary row with columns <code>rows</code>, <code>null_emails</code>, and <code>null_country</code> from <code>customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">SELECT email, COUNT(*) AS cnt
+FROM customers
+GROUP BY email
+HAVING COUNT(*) &gt; 1
+ORDER BY cnt DESC;</code></pre>
+<p><strong>How to read it:</strong> Example 2: Start with <code>customers</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>email</code>, and <code>cnt</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 2 returns one grouped row per <code>email</code>, and <code>cnt</code> with columns <code>email</code>, and <code>cnt</code> from <code>customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Encode repeatable quality rules with stable names, grains, and failure counts.</li>
@@ -301,12 +443,12 @@
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <p>Complete these in the <a href="sql-42.html#learner">learner SQL</a>:</p>
 <ol>
-<li>Build a named core-table validation report.</li>
-<li>Detect invalid/null customer emails.</li>
-<li>Explain CHECK behavior for NULL without <code>NOT NULL</code>.</li>
-<li>Reconcile order totals with calculated line revenue.</li>
-<li>Retain raw case variants in a normalized-email duplicate report.</li>
-<li>Detect overlapping inclusive promotion ranges.</li>
+<li>Build a named core-table validation report. <strong>Inputs/evidence:</strong> For sql-42 Exercise 1, read from <code>customers</code>, <code>orders</code>, <code>order_items</code>, <code>products</code>, and <code>payments</code>. Build the answer toward <code>check_name</code>, and <code>failing_rows</code>; keep <code>check_name</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-42 Exercise 1, expected output: seven rows with <code>check_name</code> and <code>failing_rows</code>. A nonzero result is evidence to investigate, not permission to delete data automatically. The final columns are <code>check_name</code>, and <code>failing_rows</code>. The final order is <code>check_name</code>. <strong>Verify:</strong> For sql-42 Exercise 1, project <code>check_name</code> plus the raw source columns from <code>customers</code>, <code>orders</code>, <code>order_items</code>, <code>products</code>, and <code>payments</code> at each join stage; record row count and distinct <code>check_name</code>, then assert the final <code>check_name</code>, and <code>failing_rows</code> values match those staged rows without unintended fanout or loss. Add one row for which <code>(email IS NULL) OR (total_amount &lt; 0) OR (c.customer_id IS NULL)</code> is true and one for which it is false; verify only the matching <code>check_name</code> value is returned.</li>
+<li>Detect invalid/null customer emails. <strong>Inputs/evidence:</strong> For sql-42 Exercise 2, read from <code>customers</code>. Build the answer toward <code>customer_id</code>, and <code>email</code>; keep <code>customer_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-42 Exercise 2, expected output: one row per <code>customer_id</code>. The final columns are <code>customer_id</code>, and <code>email</code>. The final order is <code>customer_id</code>. <strong>Verify:</strong> For sql-42 Exercise 2, run an anti-check that counts rows where NOT ((email IS NULL OR email !~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;)); require unique <code>customer_id</code> where the expected grain is one row per key and confirm the projected <code>customer_id</code>, and <code>email</code> against <code>customers</code>. Repeat with <code>NULL</code> in <code>customer_id</code>, and <code>email</code> and state whether the row is kept, rejected, or classified.</li>
+<li>Explain CHECK behavior for NULL without <code>NOT NULL</code>. <strong>Inputs/evidence:</strong> For sql-42 Exercise 3, read from <code>information_schema.columns</code>. Build the answer toward <code>table_name</code>, <code>column_name</code>, and <code>is_nullable</code>; keep <code>table_name</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-42 Exercise 3, expected output: one row per <code>table_name</code>. The final columns are <code>table_name</code>, <code>column_name</code>, and <code>is_nullable</code>. The final order is <code>table_name, column_name</code>. <strong>Verify:</strong> For sql-42 Exercise 3, run an anti-check that counts rows where NOT ((table_schema = &#x27;training&#x27; AND table_name IN (&#x27;orders&#x27;, &#x27;payments&#x27;) AND column_name IN (&#x27;total_amount&#x27;, &#x27;amount&#x27;))); require unique <code>table_name</code> where the expected grain is one row per key and confirm the projected <code>table_name</code>, <code>column_name</code>, and <code>is_nullable</code> against <code>information_schema.columns</code>. Repeat with <code>NULL</code> in <code>table_name</code>, and <code>column_name</code> and state whether the row is kept, rejected, or classified.</li>
+<li>Reconcile order totals with calculated line revenue. <strong>Inputs/evidence:</strong> For sql-42 Exercise 4, read from <code>order_items</code>, and <code>orders</code>. Build the answer toward <code>order_id</code>, <code>total_amount</code>, <code>line_total</code>, and <code>difference</code>; keep <code>order_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-42 Exercise 4, expected output: one row per order before comparison. The final columns are <code>order_id</code>, <code>total_amount</code>, <code>line_total</code>, and <code>difference</code>. The final order is <code>o.order_id</code>. <strong>Verify:</strong> For sql-42 Exercise 4, project <code>order_id</code> plus the raw source columns from <code>order_items</code>, and <code>orders</code> at each join stage; record row count and distinct <code>order_id</code>, then assert the final <code>order_id</code>, <code>total_amount</code>, <code>line_total</code>, and <code>difference</code> values match those staged rows without unintended fanout or loss. Add one row for which <code>(ABS(o.total_amount - c.line_total) &gt; 0.01)</code> is true and one for which it is false; verify only the matching <code>order_id</code> value is returned.</li>
+<li>Retain raw case variants in a normalized-email duplicate report. <strong>Inputs/evidence:</strong> For sql-42 Exercise 5, read from <code>customers</code>. Build the answer toward <code>normalized_email</code>, <code>raw_variants</code>, and <code>rows</code>; keep <code>normalized_email</code>, and <code>raw_variants</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-42 Exercise 5, expected output: one row per <code>normalized_email</code>, and <code>raw_variants</code>. The final columns are <code>normalized_email</code>, <code>raw_variants</code>, and <code>rows</code>. The final order is <code>normalized_email</code>. <strong>Verify:</strong> For sql-42 Exercise 5, independently aggregate <code>customers</code> by <code>normalized_email</code>, and <code>raw_variants</code>; require one output row for every distinct <code>normalized_email</code>, and <code>raw_variants</code> tuple satisfying <code>(email IS NOT NULL)</code> and compare <code>rows</code> tuple by tuple. Add duplicate source candidates for <code>normalized_email</code>, and <code>raw_variants</code>; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</li>
+<li>Detect overlapping inclusive promotion ranges. <strong>Inputs/evidence:</strong> For sql-42 Exercise 6, read from <code>promotions</code>. Build the answer toward <code>promotion_a</code>, <code>promotion_b</code>, and <code>product_id</code>; keep <code>product_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-42 Exercise 6, expected output: one row per <code>product_id</code>. The final columns are <code>promotion_a</code>, <code>promotion_b</code>, and <code>product_id</code>. The final order is <code>a.product_id, promotion_a, promotion_b</code>. <strong>Verify:</strong> For sql-42 Exercise 6, project <code>product_id</code> plus the raw source columns from <code>promotions</code> at each join stage; record row count and distinct <code>product_id</code>, then assert the final <code>promotion_a</code>, <code>promotion_b</code>, and <code>product_id</code> values match those staged rows without unintended fanout or loss. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final <code>WHERE</code> clause; identify which rows pass each inclusive or exclusive comparison.</li>
 </ol>
 <p>For one rule, return both a summary and failing-record detail.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -333,11 +475,8 @@
 <li>Keep observed failures separate from remediation policy.</li>
 <li>Report the grain: duplicate groups, failing records, and orphan keys are different counts.</li>
 </ul>
-<h4 id="guide--practice-match-the-learner-prompts-exactly">Practice — match the learner prompts exactly<a class="heading-anchor" href="#guide--practice-match-the-learner-prompts-exactly" aria-label="Link to this section">#</a></h4>
-<ol>
-<li>Build one validation report for core tables that summarizes null emails, normalized duplicate emails, negative totals, orphan references, invalid quantities, and discounts outside 0–1.</li>
-<li>Return <code>customer_id</code> and <code>email</code> for null or regex-invalid email values.</li>
-</ol>
+<h4 id="guide--practice-map">Practice map<a class="heading-anchor" href="#guide--practice-map" aria-label="Link to this section">#</a></h4>
+<p>Use the numbered <strong>Exercises</strong> section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.</p>
 <h4 id="guide--pitfalls-and-validation">Pitfalls and validation<a class="heading-anchor" href="#guide--pitfalls-and-validation" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>The course email regex is a pragmatic check, not the full email RFC.</li>
@@ -347,17 +486,45 @@
 </ul>
 <h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
 <p>Prompts 3–6 progress from constraint semantics to reconciliations and diagnostic evidence. SQL CHECK constraints pass both TRUE and UNKNOWN, so nullable fields need a separate <code>NOT NULL</code> rule when NULL is invalid.</p>
-<p>Reconcile stored totals to line revenue at order grain and use a one-cent tolerance deliberately. A duplicate report should retain raw email variants. For inclusive promotion dates, ranges overlap when each start is less than or equal to the other range&#x27;s end; compare each pair only once.</p></div>
+<p>Reconcile stored totals to line revenue at order grain and use a one-cent tolerance deliberately. A duplicate report should retain raw email variants. For inclusive promotion dates, ranges overlap when each start is less than or equal to the other range&#x27;s end; compare each pair only once.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-42 — Data Quality Validation.
+
+I have completed the direct catalog prerequisite: `sql-41`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day42_data_quality_validation.md
+- Answer-free learner SQL: sql/postgres-60day/day42_data_quality_validation.sql
+
+Key terms to teach in context: Invariant, Orphan, DQ result grain. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Normalize email with lower(trim(email)), group it, and return groups with COUNT() &gt; 1. Keep the raw emails in a separate detail query: the summary counts duplicate groups, while remediation needs the member records.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-42/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -374,13 +541,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 42: Data Quality &amp; Validation</span>
+<span>-- BEGINNER WORKFLOW — sql-42: Data Quality Validation</span>
+<span>-- Guide: sql/postgres-60day/companion-guides/day42_data_quality_validation.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-42/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: customers, order_items, orders, payments.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
@@ -417,28 +601,52 @@
 <span> </span>
 <span>-- Exercises</span>
 <span>-- 1. Build a validation report summarizing nulls, duplicates, and constraint violations across core tables.</span>
+<span>--    Inputs: For sql-42 Exercise 1, read from `customers`, `orders`, `order_items`, `products`, and `payments`. Build the answer toward `check_name`, and `failing_rows`; keep `check_name` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-42 Exercise 1, expected output: seven rows with `check_name` and `failing_rows`. A nonzero result is evidence to investigate, not permission to delete data automatically. The final columns are `check_name`, and `failing_rows`. The final order is `check_name`.</span>
+<span>--    Verify: For sql-42 Exercise 1, project `check_name` plus the raw source columns from `customers`, `orders`, `order_items`, `products`, and `payments` at each join stage; record row count and distinct `check_name`, then assert the final `check_name`, and `failing_rows` values match those staged rows without unintended fanout or loss. Add one row for which `(email IS NULL) OR (total_amount &lt; 0) OR (c.customer_id IS NULL)` is true and one for which it is false; verify only the matching `check_name` value is returned.</span>
+<span>--    Hint ladder, rung 1: For sql-42 Exercise 1, start with the first relation in `customers`, `orders`, `order_items`, `products`, and `payments`; after each join, record total rows and distinct `check_name` so the exact fanout or loss is visible.</span>
 <span>-- 2. Detect customers with invalid email patterns using regex.</span>
+<span>--    Inputs: For sql-42 Exercise 2, read from `customers`. Build the answer toward `customer_id`, and `email`; keep `customer_id` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-42 Exercise 2, expected output: one row per `customer_id`. The final columns are `customer_id`, and `email`. The final order is `customer_id`.</span>
+<span>--    Verify: For sql-42 Exercise 2, run an anti-check that counts rows where NOT ((email IS NULL OR email !~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `email` against `customers`. Repeat with `NULL` in `customer_id`, and `email` and state whether the row is kept, rejected, or classified.</span>
+<span>--    Hint ladder, rung 1: For sql-42 Exercise 2, inspect the source keys that survive `WHERE`; then check `customer_id` before applying the row cap.</span>
 <span>-- 3. Prediction: explain why CHECK (amount &gt;= 0) rejects negative values but,</span>
 <span>--    without NOT NULL, would accept NULL under SQL&#x27;s three-valued logic.</span>
+<span>--    Inputs: For sql-42 Exercise 3, read from `information_schema.columns`. Build the answer toward `table_name`, `column_name`, and `is_nullable`; keep `table_name` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-42 Exercise 3, expected output: one row per `table_name`. The final columns are `table_name`, `column_name`, and `is_nullable`. The final order is `table_name, column_name`.</span>
+<span>--    Verify: For sql-42 Exercise 3, run an anti-check that counts rows where NOT ((table_schema = &#x27;training&#x27; AND table_name IN (&#x27;orders&#x27;, &#x27;payments&#x27;) AND column_name IN (&#x27;total_amount&#x27;, &#x27;amount&#x27;))); require unique `table_name` where the expected grain is one row per key and confirm the projected `table_name`, `column_name`, and `is_nullable` against `information_schema.columns`. Repeat with `NULL` in `table_name`, and `column_name` and state whether the row is kept, rejected, or classified.</span>
+<span>--    Hint ladder, rung 1: For sql-42 Exercise 3, inspect the source keys that survive `WHERE`; then check `table_name, column_name` before applying the row cap.</span>
 <span>-- 4. Construction: reconcile each order&#x27;s stored total_amount with calculated</span>
 <span>--    line-item revenue and return only differences greater than one cent.</span>
+<span>--    Inputs: For sql-42 Exercise 4, read from `order_items`, and `orders`. Build the answer toward `order_id`, `total_amount`, `line_total`, and `difference`; keep `order_id` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-42 Exercise 4, expected output: one row per order before comparison. The final columns are `order_id`, `total_amount`, `line_total`, and `difference`. The final order is `o.order_id`.</span>
+<span>--    Verify: For sql-42 Exercise 4, project `order_id` plus the raw source columns from `order_items`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `total_amount`, `line_total`, and `difference` values match those staged rows without unintended fanout or loss. Add one row for which `(ABS(o.total_amount - c.line_total) &gt; 0.01)` is true and one for which it is false; verify only the matching `order_id` value is returned.</span>
+<span>--    Hint ladder, rung 1: For sql-42 Exercise 4, run `calculated` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span>
 <span>-- 5. Debugging: repair a duplicate check that groups by lower(email) but reports</span>
 <span>--    only the normalized value, losing the raw variants needed for diagnosis.</span>
+<span>--    Inputs: For sql-42 Exercise 5, read from `customers`. Build the answer toward `normalized_email`, `raw_variants`, and `rows`; keep `normalized_email`, and `raw_variants` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-42 Exercise 5, expected output: one row per `normalized_email`, and `raw_variants`. The final columns are `normalized_email`, `raw_variants`, and `rows`. The final order is `normalized_email`.</span>
+<span>--    Verify: For sql-42 Exercise 5, independently aggregate `customers` by `normalized_email`, and `raw_variants`; require one output row for every distinct `normalized_email`, and `raw_variants` tuple satisfying `(email IS NOT NULL)` and compare `rows` tuple by tuple. Add duplicate source candidates for `normalized_email`, and `raw_variants`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</span>
+<span>--    Hint ladder, rung 1: For sql-42 Exercise 5, inspect the source keys that survive `WHERE`; then confirm the groups are `normalized_email`, and `raw_variants`; then check `normalized_email` before applying the row cap.</span>
 <span>-- 6. Edge case: detect overlapping promotion date ranges for the same product,</span>
 <span>--    treating touching inclusive endpoints as an overlap.</span>
+<span>--    Inputs: For sql-42 Exercise 6, read from `promotions`. Build the answer toward `promotion_a`, `promotion_b`, and `product_id`; keep `product_id` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-42 Exercise 6, expected output: one row per `product_id`. The final columns are `promotion_a`, `promotion_b`, and `product_id`. The final order is `a.product_id, promotion_a, promotion_b`.</span>
+<span>--    Verify: For sql-42 Exercise 6, project `product_id` plus the raw source columns from `promotions` at each join stage; record row count and distinct `product_id`, then assert the final `promotion_a`, `promotion_b`, and `product_id` values match those staged rows without unintended fanout or loss. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.</span>
+<span>--    Hint ladder, rung 1: For sql-42 Exercise 6, start with the first relation in `promotions`; after each join, record total rows and distinct `product_id` so the exact fanout or loss is visible.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -462,6 +670,26 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-42-solutions-data-quality-and-validation">Day 42 Solutions — Data Quality and Validation<a class="heading-anchor" href="#solution-1--day-42-solutions-data-quality-and-validation" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day42_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day42_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are Invariant, Orphan, DQ result grain. Its worked-model focus is: Normalize email with lower(trim(email)), group it, and return groups with COUNT() &gt; 1. Keep the raw emails in a separate detail query: the summary counts duplicate groups, while remediation needs the member records.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>The goal is to turn scattered checks into one auditable report, then isolate bad email values. Run the canonical file at <a href="sql-42.html#solution-2"><code>day42_solutions.sql</code></a>.</p>
 <h4 id="solution-1--exercise-1-core-table-validation-report">Exercise 1 — Core-table validation report<a class="heading-anchor" href="#solution-1--exercise-1-core-table-validation-report" aria-label="Link to this section">#</a></h4>
 <p>Each row is a named check and the number of failing records or duplicate groups. On the deterministic course seed, every count should be zero.</p>
@@ -506,6 +734,16 @@ LEFT JOIN orders o USING (order_id)
 WHERE p.amount &lt; 0 OR o.order_id IS NULL
 ORDER BY check_name;</code></pre>
 <p>Expected shape: seven rows with <code>check_name</code> and <code>failing_rows</code>. A nonzero result is evidence to investigate, not permission to delete data automatically.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-42 Exercise 1, read from <code>customers</code>, <code>orders</code>, <code>order_items</code>, <code>products</code>, and <code>payments</code>. Build the answer toward <code>check_name</code>, and <code>failing_rows</code>; keep <code>check_name</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-42 Exercise 1, expected output: seven rows with <code>check_name</code> and <code>failing_rows</code>. A nonzero result is evidence to investigate, not permission to delete data automatically. The final columns are <code>check_name</code>, and <code>failing_rows</code>. The final order is <code>check_name</code>.</li>
+<li><strong>Independent verification:</strong> For sql-42 Exercise 1, project <code>check_name</code> plus the raw source columns from <code>customers</code>, <code>orders</code>, <code>order_items</code>, <code>products</code>, and <code>payments</code> at each join stage; record row count and distinct <code>check_name</code>, then assert the final <code>check_name</code>, and <code>failing_rows</code> values match those staged rows without unintended fanout or loss. Add one row for which <code>(email IS NULL) OR (total_amount &lt; 0) OR (c.customer_id IS NULL)</code> is true and one for which it is false; verify only the matching <code>check_name</code> value is returned.</li>
+<li><strong>Intermediate relation check:</strong> For sql-42 Exercise 1, start with the first relation in <code>customers</code>, <code>orders</code>, <code>order_items</code>, <code>products</code>, and <code>payments</code>; after each join, record total rows and distinct <code>check_name</code> so the exact fanout or loss is visible.</li>
+<li><strong>Clause check:</strong> For sql-42 Exercise 1, the solution actually uses <code>FROM</code>, <code>JOIN ... ON</code>, <code>WHERE</code>, <code>GROUP BY</code>, <code>HAVING</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>customers</code>, <code>orders</code>, <code>order_items</code>, <code>products</code>, and <code>payments</code>, preserve one row per <code>check_name</code>, and finish with <code>check_name</code>, and <code>failing_rows</code> ordered by <code>check_name</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-42 Exercise 1, the chosen form is justified by this lesson-specific rationale: Each row is a named check and the number of failing records or duplicate groups. Evaluate another form against the concrete expected result (seven rows with <code>check_name</code> and <code>failing_rows</code>. A nonzero result is evidence to investigate, not permission to delete data automatically) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row for which <code>(email IS NULL) OR (total_amount &lt; 0) OR (c.customer_id IS NULL)</code> is true and one for which it is false; verify only the matching <code>check_name</code> value is returned.</li>
+</ul>
 <h4 id="solution-1--exercise-2-invalid-email-patterns">Exercise 2 — Invalid email patterns<a class="heading-anchor" href="#solution-1--exercise-2-invalid-email-patterns" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-sql">SET search_path TO training, public;
 
@@ -515,6 +753,16 @@ WHERE email IS NULL
    OR email !~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;
 ORDER BY customer_id;</code></pre>
 <p>The seed should return zero rows. The regex is a practical course check, not a complete implementation of every valid RFC email address.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-42 Exercise 2, read from <code>customers</code>. Build the answer toward <code>customer_id</code>, and <code>email</code>; keep <code>customer_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-42 Exercise 2, expected output: one row per <code>customer_id</code>. The final columns are <code>customer_id</code>, and <code>email</code>. The final order is <code>customer_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-42 Exercise 2, run an anti-check that counts rows where NOT ((email IS NULL OR email !~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;)); require unique <code>customer_id</code> where the expected grain is one row per key and confirm the projected <code>customer_id</code>, and <code>email</code> against <code>customers</code>. Repeat with <code>NULL</code> in <code>customer_id</code>, and <code>email</code> and state whether the row is kept, rejected, or classified.</li>
+<li><strong>Intermediate relation check:</strong> For sql-42 Exercise 2, inspect the source keys that survive <code>WHERE</code>; then check <code>customer_id</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-42 Exercise 2, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>customers</code>, preserve one row per <code>customer_id</code>, and finish with <code>customer_id</code>, and <code>email</code> ordered by <code>customer_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-42 Exercise 2, the chosen form is justified by this lesson-specific rationale: The seed should return zero rows. Evaluate another form against the concrete expected result (one row per <code>customer_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Repeat with <code>NULL</code> in <code>customer_id</code>, and <code>email</code> and state whether the row is kept, rejected, or classified.</li>
+</ul>
 <h4 id="solution-1--reasoning-safety-and-pitfalls">Reasoning, safety, and pitfalls<a class="heading-anchor" href="#solution-1--reasoning-safety-and-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Normalize with <code>lower(trim(email))</code> before duplicate detection.</li>
@@ -524,14 +772,54 @@ ORDER BY customer_id;</code></pre>
 </ul>
 <h4 id="solution-1--exercise-3-explain-check-and-null">Exercise 3 — Explain CHECK and NULL<a class="heading-anchor" href="#solution-1--exercise-3-explain-check-and-null" aria-label="Link to this section">#</a></h4>
 <p>SQL CHECK rejects FALSE but accepts UNKNOWN. <code>NOT NULL</code> is therefore a separate schema rule when absence is invalid; the catalog query confirms both course amount columns declare it.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-42 Exercise 3, read from <code>information_schema.columns</code>. Build the answer toward <code>table_name</code>, <code>column_name</code>, and <code>is_nullable</code>; keep <code>table_name</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-42 Exercise 3, expected output: one row per <code>table_name</code>. The final columns are <code>table_name</code>, <code>column_name</code>, and <code>is_nullable</code>. The final order is <code>table_name, column_name</code>.</li>
+<li><strong>Independent verification:</strong> For sql-42 Exercise 3, run an anti-check that counts rows where NOT ((table_schema = &#x27;training&#x27; AND table_name IN (&#x27;orders&#x27;, &#x27;payments&#x27;) AND column_name IN (&#x27;total_amount&#x27;, &#x27;amount&#x27;))); require unique <code>table_name</code> where the expected grain is one row per key and confirm the projected <code>table_name</code>, <code>column_name</code>, and <code>is_nullable</code> against <code>information_schema.columns</code>. Repeat with <code>NULL</code> in <code>table_name</code>, and <code>column_name</code> and state whether the row is kept, rejected, or classified.</li>
+<li><strong>Intermediate relation check:</strong> For sql-42 Exercise 3, inspect the source keys that survive <code>WHERE</code>; then check <code>table_name, column_name</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-42 Exercise 3, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>information_schema.columns</code>, preserve one row per <code>table_name</code>, and finish with <code>table_name</code>, <code>column_name</code>, and <code>is_nullable</code> ordered by <code>table_name, column_name</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-42 Exercise 3, the chosen form is justified by this lesson-specific rationale: SQL CHECK rejects FALSE but accepts UNKNOWN. Evaluate another form against the concrete expected result (one row per <code>table_name</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Repeat with <code>NULL</code> in <code>table_name</code>, and <code>column_name</code> and state whether the row is kept, rejected, or classified.</li>
+</ul>
 <h4 id="solution-1--exercise-4-reconcile-order-totals">Exercise 4 — Reconcile order totals<a class="heading-anchor" href="#solution-1--exercise-4-reconcile-order-totals" aria-label="Link to this section">#</a></h4>
 <p>Line values aggregate to one row per order before comparison. The one-cent tolerance is an explicit currency rule and failing order IDs remain visible.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-42 Exercise 4, read from <code>order_items</code>, and <code>orders</code>. Build the answer toward <code>order_id</code>, <code>total_amount</code>, <code>line_total</code>, and <code>difference</code>; keep <code>order_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-42 Exercise 4, expected output: one row per order before comparison. The final columns are <code>order_id</code>, <code>total_amount</code>, <code>line_total</code>, and <code>difference</code>. The final order is <code>o.order_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-42 Exercise 4, project <code>order_id</code> plus the raw source columns from <code>order_items</code>, and <code>orders</code> at each join stage; record row count and distinct <code>order_id</code>, then assert the final <code>order_id</code>, <code>total_amount</code>, <code>line_total</code>, and <code>difference</code> values match those staged rows without unintended fanout or loss. Add one row for which <code>(ABS(o.total_amount - c.line_total) &gt; 0.01)</code> is true and one for which it is false; verify only the matching <code>order_id</code> value is returned.</li>
+<li><strong>Intermediate relation check:</strong> For sql-42 Exercise 4, run <code>calculated</code> one at a time. Record each CTE&#x27;s row count and <code>order_id</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-42 Exercise 4, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>WHERE</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>order_items</code>, and <code>orders</code>, preserve one row per <code>order_id</code>, and finish with <code>order_id</code>, <code>total_amount</code>, <code>line_total</code>, and <code>difference</code> ordered by <code>o.order_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-42 Exercise 4, the chosen form is justified by this lesson-specific rationale: Line values aggregate to one row per order before comparison. Evaluate another form against the concrete expected result (one row per order before comparison) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row for which <code>(ABS(o.total_amount - c.line_total) &gt; 0.01)</code> is true and one for which it is false; verify only the matching <code>order_id</code> value is returned.</li>
+</ul>
 <h4 id="solution-1--exercise-5-retain-duplicate-evidence">Exercise 5 — Retain duplicate evidence<a class="heading-anchor" href="#solution-1--exercise-5-retain-duplicate-evidence" aria-label="Link to this section">#</a></h4>
 <p>The normalized email is the grouping key, but <code>array_agg</code> preserves raw variants needed to diagnose case/whitespace differences.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-42 Exercise 5, read from <code>customers</code>. Build the answer toward <code>normalized_email</code>, <code>raw_variants</code>, and <code>rows</code>; keep <code>normalized_email</code>, and <code>raw_variants</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-42 Exercise 5, expected output: one row per <code>normalized_email</code>, and <code>raw_variants</code>. The final columns are <code>normalized_email</code>, <code>raw_variants</code>, and <code>rows</code>. The final order is <code>normalized_email</code>.</li>
+<li><strong>Independent verification:</strong> For sql-42 Exercise 5, independently aggregate <code>customers</code> by <code>normalized_email</code>, and <code>raw_variants</code>; require one output row for every distinct <code>normalized_email</code>, and <code>raw_variants</code> tuple satisfying <code>(email IS NOT NULL)</code> and compare <code>rows</code> tuple by tuple. Add duplicate source candidates for <code>normalized_email</code>, and <code>raw_variants</code>; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</li>
+<li><strong>Intermediate relation check:</strong> For sql-42 Exercise 5, inspect the source keys that survive <code>WHERE</code>; then confirm the groups are <code>normalized_email</code>, and <code>raw_variants</code>; then check <code>normalized_email</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-42 Exercise 5, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>GROUP BY</code>, <code>HAVING</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>customers</code>, preserve one row per <code>normalized_email</code>, and <code>raw_variants</code>, and finish with <code>normalized_email</code>, <code>raw_variants</code>, and <code>rows</code> ordered by <code>normalized_email</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-42 Exercise 5, the chosen form is justified by this lesson-specific rationale: The normalized email is the grouping key, but <code>array_agg</code> preserves raw variants needed to diagnose case/whitespace differences. Evaluate another form against the concrete expected result (one row per <code>normalized_email</code>, and <code>raw_variants</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add duplicate source candidates for <code>normalized_email</code>, and <code>raw_variants</code>; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</li>
+</ul>
 <h4 id="solution-1--exercise-6-detect-inclusive-range-overlap">Exercise 6 — Detect inclusive range overlap<a class="heading-anchor" href="#solution-1--exercise-6-detect-inclusive-range-overlap" aria-label="Link to this section">#</a></h4>
-<p>Promotion pairs share a product, are compared once, and overlap when each start is no later than the other end. Touching inclusive endpoints therefore count.</p></div>
+<p>Promotion pairs share a product, are compared once, and overlap when each start is no later than the other end. Touching inclusive endpoints therefore count.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-42 Exercise 6, read from <code>promotions</code>. Build the answer toward <code>promotion_a</code>, <code>promotion_b</code>, and <code>product_id</code>; keep <code>product_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-42 Exercise 6, expected output: one row per <code>product_id</code>. The final columns are <code>promotion_a</code>, <code>promotion_b</code>, and <code>product_id</code>. The final order is <code>a.product_id, promotion_a, promotion_b</code>.</li>
+<li><strong>Independent verification:</strong> For sql-42 Exercise 6, project <code>product_id</code> plus the raw source columns from <code>promotions</code> at each join stage; record row count and distinct <code>product_id</code>, then assert the final <code>promotion_a</code>, <code>promotion_b</code>, and <code>product_id</code> values match those staged rows without unintended fanout or loss. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final <code>WHERE</code> clause; identify which rows pass each inclusive or exclusive comparison.</li>
+<li><strong>Intermediate relation check:</strong> For sql-42 Exercise 6, start with the first relation in <code>promotions</code>; after each join, record total rows and distinct <code>product_id</code> so the exact fanout or loss is visible.</li>
+<li><strong>Clause check:</strong> For sql-42 Exercise 6, the solution actually uses <code>FROM</code>, <code>JOIN ... ON</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>promotions</code>, preserve one row per <code>product_id</code>, and finish with <code>promotion_a</code>, <code>promotion_b</code>, and <code>product_id</code> ordered by <code>a.product_id, promotion_a, promotion_b</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-42 Exercise 6, the chosen form is justified by this lesson-specific rationale: Promotion pairs share a product, are compared once, and overlap when each start is no later than the other end. Evaluate another form against the concrete expected result (one row per <code>product_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final <code>WHERE</code> clause; identify which rows pass each inclusive or exclusive comparison.</li>
+</ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -539,7 +827,7 @@ ORDER BY customer_id;</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -563,6 +851,19 @@ ORDER BY customer_id;</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 42 solutions: data-quality validation</span>
+<span>-- SOLUTION READING MAP — sql-42: Data Quality Validation</span>
+<span>-- Explanation: sql/postgres-60day/solutions/day42_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day42_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
 <span>-- Exercise 1: one compact validation report. Constraints make most counts zero;</span>
@@ -661,7 +962,50 @@ ORDER BY customer_id;</code></pre>
 <span>ORDER BY a.product_id, promotion_a, promotion_b;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-42 — Data Quality Validation.
+
+I have completed the direct catalog prerequisite: `sql-41`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day42_data_quality_validation.md
+- Answer-free learner SQL: sql/postgres-60day/day42_data_quality_validation.sql
+
+Key terms to teach in context: Invariant, Orphan, DQ result grain. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Normalize email with lower(trim(email)), group it, and return groups with COUNT() &gt; 1. Keep the raw emails in a separate detail query: the summary counts duplicate groups, while remediation needs the member records.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-42/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-41.html"><small>Previous lesson</small><strong>sql-41</strong><span>Complex Aggregations</span></a>
@@ -753,6 +1097,23 @@ ORDER BY customer_id;</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

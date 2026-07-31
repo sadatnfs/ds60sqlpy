@@ -137,6 +137,7 @@
 <td>Yes, unless <code>--no-launches</code> is supplied</td>
 </tr>
 </tbody></table></div>
+<p>The dashboard displays a prominent mode banner beneath its hero. Do not infer the mode from the URL or button styling: <strong>You are in portable reading mode</strong> means native apps cannot start, while <strong>Private launcher mode is active</strong> means the authenticated loopback bridge is ready.</p>
 <p>The static file contains its styles, scripts, and catalog data. It does not load a font, analytics script, image, or API from the internet.</p>
 <p>Static mode is a reader and setup guide. Browsers cannot execute a <code>.py</code>, <code>.ipynb</code>, or <code>.sql</code> lesson safely just by opening its source. On Windows, <code>START_DS60.cmd</code> is therefore the recommended front door: it prepares and checks the environment before enabling the portal&#x27;s fixed VS Code and JupyterLab actions.</p>
 <p>Setup, documentation, and incidental SQL links open generated pages under <code>reference-pages/</code>, not raw Markdown or SQL. In static mode, use the lesson reader&#x27;s <strong>Track completion on the course dashboard</strong> link and mark the card on <code>START_HERE.html</code>. The per-lesson completion checkbox appears only in private launcher mode, where the dashboard, reader, CLI, and Codex can share the ignored progress file.</p>
@@ -153,7 +154,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 <p>The resolver supports both the standard <code>venv</code> layout and the Anaconda conda-prefix fallback. Reuse <code>$CoursePython</code> for later Windows commands in the same PowerShell window.</p>
 <pre><code class="language-bash"># macOS/Linux
 .venv/bin/python scripts/learning_portal.py</code></pre>
-<p>The command chooses a free loopback port, prints the private URL, and opens the default browser. Keep that terminal open; press <code>Ctrl+C</code> to stop the server.</p>
+<p>The command chooses a free loopback port, prints the private URL, and opens the default browser. Keep that terminal open; press <code>Ctrl+C</code> to stop the server. Jupyter inherits <code>PATH</code> and <code>DS60_DATABASE_URL</code> from this terminal. Native Windows PostgreSQL users should complete the <a href="setup/windows.md.html#let-the-guided-notebook-authenticate-without-a-hidden-prompt">password-file handoff</a> and start the portal from that configured PowerShell window; the portal never asks for or stores a database password.</p>
 <p>Useful options:</p>
 <pre><code class="language-text">--no-browser   print the URL without opening a browser
 --no-launches  synchronize progress but disable native process actions
@@ -163,11 +164,13 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 <p>Every native action is mapped in course code; the browser never supplies a shell command or unrestricted filesystem path.</p>
 <ul>
 <li><strong>Open repository in VS Code</strong> opens only the repository root.</li>
+<li><strong>Open notebook</strong> on a Python/bridge notebook card starts JupyterLab with that exact cataloged learner notebook.</li>
+<li><strong>Open SQL workspace</strong> on a SQL card creates and opens that lesson&#x27;s guided notebook directly.</li>
 <li><strong>Open in VS Code</strong> on a lesson reader resolves that stable catalog ID plus its guide, learner, or indexed solution selector.</li>
 <li><strong>Open exact notebook</strong> starts JupyterLab with that cataloged <code>.ipynb</code>.</li>
 <li><strong>Create/open guided SQL notebook</strong> creates an ignored, editable notebook and SQL copy for that stable SQL lesson, then starts JupyterLab with that exact notebook. It never accepts a browser-supplied path or command.</li>
 <li><strong>Launch Python JupyterLab</strong> opens <code>python/ds-60day/notebooks</code>.</li>
-<li><strong>Launch PostgreSQL notebook lab</strong> opens <code>bridge/professional/notebooks</code>.</li>
+<li><strong>Open PostgreSQL magics lab</strong> opens <code>bridge/professional/notebooks</code>. This is the JupySQL <code>%sql</code>/<code>%%sql</code> integration lab, not the normal way to run a full lesson script.</li>
 </ul>
 <p>VS Code needs its <code>code</code> launcher. If it is unavailable, open the repository with <strong>File → Open Folder</strong>. Jupyter actions require the repository <code>.venv</code>; run setup first if the portal reports that it is missing.</p>
 <h3 id="progress-and-portability">Progress and portability<a class="heading-anchor" href="#progress-and-portability" aria-label="Link to this section">#</a></h3>

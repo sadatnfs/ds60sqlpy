@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-35-model-evaluation-and-cross-validation">Day 35 — Model Evaluation and Cross-Validation<a class="heading-anchor" href="#guide--day-35-model-evaluation-and-cross-validation" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-35</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
 <p>Evaluation estimates how a trained procedure will behave on relevant unseen data. It is not a contest to maximize one score without considering the decision, the sampling process, and uncertainty.</p>
@@ -356,12 +395,113 @@ scores = cross_validate(
     scoring={&quot;accuracy&quot;: &quot;accuracy&quot;, &quot;f1&quot;: &quot;f1&quot;, &quot;auc&quot;: &quot;roc_auc&quot;},
 )</code></pre>
 <p>The metric arrays describe variation across these particular folds; their standard deviation is not automatically a confidence interval. Report how the folds were formed so someone else can reproduce the estimate.</p>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Open the Day 35 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
+<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
+<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
+<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
+</ol>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
+<h4 id="guide--concept-deep-dive-metrics-resampling-design-and-honest-generalization-estimates">Concept deep dive — metrics, resampling design, and honest generalization estimates<a class="heading-anchor" href="#guide--concept-deep-dive-metrics-resampling-design-and-honest-generalization-estimates" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
+<p>Evaluation begins with the decision, not a convenient default metric. A confusion matrix records counts at one decision threshold; precision asks whether positive predictions are reliable, while recall asks how many actual positives were found. Ranking metrics such as ROC AUC and average precision evaluate scores across thresholds but do not select an operating threshold for you.</p>
+<p>Cross-validation repeatedly changes which observations train and validate a model. Its validity depends on the split unit matching the independence structure. Repeated records from one person, device, or time period must not leak across folds merely because ordinary K-fold code runs.</p>
+<h5 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>confusion_matrix(y_true, y_pred)</code>:</strong> returns outcome counts at the selected threshold; inspect label order before unpacking.</li>
+<li><strong><code>cross_validate(estimator, X, y, cv=..., scoring=...)</code>:</strong> fits a fresh estimator per fold and can report multiple metrics and timing.</li>
+<li><strong>splitter objects:</strong> encode random, stratified, grouped, or temporal assumptions; <code>cv=5</code> is not a universal design.</li>
+</ul>
+<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
+<h5 id="guide--focused-example-a-derive-precision-and-recall-from-outcome-counts">Focused example A — derive precision and recall from outcome counts<a class="heading-anchor" href="#guide--focused-example-a-derive-precision-and-recall-from-outcome-counts" aria-label="Link to this section">#</a></h5>
+<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
+<pre><code class="language-python">import numpy as np
+from sklearn.metrics import confusion_matrix, precision_score, recall_score
+
+y_true = np.array([1, 1, 1, 1, 0, 0, 0, 0])
+y_pred = np.array([1, 0, 1, 0, 1, 0, 0, 0])
+tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+precision = precision_score(y_true, y_pred)
+recall = recall_score(y_true, y_pred)
+print({&quot;tn&quot;: tn, &quot;fp&quot;: fp, &quot;fn&quot;: fn, &quot;tp&quot;: tp,
+       &quot;precision&quot;: precision, &quot;recall&quot;: recall})
+assert precision == tp / (tp + fp)
+assert recall == tp / (tp + fn)</code></pre>
+<p><strong>Expected observation:</strong> Precision is 2/3 and recall is 1/2; the two metrics answer different questions.</p>
+<p><strong>Assumption to name:</strong> Class <code>1</code> is the positive class and each error type has a known operational consequence.</p>
+<h5 id="guide--focused-example-b-keep-entity-groups-out-of-each-other-s-folds">Focused example B — keep entity groups out of each other&#x27;s folds<a class="heading-anchor" href="#guide--focused-example-b-keep-entity-groups-out-of-each-other-s-folds" aria-label="Link to this section">#</a></h5>
+<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
+<pre><code class="language-python">import numpy as np
+from sklearn.model_selection import GroupKFold
+
+groups = np.repeat([&quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;D&quot;], 3)
+X = np.arange(groups.size).reshape(-1, 1)
+y = np.tile([0, 1, 0], 4)
+splitter = GroupKFold(n_splits=4)
+
+for train_idx, valid_idx in splitter.split(X, y, groups):
+    train_groups = set(groups[train_idx])
+    valid_groups = set(groups[valid_idx])
+    assert train_groups.isdisjoint(valid_groups)
+print(&quot;all validation groups were unseen during training&quot;)</code></pre>
+<p><strong>Expected observation:</strong> Each entity appears entirely in training or validation for a fold, never both.</p>
+<p><strong>Assumption to name:</strong> The group ID captures the dependence that would otherwise create optimistic validation.</p>
+<h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>What to do</th>
+<th>Evidence to keep</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define metrics, resampling design, and honest generalization estimates in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<h5 id="guide--common-mistake-and-debugging-path">Common mistake and debugging path<a class="heading-anchor" href="#guide--common-mistake-and-debugging-path" aria-label="Link to this section">#</a></h5>
+<p><strong>Mistake:</strong> Choosing the metric and split after seeing which combination makes the model look best.</p>
+<p><strong>Debug it deliberately:</strong> Write the row grain, positive class, prediction horizon, grouping key, and error costs before constructing the splitter or scorer.</p>
+<p><strong>Stop condition:</strong> Do not compare scores produced from different rows, folds, positive labels, thresholds, or metric definitions.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Evaluate the pipeline with <code>accuracy</code>, <code>f1</code>, and <code>roc_auc</code>.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — metrics, resampling design, and honest generalization estimates — on the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores—not hard labels—for ROC AUC.</p>
+<ol>
 <li>Compare the variability from 5-fold and 10-fold cross-validation.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — metrics, resampling design, and honest generalization estimates — use identical data, estimator, scorer, shuffle policy, and seed for 5 and 10 folds; print both score vectors, means, and standard deviations, and confirm every row appears in validation exactly once per run.</p>
+<ol>
 <li>Explain leakage risks and how placing preprocessing in a pipeline helps.</li>
 </ol>
+<p><strong>Verify:</strong> Practice 3 — metrics, resampling design, and honest generalization estimates — show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Keep folds identical across metrics. Ask whether each metric uses predicted labels, scores, or probabilities.</li>
@@ -373,9 +513,16 @@ scores = cross_validate(
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Threshold analysis:</strong> Using one fixed validation score vector, compare confusion matrices at thresholds 0.2, 0.5, and 0.8. Explain which errors increase as the threshold rises and why ROC AUC stays unchanged. <strong>Progressive hint:</strong> A higher positive threshold generally reduces predicted positives: false positives fall while false negatives rise. Ranking scores do not change.</li>
+</ol>
+<p><strong>Verify:</strong> Threshold analysis — for one fixed validation score vector, print TP/FP/TN/FN at 0.2, 0.5, and 0.8; assert predicted-positive count cannot rise with threshold and ROC AUC is identical because scores did not change.</p>
+<ol>
 <li><strong>Grouped resampling:</strong> Design cross-validation for repeated measurements from the same patient or customer. Demonstrate how ordinary StratifiedKFold can place one entity in both training and validation. <strong>Progressive hint:</strong> Use <code>StratifiedGroupKFold</code> when both label balance and entity separation matter; assert that train and validation group sets are disjoint.</li>
+</ol>
+<p><strong>Verify:</strong> Grouped resampling — print train/validation entity IDs for every grouped fold and assert their intersections are empty; also exhibit at least one ordinary StratifiedKFold split where the same entity appears on both sides.</p>
+<ol>
 <li><strong>Selection-bias debugging:</strong> Explain why reporting <code>GridSearchCV.best_score_</code> as final performance is optimistic. Sketch a nested cross-validation design and distinguish it from out-of-fold predictions for one fixed model. <strong>Progressive hint:</strong> The same inner folds both select and report the best candidate. Nested CV puts the complete search inside an outer held-out fold.</li>
 </ol>
+<p><strong>Verify:</strong> Selection-bias debugging — print nested outer-fold scores plus mean/std and the inner best parameters per outer fold; contrast with best_score_ and state that one fixed model&#x27;s out-of-fold predictions do not evaluate the selection procedure.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -423,17 +570,46 @@ scores = cross_validate(
 <li>Work in the <a href="python-35.html#learner">Day 35 learner notebook</a>.</li>
 <li>Then use the <a href="python-35.html#solution-1">Day 35 solution</a>.</li>
 <li>Continue to <a href="python-36.html#guide">Day 36 — PCA and Feature Selection</a>.</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<pre><code class="language-text">Tutor me through `python-35` — Day 35 — Model Evaluation and Cross-Validation.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize metrics, resampling design, and honest generalization estimates. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day35_model_evaluation_cv.md`
+- learner artifact: `python/ds-60day/notebooks/day35_model_evaluation_cv.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-34`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -450,12 +626,12 @@ scores = cross_validate(
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-35-model-evaluation-cross-validation">Day 35 — Model evaluation &amp; cross-validation<a class="heading-anchor" href="#learner--cell-1--day-35-model-evaluation-cross-validation" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -475,28 +651,127 @@ scores = cross_validate(
 <span>scores.mean(), scores</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-3--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
+<h4 id="learner--cell-3--concept-lab-metrics-resampling-design-and-honest-generalization-estimates">Concept lab — metrics, resampling design, and honest generalization estimates<a class="heading-anchor" href="#learner--cell-3--concept-lab-metrics-resampling-design-and-honest-generalization-estimates" aria-label="Link to this section">#</a></h4>
+<h5 id="learner--cell-3--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-3--mental-model" aria-label="Link to this section">#</a></h5>
+<p>Evaluation begins with the decision, not a convenient default metric. A confusion matrix records counts at one decision threshold; precision asks whether positive predictions are reliable, while recall asks how many actual positives were found. Ranking metrics such as ROC AUC and average precision evaluate scores across thresholds but do not select an operating threshold for you.</p>
+<p>Cross-validation repeatedly changes which observations train and validate a model. Its validity depends on the split unit matching the independence structure. Repeated records from one person, device, or time period must not leak across folds merely because ordinary K-fold code runs.</p>
+<h5 id="learner--cell-3--read-the-api-before-running-it">Read the API before running it<a class="heading-anchor" href="#learner--cell-3--read-the-api-before-running-it" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>confusion_matrix(y_true, y_pred)</code>:</strong> returns outcome counts at the selected threshold; inspect label order before unpacking.</li>
+<li><strong><code>cross_validate(estimator, X, y, cv=..., scoring=...)</code>:</strong> fits a fresh estimator per fold and can report multiple metrics and timing.</li>
+<li><strong>splitter objects:</strong> encode random, stratified, grouped, or temporal assumptions; <code>cv=5</code> is not a universal design.</li>
+</ul>
+<p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-derive-precision-and-recall-from-outcome-counts">Focused example A — derive precision and recall from outcome counts<a class="heading-anchor" href="#learner--cell-4--focused-example-a-derive-precision-and-recall-from-outcome-counts" aria-label="Link to this section">#</a></h5>
+<p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
+<p><strong>Assumption:</strong> Class <code>1</code> is the positive class and each error type has a known operational consequence.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>import numpy as np</span>
+<span>from sklearn.metrics import confusion_matrix, precision_score, recall_score</span>
+<span> </span>
+<span>y_true = np.array([1, 1, 1, 1, 0, 0, 0, 0])</span>
+<span>y_pred = np.array([1, 0, 1, 0, 1, 0, 0, 0])</span>
+<span>tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()</span>
+<span>precision = precision_score(y_true, y_pred)</span>
+<span>recall = recall_score(y_true, y_pred)</span>
+<span>print({&quot;tn&quot;: tn, &quot;fp&quot;: fp, &quot;fn&quot;: fn, &quot;tp&quot;: tp,</span>
+<span>       &quot;precision&quot;: precision, &quot;recall&quot;: recall})</span>
+<span>assert precision == tp / (tp + fp)</span>
+<span>assert recall == tp / (tp + fn)</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> Precision is 2/3 and recall is 1/2; the two metrics answer different questions.</p>
+<p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-keep-entity-groups-out-of-each-other-s-folds">Focused example B — keep entity groups out of each other&#x27;s folds<a class="heading-anchor" href="#learner--cell-7--focused-example-b-keep-entity-groups-out-of-each-other-s-folds" aria-label="Link to this section">#</a></h5>
+<p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
+<p><strong>Assumption:</strong> The group ID captures the dependence that would otherwise create optimistic validation.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import numpy as np</span>
+<span>from sklearn.model_selection import GroupKFold</span>
+<span> </span>
+<span>groups = np.repeat([&quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;D&quot;], 3)</span>
+<span>X = np.arange(groups.size).reshape(-1, 1)</span>
+<span>y = np.tile([0, 1, 0], 4)</span>
+<span>splitter = GroupKFold(n_splits=4)</span>
+<span> </span>
+<span>for train_idx, valid_idx in splitter.split(X, y, groups):</span>
+<span>    train_groups = set(groups[train_idx])</span>
+<span>    valid_groups = set(groups[valid_idx])</span>
+<span>    assert train_groups.isdisjoint(valid_groups)</span>
+<span>print(&quot;all validation groups were unseen during training&quot;)</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> Each entity appears entirely in training or validation for a fold, never both.</p>
+<h5 id="learner--cell-9--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-9--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Choosing the metric and split after seeing which combination makes the model look best.</p>
+<p><strong>Diagnostic:</strong> Write the row grain, positive class, prediction horizon, grouping key, and error costs before constructing the splitter or scorer.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>Action</th>
+<th>Evidence</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define metrics, resampling design, and honest generalization estimates in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<p><strong>Stop condition:</strong> Do not compare scores produced from different rows, folds, positive labels, thresholds, or metric definitions.</p>
+<p>Continue to the numbered practice only after you can explain both examples without rereading their code.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Evaluate the pipeline with <code>accuracy</code>, <code>f1</code>, and <code>roc_auc</code>.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — metrics, resampling design, and honest generalization estimates — on the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores—not hard labels—for ROC AUC.</p>
+<ol>
 <li>Compare the variability from 5-fold and 10-fold cross-validation.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — metrics, resampling design, and honest generalization estimates — use identical data, estimator, scorer, shuffle policy, and seed for 5 and 10 folds; print both score vectors, means, and standard deviations, and confirm every row appears in validation exactly once per run.</p>
+<ol>
 <li>Explain leakage risks and how placing preprocessing in a pipeline helps.</li>
 </ol>
-<h5 id="learner--cell-3--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-3--progressive-hints" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3 — metrics, resampling design, and honest generalization estimates — show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.</p>
+<h5 id="learner--cell-10--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-10--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Keep folds identical across metrics. Ask whether each metric uses predicted labels, scores, or probabilities.</li>
 <li>Create two <code>StratifiedKFold</code> objects with shuffle and fixed seeds. Compare both mean and spread; do not infer a universal rule from one dataset.</li>
 <li>Sketch what the scaler would know if it were fit before the folds existed. Repeat the reasoning for imputation and feature selection.</li>
 </ol>
-<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Match metrics and resampling to the decision being modeled. Keep thresholds, groups, time, and hyperparameter selection inside honest validation boundaries.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Threshold analysis:</strong> Using one fixed validation score vector, compare confusion matrices at thresholds 0.2, 0.5, and 0.8. Explain which errors increase as the threshold rises and why ROC AUC stays unchanged. <strong>Progressive hint:</strong> A higher positive threshold generally reduces predicted positives: false positives fall while false negatives rise. Ranking scores do not change.</li>
+</ol>
+<p><strong>Verify:</strong> Threshold analysis — for one fixed validation score vector, print TP/FP/TN/FN at 0.2, 0.5, and 0.8; assert predicted-positive count cannot rise with threshold and ROC AUC is identical because scores did not change.</p>
+<ol>
 <li><strong>Grouped resampling:</strong> Design cross-validation for repeated measurements from the same patient or customer. Demonstrate how ordinary StratifiedKFold can place one entity in both training and validation. <strong>Progressive hint:</strong> Use <code>StratifiedGroupKFold</code> when both label balance and entity separation matter; assert that train and validation group sets are disjoint.</li>
+</ol>
+<p><strong>Verify:</strong> Grouped resampling — print train/validation entity IDs for every grouped fold and assert their intersections are empty; also exhibit at least one ordinary StratifiedKFold split where the same entity appears on both sides.</p>
+<ol>
 <li><strong>Selection-bias debugging:</strong> Explain why reporting <code>GridSearchCV.best_score_</code> as final performance is optimistic. Sketch a nested cross-validation design and distinguish it from out-of-fold predictions for one fixed model. <strong>Progressive hint:</strong> The same inner folds both select and report the best candidate. Nested CV puts the complete search inside an outer held-out fold.</li>
 </ol>
+<p><strong>Verify:</strong> Selection-bias debugging — print nested outer-fold scores plus mean/std and the inner best parameters per outer fold; contrast with best_score_ and state that one fixed model&#x27;s out-of-fold predictions do not evaluate the selection procedure.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
 <span>#</span>
 <span># Keep the official solution closed until you have attempted each task.</span>
 <span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
@@ -511,15 +786,15 @@ scores = cross_validate(
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -551,7 +826,7 @@ scores = cross_validate(
 <li>Exercise 3: Show how pipelines help prevent leakage</li>
 </ul>
 <hr>
-<p>Exercise 1 — Metrics with CV</p>
+<p>Worked reference for Exercise 1 — Metrics with CV</p>
 <pre><code class="language-python">from sklearn.datasets import load_breast_cancer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score, StratifiedKFold
@@ -581,7 +856,7 @@ scores_auc = cross_val_score(clf, X, y, cv=cv, scoring=&#x27;roc_auc&#x27;)
 <li>Report mean and variability (std or CI)</li>
 </ul>
 <hr>
-<p>Exercise 2 — 5-fold vs 10-fold</p>
+<p>Worked reference for Exercise 2 — 5-fold vs 10-fold</p>
 <pre><code class="language-python">cv5  = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
 cv10 = StratifiedKFold(n_splits=10, shuffle=True, random_state=0)
 auc5  = cross_val_score(clf, X, y, cv=cv5,  scoring=&#x27;roc_auc&#x27;)
@@ -592,7 +867,7 @@ auc10 = cross_val_score(clf, X, y, cv=cv10, scoring=&#x27;roc_auc&#x27;)
 <li>10-fold gives more train data per fold (less bias), but more variance across folds; compare stds</li>
 </ul>
 <hr>
-<p>Exercise 3 — Leakage and pipelines</p>
+<p>Worked reference for Exercise 3 — Leakage and pipelines</p>
 <ul>
 <li>Scaling and other preprocessing must be fit within each CV fold to avoid peeking at test fold</li>
 <li>Pipelines ensure transform.fit is applied only on training split; transforms then apply to held-out split via transform</li>
@@ -604,26 +879,46 @@ auc10 = cross_val_score(clf, X, y, cv=cv10, scoring=&#x27;roc_auc&#x27;)
 <li>Use pipelines to control leakage and keep code reproducible</li>
 </ul>
 <hr>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong><code>confusion_matrix(y_true, y_pred)</code>:</strong> returns outcome counts at the selected threshold; inspect label order before unpacking.</li>
+<li><strong><code>cross_validate(estimator, X, y, cv=..., scoring=...)</code>:</strong> fits a fresh estimator per fold and can report multiple metrics and timing.</li>
+<li><strong>splitter objects:</strong> encode random, stratified, grouped, or temporal assumptions; <code>cv=5</code> is not a universal design.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> Decision-aligned metrics and structure-aware resampling make the reported estimate answer the intended future-use question.</p>
+<p><strong>Useful alternative:</strong> A fixed holdout is simpler and valuable for final confirmation; repeated or nested CV estimates more of the selection procedure at higher cost.</p>
+<p><strong>Trade-off:</strong> More folds train on more data per fold but increase compute and correlation between fold estimates.</p>
+<p><strong>Edge case to test:</strong> A fold with one class, a group that dominates the dataset, or time leakage can make a nominal score undefined or misleading.</p>
+<p><strong>Evidence of correctness:</strong> Recompute metrics from outcome counts, prove split-unit disjointness, report every fold score plus variability, and preserve a separate final-evaluation boundary.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Evaluate the pipeline with <code>accuracy</code>, <code>f1</code>, and <code>roc_auc</code>.</p>
 <p><strong>How to reason about it:</strong> Accuracy and F1 use thresholded labels, while ROC AUC uses ranking scores. Keep folds identical and report class prevalence so readers can understand why the metrics may disagree.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1 — metrics, resampling design, and honest generalization estimates — on the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores—not hard labels—for ROC AUC.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare the variability from 5-fold and 10-fold cross-validation.</p>
 <p><strong>How to reason about it:</strong> Five and ten folds trade training-set size against compute and fold variance. Compare the paired fold procedure across repeated seeds rather than announcing a universal winner from one split.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2 — metrics, resampling design, and honest generalization estimates — use identical data, estimator, scorer, shuffle policy, and seed for 5 and 10 folds; print both score vectors, means, and standard deviations, and confirm every row appears in validation exactly once per run.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Explain leakage risks and how placing preprocessing in a pipeline helps.</p>
 <p><strong>How to reason about it:</strong> Any transform learned before cross-validation leaks validation-fold information. A pipeline causes preprocessing to be cloned and refit inside every fold, but it cannot repair leakage already baked into features.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 3 — metrics, resampling design, and honest generalization estimates — show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.</p>
 <h5 id="solution-1--exercise-4-threshold-analysis">Exercise 4 — Threshold analysis<a class="heading-anchor" href="#solution-1--exercise-4-threshold-analysis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Using one fixed validation score vector, compare confusion matrices at thresholds 0.2, 0.5, and 0.8. Explain which errors increase as the threshold rises and why ROC AUC stays unchanged.</p>
 <p><strong>Reasoning before implementation:</strong> A higher positive threshold generally reduces predicted positives: false positives fall while false negatives rise. Ranking scores do not change.</p>
 <p>Build the matrix with an explicit label order such as <code>[0, 1]</code> and record support beside rates. Threshold selection is a policy decision; choose it on validation data using error costs or a documented constraint, then evaluate that frozen threshold once on the final holdout.</p>
 <p>ROC AUC is unchanged because it considers ranking across all possible thresholds. Precision, recall, F1, and the confusion matrix do change because they consume the thresholded labels.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Threshold analysis — for one fixed validation score vector, print TP/FP/TN/FN at 0.2, 0.5, and 0.8; assert predicted-positive count cannot rise with threshold and ROC AUC is identical because scores did not change.</p>
 <h5 id="solution-1--exercise-5-grouped-resampling">Exercise 5 — Grouped resampling<a class="heading-anchor" href="#solution-1--exercise-5-grouped-resampling" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design cross-validation for repeated measurements from the same patient or customer. Demonstrate how ordinary StratifiedKFold can place one entity in both training and validation.</p>
 <p><strong>Reasoning before implementation:</strong> Use <code>StratifiedGroupKFold</code> when both label balance and entity separation matter; assert that train and validation group sets are disjoint.</p>
@@ -641,6 +936,7 @@ for train_index, valid_index in splitter.split(X, y, groups=entity_ids):
     assert train_groups.isdisjoint(valid_groups)</code></pre>
 <p>If deployment predicts future rows for already-known entities, a different split may be appropriate; align the split with that real decision explicitly.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Grouped resampling — print train/validation entity IDs for every grouped fold and assert their intersections are empty; also exhibit at least one ordinary StratifiedKFold split where the same entity appears on both sides.</p>
 <h5 id="solution-1--exercise-6-selection-bias-debugging">Exercise 6 — Selection-bias debugging<a class="heading-anchor" href="#solution-1--exercise-6-selection-bias-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Explain why reporting <code>GridSearchCV.best_score_</code> as final performance is optimistic. Sketch a nested cross-validation design and distinguish it from out-of-fold predictions for one fixed model.</p>
 <p><strong>Reasoning before implementation:</strong> The same inner folds both select and report the best candidate. Nested CV puts the complete search inside an outer held-out fold.</p>
@@ -651,9 +947,10 @@ for train_index, valid_index in splitter.split(X, y, groups=entity_ids):
 <li>outer scores summarize the complete model-selection procedure.</li>
 </ol>
 <p><code>cross_val_predict</code> can generate out-of-fold predictions for a fixed estimator, but it is not automatically nested. Passing the entire search object to the outer loop is what repeats selection honestly.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></div>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Selection-bias debugging — print nested outer-fold scores plus mean/std and the inner best parameters per outer fold; contrast with best_score_ and state that one fixed model&#x27;s out-of-fold predictions do not evaluate the selection procedure.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -661,7 +958,7 @@ for train_index, valid_index in splitter.split(X, y, groups=entity_ids):
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -764,7 +1061,51 @@ for train_index, valid_index in splitter.split(X, y, groups=entity_ids):
 <p><code>cross_val_predict</code> can generate out-of-fold predictions for a fixed estimator, but it is not automatically nested. Passing the entire search object to the outer loop is what repeats selection honestly.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-35` — Day 35 — Model Evaluation and Cross-Validation.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize metrics, resampling design, and honest generalization estimates. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day35_model_evaluation_cv.md`
+- learner artifact: `python/ds-60day/notebooks/day35_model_evaluation_cv.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-34`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-34.html"><small>Previous lesson</small><strong>python-34</strong><span>scikit-learn Intro Pipelines</span></a>
@@ -856,6 +1197,23 @@ for train_index, valid_index in splitter.split(X, y, groups=entity_ids):
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-temporal-01/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--sql-temporal-01-temporal-and-domain-modelling">SQL-TEMPORAL-01 — Temporal and Domain Modelling<a class="heading-anchor" href="#guide--sql-temporal-01-temporal-and-domain-modelling" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -289,6 +388,69 @@
 <p>Run:</p>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_temporal_01_domain_modelling.sql</code></pre>
 <p>The default is offline, fixed-time, and rollback-safe. It inspects but never enables <code>btree_gist</code>.</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-TEMPORAL-01 — Temporal and Domain Modelling</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-temporal-01/lesson/workspace/sql/professional/lessons/sql_temporal_01_domain_modelling.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\professional\lessons\sql_temporal_01_domain_modelling.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/professional/lessons/sql_temporal_01_domain_modelling.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Valid time, System time, Bitemporal, As-of query, Half-open interval, Exclusion constraint. Its worked SQL reads or creates <code>pro_temporal_lab.customer_terms</code>, <code>pro_temporal_lab.global_maintenance_windows</code>, <code>pg_catalog.pg_available_extensions</code>, <code>pro_temporal_lab.change_ledger</code>, <code>pro_temporal_lab.retention_classes</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: The term-version grain is one recorded version of one customer&#x27;s fact. A February-valid rate first enters the system March 1. On March 10, the old system period is closed and a corrected row begins. Querying valid February 15 as known March 5 returns 10; as known March 15 returns 12. History is appended/closed, not overwritten. The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for <code>pro_temporal_lab.customer_terms</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final <code>SELECT</code>. Verify the command tag in <code>pg_catalog</code>/<code>information_schema</code>, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit <code>NULL</code>, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/professional/lessons/sql_temporal_01_domain_modelling.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">CREATE TABLE pro_temporal_lab.customer_terms (
+    term_version_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    customer_key text NOT NULL,
+    valid_period daterange NOT NULL CHECK (
+        NOT isempty(valid_period)
+        AND lower_inc(valid_period)
+        AND NOT upper_inc(valid_period)
+    ),
+    system_period tstzrange NOT NULL CHECK (
+        NOT isempty(system_period)
+        AND lower_inc(system_period)
+        AND NOT upper_inc(system_period)
+    ),
+    monthly_rate numeric(10, 2) NOT NULL CHECK (monthly_rate &gt;= 0),
+    recorded_reason text NOT NULL CHECK (btrim(recorded_reason) &lt;&gt; &#x27;&#x27;)
+);</code></pre>
+<p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
+<p><strong>Expected result/shape:</strong> Example 1 must print the expected DDL command tag for <code>pro_temporal_lab.customer_terms</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">INSERT INTO pro_temporal_lab.customer_terms (
+    customer_key,
+    valid_period,
+    system_period,
+    monthly_rate,
+    recorded_reason
+)
+VALUES (
+    &#x27;CUS-100&#x27;,
+    daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-04-01&#x27;, &#x27;[)&#x27;),
+    tstzrange(TIMESTAMPTZ &#x27;2026-03-01 00:00:00+00&#x27;, NULL, &#x27;[)&#x27;),
+    10.00,
+    &#x27;initial import&#x27;
+);</code></pre>
+<p><strong>How to read it:</strong> Example 2 changes rows inside the lesson&#x27;s declared transaction. The command tag reports affected rows, but a follow-up query must prove the intended before/after invariant.</p>
+<p><strong>Expected result/shape:</strong> Example 2 must complete through <code>psql</code> with its documented command tag or notice for <code>pro_temporal_lab.customer_terms</code>. Treat an unexpected error as failure, and prove the stated catalog/behavior invariant plus cleanup.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Distinguish valid and system time and query bitemporal state as-of two clocks.</li>
@@ -325,18 +487,18 @@ EXCLUDE USING gist (
 <p>Complete all twelve prompts. Begin with retroactive bitemporal correction, boundary tests, optional exclusion design, ledger reversal, held-retention workflow, and an explicit domain-assumption record; then cover civil time, three clocks, Type-2 joins, temporal parents, gaps/overlaps, and hold-aware archival. Add negative controls for overlap, mutation, duplicate idempotency, and held deletion.</p>
 <p>For every temporal answer, name the clock, zone, lower/upper inclusivity, late-arrival policy, overlap/gap rule, correction authority, and audit evidence:</p>
 <ol>
-<li><strong>Retroactive correction:</strong> compare valid-at/known-at answers before and after the recorded correction.</li>
-<li><strong>Range boundaries:</strong> test every upper endpoint and require at most one row.</li>
-<li><strong>Overlap enforcement:</strong> compare an optional exclusion constraint with the locking trigger fallback.</li>
-<li><strong>Ledger reversal:</strong> append rather than update and verify idempotency and reversal links.</li>
-<li><strong>Retention decision:</strong> preserve approver, reason, time, hold, and immutable audit without deleting fixtures.</li>
-<li><strong>Assumption register:</strong> document time, authority, lateness, gaps/overlaps, privacy/deletion, ledger meaning, and correction roles.</li>
-<li><strong>Civil time:</strong> test ambiguous/nonexistent DST times while retaining source zone and UTC instant.</li>
-<li><strong>Three clocks:</strong> separate event, ingestion, and processing time; define watermark, lateness, correction, and notification.</li>
-<li><strong>Type-2 join:</strong> use business/surrogate keys and half-open effective periods; require at most one match per fact.</li>
-<li><strong>Temporal parent:</strong> design period containment, concurrency protection, deferred checking, and repair.</li>
-<li><strong>Gap/overlap report:</strong> use deterministic window/multirange logic and define adjacency, duplicates, and empty periods.</li>
-<li><strong>Archival:</strong> plan partition detach, legal-hold exceptions, verification, protected storage, restore tests, and deletion proof.</li>
+<li><strong>Retroactive correction:</strong> compare valid-at/known-at answers before and after the recorded correction. <strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 1, Close only the current <code>CUS-100</code> row whose <code>valid_period</code> contains <code>2026-02-15</code> at system time <code>2026-04-01 00:00+00</code>, then append the corrected rate as a new current <code>pro_temporal_lab.customer_terms</code> row. <strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 1, One row per <code>(valid_on, system_as_of)</code> probe, with <code>valid_on</code>, <code>system_as_of</code>, <code>term_version_id</code>, <code>monthly_rate</code>, and <code>recorded_reason</code>, ordered by <code>system_as_of</code>; March 15 returns the prior rate and April 2 returns the retroactive correction. <strong>Verify:</strong> For sql-temporal-01 Exercise 1, Group the as-of join by both probe columns and require exactly one match per probe. Prove the earlier system-period row still exists and that no current valid periods overlap for <code>CUS-100</code>.</li>
+<li><strong>Range boundaries:</strong> test every upper endpoint and require at most one row. <strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 2, Build an inline probe relation around every lower and upper bound in <code>pro_temporal_lab.customer_terms</code>: immediately before, exactly at, and immediately after each valid-date or system-time boundary. <strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 2, One row per <code>probe_id</code>, with <code>valid_on</code>, <code>known_at</code>, <code>matching_versions</code>, and <code>expected_matches</code>, ordered by <code>probe_id</code>; no <code>matching_versions</code> value is greater than one. <strong>Verify:</strong> For sql-temporal-01 Exercise 2, Independently count matching <code>term_version_id</code> values for every probe. Require the old version to stop at the upper bound and an adjacent successor, when present, to begin there without a double match.</li>
+<li><strong>Overlap enforcement:</strong> compare an optional exclusion constraint with the locking trigger fallback. <strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 3, Use the read-only <code>pg_available_extensions</code> result, the existing advisory-lock trigger, and a written (not executed) <code>btree_gist</code> exclusion constraint design for <code>customer_key WITH =, valid_period WITH &amp;&amp;</code>. <strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 3, One comparison row per enforcement approach, with <code>approach</code>, <code>enforcement_mechanism</code>, <code>assumption_or_limit</code>, and <code>concurrent_failure_behavior</code>. <strong>Verify:</strong> For sql-temporal-01 Exercise 3, The comparison output records which writes each approach locks or constrains, how a conflicting concurrent transaction fails, and what happens if an application writer bypasses the agreed advisory-lock protocol.</li>
+<li><strong>Ledger reversal:</strong> append rather than update and verify idempotency and reversal links. <strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 4, Append <code>LEDGER-102</code> to <code>pro_temporal_lab.change_ledger</code> as the exact same-subject, same-currency negation of <code>LEDGER-101</code>; set <code>reverses_entry_id</code> from the referenced row instead of hard-coding it. <strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 4, One row per <code>ledger_entry_id</code>, with <code>idempotency_key</code>, <code>event_kind</code>, signed amount, <code>reverses_entry_id</code>, and a scalar reconciled amount, ordered by <code>ledger_entry_id</code>. <strong>Verify:</strong> For sql-temporal-01 Exercise 4, Require three rows and a reconciled amount of <code>5.00</code>. Prove an UPDATE, DELETE, duplicate <code>LEDGER-102</code> retry, second reversal of the same entry, and wrong-sign reversal all fail without changing the row count.</li>
+<li><strong>Retention decision:</strong> preserve approver, reason, time, hold, and immutable audit without deleting fixtures. <strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 5, Create append-only <code>pro_temporal_lab.retention_decisions</code> with a stable decision idempotency key, <code>record_key</code>, decision, approver, reason, and authoritative <code>decided_at</code>. Lock per record and reject backdated decisions or a deletion approval while the latest decision is a hold. <strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 5, One row per retained <code>record_key</code>, with the latest decision event/key, approver, reason, decision time, and <code>eligible_for_deletion_review</code>, ordered by <code>record_key</code>. <strong>Verify:</strong> For sql-temporal-01 Exercise 5, Prove decision UPDATE/DELETE and duplicate/backdated appends fail. Keep a held fixture ineligible, release another through an ordered event, and confirm no <code>retained_records</code> row is actually deleted.</li>
+<li><strong>Assumption register:</strong> document time, authority, lateness, gaps/overlaps, privacy/deletion, ledger meaning, and correction roles. <strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 6, Use observed lesson behavior plus explicitly labeled assumptions for time zone, clock authority, lateness, overlap/gaps, correction authority, ledger units, retention/holds, and replicas/backups. <strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 6, One row per assumption topic, with <code>topic</code>, <code>decision_or_assumption</code>, <code>evidence</code>, <code>owner</code>, and <code>failure_response</code>. <strong>Verify:</strong> For sql-temporal-01 Exercise 6, Every row names an accountable owner and an operational response; every claimed fact cites a query/catalog result, while policy not present in the repository is labeled as an assumption needing approval.</li>
+<li><strong>Civil time:</strong> test ambiguous/nonexistent DST times while retaining source zone and UTC instant. <strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 7, Use three keyed civil-time cases in <code>America/Los_Angeles</code>: spring <code>2026-03-08 02:30</code>, fall <code>2026-11-01 01:30</code>, and one ordinary time. Round-trip candidate UTC instants rather than trusting one silent <code>AT TIME ZONE</code> default. <strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 7, One row per <code>case_id</code>, with <code>local_time</code>, <code>zone_name</code>, <code>civil_time_status</code>, candidate instants, PostgreSQL&#x27;s default interpreted instant, and <code>resolution_policy</code>, ordered by <code>case_id</code>. <strong>Verify:</strong> For sql-temporal-01 Exercise 7, The result contains exactly one <code>nonexistent</code>, one <code>ambiguous</code>, and one <code>ordinary</code> case. A nonexistent time has zero round-trip candidates; an ambiguous time has more than one and requires explicit disambiguation.</li>
+<li><strong>Three clocks:</strong> separate event, ingestion, and processing time; define watermark, lateness, correction, and notification. <strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 8, Create <code>pro_temporal_lab.timed_events(event_key, event_at, ingested_at, processed_at)</code> with one on-time and one late event. Use a fixed 15-minute example lateness allowance. <strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 8, Exactly one summary row with <code>event_count</code>, <code>maximum_event_time</code>, <code>example_watermark</code>, <code>maximum_arrival_delay</code>, <code>maximum_processing_delay</code>, <code>events_behind_watermark</code>, and the correction policy. <strong>Verify:</strong> For sql-temporal-01 Exercise 8, Recompute arrival and processing delays row by row, require the late fixture to fall behind the watermark, and describe a stable window/version identity for the corrected aggregate.</li>
+<li><strong>Type-2 join:</strong> use business/surrogate keys and half-open effective periods; require at most one match per fact. <strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 9, Create <code>pro_temporal_lab.customer_dimension</code> with surrogate <code>customer_version_id</code>, business key, half-open <code>effective_period</code>, <code>is_current</code>, segment, correction reason, and record time; join <code>pro_temporal_lab.order_facts</code> on business key plus range containment. <strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 9, One row per <code>order_key</code>, with <code>ordered_on</code>, <code>customer_version_id</code>, segment, effective period, current marker, and correction metadata, ordered by <code>order_key</code>. <strong>Verify:</strong> For sql-temporal-01 Exercise 9, Require output count to equal fact count and group by <code>order_key</code> with <code>HAVING count(customer_version_id) &gt; 1</code> returning no rows. Inject one overlapping dimension row, prove the diagnostic catches it, then roll it back.</li>
+<li><strong>Temporal parent:</strong> design period containment, concurrency protection, deferred checking, and repair. <strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 10, Cover child insert/update, parent shrink/delete, bulk historical repair, and deferred validation. State the shared business-key locking namespace and containment predicate for each write path. <strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 10, One row per write path, with <code>write_path</code>, <code>concurrency_or_validation_control</code>, and <code>failure_response</code>. <strong>Verify:</strong> For sql-temporal-01 Exercise 10, Walk through two concurrent transactions for both child insertion and parent shrink. Identify the lock acquired first and show that cutover is blocked whenever the final containment diagnostic is nonempty.</li>
+<li><strong>Gap/overlap report:</strong> use deterministic window/multirange logic and define adjacency, duplicates, and empty periods. <strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 11, Use keyed fixtures containing duplicate, overlapping, adjacent, gapped, empty, and unbounded-upper <code>daterange</code> values. Preserve unbounded prior coverage with <code>upper_inf()</code> or an explicit infinity sentinel. <strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 11, One row per <code>period_id</code>, with <code>business_key</code>, <code>valid_period</code>, <code>has_unbounded_upper</code>, duplicate count, prior maximum upper bound, and <code>relationship_to_prior_coverage</code>, ordered by bounds and <code>period_id</code>. <strong>Verify:</strong> For sql-temporal-01 Exercise 11, Require explicit <code>duplicate</code>, <code>empty</code>, <code>gap</code>, <code>adjacent</code>, and <code>overlap</code> outcomes. Add a bounded period after an unbounded range and prove it is classified as overlap rather than first/gap.</li>
+<li><strong>Archival:</strong> plan partition detach, legal-hold exceptions, verification, protected storage, restore tests, and deletion proof. <strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 12, Design ordered phases for inventory, hold gate, detach, encrypted archive, reconciliation, restore test, and eventual source deletion. <strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 12, One row per <code>step_number</code>, with <code>phase</code>, <code>required_control</code>, and <code>required_evidence</code>, ordered by <code>step_number</code>. <strong>Verify:</strong> For sql-temporal-01 Exercise 12, Each phase names a stop condition. Trace one active-hold fixture through every maintained copy and require a successful isolated restore plus source/archive count and checksum reconciliation before deletion.</li>
 </ol>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -362,17 +524,45 @@ EXCLUDE USING gist (
 <li>Range/exclusion indexes add write/lock cost that needs measurement.</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Use <a href="sql-test-01.html#guide">SQL-TEST-01</a> to freeze boundary, overlap, correction, and retention contracts; use <a href="sql-repl-01.html#guide">SQL-REPL-01</a> to propagate immutable versioned events idempotently; and use <a href="sql-ops-02.html#guide">SQL-OPS-02</a> to rehearse recovery without erasing required historical evidence. This completes the shared PostgreSQL professional specialization path.</p></div>
+<p>Use <a href="sql-test-01.html#guide">SQL-TEST-01</a> to freeze boundary, overlap, correction, and retention contracts; use <a href="sql-repl-01.html#guide">SQL-REPL-01</a> to propagate immutable versioned events idempotently; and use <a href="sql-ops-02.html#guide">SQL-OPS-02</a> to rehearse recovery without erasing required historical evidence. This completes the shared PostgreSQL professional specialization path.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-temporal-01 — Temporal and Domain Modelling.
+
+I have completed the direct catalog prerequisites: `sql-found-01`, `sql-types-01`, `sql-prog-01`, `sql-test-01`, `sql-39`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/professional/companion-guides/sql_temporal_01_domain_modelling.md
+- Answer-free learner SQL: sql/professional/lessons/sql_temporal_01_domain_modelling.sql
+
+Key terms to teach in context: Valid time, System time, Bitemporal, As-of query, Half-open interval, Exclusion constraint. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: The term-version grain is one recorded version of one customer&#x27;s fact. A February-valid rate first enters the system March 1. On March 10, the old system period is closed and a corrected row begins. Querying valid February 15 as known March 5 returns 10; as known March 15 returns 12. History is appended/closed, not overwritten.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-temporal-01/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -389,13 +579,30 @@ EXCLUDE USING gist (
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-TEMPORAL-01: Temporal and domain modelling</span>
+<span>-- BEGINNER WORKFLOW — sql-temporal-01: Temporal and Domain Modelling</span>
+<span>-- Guide: sql/professional/companion-guides/sql_temporal_01_domain_modelling.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-temporal-01/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: pro_temporal_lab.customer_terms, pro_temporal_lab.global_maintenance_windows, pg_catalog.pg_available_extensions, pro_temporal_lab.change_ledger, pro_temporal_lab.retention_classes.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>-- Target: PostgreSQL 16+</span>
 <span> </span>
 <span>\set ON_ERROR_STOP on</span>
@@ -610,11 +817,54 @@ EXCLUDE USING gist (
 <span>    event_kind text NOT NULL,</span>
 <span>    effective_at timestamptz NOT NULL,</span>
 <span>    recorded_at timestamptz NOT NULL,</span>
-<span>    payload jsonb NOT NULL CHECK (jsonb_typeof(payload) = &#x27;object&#x27;),</span>
+<span>    payload jsonb NOT NULL CHECK (</span>
+<span>        jsonb_typeof(payload) = &#x27;object&#x27;</span>
+<span>        AND payload ? &#x27;amount&#x27;</span>
+<span>        AND payload ? &#x27;currency&#x27;</span>
+<span>        AND payload -&gt;&gt; &#x27;amount&#x27; ~ &#x27;^-?[0-9]+([.][0-9]{1,2})?$&#x27;</span>
+<span>    ),</span>
 <span>    idempotency_key text NOT NULL UNIQUE,</span>
-<span>    reverses_entry_id bigint</span>
+<span>    reverses_entry_id bigint UNIQUE</span>
 <span>        REFERENCES pro_temporal_lab.change_ledger (ledger_entry_id)</span>
 <span>);</span>
+<span> </span>
+<span>CREATE FUNCTION pro_temporal_lab.validate_ledger_reversal()</span>
+<span>RETURNS trigger</span>
+<span>LANGUAGE plpgsql</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>DECLARE</span>
+<span>    prior_entry pro_temporal_lab.change_ledger%ROWTYPE;</span>
+<span>BEGIN</span>
+<span>    IF NEW.reverses_entry_id IS NULL THEN</span>
+<span>        RETURN NEW;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    SELECT prior.*</span>
+<span>    INTO prior_entry</span>
+<span>    FROM pro_temporal_lab.change_ledger AS prior</span>
+<span>    WHERE prior.ledger_entry_id = NEW.reverses_entry_id</span>
+<span>    FOR KEY SHARE;</span>
+<span> </span>
+<span>    IF NOT FOUND THEN</span>
+<span>        RAISE EXCEPTION &#x27;reversed ledger entry % does not exist&#x27;,</span>
+<span>            NEW.reverses_entry_id</span>
+<span>            USING ERRCODE = &#x27;foreign_key_violation&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    IF NEW.subject_key IS DISTINCT FROM prior_entry.subject_key</span>
+<span>       OR NEW.payload -&gt;&gt; &#x27;currency&#x27;</span>
+<span>          IS DISTINCT FROM prior_entry.payload -&gt;&gt; &#x27;currency&#x27;</span>
+<span>       OR (NEW.payload -&gt;&gt; &#x27;amount&#x27;)::numeric</span>
+<span>          + (prior_entry.payload -&gt;&gt; &#x27;amount&#x27;)::numeric &lt;&gt; 0 THEN</span>
+<span>        RAISE EXCEPTION</span>
+<span>            &#x27;a reversal must negate the same subject and currency&#x27;</span>
+<span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>    END IF;</span>
+<span>    RETURN NEW;</span>
+<span>END</span>
+<span>$function$;</span>
 <span> </span>
 <span>CREATE FUNCTION pro_temporal_lab.reject_ledger_mutation()</span>
 <span>RETURNS trigger</span>
@@ -627,6 +877,11 @@ EXCLUDE USING gist (
 <span>        USING ERRCODE = &#x27;check_violation&#x27;;</span>
 <span>END</span>
 <span>$function$;</span>
+<span> </span>
+<span>CREATE TRIGGER change_ledger_validate_reversal</span>
+<span>BEFORE INSERT ON pro_temporal_lab.change_ledger</span>
+<span>FOR EACH ROW</span>
+<span>EXECUTE FUNCTION pro_temporal_lab.validate_ledger_reversal();</span>
 <span> </span>
 <span>CREATE TRIGGER change_ledger_immutable</span>
 <span>BEFORE UPDATE OR DELETE ON pro_temporal_lab.change_ledger</span>
@@ -684,6 +939,42 @@ EXCLUDE USING gist (
 <span>END</span>
 <span>$expected_immutability$;</span>
 <span> </span>
+<span>DO $expected_delete_and_retry_rejections$</span>
+<span>BEGIN</span>
+<span>    BEGIN</span>
+<span>        DELETE FROM pro_temporal_lab.change_ledger</span>
+<span>        WHERE idempotency_key = &#x27;LEDGER-100&#x27;;</span>
+<span>        RAISE EXCEPTION &#x27;ledger deletion unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected append-only DELETE rejection&#x27;;</span>
+<span>    END;</span>
+<span> </span>
+<span>    BEGIN</span>
+<span>        INSERT INTO pro_temporal_lab.change_ledger (</span>
+<span>            subject_key,</span>
+<span>            event_kind,</span>
+<span>            effective_at,</span>
+<span>            recorded_at,</span>
+<span>            payload,</span>
+<span>            idempotency_key</span>
+<span>        )</span>
+<span>        VALUES (</span>
+<span>            &#x27;CUS-100&#x27;,</span>
+<span>            &#x27;credit.applied&#x27;,</span>
+<span>            TIMESTAMPTZ &#x27;2026-03-01 00:00:00+00&#x27;,</span>
+<span>            TIMESTAMPTZ &#x27;2026-03-01 00:01:00+00&#x27;,</span>
+<span>            &#x27;{&quot;amount&quot;:&quot;5.00&quot;,&quot;currency&quot;:&quot;USD&quot;}&#x27;,</span>
+<span>            &#x27;LEDGER-100&#x27;</span>
+<span>        );</span>
+<span>        RAISE EXCEPTION &#x27;duplicate idempotency key unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN unique_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected idempotent-retry rejection&#x27;;</span>
+<span>    END;</span>
+<span>END</span>
+<span>$expected_delete_and_retry_rejections$;</span>
+<span> </span>
 <span>CREATE TABLE pro_temporal_lab.retention_classes (</span>
 <span>    retention_class text PRIMARY KEY,</span>
 <span>    minimum_retention interval NOT NULL,</span>
@@ -732,36 +1023,72 @@ EXCLUDE USING gist (
 <span>--</span>
 <span>-- 1. Add a retroactive valid-time correction recorded April 1. Query the value</span>
 <span>--    valid February 15 as known March 15 versus as known April 2.</span>
+<span>--    Inputs: For sql-temporal-01 Exercise 1, Close only the current `CUS-100` row whose `valid_period` contains `2026-02-15` at system time `2026-04-01 00:00+00`, then append the corrected rate as a new current `pro_temporal_lab.customer_terms` row.</span>
+<span>--    Expected result/shape: For sql-temporal-01 Exercise 1, One row per `(valid_on, system_as_of)` probe, with `valid_on`, `system_as_of`, `term_version_id`, `monthly_rate`, and `recorded_reason`, ordered by `system_as_of`; March 15 returns the prior rate and April 2 returns the retroactive correction.</span>
+<span>--    Verify: For sql-temporal-01 Exercise 1, Group the as-of join by both probe columns and require exactly one match per probe. Prove the earlier system-period row still exists and that no current valid periods overlap for `CUS-100`.</span>
 <span>-- 2. Test facts exactly at every valid/system upper boundary. Prove [lower,upper)</span>
 <span>--    gives at most one current match.</span>
+<span>--    Inputs: For sql-temporal-01 Exercise 2, Build an inline probe relation around every lower and upper bound in `pro_temporal_lab.customer_terms`: immediately before, exactly at, and immediately after each valid-date or system-time boundary.</span>
+<span>--    Expected result/shape: For sql-temporal-01 Exercise 2, One row per `probe_id`, with `valid_on`, `known_at`, `matching_versions`, and `expected_matches`, ordered by `probe_id`; no `matching_versions` value is greater than one.</span>
+<span>--    Verify: For sql-temporal-01 Exercise 2, Independently count matching `term_version_id` values for every probe. Require the old version to stop at the upper bound and an adjacent successor, when present, to begin there without a double match.</span>
 <span>-- 3. If btree_gist is already approved in an isolated environment, write (do</span>
 <span>--    not run here) an exclusion constraint for customer_key equality and current</span>
 <span>--    valid-period overlap. Compare it with the advisory-lock trigger fallback.</span>
+<span>--    Inputs: For sql-temporal-01 Exercise 3, Use the read-only `pg_available_extensions` result, the existing advisory-lock trigger, and a written (not executed) `btree_gist` exclusion constraint design for `customer_key WITH =, valid_period WITH &amp;&amp;`.</span>
+<span>--    Expected result/shape: For sql-temporal-01 Exercise 3, One comparison row per enforcement approach, with `approach`, `enforcement_mechanism`, `assumption_or_limit`, and `concurrent_failure_behavior`.</span>
+<span>--    Verify: For sql-temporal-01 Exercise 3, The comparison output records which writes each approach locks or constrains, how a conflicting concurrent transaction fails, and what happens if an application writer bypasses the agreed advisory-lock protocol.</span>
 <span>-- 4. Add a correction ledger entry that reverses LEDGER-101 without updating</span>
 <span>--    history. Verify idempotency keys and reversal references.</span>
+<span>--    Inputs: For sql-temporal-01 Exercise 4, Append `LEDGER-102` to `pro_temporal_lab.change_ledger` as the exact same-subject, same-currency negation of `LEDGER-101`; set `reverses_entry_id` from the referenced row instead of hard-coding it.</span>
+<span>--    Expected result/shape: For sql-temporal-01 Exercise 4, One row per `ledger_entry_id`, with `idempotency_key`, `event_kind`, signed amount, `reverses_entry_id`, and a scalar reconciled amount, ordered by `ledger_entry_id`.</span>
+<span>--    Verify: For sql-temporal-01 Exercise 4, Require three rows and a reconciled amount of `5.00`. Prove an UPDATE, DELETE, duplicate `LEDGER-102` retry, second reversal of the same entry, and wrong-sign reversal all fail without changing the row count.</span>
 <span>-- 5. Add a retention exception/hold release workflow with approver, reason,</span>
 <span>--    decision time, and immutable audit. Do not auto-delete fixture rows.</span>
+<span>--    Inputs: For sql-temporal-01 Exercise 5, Create append-only `pro_temporal_lab.retention_decisions` with a stable decision idempotency key, `record_key`, decision, approver, reason, and authoritative `decided_at`. Lock per record and reject backdated decisions or a deletion approval while the latest decision is a hold.</span>
+<span>--    Expected result/shape: For sql-temporal-01 Exercise 5, One row per retained `record_key`, with the latest decision event/key, approver, reason, decision time, and `eligible_for_deletion_review`, ordered by `record_key`.</span>
+<span>--    Verify: For sql-temporal-01 Exercise 5, Prove decision UPDATE/DELETE and duplicate/backdated appends fail. Keep a held fixture ineligible, release another through an ordered event, and confirm no `retained_records` row is actually deleted.</span>
 <span>-- 6. State domain assumptions: time zone, clock authority, late arrival,</span>
 <span>--    overlap/gap policy, deletion/anonymization, ledger meaning, and who may</span>
 <span>--    correct system history.</span>
+<span>--    Inputs: For sql-temporal-01 Exercise 6, Use observed lesson behavior plus explicitly labeled assumptions for time zone, clock authority, lateness, overlap/gaps, correction authority, ledger units, retention/holds, and replicas/backups.</span>
+<span>--    Expected result/shape: For sql-temporal-01 Exercise 6, One row per assumption topic, with `topic`, `decision_or_assumption`, `evidence`, `owner`, and `failure_response`.</span>
+<span>--    Verify: For sql-temporal-01 Exercise 6, Every row names an accountable owner and an operational response; every claimed fact cites a query/catalog result, while policy not present in the repository is labeled as an assumption needing approval.</span>
 <span>-- 7. Model a local-time business rule across a daylight-saving transition.</span>
 <span>--    Store the source zone and UTC instant, test ambiguous/nonexistent local</span>
 <span>--    times, and explain why a bare timestamp or fixed UTC offset is insufficient.</span>
+<span>--    Inputs: For sql-temporal-01 Exercise 7, Use three keyed civil-time cases in `America/Los_Angeles`: spring `2026-03-08 02:30`, fall `2026-11-01 01:30`, and one ordinary time. Round-trip candidate UTC instants rather than trusting one silent `AT TIME ZONE` default.</span>
+<span>--    Expected result/shape: For sql-temporal-01 Exercise 7, One row per `case_id`, with `local_time`, `zone_name`, `civil_time_status`, candidate instants, PostgreSQL&#x27;s default interpreted instant, and `resolution_policy`, ordered by `case_id`.</span>
+<span>--    Verify: For sql-temporal-01 Exercise 7, The result contains exactly one `nonexistent`, one `ambiguous`, and one `ordinary` case. A nonexistent time has zero round-trip candidates; an ambiguous time has more than one and requires explicit disambiguation.</span>
 <span>-- 8. Distinguish event time, ingestion time, and processing time for late data.</span>
 <span>--    Define a watermark and allowed lateness, then show how a late event changes</span>
 <span>--    a previously published aggregate and how the correction is communicated.</span>
+<span>--    Inputs: For sql-temporal-01 Exercise 8, Create `pro_temporal_lab.timed_events(event_key, event_at, ingested_at, processed_at)` with one on-time and one late event. Use a fixed 15-minute example lateness allowance.</span>
+<span>--    Expected result/shape: For sql-temporal-01 Exercise 8, Exactly one summary row with `event_count`, `maximum_event_time`, `example_watermark`, `maximum_arrival_delay`, `maximum_processing_delay`, `events_behind_watermark`, and the correction policy.</span>
+<span>--    Verify: For sql-temporal-01 Exercise 8, Recompute arrival and processing delays row by row, require the late fixture to fall behind the watermark, and describe a stable window/version identity for the corrected aggregate.</span>
 <span>-- 9. Implement a Type-2 dimension as-of join with surrogate key, business key,</span>
 <span>--    effective half-open range, current marker, and correction metadata. Prove</span>
 <span>--    every fact resolves to at most one dimension row.</span>
+<span>--    Inputs: For sql-temporal-01 Exercise 9, Create `pro_temporal_lab.customer_dimension` with surrogate `customer_version_id`, business key, half-open `effective_period`, `is_current`, segment, correction reason, and record time; join `pro_temporal_lab.order_facts` on business key plus range containment.</span>
+<span>--    Expected result/shape: For sql-temporal-01 Exercise 9, One row per `order_key`, with `ordered_on`, `customer_version_id`, segment, effective period, current marker, and correction metadata, ordered by `order_key`.</span>
+<span>--    Verify: For sql-temporal-01 Exercise 9, Require output count to equal fact count and group by `order_key` with `HAVING count(customer_version_id) &gt; 1` returning no rows. Inject one overlapping dimension row, prove the diagnostic catches it, then roll it back.</span>
 <span>-- 10. Design temporal referential integrity when a child period must be</span>
 <span>--     contained by a parent period. Compare trigger/exclusion approaches,</span>
 <span>--     concurrency locking, deferred validation, and repair of historical gaps.</span>
+<span>--    Inputs: For sql-temporal-01 Exercise 10, Cover child insert/update, parent shrink/delete, bulk historical repair, and deferred validation. State the shared business-key locking namespace and containment predicate for each write path.</span>
+<span>--    Expected result/shape: For sql-temporal-01 Exercise 10, One row per write path, with `write_path`, `concurrency_or_validation_control`, and `failure_response`.</span>
+<span>--    Verify: For sql-temporal-01 Exercise 10, Walk through two concurrent transactions for both child insertion and parent shrink. Identify the lock acquired first and show that cutover is blocked whenever the final containment diagnostic is nonempty.</span>
 <span>-- 11. Produce a deterministic gap-and-overlap report per business key using</span>
 <span>--     lag/lead and multirange operations. Define whether adjacency is valid and</span>
 <span>--     fail on duplicate or empty periods.</span>
+<span>--    Inputs: For sql-temporal-01 Exercise 11, Use keyed fixtures containing duplicate, overlapping, adjacent, gapped, empty, and unbounded-upper `daterange` values. Preserve unbounded prior coverage with `upper_inf()` or an explicit infinity sentinel.</span>
+<span>--    Expected result/shape: For sql-temporal-01 Exercise 11, One row per `period_id`, with `business_key`, `valid_period`, `has_unbounded_upper`, duplicate count, prior maximum upper bound, and `relationship_to_prior_coverage`, ordered by bounds and `period_id`.</span>
+<span>--    Verify: For sql-temporal-01 Exercise 11, Require explicit `duplicate`, `empty`, `gap`, `adjacent`, and `overlap` outcomes. Add a bounded period after an unbounded range and prove it is classified as overlap rather than first/gap.</span>
 <span>-- 12. Plan time-based partition archival without violating legal holds.</span>
 <span>--     Inventory cross-partition keys, indexes, detach/archive/verify steps,</span>
 <span>--     encryption and access, hold exceptions, restore tests, and deletion proof.</span>
+<span>--    Inputs: For sql-temporal-01 Exercise 12, Design ordered phases for inventory, hold gate, detach, encrypted archive, reconciliation, restore test, and eventual source deletion.</span>
+<span>--    Expected result/shape: For sql-temporal-01 Exercise 12, One row per `step_number`, with `phase`, `required_control`, and `required_evidence`, ordered by `step_number`.</span>
+<span>--    Verify: For sql-temporal-01 Exercise 12, Each phase names a stop condition. Trace one active-hold fixture through every maintained copy and require a successful isolated restore plus source/archive count and checksum reconciliation before deletion.</span>
 <span> </span>
 <span>DO $self_check$</span>
 <span>BEGIN</span>
@@ -785,15 +1112,15 @@ EXCLUDE USING gist (
 <span>\echo &#x27;SQL-TEMPORAL-01 complete: pro_temporal_lab was rolled back&#x27;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -817,39 +1144,131 @@ EXCLUDE USING gist (
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--sql-temporal-01-solutions-temporal-and-domain-modelling">SQL-TEMPORAL-01 Solutions — Temporal and Domain Modelling<a class="heading-anchor" href="#solution-1--sql-temporal-01-solutions-temporal-and-domain-modelling" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\professional\solutions\sql_temporal_01_domain_modelling_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are Valid time, System time, Bitemporal, As-of query, Half-open interval, Exclusion constraint. Its worked-model focus is: The term-version grain is one recorded version of one customer&#x27;s fact. A February-valid rate first enters the system March 1. On March 10, the old system period is closed and a corrected row begins. Querying valid February 15 as known March 5 returns 10; as known March 15 returns 12. History is appended/closed, not overwritten.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>Run:</p>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.sql</code></pre>
 <p>The solution is fixed-time and rolls back.</p>
 <h4 id="solution-1--exercise-1-retroactive-correction">Exercise 1 — Retroactive correction<a class="heading-anchor" href="#solution-1--exercise-1-retroactive-correction" aria-label="Link to this section">#</a></h4>
 <p>Close the prior system period at April 1 and append a new version whose valid period still begins January 1. Valid February 15 as known March 15 returns the March version; the same valid date as known April 2 returns the April correction. This answers “what did we know then?” without rewriting knowledge history.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 1, Close only the current <code>CUS-100</code> row whose <code>valid_period</code> contains <code>2026-02-15</code> at system time <code>2026-04-01 00:00+00</code>, then append the corrected rate as a new current <code>pro_temporal_lab.customer_terms</code> row.</li>
+<li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 1, One row per <code>(valid_on, system_as_of)</code> probe, with <code>valid_on</code>, <code>system_as_of</code>, <code>term_version_id</code>, <code>monthly_rate</code>, and <code>recorded_reason</code>, ordered by <code>system_as_of</code>; March 15 returns the prior rate and April 2 returns the retroactive correction.</li>
+<li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 1, Group the as-of join by both probe columns and require exactly one match per probe. Prove the earlier system-period row still exists and that no current valid periods overlap for <code>CUS-100</code>.</li>
+</ul>
 <h4 id="solution-1--exercise-2-boundaries">Exercise 2 — Boundaries<a class="heading-anchor" href="#solution-1--exercise-2-boundaries" aria-label="Link to this section">#</a></h4>
 <p>Test <code>lower</code>, just before upper, and exactly upper for both date and timestamp ranges. <code>[lower,upper)</code> includes lower and excludes upper, so adjacent versions can meet at one boundary without double matching. Assert match count at most one, not merely choose one with ORDER/LIMIT.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 2, Build an inline probe relation around every lower and upper bound in <code>pro_temporal_lab.customer_terms</code>: immediately before, exactly at, and immediately after each valid-date or system-time boundary.</li>
+<li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 2, One row per <code>probe_id</code>, with <code>valid_on</code>, <code>known_at</code>, <code>matching_versions</code>, and <code>expected_matches</code>, ordered by <code>probe_id</code>; no <code>matching_versions</code> value is greater than one.</li>
+<li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 2, Independently count matching <code>term_version_id</code> values for every probe. Require the old version to stop at the upper bound and an adjacent successor, when present, to begin there without a double match.</li>
+</ul>
 <h4 id="solution-1--exercise-3-exclusion-versus-fallback">Exercise 3 — Exclusion versus fallback<a class="heading-anchor" href="#solution-1--exercise-3-exclusion-versus-fallback" aria-label="Link to this section">#</a></h4>
 <p>With approved <code>btree_gist</code>, a partial GiST exclusion combines <code>customer_key WITH =</code> and <code>valid_period WITH &amp;&amp;</code> for current system rows. PostgreSQL enforces conflicts under concurrency. The fallback advisory-lock trigger qualifies the query and serializes one hashed key before checking; hash collisions reduce concurrency, and every write path/trigger enablement must remain controlled.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 3, Use the read-only <code>pg_available_extensions</code> result, the existing advisory-lock trigger, and a written (not executed) <code>btree_gist</code> exclusion constraint design for <code>customer_key WITH =, valid_period WITH &amp;&amp;</code>.</li>
+<li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 3, One comparison row per enforcement approach, with <code>approach</code>, <code>enforcement_mechanism</code>, <code>assumption_or_limit</code>, and <code>concurrent_failure_behavior</code>.</li>
+<li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 3, The comparison output records which writes each approach locks or constrains, how a conflicting concurrent transaction fails, and what happens if an application writer bypasses the agreed advisory-lock protocol.</li>
+</ul>
 <h4 id="solution-1--exercise-4-reversal-chain">Exercise 4 — Reversal chain<a class="heading-anchor" href="#solution-1--exercise-4-reversal-chain" aria-label="Link to this section">#</a></h4>
 <p>Entries L-1 (+5), L-2 (-5 reversing L-1), and L-3 (+5 correcting/reversing L-2) sum to +5 without UPDATE. Unique idempotency keys prevent duplicate append and foreign keys preserve reversal references. Domain policy should prevent multiple unauthorized reversals of one entry if that is invalid.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 4, Append <code>LEDGER-102</code> to <code>pro_temporal_lab.change_ledger</code> as the exact same-subject, same-currency negation of <code>LEDGER-101</code>; set <code>reverses_entry_id</code> from the referenced row instead of hard-coding it.</li>
+<li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 4, One row per <code>ledger_entry_id</code>, with <code>idempotency_key</code>, <code>event_kind</code>, signed amount, <code>reverses_entry_id</code>, and a scalar reconciled amount, ordered by <code>ledger_entry_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 4, Require three rows and a reconciled amount of <code>5.00</code>. Prove an UPDATE, DELETE, duplicate <code>LEDGER-102</code> retry, second reversal of the same entry, and wrong-sign reversal all fail without changing the row count.</li>
+</ul>
 <h4 id="solution-1--exercise-5-hold-decisions">Exercise 5 — Hold decisions<a class="heading-anchor" href="#solution-1--exercise-5-hold-decisions" aria-label="Link to this section">#</a></h4>
 <p>The decision log appends who, reason, action, and time. Current hold state is derived from the latest authorized decision. Deletion still requires retention age, no current hold, approval, dependency/backup review, and an immutable execution audit. The course solution records decisions but deletes nothing.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 5, Create append-only <code>pro_temporal_lab.retention_decisions</code> with a stable decision idempotency key, <code>record_key</code>, decision, approver, reason, and authoritative <code>decided_at</code>. Lock per record and reject backdated decisions or a deletion approval while the latest decision is a hold.</li>
+<li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 5, One row per retained <code>record_key</code>, with the latest decision event/key, approver, reason, decision time, and <code>eligible_for_deletion_review</code>, ordered by <code>record_key</code>.</li>
+<li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 5, Prove decision UPDATE/DELETE and duplicate/backdated appends fail. Keep a held fixture ineligible, release another through an ordered event, and confirm no <code>retained_records</code> row is actually deleted.</li>
+</ul>
 <h4 id="solution-1--exercise-6-domain-assumptions">Exercise 6 — Domain assumptions<a class="heading-anchor" href="#solution-1--exercise-6-domain-assumptions" aria-label="Link to this section">#</a></h4>
 <p>Record business time zone and clock authority; valid/system boundary convention; late-arrival/correction authority; allowed gaps/overlaps; customer identity; money/unit semantics; ledger reconciliation and reversal policy; retention/legal basis; hold ownership; deletion versus anonymization; and how replicas/backups honor erasure and audit duties.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 6, Use observed lesson behavior plus explicitly labeled assumptions for time zone, clock authority, lateness, overlap/gaps, correction authority, ledger units, retention/holds, and replicas/backups.</li>
+<li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 6, One row per assumption topic, with <code>topic</code>, <code>decision_or_assumption</code>, <code>evidence</code>, <code>owner</code>, and <code>failure_response</code>.</li>
+<li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 6, Every row names an accountable owner and an operational response; every claimed fact cites a query/catalog result, while policy not present in the repository is labeled as an assumption needing approval.</li>
+</ul>
 <h4 id="solution-1--exercise-7-civil-time-and-daylight-saving">Exercise 7 — Civil time and daylight saving<a class="heading-anchor" href="#solution-1--exercise-7-civil-time-and-daylight-saving" aria-label="Link to this section">#</a></h4>
 <p>Store the authoritative instant as <code>timestamptz</code> and retain the IANA zone name used to interpret/display civil time. A fixed offset has no DST rules; a bare timestamp cannot identify which occurrence an ambiguous fall-back time means.</p>
 <p>Detect/reject nonexistent spring-forward times and require an explicit earlier/later-offset policy for ambiguous input. Test both transitions for the supported zone database/version.</p>
+<h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 7, Use three keyed civil-time cases in <code>America/Los_Angeles</code>: spring <code>2026-03-08 02:30</code>, fall <code>2026-11-01 01:30</code>, and one ordinary time. Round-trip candidate UTC instants rather than trusting one silent <code>AT TIME ZONE</code> default.</li>
+<li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 7, One row per <code>case_id</code>, with <code>local_time</code>, <code>zone_name</code>, <code>civil_time_status</code>, candidate instants, PostgreSQL&#x27;s default interpreted instant, and <code>resolution_policy</code>, ordered by <code>case_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 7, The result contains exactly one <code>nonexistent</code>, one <code>ambiguous</code>, and one <code>ordinary</code> case. A nonexistent time has zero round-trip candidates; an ambiguous time has more than one and requires explicit disambiguation.</li>
+</ul>
 <h4 id="solution-1--exercise-8-event-ingestion-and-processing-clocks">Exercise 8 — Event, ingestion, and processing clocks<a class="heading-anchor" href="#solution-1--exercise-8-event-ingestion-and-processing-clocks" aria-label="Link to this section">#</a></h4>
 <p>Event time is source occurrence, ingestion time is arrival, and processing time is computation. A watermark such as maximum observed event time minus allowed lateness closes windows only under a documented source/partition policy.</p>
 <p>Beyond-window data should be quarantined or applied as a versioned correction/retraction. Publish metric version, as-of/watermark, changed keys, and downstream recomputation/notification evidence.</p>
+<h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 8, Create <code>pro_temporal_lab.timed_events(event_key, event_at, ingested_at, processed_at)</code> with one on-time and one late event. Use a fixed 15-minute example lateness allowance.</li>
+<li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 8, Exactly one summary row with <code>event_count</code>, <code>maximum_event_time</code>, <code>example_watermark</code>, <code>maximum_arrival_delay</code>, <code>maximum_processing_delay</code>, <code>events_behind_watermark</code>, and the correction policy.</li>
+<li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 8, Recompute arrival and processing delays row by row, require the late fixture to fall behind the watermark, and describe a stable window/version identity for the corrected aggregate.</li>
+</ul>
 <h4 id="solution-1--exercise-9-type-2-as-of-dimension-join">Exercise 9 — Type-2 as-of dimension join<a class="heading-anchor" href="#solution-1--exercise-9-type-2-as-of-dimension-join" aria-label="Link to this section">#</a></h4>
 <p>Give each version a surrogate key, stable business key, half-open effective range, and correction metadata. Join a fact where business keys match and the range contains fact time; persist the resolved surrogate when interpretation must never drift.</p>
 <p>Enforce/report no overlap and assert each fact has at most or exactly one match according to missing-dimension policy. A current flag must agree with range state.</p>
+<h5 id="solution-1--reasoning-and-verification-9">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-9" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 9, Create <code>pro_temporal_lab.customer_dimension</code> with surrogate <code>customer_version_id</code>, business key, half-open <code>effective_period</code>, <code>is_current</code>, segment, correction reason, and record time; join <code>pro_temporal_lab.order_facts</code> on business key plus range containment.</li>
+<li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 9, One row per <code>order_key</code>, with <code>ordered_on</code>, <code>customer_version_id</code>, segment, effective period, current marker, and correction metadata, ordered by <code>order_key</code>.</li>
+<li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 9, Require output count to equal fact count and group by <code>order_key</code> with <code>HAVING count(customer_version_id) &gt; 1</code> returning no rows. Inject one overlapping dimension row, prove the diagnostic catches it, then roll it back.</li>
+</ul>
 <h4 id="solution-1--exercise-10-temporal-referential-integrity">Exercise 10 — Temporal referential integrity<a class="heading-anchor" href="#solution-1--exercise-10-temporal-referential-integrity" aria-label="Link to this section">#</a></h4>
 <p>The child period must be contained by an allowed parent period, not merely share a key. A trigger can lock a stable business-key namespace, query containment, and reject gaps under concurrency.</p>
 <p>Exclusion constraints prevent overlap but do not alone prove containment. Deferred/bulk loading needs an explicit validation and quarantine/repair gate; test parent shrink/delete and concurrent changes.</p>
+<h5 id="solution-1--reasoning-and-verification-10">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-10" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 10, Cover child insert/update, parent shrink/delete, bulk historical repair, and deferred validation. State the shared business-key locking namespace and containment predicate for each write path.</li>
+<li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 10, One row per write path, with <code>write_path</code>, <code>concurrency_or_validation_control</code>, and <code>failure_response</code>.</li>
+<li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 10, Walk through two concurrent transactions for both child insertion and parent shrink. Identify the lock acquired first and show that cutover is blocked whenever the final containment diagnostic is nonempty.</li>
+</ul>
 <h4 id="solution-1--exercise-11-gap-and-overlap-report">Exercise 11 — Gap and overlap report<a class="heading-anchor" href="#solution-1--exercise-11-gap-and-overlap-report" aria-label="Link to this section">#</a></h4>
 <p>Order nonempty periods by lower bound, upper bound, stable ID and compare each lower bound with the running maximum prior upper. Lower means overlap, greater means gap, equal means adjacency. Plain <code>lag(upper)</code> can miss overlap hidden by an earlier long interval.</p>
 <p>Multirange aggregation/subtraction can expose coverage compactly. Report duplicates/empty/inverted periods separately and define adjacency policy.</p>
+<h5 id="solution-1--reasoning-and-verification-11">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-11" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 11, Use keyed fixtures containing duplicate, overlapping, adjacent, gapped, empty, and unbounded-upper <code>daterange</code> values. Preserve unbounded prior coverage with <code>upper_inf()</code> or an explicit infinity sentinel.</li>
+<li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 11, One row per <code>period_id</code>, with <code>business_key</code>, <code>valid_period</code>, <code>has_unbounded_upper</code>, duplicate count, prior maximum upper bound, and <code>relationship_to_prior_coverage</code>, ordered by bounds and <code>period_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 11, Require explicit <code>duplicate</code>, <code>empty</code>, <code>gap</code>, <code>adjacent</code>, and <code>overlap</code> outcomes. Add a bounded period after an unbounded range and prove it is classified as overlap rather than first/gap.</li>
+</ul>
 <h4 id="solution-1--exercise-12-partition-archive-under-hold">Exercise 12 — Partition archive under hold<a class="heading-anchor" href="#solution-1--exercise-12-partition-archive-under-hold" aria-label="Link to this section">#</a></h4>
 <p>Inventory retention and holds before detach. If one held row blocks an expirable partition, move/repartition only through audited review. Verify counts/checksums, dependencies, indexes, encryption/access, manifest, and test restore.</p>
 <p>Keep archive discoverable to authorized recovery/legal processes, propagate hold decisions to replicas/backups, and record deletion evidence. Partition age alone is not authorization to erase.</p>
+<h5 id="solution-1--reasoning-and-verification-12">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-12" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-temporal-01 Exercise 12, Design ordered phases for inventory, hold gate, detach, encrypted archive, reconciliation, restore test, and eventual source deletion.</li>
+<li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 12, One row per <code>step_number</code>, with <code>phase</code>, <code>required_control</code>, and <code>required_evidence</code>, ordered by <code>step_number</code>.</li>
+<li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 12, Each phase names a stop condition. Trace one active-hold fixture through every maintained copy and require a successful isolated restore plus source/archive count and checksum reconciliation before deletion.</li>
+</ul>
 <h4 id="solution-1--edge-cases">Edge cases<a class="heading-anchor" href="#solution-1--edge-cases" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Infinity/open bounds need explicit API serialization.</li>
@@ -858,7 +1277,7 @@ EXCLUDE USING gist (
 <li>Temporal indexes and history retention grow write/storage cost.</li>
 </ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -866,7 +1285,7 @@ EXCLUDE USING gist (
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -890,123 +1309,401 @@ EXCLUDE USING gist (
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-TEMPORAL-01 executable solutions</span>
+<span>-- SOLUTION READING MAP — sql-temporal-01: Temporal and Domain Modelling</span>
+<span>-- Explanation: sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>\set ON_ERROR_STOP on</span>
 <span>BEGIN;</span>
 <span>SET LOCAL search_path TO pg_catalog, public;</span>
 <span>CREATE SCHEMA pro_temporal_lab;</span>
 <span> </span>
-<span>CREATE TABLE pro_temporal_lab.facts (</span>
-<span>    fact_version_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
-<span>    subject_key text NOT NULL,</span>
+<span>CREATE TABLE pro_temporal_lab.customer_terms (</span>
+<span>    term_version_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    customer_key text NOT NULL,</span>
 <span>    valid_period daterange NOT NULL,</span>
 <span>    system_period tstzrange NOT NULL,</span>
-<span>    value text NOT NULL,</span>
+<span>    monthly_rate numeric(10, 2) NOT NULL CHECK (monthly_rate &gt;= 0),</span>
+<span>    recorded_reason text NOT NULL CHECK (btrim(recorded_reason) &lt;&gt; &#x27;&#x27;),</span>
 <span>    CHECK (NOT isempty(valid_period)),</span>
 <span>    CHECK (NOT isempty(system_period))</span>
 <span>);</span>
 <span> </span>
 <span>-- Initial and March correction.</span>
-<span>INSERT INTO pro_temporal_lab.facts (</span>
-<span>    subject_key, valid_period, system_period, value</span>
+<span>INSERT INTO pro_temporal_lab.customer_terms (</span>
+<span>    customer_key,</span>
+<span>    valid_period,</span>
+<span>    system_period,</span>
+<span>    monthly_rate,</span>
+<span>    recorded_reason</span>
 <span>)</span>
 <span>VALUES</span>
 <span>    (</span>
-<span>        &#x27;SUB-1&#x27;,</span>
+<span>        &#x27;CUS-100&#x27;,</span>
 <span>        daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-04-01&#x27;, &#x27;[)&#x27;),</span>
 <span>        tstzrange(</span>
 <span>            TIMESTAMPTZ &#x27;2026-03-01 00:00+00&#x27;,</span>
 <span>            TIMESTAMPTZ &#x27;2026-03-10 00:00+00&#x27;,</span>
 <span>            &#x27;[)&#x27;</span>
 <span>        ),</span>
-<span>        &#x27;value-10&#x27;</span>
+<span>        10.00,</span>
+<span>        &#x27;initial value&#x27;</span>
 <span>    ),</span>
 <span>    (</span>
-<span>        &#x27;SUB-1&#x27;,</span>
+<span>        &#x27;CUS-100&#x27;,</span>
 <span>        daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-04-01&#x27;, &#x27;[)&#x27;),</span>
 <span>        tstzrange(</span>
 <span>            TIMESTAMPTZ &#x27;2026-03-10 00:00+00&#x27;,</span>
 <span>            TIMESTAMPTZ &#x27;2026-04-01 00:00+00&#x27;,</span>
 <span>            &#x27;[)&#x27;</span>
 <span>        ),</span>
-<span>        &#x27;value-12&#x27;</span>
+<span>        12.00,</span>
+<span>        &#x27;March correction&#x27;</span>
 <span>    ),</span>
 <span>    -- Exercise 1: retroactive correction recorded April 1.</span>
 <span>    (</span>
-<span>        &#x27;SUB-1&#x27;,</span>
+<span>        &#x27;CUS-100&#x27;,</span>
 <span>        daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-04-01&#x27;, &#x27;[)&#x27;),</span>
 <span>        tstzrange(TIMESTAMPTZ &#x27;2026-04-01 00:00+00&#x27;, NULL, &#x27;[)&#x27;),</span>
-<span>        &#x27;value-11&#x27;</span>
+<span>        11.00,</span>
+<span>        &#x27;retroactive correction recorded April 1&#x27;</span>
 <span>    );</span>
 <span> </span>
 <span>SELECT</span>
+<span>    DATE &#x27;2026-02-15&#x27; AS valid_on,</span>
 <span>    query.system_as_of,</span>
-<span>    f.value</span>
+<span>    f.term_version_id,</span>
+<span>    f.monthly_rate,</span>
+<span>    f.recorded_reason</span>
 <span>FROM (</span>
 <span>    VALUES</span>
 <span>        (TIMESTAMPTZ &#x27;2026-03-15 00:00+00&#x27;),</span>
 <span>        (TIMESTAMPTZ &#x27;2026-04-02 00:00+00&#x27;)</span>
 <span>) AS query(system_as_of)</span>
-<span>JOIN pro_temporal_lab.facts AS f</span>
-<span>  ON f.subject_key = &#x27;SUB-1&#x27;</span>
+<span>JOIN pro_temporal_lab.customer_terms AS f</span>
+<span>  ON f.customer_key = &#x27;CUS-100&#x27;</span>
 <span> AND f.valid_period @&gt; DATE &#x27;2026-02-15&#x27;</span>
 <span> AND f.system_period @&gt; query.system_as_of</span>
 <span>ORDER BY query.system_as_of;</span>
 <span> </span>
-<span>-- Exercise 4: immutable ledger and reversal of a reversal.</span>
+<span>-- Exercise 4: immutable ledger and reversal of a reversal. A reversal must</span>
+<span>-- negate exactly one prior entry, and each entry may be reversed only once.</span>
 <span>CREATE TABLE pro_temporal_lab.ledger (</span>
 <span>    entry_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    subject_key text NOT NULL,</span>
 <span>    idempotency_key text NOT NULL UNIQUE,</span>
 <span>    event_kind text NOT NULL,</span>
 <span>    amount numeric(12, 2) NOT NULL,</span>
-<span>    reverses_entry_id bigint REFERENCES pro_temporal_lab.ledger (entry_id)</span>
+<span>    currency text NOT NULL CHECK (currency ~ &#x27;^[A-Z]{3}$&#x27;),</span>
+<span>    reverses_entry_id bigint UNIQUE</span>
+<span>        REFERENCES pro_temporal_lab.ledger (entry_id)</span>
 <span>);</span>
 <span> </span>
-<span>INSERT INTO pro_temporal_lab.ledger (</span>
-<span>    idempotency_key, event_kind, amount</span>
-<span>)</span>
-<span>VALUES (&#x27;L-1&#x27;, &#x27;credit&#x27;, 5.00);</span>
+<span>CREATE FUNCTION pro_temporal_lab.validate_ledger_append()</span>
+<span>RETURNS trigger</span>
+<span>LANGUAGE plpgsql</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>DECLARE</span>
+<span>    reversed_amount numeric(12, 2);</span>
+<span>    reversed_subject_key text;</span>
+<span>    reversed_currency text;</span>
+<span>BEGIN</span>
+<span>    IF NEW.reverses_entry_id IS NULL THEN</span>
+<span>        RETURN NEW;</span>
+<span>    END IF;</span>
 <span> </span>
-<span>INSERT INTO pro_temporal_lab.ledger (</span>
-<span>    idempotency_key, event_kind, amount, reverses_entry_id</span>
-<span>)</span>
-<span>SELECT &#x27;L-2&#x27;, &#x27;credit.reversal&#x27;, -5.00, l.entry_id</span>
-<span>FROM pro_temporal_lab.ledger AS l</span>
-<span>WHERE l.idempotency_key = &#x27;L-1&#x27;;</span>
+<span>    SELECT l.amount, l.subject_key, l.currency</span>
+<span>    INTO reversed_amount, reversed_subject_key, reversed_currency</span>
+<span>    FROM pro_temporal_lab.ledger AS l</span>
+<span>    WHERE l.entry_id = NEW.reverses_entry_id</span>
+<span>    FOR KEY SHARE;</span>
 <span> </span>
-<span>INSERT INTO pro_temporal_lab.ledger (</span>
-<span>    idempotency_key, event_kind, amount, reverses_entry_id</span>
-<span>)</span>
-<span>SELECT &#x27;L-3&#x27;, &#x27;reversal.corrected&#x27;, 5.00, l.entry_id</span>
-<span>FROM pro_temporal_lab.ledger AS l</span>
-<span>WHERE l.idempotency_key = &#x27;L-2&#x27;;</span>
+<span>    IF NOT FOUND THEN</span>
+<span>        RAISE EXCEPTION &#x27;reversed ledger entry % does not exist&#x27;,</span>
+<span>            NEW.reverses_entry_id</span>
+<span>            USING ERRCODE = &#x27;foreign_key_violation&#x27;;</span>
+<span>    END IF;</span>
 <span> </span>
+<span>    IF NEW.subject_key IS DISTINCT FROM reversed_subject_key</span>
+<span>       OR NEW.currency IS DISTINCT FROM reversed_currency</span>
+<span>       OR NEW.amount + reversed_amount &lt;&gt; 0 THEN</span>
+<span>        RAISE EXCEPTION</span>
+<span>            &#x27;reversal must negate prior amount % for the same subject/currency&#x27;,</span>
+<span>            reversed_amount</span>
+<span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>    END IF;</span>
+<span>    RETURN NEW;</span>
+<span>END</span>
+<span>$function$;</span>
+<span> </span>
+<span>CREATE FUNCTION pro_temporal_lab.reject_ledger_mutation()</span>
+<span>RETURNS trigger</span>
+<span>LANGUAGE plpgsql</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>BEGIN</span>
+<span>    RAISE EXCEPTION</span>
+<span>        &#x27;ledger is append-only; append a reversal instead of changing history&#x27;</span>
+<span>        USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>END</span>
+<span>$function$;</span>
+<span> </span>
+<span>CREATE TRIGGER ledger_validate_append</span>
+<span>BEFORE INSERT ON pro_temporal_lab.ledger</span>
+<span>FOR EACH ROW</span>
+<span>EXECUTE FUNCTION pro_temporal_lab.validate_ledger_append();</span>
+<span> </span>
+<span>CREATE TRIGGER ledger_immutable</span>
+<span>BEFORE UPDATE OR DELETE ON pro_temporal_lab.ledger</span>
+<span>FOR EACH ROW</span>
+<span>EXECUTE FUNCTION pro_temporal_lab.reject_ledger_mutation();</span>
+<span> </span>
+<span>-- The learner uses the domain name `change_ledger`; this automatically</span>
+<span>-- updatable view exposes that name and the more descriptive identity column</span>
+<span>-- while the base table retains the focused immutability trigger used below.</span>
+<span>CREATE VIEW pro_temporal_lab.change_ledger AS</span>
 <span>SELECT</span>
-<span>    l.entry_id,</span>
+<span>    l.entry_id AS ledger_entry_id,</span>
+<span>    l.subject_key,</span>
 <span>    l.idempotency_key,</span>
 <span>    l.event_kind,</span>
 <span>    l.amount,</span>
+<span>    l.currency,</span>
 <span>    l.reverses_entry_id</span>
-<span>FROM pro_temporal_lab.ledger AS l</span>
-<span>ORDER BY l.entry_id;</span>
+<span>FROM pro_temporal_lab.ledger AS l;</span>
 <span> </span>
-<span>-- Exercise 5: immutable decision log for hold release/review.</span>
+<span>INSERT INTO pro_temporal_lab.change_ledger (</span>
+<span>    subject_key, idempotency_key, event_kind, amount, currency</span>
+<span>)</span>
+<span>VALUES (&#x27;CUS-100&#x27;, &#x27;LEDGER-100&#x27;, &#x27;credit&#x27;, 5.00, &#x27;USD&#x27;);</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.change_ledger (</span>
+<span>    subject_key,</span>
+<span>    idempotency_key,</span>
+<span>    event_kind,</span>
+<span>    amount,</span>
+<span>    currency,</span>
+<span>    reverses_entry_id</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    l.subject_key,</span>
+<span>    &#x27;LEDGER-101&#x27;,</span>
+<span>    &#x27;credit.reversal&#x27;,</span>
+<span>    -5.00,</span>
+<span>    l.currency,</span>
+<span>    l.ledger_entry_id</span>
+<span>FROM pro_temporal_lab.change_ledger AS l</span>
+<span>WHERE l.idempotency_key = &#x27;LEDGER-100&#x27;;</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.change_ledger (</span>
+<span>    subject_key,</span>
+<span>    idempotency_key,</span>
+<span>    event_kind,</span>
+<span>    amount,</span>
+<span>    currency,</span>
+<span>    reverses_entry_id</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    l.subject_key,</span>
+<span>    &#x27;LEDGER-102&#x27;,</span>
+<span>    &#x27;reversal.corrected&#x27;,</span>
+<span>    5.00,</span>
+<span>    l.currency,</span>
+<span>    l.ledger_entry_id</span>
+<span>FROM pro_temporal_lab.change_ledger AS l</span>
+<span>WHERE l.idempotency_key = &#x27;LEDGER-101&#x27;;</span>
+<span> </span>
+<span>-- These negative controls prove the guarantees, rather than merely describing</span>
+<span>-- them. Each inner block rolls back its failed statement automatically.</span>
+<span>DO $ledger_negative_controls$</span>
+<span>BEGIN</span>
+<span>    BEGIN</span>
+<span>        UPDATE pro_temporal_lab.change_ledger</span>
+<span>        SET amount = 0</span>
+<span>        WHERE idempotency_key = &#x27;LEDGER-100&#x27;;</span>
+<span>        RAISE EXCEPTION &#x27;ledger UPDATE unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected immutable-ledger UPDATE rejection&#x27;;</span>
+<span>    END;</span>
+<span> </span>
+<span>    BEGIN</span>
+<span>        DELETE FROM pro_temporal_lab.change_ledger</span>
+<span>        WHERE idempotency_key = &#x27;LEDGER-100&#x27;;</span>
+<span>        RAISE EXCEPTION &#x27;ledger DELETE unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected immutable-ledger DELETE rejection&#x27;;</span>
+<span>    END;</span>
+<span> </span>
+<span>    BEGIN</span>
+<span>        INSERT INTO pro_temporal_lab.change_ledger (</span>
+<span>            subject_key, idempotency_key, event_kind, amount, currency</span>
+<span>        )</span>
+<span>        VALUES (</span>
+<span>            &#x27;CUS-100&#x27;,</span>
+<span>            &#x27;LEDGER-100&#x27;,</span>
+<span>            &#x27;duplicate.retry&#x27;,</span>
+<span>            5.00,</span>
+<span>            &#x27;USD&#x27;</span>
+<span>        );</span>
+<span>        RAISE EXCEPTION &#x27;duplicate idempotency key unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN unique_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected duplicate idempotency-key rejection&#x27;;</span>
+<span>    END;</span>
+<span> </span>
+<span>    BEGIN</span>
+<span>        INSERT INTO pro_temporal_lab.change_ledger (</span>
+<span>            subject_key,</span>
+<span>            idempotency_key,</span>
+<span>            event_kind,</span>
+<span>            amount,</span>
+<span>            currency,</span>
+<span>            reverses_entry_id</span>
+<span>        )</span>
+<span>        SELECT</span>
+<span>            l.subject_key,</span>
+<span>            &#x27;LEDGER-BAD&#x27;,</span>
+<span>            &#x27;invalid.reversal&#x27;,</span>
+<span>            -4.00,</span>
+<span>            l.currency,</span>
+<span>            l.ledger_entry_id</span>
+<span>        FROM pro_temporal_lab.change_ledger AS l</span>
+<span>        WHERE l.idempotency_key = &#x27;LEDGER-102&#x27;;</span>
+<span>        RAISE EXCEPTION &#x27;invalid reversal amount unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected invalid reversal-amount rejection&#x27;;</span>
+<span>    END;</span>
+<span>END</span>
+<span>$ledger_negative_controls$;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    l.ledger_entry_id,</span>
+<span>    l.subject_key,</span>
+<span>    l.idempotency_key,</span>
+<span>    l.event_kind,</span>
+<span>    l.amount,</span>
+<span>    l.currency,</span>
+<span>    l.reverses_entry_id</span>
+<span>FROM pro_temporal_lab.change_ledger AS l</span>
+<span>ORDER BY l.ledger_entry_id;</span>
+<span> </span>
+<span>-- Exercise 5: immutable, idempotent decision log for hold release/review.</span>
+<span>-- Eligibility remains a report; no fixture row is physically deleted.</span>
+<span>CREATE TABLE pro_temporal_lab.retained_subjects (</span>
+<span>    record_key text PRIMARY KEY,</span>
+<span>    minimum_delete_at timestamptz NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.retained_subjects</span>
+<span>VALUES</span>
+<span>    (&#x27;REC-1&#x27;, TIMESTAMPTZ &#x27;2026-02-15 00:00+00&#x27;),</span>
+<span>    (&#x27;REC-2&#x27;, TIMESTAMPTZ &#x27;2026-02-15 00:00+00&#x27;);</span>
+<span> </span>
 <span>CREATE TABLE pro_temporal_lab.retention_decisions (</span>
-<span>    decision_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
-<span>    record_key text NOT NULL,</span>
+<span>    decision_event_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    decision_idempotency_key text NOT NULL UNIQUE,</span>
+<span>    record_key text NOT NULL</span>
+<span>        REFERENCES pro_temporal_lab.retained_subjects (record_key),</span>
 <span>    decision text NOT NULL CHECK (</span>
 <span>        decision IN (&#x27;hold_applied&#x27;, &#x27;hold_released&#x27;, &#x27;deletion_approved&#x27;)</span>
 <span>    ),</span>
-<span>    decided_by text NOT NULL,</span>
-<span>    reason text NOT NULL,</span>
-<span>    decided_at timestamptz NOT NULL,</span>
-<span>    UNIQUE (record_key, decision, decided_at)</span>
+<span>    approved_by text NOT NULL CHECK (btrim(approved_by) &lt;&gt; &#x27;&#x27;),</span>
+<span>    reason text NOT NULL CHECK (btrim(reason) &lt;&gt; &#x27;&#x27;),</span>
+<span>    decided_at timestamptz NOT NULL</span>
 <span>);</span>
 <span> </span>
+<span>CREATE FUNCTION pro_temporal_lab.validate_retention_decision()</span>
+<span>RETURNS trigger</span>
+<span>LANGUAGE plpgsql</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>DECLARE</span>
+<span>    previous_decision text;</span>
+<span>    previous_decided_at timestamptz;</span>
+<span>BEGIN</span>
+<span>    PERFORM pg_advisory_xact_lock(hashtextextended(NEW.record_key, 0));</span>
+<span> </span>
+<span>    SELECT rd.decision, rd.decided_at</span>
+<span>    INTO previous_decision, previous_decided_at</span>
+<span>    FROM pro_temporal_lab.retention_decisions AS rd</span>
+<span>    WHERE rd.record_key = NEW.record_key</span>
+<span>    ORDER BY rd.decided_at DESC, rd.decision_event_id DESC</span>
+<span>    LIMIT 1;</span>
+<span> </span>
+<span>    IF previous_decided_at IS NOT NULL</span>
+<span>       AND NEW.decided_at &lt;= previous_decided_at THEN</span>
+<span>        RAISE EXCEPTION</span>
+<span>            &#x27;decision time % must be later than prior decision time %&#x27;,</span>
+<span>            NEW.decided_at,</span>
+<span>            previous_decided_at</span>
+<span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    IF NEW.decision = &#x27;hold_released&#x27;</span>
+<span>       AND previous_decision IS DISTINCT FROM &#x27;hold_applied&#x27; THEN</span>
+<span>        RAISE EXCEPTION &#x27;hold release requires an active hold&#x27;</span>
+<span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    IF NEW.decision = &#x27;deletion_approved&#x27;</span>
+<span>       AND previous_decision IS DISTINCT FROM &#x27;hold_released&#x27; THEN</span>
+<span>        RAISE EXCEPTION &#x27;deletion approval requires a recorded hold release&#x27;</span>
+<span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>    END IF;</span>
+<span>    RETURN NEW;</span>
+<span>END</span>
+<span>$function$;</span>
+<span> </span>
+<span>CREATE FUNCTION pro_temporal_lab.reject_retention_decision_mutation()</span>
+<span>RETURNS trigger</span>
+<span>LANGUAGE plpgsql</span>
+<span>SECURITY INVOKER</span>
+<span>SET search_path = pg_catalog</span>
+<span>AS $function$</span>
+<span>BEGIN</span>
+<span>    RAISE EXCEPTION</span>
+<span>        &#x27;retention decisions are append-only; append a new decision event&#x27;</span>
+<span>        USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>END</span>
+<span>$function$;</span>
+<span> </span>
+<span>CREATE TRIGGER retention_decision_validate_append</span>
+<span>BEFORE INSERT ON pro_temporal_lab.retention_decisions</span>
+<span>FOR EACH ROW</span>
+<span>EXECUTE FUNCTION pro_temporal_lab.validate_retention_decision();</span>
+<span> </span>
+<span>CREATE TRIGGER retention_decisions_immutable</span>
+<span>BEFORE UPDATE OR DELETE ON pro_temporal_lab.retention_decisions</span>
+<span>FOR EACH ROW</span>
+<span>EXECUTE FUNCTION pro_temporal_lab.reject_retention_decision_mutation();</span>
+<span> </span>
 <span>INSERT INTO pro_temporal_lab.retention_decisions (</span>
-<span>    record_key, decision, decided_by, reason, decided_at</span>
+<span>    decision_idempotency_key,</span>
+<span>    record_key,</span>
+<span>    decision,</span>
+<span>    approved_by,</span>
+<span>    reason,</span>
+<span>    decided_at</span>
 <span>)</span>
 <span>VALUES</span>
 <span>    (</span>
+<span>        &#x27;DEC-REC-1-HOLD&#x27;,</span>
 <span>        &#x27;REC-1&#x27;,</span>
 <span>        &#x27;hold_applied&#x27;,</span>
 <span>        &#x27;policy-reviewer&#x27;,</span>
@@ -1014,81 +1711,492 @@ EXCLUDE USING gist (
 <span>        TIMESTAMPTZ &#x27;2026-02-01 00:00+00&#x27;</span>
 <span>    ),</span>
 <span>    (</span>
+<span>        &#x27;DEC-REC-1-RELEASE&#x27;,</span>
 <span>        &#x27;REC-1&#x27;,</span>
 <span>        &#x27;hold_released&#x27;,</span>
 <span>        &#x27;policy-reviewer&#x27;,</span>
 <span>        &#x27;review completed&#x27;,</span>
 <span>        TIMESTAMPTZ &#x27;2026-03-01 00:00+00&#x27;</span>
+<span>    ),</span>
+<span>    (</span>
+<span>        &#x27;DEC-REC-2-HOLD&#x27;,</span>
+<span>        &#x27;REC-2&#x27;,</span>
+<span>        &#x27;hold_applied&#x27;,</span>
+<span>        &#x27;policy-reviewer&#x27;,</span>
+<span>        &#x27;active investigation&#x27;,</span>
+<span>        TIMESTAMPTZ &#x27;2026-02-10 00:00+00&#x27;</span>
 <span>    );</span>
+<span> </span>
+<span>DO $retention_negative_controls$</span>
+<span>BEGIN</span>
+<span>    BEGIN</span>
+<span>        INSERT INTO pro_temporal_lab.retention_decisions (</span>
+<span>            decision_idempotency_key,</span>
+<span>            record_key,</span>
+<span>            decision,</span>
+<span>            approved_by,</span>
+<span>            reason,</span>
+<span>            decided_at</span>
+<span>        )</span>
+<span>        VALUES (</span>
+<span>            &#x27;DEC-REC-1-HOLD&#x27;,</span>
+<span>            &#x27;REC-1&#x27;,</span>
+<span>            &#x27;hold_applied&#x27;,</span>
+<span>            &#x27;retrying-client&#x27;,</span>
+<span>            &#x27;duplicate retry&#x27;,</span>
+<span>            TIMESTAMPTZ &#x27;2026-04-01 00:00+00&#x27;</span>
+<span>        );</span>
+<span>        RAISE EXCEPTION &#x27;duplicate decision retry unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN unique_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected duplicate decision-key rejection&#x27;;</span>
+<span>    END;</span>
+<span> </span>
+<span>    BEGIN</span>
+<span>        UPDATE pro_temporal_lab.retention_decisions</span>
+<span>        SET reason = &#x27;rewritten history&#x27;</span>
+<span>        WHERE decision_idempotency_key = &#x27;DEC-REC-1-HOLD&#x27;;</span>
+<span>        RAISE EXCEPTION &#x27;retention-decision UPDATE unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected immutable-decision rejection&#x27;;</span>
+<span>    END;</span>
+<span> </span>
+<span>    BEGIN</span>
+<span>        DELETE FROM pro_temporal_lab.retention_decisions</span>
+<span>        WHERE decision_idempotency_key = &#x27;DEC-REC-1-HOLD&#x27;;</span>
+<span>        RAISE EXCEPTION &#x27;retention-decision DELETE unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected immutable-decision DELETE rejection&#x27;;</span>
+<span>    END;</span>
+<span> </span>
+<span>    BEGIN</span>
+<span>        INSERT INTO pro_temporal_lab.retention_decisions (</span>
+<span>            decision_idempotency_key,</span>
+<span>            record_key,</span>
+<span>            decision,</span>
+<span>            approved_by,</span>
+<span>            reason,</span>
+<span>            decided_at</span>
+<span>        )</span>
+<span>        VALUES (</span>
+<span>            &#x27;DEC-REC-1-BACKDATED&#x27;,</span>
+<span>            &#x27;REC-1&#x27;,</span>
+<span>            &#x27;hold_applied&#x27;,</span>
+<span>            &#x27;policy-reviewer&#x27;,</span>
+<span>            &#x27;must fail because chronology is append ordered&#x27;,</span>
+<span>            TIMESTAMPTZ &#x27;2026-02-15 00:00+00&#x27;</span>
+<span>        );</span>
+<span>        RAISE EXCEPTION &#x27;backdated decision unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected backdated-decision rejection&#x27;;</span>
+<span>    END;</span>
+<span> </span>
+<span>    BEGIN</span>
+<span>        INSERT INTO pro_temporal_lab.retention_decisions (</span>
+<span>            decision_idempotency_key,</span>
+<span>            record_key,</span>
+<span>            decision,</span>
+<span>            approved_by,</span>
+<span>            reason,</span>
+<span>            decided_at</span>
+<span>        )</span>
+<span>        VALUES (</span>
+<span>            &#x27;DEC-REC-2-DELETE&#x27;,</span>
+<span>            &#x27;REC-2&#x27;,</span>
+<span>            &#x27;deletion_approved&#x27;,</span>
+<span>            &#x27;policy-reviewer&#x27;,</span>
+<span>            &#x27;must fail while hold remains active&#x27;,</span>
+<span>            TIMESTAMPTZ &#x27;2026-03-02 00:00+00&#x27;</span>
+<span>        );</span>
+<span>        RAISE EXCEPTION &#x27;held record was approved for deletion&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected active-hold protection&#x27;;</span>
+<span>    END;</span>
+<span>END</span>
+<span>$retention_negative_controls$;</span>
+<span> </span>
+<span>WITH latest_decision AS (</span>
+<span>    SELECT DISTINCT ON (rd.record_key)</span>
+<span>        rd.record_key,</span>
+<span>        rd.decision_event_id,</span>
+<span>        rd.decision_idempotency_key,</span>
+<span>        rd.decision,</span>
+<span>        rd.approved_by,</span>
+<span>        rd.reason,</span>
+<span>        rd.decided_at</span>
+<span>    FROM pro_temporal_lab.retention_decisions AS rd</span>
+<span>    ORDER BY rd.record_key, rd.decided_at DESC, rd.decision_event_id DESC</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    rs.record_key,</span>
+<span>    latest.decision_event_id,</span>
+<span>    latest.decision_idempotency_key,</span>
+<span>    latest.decision AS latest_decision,</span>
+<span>    latest.approved_by,</span>
+<span>    latest.reason,</span>
+<span>    latest.decided_at,</span>
+<span>    (</span>
+<span>        TIMESTAMPTZ &#x27;2026-03-15 00:00+00&#x27; &gt;= rs.minimum_delete_at</span>
+<span>        AND latest.decision &lt;&gt; &#x27;hold_applied&#x27;</span>
+<span>    ) AS eligible_for_deletion_review</span>
+<span>FROM pro_temporal_lab.retained_subjects AS rs</span>
+<span>LEFT JOIN latest_decision AS latest</span>
+<span>  ON latest.record_key = rs.record_key</span>
+<span>ORDER BY rs.record_key;</span>
 <span> </span>
 <span>DO $solution$</span>
 <span>BEGIN</span>
 <span>    IF (</span>
 <span>        SELECT COUNT(*)</span>
-<span>        FROM pro_temporal_lab.facts AS f</span>
+<span>        FROM pro_temporal_lab.customer_terms AS f</span>
 <span>        WHERE f.valid_period @&gt; DATE &#x27;2026-02-15&#x27;</span>
 <span>          AND f.system_period @&gt; TIMESTAMPTZ &#x27;2026-04-02 00:00+00&#x27;</span>
 <span>    ) &lt;&gt; 1 THEN</span>
 <span>        RAISE EXCEPTION &#x27;retroactive as-of result is not single-valued&#x27;;</span>
 <span>    END IF;</span>
 <span> </span>
-<span>    IF (SELECT SUM(l.amount) FROM pro_temporal_lab.ledger AS l) &lt;&gt; 5.00 THEN</span>
+<span>    IF (SELECT COUNT(*) FROM pro_temporal_lab.ledger) &lt;&gt; 3</span>
+<span>       OR (SELECT SUM(l.amount) FROM pro_temporal_lab.ledger AS l) &lt;&gt; 5.00 THEN</span>
 <span>        RAISE EXCEPTION &#x27;ledger reversal chain does not reconcile&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    IF (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pro_temporal_lab.retention_decisions</span>
+<span>    ) &lt;&gt; 3 THEN</span>
+<span>        RAISE EXCEPTION &#x27;retention decision log drifted&#x27;;</span>
 <span>    END IF;</span>
 <span>END</span>
 <span>$solution$;</span>
 <span> </span>
-<span>-- Exercise 2: exactly at an upper bound, the old fact is excluded by [lower,</span>
-<span>-- upper); the next adjacent fact would become eligible.</span>
-<span>SELECT</span>
-<span>    probe.valid_on,</span>
-<span>    probe.known_at,</span>
-<span>    COUNT(f.fact_version_id) AS matching_versions</span>
-<span>FROM (</span>
+<span>-- Exercise 2: probe immediately before and exactly at both upper bounds.</span>
+<span>-- Half-open [lower, upper) means the old version stops matching at the upper</span>
+<span>-- instant; an adjacent successor starts there without double matching.</span>
+<span>WITH probes(probe_id, valid_on, known_at, expected_matches) AS (</span>
 <span>    VALUES</span>
 <span>        (</span>
+<span>            &#x27;valid-before-upper&#x27;,</span>
 <span>            DATE &#x27;2026-03-31&#x27;,</span>
-<span>            TIMESTAMPTZ &#x27;2026-04-02 00:00+00&#x27;</span>
+<span>            TIMESTAMPTZ &#x27;2026-04-02 00:00+00&#x27;,</span>
+<span>            1::bigint</span>
 <span>        ),</span>
 <span>        (</span>
+<span>            &#x27;valid-at-upper&#x27;,</span>
 <span>            DATE &#x27;2026-04-01&#x27;,</span>
-<span>            TIMESTAMPTZ &#x27;2026-04-02 00:00+00&#x27;</span>
+<span>            TIMESTAMPTZ &#x27;2026-04-02 00:00+00&#x27;,</span>
+<span>            0::bigint</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            &#x27;system-before-march-boundary&#x27;,</span>
+<span>            DATE &#x27;2026-02-15&#x27;,</span>
+<span>            TIMESTAMPTZ &#x27;2026-03-09 23:59:59+00&#x27;,</span>
+<span>            1::bigint</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            &#x27;system-at-march-boundary&#x27;,</span>
+<span>            DATE &#x27;2026-02-15&#x27;,</span>
+<span>            TIMESTAMPTZ &#x27;2026-03-10 00:00:00+00&#x27;,</span>
+<span>            1::bigint</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            &#x27;system-before-april-boundary&#x27;,</span>
+<span>            DATE &#x27;2026-02-15&#x27;,</span>
+<span>            TIMESTAMPTZ &#x27;2026-03-31 23:59:59+00&#x27;,</span>
+<span>            1::bigint</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            &#x27;system-at-april-boundary&#x27;,</span>
+<span>            DATE &#x27;2026-02-15&#x27;,</span>
+<span>            TIMESTAMPTZ &#x27;2026-04-01 00:00:00+00&#x27;,</span>
+<span>            1::bigint</span>
 <span>        )</span>
-<span>) AS probe(valid_on, known_at)</span>
-<span>LEFT JOIN pro_temporal_lab.facts AS f</span>
-<span>  ON f.subject_key = &#x27;SUB-1&#x27;</span>
-<span> AND f.valid_period @&gt; probe.valid_on</span>
-<span> AND f.system_period @&gt; probe.known_at</span>
-<span>GROUP BY probe.valid_on, probe.known_at</span>
-<span>ORDER BY probe.valid_on;</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    p.probe_id,</span>
+<span>    p.valid_on,</span>
+<span>    p.known_at,</span>
+<span>    COUNT(f.term_version_id) AS matching_versions,</span>
+<span>    p.expected_matches,</span>
+<span>    COUNT(f.term_version_id) = p.expected_matches AS matches_expectation</span>
+<span>FROM probes AS p</span>
+<span>LEFT JOIN pro_temporal_lab.customer_terms AS f</span>
+<span>  ON f.customer_key = &#x27;CUS-100&#x27;</span>
+<span> AND f.valid_period @&gt; p.valid_on</span>
+<span> AND f.system_period @&gt; p.known_at</span>
+<span>GROUP BY p.probe_id, p.valid_on, p.known_at, p.expected_matches</span>
+<span>ORDER BY p.probe_id;</span>
+<span> </span>
+<span>DO $boundary_invariant$</span>
+<span>BEGIN</span>
+<span>    IF EXISTS (</span>
+<span>        WITH probes(valid_on, known_at, expected_matches) AS (</span>
+<span>            VALUES</span>
+<span>                (</span>
+<span>                    DATE &#x27;2026-03-31&#x27;,</span>
+<span>                    TIMESTAMPTZ &#x27;2026-04-02 00:00+00&#x27;,</span>
+<span>                    1::bigint</span>
+<span>                ),</span>
+<span>                (</span>
+<span>                    DATE &#x27;2026-04-01&#x27;,</span>
+<span>                    TIMESTAMPTZ &#x27;2026-04-02 00:00+00&#x27;,</span>
+<span>                    0::bigint</span>
+<span>                ),</span>
+<span>                (</span>
+<span>                    DATE &#x27;2026-02-15&#x27;,</span>
+<span>                    TIMESTAMPTZ &#x27;2026-03-10 00:00+00&#x27;,</span>
+<span>                    1::bigint</span>
+<span>                ),</span>
+<span>                (</span>
+<span>                    DATE &#x27;2026-02-15&#x27;,</span>
+<span>                    TIMESTAMPTZ &#x27;2026-04-01 00:00+00&#x27;,</span>
+<span>                    1::bigint</span>
+<span>                )</span>
+<span>        ),</span>
+<span>        observed AS (</span>
+<span>            SELECT</span>
+<span>                p.valid_on,</span>
+<span>                p.known_at,</span>
+<span>                p.expected_matches,</span>
+<span>                COUNT(f.term_version_id) AS matching_versions</span>
+<span>            FROM probes AS p</span>
+<span>            LEFT JOIN pro_temporal_lab.customer_terms AS f</span>
+<span>              ON f.customer_key = &#x27;CUS-100&#x27;</span>
+<span>             AND f.valid_period @&gt; p.valid_on</span>
+<span>             AND f.system_period @&gt; p.known_at</span>
+<span>            GROUP BY p.valid_on, p.known_at, p.expected_matches</span>
+<span>        )</span>
+<span>        SELECT 1</span>
+<span>        FROM observed AS o</span>
+<span>        WHERE o.matching_versions &lt;&gt; o.expected_matches</span>
+<span>           OR o.matching_versions &gt; 1</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION &#x27;half-open boundary invariant failed&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$boundary_invariant$;</span>
 <span> </span>
 <span>-- Exercise 3: an approved btree_gist exclusion constraint can reject current</span>
 <span>-- period overlap under concurrency. The fallback must lock one stable business</span>
 <span>-- key before checking; this core solution installs no extension.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (</span>
+<span>            1,</span>
+<span>            &#x27;btree_gist exclusion constraint&#x27;,</span>
+<span>            &#x27;declarative equality on customer_key plus &amp;&amp; on valid_period&#x27;,</span>
+<span>            &#x27;requires approved extension and applies to the represented rows&#x27;,</span>
+<span>            &#x27;database constraint handles concurrent conflicting writes&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            2,</span>
+<span>            &#x27;advisory-lock trigger fallback&#x27;,</span>
+<span>            &#x27;lock hash(customer_key), then test current rows for overlap&#x27;,</span>
+<span>            &#x27;all writers must use the same stable lock protocol&#x27;,</span>
+<span>            &#x27;trigger raises exclusion_violation before the write&#x27;</span>
+<span>        )</span>
+<span>) AS enforcement_comparison(</span>
+<span>    approach_number,</span>
+<span>    approach,</span>
+<span>    enforcement_mechanism,</span>
+<span>    assumption_or_limit,</span>
+<span>    concurrent_failure_behavior</span>
+<span>)</span>
+<span>ORDER BY approach_number;</span>
 <span> </span>
 <span>-- Exercise 6: domain assumptions include zone/clock authority, half-open bounds,</span>
 <span>-- lateness, overlap/gap, correction authority, identity, unit/ledger semantics,</span>
 <span>-- retention/hold/deletion, and replica/backup treatment.</span>
-<span> </span>
-<span>-- Exercise 7: retain both the authoritative instant and IANA source zone. These</span>
-<span>-- civil examples are deliberately visible so the application can reject or ask</span>
-<span>-- for disambiguation rather than accepting PostgreSQL&#x27;s default interpretation.</span>
-<span>SELECT</span>
-<span>    local_time,</span>
-<span>    zone_name,</span>
-<span>    local_time AT TIME ZONE zone_name AS interpreted_instant</span>
+<span>SELECT *</span>
 <span>FROM (</span>
 <span>    VALUES</span>
 <span>        (</span>
+<span>            1,</span>
+<span>            &#x27;time zone&#x27;,</span>
+<span>            &#x27;store authoritative instants as timestamptz and retain IANA source zone&#x27;,</span>
+<span>            &#x27;domain owner&#x27;,</span>
+<span>            &#x27;reject unclassified ambiguous/nonexistent civil time&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            2,</span>
+<span>            &#x27;clock authority&#x27;,</span>
+<span>            &#x27;source event time is business time; database clock is record time&#x27;,</span>
+<span>            &#x27;platform owner&#x27;,</span>
+<span>            &#x27;quarantine events from clocks outside the approved skew&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            3,</span>
+<span>            &#x27;late arrival&#x27;,</span>
+<span>            &#x27;15-minute watermark is an example, not an approved production SLA&#x27;,</span>
+<span>            &#x27;analytics owner&#x27;,</span>
+<span>            &#x27;publish a correction/retraction for accepted late data&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            4,</span>
+<span>            &#x27;overlap and gap&#x27;,</span>
+<span>            &#x27;current periods may be adjacent but never overlap per business key&#x27;,</span>
+<span>            &#x27;data model owner&#x27;,</span>
+<span>            &#x27;reject overlap; report gaps for domain review&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            5,</span>
+<span>            &#x27;history correction&#x27;,</span>
+<span>            &#x27;authorized writers append system-time versions and ledger reversals&#x27;,</span>
+<span>            &#x27;security owner&#x27;,</span>
+<span>            &#x27;deny UPDATE/DELETE on immutable audit relations&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            6,</span>
+<span>            &#x27;retention and legal hold&#x27;,</span>
+<span>            &#x27;eligibility is reviewed; a hold blocks deletion approval&#x27;,</span>
+<span>            &#x27;records-policy owner&#x27;,</span>
+<span>            &#x27;retain data and escalate conflicting policy&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            7,</span>
+<span>            &#x27;replicas and backups&#x27;,</span>
+<span>            &#x27;retention, holds, and deletion evidence cover every maintained copy&#x27;,</span>
+<span>            &#x27;recovery owner&#x27;,</span>
+<span>            &#x27;stop deletion until propagation and restore tests are evidenced&#x27;</span>
+<span>        )</span>
+<span>) AS assumption_register(</span>
+<span>    assumption_number,</span>
+<span>    topic,</span>
+<span>    decision_or_assumption,</span>
+<span>    owner,</span>
+<span>    failure_response</span>
+<span>)</span>
+<span>ORDER BY assumption_number;</span>
+<span> </span>
+<span>-- Exercise 7: retain both the authoritative instant and IANA source zone. These</span>
+<span>-- civil examples are classified *before* accepting PostgreSQL&#x27;s silent default</span>
+<span>-- interpretation. Zero matching instants means nonexistent; multiple matching</span>
+<span>-- instants mean ambiguous.</span>
+<span>WITH civil(case_id, local_time, zone_name) AS (</span>
+<span>    VALUES</span>
+<span>        (</span>
+<span>            &#x27;spring-gap&#x27;,</span>
 <span>            TIMESTAMP &#x27;2026-03-08 02:30:00&#x27;,</span>
 <span>            &#x27;America/Los_Angeles&#x27;::text</span>
 <span>        ),</span>
 <span>        (</span>
+<span>            &#x27;fall-fold&#x27;,</span>
 <span>            TIMESTAMP &#x27;2026-11-01 01:30:00&#x27;,</span>
 <span>            &#x27;America/Los_Angeles&#x27;::text</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            &#x27;ordinary-time&#x27;,</span>
+<span>            TIMESTAMP &#x27;2026-02-01 12:00:00&#x27;,</span>
+<span>            &#x27;America/Los_Angeles&#x27;::text</span>
 <span>        )</span>
-<span>) AS civil(local_time, zone_name)</span>
-<span>ORDER BY local_time;</span>
+<span>),</span>
+<span>defaults AS (</span>
+<span>    SELECT</span>
+<span>        c.*,</span>
+<span>        c.local_time AT TIME ZONE c.zone_name AS default_interpreted_instant</span>
+<span>    FROM civil AS c</span>
+<span>),</span>
+<span>candidate_instants AS (</span>
+<span>    SELECT</span>
+<span>        d.case_id,</span>
+<span>        candidate_instant</span>
+<span>    FROM defaults AS d</span>
+<span>    CROSS JOIN LATERAL generate_series(</span>
+<span>        d.default_interpreted_instant - INTERVAL &#x27;2 hours&#x27;,</span>
+<span>        d.default_interpreted_instant + INTERVAL &#x27;2 hours&#x27;,</span>
+<span>        INTERVAL &#x27;15 minutes&#x27;</span>
+<span>    ) AS candidate_instant</span>
+<span>    WHERE candidate_instant AT TIME ZONE d.zone_name = d.local_time</span>
+<span>),</span>
+<span>classified AS (</span>
+<span>    SELECT</span>
+<span>        d.case_id,</span>
+<span>        d.local_time,</span>
+<span>        d.zone_name,</span>
+<span>        d.default_interpreted_instant,</span>
+<span>        COUNT(ci.candidate_instant) AS matching_instants,</span>
+<span>        array_agg(ci.candidate_instant ORDER BY ci.candidate_instant)</span>
+<span>            FILTER (WHERE ci.candidate_instant IS NOT NULL)</span>
+<span>            AS candidate_instants</span>
+<span>    FROM defaults AS d</span>
+<span>    LEFT JOIN candidate_instants AS ci</span>
+<span>      ON ci.case_id = d.case_id</span>
+<span>    GROUP BY</span>
+<span>        d.case_id,</span>
+<span>        d.local_time,</span>
+<span>        d.zone_name,</span>
+<span>        d.default_interpreted_instant</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    c.case_id,</span>
+<span>    c.local_time,</span>
+<span>    c.zone_name,</span>
+<span>    CASE</span>
+<span>        WHEN c.matching_instants = 0 THEN &#x27;nonexistent&#x27;</span>
+<span>        WHEN c.matching_instants &gt; 1 THEN &#x27;ambiguous&#x27;</span>
+<span>        ELSE &#x27;ordinary&#x27;</span>
+<span>    END AS civil_time_status,</span>
+<span>    c.matching_instants,</span>
+<span>    c.candidate_instants,</span>
+<span>    c.default_interpreted_instant,</span>
+<span>    CASE</span>
+<span>        WHEN c.matching_instants = 0</span>
+<span>        THEN &#x27;reject or require an explicit business-approved shift&#x27;</span>
+<span>        WHEN c.matching_instants &gt; 1</span>
+<span>        THEN &#x27;require the intended UTC offset or selected candidate instant&#x27;</span>
+<span>        ELSE &#x27;accept the sole round-trip candidate&#x27;</span>
+<span>    END AS resolution_policy</span>
+<span>FROM classified AS c</span>
+<span>ORDER BY c.case_id;</span>
+<span> </span>
+<span>DO $dst_fixture_invariant$</span>
+<span>DECLARE</span>
+<span>    nonexistent_count bigint;</span>
+<span>    ambiguous_count bigint;</span>
+<span>BEGIN</span>
+<span>    WITH civil(case_id, local_time, zone_name) AS (</span>
+<span>        VALUES</span>
+<span>            (</span>
+<span>                &#x27;spring-gap&#x27;,</span>
+<span>                TIMESTAMP &#x27;2026-03-08 02:30:00&#x27;,</span>
+<span>                &#x27;America/Los_Angeles&#x27;::text</span>
+<span>            ),</span>
+<span>            (</span>
+<span>                &#x27;fall-fold&#x27;,</span>
+<span>                TIMESTAMP &#x27;2026-11-01 01:30:00&#x27;,</span>
+<span>                &#x27;America/Los_Angeles&#x27;::text</span>
+<span>            )</span>
+<span>    ),</span>
+<span>    candidate_counts AS (</span>
+<span>        SELECT</span>
+<span>            c.case_id,</span>
+<span>            COUNT(candidate_instant) FILTER (</span>
+<span>                WHERE candidate_instant AT TIME ZONE c.zone_name = c.local_time</span>
+<span>            ) AS matching_instants</span>
+<span>        FROM civil AS c</span>
+<span>        CROSS JOIN LATERAL generate_series(</span>
+<span>            (c.local_time AT TIME ZONE c.zone_name) - INTERVAL &#x27;2 hours&#x27;,</span>
+<span>            (c.local_time AT TIME ZONE c.zone_name) + INTERVAL &#x27;2 hours&#x27;,</span>
+<span>            INTERVAL &#x27;15 minutes&#x27;</span>
+<span>        ) AS candidate_instant</span>
+<span>        GROUP BY c.case_id</span>
+<span>    )</span>
+<span>    SELECT</span>
+<span>        COUNT(*) FILTER (WHERE matching_instants = 0),</span>
+<span>        COUNT(*) FILTER (WHERE matching_instants &gt; 1)</span>
+<span>    INTO nonexistent_count, ambiguous_count</span>
+<span>    FROM candidate_counts;</span>
+<span> </span>
+<span>    IF nonexistent_count &lt;&gt; 1 OR ambiguous_count &lt;&gt; 1 THEN</span>
+<span>        RAISE EXCEPTION</span>
+<span>            &#x27;DST fixture did not expose one nonexistent and one ambiguous case&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$dst_fixture_invariant$;</span>
 <span> </span>
 <span>-- Exercise 8: keep all three clocks and derive a documented watermark from</span>
 <span>-- event time; data beyond it needs a correction/retraction policy.</span>
@@ -1115,9 +2223,20 @@ EXCLUDE USING gist (
 <span>    );</span>
 <span> </span>
 <span>SELECT</span>
+<span>    COUNT(*) AS event_count,</span>
 <span>    max(e.event_at) AS maximum_event_time,</span>
 <span>    max(e.event_at) - INTERVAL &#x27;15 minutes&#x27; AS example_watermark,</span>
-<span>    max(e.ingested_at - e.event_at) AS maximum_arrival_delay</span>
+<span>    max(e.ingested_at - e.event_at) AS maximum_arrival_delay,</span>
+<span>    max(e.processed_at - e.ingested_at) AS maximum_processing_delay,</span>
+<span>    COUNT(*) FILTER (</span>
+<span>        WHERE e.event_at</span>
+<span>              &lt; (</span>
+<span>                  SELECT max(w.event_at) - INTERVAL &#x27;15 minutes&#x27;</span>
+<span>                  FROM pro_temporal_lab.timed_events AS w</span>
+<span>              )</span>
+<span>    ) AS events_behind_watermark,</span>
+<span>    &#x27;publish a corrected aggregate with stable window/version identity&#x27;</span>
+<span>        AS late_data_correction_policy</span>
 <span>FROM pro_temporal_lab.timed_events AS e;</span>
 <span> </span>
 <span>-- Exercise 9: Type-2 dimension join uses business key plus half-open effective</span>
@@ -1127,80 +2246,399 @@ EXCLUDE USING gist (
 <span>    customer_key text NOT NULL,</span>
 <span>    effective_period daterange NOT NULL,</span>
 <span>    segment text NOT NULL,</span>
-<span>    CHECK (NOT isempty(effective_period))</span>
+<span>    is_current boolean NOT NULL,</span>
+<span>    correction_reason text NOT NULL,</span>
+<span>    recorded_at timestamptz NOT NULL,</span>
+<span>    CHECK (NOT isempty(effective_period)),</span>
+<span>    CHECK (is_current = upper_inf(effective_period))</span>
 <span>);</span>
 <span> </span>
 <span>INSERT INTO pro_temporal_lab.customer_dimension (</span>
-<span>    customer_key, effective_period, segment</span>
+<span>    customer_key,</span>
+<span>    effective_period,</span>
+<span>    segment,</span>
+<span>    is_current,</span>
+<span>    correction_reason,</span>
+<span>    recorded_at</span>
 <span>)</span>
 <span>VALUES</span>
 <span>    (</span>
 <span>        &#x27;CUS-1&#x27;,</span>
 <span>        daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-02-01&#x27;, &#x27;[)&#x27;),</span>
-<span>        &#x27;starter&#x27;</span>
+<span>        &#x27;starter&#x27;,</span>
+<span>        false,</span>
+<span>        &#x27;initial classification&#x27;,</span>
+<span>        TIMESTAMPTZ &#x27;2026-01-01 00:00+00&#x27;</span>
 <span>    ),</span>
 <span>    (</span>
 <span>        &#x27;CUS-1&#x27;,</span>
 <span>        daterange(DATE &#x27;2026-02-01&#x27;, NULL, &#x27;[)&#x27;),</span>
-<span>        &#x27;established&#x27;</span>
+<span>        &#x27;established&#x27;,</span>
+<span>        true,</span>
+<span>        &#x27;scheduled segment transition&#x27;,</span>
+<span>        TIMESTAMPTZ &#x27;2026-01-20 00:00+00&#x27;</span>
 <span>    );</span>
+<span> </span>
+<span>CREATE TABLE pro_temporal_lab.order_facts (</span>
+<span>    order_key text PRIMARY KEY,</span>
+<span>    customer_key text NOT NULL,</span>
+<span>    ordered_on date NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.order_facts</span>
+<span>VALUES</span>
+<span>    (&#x27;ORD-A&#x27;, &#x27;CUS-1&#x27;, DATE &#x27;2026-01-31&#x27;),</span>
+<span>    (&#x27;ORD-B&#x27;, &#x27;CUS-1&#x27;, DATE &#x27;2026-02-01&#x27;);</span>
+<span> </span>
+<span>CREATE VIEW pro_temporal_lab.order_dimension_resolution AS</span>
+<span>SELECT</span>
+<span>    order_fact.order_key,</span>
+<span>    order_fact.customer_key,</span>
+<span>    order_fact.ordered_on,</span>
+<span>    d.customer_version_id,</span>
+<span>    d.segment,</span>
+<span>    d.effective_period,</span>
+<span>    d.is_current,</span>
+<span>    d.correction_reason,</span>
+<span>    d.recorded_at</span>
+<span>FROM pro_temporal_lab.order_facts AS order_fact</span>
+<span>LEFT JOIN pro_temporal_lab.customer_dimension AS d</span>
+<span>  ON d.customer_key = order_fact.customer_key</span>
+<span> AND d.effective_period @&gt; order_fact.ordered_on;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    resolution.order_key,</span>
+<span>    resolution.ordered_on,</span>
+<span>    resolution.customer_version_id,</span>
+<span>    resolution.segment,</span>
+<span>    resolution.effective_period,</span>
+<span>    resolution.is_current,</span>
+<span>    resolution.correction_reason</span>
+<span>FROM pro_temporal_lab.order_dimension_resolution AS resolution</span>
+<span>ORDER BY resolution.order_key;</span>
+<span> </span>
+<span>DO $type_2_invariant$</span>
+<span>BEGIN</span>
+<span>    IF EXISTS (</span>
+<span>        SELECT order_fact.order_key</span>
+<span>        FROM pro_temporal_lab.order_facts AS order_fact</span>
+<span>        LEFT JOIN pro_temporal_lab.customer_dimension AS d</span>
+<span>          ON d.customer_key = order_fact.customer_key</span>
+<span>         AND d.effective_period @&gt; order_fact.ordered_on</span>
+<span>        GROUP BY order_fact.order_key</span>
+<span>        HAVING COUNT(d.customer_version_id) &gt; 1</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION &#x27;one order matched multiple dimension versions&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    IF (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pro_temporal_lab.order_dimension_resolution</span>
+<span>    ) &lt;&gt; (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pro_temporal_lab.order_facts</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION &#x27;Type-2 join lost or duplicated an order fact&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$type_2_invariant$;</span>
+<span> </span>
+<span>-- The negative control deliberately adds an overlapping version, proves the</span>
+<span>-- diagnostic detects ORD-B, and then rolls back only that injected corruption.</span>
+<span>SAVEPOINT before_type_2_overlap;</span>
+<span>INSERT INTO pro_temporal_lab.customer_dimension (</span>
+<span>    customer_key,</span>
+<span>    effective_period,</span>
+<span>    segment,</span>
+<span>    is_current,</span>
+<span>    correction_reason,</span>
+<span>    recorded_at</span>
+<span>)</span>
+<span>VALUES (</span>
+<span>    &#x27;CUS-1&#x27;,</span>
+<span>    daterange(DATE &#x27;2026-01-15&#x27;, DATE &#x27;2026-02-15&#x27;, &#x27;[)&#x27;),</span>
+<span>    &#x27;overlap-negative-control&#x27;,</span>
+<span>    false,</span>
+<span>    &#x27;deliberate overlap for invariant test&#x27;,</span>
+<span>    TIMESTAMPTZ &#x27;2026-01-25 00:00+00&#x27;</span>
+<span>);</span>
 <span> </span>
 <span>SELECT</span>
 <span>    order_fact.order_key,</span>
-<span>    order_fact.ordered_on,</span>
-<span>    d.customer_version_id,</span>
-<span>    d.segment</span>
-<span>FROM (</span>
-<span>    VALUES</span>
-<span>        (&#x27;ORD-A&#x27;::text, &#x27;CUS-1&#x27;::text, DATE &#x27;2026-01-31&#x27;),</span>
-<span>        (&#x27;ORD-B&#x27;::text, &#x27;CUS-1&#x27;::text, DATE &#x27;2026-02-01&#x27;)</span>
-<span>) AS order_fact(order_key, customer_key, ordered_on)</span>
+<span>    COUNT(d.customer_version_id) AS matching_versions</span>
+<span>FROM pro_temporal_lab.order_facts AS order_fact</span>
 <span>LEFT JOIN pro_temporal_lab.customer_dimension AS d</span>
 <span>  ON d.customer_key = order_fact.customer_key</span>
 <span> AND d.effective_period @&gt; order_fact.ordered_on</span>
+<span>GROUP BY order_fact.order_key</span>
+<span>HAVING COUNT(d.customer_version_id) &gt; 1</span>
 <span>ORDER BY order_fact.order_key;</span>
+<span> </span>
+<span>DO $type_2_negative_control$</span>
+<span>BEGIN</span>
+<span>    IF NOT EXISTS (</span>
+<span>        SELECT order_fact.order_key</span>
+<span>        FROM pro_temporal_lab.order_facts AS order_fact</span>
+<span>        LEFT JOIN pro_temporal_lab.customer_dimension AS d</span>
+<span>          ON d.customer_key = order_fact.customer_key</span>
+<span>         AND d.effective_period @&gt; order_fact.ordered_on</span>
+<span>        GROUP BY order_fact.order_key</span>
+<span>        HAVING COUNT(d.customer_version_id) &gt; 1</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION &#x27;overlap negative control was not detected&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$type_2_negative_control$;</span>
+<span>ROLLBACK TO SAVEPOINT before_type_2_overlap;</span>
 <span> </span>
 <span>-- Exercise 10: temporal parent/child containment is a cross-row rule. A safe</span>
 <span>-- trigger locks one business-key namespace, checks containment, and validates</span>
 <span>-- parent shrink/delete and concurrent changes; exclusion alone is insufficient.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (</span>
+<span>            1,</span>
+<span>            &#x27;child insert/update&#x27;,</span>
+<span>            &#x27;advisory lock on business key, then require a containing parent&#x27;,</span>
+<span>            &#x27;reject missing or multiply matching parent&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            2,</span>
+<span>            &#x27;parent shrink/delete&#x27;,</span>
+<span>            &#x27;same lock namespace, then prove every child remains contained&#x27;,</span>
+<span>            &#x27;reject the parent change or repair children first&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            3,</span>
+<span>            &#x27;bulk historical repair&#x27;,</span>
+<span>            &#x27;stage, validate gaps/overlaps, then swap in one controlled transaction&#x27;,</span>
+<span>            &#x27;retain old snapshot and reconciliation evidence&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            4,</span>
+<span>            &#x27;deferred validation&#x27;,</span>
+<span>            &#x27;use only when the domain permits a bounded temporarily invalid state&#x27;,</span>
+<span>            &#x27;block cutover until the final invariant query is empty&#x27;</span>
+<span>        )</span>
+<span>) AS temporal_integrity_plan(</span>
+<span>    step_number,</span>
+<span>    write_path,</span>
+<span>    concurrency_or_validation_control,</span>
+<span>    failure_response</span>
+<span>)</span>
+<span>ORDER BY step_number;</span>
 <span> </span>
 <span>-- Exercise 11: compare each lower bound with the running maximum *prior* upper</span>
-<span>-- bound so an earlier long interval is not hidden by a shorter immediate row.</span>
-<span>WITH periods(period_id, valid_period) AS (</span>
-<span>    VALUES</span>
-<span>        (1, daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-01-10&#x27;, &#x27;[)&#x27;)),</span>
-<span>        (2, daterange(DATE &#x27;2026-01-05&#x27;, DATE &#x27;2026-01-07&#x27;, &#x27;[)&#x27;)),</span>
-<span>        (3, daterange(DATE &#x27;2026-01-12&#x27;, DATE &#x27;2026-01-15&#x27;, &#x27;[)&#x27;))</span>
+<span>-- bound. `upper()` is NULL for an unbounded range, so `upper_inf()` plus an</span>
+<span>-- explicit infinity sentinel preserves that prior coverage.</span>
+<span>CREATE TABLE pro_temporal_lab.period_cases (</span>
+<span>    period_id integer PRIMARY KEY,</span>
+<span>    business_key text NOT NULL,</span>
+<span>    valid_period daterange NOT NULL</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_temporal_lab.period_cases</span>
+<span>VALUES</span>
+<span>    (1, &#x27;ACCOUNT-1&#x27;, daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-01-10&#x27;, &#x27;[)&#x27;)),</span>
+<span>    (2, &#x27;ACCOUNT-1&#x27;, daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2026-01-10&#x27;, &#x27;[)&#x27;)),</span>
+<span>    (3, &#x27;ACCOUNT-1&#x27;, daterange(DATE &#x27;2026-01-05&#x27;, DATE &#x27;2026-01-07&#x27;, &#x27;[)&#x27;)),</span>
+<span>    (4, &#x27;ACCOUNT-1&#x27;, daterange(DATE &#x27;2026-01-10&#x27;, DATE &#x27;2026-01-12&#x27;, &#x27;[)&#x27;)),</span>
+<span>    (5, &#x27;ACCOUNT-1&#x27;, daterange(DATE &#x27;2026-01-15&#x27;, DATE &#x27;2026-01-18&#x27;, &#x27;[)&#x27;)),</span>
+<span>    (6, &#x27;ACCOUNT-1&#x27;, daterange(DATE &#x27;2026-01-18&#x27;, NULL, &#x27;[)&#x27;)),</span>
+<span>    (7, &#x27;ACCOUNT-1&#x27;, daterange(DATE &#x27;2026-01-20&#x27;, DATE &#x27;2026-01-21&#x27;, &#x27;[)&#x27;)),</span>
+<span>    (8, &#x27;ACCOUNT-1&#x27;, &#x27;empty&#x27;::daterange);</span>
+<span> </span>
+<span>CREATE VIEW pro_temporal_lab.period_diagnostics AS</span>
+<span>WITH duplicate_counts AS (</span>
+<span>    SELECT</span>
+<span>        p.*,</span>
+<span>        COUNT(*) OVER (</span>
+<span>            PARTITION BY p.business_key, p.valid_period</span>
+<span>        ) AS duplicate_count</span>
+<span>    FROM pro_temporal_lab.period_cases AS p</span>
 <span>),</span>
 <span>with_prior AS (</span>
 <span>    SELECT</span>
 <span>        p.*,</span>
-<span>        max(upper(p.valid_period)) OVER (</span>
-<span>            ORDER BY lower(p.valid_period), upper(p.valid_period), p.period_id</span>
+<span>        max(</span>
+<span>            CASE</span>
+<span>                WHEN NOT isempty(p.valid_period)</span>
+<span>                THEN COALESCE(upper(p.valid_period), &#x27;infinity&#x27;::date)</span>
+<span>            END</span>
+<span>        ) OVER (</span>
+<span>            PARTITION BY p.business_key</span>
+<span>            ORDER BY</span>
+<span>                isempty(p.valid_period),</span>
+<span>                lower(p.valid_period),</span>
+<span>                COALESCE(upper(p.valid_period), &#x27;infinity&#x27;::date),</span>
+<span>                p.period_id</span>
 <span>            ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING</span>
 <span>        ) AS prior_max_upper</span>
-<span>    FROM periods AS p</span>
+<span>    FROM duplicate_counts AS p</span>
 <span>)</span>
 <span>SELECT</span>
 <span>    w.period_id,</span>
+<span>    w.business_key,</span>
 <span>    w.valid_period,</span>
+<span>    upper_inf(w.valid_period) AS has_unbounded_upper,</span>
+<span>    w.duplicate_count,</span>
+<span>    w.prior_max_upper,</span>
 <span>    CASE</span>
+<span>        WHEN isempty(w.valid_period) THEN &#x27;empty&#x27;</span>
+<span>        WHEN w.duplicate_count &gt; 1 THEN &#x27;duplicate&#x27;</span>
 <span>        WHEN w.prior_max_upper IS NULL THEN &#x27;first&#x27;</span>
 <span>        WHEN lower(w.valid_period) &lt; w.prior_max_upper THEN &#x27;overlap&#x27;</span>
 <span>        WHEN lower(w.valid_period) = w.prior_max_upper THEN &#x27;adjacent&#x27;</span>
 <span>        ELSE &#x27;gap&#x27;</span>
 <span>    END AS relationship_to_prior_coverage</span>
 <span>FROM with_prior AS w</span>
-<span>ORDER BY lower(w.valid_period), upper(w.valid_period), w.period_id;</span>
+<span>;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    d.period_id,</span>
+<span>    d.business_key,</span>
+<span>    d.valid_period,</span>
+<span>    d.has_unbounded_upper,</span>
+<span>    d.duplicate_count,</span>
+<span>    d.prior_max_upper,</span>
+<span>    d.relationship_to_prior_coverage</span>
+<span>FROM pro_temporal_lab.period_diagnostics AS d</span>
+<span>ORDER BY</span>
+<span>    isempty(d.valid_period),</span>
+<span>    lower(d.valid_period),</span>
+<span>    COALESCE(upper(d.valid_period), &#x27;infinity&#x27;::date),</span>
+<span>    d.period_id;</span>
+<span> </span>
+<span>DO $period_diagnostics_invariant$</span>
+<span>BEGIN</span>
+<span>    IF NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_temporal_lab.period_diagnostics</span>
+<span>        WHERE relationship_to_prior_coverage = &#x27;duplicate&#x27;</span>
+<span>    ) OR NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_temporal_lab.period_diagnostics</span>
+<span>        WHERE relationship_to_prior_coverage = &#x27;empty&#x27;</span>
+<span>    ) OR NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_temporal_lab.period_diagnostics</span>
+<span>        WHERE relationship_to_prior_coverage = &#x27;gap&#x27;</span>
+<span>    ) OR NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_temporal_lab.period_diagnostics</span>
+<span>        WHERE relationship_to_prior_coverage = &#x27;adjacent&#x27;</span>
+<span>    ) OR NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_temporal_lab.period_diagnostics</span>
+<span>        WHERE period_id = 7</span>
+<span>          AND relationship_to_prior_coverage = &#x27;overlap&#x27;</span>
+<span>          AND prior_max_upper = &#x27;infinity&#x27;::date</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION</span>
+<span>            &#x27;period fixture must expose duplicate, empty, gap, adjacency, and unbounded overlap&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$period_diagnostics_invariant$;</span>
 <span> </span>
 <span>-- Exercise 12: archive only after hold-aware inventory, detach/move review,</span>
 <span>-- count/checksum/dependency verification, encrypted access-controlled storage,</span>
 <span>-- restore proof, propagated hold state, and immutable deletion evidence.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (</span>
+<span>            1,</span>
+<span>            &#x27;inventory&#x27;,</span>
+<span>            &#x27;partition bounds, cross-partition keys, indexes, dependencies, holds&#x27;,</span>
+<span>            &#x27;signed candidate manifest&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            2,</span>
+<span>            &#x27;hold gate&#x27;,</span>
+<span>            &#x27;exclude any partition or row covered by active legal hold&#x27;,</span>
+<span>            &#x27;empty unresolved-hold report&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            3,</span>
+<span>            &#x27;detach&#x27;,</span>
+<span>            &#x27;quiesce or lock the write path and detach in a controlled window&#x27;,</span>
+<span>            &#x27;catalog evidence and rollback point&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            4,</span>
+<span>            &#x27;archive&#x27;,</span>
+<span>            &#x27;encrypt, checksum, restrict access, and record custody/location&#x27;,</span>
+<span>            &#x27;artifact identity and checksum&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            5,</span>
+<span>            &#x27;reconcile&#x27;,</span>
+<span>            &#x27;compare schema, counts, keys, aggregates, and checksums&#x27;,</span>
+<span>            &#x27;source/archive reconciliation report&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            6,</span>
+<span>            &#x27;restore test&#x27;,</span>
+<span>            &#x27;restore the artifact into an isolated target and run smoke queries&#x27;,</span>
+<span>            &#x27;timestamped successful restore evidence&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            7,</span>
+<span>            &#x27;source deletion&#x27;,</span>
+<span>            &#x27;delete only after approval, hold propagation, and restore proof&#x27;,</span>
+<span>            &#x27;immutable deletion evidence or explicit retention decision&#x27;</span>
+<span>        )</span>
+<span>) AS archive_plan(step_number, phase, required_control, required_evidence)</span>
+<span>ORDER BY step_number;</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-temporal-01 — Temporal and Domain Modelling.
+
+I have completed the direct catalog prerequisites: `sql-found-01`, `sql-types-01`, `sql-prog-01`, `sql-test-01`, `sql-39`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/professional/companion-guides/sql_temporal_01_domain_modelling.md
+- Answer-free learner SQL: sql/professional/lessons/sql_temporal_01_domain_modelling.sql
+
+Key terms to teach in context: Valid time, System time, Bitemporal, As-of query, Half-open interval, Exclusion constraint. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: The term-version grain is one recorded version of one customer&#x27;s fact. A February-valid rate first enters the system March 1. On March 10, the old system period is closed and a corrected row begins. Querying valid February 15 as known March 5 returns 10; as known March 15 returns 12. History is appended/closed, not overwritten.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-temporal-01/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-repl-01.html"><small>Previous lesson</small><strong>sql-repl-01</strong><span>Replication, Change Data Capture, and High Availability</span></a>
@@ -1292,6 +2730,23 @@ EXCLUDE USING gist (
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

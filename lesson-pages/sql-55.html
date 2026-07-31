@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-55/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-55-complex-bi-project-part-1-drill-downs">Day 55 — Complex BI Project, Part 1: Drill-downs<a class="heading-anchor" href="#guide--day-55-complex-bi-project-part-1-drill-downs" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -285,6 +384,96 @@
 <li><strong>Prerequisites:</strong> <a href="sql-54.html#guide">Day 54 — warehouse aggregates</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-55.html#learner">learner SQL</a> · <a href="sql-55.html#solution-1">solution reasoning</a> · <a href="sql-55.html#solution-2">executable solution</a></li>
 </ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-55 — Project4 BI Part1</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-55/lesson/workspace/sql/postgres-60day/day55_project4_bi_part1.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day55_project4_bi_part1.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/day55_project4_bi_part1.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is ROLLUP, CUBE, GROUPING flag. Its worked SQL reads or creates <code>payments</code>, <code>orders</code>, <code>customers</code>, <code>order_items</code>, <code>products</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: Compare ROLLUP(country, category) with CUBE(country, category). Both include detail, country subtotal, and grand total; CUBE also adds category-only subtotals. Use GROUPING(country) and GROUPING(category) to label each level, then reconcile the grand total with source line revenue. The first runnable example has a concrete contract: Example 1 returns one grouped row per <code>category</code>, <code>month</code>, and <code>g_country</code> with columns <code>category</code>, <code>payment_method</code>, <code>month</code>, <code>revenue</code>, <code>qty</code>, and <code>units</code> from <code>payments</code>, <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>country</code>, <code>category</code>, <code>payment_method</code>, <code>month</code>, <code>revenue</code>, <code>units</code>, <code>g_country</code>, and <code>g_category</code>. Independently group <code>payments</code>, <code>payment_by_method</code>, <code>orders</code>, <code>customers</code>, and <code>order_items</code> by the shown grouping expressions and compare every displayed aggregate at that exact grain. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day55_project4_bi_part1.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">WITH payment_by_method AS (
+  SELECT order_id, method, SUM(amount) AS method_amount
+  FROM payments
+  GROUP BY order_id, method
+), primary_payment_method AS (
+  SELECT order_id, method
+  FROM (
+    SELECT order_id,
+           method,
+           ROW_NUMBER() OVER (
+             PARTITION BY order_id
+             ORDER BY method_amount DESC, method
+           ) AS method_rank
+    FROM payment_by_method
+  ) ranked_methods
+  WHERE method_rank = 1
+), line AS (
+  SELECT c.country,
+         p.category,
+         COALESCE(pm.method, &#x27;unpaid&#x27;) AS payment_method,
+         date_trunc(&#x27;month&#x27;, o.order_date)::date AS month,
+         (oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue,
+         oi.quantity AS qty
+  FROM orders o
+  JOIN customers c  ON c.customer_id = o.customer_id
+  JOIN order_items oi ON oi.order_id = o.order_id
+  JOIN products p   ON p.product_id = oi.product_id
+  LEFT JOIN primary_payment_method pm ON pm.order_id = o.order_id
+)
+SELECT country,
+       category,
+       payment_method,
+       month,
+       ROUND(SUM(revenue),2) AS revenue,
+       SUM(qty) AS units,
+       GROUPING(country)        AS g_country,
+       GROUPING(category)       AS g_category,
+       GROUPING(payment_method) AS g_method,
+       GROUPING(month)          AS g_month
+FROM line
+GROUP BY ROLLUP (country, category, payment_method, month)
+ORDER BY country NULLS FIRST, category NULLS FIRST, payment_method NULLS FIRST, month NULLS FIRST;</code></pre>
+<p><strong>How to read it:</strong> Example 1: Start with <code>payments</code>, <code>orders</code>, <code>customers</code>, and <code>order_items</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows; let <code>GROUP BY</code> collapse rows to its grouping keys; let each <code>OVER</code> expression calculate across related rows without collapsing them. The final <code>SELECT</code> displays <code>country</code>, <code>category</code>, <code>payment_method</code>, <code>month</code>, <code>revenue</code>, <code>units</code>, and <code>g_country</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>category</code>, <code>month</code>, and <code>g_country</code> with columns <code>category</code>, <code>payment_method</code>, <code>month</code>, <code>revenue</code>, <code>qty</code>, and <code>units</code> from <code>payments</code>, <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">WITH prod_rev AS (
+  SELECT c.country, p.category, p.product_id, p.name,
+         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
+  FROM orders o
+  JOIN customers c  ON c.customer_id = o.customer_id
+  JOIN order_items oi ON oi.order_id = o.order_id
+  JOIN products p   ON p.product_id = oi.product_id
+  GROUP BY c.country, p.category, p.product_id, p.name
+), ranked AS (
+  SELECT *,
+         RANK() OVER (PARTITION BY country, category ORDER BY revenue DESC) AS rnk
+  FROM prod_rev
+)
+SELECT * FROM ranked WHERE rnk &lt;= 5
+ORDER BY country, category, rnk;</code></pre>
+<p><strong>How to read it:</strong> Example 2: Start with <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows; let <code>GROUP BY</code> collapse rows to its grouping keys; let each <code>OVER</code> expression calculate across related rows without collapsing them. The final <code>SELECT</code> displays <code>*</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 2 returns one grouped row per <code>country</code>, <code>category</code>, and <code>product_id</code> with columns <code>country</code>, <code>category</code>, <code>product_id</code>, <code>name</code>, <code>revenue</code>, and <code>rnk</code> from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Generate hierarchical subtotal levels with <code>ROLLUP</code> and distinguish them from all-combination <code>CUBE</code> output.</li>
@@ -301,14 +490,22 @@
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <p>Complete these in the <a href="sql-55.html#learner">learner SQL</a>:</p>
 <ol>
-<li>Replace <code>ROLLUP</code> with <code>CUBE</code> and compare row counts.</li>
-<li>Add status to an exact top-five drill-down.</li>
-<li>Predict <code>ROLLUP(country, category, month)</code> grouping sets.</li>
-<li>Label levels with PostgreSQL&#x27;s <code>GROUPING(country, category)</code> bit mask.</li>
-<li>Use deterministic <code>ROW_NUMBER</code> for exactly five results.</li>
-<li>Separate real unknown members from generated subtotals.</li>
+<li>Replace <code>ROLLUP</code> with <code>CUBE</code> and compare row counts. <strong>Inputs/evidence:</strong> For sql-55 Exercise 1, read from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>. Compute <code>rollup_row_count</code>, and <code>cube_row_count</code> with no outer <code>GROUP BY</code>; return exactly one aggregate row and label every expression. <strong>Expected result/shape:</strong> For sql-55 Exercise 1, expected output: one comparison row. <code>CUBE(country, category)</code> adds category-only subtotals that the hierarchical <code>ROLLUP(country, category)</code> omits, so its count is greater on this seed. The final columns are <code>rollup_row_count</code>, and <code>cube_row_count</code>. <strong>Verify:</strong> For sql-55 Exercise 1, evaluate each of <code>rollup_row_count</code>, and <code>cube_row_count</code> in a separate control <code>SELECT</code> over <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>; require one final row and compare every value. Add one source row with a new <code>order_id</code>; verify the result gains exactly one row carrying that <code>order_id</code> value.</li>
+<li>Add status to an exact top-five drill-down. <strong>Inputs/evidence:</strong> For sql-55 Exercise 2, read from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>. Build the answer toward <code>country</code>, <code>category</code>, <code>status</code>, <code>product_id</code>, <code>name</code>, <code>revenue</code>, and <code>product_rank</code>; keep <code>product_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-55 Exercise 2, expected output: up to five rows per <code>(country, category, status)</code>. The final columns are <code>country</code>, <code>category</code>, <code>status</code>, <code>product_id</code>, <code>name</code>, <code>revenue</code>, and <code>product_rank</code>. The final order is <code>country, category, status, product_rank</code>. <strong>Verify:</strong> For sql-55 Exercise 2, project <code>product_id</code> plus the raw source columns from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code> at each join stage; record row count and distinct <code>product_id</code>, then assert the final <code>country</code>, <code>category</code>, <code>status</code>, <code>product_id</code>, <code>name</code>, <code>revenue</code>, and <code>product_rank</code> values match those staged rows without unintended fanout or loss. Give two rows the same <code>country</code> value and different <code>product_rank</code> values; verify <code>country, category, status, product_rank</code> produces the intended rank and display order.</li>
+<li>Predict <code>ROLLUP(country, category, month)</code> grouping sets. <strong>Inputs/evidence:</strong> For sql-55 Exercise 3, read from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>. Build the answer toward <code>country</code>, <code>category</code>, <code>revenue</code>, and <code>grouping_mask</code>; keep <code>country</code>, and <code>category</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-55 Exercise 3, expected output: one row per <code>country</code>, and <code>category</code>. The final columns are <code>country</code>, <code>category</code>, <code>revenue</code>, and <code>grouping_mask</code>. The final order is <code>grouping_mask, country, category</code>. <strong>Verify:</strong> For sql-55 Exercise 3, independently aggregate <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code> by <code>country</code>, and <code>category</code>; require one output row for every distinct <code>country</code>, and <code>category</code> tuple and compare <code>revenue</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>revenue</code> for the existing <code>country</code>, and <code>category</code> tuple and verify the new tuple appears exactly once.</li>
+<li>Label levels with PostgreSQL&#x27;s <code>GROUPING(country, category)</code> bit mask. <strong>Inputs/evidence:</strong> For sql-55 Exercise 4, read from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>. Build the answer toward <code>level_id</code>, <code>level_name</code>, <code>country</code>, <code>category</code>, and <code>revenue</code>; keep <code>level_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-55 Exercise 4, expected output: one row per <code>level_id</code>. The final columns are <code>level_id</code>, <code>level_name</code>, <code>country</code>, <code>category</code>, and <code>revenue</code>. The final order is <code>level_id, country, category</code>. <strong>Verify:</strong> For sql-55 Exercise 4, independently aggregate <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code> by <code>level_id</code>; require one output row for every distinct <code>level_id</code> tuple and compare <code>revenue</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>revenue</code> for the existing <code>level_id</code> tuple and verify the new tuple appears exactly once.</li>
+<li>Use deterministic <code>ROW_NUMBER</code> for exactly five results. <strong>Inputs/evidence:</strong> For sql-55 Exercise 5, read from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>. Build the answer toward <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code>; keep <code>order_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-55 Exercise 5, expected output: one row per <code>order_id</code>. The final columns are <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code>. The final order is <code>country, position</code>. <strong>Verify:</strong> For sql-55 Exercise 5, project <code>order_id</code> plus the raw source columns from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code> at each join stage; record row count and distinct <code>order_id</code>, then assert the final <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code> values match those staged rows without unintended fanout or loss. Add one row for which <code>(position &lt;= 5)</code> is true and one for which it is false; verify only the matching <code>order_id</code> value is returned.</li>
+<li>Separate real unknown members from generated subtotals. <strong>Inputs/evidence:</strong> For sql-55 Exercise 6, read from <code>customers</code>. Build the answer toward <code>display_country</code>, <code>is_generated_total</code>, and <code>customers</code>; keep <code>display_country</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-55 Exercise 6, expected output: one row per <code>display_country</code>. The final columns are <code>display_country</code>, <code>is_generated_total</code>, and <code>customers</code>. The final order is <code>is_generated_total, display_country</code>. <strong>Verify:</strong> For sql-55 Exercise 6, independently aggregate <code>customers</code> by <code>display_country</code>; require one output row for every distinct <code>display_country</code> tuple and compare <code>is_generated_total</code>, and <code>customers</code> tuple by tuple. Repeat with <code>NULL</code> in <code>display_country</code>, and <code>is_generated_total</code> and state whether the row is kept, rejected, or classified.</li>
 </ol>
 <p>Test one real NULL/unknown dimension value.</p>
+<h4 id="guide--common-mistakes-and-how-to-recover">Common mistakes and how to recover<a class="heading-anchor" href="#guide--common-mistakes-and-how-to-recover" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Lesson-specific semantic mistake:</strong> A raw payment join fans out split-payment orders. Keep the declared primary</li>
+<li><strong>Unexpected row count:</strong> display keys before aggregates, count rows after each join/filter stage, and find the first stage whose grain differs from the contract. Do not hide fanout with <code>DISTINCT</code>.</li>
+<li><strong>Unexpected <code>NULL</code> or missing row:</strong> decide whether the fact is unknown, inapplicable, zero, or absent before using <code>COALESCE</code>; inspect outer-join predicate placement and empty-input aggregate behavior.</li>
+<li><strong>Unstable top/first/last output:</strong> add <code>ORDER BY</code> with a unique final tie-breaker before <code>LIMIT</code> or order-sensitive windows/aggregates.</li>
+<li><strong><code>psql</code> stops on an error:</strong> fix the first error shown by <code>ON_ERROR_STOP</code>, restore the declared transaction/setup state, and rerun the complete file. A later successful statement does not validate a partial run.</li>
+</ul>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Is payment method reduced to one declared row per order before joining lines?</li>
@@ -326,11 +523,8 @@
 <h4 id="guide--how-the-learner-script-uses-the-current-schema">How the learner script uses the current schema<a class="heading-anchor" href="#guide--how-the-learner-script-uses-the-current-schema" aria-label="Link to this section">#</a></h4>
 <p>The starter builds line revenue from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>, chooses one primary payment method per order by greatest paid amount (method name breaks ties), and rolls up country, category, payment method, and month. Unpaid orders receive the <code>unpaid</code> label. <code>GROUPING(column)</code> distinguishes subtotal nulls from detail values.</p>
 <p>It separately ranks product revenue within <code>(country, category)</code>.</p>
-<h4 id="guide--practice-match-the-learner-prompts-exactly">Practice — match the learner prompts exactly<a class="heading-anchor" href="#guide--practice-match-the-learner-prompts-exactly" aria-label="Link to this section">#</a></h4>
-<ol>
-<li>Replace a two-dimension <code>ROLLUP(country, category)</code> with <code>CUBE(country, category)</code> and compare row counts. Explain the category-only subtotal added by <code>CUBE</code>.</li>
-<li>Add <code>orders.status</code>, aggregate product revenue at <code>(country, category, status, product_id)</code>, and return the top five products within every such group.</li>
-</ol>
+<h4 id="guide--practice-map">Practice map<a class="heading-anchor" href="#guide--practice-map" aria-label="Link to this section">#</a></h4>
+<p>Use the numbered <strong>Exercises</strong> section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.</p>
 <h4 id="guide--bi-reasoning">BI reasoning<a class="heading-anchor" href="#guide--bi-reasoning" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><code>ROLLUP(a, b)</code> returns <code>(a,b)</code>, <code>(a)</code>, and grand total.</li>
@@ -343,17 +537,45 @@
 <li>A raw payment join fans out split-payment orders. Keep the declared primary method policy—or document a different allocation—before using that dimension.</li>
 <li>Cube row counts grow rapidly with dimensions and distinct values.</li>
 <li>Reconcile grand-total cube revenue to source line revenue.</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-55 — Project4 BI Part1.
+
+I have completed the direct catalog prerequisite: `sql-54`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day55_project4_bi_part1.md
+- Answer-free learner SQL: sql/postgres-60day/day55_project4_bi_part1.sql
+
+Key terms to teach in context: ROLLUP, CUBE, GROUPING flag. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Compare ROLLUP(country, category) with CUBE(country, category). Both include detail, country subtotal, and grand total; CUBE also adds category-only subtotals. Use GROUPING(country) and GROUPING(category) to label each level, then reconcile the grand total with source line revenue.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-55/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -370,13 +592,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 55: Project 4 - Complex BI (Part 1)</span>
+<span>-- BEGINNER WORKFLOW — sql-55: Project4 BI Part1</span>
+<span>-- Guide: sql/postgres-60day/companion-guides/day55_project4_bi_part1.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-55/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: payments, orders, customers, order_items, products.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>-- Multi-dimensional analysis (drill-down capability)</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
@@ -447,29 +686,53 @@
 <span> </span>
 <span>-- Exercises</span>
 <span>-- 1. Replace ROLLUP with CUBE to get all subtotal combinations and compare row counts.</span>
+<span>--    Inputs: For sql-55 Exercise 1, read from `orders`, `customers`, `order_items`, and `products`. Compute `rollup_row_count`, and `cube_row_count` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.</span>
+<span>--    Expected result/shape: For sql-55 Exercise 1, expected output: one comparison row. `CUBE(country, category)` adds category-only subtotals that the hierarchical `ROLLUP(country, category)` omits, so its count is greater on this seed. The final columns are `rollup_row_count`, and `cube_row_count`.</span>
+<span>--    Verify: For sql-55 Exercise 1, evaluate each of `rollup_row_count`, and `cube_row_count` in a separate control `SELECT` over `orders`, `customers`, `order_items`, and `products`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span>
+<span>--    Hint ladder, rung 1: For sql-55 Exercise 1, run `line`, `rollup_rows`, and `cube_rows` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span>
 <span>-- 2. Add a dimension for order status and re-run the drill-down with top-5.</span>
+<span>--    Inputs: For sql-55 Exercise 2, read from `orders`, `customers`, `order_items`, and `products`. Build the answer toward `country`, `category`, `status`, `product_id`, `name`, `revenue`, and `product_rank`; keep `product_id` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-55 Exercise 2, expected output: up to five rows per `(country, category, status)`. The final columns are `country`, `category`, `status`, `product_id`, `name`, `revenue`, and `product_rank`. The final order is `country, category, status, product_rank`.</span>
+<span>--    Verify: For sql-55 Exercise 2, project `product_id` plus the raw source columns from `orders`, `customers`, `order_items`, and `products` at each join stage; record row count and distinct `product_id`, then assert the final `country`, `category`, `status`, `product_id`, `name`, `revenue`, and `product_rank` values match those staged rows without unintended fanout or loss. Give two rows the same `country` value and different `product_rank` values; verify `country, category, status, product_rank` produces the intended rank and display order.</span>
+<span>--    Hint ladder, rung 1: For sql-55 Exercise 2, run `line`, `product_revenue`, and `ranked` one at a time. Record each CTE&#x27;s row count and `product_id` uniqueness before the next stage uses it.</span>
 <span>-- 3. Prediction: list the grouping sets produced by ROLLUP(country, category,</span>
 <span>--    month) and contrast them with CUBE before running either query.</span>
+<span>--    Inputs: For sql-55 Exercise 3, read from `orders`, `customers`, `order_items`, and `products`. Build the answer toward `country`, `category`, `revenue`, and `grouping_mask`; keep `country`, and `category` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-55 Exercise 3, expected output: one row per `country`, and `category`. The final columns are `country`, `category`, `revenue`, and `grouping_mask`. The final order is `grouping_mask, country, category`.</span>
+<span>--    Verify: For sql-55 Exercise 3, independently aggregate `orders`, `customers`, `order_items`, and `products` by `country`, and `category`; require one output row for every distinct `country`, and `category` tuple and compare `revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `country`, and `category` tuple and verify the new tuple appears exactly once.</span>
+<span>--    Hint ladder, rung 1: For sql-55 Exercise 3, run `line` one at a time. Record each CTE&#x27;s row count and `country`, and `category` uniqueness before the next stage uses it.</span>
 <span>-- 4. Construction: use PostgreSQL&#x27;s GROUPING(country, category) bit mask to</span>
 <span>--    assign stable detail/subtotal/grand-total labels without mistaking stored</span>
 <span>--    NULLs for subtotal markers.</span>
+<span>--    Inputs: For sql-55 Exercise 4, read from `orders`, `customers`, `order_items`, and `products`. Build the answer toward `level_id`, `level_name`, `country`, `category`, and `revenue`; keep `level_id` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-55 Exercise 4, expected output: one row per `level_id`. The final columns are `level_id`, `level_name`, `country`, `category`, and `revenue`. The final order is `level_id, country, category`.</span>
+<span>--    Verify: For sql-55 Exercise 4, independently aggregate `orders`, `customers`, `order_items`, and `products` by `level_id`; require one output row for every distinct `level_id` tuple and compare `revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `level_id` tuple and verify the new tuple appears exactly once.</span>
+<span>--    Hint ladder, rung 1: For sql-55 Exercise 4, run `line` one at a time. Record each CTE&#x27;s row count and `level_id` uniqueness before the next stage uses it.</span>
 <span>-- 5. Debugging: replace RANK with ROW_NUMBER plus a deterministic tie-breaker</span>
 <span>--    when the dashboard must show exactly five products per group.</span>
+<span>--    Inputs: For sql-55 Exercise 5, read from `orders`, `customers`, `order_items`, and `products`. Build the answer toward `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-55 Exercise 5, expected output: one row per `order_id`. The final columns are `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`. The final order is `country, position`.</span>
+<span>--    Verify: For sql-55 Exercise 5, project `order_id` plus the raw source columns from `orders`, `customers`, `order_items`, and `products` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `customer_id`, `order_date`, `status`, and `total_amount` values match those staged rows without unintended fanout or loss. Add one row for which `(position &lt;= 5)` is true and one for which it is false; verify only the matching `order_id` value is returned.</span>
+<span>--    Hint ladder, rung 1: For sql-55 Exercise 5, run `revenue`, and `ranked` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span>
 <span>-- 6. Edge case: preserve a real &#x27;(unknown)&#x27; country member separately from the</span>
 <span>--    ALL-countries subtotal in both machine-readable and display columns.</span>
+<span>--    Inputs: For sql-55 Exercise 6, read from `customers`. Build the answer toward `display_country`, `is_generated_total`, and `customers`; keep `display_country` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-55 Exercise 6, expected output: one row per `display_country`. The final columns are `display_country`, `is_generated_total`, and `customers`. The final order is `is_generated_total, display_country`.</span>
+<span>--    Verify: For sql-55 Exercise 6, independently aggregate `customers` by `display_country`; require one output row for every distinct `display_country` tuple and compare `is_generated_total`, and `customers` tuple by tuple. Repeat with `NULL` in `display_country`, and `is_generated_total` and state whether the row is kept, rejected, or classified.</span>
+<span>--    Hint ladder, rung 1: For sql-55 Exercise 6, confirm the groups are `display_country`; then check `is_generated_total, display_country` before applying the row cap.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -493,6 +756,26 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-55-solutions-bi-drill-down-and-subtotals">Day 55 Solutions — BI Drill-down and Subtotals<a class="heading-anchor" href="#solution-1--day-55-solutions-bi-drill-down-and-subtotals" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day55_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day55_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are ROLLUP, CUBE, GROUPING flag. Its worked-model focus is: Compare ROLLUP(country, category) with CUBE(country, category). Both include detail, country subtotal, and grand total; CUBE also adds category-only subtotals. Use GROUPING(country) and GROUPING(category) to label each level, then reconcile the grand total with source line revenue.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>The two exercises compare <code>ROLLUP</code> and <code>CUBE</code>, then add order status to a country/category/product top-five drill-down. See <a href="sql-55.html#solution-2"><code>day55_solutions.sql</code></a>.</p>
 <h4 id="solution-1--exercise-1-compare-row-counts">Exercise 1 — Compare row counts<a class="heading-anchor" href="#solution-1--exercise-1-compare-row-counts" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-sql">SET search_path TO training, public;
@@ -517,6 +800,16 @@ WITH line AS (
 SELECT (SELECT COUNT(*) FROM rollup_rows) AS rollup_row_count,
        (SELECT COUNT(*) FROM cube_rows) AS cube_row_count;</code></pre>
 <p>Expected shape: one comparison row. <code>CUBE(country, category)</code> adds category-only subtotals that the hierarchical <code>ROLLUP(country, category)</code> omits, so its count is greater on this seed.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-55 Exercise 1, read from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>. Compute <code>rollup_row_count</code>, and <code>cube_row_count</code> with no outer <code>GROUP BY</code>; return exactly one aggregate row and label every expression.</li>
+<li><strong>Expected result/shape:</strong> For sql-55 Exercise 1, expected output: one comparison row. <code>CUBE(country, category)</code> adds category-only subtotals that the hierarchical <code>ROLLUP(country, category)</code> omits, so its count is greater on this seed. The final columns are <code>rollup_row_count</code>, and <code>cube_row_count</code>.</li>
+<li><strong>Independent verification:</strong> For sql-55 Exercise 1, evaluate each of <code>rollup_row_count</code>, and <code>cube_row_count</code> in a separate control <code>SELECT</code> over <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>; require one final row and compare every value. Add one source row with a new <code>order_id</code>; verify the result gains exactly one row carrying that <code>order_id</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-55 Exercise 1, run <code>line</code>, <code>rollup_rows</code>, and <code>cube_rows</code> one at a time. Record each CTE&#x27;s row count and <code>order_id</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-55 Exercise 1, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>GROUP BY</code>, and <code>SELECT</code>. Read only those operations: begin at <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>, preserve exactly one summary row, and finish with <code>rollup_row_count</code>, and <code>cube_row_count</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-55 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected shape: one comparison row. Evaluate another form against the concrete expected result (one comparison row. <code>CUBE(country, category)</code> adds category-only subtotals that the hierarchical <code>ROLLUP(country, category)</code> omits, so its count is greater on this seed) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>order_id</code>; verify the result gains exactly one row carrying that <code>order_id</code> value.</li>
+</ul>
 <h4 id="solution-1--exercise-2-status-aware-top-five">Exercise 2 — Status-aware top five<a class="heading-anchor" href="#solution-1--exercise-2-status-aware-top-five" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-sql">SET search_path TO training, public;
 
@@ -559,6 +852,16 @@ FROM ranked
 WHERE product_rank &lt;= 5
 ORDER BY country, category, status, product_rank;</code></pre>
 <p>Expected grain: up to five rows per <code>(country, category, status)</code>.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-55 Exercise 2, read from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>. Build the answer toward <code>country</code>, <code>category</code>, <code>status</code>, <code>product_id</code>, <code>name</code>, <code>revenue</code>, and <code>product_rank</code>; keep <code>product_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-55 Exercise 2, expected output: up to five rows per <code>(country, category, status)</code>. The final columns are <code>country</code>, <code>category</code>, <code>status</code>, <code>product_id</code>, <code>name</code>, <code>revenue</code>, and <code>product_rank</code>. The final order is <code>country, category, status, product_rank</code>.</li>
+<li><strong>Independent verification:</strong> For sql-55 Exercise 2, project <code>product_id</code> plus the raw source columns from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code> at each join stage; record row count and distinct <code>product_id</code>, then assert the final <code>country</code>, <code>category</code>, <code>status</code>, <code>product_id</code>, <code>name</code>, <code>revenue</code>, and <code>product_rank</code> values match those staged rows without unintended fanout or loss. Give two rows the same <code>country</code> value and different <code>product_rank</code> values; verify <code>country, category, status, product_rank</code> produces the intended rank and display order.</li>
+<li><strong>Intermediate relation check:</strong> For sql-55 Exercise 2, run <code>line</code>, <code>product_revenue</code>, and <code>ranked</code> one at a time. Record each CTE&#x27;s row count and <code>product_id</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-55 Exercise 2, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>WHERE</code>, <code>GROUP BY</code>, window <code>OVER</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>, preserve one row per <code>product_id</code>, and finish with <code>country</code>, <code>category</code>, <code>status</code>, <code>product_id</code>, <code>name</code>, <code>revenue</code>, and <code>product_rank</code> ordered by <code>country, category, status, product_rank</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-55 Exercise 2, the chosen form is justified by this lesson-specific rationale: Expected grain: up to five rows per <code>(country, category, status)</code>. Evaluate another form against the concrete expected result (up to five rows per <code>(country, category, status)</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Give two rows the same <code>country</code> value and different <code>product_rank</code> values; verify <code>country, category, status, product_rank</code> produces the intended rank and display order.</li>
+</ul>
 <h4 id="solution-1--reasoning-safety-and-pitfalls">Reasoning, safety, and pitfalls<a class="heading-anchor" href="#solution-1--reasoning-safety-and-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><code>CUBE</code> grows quickly: three dimensions produce up to eight grouping sets, before considering the number of distinct dimension values.</li>
@@ -568,14 +871,54 @@ ORDER BY country, category, status, product_rank;</code></pre>
 </ul>
 <h4 id="solution-1--exercise-3-enumerate-rollup-levels">Exercise 3 — Enumerate ROLLUP levels<a class="heading-anchor" href="#solution-1--exercise-3-enumerate-rollup-levels" aria-label="Link to this section">#</a></h4>
 <p>PostgreSQL&#x27;s <code>GROUPING(country, category)</code> returns a bit mask: detail, country subtotal, and grand total have stable numeric identities.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-55 Exercise 3, read from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>. Build the answer toward <code>country</code>, <code>category</code>, <code>revenue</code>, and <code>grouping_mask</code>; keep <code>country</code>, and <code>category</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-55 Exercise 3, expected output: one row per <code>country</code>, and <code>category</code>. The final columns are <code>country</code>, <code>category</code>, <code>revenue</code>, and <code>grouping_mask</code>. The final order is <code>grouping_mask, country, category</code>.</li>
+<li><strong>Independent verification:</strong> For sql-55 Exercise 3, independently aggregate <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code> by <code>country</code>, and <code>category</code>; require one output row for every distinct <code>country</code>, and <code>category</code> tuple and compare <code>revenue</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>revenue</code> for the existing <code>country</code>, and <code>category</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Intermediate relation check:</strong> For sql-55 Exercise 3, run <code>line</code> one at a time. Record each CTE&#x27;s row count and <code>country</code>, and <code>category</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-55 Exercise 3, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>, preserve one row per <code>country</code>, and <code>category</code>, and finish with <code>country</code>, <code>category</code>, <code>revenue</code>, and <code>grouping_mask</code> ordered by <code>grouping_mask, country, category</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-55 Exercise 3, the chosen form is justified by this lesson-specific rationale: PostgreSQL&#x27;s <code>GROUPING(country, category)</code> returns a bit mask: detail, country subtotal, and grand total have stable numeric identities. Evaluate another form against the concrete expected result (one row per <code>country</code>, and <code>category</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>revenue</code> for the existing <code>country</code>, and <code>category</code> tuple and verify the new tuple appears exactly once.</li>
+</ul>
 <h4 id="solution-1--exercise-4-label-levels-from-the-bit-mask">Exercise 4 — Label levels from the bit mask<a class="heading-anchor" href="#solution-1--exercise-4-label-levels-from-the-bit-mask" aria-label="Link to this section">#</a></h4>
 <p>The display label is derived from that mask, not from <code>column IS NULL</code>. This keeps machine-readable level identity beside human-readable text.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-55 Exercise 4, read from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>. Build the answer toward <code>level_id</code>, <code>level_name</code>, <code>country</code>, <code>category</code>, and <code>revenue</code>; keep <code>level_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-55 Exercise 4, expected output: one row per <code>level_id</code>. The final columns are <code>level_id</code>, <code>level_name</code>, <code>country</code>, <code>category</code>, and <code>revenue</code>. The final order is <code>level_id, country, category</code>.</li>
+<li><strong>Independent verification:</strong> For sql-55 Exercise 4, independently aggregate <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code> by <code>level_id</code>; require one output row for every distinct <code>level_id</code> tuple and compare <code>revenue</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>revenue</code> for the existing <code>level_id</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Intermediate relation check:</strong> For sql-55 Exercise 4, run <code>line</code> one at a time. Record each CTE&#x27;s row count and <code>level_id</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-55 Exercise 4, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>, preserve one row per <code>level_id</code>, and finish with <code>level_id</code>, <code>level_name</code>, <code>country</code>, <code>category</code>, and <code>revenue</code> ordered by <code>level_id, country, category</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-55 Exercise 4, the chosen form is justified by this lesson-specific rationale: The display label is derived from that mask, not from <code>column IS NULL</code>. Evaluate another form against the concrete expected result (one row per <code>level_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>revenue</code> for the existing <code>level_id</code> tuple and verify the new tuple appears exactly once.</li>
+</ul>
 <h4 id="solution-1--exercise-5-return-exactly-five-products">Exercise 5 — Return exactly five products<a class="heading-anchor" href="#solution-1--exercise-5-return-exactly-five-products" aria-label="Link to this section">#</a></h4>
 <p>Revenue aggregates before ranking. <code>ROW_NUMBER</code> with <code>product_id</code> as final key limits every partition deterministically even when revenue ties.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-55 Exercise 5, read from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>. Build the answer toward <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code>; keep <code>order_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-55 Exercise 5, expected output: one row per <code>order_id</code>. The final columns are <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code>. The final order is <code>country, position</code>.</li>
+<li><strong>Independent verification:</strong> For sql-55 Exercise 5, project <code>order_id</code> plus the raw source columns from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code> at each join stage; record row count and distinct <code>order_id</code>, then assert the final <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code> values match those staged rows without unintended fanout or loss. Add one row for which <code>(position &lt;= 5)</code> is true and one for which it is false; verify only the matching <code>order_id</code> value is returned.</li>
+<li><strong>Intermediate relation check:</strong> For sql-55 Exercise 5, run <code>revenue</code>, and <code>ranked</code> one at a time. Record each CTE&#x27;s row count and <code>order_id</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-55 Exercise 5, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>WHERE</code>, <code>GROUP BY</code>, window <code>OVER</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>, preserve one row per <code>order_id</code>, and finish with <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code> ordered by <code>country, position</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-55 Exercise 5, the chosen form is justified by this lesson-specific rationale: Revenue aggregates before ranking. Evaluate another form against the concrete expected result (one row per <code>order_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row for which <code>(position &lt;= 5)</code> is true and one for which it is false; verify only the matching <code>order_id</code> value is returned.</li>
+</ul>
 <h4 id="solution-1--exercise-6-preserve-unknown-versus-all">Exercise 6 — Preserve unknown versus ALL<a class="heading-anchor" href="#solution-1--exercise-6-preserve-unknown-versus-all" aria-label="Link to this section">#</a></h4>
-<p>The stored member label and generated-total flag are separate fields. A real NULL/unknown member retains flag zero; ALL has flag one.</p></div>
+<p>The stored member label and generated-total flag are separate fields. A real NULL/unknown member retains flag zero; ALL has flag one.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-55 Exercise 6, read from <code>customers</code>. Build the answer toward <code>display_country</code>, <code>is_generated_total</code>, and <code>customers</code>; keep <code>display_country</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-55 Exercise 6, expected output: one row per <code>display_country</code>. The final columns are <code>display_country</code>, <code>is_generated_total</code>, and <code>customers</code>. The final order is <code>is_generated_total, display_country</code>.</li>
+<li><strong>Independent verification:</strong> For sql-55 Exercise 6, independently aggregate <code>customers</code> by <code>display_country</code>; require one output row for every distinct <code>display_country</code> tuple and compare <code>is_generated_total</code>, and <code>customers</code> tuple by tuple. Repeat with <code>NULL</code> in <code>display_country</code>, and <code>is_generated_total</code> and state whether the row is kept, rejected, or classified.</li>
+<li><strong>Intermediate relation check:</strong> For sql-55 Exercise 6, confirm the groups are <code>display_country</code>; then check <code>is_generated_total, display_country</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-55 Exercise 6, the solution actually uses <code>FROM</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>customers</code>, preserve one row per <code>display_country</code>, and finish with <code>display_country</code>, <code>is_generated_total</code>, and <code>customers</code> ordered by <code>is_generated_total, display_country</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-55 Exercise 6, the chosen form is justified by this lesson-specific rationale: The stored member label and generated-total flag are separate fields. Evaluate another form against the concrete expected result (one row per <code>display_country</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Repeat with <code>NULL</code> in <code>display_country</code>, and <code>is_generated_total</code> and state whether the row is kept, rejected, or classified.</li>
+</ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -583,7 +926,7 @@ ORDER BY country, category, status, product_rank;</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -607,6 +950,19 @@ ORDER BY country, category, status, product_rank;</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 55 solutions: BI drill-down and subtotal design</span>
+<span>-- SOLUTION READING MAP — sql-55: Project4 BI Part1</span>
+<span>-- Explanation: sql/postgres-60day/solutions/day55_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day55_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
 <span>WITH line AS (</span>
@@ -739,7 +1095,50 @@ ORDER BY country, category, status, product_rank;</code></pre>
 <span>ORDER BY is_generated_total, display_country;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-55 — Project4 BI Part1.
+
+I have completed the direct catalog prerequisite: `sql-54`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day55_project4_bi_part1.md
+- Answer-free learner SQL: sql/postgres-60day/day55_project4_bi_part1.sql
+
+Key terms to teach in context: ROLLUP, CUBE, GROUPING flag. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Compare ROLLUP(country, category) with CUBE(country, category). Both include detail, country subtotal, and grand total; CUBE also adds category-only subtotals. Use GROUPING(country) and GROUPING(category) to label each level, then reconcile the grand total with source line revenue.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-55/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-54.html"><small>Previous lesson</small><strong>sql-54</strong><span>Project3 DWH Part3 Aggregations</span></a>
@@ -831,6 +1230,23 @@ ORDER BY country, category, status, product_rank;</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-15-project-a-testable-cli-data-tool">Day 15 — Project: A Testable CLI Data Tool<a class="heading-anchor" href="#guide--day-15-project-a-testable-cli-data-tool" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner checkpoint</p>
 <p>This checkpoint combines the first 14 days into a small command-line program that reads CSV, cleans data, writes output, and remains testable.</p>
@@ -292,6 +331,89 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Days 1–14, especially packages (<code>python-09</code>), pytest (<code>python-10</code>), logging (<code>python-11</code>), and quality tooling (<code>python-14</code>).</p>
+<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<ol>
+<li>Confirm the course environment before changing it:</li>
+</ol>
+<pre><code class="language-powershell">   # Windows PowerShell
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   &amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash">   # macOS/Linux
+   .venv/bin/python scripts/course.py doctor</code></pre>
+<ol>
+<li>Read <code>python/ds-60day/companion-guides/day15_cli_project.md</code>, then open <code>python/ds-60day/notebooks/day15_cli_project.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
+<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
+<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
+<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+</ol>
+<p><strong>Lesson outcome:</strong> use day 15 — project: a testable cli data tool to practice a small command-line application with separated boundaries and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
+<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
+<p>A command-line interface (CLI) has three layers: parse external strings, call ordinary Python logic with typed values, then present a result and choose an exit status. Keeping the core logic free from <code>sys.argv</code>, printing, and process exit makes it reusable from tests and notebooks.</p>
+<p><code>argparse</code> defines flags, help, conversion, and validation close to the command boundary. A <code>main(argv: list[str] | None = None) -&gt; int</code> function is testable because tests can pass an explicit list rather than changing the real process arguments. The guarded entry point should do little more than <code>raise SystemExit(main())</code>.</p>
+<h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>CLI:</strong> a text interface driven by command-line arguments and exit status.</li>
+<li><strong>argument parser:</strong> a component that converts command text into named values.</li>
+<li><strong>option:</strong> a named flag such as <code>--limit</code>.</li>
+<li><strong>positional argument:</strong> a value identified by its position.</li>
+<li><strong>exit status:</strong> an integer process result where zero normally means success.</li>
+<li><strong>entry point:</strong> the small boundary that starts application execution.</li>
+</ul>
+<h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<p><code>parser.add_argument(&quot;--limit&quot;, type=int, default=10)</code> declares the spelling, conversion, and fallback. <code>parser.parse_args(argv)</code> returns a namespace of parsed values. Supplying <code>argv</code> makes tests deterministic; <code>None</code> tells argparse to read the real process command line.</p>
+<h5 id="guide--worked-example-1-parse-an-explicit-argument-list">Worked example 1 — Parse an explicit argument list<a class="heading-anchor" href="#guide--worked-example-1-parse-an-explicit-argument-list" aria-label="Link to this section">#</a></h5>
+<p>Exercise the CLI contract without touching the notebook process arguments. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">import argparse
+
+def build_parser() -&gt; argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog=&quot;rowtool&quot;)
+    parser.add_argument(&quot;--limit&quot;, type=int, default=10)
+    parser.add_argument(&quot;names&quot;, nargs=&quot;+&quot;)
+    return parser
+
+args = build_parser().parse_args([&quot;--limit&quot;, &quot;2&quot;, &quot;Ada&quot;, &quot;Lin&quot;, &quot;Grace&quot;])
+(args.limit, args.names)</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`(2, [&#x27;Ada&#x27;, &#x27;Lin&#x27;, &#x27;Grace&#x27;])`. Argparse converted `2` to an integer and collected positional names.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--worked-example-2-keep-core-work-independent-of-printing">Worked example 2 — Keep core work independent of printing<a class="heading-anchor" href="#guide--worked-example-2-keep-core-work-independent-of-printing" aria-label="Link to this section">#</a></h5>
+<p>A plain function can be tested and reused by the CLI. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">def select_names(names: list[str], *, limit: int) -&gt; list[str]:
+    if limit &lt; 0:
+        raise ValueError(&quot;limit must be non-negative&quot;)
+    return [name.strip().title() for name in names[:limit]]
+
+select_names(args.names, limit=args.limit)</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`[&#x27;Ada&#x27;, &#x27;Lin&#x27;]`. Parsing and presentation remain outside the core transformation.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
+<p>When the output differs from your prediction, use this order:</p>
+<ol>
+<li>Print or test <code>vars(args)</code> when parsed values do not match the declared options.</li>
+<li>Keep file I/O and transformation out of the parser-building function.</li>
+<li>Return an exit code from <code>main</code>; avoid calling <code>sys.exit</code> deep inside reusable logic.</li>
+<li>Test help, required arguments, invalid conversion, normal output, and output-file behavior separately.</li>
+</ol>
+<h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
+<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
+<ol>
+<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
+<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
+<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
+<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
+<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
+</ol>
+<p><strong>Useful alternative:</strong> A notebook suits interactive exploration; a CLI suits repeatable parameterized execution; a library function should hold shared core logic.</p>
+<p><strong>Boundary to remember:</strong> Paths with spaces, missing files, invalid encodings, empty input, existing output files, and Windows shell quoting need tests. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>CLI:</strong> command-line interface.</li>
@@ -308,30 +430,37 @@
 <pre><code class="language-python">import argparse
 from pathlib import Path
 
-
 def parse_args(argv: list[str] | None = None) -&gt; argparse.Namespace:
     parser = argparse.ArgumentParser(description=&quot;Inspect an input path&quot;)
     parser.add_argument(&quot;--input&quot;, required=True, type=Path)
     return parser.parse_args(argv)</code></pre>
 <p>Passing <code>argv</code> makes parser behavior testable without changing global process arguments.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Read a CSV with pandas, drop or handle required missing values, and convert documented column types. <strong>Hint:</strong> make <code>clean(frame)</code> return a copy so a caller&#x27;s input is not silently mutated.</li>
-<li>Compute summary statistics and save a cleaned CSV. <strong>Hint:</strong> keep read/write functions separate from transforms and create parent directories deliberately.</li>
-<li>Provide <code>--input</code> and <code>--out</code> with <code>argparse</code>; the intended invocation is <code>python tool.py --input data.csv --out out.csv</code>. <strong>Hint:</strong> use <code>type=Path</code> and <code>required=True</code>; do not introduce Click.</li>
-<li>Test core functions and one parser path. <strong>Hint:</strong> use tiny in-memory frames and pytest&#x27;s <code>tmp_path</code>, not large external data.</li>
-<li>Run Ruff lint/format checks, mypy, and pytest. <strong>Hint:</strong> use the same commands as Day 14 and inspect the first failure before continuing.</li>
+<li>Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. <strong>Architecture:</strong> <code>build_parser()</code>, pure core function(s), and <code>main(argv=None) -&gt; int</code>. <strong>Constraints:</strong> use <code>pathlib</code>, UTF-8, no notebook-only state, and no hard-coded absolute paths. <strong>Verify:</strong> assert <code>--help</code> exits <code>0</code> and names the command/options, a valid fixture exits <code>0</code> with the expected bounded output, and invalid input exits nonzero with a useful stderr message.</li>
 </ol>
-<p>Store practice source in a tracked project directory. Put disposable generated files under ignored <code>artifacts/</code>; never commit <code>.venv</code>, caches, secrets, or a machine-specific <code>.env</code>.</p>
+<ol>
+<li>Add options for input path, output path, and a typed transformation parameter such as <code>--limit</code>. <strong>Expected behavior:</strong> argparse rejects invalid numeric text and the application returns a nonzero status for a missing input without a traceback aimed at beginners. <strong>Constraint:</strong> do not catch programming errors broadly. <strong>Verify:</strong> Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message.</li>
+</ol>
+<ol>
+<li>Write pytest tests that call core logic directly and call <code>main([...])</code> with temporary files. <strong>Coverage:</strong> happy path, empty input, missing path, invalid parameter, and output overwrite policy. <strong>Verify:</strong> assert return status, captured output, and exact file content without spawning a shell.</li>
+</ol>
+<ol>
+<li>Package the CLI invocation behind <code>if <strong>name</strong> == &#x27;<strong>main</strong>&#x27;: raise SystemExit(main())</code>. <strong>Expected behavior:</strong> importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. <strong>Verify:</strong> test both import and module execution.</li>
+</ol>
+<ol>
+<li>Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. <strong>Constraint:</strong> do not mix Bash syntax into PowerShell. <strong>Verify:</strong> copy the command for your operating system, record exit code <code>0</code> and the expected output, and confirm the quoted path with spaces is received as one argument.</li>
+</ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Keep command parsing and file I/O at thin boundaries around pure, importable transformations. Make failures observable through exit codes.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>. <strong>Progressive hint:</strong> The parser performs declared conversions before <code>main</code> receives values.</li>
-<li><strong>Tracing:</strong> Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. <strong>Progressive hint:</strong> A pure transform accepts and returns data without reading global state.</li>
-<li><strong>Implementation:</strong> Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present. <strong>Progressive hint:</strong> Check the destination before performing the write.</li>
-<li><strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard.</li>
-<li><strong>Edge case and explanation:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. <strong>Progressive hint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests.</li>
+<li><strong>Prediction:</strong> Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>. <strong>Progressive hint:</strong> The parser performs declared conversions before <code>main</code> receives values. <strong>Verify:</strong> Call <code>parse_args</code> with explicit text and assert the parsed input is a <code>Path</code>, limit is an <code>int</code>, and defaults have the documented types.</li>
+<li><strong>Tracing:</strong> Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. <strong>Progressive hint:</strong> A pure transform accepts and returns data without reading global state. <strong>Verify:</strong> For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data.</li>
+<li><strong>Implementation:</strong> Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present. <strong>Progressive hint:</strong> Check the destination before performing the write. <strong>Verify:</strong> Use a temporary existing destination: assert refusal leaves content unchanged without the flag and <code>--overwrite</code> deliberately replaces it with the flag.</li>
+<li><strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard. <strong>Verify:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</li>
+<li><strong>Edge case and explanation:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. <strong>Progressive hint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests. <strong>Verify:</strong> Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--run-the-project">Run the project<a class="heading-anchor" href="#guide--run-the-project" aria-label="Link to this section">#</a></h4>
@@ -362,17 +491,33 @@ def parse_args(argv: list[str] | None = None) -&gt; argparse.Namespace:
 <li><a href="python-15.html#learner">Open the learner notebook</a></li>
 <li><a href="python-15.html#solution-1">Check the separate project solution</a></li>
 <li><a href="python-16.html#guide">Next: Day 16 — NumPy fundamentals</a></li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-15`
+(Day 15 — Project: A Testable CLI Data Tool). Direct catalog prerequisites: `python-14`.
+I have completed the direct prerequisites: `python-14`. Emphasize a small command-line application with separated boundaries.
+Read `python/ds-60day/companion-guides/day15_cli_project.md` and use the learner notebook
+`python/ds-60day/notebooks/day15_cli_project.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -389,16 +534,71 @@ def parse_args(argv: list[str] | None = None) -&gt; argparse.Namespace:
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-15-project-cli-data-tool">Day 15 — Project: CLI data tool<a class="heading-anchor" href="#learner--cell-1--day-15-project-cli-data-tool" aria-label="Link to this section">#</a></h3>
 <p>Build a small command-line script that ingests a CSV, cleans it, and outputs a summary with tests and linting.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--requirements">Requirements<a class="heading-anchor" href="#learner--cell-2--requirements" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
+<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>This is the editable learner artifact for <code>python-15</code>. Read <code>python/ds-60day/companion-guides/day15_cli_project.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
+<p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
+<p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--core-mental-model">Core mental model<a class="heading-anchor" href="#learner--cell-3--core-mental-model" aria-label="Link to this section">#</a></h4>
+<p>A command-line interface (CLI) has three layers: parse external strings, call ordinary Python logic with typed values, then present a result and choose an exit status. Keeping the core logic free from <code>sys.argv</code>, printing, and process exit makes it reusable from tests and notebooks.</p>
+<p><code>argparse</code> defines flags, help, conversion, and validation close to the command boundary. A <code>main(argv: list[str] | None = None) -&gt; int</code> function is testable because tests can pass an explicit list rather than changing the real process arguments. The guarded entry point should do little more than <code>raise SystemExit(main())</code>.</p>
+<h5 id="learner--cell-3--vocabulary">Vocabulary<a class="heading-anchor" href="#learner--cell-3--vocabulary" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>CLI:</strong> a text interface driven by command-line arguments and exit status.</li>
+<li><strong>argument parser:</strong> a component that converts command text into named values.</li>
+<li><strong>option:</strong> a named flag such as <code>--limit</code>.</li>
+<li><strong>positional argument:</strong> a value identified by its position.</li>
+<li><strong>exit status:</strong> an integer process result where zero normally means success.</li>
+<li><strong>entry point:</strong> the small boundary that starts application execution.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<p><code>parser.add_argument(&quot;--limit&quot;, type=int, default=10)</code> declares the spelling, conversion, and fallback. <code>parser.parse_args(argv)</code> returns a namespace of parsed values. Supplying <code>argv</code> makes tests deterministic; <code>None</code> tells argparse to read the real process command line.</p>
+<h5 id="learner--cell-4--worked-example-1-parse-an-explicit-argument-list">Worked example 1 — Parse an explicit argument list<a class="heading-anchor" href="#learner--cell-4--worked-example-1-parse-an-explicit-argument-list" aria-label="Link to this section">#</a></h5>
+<p>Exercise the CLI contract without touching the notebook process arguments. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import argparse</span>
+<span> </span>
+<span>def build_parser() -&gt; argparse.ArgumentParser:</span>
+<span>    parser = argparse.ArgumentParser(prog=&quot;rowtool&quot;)</span>
+<span>    parser.add_argument(&quot;--limit&quot;, type=int, default=10)</span>
+<span>    parser.add_argument(&quot;names&quot;, nargs=&quot;+&quot;)</span>
+<span>    return parser</span>
+<span> </span>
+<span>args = build_parser().parse_args([&quot;--limit&quot;, &quot;2&quot;, &quot;Ada&quot;, &quot;Lin&quot;, &quot;Grace&quot;])</span>
+<span>(args.limit, args.names)</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> <code>(2, [&#x27;Ada&#x27;, &#x27;Lin&#x27;, &#x27;Grace&#x27;])</code>. Argparse converted <code>2</code> to an integer and collected positional names.</p>
+<p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
+<h5 id="learner--cell-6--worked-example-2-keep-core-work-independent-of-printing">Worked example 2 — Keep core work independent of printing<a class="heading-anchor" href="#learner--cell-6--worked-example-2-keep-core-work-independent-of-printing" aria-label="Link to this section">#</a></h5>
+<p>A plain function can be tested and reused by the CLI. Predict first; then run the next cell.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>def select_names(names: list[str], *, limit: int) -&gt; list[str]:</span>
+<span>    if limit &lt; 0:</span>
+<span>        raise ValueError(&quot;limit must be non-negative&quot;)</span>
+<span>    return [name.strip().title() for name in names[:limit]]</span>
+<span> </span>
+<span>select_names(args.names, limit=args.limit)</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>[&#x27;Ada&#x27;, &#x27;Lin&#x27;]</code>. Parsing and presentation remain outside the core transformation.</p>
+<h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
+<p>When evidence differs from your prediction, use this order:</p>
+<ol>
+<li>Print or test <code>vars(args)</code> when parsed values do not match the declared options.</li>
+<li>Keep file I/O and transformation out of the parser-building function.</li>
+<li>Return an exit code from <code>main</code>; avoid calling <code>sys.exit</code> deep inside reusable logic.</li>
+<li>Test help, required arguments, invalid conversion, normal output, and output-file behavior separately.</li>
+</ol>
+<p><strong>Alternative to compare:</strong> A notebook suits interactive exploration; a CLI suits repeatable parameterized execution; a library function should hold shared core logic.</p>
+<p><strong>Boundary to test:</strong> Paths with spaces, missing files, invalid encodings, empty input, existing output files, and Windows shell quoting need tests.</p>
+<p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-9--requirements">Requirements<a class="heading-anchor" href="#learner--cell-9--requirements" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Read CSV (pandas), drop NA, convert types.</li>
 <li>Output summary stats and save a cleaned CSV.</li>
@@ -406,62 +606,177 @@ def parse_args(argv: list[str] | None = None) -&gt; argparse.Namespace:
 <li>Include pytest tests for core functions.</li>
 <li>Pass Ruff lint and format checks, mypy, and pytest.</li>
 </ul></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--hints">Hints<a class="heading-anchor" href="#learner--cell-3--hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h4 id="learner--cell-10--hints">Hints<a class="heading-anchor" href="#learner--cell-10--hints" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Put core logic in functions so tests can import them.</li>
 <li>Use the standard-library <code>argparse</code> module for the CLI.</li>
 <li>Keep I/O separate from transforms.</li>
 </ul></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-4--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h4 id="learner--cell-11--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-11--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Read a CSV with pandas, drop or handle required missing values, and convert documented column types. <strong>Hint:</strong> make <code>clean(frame)</code> return a copy so a caller&#x27;s input is not silently mutated.</li>
-<li>Compute summary statistics and save a cleaned CSV. <strong>Hint:</strong> keep read/write functions separate from transforms and create parent directories deliberately.</li>
-<li>Provide <code>--input</code> and <code>--out</code> with <code>argparse</code>; the intended invocation is <code>python tool.py --input data.csv --out out.csv</code>. <strong>Hint:</strong> use <code>type=Path</code> and <code>required=True</code>; do not introduce Click.</li>
-<li>Test core functions and one parser path. <strong>Hint:</strong> use tiny in-memory frames and pytest&#x27;s <code>tmp_path</code>, not large external data.</li>
-<li>Run Ruff lint/format checks, mypy, and pytest. <strong>Hint:</strong> use the same commands as Day 14 and inspect the first failure before continuing.</li>
+<li>Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. <strong>Architecture:</strong> <code>build_parser()</code>, pure core function(s), and <code>main(argv=None) -&gt; int</code>. <strong>Constraints:</strong> use <code>pathlib</code>, UTF-8, no notebook-only state, and no hard-coded absolute paths. <strong>Verify:</strong> assert <code>--help</code> exits <code>0</code> and names the command/options, a valid fixture exits <code>0</code> with the expected bounded output, and invalid input exits nonzero with a useful stderr message.</li>
 </ol>
-<p>Store practice source in a tracked project directory. Put disposable generated files under ignored <code>artifacts/</code>; never commit <code>.venv</code>, caches, secrets, or a machine-specific <code>.env</code>.</p>
-<h5 id="learner--cell-4--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-4--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Add options for input path, output path, and a typed transformation parameter such as <code>--limit</code>. <strong>Expected behavior:</strong> argparse rejects invalid numeric text and the application returns a nonzero status for a missing input without a traceback aimed at beginners. <strong>Constraint:</strong> do not catch programming errors broadly. <strong>Verify:</strong> Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message.</li>
+</ol>
+<ol>
+<li>Write pytest tests that call core logic directly and call <code>main([...])</code> with temporary files. <strong>Coverage:</strong> happy path, empty input, missing path, invalid parameter, and output overwrite policy. <strong>Verify:</strong> assert return status, captured output, and exact file content without spawning a shell.</li>
+</ol>
+<ol>
+<li>Package the CLI invocation behind <code>if <strong>name</strong> == &#x27;<strong>main</strong>&#x27;: raise SystemExit(main())</code>. <strong>Expected behavior:</strong> importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. <strong>Verify:</strong> test both import and module execution.</li>
+</ol>
+<ol>
+<li>Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. <strong>Constraint:</strong> do not mix Bash syntax into PowerShell. <strong>Verify:</strong> copy the command for your operating system, record exit code <code>0</code> and the expected output, and confirm the quoted path with spaces is received as one argument.</li>
+</ol>
+<h5 id="learner--cell-11--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-11--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Keep command parsing and file I/O at thin boundaries around pure, importable transformations. Make failures observable through exit codes.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>. <strong>Progressive hint:</strong> The parser performs declared conversions before <code>main</code> receives values.</li>
-<li><strong>Tracing:</strong> Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. <strong>Progressive hint:</strong> A pure transform accepts and returns data without reading global state.</li>
-<li><strong>Implementation:</strong> Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present. <strong>Progressive hint:</strong> Check the destination before performing the write.</li>
-<li><strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard.</li>
-<li><strong>Edge case and explanation:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. <strong>Progressive hint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests.</li>
+<li><strong>Prediction:</strong> Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>. <strong>Progressive hint:</strong> The parser performs declared conversions before <code>main</code> receives values. <strong>Verify:</strong> Call <code>parse_args</code> with explicit text and assert the parsed input is a <code>Path</code>, limit is an <code>int</code>, and defaults have the documented types.</li>
+<li><strong>Tracing:</strong> Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. <strong>Progressive hint:</strong> A pure transform accepts and returns data without reading global state. <strong>Verify:</strong> For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data.</li>
+<li><strong>Implementation:</strong> Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present. <strong>Progressive hint:</strong> Check the destination before performing the write. <strong>Verify:</strong> Use a temporary existing destination: assert refusal leaves content unchanged without the flag and <code>--overwrite</code> deliberately replaces it with the flag.</li>
+<li><strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard. <strong>Verify:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</li>
+<li><strong>Edge case and explanation:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. <strong>Progressive hint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests. <strong>Verify:</strong> Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled.</li>
 </ol>
-<p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Predict first. Then write small code and assertions below each label.</span>
-<span># Keep the official solution closed until you have tested an honest attempt.</span>
+<p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
+<h4 id="learner--cell-11--run-the-project">Run the project<a class="heading-anchor" href="#learner--cell-11--run-the-project" aria-label="Link to this section">#</a></h4>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe tool.py --input data.csv --out artifacts\out.csv
+.\.venv\Scripts\python.exe -m pytest</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python tool.py --input data.csv --out artifacts/out.csv
+.venv/bin/python -m pytest</code></pre></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-12--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-12--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. <strong>Architecture:</strong> <code>build_parser()</code>, pure core function(s), and <code>main(argv=None) -&gt; int</code>. <strong>Constraints:</strong> use <code>pathlib</code>, UTF-8, no notebook-only state, and no hard-coded absolute paths. <strong>Verify:</strong> assert <code>--help</code> exits <code>0</code> and names the command/options, a valid fixture exits <code>0</code> with the expected bounded output, and invalid input exits nonzero with a useful stderr message.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
+<span># Short contract: Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. `build_parser()`, pu...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 6 — Prediction</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-14--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-14--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Add options for input path, output path, and a typed transformation parameter such as <code>--limit</code>. <strong>Expected behavior:</strong> argparse rejects invalid numeric text and the application returns a nonzero status for a missing input without a traceback aimed at beginners. <strong>Constraint:</strong> do not catch programming errors broadly. <strong>Verify:</strong> Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
+<span># Short contract: Add options for input path, output path, and a typed transformation parameter such as `--limit`. argparse rejects invalid numeric text and the application returns a nonzero stat...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 7 — Tracing</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-16--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-16--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Write pytest tests that call core logic directly and call <code>main([...])</code> with temporary files. <strong>Coverage:</strong> happy path, empty input, missing path, invalid parameter, and output overwrite policy. <strong>Verify:</strong> assert return status, captured output, and exact file content without spawning a shell.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
+<span># Short contract: Write pytest tests that call core logic directly and call `main([...])` with temporary files. happy path, empty input, missing path, invalid parameter, and output overwrite poli...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 8 — Implementation</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-18--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-18--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Package the CLI invocation behind <code>if <strong>name</strong> == &#x27;<strong>main</strong>&#x27;: raise SystemExit(main())</code>. <strong>Expected behavior:</strong> importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. <strong>Verify:</strong> test both import and module execution.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
+<span># Short contract: Package the CLI invocation behind `if __name__ == &#x27;__main__&#x27;: raise SystemExit(main())`. importing the module produces no output or process exit; `python -m ... --help` works fr...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 9 — Debugging</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-20--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-20--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. <strong>Constraint:</strong> do not mix Bash syntax into PowerShell. <strong>Verify:</strong> copy the command for your operating system, record exit code <code>0</code> and the expected output, and confirm the quoted path with spaces is received as one argument.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
+<span># Short contract: Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. do not mix Bash sy...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 10 — Edge case and explanation</span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 15</div><h5 id="learner--cell-22--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-22--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>. <strong>Progressive hint:</strong> The parser performs declared conversions before <code>main</code> receives values. <strong>Verify:</strong> Call <code>parse_args</code> with explicit text and assert the parsed input is a <code>Path</code>, limit is an <code>int</code>, and defaults have the documented types.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
+<span># Short contract: Predict the Python types produced by `argparse` when `--input` uses `type=Path` and `--limit` uses `type=int`. The parser performs declared conversions before `main` receives va...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 16</div><h5 id="learner--cell-24--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-24--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. <strong>Progressive hint:</strong> A pure transform accepts and returns data without reading global state. <strong>Verify:</strong> For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
+<span># Short contract: Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. A pure transform accepts and returns data without reading glo...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 17</div><h5 id="learner--cell-26--practice-8-prediction-attempt-and-evidence">Practice 8 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-26--practice-8-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present. <strong>Progressive hint:</strong> Check the destination before performing the write. <strong>Verify:</strong> Use a temporary existing destination: assert refusal leaves content unchanged without the flag and <code>--overwrite</code> deliberately replaces it with the flag.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 8 — your work</span>
+<span># Short contract: Add `--overwrite` and refuse to replace an existing output unless the flag is present. Check the destination before performing the write. Use a temporary existing destination: a...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 18</div><h5 id="learner--cell-28--practice-9-prediction-attempt-and-evidence">Practice 9 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-28--practice-9-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard. <strong>Verify:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span># Practice 9 — your work</span>
+<span># Short contract: Repair a module that parses arguments and writes files during import. Move behavior into `main(argv)` and use the `__main__` guard. Import the module while capturing output/file...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 19</div><h5 id="learner--cell-30--practice-10-prediction-attempt-and-evidence">Practice 10 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-30--practice-10-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. <strong>Progressive hint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests. <strong>Verify:</strong> Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 12</div><pre class="source-code language-python"><code><span># Practice 10 — your work</span>
+<span># Short contract: Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. Translate expected boundary failures onc...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -485,139 +800,144 @@ def parse_args(argv: list[str] | None = None) -&gt; argparse.Namespace:
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-15-solutions-cli-data-tool-project">Day 15 — Solutions: CLI Data Tool Project<a class="heading-anchor" href="#solution-1--day-15-solutions-cli-data-tool-project" aria-label="Link to this section">#</a></h3>
-<p>We scaffold a small CLI that loads a CSV, cleans it, and writes a summary and cleaned output, with tests.</p>
-<p>Contents</p>
+<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
+<p>These worked answers demonstrate <strong>a small command-line application with separated boundaries</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
+<p>A command-line interface (CLI) has three layers: parse external strings, call ordinary Python logic with typed values, then present a result and choose an exit status. Keeping the core logic free from <code>sys.argv</code>, printing, and process exit makes it reusable from tests and notebooks.</p>
+<p><code>argparse</code> defines flags, help, conversion, and validation close to the command boundary. A <code>main(argv: list[str] | None = None) -&gt; int</code> function is testable because tests can pass an explicit list rather than changing the real process arguments. The guarded entry point should do little more than <code>raise SystemExit(main())</code>.</p>
+<h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
-<li>Project layout</li>
-<li>Core transforms with tests</li>
-<li>CLI wired with argparse</li>
+<li><strong>CLI:</strong> a text interface driven by command-line arguments and exit status.</li>
+<li><strong>argument parser:</strong> a component that converts command text into named values.</li>
+<li><strong>option:</strong> a named flag such as <code>--limit</code>.</li>
+<li><strong>positional argument:</strong> a value identified by its position.</li>
+<li><strong>exit status:</strong> an integer process result where zero normally means success.</li>
+<li><strong>entry point:</strong> the small boundary that starts application execution.</li>
 </ul>
-<hr>
-<p>Project layout</p>
-<pre><code>project/
-  pyproject.toml
-  src/
-    cli.py
-    io_utils.py
-    transforms.py
-  tests/
-    test_transforms.py</code></pre>
-<p>src/transforms.py</p>
-<pre><code class="language-python">from __future__ import annotations
-from typing import Sequence
-import pandas as pd
-
-
-def clean(df: pd.DataFrame) -&gt; pd.DataFrame:
-    d = df.copy()
-    # Example cleaning: drop NA rows in key cols and convert types
-    d = d.rename(columns=str.lower)
-    if &quot;date&quot; in d.columns:
-        d[&quot;date&quot;] = pd.to_datetime(d[&quot;date&quot;], errors=&quot;coerce&quot;, utc=True)
-    for c in (&quot;price&quot;, &quot;qty&quot;):
-        if c in d.columns:
-            d[c] = pd.to_numeric(d[c], errors=&quot;coerce&quot;)
-    d = d.dropna(subset=[c for c in (&quot;price&quot;,&quot;qty&quot;) if c in d.columns])
-    return d
-
-
-def summarize(d: pd.DataFrame) -&gt; pd.DataFrame:
-    # Example summary: total revenue by day (if present)
-    if {&quot;price&quot;,&quot;qty&quot;}.issubset(d.columns):
-        d = d.assign(revenue=d[&quot;price&quot;] * d[&quot;qty&quot;])
-    if &quot;date&quot; in d.columns:
-        return d.groupby(d[&quot;date&quot;].dt.date).agg(revenue=(&quot;revenue&quot;,&quot;sum&quot;))
-    return d.agg(revenue=(&quot;revenue&quot;,&quot;sum&quot;)).to_frame().T</code></pre>
-<p>src/io_utils.py</p>
+<h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
+<p>For this lesson&#x27;s <strong>a small command-line application with separated boundaries</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--exercises-1-5-worked-answers">Exercises 1–5 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-5-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. <strong>Architecture:</strong> <code>build_parser()</code>, pure core function(s), and <code>main(argv=None) -&gt; int</code>. <strong>Constraints:</strong> use <code>pathlib</code>, UTF-8, no notebook-only state, and no hard-coded absolute paths. <strong>Verify:</strong> assert <code>--help</code> exits <code>0</code> and names the command/options, a valid fixture exits <code>0</code> with the expected bounded output, and invalid input exits nonzero with a useful stderr message.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. Architecture: <code>build_parser()</code>, pure core function(s), and <code>main(argv=None) -&gt; int</code>. Constraints: use <code>pathlib</code>, UTF-8, no notebook-only state, and no hard-coded absolute paths. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert <code>--help</code> exits <code>0</code> and names the command/options, a valid fixture exits <code>0</code> with the expected bounded output, and invalid input exits nonzero with a useful stderr message. That connects the answer to a small command-line application with separated boundaries.</p>
 <pre><code class="language-python">from pathlib import Path
-import pandas as pd
+import json
 
-def read_csv(path: Path) -&gt; pd.DataFrame:
-    return pd.read_csv(path)
 
-def write_csv(df: pd.DataFrame, path: Path) -&gt; None:
-    df.to_csv(path, index=False)</code></pre>
-<p>src/cli.py</p>
+def read_records(path: Path) -&gt; list[dict[str, object]]:
+    with path.open(encoding=&quot;utf-8&quot;) as handle:
+        payload = json.load(handle)
+    if not isinstance(payload, list):
+        raise ValueError(&quot;input JSON must be a list&quot;)
+    return payload
+
+
+def select_records(
+    records: list[dict[str, object]], *, limit: int
+) -&gt; list[dict[str, object]]:
+    if limit &lt; 0:
+        raise ValueError(&quot;limit must be non-negative&quot;)
+    return records[:limit]</code></pre>
+<p>These functions separate the file boundary from the deterministic transformation; <code>main</code> coordinates them.</p>
+<p><strong>Verification evidence:</strong> assert <code>--help</code> exits <code>0</code> and names the command/options, a valid fixture exits <code>0</code> with the expected bounded output, and invalid input exits nonzero with a useful stderr message.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Add options for input path, output path, and a typed transformation parameter such as <code>--limit</code>. <strong>Expected behavior:</strong> argparse rejects invalid numeric text and the application returns a nonzero status for a missing input without a traceback aimed at beginners. <strong>Constraint:</strong> do not catch programming errors broadly. <strong>Verify:</strong> Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Add options for input path, output path, and a typed transformation parameter such as <code>--limit</code>. Expected behavior: argparse rejects invalid numeric text and the application returns a nonzero status for a missing input without a traceback aimed at beginners. Constraint: do not catch programming errors broadly. Record the named value, shape, label, or iterator position needed to establish: Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message. The trace exposes a small command-line application with separated boundaries directly.</p>
 <pre><code class="language-python">import argparse
 from pathlib import Path
-from .io_utils import read_csv, write_csv
-from .transforms import clean, summarize
 
-def main(argv: list[str] | None = None) -&gt; int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument(&quot;--input&quot;, type=Path, required=True)
-    ap.add_argument(&quot;--out&quot;, type=Path, required=True)
-    ap.add_argument(&quot;--summary&quot;, type=Path, required=False)
-    args = ap.parse_args(argv)
 
-    df = read_csv(args.input)
-    tidy = clean(df)
-    write_csv(tidy, args.out)
-    if args.summary:
-        summ = summarize(tidy)
-        write_csv(summ, args.summary)
+def build_parser() -&gt; argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog=&quot;record-tool&quot;)
+    parser.add_argument(&quot;input&quot;, type=Path)
+    parser.add_argument(&quot;--output&quot;, type=Path)
+    parser.add_argument(&quot;--limit&quot;, type=int, default=10)
+    return parser
+
+
+parsed = build_parser().parse_args([&quot;input.json&quot;, &quot;--limit&quot;, &quot;3&quot;])
+assert isinstance(parsed.input, Path)
+assert parsed.limit == 3</code></pre>
+<p>Argparse owns text conversion and produces its own friendly error for an invalid integer.</p>
+<p><strong>Verification evidence:</strong> Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message.</p>
+<h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Write pytest tests that call core logic directly and call <code>main([...])</code> with temporary files. <strong>Coverage:</strong> happy path, empty input, missing path, invalid parameter, and output overwrite policy. <strong>Verify:</strong> assert return status, captured output, and exact file content without spawning a shell.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Write pytest tests that call core logic directly and call <code>main([...])</code> with temporary files. Coverage: happy path, empty input, missing path, invalid parameter, and output overwrite policy. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert return status, captured output, and exact file content without spawning a shell. That connects the answer to a small command-line application with separated boundaries.</p>
+<pre><code class="language-python">import json
+from pathlib import Path
+
+
+def write_records(
+    records: list[dict[str, object]],
+    path: Path,
+    *,
+    overwrite: bool,
+) -&gt; None:
+    if path.exists() and not overwrite:
+        raise FileExistsError(f&quot;refusing to overwrite {path}&quot;)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(records, indent=2), encoding=&quot;utf-8&quot;)</code></pre>
+<p>A pytest test should create an existing temporary file, prove refusal preserves it, then pass <code>overwrite=True</code> and compare the new JSON.</p>
+<p><strong>Verification evidence:</strong> assert return status, captured output, and exact file content without spawning a shell.</p>
+<h5 id="solution-1--exercise-4-worked-answer">Exercise 4 — worked answer<a class="heading-anchor" href="#solution-1--exercise-4-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Package the CLI invocation behind <code>if <strong>name</strong> == &#x27;<strong>main</strong>&#x27;: raise SystemExit(main())</code>. <strong>Expected behavior:</strong> importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. <strong>Verify:</strong> test both import and module execution.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Package the CLI invocation behind <code>if <strong>name</strong> == &#x27;<strong>main</strong>&#x27;: raise SystemExit(main())</code>. Expected behavior: importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: test both import and module execution. That connects the answer to a small command-line application with separated boundaries.</p>
+<pre><code class="language-python">import sys
+
+
+def main(arguments: list[str] | None = None) -&gt; int:
+    args = build_parser().parse_args(arguments)
+    try:
+        records = read_records(args.input)
+        selected = select_records(records, limit=args.limit)
+        if args.output is None:
+            print(json.dumps(selected, indent=2))
+        else:
+            write_records(selected, args.output, overwrite=False)
+    except (FileNotFoundError, FileExistsError, ValueError) as error:
+        print(f&quot;error: {error}&quot;, file=sys.stderr)
+        return 2
     return 0
+
 
 if __name__ == &quot;__main__&quot;:
     raise SystemExit(main())</code></pre>
-<p>tests/test_transforms.py</p>
-<pre><code class="language-python">import pandas as pd
-from src.transforms import clean, summarize
-
-def test_clean_and_summary():
-    df = pd.DataFrame({&quot;date&quot;:[&quot;2025-01-01&quot;,&quot;bad&quot;],&quot;price&quot;:[&quot;10&quot;,&quot;x&quot;],&quot;qty&quot;:[2,3]})
-    tidy = clean(df)
-    assert list(tidy.columns) &gt;= [&quot;date&quot;,&quot;price&quot;,&quot;qty&quot;]
-    assert tidy[&quot;price&quot;].dtype.kind in &quot;fi&quot;   # numeric
-    summ = summarize(tidy)
-    assert &quot;revenue&quot; in summ.columns</code></pre>
-<p>Run</p>
-<pre><code class="language-bash">pytest -q
-python -m src.cli --input data.csv --out out.csv --summary summary.csv</code></pre>
-<p>Notes</p>
-<ul>
-<li>Keep transforms pure and I/O thin for testability.</li>
-<li>Extend as needed (schemas, logging, error handling).</li>
-</ul>
-<hr>
-<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
-<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Read a CSV with pandas, drop or handle required missing values, and convert documented column types. <strong>Hint:</strong> make <code>clean(frame)</code> return a copy so a caller&#x27;s input is not silently mutated.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Compute summary statistics and save a cleaned CSV. <strong>Hint:</strong> keep read/write functions separate from transforms and create parent directories deliberately.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Provide <code>--input</code> and <code>--out</code> with <code>argparse</code>; the intended invocation is <code>python tool.py --input data.csv --out out.csv</code>. <strong>Hint:</strong> use <code>type=Path</code> and <code>required=True</code>; do not introduce Click.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-4-original-lesson-practice">Exercise 4 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-4-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Test core functions and one parser path. <strong>Hint:</strong> use tiny in-memory frames and pytest&#x27;s <code>tmp_path</code>, not large external data.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-5-original-lesson-practice">Exercise 5 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-5-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Run Ruff lint/format checks, mypy, and pytest. <strong>Hint:</strong> use the same commands as Day 14 and inspect the first failure before continuing. Store practice source in a tracked project directory. Put disposable generated files under ignored <code>artifacts/</code>; never commit <code>.venv</code>, caches, secrets, or a machine-specific <code>.env</code>.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-6-prediction">Exercise 6 — Prediction<a class="heading-anchor" href="#solution-1--exercise-6-prediction" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>.</p>
-<p><strong>Reasoning checkpoint:</strong> The parser performs declared conversions before <code>main</code> receives values. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-7-tracing">Exercise 7 — Tracing<a class="heading-anchor" href="#solution-1--exercise-7-tracing" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work.</p>
-<p><strong>Reasoning checkpoint:</strong> A pure transform accepts and returns data without reading global state. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-8-implementation">Exercise 8 — Implementation<a class="heading-anchor" href="#solution-1--exercise-8-implementation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present.</p>
-<p><strong>Reasoning checkpoint:</strong> Check the destination before performing the write. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-9-debugging">Exercise 9 — Debugging<a class="heading-anchor" href="#solution-1--exercise-9-debugging" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Repair a module that parses arguments and writes files during import.</p>
-<p><strong>Reasoning checkpoint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-10-edge-case-and-explanation">Exercise 10 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-10-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log.</p>
-<p><strong>Reasoning checkpoint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<p>Import defines functions only; the guard owns process execution.</p>
+<p><strong>Verification evidence:</strong> test both import and module execution.</p>
+<h5 id="solution-1--exercise-5-worked-answer">Exercise 5 — worked answer<a class="heading-anchor" href="#solution-1--exercise-5-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. <strong>Constraint:</strong> do not mix Bash syntax into PowerShell. <strong>Verify:</strong> copy the command for your operating system, record exit code <code>0</code> and the expected output, and confirm the quoted path with spaces is received as one argument.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. Constraint: do not mix Bash syntax into PowerShell. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: copy the command for your operating system, record exit code <code>0</code> and the expected output, and confirm the quoted path with spaces is received as one argument. That connects the answer to a small command-line application with separated boundaries.</p>
+<p>Copy-ready invocations keep platform syntax separate:</p>
+<pre><code class="language-powershell">&amp; $CoursePython -m your_package.record_tool &quot;data\input records.json&quot; --limit 3</code></pre>
+<pre><code class="language-bash">.venv/bin/python -m your_package.record_tool &quot;data/input records.json&quot; --limit 3</code></pre>
+<p>Both run from the repository root and quote the path containing spaces.</p>
+<p><strong>Verification evidence:</strong> copy the command for your operating system, record exit code <code>0</code> and the expected output, and confirm the quoted path with spaces is received as one argument.</p>
+<h4 id="solution-1--exercises-6-10-expanded-mastery-answers">Exercises 6–10 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-6-10-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>. <strong>Progressive hint:</strong> The parser performs declared conversions before <code>main</code> receives values. <strong>Verify:</strong> Call <code>parse_args</code> with explicit text and assert the parsed input is a <code>Path</code>, limit is an <code>int</code>, and defaults have the documented types.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>. Progressive hint: The parser performs declared conversions before <code>main</code> receives values. Then compare the prediction with this proof target: Call <code>parse_args</code> with explicit text and assert the parsed input is a <code>Path</code>, limit is an <code>int</code>, and defaults have the documented types. This makes a small command-line application with separated boundaries observable instead of relying on intuition.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Call <code>parse_args</code> with explicit text and assert the parsed input is a <code>Path</code>, limit is an <code>int</code>, and defaults have the documented types.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. <strong>Progressive hint:</strong> A pure transform accepts and returns data without reading global state. <strong>Verify:</strong> For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. Progressive hint: A pure transform accepts and returns data without reading global state. Record the named value, shape, label, or iterator position needed to establish: For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data. The trace exposes a small command-line application with separated boundaries directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data.</p>
+<h5 id="solution-1--exercise-8-answer-contract">Exercise 8 — answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Implementation:</strong> Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present. <strong>Progressive hint:</strong> Check the destination before performing the write. <strong>Verify:</strong> Use a temporary existing destination: assert refusal leaves content unchanged without the flag and <code>--overwrite</code> deliberately replaces it with the flag.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present. Progressive hint: Check the destination before performing the write. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Use a temporary existing destination: assert refusal leaves content unchanged without the flag and <code>--overwrite</code> deliberately replaces it with the flag. That connects the answer to a small command-line application with separated boundaries.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Use a temporary existing destination: assert refusal leaves content unchanged without the flag and <code>--overwrite</code> deliberately replaces it with the flag.</p>
+<h5 id="solution-1--exercise-9-answer-contract">Exercise 9 — answer contract<a class="heading-anchor" href="#solution-1--exercise-9-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard. <strong>Verify:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a module that parses arguments and writes files during import. Progressive hint: Move behavior into <code>main(argv)</code> and use the <code><strong>main</strong></code> guard. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation. The diagnosis depends on a small command-line application with separated boundaries.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</p>
+<h5 id="solution-1--exercise-10-answer-contract">Exercise 10 — answer contract<a class="heading-anchor" href="#solution-1--exercise-10-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. <strong>Progressive hint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests. <strong>Verify:</strong> Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Edge case and explanation: Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. Progressive hint: Translate expected boundary failures once, without hiding tracebacks in tests. Record the named value, shape, label, or iterator position needed to establish: Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled. The trace exposes a small command-line application with separated boundaries directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Keep command parsing and file I/O at thin boundaries around pure, importable transformations. Make failures observable through exit codes.</p>
-<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
-<h5 id="solution-1--practices-1-2-parsed-types-and-boundaries">Practices 1–2 — Parsed types and boundaries<a class="heading-anchor" href="#solution-1--practices-1-2-parsed-types-and-boundaries" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-6-7-parsed-types-and-boundaries">Shared implementation for Exercises 6–7 — Parsed types and boundaries<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-7-parsed-types-and-boundaries" aria-label="Link to this section">#</a></h5>
 <p><code>type=Path</code> produces a <code>Path</code>; <code>type=int</code> produces an integer or lets argparse report invalid text. Reading and writing are boundaries; deterministic cleaning and summarization should be pure enough to test in memory.</p>
-<h5 id="solution-1--practices-3-5-safe-overwrite-and-importable-entry-point">Practices 3–5 — Safe overwrite and importable entry point<a class="heading-anchor" href="#solution-1--practices-3-5-safe-overwrite-and-importable-entry-point" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-8-10-safe-overwrite-and-importable-entry-point">Shared implementation for Exercises 8–10 — Safe overwrite and importable entry point<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-8-10-safe-overwrite-and-importable-entry-point" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">from __future__ import annotations
 
 import argparse
@@ -662,7 +982,7 @@ assert isinstance(parsed.input, Path) and parsed.limit == 10
 #     raise SystemExit(main())</code></pre>
 <p>Expected user/data errors can return <code>2</code>; unexpected programming failures should propagate during tests and normally produce a controlled top-level log with a distinct nonzero code in a production application.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -670,7 +990,7 @@ assert isinstance(parsed.input, Path) and parsed.limit == 10
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -802,7 +1122,38 @@ assert isinstance(parsed.input, Path) and parsed.limit == 10
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Expected user/data errors can return <code>2</code>; unexpected programming failures should propagate during tests and normally produce a controlled top-level log with a distinct nonzero code in a production application.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-15`
+(Day 15 — Project: A Testable CLI Data Tool). Direct catalog prerequisites: `python-14`.
+I have completed the direct prerequisites: `python-14`. Emphasize a small command-line application with separated boundaries.
+Read `python/ds-60day/companion-guides/day15_cli_project.md` and use the learner notebook
+`python/ds-60day/notebooks/day15_cli_project.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-14.html"><small>Previous lesson</small><strong>python-14</strong><span>Code Quality Tooling</span></a>
@@ -894,6 +1245,23 @@ assert isinstance(parsed.input, Path) and parsed.limit == 10
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

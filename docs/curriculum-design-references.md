@@ -176,8 +176,7 @@ Each Python and SQL lesson now follows this default sequence:
 8. **Explain** — retrieval questions and a short learner explanation.
 9. **Extend** — next lesson, optional reference, or Codex coaching prompt.
 
-This sequence is enforced partly by
-[`scripts/audit_lesson_depth.py`](../scripts/audit_lesson_depth.py). The audit
+This sequence is enforced partly by `scripts/audit_lesson_depth.py`. The audit
 is deliberately only a floor. It cannot determine whether an analogy is
 accurate, an example is illuminating, or six exercises are genuinely distinct;
 human review and execution remain required.

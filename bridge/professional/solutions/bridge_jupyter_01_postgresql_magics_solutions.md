@@ -7,11 +7,16 @@ before opening the
 
 ## Connection construction
 
-The solution reads `DS60_DATABASE_URL` from the process environment, rejects a
-non-PostgreSQL backend and any database name other than
-`advanced_sql_training`, and replaces the dialect driver with
-`postgresql+psycopg`. SQLAlchemy's URL object preserves encoded connection
-fields better than string replacement.
+The solution reads `DS60_DATABASE_URL` from the process environment and sends
+it through `validate_course_database_target()` before constructing an engine.
+That shared boundary accepts only `advanced_sql_training` through a native
+local socket or loopback host (`localhost`, `127.0.0.1`, or `::1`). It rejects
+non-PostgreSQL and key-value targets, remote and multi-host authorities,
+fragments, plus routing, service, file-reading, and unsupported query
+overrides. The literal course database name is normalized to a local-socket
+URL, and then the SQLAlchemy URL selects the `postgresql+psycopg` dialect.
+SQLAlchemy's URL object preserves encoded connection fields better than string
+replacement.
 
 The URL variables and engine are never the final expression in a cell, so
 Jupyter does not render them. `SqlMagic.displaycon=False` is configured before
@@ -236,13 +241,16 @@ clear all outputs/execution counts, and scan notebook JSON for URL-shaped creden
 **Prompt:** Trace how the environment URL becomes a SQLAlchemy engine without ever being
 displayed and identify every validation step.
 
-**Approach:** Read the variable with `os.environ`, parse with `make_url`, require PostgreSQL
-plus the `psycopg` driver and disposable database, set `displaycon=False`, create the engine,
-then bind the object rather than a literal URL.
+**Approach:** Read the variable with `os.environ`, run
+`validate_course_database_target()` before parsing, normalize the accepted
+literal database name to a local-socket URL, select the `psycopg` driver, set
+`displaycon=False`, create the engine, then bind the object rather than a
+literal URL.
 
-**Why:** Validate scheme, driver, host/database target, and display settings before connecting.
+**Why:** The shared boundary prevents a correct database path from hiding a
+remote, multi-host, service, routing, or file-reading redirect.
 
-**Verification evidence:** Trace `DS60_DATABASE_URL` to `make_url`, PostgreSQL/database-name validation, `postgresql+psycopg`, `create_engine`, and `%sql engine`; assert no step prints or evaluates the URL/engine as the final cell expression.
+**Verification evidence:** Trace `DS60_DATABASE_URL` through `validate_course_database_target`, optional literal-name normalization, `make_url`, `postgresql+psycopg`, `create_engine`, and `%sql engine`; name the local transports it accepts and the redirect controls it rejects, then assert no step prints or evaluates the URL/engine as the final cell expression.
 
 ### Exercise 11 — Prediction
 

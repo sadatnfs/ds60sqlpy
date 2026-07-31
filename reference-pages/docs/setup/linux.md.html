@@ -127,7 +127,7 @@ python3.12 --version</code></pre>
 <p>Install <a href="https://code.visualstudio.com/docs/setup/linux">Visual Studio Code</a> through the supported package for your distribution.</p>
 <p>If your distribution does not provide Python 3.12, use a current vendor package or a Python version manager. Do not replace the distribution’s system Python.</p>
 <h3 id="2-clone-and-open-the-repository">2. Clone and open the repository<a class="heading-anchor" href="#2-clone-and-open-the-repository" aria-label="Link to this section">#</a></h3>
-<pre><code class="language-bash">git clone &lt;repository-url&gt; ds60sqlpy
+<pre><code class="language-bash">git clone https://github.com/sadatnfs/ds60sqlpy.git ds60sqlpy
 cd ds60sqlpy
 code .
 test -f README.md</code></pre>
@@ -161,10 +161,14 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_ver
 <h4 id="canonical-container-environment">Canonical container environment<a class="heading-anchor" href="#canonical-container-environment" aria-label="Link to this section">#</a></h4>
 <p>Docker-based automation uses PostgreSQL 17 and avoids host authentication differences. It requires a container runtime and a first image download. See <a href="../validation.md.html">Validation</a>.</p>
 <h3 id="5-start-learning">5. Start learning<a class="heading-anchor" href="#5-start-learning" aria-label="Link to this section">#</a></h3>
+<p>For the guided dashboard, file-backed progress, and exact VS Code/Jupyter lesson actions, start the private loopback portal and keep its terminal open:</p>
+<pre><code class="language-bash">.venv/bin/python scripts/learning_portal.py</code></pre>
+<p>The browser page clearly identifies private launcher mode. If you instead open <code>START_HERE.html</code> directly, it is a read-only course navigator; it cannot start local programs.</p>
 <p>Python:</p>
 <pre><code class="language-bash">.venv/bin/python -m jupyter lab python/ds-60day/notebooks</code></pre>
 <p>SQL:</p>
 <pre><code class="language-bash">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
+<p>In private launcher mode, the recommended SQL route is to open the Day 1 reader and choose <strong>Create/open guided SQL notebook</strong>. That creates a preserved, ignored working copy under <code>.learning/sql/sql-01/</code> and runs the complete script through a fixed <code>psql -f</code> path.</p>
 <p>For <code>%sql</code> and <code>%%sql</code> in the course kernel, continue with <a href="jupyter-postgresql.md.html">PostgreSQL in Jupyter</a>.</p>
 <h3 id="6-prepare-for-offline-study">6. Prepare for offline study<a class="heading-anchor" href="#6-prepare-for-offline-study" aria-label="Link to this section">#</a></h3>
 <p>Run disclosed first-use downloads while connected, then follow <a href="offline.md.html">Offline use</a>. Seaborn datasets cache after first use; pretrained models require their own cache or a lesson’s offline fallback.</p>

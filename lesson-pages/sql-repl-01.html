@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-repl-01/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--sql-repl-01-replication-cdc-and-high-availability">SQL-REPL-01 — Replication, CDC, and High Availability<a class="heading-anchor" href="#guide--sql-repl-01-replication-cdc-and-high-availability" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -289,6 +388,58 @@
 <p>Run the single-database offline simulation:</p>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_repl_01_cdc_high_availability.sql</code></pre>
 <p>It reads capability/count catalogs and rolls back local tables. It never changes <code>wal_level</code>, creates publications/subscriptions/slots, promotes a server, or contacts another node.</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-REPL-01 — Replication, Change Data Capture, and High Availability</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-repl-01/lesson/workspace/sql/professional/lessons/sql_repl_01_cdc_high_availability.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Some demonstrations require privileges or server features a normal course role may not have. Run the capability check first. The supported default path still teaches inspection and design without creating cluster-wide roles, extensions, or replication objects.</p>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\professional\lessons\sql_repl_01_cdc_high_availability.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/professional/lessons/sql_repl_01_cdc_high_availability.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is WAL, Physical replication, Logical replication, CDC, Transactional outbox, Inbox/idempotency key. Its worked SQL reads or creates <code>pg_catalog.pg_replication_slots</code>, <code>pg_catalog.pg_publication</code>, <code>pg_catalog.pg_subscription</code>, <code>pg_catalog.pg_stat_replication</code>, <code>pg_catalog.pg_stat_wal_receiver</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: The capability query reports WAL level and counts only; it does not print slot, publication, subscription, host, or query identities. Counts can still require monitoring privileges on managed services. Capability settings are evidence, not authorization to mutate them. The first runnable example has a concrete contract: Example 1 returns one row per <code>database_name</code> with columns <code>database_name</code>, <code>wal_level</code>, <code>max_wal_senders</code>, <code>max_replication_slots</code>, and <code>hot_standby</code> from the lesson evidence named below. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>database_name</code>, <code>wal_level</code>, <code>max_wal_senders</code>, <code>max_replication_slots</code>, and <code>hot_standby</code>. Reselect the returned key columns from the columns written in the final <code>SELECT</code>, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/professional/lessons/sql_repl_01_cdc_high_availability.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">SELECT
+    current_database() AS database_name,
+    current_setting(&#x27;wal_level&#x27;) AS wal_level,
+    current_setting(&#x27;max_wal_senders&#x27;) AS max_wal_senders,
+    current_setting(&#x27;max_replication_slots&#x27;) AS max_replication_slots,
+    current_setting(&#x27;hot_standby&#x27;) AS hot_standby,
+    pg_catalog.pg_is_in_recovery() AS is_in_recovery;</code></pre>
+<p><strong>How to read it:</strong> Example 1: Start with the row source produced by the preceding CTEs in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>database_name</code>, <code>wal_level</code>, <code>max_wal_senders</code>, <code>max_replication_slots</code>, and <code>hot_standby</code>. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>database_name</code> with columns <code>database_name</code>, <code>wal_level</code>, <code>max_wal_senders</code>, <code>max_replication_slots</code>, and <code>hot_standby</code> from the lesson evidence named below. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">SELECT
+    (SELECT COUNT(*) FROM pg_catalog.pg_replication_slots) AS slot_count,
+    (
+        SELECT COUNT(*)
+        FROM pg_catalog.pg_replication_slots AS s
+        WHERE s.active
+    ) AS active_slot_count,
+    (SELECT COUNT(*) FROM pg_catalog.pg_publication) AS publication_count,
+    (SELECT COUNT(*) FROM pg_catalog.pg_subscription) AS subscription_count,
+    (SELECT COUNT(*) FROM pg_catalog.pg_stat_replication) AS sender_count,
+    (SELECT COUNT(*) FROM pg_catalog.pg_stat_wal_receiver) AS receiver_count;</code></pre>
+<p><strong>How to read it:</strong> Example 2: Start with <code>pg_catalog.pg_replication_slots</code>, <code>pg_catalog.pg_publication</code>, <code>pg_catalog.pg_subscription</code>, and <code>pg_catalog.pg_stat_replication</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows. The final <code>SELECT</code> displays the columns written in the final <code>SELECT</code>. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 2 returns exactly one summary row with columns <code>slot_count</code>, <code>active_slot_count</code>, <code>publication_count</code>, <code>subscription_count</code>, and <code>sender_count</code> from <code>pg_catalog.pg_replication_slots</code>, <code>pg_catalog.pg_publication</code>, <code>pg_catalog.pg_subscription</code>, <code>pg_catalog.pg_stat_replication</code>, and <code>pg_catalog.pg_stat_wal_receiver</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Implement a transactional outbox and an idempotent consumer with immutable event fingerprints.</li>
@@ -324,18 +475,18 @@
 <p>Complete all twelve prompts. Begin with publisher crash, consumer uncertainty, out-of-order versions, physical/logical semantics, slot retention operations, and a fenced failover runbook; then cover publications, bootstrap, replica consistency, conflict handling, DDL sequencing, and failback. For every failure, identify durable state before retry and the evidence needed to distinguish “not applied” from “applied but acknowledgement lost.”</p>
 <p>Keep the local SQL as a single-node model; multi-node actions remain reviewed runbook work:</p>
 <ol>
-<li><strong>Publisher crash:</strong> prove a committed, unacknowledged outbox row is durable.</li>
-<li><strong>Consumer uncertainty:</strong> distinguish database-local idempotency from an external side effect and design its key.</li>
-<li><strong>Ordering:</strong> deliver versions out of order, prevent regression, and detect gaps.</li>
-<li><strong>Mechanisms:</strong> compare physical streaming with logical publication, including DDL and sequence behavior.</li>
-<li><strong>Slots:</strong> define WAL-byte, active-state, lag, disk, alert, ownership, and retirement evidence.</li>
-<li><strong>Failover:</strong> cover quorum, fencing, loss, routing, timeline, CDC state, objectives, fallback, verification, and new backup.</li>
-<li><strong>Publication contract:</strong> design row/column scope, replica identity, initial copy, updates/deletes, and tenant-leak tests.</li>
-<li><strong>Bootstrap:</strong> align consistent snapshot and start LSN with slot retention, deduplication, restart, handoff, and abandoned-run cleanup.</li>
-<li><strong>Read consistency:</strong> define user-visible staleness and compare primary pinning, LSN waits, bounded lag, timeout, and fallback.</li>
-<li><strong>Conflicts:</strong> compare single-writer ownership, versions, merge, quarantine, and repair; reject naive wall-clock wins.</li>
-<li><strong>DDL sequencing:</strong> build publisher/subscriber/application compatibility across additive, validating, contract, and removal phases.</li>
-<li><strong>Failback/reseed:</strong> choose rewind/rebuild safely and verify timelines, slots, subscriptions, routing, data, backup, and audit.</li>
+<li><strong>Publisher crash:</strong> prove a committed, unacknowledged outbox row is durable. <strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 1, Insert business state and its row in <code>pro_replication_lab.outbox_events</code> in one transaction, commit, and leave <code>published_at</code> NULL to represent a crash before publisher acknowledgement. <strong>Expected result/shape:</strong> For sql-repl-01 Exercise 1, One row per unpublished <code>event_id</code>, with <code>event_id</code>, <code>aggregate_key</code>, and <code>aggregate_version</code>, ordered by <code>aggregate_key, aggregate_version, event_id</code>. <strong>Verify:</strong> For sql-repl-01 Exercise 1, Query only <code>published_at IS NULL</code>, require unique <code>event_id</code>, and prove the committed event remains after a new session connects. Mark a different event published in a savepoint and prove it leaves this result. Hint ladder, rung 1: The durable outbox row—not process memory—is what lets a publisher retry after a crash.</li>
+<li><strong>Consumer uncertainty:</strong> distinguish database-local idempotency from an external side effect and design its key. <strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 2, Deliver the same event twice to one consumer. Use <code>(consumer_name, event_id)</code> as the inbox key and retain a canonical payload hash; describe a separate idempotency key for any external API effect. <strong>Expected result/shape:</strong> For sql-repl-01 Exercise 2, One row per <code>(consumer_name, event_id)</code>, with <code>consumer_name</code>, <code>event_id</code>, and <code>accepted_rows</code>, ordered by both keys; every <code>accepted_rows</code> value is 1. <strong>Verify:</strong> For sql-repl-01 Exercise 2, The duplicate call leaves one inbox row and one database projection effect. Reuse the event ID with different payload and prove SQLSTATE <code>23514</code>; explain that an external API must persist/replay the same idempotency key because the local inbox cannot roll that effect back. Hint ladder, rung 1: Duplicate delivery is expected; idempotency means the same logical effect is accepted once, not that the broker sends once.</li>
+<li><strong>Ordering:</strong> deliver versions out of order, prevent regression, and detect gaps. <strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 3, Deliver version 3, then version 2, then redeliver version 3 for <code>ORDER-1</code>. Compare consumer inbox versions with the authoritative outbox sequence, whose valid sequence begins at version 1. <strong>Expected result/shape:</strong> For sql-repl-01 Exercise 3, The projection result has one row per <code>(consumer_name, aggregate_key)</code>, with <code>consumer_name</code>, <code>aggregate_key</code>, <code>aggregate_version</code>, and <code>status</code>. A second result has one row per <code>aggregate_key</code>, with <code>expected_versions</code>, <code>accepted_versions</code>, and <code>missing_versions</code>; it reports missing version 1. <strong>Verify:</strong> For sql-repl-01 Exercise 3, Projection remains at version 3/cancelled after version 2 arrives. The gap diagnostic must compare against the source sequence, not generate only from the minimum accepted version; after version 1 is accepted, <code>missing_versions</code> becomes empty. Hint ladder, rung 1: Monotonic projection updates prevent regression but do not prove the consumer saw every earlier event.</li>
+<li><strong>Mechanisms:</strong> compare physical streaming with logical publication, including DDL and sequence behavior. <strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 4, Read local <code>pg_is_in_recovery()</code> and <code>server_version</code>, then build a comparison matrix for physical streaming and logical replication. <strong>Expected result/shape:</strong> For sql-repl-01 Exercise 4, Exactly one local capability row with <code>connected_to_recovery_node</code> and <code>server_version</code>. The matrix has one row per mechanism and columns for replicated scope, DDL, sequence state, filtering, compatibility, failover use, and major limitation. <strong>Verify:</strong> For sql-repl-01 Exercise 4, Trace each matrix claim to PostgreSQL documentation or observed catalog state. State explicitly that logical replication does not carry DDL or sequence state and schema mismatch can halt apply; no replication object is created in this lesson. Hint ladder, rung 1: Local server state is evidence about this connection; it does not reveal an unconfigured topology.</li>
+<li><strong>Slots:</strong> define WAL-byte, active-state, lag, disk, alert, ownership, and retirement evidence. <strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 5, Read <code>pg_replication_slots</code> only; derive local current/replay LSN and retained WAL bytes from each non-NULL <code>restart_lsn</code>. Add an operations policy without creating or dropping slots. <strong>Expected result/shape:</strong> For sql-repl-01 Exercise 5, Zero or one row per <code>slot_name</code>, with <code>slot_name</code>, <code>slot_type</code>, <code>active</code>, <code>restart_lsn</code>, <code>confirmed_flush_lsn</code>, <code>retained_wal_bytes</code>, <code>wal_status</code>, and <code>safe_wal_size</code>, ordered by <code>slot_name</code>. Empty output is valid on an unconfigured course server. <strong>Verify:</strong> For sql-repl-01 Exercise 5, Reconcile retained bytes with <code>pg_wal_lsn_diff</code>; the policy names consumer owner, lag/disk budgets, alert thresholds, last progress, incident response, and evidence required before retirement. Never create a slot merely to make this exercise nonempty. Hint ladder, rung 1: Inactive means disconnected now; it does not prove the consumer is abandoned or the retained WAL is safe to discard.</li>
+<li><strong>Failover:</strong> cover quorum, fencing, loss, routing, timeline, CDC state, objectives, fallback, verification, and new backup. <strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 6, Write a topology-specific failover runbook; this local transaction cannot promote or fence a server. Include authority, health/quorum, old-primary fencing, data-loss evidence, routing, reconnect, timeline, slots/subscriptions, RPO/RTO, fallback, backup, and audit. <strong>Expected result/shape:</strong> For sql-repl-01 Exercise 6, One reviewed row per <code>step_number</code>, with <code>phase</code>, <code>action</code>, <code>required_evidence</code>, <code>stop_condition</code>, and <code>owner</code>. <strong>Verify:</strong> For sql-repl-01 Exercise 6, Tabletop-test one unreachable-but-not-failed primary and one lagged candidate. Promotion remains blocked until fencing/quorum and data-loss evidence satisfy the runbook; after promotion, verify writes, routing, CDC state, a replacement replica, and a new protected backup. Hint ladder, rung 1: Failover without fencing can create two writers; that is a correctness incident, not merely an availability issue.</li>
+<li><strong>Publication contract:</strong> design row/column scope, replica identity, initial copy, updates/deletes, and tenant-leak tests. <strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 7, Inspect local <code>pg_class</code>/<code>pg_namespace</code> metadata for <code>pro_replication_lab.outbox_events</code>. Separately write, but do not run, a publication DDL contract with one row filter and explicit column list. <strong>Expected result/shape:</strong> For sql-repl-01 Exercise 7, One local evidence row per <code>(schema_name, table_name)</code>, with <code>schema_name</code>, <code>table_name</code>, and <code>replica_identity</code>. The design record lists published columns/filter, UPDATE/DELETE replica identity, initial copy, DDL/sequence handling, subscriber compatibility, and tenant-leak tests. <strong>Verify:</strong> For sql-repl-01 Exercise 7, Prove the identity supports published UPDATE/DELETE keys and test allowed, denied, NULL, INSERT, UPDATE-transition, and DELETE cases in an approved isolated topology. The local catalog row alone does not prove publication scope or leak prevention. Hint ladder, rung 1: Schema plus table is the relation identity; schema name alone is not the output grain.</li>
+<li><strong>Bootstrap:</strong> align consistent snapshot and start LSN with slot retention, deduplication, restart, handoff, and abandoned-run cleanup. <strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 8, Build an inline ordered bootstrap plan connecting one exported snapshot, start LSN/slot, copy progress, stream handoff, deduplication, durable checkpoint, WAL budget, restart, and abandoned-bootstrap cleanup. <strong>Expected result/shape:</strong> For sql-repl-01 Exercise 8, One row per <code>step_number</code>, with <code>step_number</code> and <code>required_evidence</code>, ordered numerically by <code>step_number</code>. <strong>Verify:</strong> For sql-repl-01 Exercise 8, Each step consumes evidence produced by the prior step; the snapshot identity and start LSN remain paired. Simulate interruption before and after handoff and prove restart avoids gaps/duplicates and abandoned slots/resources are cleaned only with owner evidence. Hint ladder, rung 1: Snapshot copy and streaming overlap must share one exact boundary; two unrelated “latest” points can create gaps.</li>
+<li><strong>Read consistency:</strong> define user-visible staleness and compare primary pinning, LSN waits, bounded lag, timeout, and fallback. <strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 9, Capture the local current WAL LSN on a primary or last replay LSN on a recovery node as a visibility token; compare read-after-write strategies without claiming a replica exists. <strong>Expected result/shape:</strong> For sql-repl-01 Exercise 9, Exactly one local row with <code>local_visibility_lsn</code>. A strategy matrix covers primary pinning, replica wait for token, bounded staleness/session guarantee, timeout, and fallback. <strong>Verify:</strong> For sql-repl-01 Exercise 9, In an approved topology, carry the commit token to the read path and wait until the chosen replica replay position reaches it; test timeout and fallback. This local token alone is not evidence that any remote replica replayed the write. Hint ladder, rung 1: Byte lag is an operations measure; user-visible consistency asks whether a particular commit is observable.</li>
+<li><strong>Conflicts:</strong> compare single-writer ownership, versions, merge, quarantine, and repair; reject naive wall-clock wins. <strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 10, Read current projection rows; compare single-writer ownership, expected-version rejection, deterministic domain merge, quarantine, and canonical snapshot/replay repair. Perform no multi-writer mutation here. <strong>Expected result/shape:</strong> For sql-repl-01 Exercise 10, One row per <code>(consumer_name, aggregate_key)</code>, with <code>consumer_name</code>, <code>aggregate_key</code>, <code>aggregate_version</code>, and <code>status</code>, ordered by both identity columns. The strategy matrix names prerequisites, conflicts handled, failure mode, audit evidence, and repair. <strong>Verify:</strong> For sql-repl-01 Exercise 10, Walk clock-skew and concurrent-version counterexamples; wall-clock last-write-wins must fail review. Each accepted strategy either prevents a second writer or detects/quarantines a version conflict without silently overwriting the canonical state. Hint ladder, rung 1: Version/ownership evidence is causal; unsynchronized wall-clock timestamps are not a safe conflict order.</li>
+<li><strong>DDL sequencing:</strong> build publisher/subscriber/application compatibility across additive, validating, contract, and removal phases. <strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 11, Encode the required lifecycle order as an inline matrix: expand → deploy → backfill/validate → contract. Include publisher, subscriber, and application compatibility at every phase. <strong>Expected result/shape:</strong> For sql-repl-01 Exercise 11, One row per <code>step_number</code>, with <code>step_number</code>, <code>phase</code>, and <code>compatibility_gate</code>, ordered by <code>step_number</code>—never lexicographically by phase text. <strong>Verify:</strong> For sql-repl-01 Exercise 11, The numeric sequence is exactly <code>{1,2,3,4}</code> and phase array is exactly <code>{expand,deploy,backfill,contract}</code>. Test additive columns, defaults, constraints, type changes, indexes, old/new readers/writers, and rollback; logical replication&#x27;s separate DDL/sequence handling is explicit. Hint ladder, rung 1: Compatibility is a time-ordered protocol, not an alphabetically sorted checklist.</li>
+<li><strong>Failback/reseed:</strong> choose rewind/rebuild safely and verify timelines, slots, subscriptions, routing, data, backup, and audit. <strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 12, Write a topology-specific failback/reseed plan after promotion; this local SQL file cannot rewind, rebuild, route clients, or manipulate replication objects. <strong>Expected result/shape:</strong> For sql-repl-01 Exercise 12, One row per <code>step_number</code>, with <code>phase</code>, <code>required_evidence</code>, <code>decision</code>, <code>owner</code>, and <code>stop_condition</code>. Cover a protected new-primary backup, old-primary fencing, timeline divergence, rewind/rebuild choice, slots/subscriptions, client routing, data checks, new redundancy/backup, and audit. <strong>Verify:</strong> For sql-repl-01 Exercise 12, Tabletop both a rewind-eligible and rewind-ineligible former primary. Rejoin stays blocked until lineage/data checks pass, no client can write the fenced node, CDC state is rebuilt/reconciled, and rollback/stop authority is explicit. Hint ladder, rung 1: Failback is another migration with data-lineage risk, not simply “point traffic back.”</li>
 </ol>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -362,17 +513,45 @@
 <li>Monitoring only “replica connected” misses replay/apply lag.</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-temporal-01.html#guide">SQL-TEMPORAL-01 — temporal and domain modelling</a>. Combine the outbox with SQL-TEST-01 contracts and SQL-OPS-02 recovery rehearsals before treating CDC or failover as production-ready.</p></div>
+<p>Continue to <a href="sql-temporal-01.html#guide">SQL-TEMPORAL-01 — temporal and domain modelling</a>. Combine the outbox with SQL-TEST-01 contracts and SQL-OPS-02 recovery rehearsals before treating CDC or failover as production-ready.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-repl-01 — Replication, Change Data Capture, and High Availability.
+
+I have completed the direct catalog prerequisites: `sql-ops-02`, `sql-prog-01`, `sql-test-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/professional/companion-guides/sql_repl_01_cdc_high_availability.md
+- Answer-free learner SQL: sql/professional/lessons/sql_repl_01_cdc_high_availability.sql
+
+Key terms to teach in context: WAL, Physical replication, Logical replication, CDC, Transactional outbox, Inbox/idempotency key. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: The capability query reports WAL level and counts only; it does not print slot, publication, subscription, host, or query identities. Counts can still require monitoring privileges on managed services. Capability settings are evidence, not authorization to mutate them.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-repl-01/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -389,13 +568,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-REPL-01: Replication, CDC, and high availability</span>
+<span>-- BEGINNER WORKFLOW — sql-repl-01: Replication, Change Data Capture, and High Availability</span>
+<span>-- Guide: sql/professional/companion-guides/sql_repl_01_cdc_high_availability.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-repl-01/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: pg_catalog.pg_replication_slots, pg_catalog.pg_publication, pg_catalog.pg_subscription, pg_catalog.pg_stat_replication, pg_catalog.pg_stat_wal_receiver.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>-- Target: PostgreSQL 16+</span>
 <span>-- Default path is one-database outbox/idempotency simulation plus read-only</span>
 <span>-- capability inspection. It creates no publication, subscription, or slot.</span>
@@ -671,34 +867,67 @@
 <span>--</span>
 <span>-- 1. Simulate a process crash after the business transaction commits but before</span>
 <span>--    publication. Prove the unpublished outbox event remains discoverable.</span>
+<span>--    Inputs: For sql-repl-01 Exercise 1, Insert business state and its row in `pro_replication_lab.outbox_events` in one transaction, commit, and leave `published_at` NULL to represent a crash before publisher acknowledgement.</span>
+<span>--    Expected result/shape: For sql-repl-01 Exercise 1, One row per unpublished `event_id`, with `event_id`, `aggregate_key`, and `aggregate_version`, ordered by `aggregate_key, aggregate_version, event_id`.</span>
+<span>--    Verify: For sql-repl-01 Exercise 1, Query only `published_at IS NULL`, require unique `event_id`, and prove the committed event remains after a new session connects. Mark a different event published in a savepoint and prove it leaves this result. Hint ladder, rung 1: The durable outbox row—not process memory—is what lets a publisher retry after a crash.</span>
 <span>-- 2. Simulate consumer redelivery after an external side effect but before</span>
 <span>--    acknowledgement. Explain why an inbox transaction works only when the</span>
 <span>--    effect shares its database; design an idempotency key for an external API.</span>
+<span>--    Inputs: For sql-repl-01 Exercise 2, Deliver the same event twice to one consumer. Use `(consumer_name, event_id)` as the inbox key and retain a canonical payload hash; describe a separate idempotency key for any external API effect.</span>
+<span>--    Expected result/shape: For sql-repl-01 Exercise 2, One row per `(consumer_name, event_id)`, with `consumer_name`, `event_id`, and `accepted_rows`, ordered by both keys; every `accepted_rows` value is 1.</span>
+<span>--    Verify: For sql-repl-01 Exercise 2, The duplicate call leaves one inbox row and one database projection effect. Reuse the event ID with different payload and prove SQLSTATE `23514`; explain that an external API must persist/replay the same idempotency key because the local inbox cannot roll that effect back. Hint ladder, rung 1: Duplicate delivery is expected; idempotency means the same logical effect is accepted once, not that the broker sends once.</span>
 <span>-- 3. Deliver aggregate version 3 before version 2 to a fresh consumer and prove</span>
 <span>--    the projection never regresses. Define how gaps are detected/repaired.</span>
+<span>--    Inputs: For sql-repl-01 Exercise 3, Deliver version 3, then version 2, then redeliver version 3 for `ORDER-1`. Compare consumer inbox versions with the authoritative outbox sequence, whose valid sequence begins at version 1.</span>
+<span>--    Expected result/shape: For sql-repl-01 Exercise 3, The projection result has one row per `(consumer_name, aggregate_key)`, with `consumer_name`, `aggregate_key`, `aggregate_version`, and `status`. A second result has one row per `aggregate_key`, with `expected_versions`, `accepted_versions`, and `missing_versions`; it reports missing version 1.</span>
+<span>--    Verify: For sql-repl-01 Exercise 3, Projection remains at version 3/cancelled after version 2 arrives. The gap diagnostic must compare against the source sequence, not generate only from the minimum accepted version; after version 1 is accepted, `missing_versions` becomes empty. Hint ladder, rung 1: Monotonic projection updates prevent regression but do not prove the consumer saw every earlier event.</span>
 <span>-- 4. Explain physical streaming versus logical replication/publications, and</span>
 <span>--    whether schema DDL and sequences are replicated by the chosen mechanism.</span>
+<span>--    Inputs: For sql-repl-01 Exercise 4, Read local `pg_is_in_recovery()` and `server_version`, then build a comparison matrix for physical streaming and logical replication.</span>
+<span>--    Expected result/shape: For sql-repl-01 Exercise 4, Exactly one local capability row with `connected_to_recovery_node` and `server_version`. The matrix has one row per mechanism and columns for replicated scope, DDL, sequence state, filtering, compatibility, failover use, and major limitation.</span>
+<span>--    Verify: For sql-repl-01 Exercise 4, Trace each matrix claim to PostgreSQL documentation or observed catalog state. State explicitly that logical replication does not carry DDL or sequence state and schema mismatch can halt apply; no replication object is created in this lesson. Hint ladder, rung 1: Local server state is evidence about this connection; it does not reveal an unconfigured topology.</span>
 <span>-- 5. Design slot monitoring around retained WAL bytes, active state, consumer</span>
 <span>--    lag, disk budget, alert threshold, and safe slot retirement. Never drop a</span>
 <span>--    slot merely because its consumer is temporarily disconnected.</span>
+<span>--    Inputs: For sql-repl-01 Exercise 5, Read `pg_replication_slots` only; derive local current/replay LSN and retained WAL bytes from each non-NULL `restart_lsn`. Add an operations policy without creating or dropping slots.</span>
+<span>--    Expected result/shape: For sql-repl-01 Exercise 5, Zero or one row per `slot_name`, with `slot_name`, `slot_type`, `active`, `restart_lsn`, `confirmed_flush_lsn`, `retained_wal_bytes`, `wal_status`, and `safe_wal_size`, ordered by `slot_name`. Empty output is valid on an unconfigured course server.</span>
+<span>--    Verify: For sql-repl-01 Exercise 5, Reconcile retained bytes with `pg_wal_lsn_diff`; the policy names consumer owner, lag/disk budgets, alert thresholds, last progress, incident response, and evidence required before retirement. Never create a slot merely to make this exercise nonempty. Hint ladder, rung 1: Inactive means disconnected now; it does not prove the consumer is abandoned or the retained WAL is safe to discard.</span>
 <span>-- 6. Write a failover runbook covering health/quorum, fencing the old primary,</span>
 <span>--    data-loss evidence, DNS/client reconnect, timeline, slot/subscriber state,</span>
 <span>--    RPO/RTO, rollback, and post-failover backups.</span>
+<span>--    Inputs: For sql-repl-01 Exercise 6, Write a topology-specific failover runbook; this local transaction cannot promote or fence a server. Include authority, health/quorum, old-primary fencing, data-loss evidence, routing, reconnect, timeline, slots/subscriptions, RPO/RTO, fallback, backup, and audit.</span>
+<span>--    Expected result/shape: For sql-repl-01 Exercise 6, One reviewed row per `step_number`, with `phase`, `action`, `required_evidence`, `stop_condition`, and `owner`.</span>
+<span>--    Verify: For sql-repl-01 Exercise 6, Tabletop-test one unreachable-but-not-failed primary and one lagged candidate. Promotion remains blocked until fencing/quorum and data-loss evidence satisfy the runbook; after promotion, verify writes, routing, CDC state, a replacement replica, and a new protected backup. Hint ladder, rung 1: Failover without fencing can create two writers; that is a correctness incident, not merely an availability issue.</span>
 <span>-- 7. Design a logical publication for one table with a row filter and column</span>
 <span>--    list. Explain replica identity for UPDATE/DELETE, unsupported schema</span>
 <span>--    changes, sequence state, initial copy, and how to prove no tenant leaks.</span>
+<span>--    Inputs: For sql-repl-01 Exercise 7, Inspect local `pg_class`/`pg_namespace` metadata for `pro_replication_lab.outbox_events`. Separately write, but do not run, a publication DDL contract with one row filter and explicit column list.</span>
+<span>--    Expected result/shape: For sql-repl-01 Exercise 7, One local evidence row per `(schema_name, table_name)`, with `schema_name`, `table_name`, and `replica_identity`. The design record lists published columns/filter, UPDATE/DELETE replica identity, initial copy, DDL/sequence handling, subscriber compatibility, and tenant-leak tests.</span>
+<span>--    Verify: For sql-repl-01 Exercise 7, Prove the identity supports published UPDATE/DELETE keys and test allowed, denied, NULL, INSERT, UPDATE-transition, and DELETE cases in an approved isolated topology. The local catalog row alone does not prove publication scope or leak prevention. Hint ladder, rung 1: Schema plus table is the relation identity; schema name alone is not the output grain.</span>
 <span>-- 8. Document a consistent snapshot-to-stream bootstrap. Relate exported</span>
 <span>--    snapshot, start LSN, replication slot, initial copy, handoff, deduplication,</span>
 <span>--    restart, WAL retention, and cleanup after an abandoned bootstrap.</span>
+<span>--    Inputs: For sql-repl-01 Exercise 8, Build an inline ordered bootstrap plan connecting one exported snapshot, start LSN/slot, copy progress, stream handoff, deduplication, durable checkpoint, WAL budget, restart, and abandoned-bootstrap cleanup.</span>
+<span>--    Expected result/shape: For sql-repl-01 Exercise 8, One row per `step_number`, with `step_number` and `required_evidence`, ordered numerically by `step_number`.</span>
+<span>--    Verify: For sql-repl-01 Exercise 8, Each step consumes evidence produced by the prior step; the snapshot identity and start LSN remain paired. Simulate interruption before and after handoff and prove restart avoids gaps/duplicates and abandoned slots/resources are cleaned only with owner evidence. Hint ladder, rung 1: Snapshot copy and streaming overlap must share one exact boundary; two unrelated “latest” points can create gaps.</span>
 <span>-- 9. Specify a read-after-write contract for traffic sent to replicas. Compare</span>
 <span>--    primary pinning, LSN tokens/waits, bounded staleness, session guarantees,</span>
 <span>--    timeout fallback, and what lag metric users actually experience.</span>
+<span>--    Inputs: For sql-repl-01 Exercise 9, Capture the local current WAL LSN on a primary or last replay LSN on a recovery node as a visibility token; compare read-after-write strategies without claiming a replica exists.</span>
+<span>--    Expected result/shape: For sql-repl-01 Exercise 9, Exactly one local row with `local_visibility_lsn`. A strategy matrix covers primary pinning, replica wait for token, bounded staleness/session guarantee, timeout, and fallback.</span>
+<span>--    Verify: For sql-repl-01 Exercise 9, In an approved topology, carry the commit token to the read path and wait until the chosen replica replay position reaches it; test timeout and fallback. This local token alone is not evidence that any remote replica replayed the write. Hint ladder, rung 1: Byte lag is an operations measure; user-visible consistency asks whether a particular commit is observable.</span>
 <span>-- 10. Design conflict handling for accidental multi-writer topology. Explain</span>
 <span>--     why wall-clock last-write-wins is unsafe, and compare single-writer</span>
 <span>--     ownership, version checks, deterministic merge, quarantine, and repair.</span>
+<span>--    Inputs: For sql-repl-01 Exercise 10, Read current projection rows; compare single-writer ownership, expected-version rejection, deterministic domain merge, quarantine, and canonical snapshot/replay repair. Perform no multi-writer mutation here.</span>
+<span>--    Expected result/shape: For sql-repl-01 Exercise 10, One row per `(consumer_name, aggregate_key)`, with `consumer_name`, `aggregate_key`, `aggregate_version`, and `status`, ordered by both identity columns. The strategy matrix names prerequisites, conflicts handled, failure mode, audit evidence, and repair.</span>
+<span>--    Verify: For sql-repl-01 Exercise 10, Walk clock-skew and concurrent-version counterexamples; wall-clock last-write-wins must fail review. Each accepted strategy either prevents a second writer or detects/quarantines a version conflict without silently overwriting the canonical state. Hint ladder, rung 1: Version/ownership evidence is causal; unsynchronized wall-clock timestamps are not a safe conflict order.</span>
 <span>-- 11. Create a DDL compatibility matrix for publisher/subscriber versions.</span>
 <span>--     Sequence additive columns, defaults, constraints, type changes, indexes,</span>
 <span>--     application deployments, validation, and removal without stopping CDC.</span>
+<span>--    Inputs: For sql-repl-01 Exercise 11, Encode the required lifecycle order as an inline matrix: expand → deploy → backfill/validate → contract. Include publisher, subscriber, and application compatibility at every phase.</span>
+<span>--    Expected result/shape: For sql-repl-01 Exercise 11, One row per `step_number`, with `step_number`, `phase`, and `compatibility_gate`, ordered by `step_number`—never lexicographically by phase text.</span>
+<span>--    Verify: For sql-repl-01 Exercise 11, The numeric sequence is exactly `{1,2,3,4}` and phase array is exactly `{expand,deploy,backfill,contract}`. Test additive columns, defaults, constraints, type changes, indexes, old/new readers/writers, and rollback; logical replication&#x27;s separate DDL/sequence handling is explicit. Hint ladder, rung 1: Compatibility is a time-ordered protocol, not an alphabetically sorted checklist.</span>
 <span>-- 12. Write failback/reseed steps after promotion. Cover new-primary backup,</span>
 <span>--     old-primary fencing, timeline divergence, rewind or rebuild choice,</span>
 <span>--     replication slots, subscriptions, client routing, data checks, and audit.</span>
@@ -725,20 +954,23 @@
 <span>    END IF;</span>
 <span>END</span>
 <span>$self_check$;</span>
+<span>--    Inputs: For sql-repl-01 Exercise 12, Write a topology-specific failback/reseed plan after promotion; this local SQL file cannot rewind, rebuild, route clients, or manipulate replication objects.</span>
+<span>--    Expected result/shape: For sql-repl-01 Exercise 12, One row per `step_number`, with `phase`, `required_evidence`, `decision`, `owner`, and `stop_condition`. Cover a protected new-primary backup, old-primary fencing, timeline divergence, rewind/rebuild choice, slots/subscriptions, client routing, data checks, new redundancy/backup, and audit.</span>
+<span>--    Verify: For sql-repl-01 Exercise 12, Tabletop both a rewind-eligible and rewind-ineligible former primary. Rejoin stays blocked until lineage/data checks pass, no client can write the fenced node, CDC state is rebuilt/reconciled, and rollback/stop authority is explicit. Hint ladder, rung 1: Failback is another migration with data-lineage risk, not simply “point traffic back.”</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span>\echo &#x27;SQL-REPL-01 complete: no replication object was created&#x27;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -762,39 +994,131 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--sql-repl-01-solutions-replication-cdc-and-ha">SQL-REPL-01 Solutions — Replication, CDC, and HA<a class="heading-anchor" href="#solution-1--sql-repl-01-solutions-replication-cdc-and-ha" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\professional\solutions\sql_repl_01_cdc_high_availability_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/professional/solutions/sql_repl_01_cdc_high_availability_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are WAL, Physical replication, Logical replication, CDC, Transactional outbox, Inbox/idempotency key. Its worked-model focus is: The capability query reports WAL level and counts only; it does not print slot, publication, subscription, host, or query identities. Counts can still require monitoring privileges on managed services. Capability settings are evidence, not authorization to mutate them.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>Run:</p>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_repl_01_cdc_high_availability_solutions.sql</code></pre>
 <p>The solution creates no replication objects and rolls back.</p>
 <h4 id="solution-1--exercise-1-publisher-crash">Exercise 1 — Publisher crash<a class="heading-anchor" href="#solution-1--exercise-1-publisher-crash" aria-label="Link to this section">#</a></h4>
 <p>Commit business state and outbox intent together. A crash before publisher acknowledgement leaves <code>published=false</code>; a later worker discovers it. Mark published only after durable downstream acknowledgement. Monitor old unpublished rows and retry with backoff/ownership.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 1, Insert business state and its row in <code>pro_replication_lab.outbox_events</code> in one transaction, commit, and leave <code>published_at</code> NULL to represent a crash before publisher acknowledgement.</li>
+<li><strong>Expected result/shape:</strong> For sql-repl-01 Exercise 1, One row per unpublished <code>event_id</code>, with <code>event_id</code>, <code>aggregate_key</code>, and <code>aggregate_version</code>, ordered by <code>aggregate_key, aggregate_version, event_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-repl-01 Exercise 1, Query only <code>published_at IS NULL</code>, require unique <code>event_id</code>, and prove the committed event remains after a new session connects. Mark a different event published in a savepoint and prove it leaves this result. Hint ladder, rung 1: The durable outbox row—not process memory—is what lets a publisher retry after a crash.</li>
+</ul>
 <h4 id="solution-1--exercise-2-consumer-uncertainty">Exercise 2 — Consumer uncertainty<a class="heading-anchor" href="#solution-1--exercise-2-consumer-uncertainty" aria-label="Link to this section">#</a></h4>
 <p>Inbox plus projection is atomic when both live in one database transaction. For an external API, send <code>event_id</code> as an idempotency key to a service that durably stores it and returns the original result on retry. After a timeout, query/reconcile by key; do not assume failure means no effect. Bind the key to a canonical request fingerprint and reject key reuse with different content.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 2, Deliver the same event twice to one consumer. Use <code>(consumer_name, event_id)</code> as the inbox key and retain a canonical payload hash; describe a separate idempotency key for any external API effect.</li>
+<li><strong>Expected result/shape:</strong> For sql-repl-01 Exercise 2, One row per <code>(consumer_name, event_id)</code>, with <code>consumer_name</code>, <code>event_id</code>, and <code>accepted_rows</code>, ordered by both keys; every <code>accepted_rows</code> value is 1.</li>
+<li><strong>Independent verification:</strong> For sql-repl-01 Exercise 2, The duplicate call leaves one inbox row and one database projection effect. Reuse the event ID with different payload and prove SQLSTATE <code>23514</code>; explain that an external API must persist/replay the same idempotency key because the local inbox cannot roll that effect back. Hint ladder, rung 1: Duplicate delivery is expected; idempotency means the same logical effect is accepted once, not that the broker sends once.</li>
+</ul>
 <h4 id="solution-1--exercise-3-ordering-and-gaps">Exercise 3 — Ordering and gaps<a class="heading-anchor" href="#solution-1--exercise-3-ordering-and-gaps" aria-label="Link to this section">#</a></h4>
 <p>The executable delivers v3 before v2. The projection update condition accepts only a greater aggregate version, so v2 cannot regress v3. Inbox contains versions 2 and 3; comparing with generated contiguous versions reveals the missing v1 gap. Policy may pause/replay, fetch a canonical snapshot, or accept a documented compaction—not silently ignore it.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 3, Deliver version 3, then version 2, then redeliver version 3 for <code>ORDER-1</code>. Compare consumer inbox versions with the authoritative outbox sequence, whose valid sequence begins at version 1.</li>
+<li><strong>Expected result/shape:</strong> For sql-repl-01 Exercise 3, The projection result has one row per <code>(consumer_name, aggregate_key)</code>, with <code>consumer_name</code>, <code>aggregate_key</code>, <code>aggregate_version</code>, and <code>status</code>. A second result has one row per <code>aggregate_key</code>, with <code>expected_versions</code>, <code>accepted_versions</code>, and <code>missing_versions</code>; it reports missing version 1.</li>
+<li><strong>Independent verification:</strong> For sql-repl-01 Exercise 3, Projection remains at version 3/cancelled after version 2 arrives. The gap diagnostic must compare against the source sequence, not generate only from the minimum accepted version; after version 1 is accepted, <code>missing_versions</code> becomes empty. Hint ladder, rung 1: Monotonic projection updates prevent regression but do not prove the consumer saw every earlier event.</li>
+</ul>
 <h4 id="solution-1--exercise-4-physical-versus-logical">Exercise 4 — Physical versus logical<a class="heading-anchor" href="#solution-1--exercise-4-physical-versus-logical" aria-label="Link to this section">#</a></h4>
 <p>Physical replication streams WAL/storage changes for the cluster and supports standby recovery; it needs compatible PostgreSQL/storage/extensions. Logical replication decodes selected table DML through publication/subscription and can support version/platform differences, but schema DDL, sequences, large objects, and conflict policy need separate handling.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 4, Read local <code>pg_is_in_recovery()</code> and <code>server_version</code>, then build a comparison matrix for physical streaming and logical replication.</li>
+<li><strong>Expected result/shape:</strong> For sql-repl-01 Exercise 4, Exactly one local capability row with <code>connected_to_recovery_node</code> and <code>server_version</code>. The matrix has one row per mechanism and columns for replicated scope, DDL, sequence state, filtering, compatibility, failover use, and major limitation.</li>
+<li><strong>Independent verification:</strong> For sql-repl-01 Exercise 4, Trace each matrix claim to PostgreSQL documentation or observed catalog state. State explicitly that logical replication does not carry DDL or sequence state and schema mismatch can halt apply; no replication object is created in this lesson. Hint ladder, rung 1: Local server state is evidence about this connection; it does not reveal an unconfigured topology.</li>
+</ul>
 <h4 id="solution-1--exercise-5-slot-operations">Exercise 5 — Slot operations<a class="heading-anchor" href="#solution-1--exercise-5-slot-operations" aria-label="Link to this section">#</a></h4>
 <p>Track slot owner/consumer, active state, restart/confirmed LSN, retained WAL bytes versus disk budget, consumer lag/rate, last success, and alert/runbook threshold. Confirm consumer decommission or new restart position before dropping a slot. A disconnected but recoverable consumer may still need retained WAL.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 5, Read <code>pg_replication_slots</code> only; derive local current/replay LSN and retained WAL bytes from each non-NULL <code>restart_lsn</code>. Add an operations policy without creating or dropping slots.</li>
+<li><strong>Expected result/shape:</strong> For sql-repl-01 Exercise 5, Zero or one row per <code>slot_name</code>, with <code>slot_name</code>, <code>slot_type</code>, <code>active</code>, <code>restart_lsn</code>, <code>confirmed_flush_lsn</code>, <code>retained_wal_bytes</code>, <code>wal_status</code>, and <code>safe_wal_size</code>, ordered by <code>slot_name</code>. Empty output is valid on an unconfigured course server.</li>
+<li><strong>Independent verification:</strong> For sql-repl-01 Exercise 5, Reconcile retained bytes with <code>pg_wal_lsn_diff</code>; the policy names consumer owner, lag/disk budgets, alert thresholds, last progress, incident response, and evidence required before retirement. Never create a slot merely to make this exercise nonempty. Hint ladder, rung 1: Inactive means disconnected now; it does not prove the consumer is abandoned or the retained WAL is safe to discard.</li>
+</ul>
 <h4 id="solution-1--exercise-6-failover">Exercise 6 — Failover<a class="heading-anchor" href="#solution-1--exercise-6-failover" aria-label="Link to this section">#</a></h4>
 <p>Detect with quorum-aware health, fence the old writer, determine replay/loss against RPO, promote one target, update routing, reconnect clients with retry, verify data/application/slots/subscribers, establish a new replica and backup, and record the new timeline. Define abort/rollback boundaries before promotion; after divergent writes, “fail back” is reconciliation, not a simple switch.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 6, Write a topology-specific failover runbook; this local transaction cannot promote or fence a server. Include authority, health/quorum, old-primary fencing, data-loss evidence, routing, reconnect, timeline, slots/subscriptions, RPO/RTO, fallback, backup, and audit.</li>
+<li><strong>Expected result/shape:</strong> For sql-repl-01 Exercise 6, One reviewed row per <code>step_number</code>, with <code>phase</code>, <code>action</code>, <code>required_evidence</code>, <code>stop_condition</code>, and <code>owner</code>.</li>
+<li><strong>Independent verification:</strong> For sql-repl-01 Exercise 6, Tabletop-test one unreachable-but-not-failed primary and one lagged candidate. Promotion remains blocked until fencing/quorum and data-loss evidence satisfy the runbook; after promotion, verify writes, routing, CDC state, a replacement replica, and a new protected backup. Hint ladder, rung 1: Failover without fencing can create two writers; that is a correctness incident, not merely an availability issue.</li>
+</ul>
 <h4 id="solution-1--exercise-7-publication-and-replica-identity-contract">Exercise 7 — Publication and replica identity contract<a class="heading-anchor" href="#solution-1--exercise-7-publication-and-replica-identity-contract" aria-label="Link to this section">#</a></h4>
 <p>Publish only reviewed rows/columns and test inserts, updates crossing the row filter, deletes, NULL boundaries, and every tenant. UPDATE/DELETE need a replica identity that identifies the old row—usually a suitable primary key; FULL increases WAL and has limitations.</p>
 <p>Logical replication does not automatically maintain sequence state or replicate general DDL. Filtering defines movement scope, not subscriber authorization, so test for leaks end to end.</p>
+<h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 7, Inspect local <code>pg_class</code>/<code>pg_namespace</code> metadata for <code>pro_replication_lab.outbox_events</code>. Separately write, but do not run, a publication DDL contract with one row filter and explicit column list.</li>
+<li><strong>Expected result/shape:</strong> For sql-repl-01 Exercise 7, One local evidence row per <code>(schema_name, table_name)</code>, with <code>schema_name</code>, <code>table_name</code>, and <code>replica_identity</code>. The design record lists published columns/filter, UPDATE/DELETE replica identity, initial copy, DDL/sequence handling, subscriber compatibility, and tenant-leak tests.</li>
+<li><strong>Independent verification:</strong> For sql-repl-01 Exercise 7, Prove the identity supports published UPDATE/DELETE keys and test allowed, denied, NULL, INSERT, UPDATE-transition, and DELETE cases in an approved isolated topology. The local catalog row alone does not prove publication scope or leak prevention. Hint ladder, rung 1: Schema plus table is the relation identity; schema name alone is not the output grain.</li>
+</ul>
 <h4 id="solution-1--exercise-8-snapshot-to-stream-bootstrap">Exercise 8 — Snapshot-to-stream bootstrap<a class="heading-anchor" href="#solution-1--exercise-8-snapshot-to-stream-bootstrap" aria-label="Link to this section">#</a></h4>
 <p>Create/own the slot and exported snapshot, record its start LSN, read initial data under that snapshot, then consume from the matching position before handoff. Deduplicate by stable source identity and checkpoint only durable work.</p>
 <p>Monitor retained WAL versus disk. On abandonment, prove no consumer needs the slot before cleanup; an orphan slot is a disk-growth hazard.</p>
+<h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 8, Build an inline ordered bootstrap plan connecting one exported snapshot, start LSN/slot, copy progress, stream handoff, deduplication, durable checkpoint, WAL budget, restart, and abandoned-bootstrap cleanup.</li>
+<li><strong>Expected result/shape:</strong> For sql-repl-01 Exercise 8, One row per <code>step_number</code>, with <code>step_number</code> and <code>required_evidence</code>, ordered numerically by <code>step_number</code>.</li>
+<li><strong>Independent verification:</strong> For sql-repl-01 Exercise 8, Each step consumes evidence produced by the prior step; the snapshot identity and start LSN remain paired. Simulate interruption before and after handoff and prove restart avoids gaps/duplicates and abandoned slots/resources are cleaned only with owner evidence. Hint ladder, rung 1: Snapshot copy and streaming overlap must share one exact boundary; two unrelated “latest” points can create gaps.</li>
+</ul>
 <h4 id="solution-1--exercise-9-read-after-write-on-replicas">Exercise 9 — Read-after-write on replicas<a class="heading-anchor" href="#solution-1--exercise-9-read-after-write-on-replicas" aria-label="Link to this section">#</a></h4>
 <p>Define user-visible consistency: immediate own-write visibility, maximum staleness, or best effort. Compare primary pinning, a commit-LSN token and replay wait, bounded-lag routing, and timeout fallback.</p>
 <p>Byte/time lag does not prove one transaction is visible. Observe replay LSN and application caches, cap waits, and specify paused-replay/failover behavior.</p>
+<h5 id="solution-1--reasoning-and-verification-9">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-9" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 9, Capture the local current WAL LSN on a primary or last replay LSN on a recovery node as a visibility token; compare read-after-write strategies without claiming a replica exists.</li>
+<li><strong>Expected result/shape:</strong> For sql-repl-01 Exercise 9, Exactly one local row with <code>local_visibility_lsn</code>. A strategy matrix covers primary pinning, replica wait for token, bounded staleness/session guarantee, timeout, and fallback.</li>
+<li><strong>Independent verification:</strong> For sql-repl-01 Exercise 9, In an approved topology, carry the commit token to the read path and wait until the chosen replica replay position reaches it; test timeout and fallback. This local token alone is not evidence that any remote replica replayed the write. Hint ladder, rung 1: Byte lag is an operations measure; user-visible consistency asks whether a particular commit is observable.</li>
+</ul>
 <h4 id="solution-1--exercise-10-multi-writer-conflicts">Exercise 10 — Multi-writer conflicts<a class="heading-anchor" href="#solution-1--exercise-10-multi-writer-conflicts" aria-label="Link to this section">#</a></h4>
 <p>Wall clocks skew, so last timestamp wins can discard a causally later change. Prefer single-writer ownership; otherwise use expected versions, deterministic domain merge, and quarantine irreconcilable conflicts with source evidence.</p>
 <p>Do not advance checkpoints silently past unresolved data. Provide canonical snapshot/replay repair, idempotency, authorization, and an audit of the choice.</p>
+<h5 id="solution-1--reasoning-and-verification-10">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-10" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 10, Read current projection rows; compare single-writer ownership, expected-version rejection, deterministic domain merge, quarantine, and canonical snapshot/replay repair. Perform no multi-writer mutation here.</li>
+<li><strong>Expected result/shape:</strong> For sql-repl-01 Exercise 10, One row per <code>(consumer_name, aggregate_key)</code>, with <code>consumer_name</code>, <code>aggregate_key</code>, <code>aggregate_version</code>, and <code>status</code>, ordered by both identity columns. The strategy matrix names prerequisites, conflicts handled, failure mode, audit evidence, and repair.</li>
+<li><strong>Independent verification:</strong> For sql-repl-01 Exercise 10, Walk clock-skew and concurrent-version counterexamples; wall-clock last-write-wins must fail review. Each accepted strategy either prevents a second writer or detects/quarantines a version conflict without silently overwriting the canonical state. Hint ladder, rung 1: Version/ownership evidence is causal; unsynchronized wall-clock timestamps are not a safe conflict order.</li>
+</ul>
 <h4 id="solution-1--exercise-11-ddl-compatibility-sequencing">Exercise 11 — DDL compatibility sequencing<a class="heading-anchor" href="#solution-1--exercise-11-ddl-compatibility-sequencing" aria-label="Link to this section">#</a></h4>
 <p>Matrix publisher, subscriber, decoder/apply, and old/new application schemas. Add nullable columns first, deploy tolerant readers/writers, backfill/reconcile, validate constraints, and remove only after every consumer stops using old shape.</p>
 <p>Defaults, generated values, replica identity, types, row filters, and column lists need explicit tests. DDL requires its own ordered deployment channel.</p>
+<h5 id="solution-1--reasoning-and-verification-11">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-11" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 11, Encode the required lifecycle order as an inline matrix: expand → deploy → backfill/validate → contract. Include publisher, subscriber, and application compatibility at every phase.</li>
+<li><strong>Expected result/shape:</strong> For sql-repl-01 Exercise 11, One row per <code>step_number</code>, with <code>step_number</code>, <code>phase</code>, and <code>compatibility_gate</code>, ordered by <code>step_number</code>—never lexicographically by phase text.</li>
+<li><strong>Independent verification:</strong> For sql-repl-01 Exercise 11, The numeric sequence is exactly <code>{1,2,3,4}</code> and phase array is exactly <code>{expand,deploy,backfill,contract}</code>. Test additive columns, defaults, constraints, type changes, indexes, old/new readers/writers, and rollback; logical replication&#x27;s separate DDL/sequence handling is explicit. Hint ladder, rung 1: Compatibility is a time-ordered protocol, not an alphabetically sorted checklist.</li>
+</ul>
 <h4 id="solution-1--exercise-12-failback-and-reseed">Exercise 12 — Failback and reseed<a class="heading-anchor" href="#solution-1--exercise-12-failback-and-reseed" aria-label="Link to this section">#</a></h4>
 <p>Protect a verified new-primary backup and keep the old primary fenced. Compare timelines/LSNs and use rewind only when prerequisites/WAL exist; otherwise rebuild. Recreate and verify replicas, slots, subscriptions, and checkpoints.</p>
 <p>Before routing writes, reconcile data and critical queries, establish backup/HA, monitor retry/lag/conflicts, and record authority/evidence. A diverged former primary cannot be restored by reversing DNS.</p>
+<h5 id="solution-1--reasoning-and-verification-12">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-12" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-repl-01 Exercise 12, Write a topology-specific failback/reseed plan after promotion; this local SQL file cannot rewind, rebuild, route clients, or manipulate replication objects.</li>
+<li><strong>Expected result/shape:</strong> For sql-repl-01 Exercise 12, One row per <code>step_number</code>, with <code>phase</code>, <code>required_evidence</code>, <code>decision</code>, <code>owner</code>, and <code>stop_condition</code>. Cover a protected new-primary backup, old-primary fencing, timeline divergence, rewind/rebuild choice, slots/subscriptions, client routing, data checks, new redundancy/backup, and audit.</li>
+<li><strong>Independent verification:</strong> For sql-repl-01 Exercise 12, Tabletop both a rewind-eligible and rewind-ineligible former primary. Rejoin stays blocked until lineage/data checks pass, no client can write the fenced node, CDC state is rebuilt/reconciled, and rollback/stop authority is explicit. Hint ladder, rung 1: Failback is another migration with data-lineage risk, not simply “point traffic back.”</li>
+</ul>
 <h4 id="solution-1--edge-cases">Edge cases<a class="heading-anchor" href="#solution-1--edge-cases" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Poison events need quarantine without blocking every later aggregate forever.</li>
@@ -803,7 +1127,7 @@
 <li>Logical subscriber conflicts require explicit ownership.</li>
 </ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -811,7 +1135,7 @@
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -835,15 +1159,28 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-REPL-01 executable solutions: local simulation only.</span>
+<span>-- SOLUTION READING MAP — sql-repl-01: Replication, Change Data Capture, and High Availability</span>
+<span>-- Explanation: sql/professional/solutions/sql_repl_01_cdc_high_availability_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_repl_01_cdc_high_availability_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>\set ON_ERROR_STOP on</span>
 <span>BEGIN;</span>
 <span>SET LOCAL search_path TO pg_catalog, public;</span>
 <span>CREATE SCHEMA pro_replication_lab;</span>
 <span> </span>
-<span>CREATE TABLE pro_replication_lab.outbox (</span>
+<span>CREATE TABLE pro_replication_lab.outbox_events (</span>
 <span>    event_id text PRIMARY KEY,</span>
 <span>    aggregate_key text NOT NULL,</span>
-<span>    aggregate_version integer NOT NULL,</span>
+<span>    aggregate_version integer NOT NULL CHECK (aggregate_version &gt; 0),</span>
 <span>    payload jsonb NOT NULL,</span>
 <span>    published boolean NOT NULL DEFAULT false,</span>
 <span>    UNIQUE (aggregate_key, aggregate_version)</span>
@@ -864,7 +1201,7 @@
 <span>    PRIMARY KEY (consumer_name, aggregate_key)</span>
 <span>);</span>
 <span> </span>
-<span>INSERT INTO pro_replication_lab.outbox</span>
+<span>INSERT INTO pro_replication_lab.outbox_events</span>
 <span>VALUES</span>
 <span>    (&#x27;E-v1&#x27;, &#x27;ORDER-1&#x27;, 1, &#x27;{&quot;status&quot;:&quot;open&quot;}&#x27;, false),</span>
 <span>    (&#x27;E-v2&#x27;, &#x27;ORDER-1&#x27;, 2, &#x27;{&quot;status&quot;:&quot;paid&quot;}&#x27;, false),</span>
@@ -878,12 +1215,12 @@
 <span>SECURITY INVOKER</span>
 <span>AS $procedure$</span>
 <span>DECLARE</span>
-<span>    e pro_replication_lab.outbox%ROWTYPE;</span>
+<span>    e pro_replication_lab.outbox_events%ROWTYPE;</span>
 <span>    event_payload_sha256 text;</span>
 <span>BEGIN</span>
 <span>    SELECT o.*</span>
 <span>    INTO STRICT e</span>
-<span>    FROM pro_replication_lab.outbox AS o</span>
+<span>    FROM pro_replication_lab.outbox_events AS o</span>
 <span>    WHERE o.event_id = p_event_id</span>
 <span>    FOR UPDATE;</span>
 <span> </span>
@@ -928,9 +1265,26 @@
 <span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
 <span>    END IF;</span>
 <span> </span>
-<span>    UPDATE pro_replication_lab.outbox AS o</span>
+<span>END</span>
+<span>$procedure$;</span>
+<span> </span>
+<span>-- Publisher acknowledgement is a separate boundary from consumer processing.</span>
+<span>-- This local procedure stands in only for “broker accepted this event”; a</span>
+<span>-- production publisher must call it after broker acknowledgement, not after one</span>
+<span>-- particular consumer&#x27;s side effect.</span>
+<span>CREATE PROCEDURE pro_replication_lab.mark_published(p_event_id text)</span>
+<span>LANGUAGE plpgsql</span>
+<span>SECURITY INVOKER</span>
+<span>AS $procedure$</span>
+<span>BEGIN</span>
+<span>    UPDATE pro_replication_lab.outbox_events AS o</span>
 <span>    SET published = true</span>
-<span>    WHERE o.event_id = e.event_id;</span>
+<span>    WHERE o.event_id = p_event_id;</span>
+<span> </span>
+<span>    IF NOT FOUND THEN</span>
+<span>        RAISE EXCEPTION &#x27;unknown outbox event %&#x27;, p_event_id</span>
+<span>            USING ERRCODE = &#x27;P0002&#x27;;</span>
+<span>    END IF;</span>
 <span>END</span>
 <span>$procedure$;</span>
 <span> </span>
@@ -938,6 +1292,8 @@
 <span>CALL pro_replication_lab.deliver_event(&#x27;projection&#x27;, &#x27;E-v3&#x27;);</span>
 <span>CALL pro_replication_lab.deliver_event(&#x27;projection&#x27;, &#x27;E-v2&#x27;);</span>
 <span>CALL pro_replication_lab.deliver_event(&#x27;projection&#x27;, &#x27;E-v3&#x27;);</span>
+<span>CALL pro_replication_lab.mark_published(&#x27;E-v2&#x27;);</span>
+<span>CALL pro_replication_lab.mark_published(&#x27;E-v3&#x27;);</span>
 <span> </span>
 <span>SELECT</span>
 <span>    p.consumer_name,</span>
@@ -947,28 +1303,41 @@
 <span>FROM pro_replication_lab.projection AS p</span>
 <span>ORDER BY p.consumer_name, p.aggregate_key;</span>
 <span> </span>
-<span>WITH accepted_versions AS (</span>
+<span>WITH source_versions AS (</span>
 <span>    SELECT</span>
 <span>        o.aggregate_key,</span>
-<span>        array_agg(o.aggregate_version ORDER BY o.aggregate_version) AS versions</span>
+<span>        array_agg(o.aggregate_version ORDER BY o.aggregate_version)</span>
+<span>            AS expected_versions</span>
+<span>    FROM pro_replication_lab.outbox_events AS o</span>
+<span>    GROUP BY o.aggregate_key</span>
+<span>),</span>
+<span>accepted_versions AS (</span>
+<span>    SELECT</span>
+<span>        o.aggregate_key,</span>
+<span>        array_agg(o.aggregate_version ORDER BY o.aggregate_version)</span>
+<span>            AS accepted_versions</span>
 <span>    FROM pro_replication_lab.inbox AS i</span>
-<span>    JOIN pro_replication_lab.outbox AS o</span>
+<span>    JOIN pro_replication_lab.outbox_events AS o</span>
 <span>      ON o.event_id = i.event_id</span>
 <span>    WHERE i.consumer_name = &#x27;projection&#x27;</span>
 <span>    GROUP BY o.aggregate_key</span>
 <span>)</span>
 <span>SELECT</span>
-<span>    av.aggregate_key,</span>
-<span>    av.versions,</span>
-<span>    (</span>
-<span>        SELECT array_agg(v ORDER BY v)</span>
-<span>        FROM generate_series(</span>
-<span>            av.versions[1],</span>
-<span>            av.versions[cardinality(av.versions)]</span>
-<span>        ) AS v</span>
-<span>    ) AS expected_contiguous_versions</span>
-<span>FROM accepted_versions AS av</span>
-<span>ORDER BY av.aggregate_key;</span>
+<span>    sv.aggregate_key,</span>
+<span>    sv.expected_versions,</span>
+<span>    COALESCE(av.accepted_versions, ARRAY[]::integer[]) AS accepted_versions,</span>
+<span>    ARRAY(</span>
+<span>        SELECT expected.version</span>
+<span>        FROM unnest(sv.expected_versions) AS expected(version)</span>
+<span>        WHERE NOT expected.version = ANY (</span>
+<span>            COALESCE(av.accepted_versions, ARRAY[]::integer[])</span>
+<span>        )</span>
+<span>        ORDER BY expected.version</span>
+<span>    ) AS missing_versions</span>
+<span>FROM source_versions AS sv</span>
+<span>LEFT JOIN accepted_versions AS av</span>
+<span>  ON av.aggregate_key = sv.aggregate_key</span>
+<span>ORDER BY sv.aggregate_key;</span>
 <span> </span>
 <span>DO $solution$</span>
 <span>BEGIN</span>
@@ -988,6 +1357,20 @@
 <span>    ) &lt;&gt; 2 THEN</span>
 <span>        RAISE EXCEPTION &#x27;redelivery bypassed inbox idempotency&#x27;;</span>
 <span>    END IF;</span>
+<span>    IF NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_replication_lab.outbox_events AS source_event</span>
+<span>        WHERE source_event.aggregate_key = &#x27;ORDER-1&#x27;</span>
+<span>          AND source_event.aggregate_version = 1</span>
+<span>          AND NOT EXISTS (</span>
+<span>              SELECT 1</span>
+<span>              FROM pro_replication_lab.inbox AS accepted</span>
+<span>              WHERE accepted.consumer_name = &#x27;projection&#x27;</span>
+<span>                AND accepted.event_id = source_event.event_id</span>
+<span>          )</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION &#x27;leading source-version gap was not detected&#x27;;</span>
+<span>    END IF;</span>
 <span>END</span>
 <span>$solution$;</span>
 <span> </span>
@@ -997,7 +1380,7 @@
 <span>    o.event_id,</span>
 <span>    o.aggregate_key,</span>
 <span>    o.aggregate_version</span>
-<span>FROM pro_replication_lab.outbox AS o</span>
+<span>FROM pro_replication_lab.outbox_events AS o</span>
 <span>WHERE NOT o.published</span>
 <span>ORDER BY o.aggregate_key, o.aggregate_version;</span>
 <span> </span>
@@ -1019,20 +1402,76 @@
 <span>    pg_catalog.pg_is_in_recovery() AS connected_to_recovery_node,</span>
 <span>    current_setting(&#x27;server_version&#x27;) AS server_version;</span>
 <span> </span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (&#x27;physical streaming&#x27;::text, &#x27;cluster WAL/block changes&#x27;::text, &#x27;carried as physical WAL&#x27;::text, &#x27;physical sequence state follows storage&#x27;, &#x27;HA/read replicas and whole-cluster recovery&#x27;, &#x27;same-major-version/storage compatibility and coarse filtering&#x27;),</span>
+<span>        (&#x27;logical replication&#x27;, &#x27;selected table DML via publications&#x27;, &#x27;not replicated; subscriber schema must be compatible&#x27;, &#x27;sequence state is not replicated&#x27;, &#x27;selective data distribution and version transitions&#x27;, &#x27;DDL/sequence coordination, replica identity and apply conflicts&#x27;)</span>
+<span>) AS replication_methods(</span>
+<span>    mechanism,</span>
+<span>    replicated_scope,</span>
+<span>    ddl_behavior,</span>
+<span>    sequence_behavior,</span>
+<span>    common_use,</span>
+<span>    major_limit</span>
+<span>)</span>
+<span>ORDER BY mechanism;</span>
+<span> </span>
 <span>-- Exercise 5: read-only slot inventory. Empty results are a valid capability</span>
 <span>-- state; never drop a disconnected slot without consumer ownership evidence.</span>
+<span>WITH local_position AS (</span>
+<span>    SELECT CASE</span>
+<span>        WHEN pg_catalog.pg_is_in_recovery()</span>
+<span>        THEN pg_catalog.pg_last_wal_replay_lsn()</span>
+<span>        ELSE pg_catalog.pg_current_wal_lsn()</span>
+<span>    END AS current_or_replay_lsn</span>
+<span>)</span>
 <span>SELECT</span>
 <span>    s.slot_name,</span>
 <span>    s.slot_type,</span>
 <span>    s.active,</span>
 <span>    s.restart_lsn,</span>
-<span>    s.confirmed_flush_lsn</span>
+<span>    s.confirmed_flush_lsn,</span>
+<span>    CASE</span>
+<span>        WHEN s.restart_lsn IS NULL</span>
+<span>          OR p.current_or_replay_lsn IS NULL</span>
+<span>        THEN NULL</span>
+<span>        ELSE pg_catalog.pg_wal_lsn_diff(</span>
+<span>            p.current_or_replay_lsn,</span>
+<span>            s.restart_lsn</span>
+<span>        )</span>
+<span>    END AS retained_wal_bytes,</span>
+<span>    s.wal_status,</span>
+<span>    s.safe_wal_size</span>
 <span>FROM pg_catalog.pg_replication_slots AS s</span>
+<span>CROSS JOIN local_position AS p</span>
 <span>ORDER BY s.slot_name;</span>
+<span> </span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (1, &#x27;ownership&#x27;, &#x27;slot maps to a named consumer/service owner&#x27;),</span>
+<span>        (2, &#x27;progress&#x27;, &#x27;active state plus restart/flush LSN movement and last progress time&#x27;),</span>
+<span>        (3, &#x27;capacity&#x27;, &#x27;retained bytes, wal_status, safe_wal_size and disk budget&#x27;),</span>
+<span>        (4, &#x27;alert&#x27;, &#x27;warning/critical thresholds with response owner and runbook&#x27;),</span>
+<span>        (5, &#x27;retirement&#x27;, &#x27;consumer decommission approval, catch-up/reseed decision and backup evidence&#x27;)</span>
+<span>) AS slot_policy(check_number, check_name, required_evidence)</span>
+<span>ORDER BY check_number;</span>
 <span> </span>
 <span>-- Exercise 6: promotion requires quorum-aware diagnosis, old-primary fencing,</span>
 <span>-- data-loss evidence, controlled routing, timeline/CDC verification, a new</span>
 <span>-- replica and backup, and recorded RPO/RTO plus stop/fallback boundaries.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (1, &#x27;authority and diagnosis&#x27;, &#x27;incident commander, quorum and candidate health&#x27;, &#x27;uncertain quorum or candidate&#x27;),</span>
+<span>        (2, &#x27;fence old primary&#x27;, &#x27;write fencing confirmed from every client path&#x27;, &#x27;old writer is reachable&#x27;),</span>
+<span>        (3, &#x27;data-loss decision&#x27;, &#x27;candidate replay position and RPO evidence&#x27;, &#x27;loss exceeds approved RPO&#x27;),</span>
+<span>        (4, &#x27;promote and route&#x27;, &#x27;timeline, write smoke test, DNS/client reconnect&#x27;, &#x27;writes or routing fail&#x27;),</span>
+<span>        (5, &#x27;CDC and redundancy&#x27;, &#x27;slots/subscriptions reconciled; new replica and backup&#x27;, &#x27;CDC lineage or backup incomplete&#x27;),</span>
+<span>        (6, &#x27;close and audit&#x27;, &#x27;achieved RPO/RTO, gaps, owners and fallback record&#x27;, &#x27;unowned unresolved risk&#x27;)</span>
+<span>) AS failover_runbook(step_number, phase, required_evidence, stop_condition)</span>
+<span>ORDER BY step_number;</span>
 <span> </span>
 <span>-- Exercise 7: publication scope needs row/column leak tests and an UPDATE/DELETE</span>
 <span>-- replica identity. The local table&#x27;s primary key is the intended identity.</span>
@@ -1050,6 +1489,17 @@
 <span>  ON n.oid = rel.relnamespace</span>
 <span>WHERE n.nspname = &#x27;pro_replication_lab&#x27;</span>
 <span>  AND rel.relname = &#x27;outbox&#x27;;</span>
+<span> </span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (1, &#x27;published relation&#x27;, &#x27;schema/table, explicit columns and row filter&#x27;),</span>
+<span>        (2, &#x27;replica identity&#x27;, &#x27;UPDATE/DELETE key is present and published&#x27;),</span>
+<span>        (3, &#x27;initial copy&#x27;, &#x27;snapshot boundary and row/column filter evidence&#x27;),</span>
+<span>        (4, &#x27;leak tests&#x27;, &#x27;allowed, denied, NULL and UPDATE-transition cases&#x27;),</span>
+<span>        (5, &#x27;compatibility&#x27;, &#x27;subscriber schema, DDL and sequence plan&#x27;)</span>
+<span>) AS publication_review(check_number, check_name, required_evidence)</span>
+<span>ORDER BY check_number;</span>
 <span> </span>
 <span>-- Exercise 8: a consistent bootstrap owns one exported snapshot/start LSN,</span>
 <span>-- initial copy, stream handoff, durable checkpoint, WAL budget, retry, and</span>
@@ -1073,36 +1523,111 @@
 <span>        ELSE pg_catalog.pg_current_wal_lsn()</span>
 <span>    END AS local_visibility_lsn;</span>
 <span> </span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (&#x27;primary pinning&#x27;::text, &#x27;route reads to writer for a bounded session&#x27;, &#x27;higher primary load&#x27;),</span>
+<span>        (&#x27;LSN token wait&#x27;, &#x27;wait until replica replay reaches commit token&#x27;, &#x27;requires timeout and fallback&#x27;),</span>
+<span>        (&#x27;bounded staleness&#x27;, &#x27;accept age/position budget by endpoint&#x27;, &#x27;not strict read-your-write&#x27;),</span>
+<span>        (&#x27;fallback&#x27;, &#x27;route to primary or return explicit retry result&#x27;, &#x27;must be observable and bounded&#x27;)</span>
+<span>) AS consistency_strategies(strategy, contract, tradeoff)</span>
+<span>ORDER BY strategy;</span>
+<span> </span>
 <span>-- Exercise 10: wall-clock last-write-wins is unsafe under skew. Prefer one</span>
 <span>-- writer per key; otherwise use expected versions, deterministic merge, or</span>
 <span>-- quarantine with canonical snapshot/replay repair and an audit.</span>
 <span>SELECT</span>
+<span>    p.consumer_name,</span>
 <span>    p.aggregate_key,</span>
 <span>    p.aggregate_version,</span>
 <span>    p.status</span>
 <span>FROM pro_replication_lab.projection AS p</span>
-<span>ORDER BY p.aggregate_key;</span>
+<span>ORDER BY p.consumer_name, p.aggregate_key;</span>
+<span> </span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (&#x27;single writer per key&#x27;::text, &#x27;ownership/lease or routing proof&#x27;, &#x27;prevents concurrent authorities&#x27;),</span>
+<span>        (&#x27;expected version&#x27;, &#x27;compare-and-set against aggregate version&#x27;, &#x27;rejects stale write for retry&#x27;),</span>
+<span>        (&#x27;deterministic merge&#x27;, &#x27;domain-specific associative/commutative rule&#x27;, &#x27;only for fields with proved merge semantics&#x27;),</span>
+<span>        (&#x27;quarantine and repair&#x27;, &#x27;retain both events plus audit and canonical replay&#x27;, &#x27;manual or automated repair path&#x27;)</span>
+<span>) AS conflict_strategies(strategy, required_evidence, behavior)</span>
+<span>ORDER BY strategy;</span>
 <span> </span>
 <span>-- Exercise 11: DDL uses an explicit compatibility sequence outside logical</span>
 <span>-- replication, with publisher/subscriber/application checks at every phase.</span>
 <span>SELECT *</span>
 <span>FROM (</span>
 <span>    VALUES</span>
-<span>        (&#x27;expand&#x27;::text, &#x27;nullable/additive on compatible endpoints&#x27;::text),</span>
-<span>        (&#x27;deploy&#x27;, &#x27;tolerant readers and dual-compatible writers&#x27;),</span>
-<span>        (&#x27;backfill&#x27;, &#x27;reconcile before validating constraints&#x27;),</span>
-<span>        (&#x27;contract&#x27;, &#x27;remove only after all consumers stop old shape&#x27;)</span>
-<span>) AS ddl_matrix(phase, compatibility_gate)</span>
-<span>ORDER BY phase;</span>
+<span>        (1, &#x27;expand&#x27;::text, &#x27;nullable/additive on compatible endpoints&#x27;::text),</span>
+<span>        (2, &#x27;deploy&#x27;, &#x27;tolerant readers and dual-compatible writers&#x27;),</span>
+<span>        (3, &#x27;backfill&#x27;, &#x27;reconcile before validating constraints&#x27;),</span>
+<span>        (4, &#x27;contract&#x27;, &#x27;remove only after all consumers stop old shape&#x27;)</span>
+<span>) AS ddl_matrix(step_number, phase, compatibility_gate)</span>
+<span>ORDER BY step_number;</span>
 <span> </span>
 <span>-- Exercise 12: failback/reseed begins with a protected new-primary backup and a</span>
 <span>-- fenced former primary, then chooses rewind or rebuild from timeline/WAL</span>
 <span>-- evidence and revalidates data, slots, subscriptions, routing, backup, and HA.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (1, &#x27;protect new primary&#x27;, &#x27;verified backup plus current timeline/LSN evidence&#x27;),</span>
+<span>        (2, &#x27;keep former primary fenced&#x27;, &#x27;no write/client path reaches it&#x27;),</span>
+<span>        (3, &#x27;choose rewind or rebuild&#x27;, &#x27;timeline divergence, WAL and compatibility evidence&#x27;),</span>
+<span>        (4, &#x27;reseed and validate&#x27;, &#x27;data checks plus slots/subscriptions rebuilt or reconciled&#x27;),</span>
+<span>        (5, &#x27;restore routing/redundancy&#x27;, &#x27;clients, replica, backup and monitoring pass&#x27;),</span>
+<span>        (6, &#x27;audit and stop boundary&#x27;, &#x27;owners, achieved RPO/RTO, gaps and rollback decision&#x27;)</span>
+<span>) AS failback_plan(step_number, phase, required_evidence)</span>
+<span>ORDER BY step_number;</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-repl-01 — Replication, Change Data Capture, and High Availability.
+
+I have completed the direct catalog prerequisites: `sql-ops-02`, `sql-prog-01`, `sql-test-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/professional/companion-guides/sql_repl_01_cdc_high_availability.md
+- Answer-free learner SQL: sql/professional/lessons/sql_repl_01_cdc_high_availability.sql
+
+Key terms to teach in context: WAL, Physical replication, Logical replication, CDC, Transactional outbox, Inbox/idempotency key. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: The capability query reports WAL level and counts only; it does not print slot, publication, subscription, host, or query identities. Counts can still require monitoring privileges on managed services. Capability settings are evidence, not authorization to mutate them.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-repl-01/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-ext-01.html"><small>Previous lesson</small><strong>sql-ext-01</strong><span>PostgreSQL Extensions, Spatial Data, and Vectors</span></a>
@@ -1194,6 +1719,23 @@
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

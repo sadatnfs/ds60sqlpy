@@ -118,18 +118,24 @@
     <article class="document"><h2 id="professional-and-specialization-paths">Professional and specialization paths<a class="heading-anchor" href="#professional-and-specialization-paths" aria-label="Link to this section">#</a></h2>
 <p>The historical Days 1–60 remain stable. Named modules add the relational foundations and professional practice that do not fit honestly into one more linear countdown. The generated catalog is the source of truth for exact prerequisites and artifact paths:</p>
 <pre><code class="language-powershell"># Windows PowerShell
-.\.venv\Scripts\python.exe scripts\course.py catalog</code></pre>
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython scripts\course.py catalog</code></pre>
 <pre><code class="language-bash"># macOS/Linux
 .venv/bin/python scripts/course.py catalog</code></pre>
 <p>Choose a lane from demonstrated prerequisites. You do not need every specialization to call the shared curriculum complete.</p>
-<h3 id="start-sql-with-the-missing-foundations">Start SQL with the missing foundations<a class="heading-anchor" href="#start-sql-with-the-missing-foundations" aria-label="Link to this section">#</a></h3>
-<p>New SQL learners begin here before SQL Day 1:</p>
+<h3 id="add-relational-engineering-after-sql-fundamentals">Add relational engineering after SQL fundamentals<a class="heading-anchor" href="#add-relational-engineering-after-sql-fundamentals" aria-label="Link to this section">#</a></h3>
+<p>A new SQL learner begins with <a href="../../lesson-pages/sql-01.html#guide">SQL Day 1 — SELECT, WHERE, and ORDER BY</a>. The named relational-engineering modules then deepen responsibilities at the point where their prerequisites make sense:</p>
 <ol>
-<li><a href="../../lesson-pages/sql-found-01.html#guide"><code>sql-found-01</code> — relational design, DDL, and constraints</a></li>
-<li><a href="../../lesson-pages/sql-found-02.html#guide"><code>sql-found-02</code> — versioned migrations and safe evolution</a></li>
-<li><a href="../../lesson-pages/sql-01.html#guide">SQL Day 1 — SELECT, WHERE, and ORDER BY</a></li>
+<li>Complete SQL Days 1–15.</li>
+<li>Take <a href="../../lesson-pages/sql-found-01.html#guide"><code>sql-found-01</code> — relational design, DDL, and constraints</a>.</li>
+<li>Complete the transaction and locking sequence through SQL Day 39.</li>
+<li>Take <a href="../../lesson-pages/sql-found-02.html#guide"><code>sql-found-02</code> — versioned migrations and safe evolution</a>.</li>
 </ol>
-<p>The foundation scripts use isolated disposable schemas. SQL Day 1 then queries the seeded <code>training</code> schema.</p>
+<p>Both named scripts use isolated disposable schemas; SQL Days 1–60 continue to query the seeded <code>training</code> schema.</p>
 <h3 id="professional-python-engineering-lane">Professional Python engineering lane<a class="heading-anchor" href="#professional-python-engineering-lane" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
 <th>Stable ID</th>
@@ -266,9 +272,9 @@
 <li>explain one failure mode and one tradeoff without the solution open; and</li>
 <li>distinguish local/fake evidence from any optional live or platform-specific evidence.</li>
 </ol>
-<p>Use the exact stable ID when recording optional progress:</p>
+<p>Use the exact stable ID when recording optional progress. On Windows, reuse the <code>$CoursePython</code> value resolved at the top of this page; rerun that resolver first if this is a new PowerShell window.</p>
 <pre><code class="language-powershell"># Windows PowerShell
-.\.venv\Scripts\python.exe scripts\course.py progress complete python-pro-01 `
+&amp; $CoursePython scripts\course.py progress complete python-pro-01 `
     --notes &quot;Built and inspected a wheel from a clean target.&quot;</code></pre>
 <pre><code class="language-bash"># macOS/Linux
 .venv/bin/python scripts/course.py progress complete python-pro-01 \

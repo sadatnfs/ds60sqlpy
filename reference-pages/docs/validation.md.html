@@ -127,25 +127,34 @@
 <pre><code class="language-text">python scripts/course.py validate</code></pre>
 <p>Sensitive-content guard:</p>
 <pre><code class="language-text">python scripts/scan_secrets.py --history</code></pre>
-<p>Practice-enrichment and generated portal drift:</p>
+<p>Practice enrichment, self-contained lesson depth, and generated portal drift:</p>
 <pre><code class="language-text">python scripts/audit_practice.py
+python scripts/audit_lesson_depth.py
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check</code></pre>
 <p>Add <code>--all</code> to print passing details as well as failures, warnings, and summaries. This command performs fast structural checks; it does not execute every notebook or SQL lesson.</p>
 <p>On Windows, use:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe scripts\course.py doctor
-.\.venv\Scripts\python.exe scripts\course.py catalog
-.\.venv\Scripts\python.exe scripts\course.py validate
-.\.venv\Scripts\python.exe scripts\scan_secrets.py --history
-.\.venv\Scripts\python.exe scripts\audit_practice.py
-.\.venv\Scripts\python.exe scripts\build_course_guide.py --check
-.\.venv\Scripts\python.exe scripts\build_lesson_readers.py --check</code></pre>
+<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+
+&amp; $CoursePython scripts\course.py doctor
+&amp; $CoursePython scripts\course.py catalog
+&amp; $CoursePython scripts\course.py validate
+&amp; $CoursePython scripts\scan_secrets.py --history
+&amp; $CoursePython scripts\audit_practice.py
+&amp; $CoursePython scripts\audit_lesson_depth.py
+&amp; $CoursePython scripts\build_course_guide.py --check
+&amp; $CoursePython scripts\build_lesson_readers.py --check</code></pre>
 <p>On macOS/Linux, use:</p>
 <pre><code class="language-bash">.venv/bin/python scripts/course.py doctor
 .venv/bin/python scripts/course.py catalog
 .venv/bin/python scripts/course.py validate
 .venv/bin/python scripts/scan_secrets.py --history
 .venv/bin/python scripts/audit_practice.py
+.venv/bin/python scripts/audit_lesson_depth.py
 .venv/bin/python scripts/build_course_guide.py --check
 .venv/bin/python scripts/build_lesson_readers.py --check</code></pre>
 <p>The course CLI uses the standard library for pre-install inspection so catalog and environment diagnostics remain available before third-party packages are installed.</p>
@@ -160,16 +169,18 @@ uv run --no-sync pytest</code></pre>
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check
 python scripts/audit_practice.py
-python -m pytest tests/test_course_guide.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py
+python scripts/audit_lesson_depth.py
+python -m pytest tests/test_course_guide.py tests/test_lesson_depth_audit.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py
 python -m ruff check src scripts tests bridge python/professional
 python -m mypy
 python -m pytest
 python scripts/course.py validate
 python scripts/scan_secrets.py --history</code></pre>
-<p>Review the regenerated catalog diff. CI runs these core checks on Python 3.12 for Windows, macOS, and Linux and on Python 3.11 for Linux, then executes the full SQL sequence separately against PostgreSQL 17. Each matrix leg sets <code>UV_PYTHON</code> to the requested version and asserts <code>sys.version_info[:2]</code> after sync, so the learner-default <code>.python-version</code> cannot silently collapse the matrix onto Python 3.12. The Windows core runner also registers <code>Python (ds60sqlpy)</code> and runs <code>start_ds60.ps1 -DiagnosticsOnly -NonInteractive -SkipPostgreSql</code>, exercising the native PowerShell startup and both-environment-layout readiness path without opening a browser.</p>
+<p>Review the regenerated catalog diff. CI runs these core checks on Python 3.12 for Windows, macOS, and Linux and on Python 3.11 for Linux, then executes the full SQL sequence separately against PostgreSQL 17. Each matrix leg sets <code>UV_PYTHON</code> to the requested version and asserts <code>sys.version_info[:2]</code> after sync, so the learner-default <code>.python-version</code> cannot silently collapse the matrix onto Python 3.12. The Windows core runner also registers <code>Python (ds60sqlpy)</code> and runs <code>start_ds60.ps1 -DiagnosticsOnly -NonInteractive -SkipPostgreSql</code>, exercising the native startup under Windows PowerShell 5.1 and the both-environment-layout readiness path without opening a browser.</p>
 <p>The focused learner-entry tests cover different boundaries:</p>
 <ul>
-<li><code>test_course_guide.py</code> checks dashboard catalog links and generated copy.</li>
+<li><code>test_course_guide.py</code> checks dashboard catalog links, generated copy, and that all 154 guide-authored Codex prompts are embedded without fallback drift.</li>
+<li><code>test_lesson_depth_audit.py</code> checks the curriculum-wide beginner-depth contract, duplicate/template guards, runnable guide fences, and report.</li>
 <li><code>test_lesson_reader.py</code> checks deterministic rendered pages, safe link rewriting, recursive Markdown/SQL reference pages, mode-specific completion controls, and stale-page removal.</li>
 <li><code>test_portal.py</code> checks loopback/token/origin/path/launch restrictions and exact artifact commands.</li>
 <li><code>test_sql_notebook.py</code> checks stable SQL IDs, paths below <code>.learning/sql/</code>, no-overwrite behavior, fixed <code>psql</code> invocation, database/reset guards, bounded transcripts, and stateful prerequisite preparation.</li>
@@ -177,23 +188,35 @@ python scripts/scan_secrets.py --history</code></pre>
 </ul>
 <p>Unit tests do not replace browser QA. For a learner-experience change, open both <code>file://.../START_HERE.html</code> and the private <code>127.0.0.1</code> portal. Verify a Python, SQL, and bridge card; guide/learner/solution tabs; keyboard navigation; desktop and narrow layouts; no raw <code>.md</code>, <code>.ipynb</code>, <code>.py</code>, or <code>.sql</code> browser view; rendered setup/reference navigation; dashboard-only static completion; the loopback lesson checkbox; no unexpected network requests; and the exact run controls available in each mode. Do not click an action that would reset PostgreSQL.</p>
 <p>The sensitive-content scan is deliberately offline and reports only an object ID, path, line number, and finding category so it does not copy a suspected credential into logs. It catches common token/key formats, private-key files, credential-bearing URLs, ignored credential-shaped local files, and reachable Git-history blobs. Its narrow fixture allowances are covered by tests. It is a guardrail, not proof against every secret format; still review changes and use an organization scanner when available.</p>
-<p>Every push and pull request also runs the actual learner <code>setup.ps1</code> or <code>setup.sh</code> flow on fresh Windows, macOS, and Ubuntu Python 3.12 runners, reruns doctor through the generated <code>.venv</code>, and checks that setup produced no trackable files. The Windows runner first executes <code>bootstrap_windows.ps1 -SkipPostgreSql -WhatIf</code>, which exercises native PowerShell parsing and discovery without changing PATH, installing packages, registering a kernel, or requiring a database server on the CI image.</p>
-<p>The weekly and manually dispatched heavy job validates the lock, installs every extra, then exercises the maintained advanced import manifest for the <code>bridge</code>, <code>professional</code>, <code>sql-notebooks</code>, <code>ml</code>, <code>production</code>, <code>deep-learning</code>, <code>nlp</code>, and <code>geo</code> lesson stacks on fresh Windows and Ubuntu Python 3.12 runners:</p>
+<p>Every push and pull request also runs the actual learner <code>setup.ps1</code> or <code>setup.sh</code> flow on fresh Windows, macOS, and Ubuntu Python 3.12 runners, reruns doctor through the generated <code>.venv</code>, and checks that setup produced no trackable files. The Windows runner first executes <code>bootstrap_windows.ps1 -SkipPostgreSql -WhatIf</code>, which exercises native Windows PowerShell 5.1 parsing and discovery without changing PATH, installing packages, registering a kernel, or requiring a database server on the CI image.</p>
+<p>The weekly and manually dispatched heavy job validates the lock, installs every extra, then exercises the maintained advanced import manifest for the <code>bridge</code>, <code>professional</code>, <code>sql-notebooks</code>, <code>ml</code>, <code>production</code>, <code>deep-learning</code>, <code>nlp</code>, and <code>geo</code> lesson stacks on fresh Windows, Ubuntu, and macOS Python 3.12 runners:</p>
 <pre><code class="language-text">uv sync --frozen --all-extras
 uv run --no-sync python scripts/check_advanced_imports.py</code></pre>
-<p>Each import runs in an isolated process and does not fetch datasets, pretrained weights, spaCy pipelines, or external services. This proves locked package installation and basic import compatibility on those two platforms; it does not prove model training, GPU support, asset availability, live APIs, or every advanced lesson&#x27;s runtime behavior. macOS receives the core matrix but not this heavy all-extras gate. The ML extra constrains Numba by platform because SHAP&#x27;s transitive requirement is otherwise broad enough for a legacy source release with incomplete Python-version metadata to enter a valid-looking lock. The bounds retain Python 3.12 wheels on Windows, Linux, Intel macOS, and Apple silicon.</p>
+<p>Each import runs in an isolated process and does not fetch datasets, pretrained weights, spaCy pipelines, or external services. This proves locked package installation and basic import compatibility on those platforms; it does not prove model training, GPU support, asset availability, live APIs, or every advanced lesson&#x27;s runtime behavior. A fast core-job dry run also proves that the all-extras lock has an installable plan for Windows x86-64, Linux x86-64, Intel macOS, and Apple Silicon before the heavy job starts. The ML extra constrains Numba by platform because SHAP&#x27;s transitive requirement is otherwise broad enough for a legacy source release with incomplete Python-version metadata to enter a valid-looking lock. PyTorch and TorchVision are likewise paired by macOS architecture because current PyTorch releases no longer ship Intel-macOS wheels and now require macOS 14 for Apple Silicon. The macOS heavy job installs Homebrew&#x27;s <code>libomp</code> first, matching the documented learner setup and allowing the locked LightGBM and XGBoost binaries to load.</p>
+<p><code>Advanced imports</code> intentionally does <strong>not</strong> run for an ordinary push or pull request because installing every optional package is the slowest workflow surface. To run it immediately, follow GitHub&#x27;s <a href="https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow">manual workflow instructions</a>:</p>
+<ol>
+<li>Open <strong>Actions</strong>.</li>
+<li>Select <strong>Course validation</strong>.</li>
+<li>Choose <strong>Run workflow</strong>, select the branch containing the changes, and confirm <strong>Run workflow</strong>.</li>
+<li>Open that run and watch the three <code>Advanced imports</code> matrix jobs.</li>
+</ol>
+<p>GitHub dispatches the whole workflow; its UI cannot start only one job inside a workflow. The <code>workflow_dispatch</code> event is what makes the advanced job eligible while the normal core, learner-bootstrap, and PostgreSQL jobs also run. With the GitHub CLI installed, the equivalent command is:</p>
+<pre><code class="language-text">gh workflow run ci.yml --ref &lt;branch-name&gt;</code></pre>
 <h3 id="local-validation-evidence-2026-07-30">Local validation evidence (2026-07-30)<a class="heading-anchor" href="#local-validation-evidence-2026-07-30" aria-label="Link to this section">#</a></h3>
 <p>The comprehensive local run recorded this evidence:</p>
 <ul>
-<li>Locked Python 3.11 suite: <strong>167 passed, 2 expected skips</strong>.</li>
-<li>Locked Python 3.12 suite: <strong>167 passed, 2 expected skips</strong>.</li>
-<li>PostgreSQL 16.14: <strong>72/72 learner scripts</strong> and <strong>72/72 executable solutions</strong> passed.</li>
-<li>The JupySQL solution notebook executed <strong>18/18 code cells</strong>, including <strong>9/9 live SQL cells</strong>.</li>
-<li>Notebook smoke checks passed <strong>13/13</strong>.</li>
-<li>Practice coverage passed <strong>154/154 lessons</strong>.</li>
+<li>Locked Python 3.12 suite: <strong>440 passed, 3 expected skips</strong>, plus <strong>10 unittest subtests</strong>. Two skips require native PowerShell and one requires a process-pool semaphore unavailable in the local sandbox.</li>
+<li>Ruff lint/format passed, and mypy checked <strong>89 source files</strong> without an error.</li>
+<li><code>uv.lock</code> resolved <strong>376 packages</strong>; frozen all-extras dry runs succeeded for Windows x86-64, Linux x86-64, Intel macOS, and Apple Silicon.</li>
+<li>PostgreSQL 16.14: <strong>72/72 learner scripts</strong> and <strong>72/72 executable solutions</strong> passed; focused SQL runner/contract/semantic tests passed <strong>153/153</strong>.</li>
+<li>The JupySQL solution notebook executed <strong>18/18 code cells</strong>, including <strong>9/9 live SQL cells</strong>, against only the local disposable course database.</li>
+<li>Notebook structure/syntax checks passed <strong>122/122</strong>, and offline smoke checks passed <strong>13/13</strong>.</li>
+<li>Practice coverage and lesson-depth audits each passed <strong>154/154 lessons</strong>.</li>
+<li>Generated-reader checks passed for <code>START_HERE.html</code>, <strong>154 lesson pages</strong>, and <strong>39 recursively linked reference pages</strong>.</li>
+<li>Interactive private-portal browser QA passed at desktop and narrow breakpoints with no horizontal page overflow, raw source links, or console warnings. The sandboxed test browser blocks <code>file://</code> navigation, so static USB mode is covered here by deterministic DOM/link tests and isolated generation rather than a live <code>file://</code> session.</li>
 <li>The current-tree and reachable-Git-history sensitive-content scan passed.</li>
 </ul>
-<p>Native Windows execution was not verified locally and remains CI-only for this snapshot. These results describe this checkout and environment on the stated date; they are evidence, not a promise that later revisions or other machines will produce the same results.</p>
+<p>Native Windows PowerShell 5.1 execution and the Linux Python 3.11 matrix remain CI-only boundaries for this snapshot. These results describe this checkout and environment on the stated date; they are evidence, not a promise that later revisions or other machines will produce the same results.</p>
 <h3 id="validation-layers">Validation layers<a class="heading-anchor" href="#validation-layers" aria-label="Link to this section">#</a></h3>
 <h4 id="1-inventory-and-structure">1. Inventory and structure<a class="heading-anchor" href="#1-inventory-and-structure" aria-label="Link to this section">#</a></h4>
 <p>Check:</p>
@@ -205,6 +228,8 @@ uv run --no-sync python scripts/check_advanced_imports.py</code></pre>
 <li>Notebook files are valid JSON and valid <code>nbformat</code>.</li>
 <li>Markdown internal links resolve.</li>
 <li>Every lesson surface meets its immutable <code>curriculum/practice_baseline.json</code> doubling target.</li>
+<li>Every cataloged lesson passes <code>scripts/audit_lesson_depth.py</code>: complete beginner-facing sections, definitions, worked examples, exercise verification contracts, explanatory solutions, historical Python notebook depth, and a context-rich per-lesson Codex coaching prompt.</li>
+<li><code>docs/practice-coverage.md</code> and <code>docs/lesson-depth-report.md</code> match their generators.</li>
 <li><code>START_HERE.html</code> matches a fresh deterministic portal render.</li>
 <li><code>lesson-pages/</code> contains exactly one current page per cataloged lesson and matches a fresh deterministic reader render.</li>
 <li><code>reference-pages/</code> matches the recursive closure of local Markdown/SQL links reachable from the dashboard and rendered course artifacts.</li>
@@ -230,7 +255,13 @@ uv run --no-sync python scripts/check_advanced_imports.py</code></pre>
 python scripts/validate_notebooks.py --smoke</code></pre>
 <p>The normal smoke set excludes the live PostgreSQL notebook. After setting <code>DS60_DATABASE_URL</code> to the disposable database, execute its solution from a clean kernel:</p>
 <pre><code class="language-powershell"># Windows PowerShell
-.\.venv\Scripts\python.exe -m nbconvert --execute --to notebook `
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+
+&amp; $CoursePython -m nbconvert --execute --to notebook `
     --output-dir .\artifacts\notebook-validation `
     .\bridge\professional\solutions\bridge_jupyter_01_postgresql_magics_solution.ipynb</code></pre>
 <pre><code class="language-bash"># macOS/Linux

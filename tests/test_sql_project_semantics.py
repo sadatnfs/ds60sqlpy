@@ -30,6 +30,17 @@ def _professional_guide(stem: str) -> str:
     return (PROFESSIONAL_SQL_ROOT / "companion-guides" / f"{stem}.md").read_text(encoding="utf-8")
 
 
+def _professional_guide_exercise(stem: str, number: int) -> str:
+    exercises = _markdown_exercises(_professional_guide(stem))
+    match = re.search(
+        rf"^{number}\.\s+\*\*.*?(?=^{number + 1}\.\s+\*\*|\Z)",
+        exercises,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    assert match is not None, f"{stem} guide is missing Exercise {number}"
+    return match.group(0)
+
+
 def _professional_solution(stem: str) -> str:
     return (PROFESSIONAL_SQL_ROOT / "solutions" / f"{stem}_solutions.sql").read_text(
         encoding="utf-8"
@@ -351,6 +362,7 @@ def test_professional_exercise_contracts_do_not_treat_sql_tokens_as_relations(
     stem: str,
 ) -> None:
     exercises = _markdown_exercises(_professional_guide(stem))
+    solution = _code(_professional_solution(stem))
     banned_generated_contracts = (
         "expected output: a completed the",
         "the command tag and an independently counted set of affected",
@@ -371,6 +383,7 @@ def test_professional_exercise_contracts_do_not_treat_sql_tokens_as_relations(
         "true",
     }
     bad_sources: list[str] = []
+    phantom_relations: list[str] = []
 
     for line in exercises.splitlines():
         if "**Inputs/evidence:**" not in line:
@@ -379,10 +392,22 @@ def test_professional_exercise_contracts_do_not_treat_sql_tokens_as_relations(
             is_named_index = token.endswith(("_idx", "_uk"))
             if token in banned_source_tokens or is_named_index:
                 bad_sources.append(token)
+            if (
+                re.fullmatch(
+                    r"(?:pro_[a-z0-9_]+|pg_catalog|information_schema)\.[a-z0-9_]+",
+                    token,
+                )
+                and token not in solution
+            ):
+                phantom_relations.append(token)
 
     assert bad_sources == [], (
         f"{stem} classifies SQL keywords, aliases, extensions, commands, or "
         f"indexes as input relations: {bad_sources}"
+    )
+    assert phantom_relations == [], (
+        f"{stem} names input relations that do not exist anywhere in its "
+        f"executable solution: {phantom_relations}"
     )
 
     assert "with no outer `GROUP BY`; return exactly one aggregate row" not in exercises, (
@@ -462,6 +487,52 @@ def test_professional_analytics_implements_attribution_and_asof_boundaries() -> 
         r"\bhaving\s+count\s*\(\s*(?:\*|\w+(?:\.\w+)?)\s*\)\s*>\s*1\b",
         as_of,
     ), "an as-of answer must detect overlapping matches, not hide them with LIMIT 1"
+
+
+def test_professional_analytics_guide_states_the_real_result_grains() -> None:
+    stem = "sql_analytics_01_query_patterns"
+    islands = _professional_guide_exercise(stem, 4).lower()
+    attribution = _professional_guide_exercise(stem, 5).lower()
+    as_of = _professional_guide_exercise(stem, 7).lower()
+    percentiles = _professional_guide_exercise(stem, 9).lower()
+    approximation = _professional_guide_exercise(stem, 13).lower()
+
+    assert "one row per user-date" not in islands
+    assert re.search(r"one row per .*island", islands)
+    for field in ("user_id", "island_start", "island_end", "active_days"):
+        assert f"`{field}`" in islands
+
+    for relation in (
+        "pro_analytics_lab.deduplicated_events",
+        "pro_analytics_lab.campaign_touches",
+    ):
+        assert f"`{relation}`" in attribution
+    assert re.search(r"one row per .*purchase", attribution)
+    for field in ("source_event_id", "purchased_at", "touch_id", "campaign"):
+        assert f"`{field}`" in attribution
+
+    for relation in (
+        "pro_analytics_lab.event_probes",
+        "pro_analytics_lab.user_tiers",
+    ):
+        assert f"`{relation}`" in as_of
+    assert re.search(r"one row per .*probe", as_of)
+    for field in ("probe_id", "event_at", "tier_name", "matching_tiers"):
+        assert f"`{field}`" in as_of
+
+    assert "disposable restore target" not in percentiles
+    assert re.search(r"(?:exactly )?one (?:aggregate |summary )?row", percentiles)
+    for field in ("session_count", "median_and_p90"):
+        assert f"`{field}`" in percentiles
+
+    assert "command tag" not in approximation
+    for field in (
+        "exact_distinct_users",
+        "criterion_number",
+        "criterion",
+        "required_evidence",
+    ):
+        assert f"`{field}`" in approximation
 
 
 def test_professional_analytics_learner_demonstrates_positive_month_one_retention() -> None:
@@ -803,16 +874,19 @@ def test_professional_replication_separates_broker_ack_from_consumer_effects() -
 
     assert consumer is not None
     assert publisher_ack is not None
+    acknowledged_relation = re.search(
+        r"\bupdate\s+pro_replication_lab\.(?P<relation>\w+)\b"
+        r".*?\bset\s+published\s*=\s*true\b",
+        publisher_ack.group("body"),
+    )
+    assert acknowledged_relation is not None
+    outbox_relation = acknowledged_relation.group("relation")
     assert not re.search(
-        r"\bupdate\s+pro_replication_lab\.outbox\b.*?\bpublished\b",
+        rf"\bupdate\s+pro_replication_lab\.{outbox_relation}\b.*?\bpublished\b",
         consumer.group("body"),
     ), (
         "a consumer side effect is not proof that the publisher's broker "
         "delivery was durably acknowledged"
-    )
-    assert re.search(
-        r"\bupdate\s+pro_replication_lab\.outbox\b.*?\bset\s+published\s*=\s*true\b",
-        publisher_ack.group("body"),
     )
 
 

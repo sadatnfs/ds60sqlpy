@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-24-exploratory-data-analysis-best-practices">Day 24 — Exploratory Data Analysis Best Practices<a class="heading-anchor" href="#guide--day-24-exploratory-data-analysis-best-practices" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
 <p>EDA is a reproducible investigation, not a gallery of plots. Begin with the question and data grain, then record evidence, caveats, and next actions.</p>
@@ -292,6 +331,89 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 23 (<code>python-23</code>) and pandas cleaning/grouping through Day 22.</p>
+<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<ol>
+<li>Confirm the course environment before changing it:</li>
+</ol>
+<pre><code class="language-powershell">   # Windows PowerShell
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   &amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash">   # macOS/Linux
+   .venv/bin/python scripts/course.py doctor</code></pre>
+<ol>
+<li>Read <code>python/ds-60day/companion-guides/day24_eda_best_practices.md</code>, then open <code>python/ds-60day/notebooks/day24_eda_best_practices.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
+<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
+<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
+<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+</ol>
+<p><strong>Lesson outcome:</strong> use day 24 — exploratory data analysis best practices to practice question-led exploratory data analysis with evidence, caveats, and quality checks and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
+<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
+<p>Exploratory data analysis (EDA) is a disciplined conversation with a dataset, not a gallery of every possible chart. Start with an analytical question, source/provenance, row grain, keys, and scope. Then inspect data quality, individual distributions, relationships, segments, and unusual records in an order that helps answer that question.</p>
+<p>Separate an observation (“the median differs”) from a hypothesis (“one segment may behave differently”) and from a causal claim, which EDA alone normally cannot establish. Every table or chart needs a sentence about evidence and a caveat. Missingness, duplicates, outliers, tiny samples, and target leakage can make technically valid calculations misleading.</p>
+<h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>EDA:</strong> exploratory data analysis, structured investigation before formal conclusions.</li>
+<li><strong>provenance:</strong> where data came from and under what conditions.</li>
+<li><strong>distribution:</strong> the pattern of values, frequency, center, spread, and shape.</li>
+<li><strong>outlier:</strong> an observation unusually distant under a stated context.</li>
+<li><strong>association:</strong> a measured relationship that does not itself prove causation.</li>
+<li><strong>leakage:</strong> information unavailable at the intended decision time contaminating analysis/modeling.</li>
+</ul>
+<h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<p>A useful EDA paragraph follows <strong>question → method → observation → limitation → next check</strong>. <code>frame.describe(include=&quot;all&quot;)</code> can orient you but is not a conclusion. A correlation matrix measures selected pairwise associations under assumptions; it does not explain cause, handle every nonlinear relationship, or protect against leakage.</p>
+<h5 id="guide--worked-example-1-create-a-bounded-quality-profile">Worked example 1 — Create a bounded quality profile<a class="heading-anchor" href="#guide--worked-example-1-create-a-bounded-quality-profile" aria-label="Link to this section">#</a></h5>
+<p>Make basic risks visible before plotting relationships. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">import pandas as pd
+
+sample = pd.DataFrame({
+    &quot;customer_id&quot;: [1, 2, 2, 3],
+    &quot;amount&quot;: [10.0, 12.0, 12.0, None],
+    &quot;segment&quot;: [&quot;new&quot;, &quot;returning&quot;, &quot;returning&quot;, &quot;new&quot;],
+})
+profile = {
+    &quot;shape&quot;: sample.shape,
+    &quot;duplicate_rows&quot;: int(sample.duplicated().sum()),
+    &quot;missing_rate&quot;: sample.isna().mean().round(2).to_dict(),
+    &quot;unique&quot;: sample.nunique(dropna=False).to_dict(),
+}
+profile</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">The profile reports four rows, one duplicate row, and a 0.25 missing rate for `amount`.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--worked-example-2-compare-robust-and-non-robust-center">Worked example 2 — Compare robust and non-robust center<a class="heading-anchor" href="#guide--worked-example-2-compare-robust-and-non-robust-center" aria-label="Link to this section">#</a></h5>
+<p>One extreme value affects the mean more than the median. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">values = pd.Series([10, 11, 12, 13, 200])
+{&quot;mean&quot;: values.mean(), &quot;median&quot;: values.median(), &quot;max&quot;: values.max()}</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`{&#x27;mean&#x27;: 49.2, &#x27;median&#x27;: 12.0, &#x27;max&#x27;: 200}`. The difference motivates inspection; it does not automatically justify deleting 200.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
+<p>When the output differs from your prediction, use this order:</p>
+<ol>
+<li>Write the question and row grain above the first calculation.</li>
+<li>Profile missingness, duplicates, ranges, and key uniqueness before interpreting relationships.</li>
+<li>Pair each finding with sample size, units, denominator, and a caveat.</li>
+<li>Remove post-outcome or target-derived fields before correlation or predictive exploration.</li>
+</ol>
+<h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
+<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
+<ol>
+<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
+<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
+<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
+<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
+<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
+</ol>
+<p><strong>Useful alternative:</strong> Use a compact reusable profile for orientation, then write question-specific code rather than relying on a one-click profiling report.</p>
+<p><strong>Boundary to remember:</strong> Constant/all-missing columns, tiny groups, extreme values, duplicated entities, Simpson&#x27;s paradox, and time drift can invalidate naive summaries. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Unit of observation / grain:</strong> what one row represents.</li>
@@ -325,19 +447,22 @@ segment_summary = frame.groupby(&quot;segment&quot;).agg(
 <h4 id="guide--dataset-note">Dataset note<a class="heading-anchor" href="#guide--dataset-note" aria-label="Link to this section">#</a></h4>
 <p>The notebook uses Seaborn&#x27;s <code>penguins</code> sample, which downloads on first uncached use and is then cached. Constructed/local data is the fully offline route.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Produce a concise EDA summary with text and visuals for a chosen dataset. <strong>Hint:</strong> organize the notebook as question → scope/grain → quality → univariate → relationships/segments → findings/caveats, not in execution order alone.</li>
-<li>Add a data-quality section with issues and next steps. <strong>Hint:</strong> for each issue record evidence, possible impact, proposed treatment, and how that treatment will be validated.</li>
+<li>Produce a concise EDA for one local or already-cached dataset, organized as question → provenance/scope/grain → quality → univariate distributions → relationships/segments → findings/caveats. <strong>Expected behavior:</strong> every table/plot answers a written question and has an observation plus limitation. <strong>Constraint:</strong> avoid causal language and full-data dumps. <strong>Verify:</strong> restart and reproduce all results top to bottom.</li>
+</ol>
+<ol>
+<li>Add a data-quality register with one row per issue: evidence/count, possible analytical impact, proposed treatment, validation check, and status. <strong>Coverage:</strong> missingness, duplicates/key uniqueness, ranges, categories, and at least one dataset-specific rule. <strong>Verify:</strong> trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Organize exploratory data analysis around questions, grain, quality, and evidence. Separate observed patterns from hypotheses and causal claims.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict how one extreme value can change mean, median, standard deviation, and a scatterplot. <strong>Progressive hint:</strong> Robust and non-robust summaries respond differently to outliers.</li>
-<li><strong>Tracing:</strong> Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward. <strong>Progressive hint:</strong> Aggregation discards within-customer event detail.</li>
-<li><strong>Implementation:</strong> Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts. <strong>Progressive hint:</strong> Bound the result rather than dumping every row/value.</li>
-<li><strong>Debugging:</strong> Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal. <strong>Progressive hint:</strong> Remove leakage and label correlations as associations.</li>
-<li><strong>Edge case and explanation:</strong> Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful. <strong>Progressive hint:</strong> A calculation returning a number does not guarantee interpretability.</li>
+<li><strong>Prediction:</strong> Predict how one extreme value can change mean, median, standard deviation, and a scatterplot. <strong>Progressive hint:</strong> Robust and non-robust summaries respond differently to outliers. <strong>Verify:</strong> Compute statistics before/after adding the extreme value; record the exact mean/median/std changes and describe the visible plot-scale effect.</li>
+<li><strong>Tracing:</strong> Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward. <strong>Progressive hint:</strong> Aggregation discards within-customer event detail. <strong>Verify:</strong> List questions answerable at transaction grain, then assert the customer summary row count/uniqueness and identify at least one detail that cannot be recovered.</li>
+<li><strong>Implementation:</strong> Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts. <strong>Progressive hint:</strong> Bound the result rather than dumping every row/value. <strong>Verify:</strong> Run the profile on ordinary, empty, duplicate, and missing fixtures; assert bounded keys/counts/rates without embedding full data values.</li>
+<li><strong>Debugging:</strong> Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal. <strong>Progressive hint:</strong> Remove leakage and label correlations as associations. <strong>Verify:</strong> Remove the target-derived field, recompute the association, and label it noncausal; assert the leakage column cannot enter the reported matrix.</li>
+<li><strong>Edge case and explanation:</strong> Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful. <strong>Progressive hint:</strong> A calculation returning a number does not guarantee interpretability. <strong>Verify:</strong> Detect constant/all-missing/tiny columns and assert each is skipped or annotated according to policy rather than reported as an interpretable statistic.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -361,17 +486,33 @@ segment_summary = frame.groupby(&quot;segment&quot;).agg(
 <li><a href="python-24.html#learner">Open the learner notebook</a></li>
 <li><a href="python-24.html#solution-1">Check the separate solution</a></li>
 <li><a href="python-25.html#guide">Next: Day 25 — Matplotlib and Seaborn</a></li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-24`
+(Day 24 — Exploratory Data Analysis Best Practices). Direct catalog prerequisites: `python-23`.
+I have completed the direct prerequisites: `python-23`. Emphasize question-led exploratory data analysis with evidence, caveats, and quality checks.
+Read `python/ds-60day/companion-guides/day24_eda_best_practices.md` and use the learner notebook
+`python/ds-60day/notebooks/day24_eda_best_practices.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -388,12 +529,12 @@ segment_summary = frame.groupby(&quot;segment&quot;).agg(
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-24-eda-best-practices">Day 24 — EDA best practices<a class="heading-anchor" href="#learner--cell-1--day-24-eda-best-practices" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -402,7 +543,62 @@ segment_summary = frame.groupby(&quot;segment&quot;).agg(
 <li>Summary stats, missingness, distributions, correlations.</li>
 <li>Clear, reproducible narrative in notebook form.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import pandas as pd, seaborn as sns, matplotlib.pyplot as plt</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
+<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>This is the editable learner artifact for <code>python-24</code>. Read <code>python/ds-60day/companion-guides/day24_eda_best_practices.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
+<p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
+<p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--core-mental-model">Core mental model<a class="heading-anchor" href="#learner--cell-3--core-mental-model" aria-label="Link to this section">#</a></h4>
+<p>Exploratory data analysis (EDA) is a disciplined conversation with a dataset, not a gallery of every possible chart. Start with an analytical question, source/provenance, row grain, keys, and scope. Then inspect data quality, individual distributions, relationships, segments, and unusual records in an order that helps answer that question.</p>
+<p>Separate an observation (“the median differs”) from a hypothesis (“one segment may behave differently”) and from a causal claim, which EDA alone normally cannot establish. Every table or chart needs a sentence about evidence and a caveat. Missingness, duplicates, outliers, tiny samples, and target leakage can make technically valid calculations misleading.</p>
+<h5 id="learner--cell-3--vocabulary">Vocabulary<a class="heading-anchor" href="#learner--cell-3--vocabulary" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>EDA:</strong> exploratory data analysis, structured investigation before formal conclusions.</li>
+<li><strong>provenance:</strong> where data came from and under what conditions.</li>
+<li><strong>distribution:</strong> the pattern of values, frequency, center, spread, and shape.</li>
+<li><strong>outlier:</strong> an observation unusually distant under a stated context.</li>
+<li><strong>association:</strong> a measured relationship that does not itself prove causation.</li>
+<li><strong>leakage:</strong> information unavailable at the intended decision time contaminating analysis/modeling.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<p>A useful EDA paragraph follows <strong>question → method → observation → limitation → next check</strong>. <code>frame.describe(include=&quot;all&quot;)</code> can orient you but is not a conclusion. A correlation matrix measures selected pairwise associations under assumptions; it does not explain cause, handle every nonlinear relationship, or protect against leakage.</p>
+<h5 id="learner--cell-4--worked-example-1-create-a-bounded-quality-profile">Worked example 1 — Create a bounded quality profile<a class="heading-anchor" href="#learner--cell-4--worked-example-1-create-a-bounded-quality-profile" aria-label="Link to this section">#</a></h5>
+<p>Make basic risks visible before plotting relationships. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import pandas as pd</span>
+<span> </span>
+<span>sample = pd.DataFrame({</span>
+<span>    &quot;customer_id&quot;: [1, 2, 2, 3],</span>
+<span>    &quot;amount&quot;: [10.0, 12.0, 12.0, None],</span>
+<span>    &quot;segment&quot;: [&quot;new&quot;, &quot;returning&quot;, &quot;returning&quot;, &quot;new&quot;],</span>
+<span>})</span>
+<span>profile = {</span>
+<span>    &quot;shape&quot;: sample.shape,</span>
+<span>    &quot;duplicate_rows&quot;: int(sample.duplicated().sum()),</span>
+<span>    &quot;missing_rate&quot;: sample.isna().mean().round(2).to_dict(),</span>
+<span>    &quot;unique&quot;: sample.nunique(dropna=False).to_dict(),</span>
+<span>}</span>
+<span>profile</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> The profile reports four rows, one duplicate row, and a 0.25 missing rate for <code>amount</code>.</p>
+<p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
+<h5 id="learner--cell-6--worked-example-2-compare-robust-and-non-robust-center">Worked example 2 — Compare robust and non-robust center<a class="heading-anchor" href="#learner--cell-6--worked-example-2-compare-robust-and-non-robust-center" aria-label="Link to this section">#</a></h5>
+<p>One extreme value affects the mean more than the median. Predict first; then run the next cell.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>values = pd.Series([10, 11, 12, 13, 200])</span>
+<span>{&quot;mean&quot;: values.mean(), &quot;median&quot;: values.median(), &quot;max&quot;: values.max()}</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>{&#x27;mean&#x27;: 49.2, &#x27;median&#x27;: 12.0, &#x27;max&#x27;: 200}</code>. The difference motivates inspection; it does not automatically justify deleting 200.</p>
+<h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
+<p>When evidence differs from your prediction, use this order:</p>
+<ol>
+<li>Write the question and row grain above the first calculation.</li>
+<li>Profile missingness, duplicates, ranges, and key uniqueness before interpreting relationships.</li>
+<li>Pair each finding with sample size, units, denominator, and a caveat.</li>
+<li>Remove post-outcome or target-derived fields before correlation or predictive exploration.</li>
+</ol>
+<p><strong>Alternative to compare:</strong> Use a compact reusable profile for orientation, then write question-specific code rather than relying on a one-click profiling report.</p>
+<p><strong>Boundary to test:</strong> Constant/all-missing columns, tiny groups, extreme values, duplicated entities, Simpson&#x27;s paradox, and time drift can invalidate naive summaries.</p>
+<p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import pandas as pd, seaborn as sns, matplotlib.pyplot as plt</span>
 <span>df = sns.load_dataset(&#x27;penguins&#x27;).dropna()</span>
 <span>df.describe(include=&#x27;all&#x27;)</span>
 <span>sns.pairplot(df.select_dtypes(&#x27;number&#x27;))</span>
@@ -411,52 +607,119 @@ segment_summary = frame.groupby(&quot;segment&quot;).agg(
 <span>plt.show()</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Produce a concise EDA summary with text and visuals for a chosen dataset. <strong>Hint:</strong> organize the notebook as question → scope/grain → quality → univariate → relationships/segments → findings/caveats, not in execution order alone.</li>
-<li>Add a data-quality section with issues and next steps. <strong>Hint:</strong> for each issue record evidence, possible impact, proposed treatment, and how that treatment will be validated.</li>
+<li>Produce a concise EDA for one local or already-cached dataset, organized as question → provenance/scope/grain → quality → univariate distributions → relationships/segments → findings/caveats. <strong>Expected behavior:</strong> every table/plot answers a written question and has an observation plus limitation. <strong>Constraint:</strong> avoid causal language and full-data dumps. <strong>Verify:</strong> restart and reproduce all results top to bottom.</li>
 </ol>
-<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Add a data-quality register with one row per issue: evidence/count, possible analytical impact, proposed treatment, validation check, and status. <strong>Coverage:</strong> missingness, duplicates/key uniqueness, ranges, categories, and at least one dataset-specific rule. <strong>Verify:</strong> trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats.</li>
+</ol>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Organize exploratory data analysis around questions, grain, quality, and evidence. Separate observed patterns from hypotheses and causal claims.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict how one extreme value can change mean, median, standard deviation, and a scatterplot. <strong>Progressive hint:</strong> Robust and non-robust summaries respond differently to outliers.</li>
-<li><strong>Tracing:</strong> Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward. <strong>Progressive hint:</strong> Aggregation discards within-customer event detail.</li>
-<li><strong>Implementation:</strong> Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts. <strong>Progressive hint:</strong> Bound the result rather than dumping every row/value.</li>
-<li><strong>Debugging:</strong> Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal. <strong>Progressive hint:</strong> Remove leakage and label correlations as associations.</li>
-<li><strong>Edge case and explanation:</strong> Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful. <strong>Progressive hint:</strong> A calculation returning a number does not guarantee interpretability.</li>
+<li><strong>Prediction:</strong> Predict how one extreme value can change mean, median, standard deviation, and a scatterplot. <strong>Progressive hint:</strong> Robust and non-robust summaries respond differently to outliers. <strong>Verify:</strong> Compute statistics before/after adding the extreme value; record the exact mean/median/std changes and describe the visible plot-scale effect.</li>
+<li><strong>Tracing:</strong> Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward. <strong>Progressive hint:</strong> Aggregation discards within-customer event detail. <strong>Verify:</strong> List questions answerable at transaction grain, then assert the customer summary row count/uniqueness and identify at least one detail that cannot be recovered.</li>
+<li><strong>Implementation:</strong> Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts. <strong>Progressive hint:</strong> Bound the result rather than dumping every row/value. <strong>Verify:</strong> Run the profile on ordinary, empty, duplicate, and missing fixtures; assert bounded keys/counts/rates without embedding full data values.</li>
+<li><strong>Debugging:</strong> Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal. <strong>Progressive hint:</strong> Remove leakage and label correlations as associations. <strong>Verify:</strong> Remove the target-derived field, recompute the association, and label it noncausal; assert the leakage column cannot enter the reported matrix.</li>
+<li><strong>Edge case and explanation:</strong> Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful. <strong>Progressive hint:</strong> A calculation returning a number does not guarantee interpretability. <strong>Verify:</strong> Detect constant/all-missing/tiny columns and assert each is skipped or annotated according to policy rather than reported as an interpretable statistic.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Predict first. Then write small code and assertions below each label.</span>
-<span># Keep the official solution closed until you have tested an honest attempt.</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Produce a concise EDA for one local or already-cached dataset, organized as question → provenance/scope/grain → quality → univariate distributions → relationships/segments → findings/caveats. <strong>Expected behavior:</strong> every table/plot answers a written question and has an observation plus limitation. <strong>Constraint:</strong> avoid causal language and full-data dumps. <strong>Verify:</strong> restart and reproduce all results top to bottom.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
+<span># Short contract: Produce a concise EDA for one local or already-cached dataset, organized as question → provenance/scope/grain → quality → univariate distributions → relationships/segments → fin...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 3 — Prediction</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Add a data-quality register with one row per issue: evidence/count, possible analytical impact, proposed treatment, validation check, and status. <strong>Coverage:</strong> missingness, duplicates/key uniqueness, ranges, categories, and at least one dataset-specific rule. <strong>Verify:</strong> trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
+<span># Short contract: Add a data-quality register with one row per issue: evidence/count, possible analytical impact, proposed treatment, validation check, and status. missingness, duplicates/key uni...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 4 — Tracing</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict how one extreme value can change mean, median, standard deviation, and a scatterplot. <strong>Progressive hint:</strong> Robust and non-robust summaries respond differently to outliers. <strong>Verify:</strong> Compute statistics before/after adding the extreme value; record the exact mean/median/std changes and describe the visible plot-scale effect.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
+<span># Short contract: Predict how one extreme value can change mean, median, standard deviation, and a scatterplot. Robust and non-robust summaries respond differently to outliers. Compute statistics...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 5 — Implementation</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward. <strong>Progressive hint:</strong> Aggregation discards within-customer event detail. <strong>Verify:</strong> List questions answerable at transaction grain, then assert the customer summary row count/uniqueness and identify at least one detail that cannot be recovered.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
+<span># Short contract: Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward. Aggregation discards within-customer event det...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 6 — Debugging</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts. <strong>Progressive hint:</strong> Bound the result rather than dumping every row/value. <strong>Verify:</strong> Run the profile on ordinary, empty, duplicate, and missing fixtures; assert bounded keys/counts/rates without embedding full data values.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
+<span># Short contract: Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts. Bound the result rather than dumping every row/value. Run the pro...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 7 — Edge case and explanation</span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal. <strong>Progressive hint:</strong> Remove leakage and label correlations as associations. <strong>Verify:</strong> Remove the target-derived field, recompute the association, and label it noncausal; assert the leakage column cannot enter the reported matrix.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
+<span># Short contract: Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal. Remove leakage and label correlations as associ...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful. <strong>Progressive hint:</strong> A calculation returning a number does not guarantee interpretability. <strong>Verify:</strong> Detect constant/all-missing/tiny columns and assert each is skipped or annotated according to policy rather than reported as an interpretable statistic.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
+<span># Short contract: Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful. A calculation returning a number does not guarantee interpr...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -480,88 +743,174 @@ segment_summary = frame.groupby(&quot;segment&quot;).agg(
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-24-solutions-eda-best-practices">Day 24 — Solutions: EDA Best Practices<a class="heading-anchor" href="#solution-1--day-24-solutions-eda-best-practices" aria-label="Link to this section">#</a></h3>
-<p>We follow a checklist to produce a concise EDA with visuals and document data quality issues.</p>
-<p>Contents</p>
+<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
+<p>These worked answers demonstrate <strong>question-led exploratory data analysis with evidence, caveats, and quality checks</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
+<p>Exploratory data analysis (EDA) is a disciplined conversation with a dataset, not a gallery of every possible chart. Start with an analytical question, source/provenance, row grain, keys, and scope. Then inspect data quality, individual distributions, relationships, segments, and unusual records in an order that helps answer that question.</p>
+<p>Separate an observation (“the median differs”) from a hypothesis (“one segment may behave differently”) and from a causal claim, which EDA alone normally cannot establish. Every table or chart needs a sentence about evidence and a caveat. Missingness, duplicates, outliers, tiny samples, and target leakage can make technically valid calculations misleading.</p>
+<h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
-<li>Exercise 1: EDA summary (text + visuals)</li>
-<li>Exercise 2: Document data quality issues and next steps</li>
+<li><strong>EDA:</strong> exploratory data analysis, structured investigation before formal conclusions.</li>
+<li><strong>provenance:</strong> where data came from and under what conditions.</li>
+<li><strong>distribution:</strong> the pattern of values, frequency, center, spread, and shape.</li>
+<li><strong>outlier:</strong> an observation unusually distant under a stated context.</li>
+<li><strong>association:</strong> a measured relationship that does not itself prove causation.</li>
+<li><strong>leakage:</strong> information unavailable at the intended decision time contaminating analysis/modeling.</li>
 </ul>
-<hr>
-<p>Exercise 1 — EDA summary</p>
-<pre><code class="language-python">import pandas as pd, seaborn as sns, matplotlib.pyplot as plt
-sns.set_theme(style=&#x27;whitegrid&#x27;)
+<h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
+<p>For this lesson&#x27;s <strong>question-led exploratory data analysis with evidence, caveats, and quality checks</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Produce a concise EDA for one local or already-cached dataset, organized as question → provenance/scope/grain → quality → univariate distributions → relationships/segments → findings/caveats. <strong>Expected behavior:</strong> every table/plot answers a written question and has an observation plus limitation. <strong>Constraint:</strong> avoid causal language and full-data dumps. <strong>Verify:</strong> restart and reproduce all results top to bottom.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Produce a concise EDA for one local or already-cached dataset, organized as question → provenance/scope/grain → quality → univariate distributions → relationships/segments → findings/caveats. Expected behavior: every table/plot answers a written question and has an observation plus limitation. Constraint: avoid causal language and full-data dumps. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: restart and reproduce all results top to bottom. That connects the answer to question-led exploratory data analysis with evidence, caveats, and quality checks.</p>
+<pre><code class="language-python">import pandas as pd
 
-df = sns.load_dataset(&#x27;penguins&#x27;)
 
-# Overview
-print(df.info())
-print(df.describe(include=&#x27;number&#x27;).T)
-print(df.isna().mean().sort_values(ascending=False).head())
+def compact_profile(frame: pd.DataFrame) -&gt; dict[str, object]:
+    numeric = frame.select_dtypes(&quot;number&quot;)
+    return {
+        &quot;shape&quot;: frame.shape,
+        &quot;duplicate_rows&quot;: int(frame.duplicated().sum()),
+        &quot;missing_rate&quot;: frame.isna().mean().round(3).to_dict(),
+        &quot;numeric_min&quot;: numeric.min().to_dict(),
+        &quot;numeric_max&quot;: numeric.max().to_dict(),
+        &quot;unique&quot;: frame.nunique(dropna=False).to_dict(),
+    }
 
-# Distributions
-sns.histplot(data=df, x=&#x27;body_mass_g&#x27;, hue=&#x27;sex&#x27;, kde=True, element=&#x27;step&#x27;)
-plt.title(&#x27;Body mass by Sex&#x27;); plt.tight_layout(); plt.show()
 
-# Relationships
-sns.scatterplot(data=df, x=&#x27;bill_length_mm&#x27;, y=&#x27;bill_depth_mm&#x27;, hue=&#x27;species&#x27;)
-plt.title(&#x27;Bill length vs depth by species&#x27;); plt.tight_layout(); plt.show()
-
-# Correlations (numeric only)
-sns.heatmap(df.corr(numeric_only=True), annot=False, cmap=&#x27;viridis&#x27;)
-plt.title(&#x27;Correlation (numeric)&#x27;); plt.tight_layout(); plt.show()</code></pre>
-<p>Narrative</p>
-<ul>
-<li>Summarize key distributions and any skew</li>
-<li>Note segments with clear separation (e.g., species differences)</li>
-<li>List candidate features and questions to answer next</li>
-</ul>
-<hr>
-<p>Exercise 2 — Data quality notes Template</p>
-<ul>
-<li>Missingness: which columns; strategy (drop, impute)</li>
-<li>Dtypes: convert categorical columns to category; parse dates</li>
-<li>Duplicates/outliers: detection and treatment</li>
-<li>Leakage risks (if target present); split strategy</li>
-</ul>
-<p>Example</p>
-<pre><code class="language-python">notes = {
-    &#x27;missing&#x27;: df.isna().mean().to_dict(),
-    &#x27;dtype_suggestion&#x27;: {&#x27;species&#x27;: &#x27;category&#x27;, &#x27;island&#x27;: &#x27;category&#x27;},
-    &#x27;next_steps&#x27;: [&#x27;impute flipper_length_mm with group median&#x27;,
-                   &#x27;derive bill_ratio = length/depth&#x27;,
-                   &#x27;segment visuals by island&#x27;]
+sample = pd.DataFrame({
+    &quot;customer&quot;: [1, 2, 2, 3, 4],
+    &quot;amount&quot;: [10.0, 20.0, 20.0, None, 200.0],
+    &quot;segment&quot;: [&quot;new&quot;, &quot;returning&quot;, &quot;returning&quot;, &quot;new&quot;, &quot;unknown&quot;],
+})
+profile = compact_profile(sample)
+scope = {
+    &quot;question&quot;: &quot;How does known amount differ by customer segment?&quot;,
+    &quot;provenance&quot;: &quot;constructed offline Day 24 fixture&quot;,
+    &quot;grain&quot;: &quot;one customer observation per row before duplicate review&quot;,
+    &quot;rows&quot;: len(sample),
 }
-print(notes)</code></pre>
-<hr>
-<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
-<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Produce a concise EDA summary with text and visuals for a chosen dataset. <strong>Hint:</strong> organize the notebook as question → scope/grain → quality → univariate → relationships/segments → findings/caveats, not in execution order alone.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Add a data-quality section with issues and next steps. <strong>Hint:</strong> for each issue record evidence, possible impact, proposed treatment, and how that treatment will be validated.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-3-prediction">Exercise 3 — Prediction<a class="heading-anchor" href="#solution-1--exercise-3-prediction" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Predict how one extreme value can change mean, median, standard deviation, and a scatterplot.</p>
-<p><strong>Reasoning checkpoint:</strong> Robust and non-robust summaries respond differently to outliers. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-4-tracing">Exercise 4 — Tracing<a class="heading-anchor" href="#solution-1--exercise-4-tracing" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward.</p>
-<p><strong>Reasoning checkpoint:</strong> Aggregation discards within-customer event detail. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-5-implementation">Exercise 5 — Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts.</p>
-<p><strong>Reasoning checkpoint:</strong> Bound the result rather than dumping every row/value. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-6-debugging">Exercise 6 — Debugging<a class="heading-anchor" href="#solution-1--exercise-6-debugging" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal.</p>
-<p><strong>Reasoning checkpoint:</strong> Remove leakage and label correlations as associations. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-7-edge-case-and-explanation">Exercise 7 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-7-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful.</p>
-<p><strong>Reasoning checkpoint:</strong> A calculation returning a number does not guarantee interpretability. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+amount_distribution = sample[&quot;amount&quot;].describe()
+segment_summary = (
+    sample.groupby(&quot;segment&quot;, dropna=False, as_index=False)
+    .agg(
+        rows=(&quot;customer&quot;, &quot;size&quot;),
+        known_amounts=(&quot;amount&quot;, &quot;count&quot;),
+        total_amount=(&quot;amount&quot;, &quot;sum&quot;),
+        median_amount=(&quot;amount&quot;, &quot;median&quot;),
+    )
+)
+observations = [
+    {
+        &quot;evidence&quot;: &quot;1/5 rows has missing amount&quot;,
+        &quot;limitation&quot;: &quot;the missingness cause is unknown&quot;,
+    },
+    {
+        &quot;evidence&quot;: &quot;unknown segment contains one 200-unit observation&quot;,
+        &quot;limitation&quot;: &quot;one row cannot describe a population pattern&quot;,
+    },
+]
+
+assert profile[&quot;shape&quot;] == (5, 3)
+assert profile[&quot;duplicate_rows&quot;] == 1
+assert amount_distribution[&quot;count&quot;] == 4
+assert segment_summary[&quot;rows&quot;].sum() == len(sample)
+assert segment_summary[&quot;total_amount&quot;].sum() == sample[&quot;amount&quot;].sum()
+assert all({&quot;evidence&quot;, &quot;limitation&quot;} &lt;= item.keys() for item in observations)</code></pre>
+<p>The sequence is explicit: question and provenance, row grain, quality profile, univariate distribution, segment relationship, then bounded observations with limitations. The 200-unit row is an observed outlier, not proof that its segment causes higher amounts.</p>
+<p><strong>Verification evidence:</strong> restart and reproduce all results top to bottom.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Add a data-quality register with one row per issue: evidence/count, possible analytical impact, proposed treatment, validation check, and status. <strong>Coverage:</strong> missingness, duplicates/key uniqueness, ranges, categories, and at least one dataset-specific rule. <strong>Verify:</strong> trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Add a data-quality register with one row per issue: evidence/count, possible analytical impact, proposed treatment, validation check, and status. Coverage: missingness, duplicates/key uniqueness, ranges, categories, and at least one dataset-specific rule. Record the named value, shape, label, or iterator position needed to establish: trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats. The trace exposes question-led exploratory data analysis with evidence, caveats, and quality checks directly.</p>
+<pre><code class="language-python">quality_issues = pd.DataFrame([
+    {
+        &quot;issue&quot;: &quot;duplicate business key&quot;,
+        &quot;evidence&quot;: 1,
+        &quot;possible_impact&quot;: &quot;double-counted amount&quot;,
+        &quot;proposed_treatment&quot;: &quot;remove the exact repeated row&quot;,
+        &quot;validation&quot;: &quot;customer key uniqueness and total reconciliation&quot;,
+        &quot;status&quot;: &quot;accepted&quot;,
+    },
+    {
+        &quot;issue&quot;: &quot;missing amount&quot;,
+        &quot;evidence&quot;: int(sample[&quot;amount&quot;].isna().sum()),
+        &quot;possible_impact&quot;: &quot;incomplete totals&quot;,
+        &quot;proposed_treatment&quot;: &quot;retain until source policy is known&quot;,
+        &quot;validation&quot;: &quot;missing count remains visible&quot;,
+        &quot;status&quot;: &quot;open&quot;,
+    },
+    {
+        &quot;issue&quot;: &quot;amount range&quot;,
+        &quot;evidence&quot;: int(sample[&quot;amount&quot;].gt(100).sum()),
+        &quot;possible_impact&quot;: &quot;extreme values dominate totals&quot;,
+        &quot;proposed_treatment&quot;: &quot;retain and report robust summaries&quot;,
+        &quot;validation&quot;: &quot;median and maximum both reported&quot;,
+        &quot;status&quot;: &quot;accepted&quot;,
+    },
+    {
+        &quot;issue&quot;: &quot;unexpected category&quot;,
+        &quot;evidence&quot;: int(sample[&quot;segment&quot;].eq(&quot;unknown&quot;).sum()),
+        &quot;possible_impact&quot;: &quot;segment comparison is incomplete&quot;,
+        &quot;proposed_treatment&quot;: &quot;preserve as explicit unknown&quot;,
+        &quot;validation&quot;: &quot;unknown remains a visible group&quot;,
+        &quot;status&quot;: &quot;open&quot;,
+    },
+    {
+        &quot;issue&quot;: &quot;customer-specific nonnegative amount rule&quot;,
+        &quot;evidence&quot;: int(sample[&quot;amount&quot;].lt(0).sum()),
+        &quot;possible_impact&quot;: &quot;negative amount would invert totals&quot;,
+        &quot;proposed_treatment&quot;: &quot;quarantine negatives if observed&quot;,
+        &quot;validation&quot;: &quot;accepted known amounts are nonnegative&quot;,
+        &quot;status&quot;: &quot;accepted&quot;,
+    },
+])
+assert set(quality_issues.columns) == {
+    &quot;issue&quot;, &quot;evidence&quot;, &quot;possible_impact&quot;,
+    &quot;proposed_treatment&quot;, &quot;validation&quot;, &quot;status&quot;
+}
+
+before_rows = len(sample)
+before_total = sample[&quot;amount&quot;].sum()
+treated = sample.drop_duplicates([&quot;customer&quot;], keep=&quot;first&quot;)
+treatment_impact = {
+    &quot;rows_removed&quot;: before_rows - len(treated),
+    &quot;known_amount_removed&quot;: float(before_total - treated[&quot;amount&quot;].sum()),
+}
+assert treatment_impact == {
+    &quot;rows_removed&quot;: 1,
+    &quot;known_amount_removed&quot;: 20.0,
+}
+assert quality_issues.loc[
+    quality_issues[&quot;status&quot;].eq(&quot;open&quot;), &quot;issue&quot;
+].tolist() == [&quot;missing amount&quot;, &quot;unexpected category&quot;]</code></pre>
+<p>Only the accepted exact-duplicate treatment changes data here, and its row/amount impact is reconciled. Missingness and the unknown category remain unresolved caveats instead of being silently removed.</p>
+<p><strong>Verification evidence:</strong> trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats.</p>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict how one extreme value can change mean, median, standard deviation, and a scatterplot. <strong>Progressive hint:</strong> Robust and non-robust summaries respond differently to outliers. <strong>Verify:</strong> Compute statistics before/after adding the extreme value; record the exact mean/median/std changes and describe the visible plot-scale effect.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict how one extreme value can change mean, median, standard deviation, and a scatterplot. Progressive hint: Robust and non-robust summaries respond differently to outliers. Then compare the prediction with this proof target: Compute statistics before/after adding the extreme value; record the exact mean/median/std changes and describe the visible plot-scale effect. This makes question-led exploratory data analysis with evidence, caveats, and quality checks observable instead of relying on intuition.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Compute statistics before/after adding the extreme value; record the exact mean/median/std changes and describe the visible plot-scale effect.</p>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward. <strong>Progressive hint:</strong> Aggregation discards within-customer event detail. <strong>Verify:</strong> List questions answerable at transaction grain, then assert the customer summary row count/uniqueness and identify at least one detail that cannot be recovered.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward. Progressive hint: Aggregation discards within-customer event detail. Record the named value, shape, label, or iterator position needed to establish: List questions answerable at transaction grain, then assert the customer summary row count/uniqueness and identify at least one detail that cannot be recovered. The trace exposes question-led exploratory data analysis with evidence, caveats, and quality checks directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> List questions answerable at transaction grain, then assert the customer summary row count/uniqueness and identify at least one detail that cannot be recovered.</p>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts. <strong>Progressive hint:</strong> Bound the result rather than dumping every row/value. <strong>Verify:</strong> Run the profile on ordinary, empty, duplicate, and missing fixtures; assert bounded keys/counts/rates without embedding full data values.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts. Progressive hint: Bound the result rather than dumping every row/value. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Run the profile on ordinary, empty, duplicate, and missing fixtures; assert bounded keys/counts/rates without embedding full data values. That connects the answer to question-led exploratory data analysis with evidence, caveats, and quality checks.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Run the profile on ordinary, empty, duplicate, and missing fixtures; assert bounded keys/counts/rates without embedding full data values.</p>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal. <strong>Progressive hint:</strong> Remove leakage and label correlations as associations. <strong>Verify:</strong> Remove the target-derived field, recompute the association, and label it noncausal; assert the leakage column cannot enter the reported matrix.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal. Progressive hint: Remove leakage and label correlations as associations. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Remove the target-derived field, recompute the association, and label it noncausal; assert the leakage column cannot enter the reported matrix. The diagnosis depends on question-led exploratory data analysis with evidence, caveats, and quality checks.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Remove the target-derived field, recompute the association, and label it noncausal; assert the leakage column cannot enter the reported matrix.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful. <strong>Progressive hint:</strong> A calculation returning a number does not guarantee interpretability. <strong>Verify:</strong> Detect constant/all-missing/tiny columns and assert each is skipped or annotated according to policy rather than reported as an interpretable statistic.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful. Progressive hint: A calculation returning a number does not guarantee interpretability. Values below, at, and above the named boundary must produce the evidence Detect constant/all-missing/tiny columns and assert each is skipped or annotated according to policy rather than reported as an interpretable statistic. Those cases show how question-led exploratory data analysis with evidence, caveats, and quality checks behaves at its edge.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Detect constant/all-missing/tiny columns and assert each is skipped or annotated according to policy rather than reported as an interpretable statistic.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Organize exploratory data analysis around questions, grain, quality, and evidence. Separate observed patterns from hypotheses and causal claims.</p>
-<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
-<h5 id="solution-1--practices-1-2-robust-summaries-and-grain">Practices 1–2 — Robust summaries and grain<a class="heading-anchor" href="#solution-1--practices-1-2-robust-summaries-and-grain" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-robust-summaries-and-grain">Shared implementation for Exercises 3–4 — Robust summaries and grain<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-robust-summaries-and-grain" aria-label="Link to this section">#</a></h5>
 <p>An extreme value can move the mean and standard deviation substantially, while the median is usually more stable. Aggregating transactions to one row per customer supports customer questions but loses event order and transaction variation.</p>
-<h5 id="solution-1--practices-3-5-a-bounded-profile-with-interpretation-guards">Practices 3–5 — A bounded profile with interpretation guards<a class="heading-anchor" href="#solution-1--practices-3-5-a-bounded-profile-with-interpretation-guards" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-a-bounded-profile-with-interpretation-guards">Shared implementation for Exercises 5–7 — A bounded profile with interpretation guards<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-a-bounded-profile-with-interpretation-guards" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">import pandas as pd
 
 
@@ -597,7 +946,7 @@ assert profile[&quot;unique_count&quot;][&quot;constant&quot;] == 1
 # Tiny groups may be shown as raw points but should not receive stable trend claims.</code></pre>
 <p>Target-derived columns must be excluded from pre-model EDA of predictors. Correlation is descriptive evidence of association; a causal claim needs design assumptions and additional evidence.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -605,7 +954,7 @@ assert profile[&quot;unique_count&quot;][&quot;constant&quot;] == 1
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -718,7 +1067,38 @@ assert profile[&quot;unique_count&quot;][&quot;constant&quot;] == 1
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Target-derived columns must be excluded from pre-model EDA of predictors. Correlation is descriptive evidence of association; a causal claim needs design assumptions and additional evidence.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-24`
+(Day 24 — Exploratory Data Analysis Best Practices). Direct catalog prerequisites: `python-23`.
+I have completed the direct prerequisites: `python-23`. Emphasize question-led exploratory data analysis with evidence, caveats, and quality checks.
+Read `python/ds-60day/companion-guides/day24_eda_best_practices.md` and use the learner notebook
+`python/ds-60day/notebooks/day24_eda_best_practices.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-23.html"><small>Previous lesson</small><strong>python-23</strong><span>Data Pipelines Generators</span></a>
@@ -810,6 +1190,23 @@ assert profile[&quot;unique_count&quot;][&quot;constant&quot;] == 1
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

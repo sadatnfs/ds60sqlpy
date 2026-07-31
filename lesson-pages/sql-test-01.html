@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-test-01/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--sql-test-01-sql-tests-migration-checks-and-data-contracts">SQL-TEST-01 — SQL Tests, Migration Checks, and Data Contracts<a class="heading-anchor" href="#guide--sql-test-01-sql-tests-migration-checks-and-data-contracts" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -289,6 +388,48 @@
 <p>Run on any supported operating system:</p>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_test_01_contracts_migrations.sql</code></pre>
 <p>The harness needs no third-party framework and rolls back its test schema.</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-TEST-01 — SQL Tests, Migration Checks, and Data Contracts</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-test-01/lesson/workspace/sql/professional/lessons/sql_test_01_contracts_migrations.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\professional\lessons\sql_test_01_contracts_migrations.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/professional/lessons/sql_test_01_contracts_migrations.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Assertion, Fixture, Negative control, Contract, Invariant test, Reconciliation. Its worked SQL reads or creates <code>pro_contract_test_lab.schema_migrations</code>, <code>pro_contract_test_lab.customers</code>, <code>pro_contract_test_lab.orders</code>, <code>pro_contract_test_lab.order_lines</code>, <code>pro_contract_test_lab.fixture_manifest</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: asserttrue(name, condition, detail) treats both false and NULL as failure, raises an exception, and emits a PASS notice only after success. With ONERRORSTOP=1, an uncaught failed assertion gives the command a nonzero exit status—CI cannot mistake printed warnings for success. The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for <code>pro_contract_test_lab.schema_migrations</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final <code>SELECT</code>. Verify the command tag in <code>pg_catalog</code>/<code>information_schema</code>, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit <code>NULL</code>, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/professional/lessons/sql_test_01_contracts_migrations.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">CREATE TABLE pro_contract_test_lab.schema_migrations (
+    migration_id integer PRIMARY KEY,
+    migration_name text NOT NULL UNIQUE
+);</code></pre>
+<p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
+<p><strong>Expected result/shape:</strong> Example 1 must print the expected DDL command tag for <code>pro_contract_test_lab.schema_migrations</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">CREATE TABLE pro_contract_test_lab.customers (
+    customer_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    customer_key text NOT NULL UNIQUE,
+    display_name text NOT NULL CHECK (btrim(display_name) &lt;&gt; &#x27;&#x27;)
+);</code></pre>
+<p><strong>How to read it:</strong> Example 2 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
+<p><strong>Expected result/shape:</strong> Example 2 must print the expected DDL command tag for <code>pro_contract_test_lab.customers</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Build fail-fast SQL assertions, deterministic owned fixtures, and schema contract comparisons.</li>
@@ -318,16 +459,16 @@
 <p>For each check, write expected result, observed result, result grain, and failure action. Detection is not automatic remediation permission.</p>
 <p>Make every test fail loudly on the wrong result and independently verify the test harness with a negative control:</p>
 <ol>
-<li><strong>Currency migration:</strong> update migration manifest and expected contract for the new required defaulted column.</li>
-<li><strong>Producer duplicates:</strong> report duplicate groups and participating detail rows without confusing their grains.</li>
-<li><strong>Key contracts:</strong> inspect defaults, primary/unique keys, and foreign keys by properties rather than generated names.</li>
-<li><strong>Zero-line reconciliation:</strong> preserve every order and distinguish absent detail from a numeric zero.</li>
-<li><strong>Harness:</strong> document fixture ownership, isolation, negative control, CI exit, and cleanup.</li>
-<li><strong>Expected SQLSTATE:</strong> reject a duplicate for the intended category and fail if no error or the wrong error occurs.</li>
-<li><strong>Boundary matrix:</strong> drive below/exact/above/malformed/NULL cases from data with an expected outcome for each.</li>
-<li><strong>Concurrency:</strong> specify sessions, barriers, timeouts, observed states, deterministic assertions, and cleanup.</li>
-<li><strong>Schema fingerprint:</strong> compare stable semantic properties while excluding OIDs and unstable generated names.</li>
-<li><strong>Destructive rehearsal:</strong> restore, migrate, reconcile, test critical queries, measure, assess rollback, and preserve approval evidence.</li>
+<li><strong>Currency migration:</strong> update migration manifest and expected contract for the new required defaulted column. <strong>Inputs/evidence:</strong> For sql-test-01 Exercise 1, alter <code>pro_contract_test_lab.orders</code> with required <code>currency_code character(3) DEFAULT &#x27;USD&#x27;</code>, add migration ID 3, and extend the expected column contract inside the rollback-only fixture. <strong>Expected result/shape:</strong> For sql-test-01 Exercise 1, expected output: the version and currency assertions pass, followed by one evidence row with migration IDs <code>{1,2,3}</code>, type <code>character</code>, length 3, <code>is_nullable = &#x27;NO&#x27;</code>, and a default containing USD. <strong>Verify:</strong> For sql-test-01 Exercise 1, independently query the ordered migration IDs and the <code>information_schema.columns</code> row; then change the length or omit migration 3 in a negative control and require the assertion to raise.</li>
+<li><strong>Producer duplicates:</strong> report duplicate groups and participating detail rows without confusing their grains. <strong>Inputs/evidence:</strong> For sql-test-01 Exercise 2, populate <code>pro_contract_test_lab.raw_orders</code> with two <code>ORD-100</code> producer rows and one <code>ORD-101</code> row, then group by <code>source_order_key</code> and retain duplicate groups with <code>HAVING COUNT(*) &gt; 1</code>. <strong>Expected result/shape:</strong> For sql-test-01 Exercise 2, expected output: one row per duplicate producer key with columns <code>source_order_key</code> and <code>participating_rows</code>, ordered by key; the supplied fixture returns <code>ORD-100</code> with 2 participating rows. <strong>Verify:</strong> For sql-test-01 Exercise 2, independently assert one duplicate group and two participating rows; add another <code>ORD-100</code> plus two <code>ORD-102</code> rows and prove both groups appear once while <code>ORD-101</code> remains absent.</li>
+<li><strong>Key contracts:</strong> inspect defaults, primary/unique keys, and foreign keys by properties rather than generated names. <strong>Inputs/evidence:</strong> For sql-test-01 Exercise 3, inspect order defaults through <code>information_schema.columns</code> and inspect primary, unique, and foreign-key semantics through <code>pg_constraint</code>, <code>pg_class</code>, and <code>pg_namespace</code> without relying on generated names. <strong>Expected result/shape:</strong> For sql-test-01 Exercise 3, expected output: four named assertions pass for the required defaults, primary key on <code>order_id</code>, unique key on <code>order_key</code>, and <code>customer_id</code> foreign key; no constraint name is contractual. <strong>Verify:</strong> For sql-test-01 Exercise 3, render candidates with <code>pg_get_constraintdef</code>, require exactly one semantic match per rule, and prove a negative control looking for a nonexistent <code>UNIQUE (reported_total)</code> contract raises.</li>
+<li><strong>Zero-line reconciliation:</strong> preserve every order and distinguish absent detail from a numeric zero. <strong>Inputs/evidence:</strong> For sql-test-01 Exercise 4, pre-aggregate <code>pro_contract_test_lab.order_lines</code> by <code>order_id</code>, LEFT JOIN those totals to every order, and apply the stated policy that no lines means numeric zero. <strong>Expected result/shape:</strong> For sql-test-01 Exercise 4, expected output: one row per order with <code>order_id</code>, <code>order_key</code>, <code>reported_total</code>, <code>line_total</code>, and <code>reconciles</code>, ordered by <code>order_id</code>; zero-line orders remain and show zero. <strong>Verify:</strong> For sql-test-01 Exercise 4, reconcile output count and unique IDs with the orders table, prove <code>ORD-200</code> totals 5 and <code>ORD-201</code> totals 0, then corrupt a reported total under a savepoint and require the assertion to fail.</li>
+<li><strong>Harness:</strong> document fixture ownership, isolation, negative control, CI exit, and cleanup. <strong>Inputs/evidence:</strong> For sql-test-01 Exercise 5, derive a harness checklist from the fixture manifest, outer transaction, caught negative control, raised assertions, final rollback, and psql <code>ON_ERROR_STOP=1</code> behavior. <strong>Expected result/shape:</strong> For sql-test-01 Exercise 5, expected output: exactly four ordered rows with <code>step_number</code>, <code>control_name</code>, <code>required_evidence</code>, and <code>failure_if_missing</code>, covering fixture ownership, rollback isolation, negative control, and process failure. <strong>Verify:</strong> For sql-test-01 Exercise 5, run one intentionally false assertion in a disposable invocation and require a nonzero psql exit, then rerun the valid suite and confirm rollback leaves no <code>pro_contract_test_lab</code> schema.</li>
+<li><strong>Expected SQLSTATE:</strong> reject a duplicate for the intended category and fail if no error or the wrong error occurs. <strong>Inputs/evidence:</strong> For sql-test-01 Exercise 6, record the order count, attempt a duplicate <code>order_key</code> inside a nested exception block, capture returned SQLSTATE and constraint name, and record the post-attempt count. <strong>Expected result/shape:</strong> For sql-test-01 Exercise 6, expected output: one <code>negative_test_results</code> row showing SQLSTATE <code>23505</code>, a nonblank constraint name, unchanged before/after counts, and <code>passed = true</code>, followed by a passing assertion. <strong>Verify:</strong> For sql-test-01 Exercise 6, fail if the insert succeeds or raises any category other than <code>unique_violation</code>, compare the before/after counts independently, and verify the duplicate row is absent.</li>
+<li><strong>Boundary matrix:</strong> drive below/exact/above/malformed/NULL cases from data with an expected outcome for each. <strong>Inputs/evidence:</strong> For sql-test-01 Exercise 7, drive six quantity cases—below, lower bound, upper bound, above, NULL, and malformed—from data, executing each insert in its own exception subtransaction and recording observed SQLSTATE. <strong>Expected result/shape:</strong> For sql-test-01 Exercise 7, expected output: six rows with <code>case_id</code>, raw value, expected/observed acceptance, observed SQLSTATE, and <code>matches</code>; bounds 1 and 100 pass, and all four invalid cases fail with their intended category. <strong>Verify:</strong> For sql-test-01 Exercise 7, require exactly six unique case IDs and no false <code>matches</code>, independently inspect accepted rows, and prove an omitted or misclassified case makes the final assertion raise.</li>
+<li><strong>Concurrency:</strong> specify sessions, barriers, timeouts, observed states, deterministic assertions, and cleanup. <strong>Inputs/evidence:</strong> For sql-test-01 Exercise 8, specify a two-session lock test with named setup, session barriers, bounded lock and statement timeouts, captured outcomes, deterministic final reconciliation, and cleanup. <strong>Expected result/shape:</strong> For sql-test-01 Exercise 8, expected output: seven ordered protocol rows with <code>step_number</code>, <code>session_name</code>, <code>action</code>, <code>wait_for</code>, <code>expected_observation</code>, and <code>failure_evidence</code>, from setup through cleanup. <strong>Verify:</strong> For sql-test-01 Exercise 8, execute the protocol only in two disposable sessions, capture both transcripts and the final row, require one committed owner plus the expected losing outcome, and restore the fixture even after failure.</li>
+<li><strong>Schema fingerprint:</strong> compare stable semantic properties while excluding OIDs and unstable generated names. <strong>Inputs/evidence:</strong> For sql-test-01 Exercise 9, inventory ordered order-column properties from <code>information_schema.columns</code> and semantic constraint definitions from PostgreSQL catalogs, excluding OIDs, statistics, timestamps, and generated names. <strong>Expected result/shape:</strong> For sql-test-01 Exercise 9, expected output: one deterministic result set at one-row-per-column grain and another at one-row-per-constraint grain, with definitions ordered by constraint type and definition. <strong>Verify:</strong> For sql-test-01 Exercise 9, compare visible semantic rows before any hash, inject one missing and one unexpected property, and prove both drift directions are diagnosable without depending on an OID or generated name.</li>
+<li><strong>Destructive rehearsal:</strong> restore, migrate, reconcile, test critical queries, measure, assess rollback, and preserve approval evidence. <strong>Inputs/evidence:</strong> For sql-test-01 Exercise 10, describe a destructive-migration rehearsal in an isolated restored database, covering artifact identity, baseline contracts, migration evidence, reconciliation, application checks, recovery decision, approval, and cleanup. <strong>Expected result/shape:</strong> For sql-test-01 Exercise 10, expected output: eight ordered rows with <code>phase_number</code>, <code>phase_name</code>, and <code>required_evidence</code>, beginning with restore and ending with cleanup; the SQL lesson records the plan but does not perform an external restore. <strong>Verify:</strong> For sql-test-01 Exercise 10, rehearse against a disposable representative restore, inject one missing or invalid artifact, require validation to stop before cutover, and archive measured duration, rollback limits, approval, and cleanup evidence.</li>
 </ol>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -353,17 +494,45 @@
 <li>Golden snapshots without reviewed change policy normalize accidental drift.</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-analytics-01.html#guide">SQL-ANALYTICS-01 — reusable analytical query patterns</a> and apply these assertion/reconciliation habits to every pattern. Pair this module with migration delivery so contract tests run on both fresh installs and upgrades.</p></div>
+<p>Continue to <a href="sql-analytics-01.html#guide">SQL-ANALYTICS-01 — reusable analytical query patterns</a> and apply these assertion/reconciliation habits to every pattern. Pair this module with migration delivery so contract tests run on both fresh installs and upgrades.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-test-01 — SQL Tests, Migration Checks, and Data Contracts.
+
+I have completed the direct catalog prerequisites: `sql-found-02`, `sql-42`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/professional/companion-guides/sql_test_01_contracts_migrations.md
+- Answer-free learner SQL: sql/professional/lessons/sql_test_01_contracts_migrations.sql
+
+Key terms to teach in context: Assertion, Fixture, Negative control, Contract, Invariant test, Reconciliation. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: asserttrue(name, condition, detail) treats both false and NULL as failure, raises an exception, and emits a PASS notice only after success. With ONERRORSTOP=1, an uncaught failed assertion gives the command a nonzero exit status—CI cannot mistake printed warnings for success.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-test-01/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -380,13 +549,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-TEST-01: SQL tests, migration checks, and data contracts</span>
+<span>-- BEGINNER WORKFLOW — sql-test-01: SQL Tests, Migration Checks, and Data Contracts</span>
+<span>-- Guide: sql/professional/companion-guides/sql_test_01_contracts_migrations.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-test-01/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: pro_contract_test_lab.schema_migrations, pro_contract_test_lab.customers, pro_contract_test_lab.orders, pro_contract_test_lab.order_lines, pro_contract_test_lab.fixture_manifest.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>-- Target: PostgreSQL 16+</span>
 <span> </span>
 <span>\set ON_ERROR_STOP on</span>
@@ -670,52 +856,102 @@
 <span>-- 1. Add migration 3: currency_code character(3) NOT NULL DEFAULT &#x27;USD&#x27;.</span>
 <span>--    Update the expected contract and prove versions 1-3 are exact.</span>
 <span>--</span>
+<span>--    Inputs: For sql-test-01 Exercise 1, alter `pro_contract_test_lab.orders` with required `currency_code character(3) DEFAULT &#x27;USD&#x27;`, add migration ID 3, and extend the expected column contract inside the rollback-only fixture.</span>
+<span>--    Expected result/shape: For sql-test-01 Exercise 1, expected output: the version and currency assertions pass, followed by one evidence row with migration IDs `{1,2,3}`, type `character`, length 3, `is_nullable = &#x27;NO&#x27;`, and a default containing USD.</span>
+<span>--    Verify: For sql-test-01 Exercise 1, independently query the ordered migration IDs and the `information_schema.columns` row; then change the length or omit migration 3 in a negative control and require the assertion to raise.</span>
+<span>--    Hint ladder, rung 1: Inspect `information_schema.columns` before writing</span>
+<span>--    the assertion so you know PostgreSQL&#x27;s exact type and default rendering.</span>
 <span>-- 2. Create a raw producer fixture with duplicate source_order_key values.</span>
 <span>--    Write one summary check and one detail query; label whether you count</span>
 <span>--    duplicate groups, keys, or participating rows.</span>
 <span>--</span>
+<span>--    Inputs: For sql-test-01 Exercise 2, populate `pro_contract_test_lab.raw_orders` with two `ORD-100` producer rows and one `ORD-101` row, then group by `source_order_key` and retain duplicate groups with `HAVING COUNT(*) &gt; 1`.</span>
+<span>--    Expected result/shape: For sql-test-01 Exercise 2, expected output: one row per duplicate producer key with columns `source_order_key` and `participating_rows`, ordered by key; the supplied fixture returns `ORD-100` with 2 participating rows.</span>
+<span>--    Verify: For sql-test-01 Exercise 2, independently assert one duplicate group and two participating rows; add another `ORD-100` plus two `ORD-102` rows and prove both groups appear once while `ORD-101` remains absent.</span>
+<span>--    Hint ladder, rung 1: `WHERE` filters rows before grouping; duplicate</span>
+<span>--    detection needs `GROUP BY ... HAVING COUNT(*) &gt; 1`.</span>
 <span>-- 3. Add contract checks for defaults, primary/unique keys, and the customer</span>
 <span>--    foreign key without depending on generated constraint names.</span>
 <span>--</span>
+<span>--    Inputs: For sql-test-01 Exercise 3, inspect order defaults through `information_schema.columns` and inspect primary, unique, and foreign-key semantics through `pg_constraint`, `pg_class`, and `pg_namespace` without relying on generated names.</span>
+<span>--    Expected result/shape: For sql-test-01 Exercise 3, expected output: four named assertions pass for the required defaults, primary key on `order_id`, unique key on `order_key`, and `customer_id` foreign key; no constraint name is contractual.</span>
+<span>--    Verify: For sql-test-01 Exercise 3, render candidates with `pg_get_constraintdef`, require exactly one semantic match per rule, and prove a negative control looking for a nonexistent `UNIQUE (reported_total)` contract raises.</span>
+<span>--    Hint ladder, rung 1: Filter by schema, table, `contype`, and rendered</span>
+<span>--    definition; `conname` is not stable enough for this contract.</span>
 <span>-- 4. Add a reconciliation that includes orders with zero lines and distinguishes</span>
 <span>--    a missing total from numeric zero.</span>
 <span>--</span>
+<span>--    Inputs: For sql-test-01 Exercise 4, pre-aggregate `pro_contract_test_lab.order_lines` by `order_id`, LEFT JOIN those totals to every order, and apply the stated policy that no lines means numeric zero.</span>
+<span>--    Expected result/shape: For sql-test-01 Exercise 4, expected output: one row per order with `order_id`, `order_key`, `reported_total`, `line_total`, and `reconciles`, ordered by `order_id`; zero-line orders remain and show zero.</span>
+<span>--    Verify: For sql-test-01 Exercise 4, reconcile output count and unique IDs with the orders table, prove `ORD-200` totals 5 and `ORD-201` totals 0, then corrupt a reported total under a savepoint and require the assertion to fail.</span>
+<span>--    Hint ladder, rung 1: Aggregate lines before joining; otherwise an order</span>
+<span>--    with several lines changes the output grain.</span>
 <span>-- 5. Explain fixture ownership, rollback isolation, negative controls, and why</span>
 <span>--    a test that only prints failures is unsafe in CI.</span>
 <span>--</span>
+<span>--    Inputs: For sql-test-01 Exercise 5, derive a harness checklist from the fixture manifest, outer transaction, caught negative control, raised assertions, final rollback, and psql `ON_ERROR_STOP=1` behavior.</span>
+<span>--    Expected result/shape: For sql-test-01 Exercise 5, expected output: exactly four ordered rows with `step_number`, `control_name`, `required_evidence`, and `failure_if_missing`, covering fixture ownership, rollback isolation, negative control, and process failure.</span>
+<span>--    Verify: For sql-test-01 Exercise 5, run one intentionally false assertion in a disposable invocation and require a nonzero psql exit, then rerun the valid suite and confirm rollback leaves no `pro_contract_test_lab` schema.</span>
+<span>--    Hint ladder, rung 1: Separate “the test detected the defect” from “the</span>
+<span>--    command returned a failing process status.”</span>
 <span>-- 6. Assert that duplicate source_order_key fails with the expected SQLSTATE and</span>
 <span>--    constraint category. Explain why matching the entire localized error text</span>
 <span>--    or accepting any exception makes a brittle or false-positive test.</span>
 <span>--</span>
+<span>--    Inputs: For sql-test-01 Exercise 6, record the order count, attempt a duplicate `order_key` inside a nested exception block, capture returned SQLSTATE and constraint name, and record the post-attempt count.</span>
+<span>--    Expected result/shape: For sql-test-01 Exercise 6, expected output: one `negative_test_results` row showing SQLSTATE `23505`, a nonblank constraint name, unchanged before/after counts, and `passed = true`, followed by a passing assertion.</span>
+<span>--    Verify: For sql-test-01 Exercise 6, fail if the insert succeeds or raises any category other than `unique_violation`, compare the before/after counts independently, and verify the duplicate row is absent.</span>
+<span>--    Hint ladder, rung 1: Match the stable SQLSTATE/category first; treat the</span>
+<span>--    full localized message as diagnostic text, not a test contract.</span>
 <span>-- 7. Build table-driven boundary fixtures for quantity, money, dates, NULL, and</span>
 <span>--    Unicode text. Include just-below, exact-boundary, just-above, and malformed</span>
 <span>--    cases, with an explicit expected outcome for every row.</span>
 <span>--</span>
+<span>--    Inputs: For sql-test-01 Exercise 7, drive six quantity cases—below, lower bound, upper bound, above, NULL, and malformed—from data, executing each insert in its own exception subtransaction and recording observed SQLSTATE.</span>
+<span>--    Expected result/shape: For sql-test-01 Exercise 7, expected output: six rows with `case_id`, raw value, expected/observed acceptance, observed SQLSTATE, and `matches`; bounds 1 and 100 pass, and all four invalid cases fail with their intended category.</span>
+<span>--    Verify: For sql-test-01 Exercise 7, require exactly six unique case IDs and no false `matches`, independently inspect accepted rows, and prove an omitted or misclassified case makes the final assertion raise.</span>
+<span>--    Hint ladder, rung 1: Expected rejection must be caught in a nested</span>
+<span>--    subtransaction so the remaining cases still execute and get recorded.</span>
 <span>-- 8. Design a two-session concurrency test for lost updates or double claims.</span>
 <span>--    Document synchronization barriers, timeouts, cleanup, deterministic pass</span>
 <span>--    criteria, and why a single transaction cannot reproduce every anomaly.</span>
 <span>--</span>
+<span>--    Inputs: For sql-test-01 Exercise 8, specify a two-session lock test with named setup, session barriers, bounded lock and statement timeouts, captured outcomes, deterministic final reconciliation, and cleanup.</span>
+<span>--    Expected result/shape: For sql-test-01 Exercise 8, expected output: seven ordered protocol rows with `step_number`, `session_name`, `action`, `wait_for`, `expected_observation`, and `failure_evidence`, from setup through cleanup.</span>
+<span>--    Verify: For sql-test-01 Exercise 8, execute the protocol only in two disposable sessions, capture both transcripts and the final row, require one committed owner plus the expected losing outcome, and restore the fixture even after failure.</span>
+<span>--    Hint ladder, rung 1: A deterministic barrier is something one session can</span>
+<span>--    observe (a lock or harness signal), not “wait about two seconds.”</span>
 <span>-- 9. Capture a stable schema fingerprint before and after a migration. Exclude</span>
 <span>--    volatile OIDs and generated names, but detect changed types, defaults,</span>
 <span>--    nullability, constraints, indexes, privileges, and routine signatures.</span>
 <span>--</span>
+<span>--    Inputs: For sql-test-01 Exercise 9, inventory ordered order-column properties from `information_schema.columns` and semantic constraint definitions from PostgreSQL catalogs, excluding OIDs, statistics, timestamps, and generated names.</span>
+<span>--    Expected result/shape: For sql-test-01 Exercise 9, expected output: one deterministic result set at one-row-per-column grain and another at one-row-per-constraint grain, with definitions ordered by constraint type and definition.</span>
+<span>--    Verify: For sql-test-01 Exercise 9, compare visible semantic rows before any hash, inject one missing and one unexpected property, and prove both drift directions are diagnosable without depending on an OID or generated name.</span>
+<span>--    Hint ladder, rung 1: A hash is only stable after every input row and field</span>
+<span>--    has a deterministic representation and order.</span>
 <span>-- 10. Rehearse a destructive migration against a disposable restored database.</span>
 <span>--     Compare row counts, checksums, rejected rows, critical queries, rollback</span>
 <span>--     feasibility, elapsed time, and application compatibility before approval.</span>
+<span>--    Inputs: For sql-test-01 Exercise 10, describe a destructive-migration rehearsal in an isolated restored database, covering artifact identity, baseline contracts, migration evidence, reconciliation, application checks, recovery decision, approval, and cleanup.</span>
+<span>--    Expected result/shape: For sql-test-01 Exercise 10, expected output: eight ordered rows with `phase_number`, `phase_name`, and `required_evidence`, beginning with restore and ending with cleanup; the SQL lesson records the plan but does not perform an external restore.</span>
+<span>--    Verify: For sql-test-01 Exercise 10, rehearse against a disposable representative restore, inject one missing or invalid artifact, require validation to stop before cutover, and archive measured duration, rollback limits, approval, and cleanup evidence.</span>
+<span>--    Hint ladder, rung 1: Treat the rehearsal record as evidence about one</span>
+<span>--    exact artifact and migration revision, not as a timeless promise.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span>\echo &#x27;SQL-TEST-01 complete: pro_contract_test_lab was rolled back&#x27;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -739,37 +975,117 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--sql-test-01-solutions-contracts-and-migration-checks">SQL-TEST-01 Solutions — Contracts and Migration Checks<a class="heading-anchor" href="#solution-1--sql-test-01-solutions-contracts-and-migration-checks" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\professional\solutions\sql_test_01_contracts_migrations_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/professional/solutions/sql_test_01_contracts_migrations_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are Assertion, Fixture, Negative control, Contract, Invariant test, Reconciliation. Its worked-model focus is: asserttrue(name, condition, detail) treats both false and NULL as failure, raises an exception, and emits a PASS notice only after success. With ONERRORSTOP=1, an uncaught failed assertion gives the command a nonzero exit status—CI cannot mistake printed warnings for success.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>Run:</p>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_test_01_contracts_migrations_solutions.sql</code></pre>
 <p>The solution rolls back its schema and uses only PostgreSQL catalogs.</p>
 <h4 id="solution-1--exercise-1-migration-and-currency-contract">Exercise 1 — Migration and currency contract<a class="heading-anchor" href="#solution-1--exercise-1-migration-and-currency-contract" aria-label="Link to this section">#</a></h4>
 <p>The exact manifest is <code>ARRAY[1,2,3]</code>. The column contract checks information schema type <code>character</code>, length 3, <code>NOT NULL</code>, and a USD default. A production contract should additionally define ISO vocabulary, conversion policy, and whether totals may combine currencies.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-test-01 Exercise 1, alter <code>pro_contract_test_lab.orders</code> with required <code>currency_code character(3) DEFAULT &#x27;USD&#x27;</code>, add migration ID 3, and extend the expected column contract inside the rollback-only fixture.</li>
+<li><strong>Expected result/shape:</strong> For sql-test-01 Exercise 1, expected output: the version and currency assertions pass, followed by one evidence row with migration IDs <code>{1,2,3}</code>, type <code>character</code>, length 3, <code>is_nullable = &#x27;NO&#x27;</code>, and a default containing USD.</li>
+<li><strong>Independent verification:</strong> For sql-test-01 Exercise 1, independently query the ordered migration IDs and the <code>information_schema.columns</code> row; then change the length or omit migration 3 in a negative control and require the assertion to raise.</li>
+</ul>
 <h4 id="solution-1--exercise-2-duplicate-producer-keys">Exercise 2 — Duplicate producer keys<a class="heading-anchor" href="#solution-1--exercise-2-duplicate-producer-keys" aria-label="Link to this section">#</a></h4>
 <p>The detail query returns one row per duplicate key group and labels its count <code>participating_rows</code>. The summary wraps that query and expects one duplicate group. Counting all rows with a window would answer a different grain.</p>
 <p>Raw staging intentionally permits duplicates so the contract test can observe them. Curated storage should add the appropriate key only after a duplicate resolution policy is explicit.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-test-01 Exercise 2, populate <code>pro_contract_test_lab.raw_orders</code> with two <code>ORD-100</code> producer rows and one <code>ORD-101</code> row, then group by <code>source_order_key</code> and retain duplicate groups with <code>HAVING COUNT(*) &gt; 1</code>.</li>
+<li><strong>Expected result/shape:</strong> For sql-test-01 Exercise 2, expected output: one row per duplicate producer key with columns <code>source_order_key</code> and <code>participating_rows</code>, ordered by key; the supplied fixture returns <code>ORD-100</code> with 2 participating rows.</li>
+<li><strong>Independent verification:</strong> For sql-test-01 Exercise 2, independently assert one duplicate group and two participating rows; add another <code>ORD-100</code> plus two <code>ORD-102</code> rows and prove both groups appear once while <code>ORD-101</code> remains absent.</li>
+</ul>
 <h4 id="solution-1--exercise-3-constraint-contracts">Exercise 3 — Constraint contracts<a class="heading-anchor" href="#solution-1--exercise-3-constraint-contracts" aria-label="Link to this section">#</a></h4>
 <p>The solution searches <code>pg_constraint</code> by schema, relation, type, and rendered definition rather than relying on an auto-generated name. A more rigorous helper can inspect <code>conkey</code> attribute numbers directly. Test semantic properties while allowing harmless naming differences.</p>
 <p>Primary keys, foreign keys, checks, defaults, ownership, privileges, indexes, and RLS policies may all be part of a migration contract.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-test-01 Exercise 3, inspect order defaults through <code>information_schema.columns</code> and inspect primary, unique, and foreign-key semantics through <code>pg_constraint</code>, <code>pg_class</code>, and <code>pg_namespace</code> without relying on generated names.</li>
+<li><strong>Expected result/shape:</strong> For sql-test-01 Exercise 3, expected output: four named assertions pass for the required defaults, primary key on <code>order_id</code>, unique key on <code>order_key</code>, and <code>customer_id</code> foreign key; no constraint name is contractual.</li>
+<li><strong>Independent verification:</strong> For sql-test-01 Exercise 3, render candidates with <code>pg_get_constraintdef</code>, require exactly one semantic match per rule, and prove a negative control looking for a nonexistent <code>UNIQUE (reported_total)</code> contract raises.</li>
+</ul>
 <h4 id="solution-1--exercise-4-zero-line-reconciliation">Exercise 4 — Zero-line reconciliation<a class="heading-anchor" href="#solution-1--exercise-4-zero-line-reconciliation" aria-label="Link to this section">#</a></h4>
 <p>A LEFT JOIN retains orders with no line aggregate. <code>COALESCE(line_total, 0)</code> implements the stated rule that no lines sum to numeric zero. Without that business rule, missing may need to remain NULL and fail separately. <code>IS DISTINCT FROM</code> compares NULL safely.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-test-01 Exercise 4, pre-aggregate <code>pro_contract_test_lab.order_lines</code> by <code>order_id</code>, LEFT JOIN those totals to every order, and apply the stated policy that no lines means numeric zero.</li>
+<li><strong>Expected result/shape:</strong> For sql-test-01 Exercise 4, expected output: one row per order with <code>order_id</code>, <code>order_key</code>, <code>reported_total</code>, <code>line_total</code>, and <code>reconciles</code>, ordered by <code>order_id</code>; zero-line orders remain and show zero.</li>
+<li><strong>Independent verification:</strong> For sql-test-01 Exercise 4, reconcile output count and unique IDs with the orders table, prove <code>ORD-200</code> totals 5 and <code>ORD-201</code> totals 0, then corrupt a reported total under a savepoint and require the assertion to fail.</li>
+</ul>
 <h4 id="solution-1--exercise-5-harness-reasoning">Exercise 5 — Harness reasoning<a class="heading-anchor" href="#solution-1--exercise-5-harness-reasoning" aria-label="Link to this section">#</a></h4>
 <p>Fixtures belong to this test module, carry deterministic keys/content tags, and live in a rollback-isolated schema. A negative control proves failure detection. CI requires raised errors plus <code>ON_ERROR_STOP=1</code>; human-readable failure rows alone can still exit zero.</p>
 <p>Tests must never reset production/shared schemas. Use a disposable database, per-run schema/database, or transaction whose code does not require commits.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-test-01 Exercise 5, derive a harness checklist from the fixture manifest, outer transaction, caught negative control, raised assertions, final rollback, and psql <code>ON_ERROR_STOP=1</code> behavior.</li>
+<li><strong>Expected result/shape:</strong> For sql-test-01 Exercise 5, expected output: exactly four ordered rows with <code>step_number</code>, <code>control_name</code>, <code>required_evidence</code>, and <code>failure_if_missing</code>, covering fixture ownership, rollback isolation, negative control, and process failure.</li>
+<li><strong>Independent verification:</strong> For sql-test-01 Exercise 5, run one intentionally false assertion in a disposable invocation and require a nonzero psql exit, then rerun the valid suite and confirm rollback leaves no <code>pro_contract_test_lab</code> schema.</li>
+</ul>
 <h4 id="solution-1--exercise-6-assert-the-intended-error">Exercise 6 — Assert the intended error<a class="heading-anchor" href="#solution-1--exercise-6-assert-the-intended-error" aria-label="Link to this section">#</a></h4>
 <p>Wrap the duplicate insert in a nested block, require <code>unique_violation</code> (SQLSTATE <code>23505</code>), and raise if the insert succeeds. Optionally inspect <code>CONSTRAINT_NAME</code> with <code>GET STACKED DIAGNOSTICS</code> when the exact stable constraint is contractual; do not accept every integrity error as proof of this rule.</p>
 <p>Full server messages vary with version, locale, detail, and object names. Matching them makes tests brittle, while <code>WHEN OTHERS</code> can falsely pass on permissions, missing objects, or syntax defects.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-test-01 Exercise 6, record the order count, attempt a duplicate <code>order_key</code> inside a nested exception block, capture returned SQLSTATE and constraint name, and record the post-attempt count.</li>
+<li><strong>Expected result/shape:</strong> For sql-test-01 Exercise 6, expected output: one <code>negative_test_results</code> row showing SQLSTATE <code>23505</code>, a nonblank constraint name, unchanged before/after counts, and <code>passed = true</code>, followed by a passing assertion.</li>
+<li><strong>Independent verification:</strong> For sql-test-01 Exercise 6, fail if the insert succeeds or raises any category other than <code>unique_violation</code>, compare the before/after counts independently, and verify the duplicate row is absent.</li>
+</ul>
 <h4 id="solution-1--exercise-7-table-driven-boundaries">Exercise 7 — Table-driven boundaries<a class="heading-anchor" href="#solution-1--exercise-7-table-driven-boundaries" aria-label="Link to this section">#</a></h4>
 <p>Represent cases as rows with case ID, input fields, and expected accept/reject or normalized result. Cover just below, exact, and just above numeric/date bounds; NULL versus empty; Unicode normalization/case/length; malformed values; and arithmetic overflow/rounding.</p>
 <p>Execute each case in an isolated subtransaction when rejection is expected and record observed SQLSTATE. Finally assert every case ran exactly once and matched its expected outcome so an accidentally filtered case cannot disappear.</p>
+<h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-test-01 Exercise 7, drive six quantity cases—below, lower bound, upper bound, above, NULL, and malformed—from data, executing each insert in its own exception subtransaction and recording observed SQLSTATE.</li>
+<li><strong>Expected result/shape:</strong> For sql-test-01 Exercise 7, expected output: six rows with <code>case_id</code>, raw value, expected/observed acceptance, observed SQLSTATE, and <code>matches</code>; bounds 1 and 100 pass, and all four invalid cases fail with their intended category.</li>
+<li><strong>Independent verification:</strong> For sql-test-01 Exercise 7, require exactly six unique case IDs and no false <code>matches</code>, independently inspect accepted rows, and prove an omitted or misclassified case makes the final assertion raise.</li>
+</ul>
 <h4 id="solution-1--exercise-8-deterministic-concurrency-test">Exercise 8 — Deterministic concurrency test<a class="heading-anchor" href="#solution-1--exercise-8-deterministic-concurrency-test" aria-label="Link to this section">#</a></h4>
 <p>Use two independent sessions because one PostgreSQL transaction cannot observe every competing-transaction anomaly. Establish fixture state, set short <code>lock_timeout</code>/<code>statement_timeout</code>, coordinate named barriers, perform the interleaving, commit/rollback explicitly, and assert final rows plus errors.</p>
 <p>Avoid arbitrary sleeps as the only synchronization—they create flaky tests. Use locks/advisory barriers or a harness that waits for observable session state, capture both session logs, and always clean a disposable target after failure.</p>
+<h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-test-01 Exercise 8, specify a two-session lock test with named setup, session barriers, bounded lock and statement timeouts, captured outcomes, deterministic final reconciliation, and cleanup.</li>
+<li><strong>Expected result/shape:</strong> For sql-test-01 Exercise 8, expected output: seven ordered protocol rows with <code>step_number</code>, <code>session_name</code>, <code>action</code>, <code>wait_for</code>, <code>expected_observation</code>, and <code>failure_evidence</code>, from setup through cleanup.</li>
+<li><strong>Independent verification:</strong> For sql-test-01 Exercise 8, execute the protocol only in two disposable sessions, capture both transcripts and the final row, require one committed owner plus the expected losing outcome, and restore the fixture even after failure.</li>
+</ul>
 <h4 id="solution-1--exercise-9-stable-schema-fingerprint">Exercise 9 — Stable schema fingerprint<a class="heading-anchor" href="#solution-1--exercise-9-stable-schema-fingerprint" aria-label="Link to this section">#</a></h4>
 <p>Canonicalize ordered semantic rows for columns/types/defaults/nullability, constraints and referenced columns, indexes/predicates/operator classes, privileges/policies, and routine signatures/attributes. Compare expected and observed rows directly before hashing so drift remains diagnosable.</p>
 <p>Exclude OIDs, relation file identifiers, statistics, timestamps, and auto-generated names unless explicitly contractual. Test both missing and unexpected objects; a one-way expected-subset check misses accidental exposure.</p>
+<h5 id="solution-1--reasoning-and-verification-9">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-9" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-test-01 Exercise 9, inventory ordered order-column properties from <code>information_schema.columns</code> and semantic constraint definitions from PostgreSQL catalogs, excluding OIDs, statistics, timestamps, and generated names.</li>
+<li><strong>Expected result/shape:</strong> For sql-test-01 Exercise 9, expected output: one deterministic result set at one-row-per-column grain and another at one-row-per-constraint grain, with definitions ordered by constraint type and definition.</li>
+<li><strong>Independent verification:</strong> For sql-test-01 Exercise 9, compare visible semantic rows before any hash, inject one missing and one unexpected property, and prove both drift directions are diagnosable without depending on an OID or generated name.</li>
+</ul>
 <h4 id="solution-1--exercise-10-destructive-migration-rehearsal">Exercise 10 — Destructive migration rehearsal<a class="heading-anchor" href="#solution-1--exercise-10-destructive-migration-rehearsal" aria-label="Link to this section">#</a></h4>
 <p>Restore a representative, access-isolated backup to a disposable database, record tool/server versions and baseline contracts, run the exact migration, then reconcile counts/checksums/rejected keys and execute critical read/write queries with compatible application versions.</p>
 <p>Measure locks, WAL, lag proxy, storage, and elapsed time. Determine whether rollback preserves new writes or whether recovery requires restore/forward fix. Archive results, approvals, cleanup, gaps, and owners; never infer production permission from a successful course fixture.</p>
+<h5 id="solution-1--reasoning-and-verification-10">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-10" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-test-01 Exercise 10, describe a destructive-migration rehearsal in an isolated restored database, covering artifact identity, baseline contracts, migration evidence, reconciliation, application checks, recovery decision, approval, and cleanup.</li>
+<li><strong>Expected result/shape:</strong> For sql-test-01 Exercise 10, expected output: eight ordered rows with <code>phase_number</code>, <code>phase_name</code>, and <code>required_evidence</code>, beginning with restore and ending with cleanup; the SQL lesson records the plan but does not perform an external restore.</li>
+<li><strong>Independent verification:</strong> For sql-test-01 Exercise 10, rehearse against a disposable representative restore, inject one missing or invalid artifact, require validation to stop before cutover, and archive measured duration, rollback limits, approval, and cleanup evidence.</li>
+</ul>
 <h4 id="solution-1--edge-cases">Edge cases<a class="heading-anchor" href="#solution-1--edge-cases" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>DDL that commits externally cannot be isolated by one rollback.</li>
@@ -778,7 +1094,7 @@
 <li>Reconciliation tolerances need explicit units and rounding rules.</li>
 </ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -786,7 +1102,7 @@
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -810,6 +1126,19 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-TEST-01 executable solutions</span>
+<span>-- SOLUTION READING MAP — sql-test-01: SQL Tests, Migration Checks, and Data Contracts</span>
+<span>-- Explanation: sql/professional/solutions/sql_test_01_contracts_migrations_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_test_01_contracts_migrations_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>\set ON_ERROR_STOP on</span>
 <span>BEGIN;</span>
 <span>SET LOCAL search_path TO pg_catalog, public;</span>
@@ -838,9 +1167,21 @@
 <span>    migration_name text NOT NULL UNIQUE</span>
 <span>);</span>
 <span> </span>
+<span>CREATE TABLE pro_contract_test_lab.customers (</span>
+<span>    customer_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
+<span>    customer_key text NOT NULL UNIQUE</span>
+<span>);</span>
+<span> </span>
+<span>INSERT INTO pro_contract_test_lab.customers (customer_key)</span>
+<span>VALUES (&#x27;CUS-100&#x27;);</span>
+<span> </span>
 <span>CREATE TABLE pro_contract_test_lab.orders (</span>
 <span>    order_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
 <span>    order_key text NOT NULL UNIQUE,</span>
+<span>    customer_id bigint NOT NULL DEFAULT 1</span>
+<span>        REFERENCES pro_contract_test_lab.customers (customer_id),</span>
+<span>    status text NOT NULL DEFAULT &#x27;open&#x27;</span>
+<span>        CHECK (status IN (&#x27;open&#x27;, &#x27;paid&#x27;, &#x27;cancelled&#x27;)),</span>
 <span>    reported_total numeric(12, 2) NOT NULL,</span>
 <span>    currency_code character(3) NOT NULL DEFAULT &#x27;USD&#x27;</span>
 <span>);</span>
@@ -876,6 +1217,20 @@
 <span>    ),</span>
 <span>    &#x27;currency_code type, nullability, length, or default drifted&#x27;</span>
 <span>);</span>
+<span> </span>
+<span>SELECT</span>
+<span>    (</span>
+<span>        SELECT array_agg(sm.migration_id ORDER BY sm.migration_id)</span>
+<span>        FROM pro_contract_test_lab.schema_migrations AS sm</span>
+<span>    ) AS migration_ids,</span>
+<span>    c.data_type,</span>
+<span>    c.character_maximum_length,</span>
+<span>    c.is_nullable,</span>
+<span>    c.column_default</span>
+<span>FROM information_schema.columns AS c</span>
+<span>WHERE c.table_schema = &#x27;pro_contract_test_lab&#x27;</span>
+<span>  AND c.table_name = &#x27;orders&#x27;</span>
+<span>  AND c.column_name = &#x27;currency_code&#x27;;</span>
 <span> </span>
 <span>-- Exercise 2: raw producer data can contain duplicates before validation.</span>
 <span>CREATE TABLE pro_contract_test_lab.raw_orders (</span>
@@ -914,11 +1269,48 @@
 <span>    &#x27;expected one duplicate source_order_key group&#x27;</span>
 <span>);</span>
 <span> </span>
-<span>-- Exercise 3: use catalog properties rather than generated names.</span>
+<span>-- Exercise 3: use catalog properties rather than generated names. Each</span>
+<span>-- assertion tests one semantic contract and raises on absence or ambiguity.</span>
+<span>SELECT pro_contract_test_lab.assert_true(</span>
+<span>    &#x27;required defaults&#x27;,</span>
+<span>    (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM information_schema.columns AS c</span>
+<span>        WHERE c.table_schema = &#x27;pro_contract_test_lab&#x27;</span>
+<span>          AND c.table_name = &#x27;orders&#x27;</span>
+<span>          AND (</span>
+<span>              (c.column_name = &#x27;status&#x27; AND c.column_default LIKE &#x27;%open%&#x27;)</span>
+<span>              OR (</span>
+<span>                  c.column_name = &#x27;currency_code&#x27;</span>
+<span>                  AND c.column_default LIKE &#x27;%USD%&#x27;</span>
+<span>              )</span>
+<span>          )</span>
+<span>    ) = 2,</span>
+<span>    &#x27;status or currency_code default drifted&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>SELECT pro_contract_test_lab.assert_true(</span>
+<span>    &#x27;order primary key&#x27;,</span>
+<span>    (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pg_catalog.pg_constraint AS con</span>
+<span>        JOIN pg_catalog.pg_class AS rel</span>
+<span>          ON rel.oid = con.conrelid</span>
+<span>        JOIN pg_catalog.pg_namespace AS n</span>
+<span>          ON n.oid = rel.relnamespace</span>
+<span>        WHERE n.nspname = &#x27;pro_contract_test_lab&#x27;</span>
+<span>          AND rel.relname = &#x27;orders&#x27;</span>
+<span>          AND con.contype = &#x27;p&#x27;</span>
+<span>          AND pg_catalog.pg_get_constraintdef(con.oid)</span>
+<span>              = &#x27;PRIMARY KEY (order_id)&#x27;</span>
+<span>    ) = 1,</span>
+<span>    &#x27;orders.order_id primary-key contract missing or ambiguous&#x27;</span>
+<span>);</span>
+<span> </span>
 <span>SELECT pro_contract_test_lab.assert_true(</span>
 <span>    &#x27;order key unique&#x27;,</span>
-<span>    EXISTS (</span>
-<span>        SELECT 1</span>
+<span>    (</span>
+<span>        SELECT COUNT(*)</span>
 <span>        FROM pg_catalog.pg_constraint AS con</span>
 <span>        JOIN pg_catalog.pg_class AS rel</span>
 <span>          ON rel.oid = con.conrelid</span>
@@ -929,8 +1321,26 @@
 <span>          AND con.contype = &#x27;u&#x27;</span>
 <span>          AND pg_catalog.pg_get_constraintdef(con.oid)</span>
 <span>              LIKE &#x27;UNIQUE (order_key)%&#x27;</span>
-<span>    ),</span>
-<span>    &#x27;orders.order_key unique contract missing&#x27;</span>
+<span>    ) = 1,</span>
+<span>    &#x27;orders.order_key unique contract missing or ambiguous&#x27;</span>
+<span>);</span>
+<span> </span>
+<span>SELECT pro_contract_test_lab.assert_true(</span>
+<span>    &#x27;orders customer foreign key&#x27;,</span>
+<span>    (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pg_catalog.pg_constraint AS con</span>
+<span>        JOIN pg_catalog.pg_class AS rel</span>
+<span>          ON rel.oid = con.conrelid</span>
+<span>        JOIN pg_catalog.pg_namespace AS n</span>
+<span>          ON n.oid = rel.relnamespace</span>
+<span>        WHERE n.nspname = &#x27;pro_contract_test_lab&#x27;</span>
+<span>          AND rel.relname = &#x27;orders&#x27;</span>
+<span>          AND con.contype = &#x27;f&#x27;</span>
+<span>          AND pg_catalog.pg_get_constraintdef(con.oid)</span>
+<span>              LIKE &#x27;FOREIGN KEY (customer_id) REFERENCES %customers(customer_id)%&#x27;</span>
+<span>    ) = 1,</span>
+<span>    &#x27;orders.customer_id foreign-key contract missing or ambiguous&#x27;</span>
 <span>);</span>
 <span> </span>
 <span>-- Exercise 4: LEFT JOIN and COALESCE distinguish no lines from nonzero lines.</span>
@@ -948,6 +1358,23 @@
 <span>SELECT o.order_id, 5.00</span>
 <span>FROM pro_contract_test_lab.orders AS o</span>
 <span>WHERE o.order_key = &#x27;ORD-200&#x27;;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    o.order_id,</span>
+<span>    o.order_key,</span>
+<span>    o.reported_total,</span>
+<span>    COALESCE(totals.line_total, 0::numeric) AS line_total,</span>
+<span>    o.reported_total</span>
+<span>        IS NOT DISTINCT FROM COALESCE(totals.line_total, 0::numeric)</span>
+<span>        AS reconciles</span>
+<span>FROM pro_contract_test_lab.orders AS o</span>
+<span>LEFT JOIN (</span>
+<span>    SELECT ol.order_id, SUM(ol.amount) AS line_total</span>
+<span>    FROM pro_contract_test_lab.order_lines AS ol</span>
+<span>    GROUP BY ol.order_id</span>
+<span>) AS totals</span>
+<span>  ON totals.order_id = o.order_id</span>
+<span>ORDER BY o.order_id;</span>
 <span> </span>
 <span>SELECT pro_contract_test_lab.assert_true(</span>
 <span>    &#x27;zero-line reconciliation&#x27;,</span>
@@ -969,11 +1396,62 @@
 <span>-- Exercise 5: every assertion raises on failure under ON_ERROR_STOP, fixtures</span>
 <span>-- live in this rollback-isolated schema, and earlier negative controls prove</span>
 <span>-- the harness can fail.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (</span>
+<span>            1,</span>
+<span>            &#x27;fixture ownership&#x27;,</span>
+<span>            &#x27;fixture owner, content tag, and expected row count&#x27;,</span>
+<span>            &#x27;stale or cross-test data can pass accidentally&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            2,</span>
+<span>            &#x27;rollback isolation&#x27;,</span>
+<span>            &#x27;outer BEGIN and final ROLLBACK in a disposable database&#x27;,</span>
+<span>            &#x27;test DDL or DML can leak into later work&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            3,</span>
+<span>            &#x27;negative control&#x27;,</span>
+<span>            &#x27;an intentional false assertion raises and is observed&#x27;,</span>
+<span>            &#x27;a broken assertion helper can make every test look green&#x27;</span>
+<span>        ),</span>
+<span>        (</span>
+<span>            4,</span>
+<span>            &#x27;process failure&#x27;,</span>
+<span>            &#x27;raised errors plus psql ON_ERROR_STOP=1&#x27;,</span>
+<span>            &#x27;printed failure rows can still return exit status zero&#x27;</span>
+<span>        )</span>
+<span>) AS harness_controls(</span>
+<span>    step_number,</span>
+<span>    control_name,</span>
+<span>    required_evidence,</span>
+<span>    failure_if_missing</span>
+<span>)</span>
+<span>ORDER BY step_number;</span>
 <span> </span>
 <span>-- Exercise 6: require the intended SQLSTATE category and fail if no error or a</span>
 <span>-- different error occurs. Full localized error text is deliberately ignored.</span>
+<span>CREATE TABLE pro_contract_test_lab.negative_test_results (</span>
+<span>    test_name text PRIMARY KEY,</span>
+<span>    observed_sqlstate text NOT NULL,</span>
+<span>    constraint_name text NOT NULL,</span>
+<span>    row_count_before bigint NOT NULL,</span>
+<span>    row_count_after bigint NOT NULL,</span>
+<span>    passed boolean NOT NULL</span>
+<span>);</span>
+<span> </span>
 <span>DO $solution$</span>
+<span>DECLARE</span>
+<span>    before_count bigint;</span>
+<span>    after_count bigint;</span>
+<span>    actual_sqlstate text;</span>
+<span>    actual_constraint text;</span>
 <span>BEGIN</span>
+<span>    SELECT COUNT(*) INTO before_count</span>
+<span>    FROM pro_contract_test_lab.orders;</span>
+<span> </span>
 <span>    BEGIN</span>
 <span>        INSERT INTO pro_contract_test_lab.orders (</span>
 <span>            order_key, reported_total</span>
@@ -982,10 +1460,46 @@
 <span>        RAISE EXCEPTION &#x27;duplicate order key unexpectedly succeeded&#x27;;</span>
 <span>    EXCEPTION</span>
 <span>        WHEN unique_violation THEN</span>
-<span>            RAISE NOTICE &#x27;Expected unique violation observed&#x27;;</span>
+<span>            GET STACKED DIAGNOSTICS</span>
+<span>                actual_sqlstate = RETURNED_SQLSTATE,</span>
+<span>                actual_constraint = CONSTRAINT_NAME;</span>
 <span>    END;</span>
+<span> </span>
+<span>    SELECT COUNT(*) INTO after_count</span>
+<span>    FROM pro_contract_test_lab.orders;</span>
+<span> </span>
+<span>    INSERT INTO pro_contract_test_lab.negative_test_results (</span>
+<span>        test_name,</span>
+<span>        observed_sqlstate,</span>
+<span>        constraint_name,</span>
+<span>        row_count_before,</span>
+<span>        row_count_after,</span>
+<span>        passed</span>
+<span>    )</span>
+<span>    VALUES (</span>
+<span>        &#x27;duplicate order_key&#x27;,</span>
+<span>        actual_sqlstate,</span>
+<span>        actual_constraint,</span>
+<span>        before_count,</span>
+<span>        after_count,</span>
+<span>        actual_sqlstate = &#x27;23505&#x27; AND before_count = after_count</span>
+<span>    );</span>
 <span>END</span>
 <span>$solution$;</span>
+<span> </span>
+<span>SELECT *</span>
+<span>FROM pro_contract_test_lab.negative_test_results</span>
+<span>ORDER BY test_name;</span>
+<span> </span>
+<span>SELECT pro_contract_test_lab.assert_true(</span>
+<span>    &#x27;duplicate order_key negative test&#x27;,</span>
+<span>    (</span>
+<span>        SELECT ntr.passed</span>
+<span>        FROM pro_contract_test_lab.negative_test_results AS ntr</span>
+<span>        WHERE ntr.test_name = &#x27;duplicate order_key&#x27;</span>
+<span>    ),</span>
+<span>    &#x27;duplicate insert did not produce 23505 with an unchanged row count&#x27;</span>
+<span>);</span>
 <span> </span>
 <span>-- Exercise 7: table-driven exact-boundary cases. The expected outcome is data,</span>
 <span>-- so an accidentally omitted or misclassified case is visible.</span>
@@ -995,56 +1509,116 @@
 <span> </span>
 <span>CREATE TABLE pro_contract_test_lab.boundary_results (</span>
 <span>    case_id text PRIMARY KEY,</span>
+<span>    raw_value text,</span>
 <span>    expected_accept boolean NOT NULL,</span>
-<span>    observed_accept boolean NOT NULL</span>
+<span>    expected_sqlstate text,</span>
+<span>    observed_accept boolean NOT NULL,</span>
+<span>    observed_sqlstate text,</span>
+<span>    matches boolean NOT NULL</span>
 <span>);</span>
 <span> </span>
 <span>DO $solution$</span>
 <span>DECLARE</span>
 <span>    test_case record;</span>
 <span>    accepted boolean;</span>
+<span>    actual_sqlstate text;</span>
 <span>BEGIN</span>
 <span>    FOR test_case IN</span>
 <span>        SELECT *</span>
 <span>        FROM (</span>
 <span>            VALUES</span>
-<span>                (&#x27;below&#x27;::text, 0, false),</span>
-<span>                (&#x27;lower&#x27;, 1, true),</span>
-<span>                (&#x27;upper&#x27;, 100, true),</span>
-<span>                (&#x27;above&#x27;, 101, false)</span>
-<span>        ) AS cases(case_id, quantity, expected_accept)</span>
+<span>                (&#x27;01-below&#x27;::text, &#x27;0&#x27;::text, false, &#x27;23514&#x27;::text),</span>
+<span>                (&#x27;02-lower&#x27;, &#x27;1&#x27;, true, NULL),</span>
+<span>                (&#x27;03-upper&#x27;, &#x27;100&#x27;, true, NULL),</span>
+<span>                (&#x27;04-above&#x27;, &#x27;101&#x27;, false, &#x27;23514&#x27;),</span>
+<span>                (&#x27;05-null&#x27;, NULL, false, &#x27;23502&#x27;),</span>
+<span>                (&#x27;06-malformed&#x27;, &#x27;not-an-integer&#x27;, false, &#x27;22P02&#x27;)</span>
+<span>        ) AS cases(</span>
+<span>            case_id,</span>
+<span>            raw_value,</span>
+<span>            expected_accept,</span>
+<span>            expected_sqlstate</span>
+<span>        )</span>
 <span>        ORDER BY case_id</span>
 <span>    LOOP</span>
 <span>        accepted := true;</span>
+<span>        actual_sqlstate := NULL;</span>
 <span>        BEGIN</span>
 <span>            INSERT INTO pro_contract_test_lab.boundary_probe (quantity)</span>
-<span>            VALUES (test_case.quantity);</span>
+<span>            VALUES (test_case.raw_value::integer);</span>
 <span>        EXCEPTION</span>
-<span>            WHEN check_violation THEN</span>
+<span>            WHEN OTHERS THEN</span>
 <span>                accepted := false;</span>
+<span>                GET STACKED DIAGNOSTICS</span>
+<span>                    actual_sqlstate = RETURNED_SQLSTATE;</span>
 <span>        END;</span>
 <span> </span>
 <span>        INSERT INTO pro_contract_test_lab.boundary_results (</span>
-<span>            case_id, expected_accept, observed_accept</span>
+<span>            case_id,</span>
+<span>            raw_value,</span>
+<span>            expected_accept,</span>
+<span>            expected_sqlstate,</span>
+<span>            observed_accept,</span>
+<span>            observed_sqlstate,</span>
+<span>            matches</span>
 <span>        )</span>
-<span>        VALUES (test_case.case_id, test_case.expected_accept, accepted);</span>
+<span>        VALUES (</span>
+<span>            test_case.case_id,</span>
+<span>            test_case.raw_value,</span>
+<span>            test_case.expected_accept,</span>
+<span>            test_case.expected_sqlstate,</span>
+<span>            accepted,</span>
+<span>            actual_sqlstate,</span>
+<span>            test_case.expected_accept = accepted</span>
+<span>            AND test_case.expected_sqlstate IS NOT DISTINCT FROM actual_sqlstate</span>
+<span>        );</span>
 <span>    END LOOP;</span>
 <span>END</span>
 <span>$solution$;</span>
 <span> </span>
+<span>SELECT</span>
+<span>    br.case_id,</span>
+<span>    br.raw_value,</span>
+<span>    br.expected_accept,</span>
+<span>    br.observed_accept,</span>
+<span>    br.observed_sqlstate,</span>
+<span>    br.matches</span>
+<span>FROM pro_contract_test_lab.boundary_results AS br</span>
+<span>ORDER BY br.case_id;</span>
+<span> </span>
 <span>SELECT pro_contract_test_lab.assert_true(</span>
 <span>    &#x27;all quantity boundaries match&#x27;,</span>
-<span>    NOT EXISTS (</span>
+<span>    (SELECT COUNT(*) FROM pro_contract_test_lab.boundary_results) = 6</span>
+<span>    AND NOT EXISTS (</span>
 <span>        SELECT 1</span>
 <span>        FROM pro_contract_test_lab.boundary_results AS r</span>
-<span>        WHERE r.expected_accept IS DISTINCT FROM r.observed_accept</span>
+<span>        WHERE NOT r.matches</span>
 <span>    ),</span>
-<span>    &#x27;a boundary case differed from its expected acceptance&#x27;</span>
+<span>    &#x27;a boundary case was missing or differed from its expected outcome&#x27;</span>
 <span>);</span>
 <span> </span>
 <span>-- Exercise 8: concurrency needs two independent sessions, named barriers,</span>
 <span>-- bounded timeouts, captured outcomes, deterministic final assertions, and</span>
 <span>-- cleanup. One transaction cannot simulate every conflicting snapshot.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (1, &#x27;setup&#x27;, &#x27;create one unclaimed disposable row&#x27;, &#x27;both sessions idle&#x27;, &#x27;one known fixture row&#x27;, &#x27;fixture key and value&#x27;),</span>
+<span>        (2, &#x27;session-a&#x27;, &#x27;BEGIN; lock/claim the row&#x27;, &#x27;setup complete&#x27;, &#x27;session A holds the row lock&#x27;, &#x27;A transcript plus pg_locks observation&#x27;),</span>
+<span>        (3, &#x27;session-b&#x27;, &#x27;attempt the competing claim&#x27;, &#x27;session A lock visible&#x27;, &#x27;bounded wait or expected lock error&#x27;, &#x27;B SQLSTATE and elapsed time&#x27;),</span>
+<span>        (4, &#x27;session-a&#x27;, &#x27;commit the winning claim&#x27;, &#x27;session B attempted&#x27;, &#x27;one committed owner&#x27;, &#x27;A commit and returned key&#x27;),</span>
+<span>        (5, &#x27;session-b&#x27;, &#x27;retry or roll back by contract&#x27;, &#x27;session A committed&#x27;, &#x27;no second successful claim&#x27;, &#x27;B command tag or rollback&#x27;),</span>
+<span>        (6, &#x27;verify&#x27;, &#x27;reconcile row and both transcripts&#x27;, &#x27;both sessions ended&#x27;, &#x27;one owner plus expected SQLSTATEs&#x27;, &#x27;final row and both logs&#x27;),</span>
+<span>        (7, &#x27;cleanup&#x27;, &#x27;restore the disposable fixture&#x27;, &#x27;verification captured&#x27;, &#x27;original fixture state&#x27;, &#x27;post-cleanup query&#x27;)</span>
+<span>) AS protocol(</span>
+<span>    step_number,</span>
+<span>    session_name,</span>
+<span>    action,</span>
+<span>    wait_for,</span>
+<span>    expected_observation,</span>
+<span>    failure_evidence</span>
+<span>)</span>
+<span>ORDER BY step_number;</span>
 <span> </span>
 <span>-- Exercise 9: inspect ordered semantic properties; omit OIDs/statistics and</span>
 <span>-- compare rows before hashing so any drift remains diagnosable.</span>
@@ -1074,11 +1648,67 @@
 <span>-- Exercise 10: destructive migration validation belongs in a restored,</span>
 <span>-- disposable database with baseline/post counts, checksums, rejected keys,</span>
 <span>-- critical application queries, elapsed time, rollback evidence, and approval.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (1, &#x27;restore&#x27;, &#x27;artifact hash, tool/server versions, restore transcript&#x27;),</span>
+<span>        (2, &#x27;baseline contracts&#x27;, &#x27;schema inventory, counts, checksums, key samples&#x27;),</span>
+<span>        (3, &#x27;migration&#x27;, &#x27;exact revision, command status, elapsed time, lock/WAL/storage evidence&#x27;),</span>
+<span>        (4, &#x27;reconciliation&#x27;, &#x27;post counts/checksums, rejected keys, semantic differences&#x27;),</span>
+<span>        (5, &#x27;application smoke tests&#x27;, &#x27;compatible readers and writers exercised&#x27;),</span>
+<span>        (6, &#x27;recovery decision&#x27;, &#x27;rollback data-loss limit or forward-fix plan&#x27;),</span>
+<span>        (7, &#x27;approval&#x27;, &#x27;named reviewer accepts every prior evidence item&#x27;),</span>
+<span>        (8, &#x27;cleanup&#x27;, &#x27;isolated target removed or retained under named custody&#x27;)</span>
+<span>) AS rehearsal_plan(phase_number, phase_name, required_evidence)</span>
+<span>ORDER BY phase_number;</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-test-01 — SQL Tests, Migration Checks, and Data Contracts.
+
+I have completed the direct catalog prerequisites: `sql-found-02`, `sql-42`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/professional/companion-guides/sql_test_01_contracts_migrations.md
+- Answer-free learner SQL: sql/professional/lessons/sql_test_01_contracts_migrations.sql
+
+Key terms to teach in context: Assertion, Fixture, Negative control, Contract, Invariant test, Reconciliation. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: asserttrue(name, condition, detail) treats both false and NULL as failure, raises an exception, and emits a PASS notice only after success. With ONERRORSTOP=1, an uncaught failed assertion gives the command a nonzero exit status—CI cannot mistake printed warnings for success.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-test-01/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-ops-01.html"><small>Previous lesson</small><strong>sql-ops-01</strong><span>Index Types, Statistics, and Maintenance Lifecycle</span></a>
@@ -1170,6 +1800,23 @@
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

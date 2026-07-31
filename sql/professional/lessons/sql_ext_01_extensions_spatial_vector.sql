@@ -294,7 +294,7 @@ ORDER BY
 --     CVEs, reproducibility, licensing, patch ownership, and removal testing.
 --    Inputs: For sql-ext-01 Exercise 13, For one unavailable requested extension, assemble observed package availability plus reviewed source/build provenance, SBOM/native dependencies, CVEs, license, reproducibility, signer/hash, patch owner/SLA, restore compatibility, removal test, and approving authority.
 --    Expected result/shape: For sql-ext-01 Exercise 13, One row per `review_item`, with `review_item`, `observed_evidence`, `status`, `owner`, and `blocking_reason`. Unknown or missing evidence remains visible and blocks approval.
---    Verify: For sql-ext-01 Exercise 13, A successful local compile is not sufficient. Remove the source signature/SBOM or make the removal rehearsal fail; the final decision must remain `rejected`/`blocked` without installing anything. Hint ladder, rung 1: Native extension code executes inside the database server process, so provenance and patch ownership are security controls.
+--    Verify: For sql-ext-01 Exercise 13, The review output must remain `rejected`/`blocked` when the source signature/SBOM is removed or the removal rehearsal fails; a successful local compile is not sufficient and nothing is installed. Hint ladder, rung 1: Native extension code executes inside the database server process, so provenance and patch ownership are security controls.
 -- 14. Plan an extension upgrade rehearsal in a restored disposable database.
 --     Capture dependencies and plans before/after, application canaries,
 --     performance/correctness checks, backup compatibility, and rollback limits.

@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-13-functional-tools-itertools-and-functools">Day 13 — Functional Tools: <code>itertools</code> and <code>functools</code><a class="heading-anchor" href="#guide--day-13-functional-tools-itertools-and-functools" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>The standard library can transform iterables lazily and specialize or cache functions. Use these tools when they make intent clearer than hand-written state.</p>
@@ -292,6 +331,84 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 12 (<code>python-12</code>), plus generators from Day 4 (<code>python-04</code>).</p>
+<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<ol>
+<li>Confirm the course environment before changing it:</li>
+</ol>
+<pre><code class="language-powershell">   # Windows PowerShell
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   &amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash">   # macOS/Linux
+   .venv/bin/python scripts/course.py doctor</code></pre>
+<ol>
+<li>Read <code>python/ds-60day/companion-guides/day13_functional_tools.md</code>, then open <code>python/ds-60day/notebooks/day13_functional_tools.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
+<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
+<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
+<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+</ol>
+<p><strong>Lesson outcome:</strong> use day 13 — functional tools: <code>itertools</code> and <code>functools</code> to practice functions as values and composable iterable tools and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
+<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
+<p>Python functions are objects: they can be assigned to names, passed as arguments, and returned. A higher-order function accepts or returns another function. This enables small reusable operations, but an ordinary named function is usually clearer than a dense lambda once logic needs explanation.</p>
+<p><code>map</code> transforms, <code>filter</code> selects, <code>itertools</code> composes lazy iteration, and <code>functools</code> supplies function adapters and caching. List comprehensions often read more naturally for one transformation/filter; lazy tools matter when the input is a stream or too large to materialize. Avoid <code>reduce</code> when a named loop or built-in such as <code>sum</code>, <code>min</code>, or <code>max</code> states the intent better.</p>
+<h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>first-class function:</strong> a function usable as an ordinary runtime value.</li>
+<li><strong>higher-order function:</strong> a function that accepts or returns functions.</li>
+<li><strong>lambda:</strong> a small anonymous single-expression function.</li>
+<li><strong>lazy iterator:</strong> an iterator that computes values only when requested.</li>
+<li><strong>accumulator:</strong> the progressively combined value in a fold/reduction.</li>
+<li><strong>cache:</strong> stored results reused for repeated equivalent calls.</li>
+</ul>
+<h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<p><code>map(normalize, names)</code> receives the function object <code>normalize</code>—without parentheses—and an iterable. Iteration later calls it for each item. <code>sorted(records, key=lambda row: row[&quot;score&quot;])</code> calls the key function once per row to derive comparison keys; the lambda returns one expression.</p>
+<h5 id="guide--worked-example-1-pass-a-named-function-into-a-lazy-transformation">Worked example 1 — Pass a named function into a lazy transformation<a class="heading-anchor" href="#guide--worked-example-1-pass-a-named-function-into-a-lazy-transformation" aria-label="Link to this section">#</a></h5>
+<p>Keep the operation testable on its own. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">def normalize_name(text: str) -&gt; str:
+    return &quot; &quot;.join(text.strip().title().split())
+
+raw_names = [&quot;  ada lovelace&quot;, &quot;GRACE   HOPPER  &quot;]
+normalized_iter = map(normalize_name, raw_names)
+list(normalized_iter)</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`[&#x27;Ada Lovelace&#x27;, &#x27;Grace Hopper&#x27;]`. `map` is lazy; `list` consumes it.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--worked-example-2-compose-lazy-filtering-and-slicing">Worked example 2 — Compose lazy filtering and slicing<a class="heading-anchor" href="#guide--worked-example-2-compose-lazy-filtering-and-slicing" aria-label="Link to this section">#</a></h5>
+<p>Generate only as many values as the consumer requests. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">from itertools import islice
+
+squares = (number**2 for number in range(100))
+even_squares = filter(lambda value: value % 2 == 0, squares)
+list(islice(even_squares, 5))</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`[0, 4, 16, 36, 64]`. `islice` stops after five accepted values rather than consuming all 100 squares.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
+<p>When the output differs from your prediction, use this order:</p>
+<ol>
+<li>If a function runs too early, check whether you passed <code>function</code> or called <code>function(...)</code>.</li>
+<li>If output prints as a map/filter object, remember these are lazy iterators and consume only as needed.</li>
+<li>Replace a multi-step lambda with a named function and tests.</li>
+<li>Cache only functions whose result depends entirely on hashable arguments and stable external state.</li>
+</ol>
+<h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
+<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
+<ol>
+<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
+<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
+<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
+<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
+<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
+</ol>
+<p><strong>Useful alternative:</strong> Use a comprehension for a clear transform/filter, <code>itertools</code> for lazy composition, and an explicit loop when stateful branching matters.</p>
+<p><strong>Boundary to remember:</strong> One-shot iterators, infinite inputs, side effects inside transformations, unhashable cache arguments, and empty reductions require care. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Higher-order function:</strong> accepts or returns another function.</li>
@@ -305,30 +422,31 @@
 <pre><code class="language-python">from functools import lru_cache
 from itertools import chain, islice
 
-
 @lru_cache(maxsize=128)
 def expensive_label(code: int) -&gt; str:
     return f&quot;item-{code:04d}&quot;
-
 
 pages = [[1, 2], [3, 4], [5]]
 first_three = list(islice(chain.from_iterable(pages), 3))
 labels = [expensive_label(code) for code in first_three]</code></pre>
 <p><code>chain.from_iterable</code> flattens lazily. The bounded cache is useful only because the function is deterministic for a given integer.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Group <code>(key, value)</code> pairs by key with <code>itertools.groupby</code>. <strong>Hint:</strong> inspect what happens to keys that reappear later; arrange the input by the same key before grouping.</li>
-<li>Use <code>partial</code> to create a specialized function from a more general one. <strong>Hint:</strong> identify the argument that stays constant across many calls and bind only that argument.</li>
+<li>Use <code>itertools.groupby</code> to group records that are already sorted by a category key. <strong>Inputs:</strong> include the same category in separated positions before sorting. <strong>Expected behavior:</strong> after explicit sorting, each category appears once with all of its records. <strong>Constraint:</strong> explain why <code>groupby</code> groups adjacent runs rather than globally collecting unsorted data. <strong>Verify:</strong> Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record.</li>
+</ol>
+<ol>
+<li>Use <code>functools.reduce</code> to compute a product for <code>[2, 3, 4]</code>, giving an explicit identity so empty input returns <code>1</code>. <strong>Then:</strong> implement the same result with a named loop and compare readability. <strong>Verify:</strong> both return <code>24</code> and both define empty behavior; state why <code>sum</code>/<code>math.prod</code> is preferable in ordinary production code.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Use functional tools when they make data flow clearer. Preserve laziness intentionally and keep side effects at explicit boundaries.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict what remains after calling <code>next</code> on a <code>map</code> object and then converting it to a list. <strong>Progressive hint:</strong> <code>map</code> is a lazy one-shot iterator in Python 3.</li>
-<li><strong>Tracing:</strong> Trace <code>sorted(records, key=lambda row: (row[&#x27;team&#x27;], -row[&#x27;score&#x27;]))</code> and explain the tuple key. <strong>Progressive hint:</strong> Tuple components are compared left to right.</li>
-<li><strong>Implementation:</strong> Implement <code>compose(*functions)</code> so <code>compose(f, g)(x)</code> applies <code>g</code> then <code>f</code>, and handle no functions as identity. <strong>Progressive hint:</strong> Apply the reversed function sequence to the current value.</li>
-<li><strong>Debugging:</strong> Repair lambdas created in a loop that all use the final loop value. <strong>Progressive hint:</strong> Bind the current value as a default argument or use a factory function.</li>
-<li><strong>Edge case and explanation:</strong> Refactor a pipeline that prints inside <code>map</code> into pure transforms plus one explicit presentation step. <strong>Progressive hint:</strong> Pure stages are easier to test and reuse.</li>
+<li><strong>Prediction:</strong> Predict what remains after calling <code>next</code> on a <code>map</code> object and then converting it to a list. <strong>Progressive hint:</strong> <code>map</code> is a lazy one-shot iterator in Python 3. <strong>Verify:</strong> Assert the first mapped value and exact remaining list, then confirm another pass is empty because the map iterator is exhausted.</li>
+<li><strong>Tracing:</strong> Trace <code>sorted(records, key=lambda row: (row[&#x27;team&#x27;], -row[&#x27;score&#x27;]))</code> and explain the tuple key. <strong>Progressive hint:</strong> Tuple components are compared left to right. <strong>Verify:</strong> Compute each tuple key beside its record and assert final order groups team ascending and score descending within team.</li>
+<li><strong>Implementation:</strong> Implement <code>compose(*functions)</code> so <code>compose(f, g)(x)</code> applies <code>g</code> then <code>f</code>, and handle no functions as identity. <strong>Progressive hint:</strong> Apply the reversed function sequence to the current value. <strong>Verify:</strong> Assert composition order with noncommutative functions and assert <code>compose()(value)</code> returns the original value unchanged.</li>
+<li><strong>Debugging:</strong> Repair lambdas created in a loop that all use the final loop value. <strong>Progressive hint:</strong> Bind the current value as a default argument or use a factory function. <strong>Verify:</strong> Call every produced function and show the faulty results share the final loop value; assert the factory/default-binding repair preserves each intended value.</li>
+<li><strong>Edge case and explanation:</strong> Refactor a pipeline that prints inside <code>map</code> into pure transforms plus one explicit presentation step. <strong>Progressive hint:</strong> Pure stages are easier to test and reuse. <strong>Verify:</strong> Assert transformed values are identical before/after refactoring and capture presentation output only in the final explicit step.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -352,17 +470,33 @@ labels = [expensive_label(code) for code in first_three]</code></pre>
 <li><a href="python-13.html#learner">Open the learner notebook</a></li>
 <li><a href="python-13.html#solution-1">Check the separate solution</a></li>
 <li><a href="python-14.html#guide">Next: Day 14 — Ruff, mypy, and pytest</a></li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-13`
+(Day 13 — Functional Tools: `itertools` and `functools`). Direct catalog prerequisites: `python-12`.
+I have completed the direct prerequisites: `python-12`. Emphasize functions as values and composable iterable tools.
+Read `python/ds-60day/companion-guides/day13_functional_tools.md` and use the learner notebook
+`python/ds-60day/notebooks/day13_functional_tools.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -379,12 +513,12 @@ labels = [expensive_label(code) for code in first_three]</code></pre>
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-13-functional-tools-itertools-functools-map-filter-lambda">Day 13 — Functional tools: itertools, functools, map/filter, lambda<a class="heading-anchor" href="#learner--cell-1--day-13-functional-tools-itertools-functools-map-filter-lambda" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -393,7 +527,57 @@ labels = [expensive_label(code) for code in first_three]</code></pre>
 <li>functools.lru_cache and partial.</li>
 <li>When to prefer vectorization over map/filter in DS code.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import itertools as it</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
+<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>This is the editable learner artifact for <code>python-13</code>. Read <code>python/ds-60day/companion-guides/day13_functional_tools.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
+<p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
+<p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--core-mental-model">Core mental model<a class="heading-anchor" href="#learner--cell-3--core-mental-model" aria-label="Link to this section">#</a></h4>
+<p>Python functions are objects: they can be assigned to names, passed as arguments, and returned. A higher-order function accepts or returns another function. This enables small reusable operations, but an ordinary named function is usually clearer than a dense lambda once logic needs explanation.</p>
+<p><code>map</code> transforms, <code>filter</code> selects, <code>itertools</code> composes lazy iteration, and <code>functools</code> supplies function adapters and caching. List comprehensions often read more naturally for one transformation/filter; lazy tools matter when the input is a stream or too large to materialize. Avoid <code>reduce</code> when a named loop or built-in such as <code>sum</code>, <code>min</code>, or <code>max</code> states the intent better.</p>
+<h5 id="learner--cell-3--vocabulary">Vocabulary<a class="heading-anchor" href="#learner--cell-3--vocabulary" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>first-class function:</strong> a function usable as an ordinary runtime value.</li>
+<li><strong>higher-order function:</strong> a function that accepts or returns functions.</li>
+<li><strong>lambda:</strong> a small anonymous single-expression function.</li>
+<li><strong>lazy iterator:</strong> an iterator that computes values only when requested.</li>
+<li><strong>accumulator:</strong> the progressively combined value in a fold/reduction.</li>
+<li><strong>cache:</strong> stored results reused for repeated equivalent calls.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<p><code>map(normalize, names)</code> receives the function object <code>normalize</code>—without parentheses—and an iterable. Iteration later calls it for each item. <code>sorted(records, key=lambda row: row[&quot;score&quot;])</code> calls the key function once per row to derive comparison keys; the lambda returns one expression.</p>
+<h5 id="learner--cell-4--worked-example-1-pass-a-named-function-into-a-lazy-transformation">Worked example 1 — Pass a named function into a lazy transformation<a class="heading-anchor" href="#learner--cell-4--worked-example-1-pass-a-named-function-into-a-lazy-transformation" aria-label="Link to this section">#</a></h5>
+<p>Keep the operation testable on its own. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>def normalize_name(text: str) -&gt; str:</span>
+<span>    return &quot; &quot;.join(text.strip().title().split())</span>
+<span> </span>
+<span>raw_names = [&quot;  ada lovelace&quot;, &quot;GRACE   HOPPER  &quot;]</span>
+<span>normalized_iter = map(normalize_name, raw_names)</span>
+<span>list(normalized_iter)</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> <code>[&#x27;Ada Lovelace&#x27;, &#x27;Grace Hopper&#x27;]</code>. <code>map</code> is lazy; <code>list</code> consumes it.</p>
+<p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
+<h5 id="learner--cell-6--worked-example-2-compose-lazy-filtering-and-slicing">Worked example 2 — Compose lazy filtering and slicing<a class="heading-anchor" href="#learner--cell-6--worked-example-2-compose-lazy-filtering-and-slicing" aria-label="Link to this section">#</a></h5>
+<p>Generate only as many values as the consumer requests. Predict first; then run the next cell.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>from itertools import islice</span>
+<span> </span>
+<span>squares = (number**2 for number in range(100))</span>
+<span>even_squares = filter(lambda value: value % 2 == 0, squares)</span>
+<span>list(islice(even_squares, 5))</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>[0, 4, 16, 36, 64]</code>. <code>islice</code> stops after five accepted values rather than consuming all 100 squares.</p>
+<h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
+<p>When evidence differs from your prediction, use this order:</p>
+<ol>
+<li>If a function runs too early, check whether you passed <code>function</code> or called <code>function(...)</code>.</li>
+<li>If output prints as a map/filter object, remember these are lazy iterators and consume only as needed.</li>
+<li>Replace a multi-step lambda with a named function and tests.</li>
+<li>Cache only functions whose result depends entirely on hashable arguments and stable external state.</li>
+</ol>
+<p><strong>Alternative to compare:</strong> Use a comprehension for a clear transform/filter, <code>itertools</code> for lazy composition, and an explicit loop when stateful branching matters.</p>
+<p><strong>Boundary to test:</strong> One-shot iterators, infinite inputs, side effects inside transformations, unhashable cache arguments, and empty reductions require care.</p>
+<p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import itertools as it</span>
 <span>from functools import lru_cache, partial</span>
 <span> </span>
 <span>list(it.accumulate([1,2,3,4]))</span>
@@ -405,52 +589,119 @@ labels = [expensive_label(code) for code in first_three]</code></pre>
 <span>fib(30)</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Group <code>(key, value)</code> pairs by key with <code>itertools.groupby</code>. <strong>Hint:</strong> inspect what happens to keys that reappear later; arrange the input by the same key before grouping.</li>
-<li>Use <code>partial</code> to create a specialized function from a more general one. <strong>Hint:</strong> identify the argument that stays constant across many calls and bind only that argument.</li>
+<li>Use <code>itertools.groupby</code> to group records that are already sorted by a category key. <strong>Inputs:</strong> include the same category in separated positions before sorting. <strong>Expected behavior:</strong> after explicit sorting, each category appears once with all of its records. <strong>Constraint:</strong> explain why <code>groupby</code> groups adjacent runs rather than globally collecting unsorted data. <strong>Verify:</strong> Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record.</li>
 </ol>
-<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Use <code>functools.reduce</code> to compute a product for <code>[2, 3, 4]</code>, giving an explicit identity so empty input returns <code>1</code>. <strong>Then:</strong> implement the same result with a named loop and compare readability. <strong>Verify:</strong> both return <code>24</code> and both define empty behavior; state why <code>sum</code>/<code>math.prod</code> is preferable in ordinary production code.</li>
+</ol>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Use functional tools when they make data flow clearer. Preserve laziness intentionally and keep side effects at explicit boundaries.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict what remains after calling <code>next</code> on a <code>map</code> object and then converting it to a list. <strong>Progressive hint:</strong> <code>map</code> is a lazy one-shot iterator in Python 3.</li>
-<li><strong>Tracing:</strong> Trace <code>sorted(records, key=lambda row: (row[&#x27;team&#x27;], -row[&#x27;score&#x27;]))</code> and explain the tuple key. <strong>Progressive hint:</strong> Tuple components are compared left to right.</li>
-<li><strong>Implementation:</strong> Implement <code>compose(*functions)</code> so <code>compose(f, g)(x)</code> applies <code>g</code> then <code>f</code>, and handle no functions as identity. <strong>Progressive hint:</strong> Apply the reversed function sequence to the current value.</li>
-<li><strong>Debugging:</strong> Repair lambdas created in a loop that all use the final loop value. <strong>Progressive hint:</strong> Bind the current value as a default argument or use a factory function.</li>
-<li><strong>Edge case and explanation:</strong> Refactor a pipeline that prints inside <code>map</code> into pure transforms plus one explicit presentation step. <strong>Progressive hint:</strong> Pure stages are easier to test and reuse.</li>
+<li><strong>Prediction:</strong> Predict what remains after calling <code>next</code> on a <code>map</code> object and then converting it to a list. <strong>Progressive hint:</strong> <code>map</code> is a lazy one-shot iterator in Python 3. <strong>Verify:</strong> Assert the first mapped value and exact remaining list, then confirm another pass is empty because the map iterator is exhausted.</li>
+<li><strong>Tracing:</strong> Trace <code>sorted(records, key=lambda row: (row[&#x27;team&#x27;], -row[&#x27;score&#x27;]))</code> and explain the tuple key. <strong>Progressive hint:</strong> Tuple components are compared left to right. <strong>Verify:</strong> Compute each tuple key beside its record and assert final order groups team ascending and score descending within team.</li>
+<li><strong>Implementation:</strong> Implement <code>compose(*functions)</code> so <code>compose(f, g)(x)</code> applies <code>g</code> then <code>f</code>, and handle no functions as identity. <strong>Progressive hint:</strong> Apply the reversed function sequence to the current value. <strong>Verify:</strong> Assert composition order with noncommutative functions and assert <code>compose()(value)</code> returns the original value unchanged.</li>
+<li><strong>Debugging:</strong> Repair lambdas created in a loop that all use the final loop value. <strong>Progressive hint:</strong> Bind the current value as a default argument or use a factory function. <strong>Verify:</strong> Call every produced function and show the faulty results share the final loop value; assert the factory/default-binding repair preserves each intended value.</li>
+<li><strong>Edge case and explanation:</strong> Refactor a pipeline that prints inside <code>map</code> into pure transforms plus one explicit presentation step. <strong>Progressive hint:</strong> Pure stages are easier to test and reuse. <strong>Verify:</strong> Assert transformed values are identical before/after refactoring and capture presentation output only in the final explicit step.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Predict first. Then write small code and assertions below each label.</span>
-<span># Keep the official solution closed until you have tested an honest attempt.</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Use <code>itertools.groupby</code> to group records that are already sorted by a category key. <strong>Inputs:</strong> include the same category in separated positions before sorting. <strong>Expected behavior:</strong> after explicit sorting, each category appears once with all of its records. <strong>Constraint:</strong> explain why <code>groupby</code> groups adjacent runs rather than globally collecting unsorted data. <strong>Verify:</strong> Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
+<span># Short contract: Use `itertools.groupby` to group records that are already sorted by a category key. include the same category in separated positions before sorting. after explicit sorting, each...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 3 — Prediction</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Use <code>functools.reduce</code> to compute a product for <code>[2, 3, 4]</code>, giving an explicit identity so empty input returns <code>1</code>. <strong>Then:</strong> implement the same result with a named loop and compare readability. <strong>Verify:</strong> both return <code>24</code> and both define empty behavior; state why <code>sum</code>/<code>math.prod</code> is preferable in ordinary production code.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
+<span># Short contract: Use `functools.reduce` to compute a product for `[2, 3, 4]`, giving an explicit identity so empty input returns `1`. implement the same result with a named loop and compare read...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 4 — Tracing</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict what remains after calling <code>next</code> on a <code>map</code> object and then converting it to a list. <strong>Progressive hint:</strong> <code>map</code> is a lazy one-shot iterator in Python 3. <strong>Verify:</strong> Assert the first mapped value and exact remaining list, then confirm another pass is empty because the map iterator is exhausted.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
+<span># Short contract: Predict what remains after calling `next` on a `map` object and then converting it to a list. `map` is a lazy one-shot iterator in Python 3. Assert the first mapped value and ex...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 5 — Implementation</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace <code>sorted(records, key=lambda row: (row[&#x27;team&#x27;], -row[&#x27;score&#x27;]))</code> and explain the tuple key. <strong>Progressive hint:</strong> Tuple components are compared left to right. <strong>Verify:</strong> Compute each tuple key beside its record and assert final order groups team ascending and score descending within team.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
+<span># Short contract: Trace `sorted(records, key=lambda row: (row[&#x27;team&#x27;], -row[&#x27;score&#x27;]))` and explain the tuple key. Tuple components are compared left to right. Compute each tuple key beside its r...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 6 — Debugging</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement <code>compose(*functions)</code> so <code>compose(f, g)(x)</code> applies <code>g</code> then <code>f</code>, and handle no functions as identity. <strong>Progressive hint:</strong> Apply the reversed function sequence to the current value. <strong>Verify:</strong> Assert composition order with noncommutative functions and assert <code>compose()(value)</code> returns the original value unchanged.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
+<span># Short contract: Implement `compose(*functions)` so `compose(f, g)(x)` applies `g` then `f`, and handle no functions as identity. Apply the reversed function sequence to the current value. Asser...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 7 — Edge case and explanation</span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair lambdas created in a loop that all use the final loop value. <strong>Progressive hint:</strong> Bind the current value as a default argument or use a factory function. <strong>Verify:</strong> Call every produced function and show the faulty results share the final loop value; assert the factory/default-binding repair preserves each intended value.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
+<span># Short contract: Repair lambdas created in a loop that all use the final loop value. Bind the current value as a default argument or use a factory function. Call every produced function and show...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Refactor a pipeline that prints inside <code>map</code> into pure transforms plus one explicit presentation step. <strong>Progressive hint:</strong> Pure stages are easier to test and reuse. <strong>Verify:</strong> Assert transformed values are identical before/after refactoring and capture presentation output only in the final explicit step.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
+<span># Short contract: Refactor a pipeline that prints inside `map` into pure transforms plus one explicit presentation step. Pure stages are easier to test and reuse. Assert transformed values are id...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -474,84 +725,84 @@ labels = [expensive_label(code) for code in first_three]</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-13-solutions-functional-tools-itertools-functools-map-filter">Day 13 — Solutions: Functional Tools (itertools, functools, map/filter)<a class="heading-anchor" href="#solution-1--day-13-solutions-functional-tools-itertools-functools-map-filter" aria-label="Link to this section">#</a></h3>
-<p>We implement grouping with itertools.groupby and create specialized functions with functools.partial.</p>
-<p>Contents</p>
+<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
+<p>These worked answers demonstrate <strong>functions as values and composable iterable tools</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
+<p>Python functions are objects: they can be assigned to names, passed as arguments, and returned. A higher-order function accepts or returns another function. This enables small reusable operations, but an ordinary named function is usually clearer than a dense lambda once logic needs explanation.</p>
+<p><code>map</code> transforms, <code>filter</code> selects, <code>itertools</code> composes lazy iteration, and <code>functools</code> supplies function adapters and caching. List comprehensions often read more naturally for one transformation/filter; lazy tools matter when the input is a stream or too large to materialize. Avoid <code>reduce</code> when a named loop or built-in such as <code>sum</code>, <code>min</code>, or <code>max</code> states the intent better.</p>
+<h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
-<li>Exercise 1: Group pairs by key with itertools.groupby</li>
-<li>Exercise 2: Use partial to specialize a function</li>
+<li><strong>first-class function:</strong> a function usable as an ordinary runtime value.</li>
+<li><strong>higher-order function:</strong> a function that accepts or returns functions.</li>
+<li><strong>lambda:</strong> a small anonymous single-expression function.</li>
+<li><strong>lazy iterator:</strong> an iterator that computes values only when requested.</li>
+<li><strong>accumulator:</strong> the progressively combined value in a fold/reduction.</li>
+<li><strong>cache:</strong> stored results reused for repeated equivalent calls.</li>
 </ul>
-<hr>
-<p>Exercise 1 — Group by key Note: itertools.groupby requires data to be sorted by the same key.</p>
-<pre><code class="language-python">import itertools as it
+<h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
+<p>For this lesson&#x27;s <strong>functions as values and composable iterable tools</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Use <code>itertools.groupby</code> to group records that are already sorted by a category key. <strong>Inputs:</strong> include the same category in separated positions before sorting. <strong>Expected behavior:</strong> after explicit sorting, each category appears once with all of its records. <strong>Constraint:</strong> explain why <code>groupby</code> groups adjacent runs rather than globally collecting unsorted data. <strong>Verify:</strong> Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Use <code>itertools.groupby</code> to group records that are already sorted by a category key. Inputs: include the same category in separated positions before sorting. Expected behavior: after explicit sorting, each category appears once with all of its records. Constraint: explain why <code>groupby</code> groups adjacent runs rather than globally collecting unsorted data. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record. That connects the answer to functions as values and composable iterable tools.</p>
+<pre><code class="language-python">from itertools import groupby
 from operator import itemgetter
-from typing import Iterable, Tuple, Hashable, List
 
-Pair = Tuple[Hashable, int]
+pairs = [(&quot;b&quot;, 2), (&quot;a&quot;, 1), (&quot;b&quot;, 3)]
+ordered = sorted(pairs, key=itemgetter(0))
+grouped = {
+    key: [value for _, value in rows]
+    for key, rows in groupby(ordered, key=itemgetter(0))
+}
+assert grouped == {&quot;a&quot;: [1], &quot;b&quot;: [2, 3]}</code></pre>
+<p>Sorting is part of the contract because <code>groupby</code> collects adjacent runs rather than searching the entire iterable.</p>
+<p><strong>Verification evidence:</strong> Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Use <code>functools.reduce</code> to compute a product for <code>[2, 3, 4]</code>, giving an explicit identity so empty input returns <code>1</code>. <strong>Then:</strong> implement the same result with a named loop and compare readability. <strong>Verify:</strong> both return <code>24</code> and both define empty behavior; state why <code>sum</code>/<code>math.prod</code> is preferable in ordinary production code.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Use <code>functools.reduce</code> to compute a product for <code>[2, 3, 4]</code>, giving an explicit identity so empty input returns <code>1</code>. Then: implement the same result with a named loop and compare readability. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: both return <code>24</code> and both define empty behavior; state why <code>sum</code>/<code>math.prod</code> is preferable in ordinary production code. That connects the answer to functions as values and composable iterable tools.</p>
+<pre><code class="language-python">from functools import reduce
+from operator import mul
 
-def group_pairs(pairs: Iterable[Pair]) -&gt; dict[Hashable, list[int]]:
-    # 1) sort by key so groupby can group consecutive items
-    pairs_sorted = sorted(pairs, key=itemgetter(0))
-    out: dict[Hashable, list[int]] = {}
-    # 2) groupby yields (key, iterator-over-group)
-    for k, group in it.groupby(pairs_sorted, key=itemgetter(0)):
-        vals = [v for _, v in group]         # 3) extract second element
-        out[k] = vals
-    return out
 
-# Demo
-pairs = [(&quot;b&quot;,2),(&quot;a&quot;,1),(&quot;a&quot;,3),(&quot;b&quot;,4)]
-assert group_pairs(pairs) == {&quot;a&quot;:[1,3], &quot;b&quot;:[2,4]}</code></pre>
-<p>Line-by-line</p>
-<ul>
-<li>sorted by itemgetter(0) aligns with groupby’s key</li>
-<li>group is an iterator over consecutive items with the same key</li>
-</ul>
-<p>Alternative: collections.defaultdict (often simpler and order-preserving per input).</p>
-<hr>
-<p>Exercise 2 — partial to specialize Given a generic power function, make square and cube variants.</p>
-<pre><code class="language-python">from functools import partial
+def product(values: list[int]) -&gt; int:
+    return reduce(mul, values, 1)
 
-def power(base: float, exp: float) -&gt; float:
-    return base ** exp
 
-square = partial(power, exp=2)
-cube   = partial(power, exp=3)
+def loop_product(values: list[int]) -&gt; int:
+    result = 1
+    for value in values:
+        result *= value
+    return result
 
-assert square(5) == 25
-assert cube(2) == 8</code></pre>
-<p>Notes</p>
-<ul>
-<li>partial binds some parameters, returning a new callable with fewer arguments.</li>
-<li>Combine with map for pipelines, but prefer comprehensions for clarity when possible.</li>
-</ul>
-<hr>
-<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
-<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Group <code>(key, value)</code> pairs by key with <code>itertools.groupby</code>. <strong>Hint:</strong> inspect what happens to keys that reappear later; arrange the input by the same key before grouping.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Use <code>partial</code> to create a specialized function from a more general one. <strong>Hint:</strong> identify the argument that stays constant across many calls and bind only that argument.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-3-prediction">Exercise 3 — Prediction<a class="heading-anchor" href="#solution-1--exercise-3-prediction" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Predict what remains after calling <code>next</code> on a <code>map</code> object and then converting it to a list.</p>
-<p><strong>Reasoning checkpoint:</strong> <code>map</code> is a lazy one-shot iterator in Python 3. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-4-tracing">Exercise 4 — Tracing<a class="heading-anchor" href="#solution-1--exercise-4-tracing" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Trace <code>sorted(records, key=lambda row: (row[&#x27;team&#x27;], -row[&#x27;score&#x27;]))</code> and explain the tuple key.</p>
-<p><strong>Reasoning checkpoint:</strong> Tuple components are compared left to right. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-5-implementation">Exercise 5 — Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Implement <code>compose(*functions)</code> so <code>compose(f, g)(x)</code> applies <code>g</code> then <code>f</code>, and handle no functions as identity.</p>
-<p><strong>Reasoning checkpoint:</strong> Apply the reversed function sequence to the current value. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-6-debugging">Exercise 6 — Debugging<a class="heading-anchor" href="#solution-1--exercise-6-debugging" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Repair lambdas created in a loop that all use the final loop value.</p>
-<p><strong>Reasoning checkpoint:</strong> Bind the current value as a default argument or use a factory function. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-7-edge-case-and-explanation">Exercise 7 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-7-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Refactor a pipeline that prints inside <code>map</code> into pure transforms plus one explicit presentation step.</p>
-<p><strong>Reasoning checkpoint:</strong> Pure stages are easier to test and reuse. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+
+assert product([2, 3, 4]) == loop_product([2, 3, 4]) == 24
+assert product([]) == loop_product([]) == 1</code></pre>
+<p><code>math.prod(values)</code> is the clearest production alternative; the explicit reduction here makes identity behavior visible.</p>
+<p><strong>Verification evidence:</strong> both return <code>24</code> and both define empty behavior; state why <code>sum</code>/<code>math.prod</code> is preferable in ordinary production code.</p>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict what remains after calling <code>next</code> on a <code>map</code> object and then converting it to a list. <strong>Progressive hint:</strong> <code>map</code> is a lazy one-shot iterator in Python 3. <strong>Verify:</strong> Assert the first mapped value and exact remaining list, then confirm another pass is empty because the map iterator is exhausted.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict what remains after calling <code>next</code> on a <code>map</code> object and then converting it to a list. Progressive hint: <code>map</code> is a lazy one-shot iterator in Python 3. Then compare the prediction with this proof target: Assert the first mapped value and exact remaining list, then confirm another pass is empty because the map iterator is exhausted. This makes functions as values and composable iterable tools observable instead of relying on intuition.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert the first mapped value and exact remaining list, then confirm another pass is empty because the map iterator is exhausted.</p>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace <code>sorted(records, key=lambda row: (row[&#x27;team&#x27;], -row[&#x27;score&#x27;]))</code> and explain the tuple key. <strong>Progressive hint:</strong> Tuple components are compared left to right. <strong>Verify:</strong> Compute each tuple key beside its record and assert final order groups team ascending and score descending within team.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace <code>sorted(records, key=lambda row: (row[&#x27;team&#x27;], -row[&#x27;score&#x27;]))</code> and explain the tuple key. Progressive hint: Tuple components are compared left to right. Record the named value, shape, label, or iterator position needed to establish: Compute each tuple key beside its record and assert final order groups team ascending and score descending within team. The trace exposes functions as values and composable iterable tools directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Compute each tuple key beside its record and assert final order groups team ascending and score descending within team.</p>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement <code>compose(*functions)</code> so <code>compose(f, g)(x)</code> applies <code>g</code> then <code>f</code>, and handle no functions as identity. <strong>Progressive hint:</strong> Apply the reversed function sequence to the current value. <strong>Verify:</strong> Assert composition order with noncommutative functions and assert <code>compose()(value)</code> returns the original value unchanged.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement <code>compose(*functions)</code> so <code>compose(f, g)(x)</code> applies <code>g</code> then <code>f</code>, and handle no functions as identity. Progressive hint: Apply the reversed function sequence to the current value. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert composition order with noncommutative functions and assert <code>compose()(value)</code> returns the original value unchanged. That connects the answer to functions as values and composable iterable tools.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert composition order with noncommutative functions and assert <code>compose()(value)</code> returns the original value unchanged.</p>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair lambdas created in a loop that all use the final loop value. <strong>Progressive hint:</strong> Bind the current value as a default argument or use a factory function. <strong>Verify:</strong> Call every produced function and show the faulty results share the final loop value; assert the factory/default-binding repair preserves each intended value.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair lambdas created in a loop that all use the final loop value. Progressive hint: Bind the current value as a default argument or use a factory function. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Call every produced function and show the faulty results share the final loop value; assert the factory/default-binding repair preserves each intended value. The diagnosis depends on functions as values and composable iterable tools.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Call every produced function and show the faulty results share the final loop value; assert the factory/default-binding repair preserves each intended value.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Refactor a pipeline that prints inside <code>map</code> into pure transforms plus one explicit presentation step. <strong>Progressive hint:</strong> Pure stages are easier to test and reuse. <strong>Verify:</strong> Assert transformed values are identical before/after refactoring and capture presentation output only in the final explicit step.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Refactor a pipeline that prints inside <code>map</code> into pure transforms plus one explicit presentation step. Progressive hint: Pure stages are easier to test and reuse. Values below, at, and above the named boundary must produce the evidence Assert transformed values are identical before/after refactoring and capture presentation output only in the final explicit step. Those cases show how functions as values and composable iterable tools behaves at its edge.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert transformed values are identical before/after refactoring and capture presentation output only in the final explicit step.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Use functional tools when they make data flow clearer. Preserve laziness intentionally and keep side effects at explicit boundaries.</p>
-<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
-<h5 id="solution-1--practices-1-2-lazy-iterators-and-tuple-ordering">Practices 1–2 — Lazy iterators and tuple ordering<a class="heading-anchor" href="#solution-1--practices-1-2-lazy-iterators-and-tuple-ordering" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-lazy-iterators-and-tuple-ordering">Shared implementation for Exercises 3–4 — Lazy iterators and tuple ordering<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-lazy-iterators-and-tuple-ordering" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">doubled = map(lambda value: value * 2, [1, 2, 3])
 assert next(doubled) == 2
 assert list(doubled) == [4, 6]
@@ -563,7 +814,7 @@ records = [
 ]
 ordered = sorted(records, key=lambda row: (row[&quot;team&quot;], -row[&quot;score&quot;]))
 assert [row[&quot;score&quot;] for row in ordered] == [9, 7, 8]</code></pre>
-<h5 id="solution-1--practices-3-5-composition-binding-and-pure-stages">Practices 3–5 — Composition, binding, and pure stages<a class="heading-anchor" href="#solution-1--practices-3-5-composition-binding-and-pure-stages" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-composition-binding-and-pure-stages">Shared implementation for Exercises 5–7 — Composition, binding, and pure stages<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-composition-binding-and-pure-stages" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">from collections.abc import Callable
 from typing import Any
 
@@ -593,7 +844,7 @@ normalized = list(map(normalize, [&quot; A &quot;, &quot; B &quot;]))  # Pure tr
 rendered = &quot;, &quot;.join(normalized)                    # Presentation boundary.
 assert rendered == &quot;a, b&quot;</code></pre></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -601,7 +852,7 @@ assert rendered == &quot;a, b&quot;</code></pre></div>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -721,7 +972,38 @@ assert rendered == &quot;a, b&quot;</code></pre></div>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-13`
+(Day 13 — Functional Tools: `itertools` and `functools`). Direct catalog prerequisites: `python-12`.
+I have completed the direct prerequisites: `python-12`. Emphasize functions as values and composable iterable tools.
+Read `python/ds-60day/companion-guides/day13_functional_tools.md` and use the learner notebook
+`python/ds-60day/notebooks/day13_functional_tools.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-12.html"><small>Previous lesson</small><strong>python-12</strong><span>OOP Dataclasses</span></a>
@@ -813,6 +1095,23 @@ assert rendered == &quot;a, b&quot;</code></pre></div>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

@@ -4,10 +4,16 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from types import SimpleNamespace
 from typing import cast
 
 import nbformat
+import pytest
+import sqlalchemy
 from nbformat import NotebookNode
+from sqlalchemy.engine import URL
+
+from ds60sqlpy.sql_notebook import SqlNotebookError
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 PROFESSIONAL_ROOT = REPOSITORY_ROOT / "bridge" / "professional"
@@ -49,6 +55,13 @@ def notebook_source(notebook: NotebookNode) -> str:
 
 def code_sources(notebook: NotebookNode) -> list[str]:
     return [str(cell.source) for cell in notebook.cells if cell.cell_type == "code"]
+
+
+def code_cell_source(notebook: NotebookNode, cell_id: str) -> str:
+    for cell in notebook.cells:
+        if cell.cell_type == "code" and str(cell.id) == cell_id:
+            return str(cell.source)
+    raise AssertionError(f"Missing code cell {cell_id!r}")
 
 
 def test_artifacts_use_exact_stable_paths() -> None:
@@ -138,6 +151,8 @@ def test_required_jupysql_and_safety_content_is_present() -> None:
             "%sql --close ds60-course",
             "%%sql",
             "DS60_DATABASE_URL",
+            "COURSE_DATABASE_NAME",
+            "validate_course_database_target",
             "make_url",
             "postgresql+psycopg",
             "SqlMagic.displaycon = False",
@@ -157,6 +172,96 @@ def test_required_jupysql_and_safety_content_is_present() -> None:
         )
         for needle in required:
             assert needle in source, f"{path.name} lacks {needle!r}"
+
+
+@pytest.mark.parametrize(
+    ("path", "cell_id"),
+    (
+        (LEARNER, "setup-engine"),
+        (SOLUTION, "solution-engine"),
+    ),
+)
+@pytest.mark.parametrize(
+    "target",
+    (
+        "advanced_sql_training",
+        "postgresql:///advanced_sql_training",
+        "postgresql://localhost:5432/advanced_sql_training?sslmode=disable",
+        "postgresql://127.0.0.1/advanced_sql_training",
+        "postgresql://[::1]:5432/advanced_sql_training",
+    ),
+)
+def test_engine_setup_accepts_only_local_course_targets(
+    path: Path,
+    cell_id: str,
+    target: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    created_urls: list[object] = []
+
+    def fake_create_engine(url: object, *, pool_pre_ping: bool) -> SimpleNamespace:
+        assert pool_pre_ping is True
+        created_urls.append(url)
+        return SimpleNamespace(url=url)
+
+    monkeypatch.setenv("DS60_DATABASE_URL", target)
+    monkeypatch.setattr(sqlalchemy, "create_engine", fake_create_engine)
+    namespace: dict[str, object] = {}
+
+    exec(
+        compile(code_cell_source(read_notebook(path), cell_id), str(path), "exec"),
+        namespace,
+    )
+
+    assert len(created_urls) == 1
+    course_url = cast(URL, namespace["course_url"])
+    assert course_url.database == "advanced_sql_training"
+    assert course_url.host in {None, "localhost", "127.0.0.1", "::1"}
+
+
+@pytest.mark.parametrize(
+    ("path", "cell_id"),
+    (
+        (LEARNER, "setup-engine"),
+        (SOLUTION, "solution-engine"),
+    ),
+)
+@pytest.mark.parametrize(
+    "target",
+    (
+        "postgresql://db.example/advanced_sql_training",
+        "postgresql://localhost:5432,db.example:5432/advanced_sql_training",
+        "postgresql://localhost/advanced_sql_training?host=127.0.0.2",
+        "postgresql://localhost/advanced_sql_training?hostaddr=127.0.0.2",
+        "postgresql://localhost/advanced_sql_training?service=production",
+        "postgresql://localhost/advanced_sql_training?servicefile=valuable.conf",
+        "postgresql://localhost/advanced_sql_training?passfile=secrets.txt",
+        "postgresql://localhost/advanced_sql_training?connect_timeout=30",
+    ),
+)
+def test_engine_setup_rejects_rerouting_before_engine_creation(
+    path: Path,
+    cell_id: str,
+    target: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def forbidden_make_url(value: str) -> object:
+        raise AssertionError(f"Unsafe target reached make_url: {value!r}")
+
+    def forbidden_create_engine(url: object, *, pool_pre_ping: bool) -> None:
+        raise AssertionError(
+            f"Unsafe target reached create_engine: {url!r}, pool_pre_ping={pool_pre_ping!r}"
+        )
+
+    monkeypatch.setenv("DS60_DATABASE_URL", target)
+    monkeypatch.setattr(sqlalchemy.engine, "make_url", forbidden_make_url)
+    monkeypatch.setattr(sqlalchemy, "create_engine", forbidden_create_engine)
+
+    with pytest.raises(SqlNotebookError):
+        exec(
+            compile(code_cell_source(read_notebook(path), cell_id), str(path), "exec"),
+            {},
+        )
 
 
 def test_notebooks_have_no_install_shell_secret_or_destructive_cells() -> None:
@@ -212,15 +317,21 @@ def test_cross_platform_guide_and_reasoning_contract() -> None:
     guide = GUIDE.read_text(encoding="utf-8")
     assert "# Windows PowerShell" in guide
     assert "# macOS/Linux" in guide
-    assert r".\.venv\Scripts\python.exe -m jupyter lab" in guide
+    assert r"& .\scripts\bootstrap_windows.ps1 -Profile Advanced" in guide
+    assert "& $CoursePython -m jupyter lab" in guide
     assert ".venv/bin/python -m jupyter lab" in guide
     assert "$env:DS60_DATABASE_URL = Read-Host" in guide
     assert "read -r -s" in guide
     assert "code ." in guide
+    assert "validate_course_database_target" in guide
+    assert "remote or multi-host authority" in guide
+    assert "query parameter except `sslmode`" in guide
     assert "%pip" in guide
     assert "Do not install packages" in guide
 
     notes = SOLUTION_NOTES.read_text(encoding="utf-8")
+    assert "validate_course_database_target" in notes
+    assert "remote and multi-host authorities" in notes
     assert "## Tradeoffs" in notes
     assert "parameter" in notes.casefold()
     assert "transaction" in notes.casefold()

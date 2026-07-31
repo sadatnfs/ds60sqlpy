@@ -300,165 +300,85 @@ SELECT
 --
 -- 1. Add a schema fingerprint based on expected columns, types, nullability,
 --    constraints, and indexes. Explain why a data checksum alone is incomplete.
---    Inputs: Canonicalize `pro_recovery_lab.restored_accounts` and
---    `restored_entries` metadata from `information_schema.columns` and
---    PostgreSQL catalogs. Include type/schema/domain, length or precision,
---    nullability, default, identity/generated state, collation, constraints,
---    and indexes; exclude OIDs and generated names.
---    Expected result/shape: First return ordered canonical rows with columns
---    `object_kind`, `relation_name`, `item_order`, `item_name`, and
---    `semantic_definition`. Then return exactly one row with
---    `restored_schema_fingerprint`.
---    Verify: Compare canonical rows before hashes. Changing a default, dropping
---    a constraint, or adding an index must change a visible semantic row and
---    the fingerprint, while a volatile OID change must not.
+--    Inputs: For sql-ops-02 Exercise 1, canonicalize source and restored column, constraint, and index semantics from information schema and PostgreSQL catalogs, excluding volatile OIDs and generated object names before comparing or hashing.
+--    Expected result/shape: For sql-ops-02 Exercise 1, expected output: ordered semantic rows with contract side, relation role, object kind, item order/name, and JSON definition, followed by one fingerprint row where source and restored hashes match and `mismatch_rows = 0`.
+--    Verify: For sql-ops-02 Exercise 1, compare visible canonical rows before hashes, then alter a default, constraint, and index separately and require each change to produce diagnosable mismatch rows while an OID change remains outside the contract.
 --    Hint ladder, rung 1: An opaque digest is useful only after its stable,
 --    diagnosable input rows are defined.
 -- 2. Inside a savepoint, corrupt one restored row and prove the checksum test
 --    fails; roll back to the savepoint and prove it passes again.
---    Inputs: Record the source and restored account/entry checksums, create a
---    savepoint, update one `pro_recovery_lab.restored_entries.amount`, compare
---    again, roll back to the savepoint, and compare a third time.
---    Expected result/shape: Three named observations: baseline checksums match;
---    the corrupted restored checksum differs; after savepoint rollback the
---    checksums match again. The intentional mismatch is reported and caught,
---    not allowed to abort the remaining demonstration.
---    Verify: Also compare row counts and a key-level detail query so a NULL or
---    colliding digest cannot be the sole proof. Corrupt a second key and prove
---    the detail query identifies exactly that key.
+--    Inputs: For sql-ops-02 Exercise 2, record source/restored checksums and counts, corrupt one restored amount after a savepoint, compare again, roll back to that savepoint, and run the comparison a third time.
+--    Expected result/shape: For sql-ops-02 Exercise 2, expected output: baseline, corrupted, and after-savepoint-rollback observations; equality is true, false, then true, with row counts unchanged and the intentional mismatch explicitly observed.
+--    Verify: For sql-ops-02 Exercise 2, supplement digests with row counts and key-level detail, corrupt a second chosen key to prove the detail query identifies it, and require the post-rollback comparison to return to the reviewed baseline.
 --    Hint ladder, rung 1: A savepoint lets you prove the negative control and
 --    still restore the transaction to its known-good state.
 -- 3. Write RPO/RTO requirements for a new service, then choose logical dumps,
 --    physical base backup plus WAL, replication, or a combination. Separate
 --    availability from backup.
---    Inputs: Fill `pro_recovery_lab.recovery_plan` from explicit business RPO
---    and RTO requirements. Choose backup and availability strategies
---    separately and state each strategy's limit.
---    Expected result/shape: One row per `service_name`, with `service_name`,
---    `rpo`, `rto`, `backup_strategy`, and `availability_strategy`, ordered by
---    `service_name`.
---    Verify: For every row, map RPO to recoverable data age and RTO to the full
---    restore-through-validation timeline. Remove replicas and prove a usable
---    backup path remains; remove backups and explain why replicas alone cannot
---    recover deleted/corrupted data.
+--    Inputs: For sql-ops-02 Exercise 3, enter explicit service RPO and RTO requirements in `pro_recovery_lab.recovery_plan`, then choose backup and availability strategies separately with their limits.
+--    Expected result/shape: For sql-ops-02 Exercise 3, expected output: one row per service with `service_name`, `rpo`, `rto`, `backup_strategy`, and `availability_strategy`, ordered by service; the example targets five-minute RPO and thirty-minute RTO.
+--    Verify: For sql-ops-02 Exercise 3, map RPO to recoverable data age and RTO to restore-through-application-readiness time, then remove replicas and backups in separate thought experiments to prove neither substitutes for the other.
 --    Hint ladder, rung 1: Availability reduces interruption; backup preserves
 --    a recoverable historical state. Neither substitutes automatically.
 -- 4. Draft and peer-review exact pg_dump/pg_restore commands for an isolated
 --    ds60_restore_rehearsal database. Verify rows, constraints, owners/grants,
 --    sequences, functions, extensions, and application queries before cleanup.
---    Inputs: Draft literal `pg_dump`/`createdb`/`pg_restore` commands for a
---    separately created disposable database named `ds60_restore_rehearsal`.
---    Record artifact path/hash, tool/server versions, exact flags, start/end
---    time, exit status, and cleanup command. Do not run external commands from
---    this SQL transaction.
---    Expected result/shape: One reviewed row per phase—dump, create isolated
---    target, restore, catalogs, data, security, application smoke tests, and
---    cleanup—with `phase_number`, `command_or_check`, `required_evidence`,
---    `owner`, and `status`.
---    Verify: Execute only after peer review; reconcile rows, constraints,
---    owners/grants, identity/sequence state, functions, extensions, and critical
---    queries. A missing artifact or failed check blocks completion and cutover.
+--    Inputs: For sql-ops-02 Exercise 4, review literal dump/create/restore commands outside this transaction and use the SQL matrix to specify evidence for target isolation, catalogs, data, application behavior, and cleanup.
+--    Expected result/shape: For sql-ops-02 Exercise 4, expected output: seven ordered rows with `phase_number`, `phase_name`, and `required_evidence`, covering dump, target creation, restore, catalogs/security, data, application checks, and cleanup; no external command runs here.
+--    Verify: For sql-ops-02 Exercise 4, execute only in a separately created disposable database after peer review, reconcile rows and semantic objects including owners/grants and sequence state, and block completion on any failed phase.
 --    Hint ladder, rung 1: `ds60_restore_rehearsal` is a database target name,
 --    not a relation to select from.
 -- 5. Explain WAL archiving, base backups, timelines, recovery target time, and
 --    retention. State why archived WAL without a usable base backup is not PITR.
---    Inputs: Build a PITR evidence chain that names one compatible base backup,
---    every required WAL segment, timeline history, recovery target, retention
---    horizon, restore configuration, and validation/cleanup owner.
---    Expected result/shape: One row per chain component, with `component`,
---    `artifact_identity`, `required_from`, `required_through`, `observed_status`,
---    and `failure_response`. This lesson records a plan; it does not configure
---    archiving or execute recovery.
---    Verify: Remove one required WAL segment and separately remove the usable
---    base backup; each negative control makes the target unrecoverable. Record
---    the actual recovered timeline/time and application checks in an isolated
---    rehearsal rather than accepting file presence alone.
+--    Inputs: For sql-ops-02 Exercise 5, model the PITR evidence chain from a compatible base backup through every required WAL segment, timeline history, target specification, retention overlap, and recovered-state validation.
+--    Expected result/shape: For sql-ops-02 Exercise 5, expected output: six ordered rows with `component_number`, `component`, and `required_evidence`; the lesson records a recovery plan and does not configure archiving.
+--    Verify: For sql-ops-02 Exercise 5, remove one required WAL segment and then the usable base backup as separate negative controls, and assert both scenario results mark the target unrecoverable before application validation.
 --    Hint ladder, rung 1: WAL replays changes after a compatible starting
 --    backup; an archive by itself is not a full database image.
 -- 6. Explain why “backup command exited zero” is not recovery evidence.
---    Inputs: Classify evidence from the dump command, artifact manifest,
---    isolated restore, catalog/data reconciliation, recovery-point proof, and
---    application read/write smoke tests.
---    Expected result/shape: One row per evidence layer, with `evidence_layer`,
---    `what_it_proves`, `what_it_does_not_prove`, `failure_signal`, and `owner`.
---    An exit-zero dump is only the first layer.
---    Verify: Inject a syntactically valid but incomplete artifact or a restore
---    that lacks one critical object. Command exit evidence may pass, while the
---    later reconciliation must fail and prevent a “recoverable” decision.
+--    Inputs: For sql-ops-02 Exercise 6, classify command exit, artifact manifest, isolated restore, catalog/data reconciliation, and application smoke tests as separate evidence layers.
+--    Expected result/shape: For sql-ops-02 Exercise 6, expected output: five ordered rows with `layer_number`, `evidence_layer`, `what_it_proves`, and `what_it_does_not_prove`; exit zero proves only that the backup program reported success.
+--    Verify: For sql-ops-02 Exercise 6, inject a valid-looking but incomplete artifact or omit one critical restored object, and prove early command evidence can pass while later reconciliation blocks a recoverable decision.
 --    Hint ladder, rung 1: Evidence should advance from “bytes were written” to
 --    “a representative application can safely use the restored state.”
 -- 7. Design encryption and custody for dump files, base backups, WAL archives,
 --    manifests, and keys. Separate transport/storage encryption from database
 --    checksums; include rotation, least privilege, restore access, and deletion.
---    Inputs: Complete `pro_recovery_lab.artifact_controls` for dump files, base
---    backups, WAL archives, manifests, and keys. Keep artifact encryption,
---    integrity/authenticity, key custody, and restore authorization separate.
---    Expected result/shape: One row per `artifact_kind`, with `artifact_kind`,
---    `encrypted`, `integrity_manifest`, `key_owner`, and `restore_role`, ordered
---    by `artifact_kind`.
---    Verify: Every artifact except the key record names encryption at rest and
---    every restorable artifact has integrity evidence plus a distinct
---    least-privileged restore role. Walk one key rotation and deletion event
---    without making old retained backups permanently unrestorable.
+--    Inputs: For sql-ops-02 Exercise 7, populate `pro_recovery_lab.artifact_controls` for logical dumps, base backups, and WAL archives, separating encryption, integrity manifest, key owner, and restore role.
+--    Expected result/shape: For sql-ops-02 Exercise 7, expected output: three ordered rows with `artifact_kind`, `encrypted`, `integrity_manifest`, `key_owner`, and `restore_role`; every restorable artifact is encrypted and has integrity evidence.
+--    Verify: For sql-ops-02 Exercise 7, verify key custody is distinct from restore authorization, extend the review to manifest/key records, and rehearse rotation and deletion without making retained backups permanently unrestorable.
 --    Hint ladder, rung 1: PostgreSQL page checksums detect some storage
 --    corruption; they do not encrypt a dump or prove artifact provenance.
 -- 8. Extend the restore checklist for sequences/identity state, large objects,
 --    owners, memberships, default privileges, security labels, extensions, and
 --    configuration outside the database. Classify what each backup format omits.
---    Inputs: Classify each inline restore component—identity/sequence state,
---    large objects, owners, memberships, default privileges, security labels,
---    extensions, and external configuration—by its authoritative source.
---    Expected result/shape: One row per `component`, with `component` and
---    `expected_source`, ordered by `component`.
---    Verify: For each chosen dump format, mark whether the component is inside
---    the artifact, requires separate global/config capture, or must be rebuilt.
---    A checklist is incomplete if any required component has no source and
---    validation query.
+--    Inputs: For sql-ops-02 Exercise 8, classify restored data/schema, roles/memberships, sequences/identity, extensions, and external configuration by their authoritative source rather than assuming one artifact contains everything.
+--    Expected result/shape: For sql-ops-02 Exercise 8, expected output: five ordered baseline rows with `component` and `expected_source`; the accompanying checklist extends coverage to large objects, default privileges, and security labels when required.
+--    Verify: For sql-ops-02 Exercise 8, mark each required component as artifact-contained, separately captured, or rebuilt for the chosen backup format, and fail the checklist when any component lacks both a source and validation query.
 --    Hint ladder, rung 1: Database contents, cluster-global objects, and
 --    host/service configuration have different backup boundaries.
 -- 9. Plan a PostgreSQL major-version recovery rehearsal. Compare logical restore
 --    with pg_upgrade, extension compatibility, collation changes, ANALYZE,
 --    application-driver tests, rollback window, and cutover evidence.
---    Inputs: Query the current database and server for `server_version`,
---    `server_version_num`, `datcollate`, and `datctype`; separately draft the
---    logical-restore versus `pg_upgrade` rehearsal decision.
---    Expected result/shape: Exactly one local capability row with those four
---    columns. The reviewed plan also records source/target versions, extension
---    and collation compatibility, ANALYZE, driver/application tests, rollback
---    window, cutover evidence, and cleanup.
---    Verify: Capture the same capability row in the isolated target and compare
---    it with the planned target. A missing extension version, collation drift,
---    or failed application test blocks cutover even if `pg_upgrade --check` or
---    restore exits zero.
+--    Inputs: For sql-ops-02 Exercise 9, query the current database for server version number plus database collation/ctype and separately review logical-restore versus binary-upgrade compatibility, extension, statistics, driver, and rollback evidence.
+--    Expected result/shape: For sql-ops-02 Exercise 9, expected output: exactly one local capability row with `server_version`, `server_version_num`, `datcollate`, and `datctype`; the broader major-version plan remains explicitly review-only.
+--    Verify: For sql-ops-02 Exercise 9, capture the same capability row in the isolated target and block cutover on extension incompatibility, collation drift, missing ANALYZE evidence, or failed driver/application tests even when upgrade tooling exits zero.
 --    Hint ladder, rung 1: `pg_upgrade` is an external program, not a catalog
 --    relation in this query.
 -- 10. Design a selective table/schema restore without violating dependencies.
 --     Inventory foreign keys, types, functions, sequences, privileges, and
 --     downstream consumers; explain when full isolated restore is safer.
---    Inputs: Inspect `pg_constraint`, `pg_class`, and `pg_namespace` for
---    relations in `pro_recovery_lab`, then extend the dependency inventory to
---    types, functions, sequences, privileges, and downstream consumers.
---    Expected result/shape: One row per `(relation_name, constraint_type,
---    dependency_contract)`, with those three columns ordered by
---    `relation_name, constraint_type, dependency_contract`.
---    Verify: For every selected table, prove its referenced and referencing
---    objects are either restored or deliberately remapped. Remove one required
---    parent/table/type in an isolated target and prove validation stops; choose
---    full isolated restore when the closure cannot be established safely.
+--    Inputs: For sql-ops-02 Exercise 10, inspect `pg_constraint`, `pg_class`, and `pg_namespace` for recovery-lab relations, then extend the selective-restore inventory to referenced types, functions, sequences, privileges, and downstream consumers.
+--    Expected result/shape: For sql-ops-02 Exercise 10, expected output: one row per semantic constraint dependency with `relation_name`, `constraint_type`, and `dependency_contract`, ordered by all three fields.
+--    Verify: For sql-ops-02 Exercise 10, prove every referenced and referencing object is restored or deliberately remapped, remove one required dependency in an isolated target, and choose a full isolated restore when closure cannot be established.
 --    Hint ladder, rung 1: Constraint type alone is not an identity; retain the
 --    relation and rendered dependency definition.
 -- 11. Create a restore-capacity test: artifact size, transfer throughput, CPU,
 --     I/O, parallel jobs, WAL volume, index build, validation, and safety margin.
 --     Explain why a small-fixture linear extrapolation can miss bottlenecks.
---    Inputs: Fill `pro_recovery_lab.capacity_budget` with measured restore
---    phases, including artifact transfer, data load, index build, WAL catch-up,
---    validation, and application readiness.
---    Expected result/shape: One row per `phase`, with `phase`,
---    `measured_seconds`, `peak_bytes`, and `evidence_note`, ordered by `phase`.
---    Verify: Sum the measured critical path plus a named safety margin and
---    compare it with RTO; separately record CPU, I/O, parallel jobs, transfer
---    throughput, and free-space headroom. Repeat at a representative scale
---    because small-fixture linear extrapolation is not sufficient evidence.
+--    Inputs: For sql-ops-02 Exercise 11, fill `pro_recovery_lab.capacity_budget` with measured transfer, restore, verification, and routing phases, recording duration, peak bytes, and evidence notes at representative scale.
+--    Expected result/shape: For sql-ops-02 Exercise 11, expected output: four ordered rows with `phase`, `measured_seconds`, `peak_bytes`, and `evidence_note`; NULL measurements in the starter matrix are explicit work still to complete, not passing evidence.
+--    Verify: For sql-ops-02 Exercise 11, sum the measured critical path plus named safety margin against RTO and separately record throughput, CPU, I/O, parallelism, WAL, and free-space headroom instead of linearly extrapolating a tiny fixture.
 --    Hint ladder, rung 1: RTO ends after validation and application readiness,
 --    not when the last table finishes loading.
 -- 12. Write a recovery-game-day record with incident commander, operators,
@@ -490,16 +410,9 @@ BEGIN
     END IF;
 END
 $self_check$;
---    Inputs: Use the inline role fixture as the minimum authority map, then add
---    named incident commander, operators, observers, and follow-up owners to a
---    timestamped game-day record.
---    Expected result/shape: One row per `role_name`, with `role_name` and
---    `responsibility`, ordered by `role_name`; the accompanying record includes
---    decision timestamps, injected failures, achieved RPO/RTO, gaps, cleanup,
---    owners, and next rehearsal date.
---    Verify: Every decision and action has exactly one accountable role, every
---    injected failure links to observed evidence, and all unresolved gaps have
---    an owner/due date. Compare achieved RPO/RTO with Exercise 3's requirements.
+--    Inputs: For sql-ops-02 Exercise 12, use the inline authority map for incident commander, recovery operator, application owner, and observer, then attach those roles to a timestamped recovery game-day record.
+--    Expected result/shape: For sql-ops-02 Exercise 12, expected output: four ordered rows with `role_name` and `responsibility`; the completed record also captures decisions, injected failures, achieved RPO/RTO, gaps, cleanup, owners, and next rehearsal date.
+--    Verify: For sql-ops-02 Exercise 12, require exactly one accountable role for every action, link each injected failure to observed evidence, assign owner/due date to every gap, and compare achieved RPO/RTO with Exercise 3 requirements.
 --    Hint ladder, rung 1: This is an authority and evidence-coverage check, not
 --    a permission-granting exercise.
 

@@ -43,7 +43,7 @@ def test_solution_files_follow_catalog_and_are_sql(runner: SqlRunner) -> None:
 
     assert len(paths) == len(runner.catalog.lessons("sql"))
     assert all(path.suffix == ".sql" for path in paths)
-    assert paths[0].name == "sql_found_01_relational_design_solutions.sql"
+    assert paths[0].name == "day01_solutions.sql"
     assert paths[-1].name == "sql_temporal_01_domain_modelling_solutions.sql"
     assert all(isinstance(path, Path) for path in paths)
 

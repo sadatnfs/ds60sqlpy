@@ -19,6 +19,19 @@ GUIDED_SQL_GUIDE = REPO_ROOT / "docs" / "guided-sql-notebooks.md"
 PORTAL_GUIDE = REPO_ROOT / "docs" / "learning-portal.md"
 MACOS_GUIDE = REPO_ROOT / "docs" / "setup" / "macos.md"
 LINUX_GUIDE = REPO_ROOT / "docs" / "setup" / "linux.md"
+DEPENDENCY_PROFILES = REPO_ROOT / "docs" / "dependency-profiles.md"
+CURRICULUM_MAP = REPO_ROOT / "docs" / "curriculum-map.md"
+VALIDATION_GUIDE = REPO_ROOT / "docs" / "validation.md"
+PROFESSIONAL_PATHS = REPO_ROOT / "docs" / "professional-paths.md"
+CONTENT_AUTHORING = REPO_ROOT / "docs" / "content-authoring.md"
+TROUBLESHOOTING = REPO_ROOT / "docs" / "troubleshooting.md"
+JUPYSQL_GUIDE = (
+    REPO_ROOT
+    / "bridge"
+    / "professional"
+    / "companion-guides"
+    / "bridge_jupyter_01_postgresql_magics.md"
+)
 
 
 def powershell_text() -> str:
@@ -160,10 +173,66 @@ def test_startup_uses_only_windows_powershell_51_syntax_markers() -> None:
 
 def test_ci_executes_native_windows_startup_diagnostics() -> None:
     text = CI_WORKFLOW.read_text(encoding="utf-8")
+    startup_step = text.split(
+        "- name: Exercise guided Windows startup diagnostics",
+        maxsplit=1,
+    )[1].split("- name: Offline notebook smoke execution", maxsplit=1)[0]
+    bootstrap_step = text.split(
+        "- name: Exercise the Windows discovery bootstrap",
+        maxsplit=1,
+    )[1].split("- name: Run the Windows learner setup", maxsplit=1)[0]
 
     assert "Exercise guided Windows startup diagnostics" in text
-    assert r".\scripts\start_ds60.ps1 `" in text
-    assert "-DiagnosticsOnly -NonInteractive -SkipPostgreSql" in text
+    assert "powershell.exe -NoProfile -ExecutionPolicy Bypass" in startup_step
+    assert r"-File .\scripts\start_ds60.ps1 `" in startup_step
+    assert "-DiagnosticsOnly -NonInteractive -SkipPostgreSql" in startup_step
+    assert "powershell.exe -NoProfile -ExecutionPolicy Bypass" in bootstrap_step
+    assert r"-File .\scripts\bootstrap_windows.ps1" in bootstrap_step
+    assert "-SkipPostgreSql -WhatIf" in bootstrap_step
+
+
+def test_windows_commands_document_both_repository_environment_layouts() -> None:
+    documents = (
+        DEPENDENCY_PROFILES,
+        CURRICULUM_MAP,
+        VALIDATION_GUIDE,
+        PROFESSIONAL_PATHS,
+        CONTENT_AUTHORING,
+        TROUBLESHOOTING,
+        JUPYSQL_GUIDE,
+    )
+
+    for document in documents:
+        text = document.read_text(encoding="utf-8")
+        assert r"Test-Path .\.venv\Scripts\python.exe" in text, document
+        assert r"Resolve-Path .\.venv\python.exe" in text, document
+        assert "$CoursePython" in text, document
+        assert (
+            re.search(
+                r"(?m)^\s*\.\\\.venv\\Scripts\\python\.exe(?:\s|$)",
+                text,
+            )
+            is None
+        ), document
+
+
+def test_advanced_windows_docs_use_discovery_bootstrap() -> None:
+    for document in (DEPENDENCY_PROFILES, JUPYSQL_GUIDE):
+        text = document.read_text(encoding="utf-8")
+        assert r"& .\scripts\bootstrap_windows.ps1 -Profile Advanced" in text
+        assert "setup.ps1 -Advanced" not in text
+
+
+def test_windows_troubleshooting_discovers_before_install_advice() -> None:
+    text = TROUBLESHOOTING.read_text(encoding="utf-8")
+    section = text.split("## `python` or `py` is not found", maxsplit=1)[1].split(
+        "## Virtual environment creation fails",
+        maxsplit=1,
+    )[0]
+
+    assert section.index("bootstrap_windows.ps1 -SkipPostgreSql -WhatIf") < section.index(
+        "install Python 3.12"
+    )
 
 
 def test_beginner_sql_start_uses_day_one_before_foundation_milestones() -> None:

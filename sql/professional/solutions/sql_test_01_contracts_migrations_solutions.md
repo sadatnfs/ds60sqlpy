@@ -70,13 +70,9 @@ whether totals may combine currencies.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-test-01 Exercise 1, complete the currency migration written analysis and support its claims with read-only evidence from `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders`. Mark unverified assumptions explicitly.
-- **Expected result/shape:** For sql-test-01 Exercise 1, expected output: a completed the currency migration written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `character`.
-- **Independent verification:** For sql-test-01 Exercise 1, check the currency migration written analysis against `character`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
-- **Intermediate relation check:** For sql-test-01 Exercise 1, check the currency migration written analysis against `character`.
-- **Clause check:** For sql-test-01 Exercise 1, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-test-01 Exercise 1, the chosen form is justified by this lesson-specific rationale: The exact manifest is `ARRAY[1,2,3]`. Evaluate another form against the concrete expected result (a completed the currency migration written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
-- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Inputs/evidence:** For sql-test-01 Exercise 1, alter `pro_contract_test_lab.orders` with required `currency_code character(3) DEFAULT 'USD'`, add migration ID 3, and extend the expected column contract inside the rollback-only fixture.
+- **Expected result/shape:** For sql-test-01 Exercise 1, expected output: the version and currency assertions pass, followed by one evidence row with migration IDs `{1,2,3}`, type `character`, length 3, `is_nullable = 'NO'`, and a default containing USD.
+- **Independent verification:** For sql-test-01 Exercise 1, independently query the ordered migration IDs and the `information_schema.columns` row; then change the length or omit migration 3 in a negative control and require the assertion to raise.
 
 ## Exercise 2 — Duplicate producer keys
 
@@ -90,13 +86,9 @@ resolution policy is explicit.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-test-01 Exercise 2, read from `pro_contract_test_lab.raw_orders`. Compute `source_order_key`, and `participating_rows` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-- **Expected result/shape:** For sql-test-01 Exercise 2, expected output: one row per duplicate key group and labels its count `participating_rows`. The final columns are `source_order_key`, and `participating_rows`. The final order is `ro.source_order_key`.
-- **Independent verification:** For sql-test-01 Exercise 2, evaluate each of `source_order_key`, and `participating_rows` in a separate control `SELECT` over `pro_contract_test_lab.raw_orders`; require one final row and compare every value. Add duplicate source candidates for `source_order_key`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
-- **Intermediate relation check:** For sql-test-01 Exercise 2, confirm the groups are `source_order_key`; then check `ro.source_order_key` before applying the row cap.
-- **Clause check:** For sql-test-01 Exercise 2, the solution actually uses `FROM`, `GROUP BY`, `HAVING`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `pro_contract_test_lab.raw_orders`, preserve one row per `source_order_key`, and finish with `source_order_key`, and `participating_rows` ordered by `ro.source_order_key`.
-- **Alternative/trade-off:** For sql-test-01 Exercise 2, the chosen form is justified by this lesson-specific rationale: The detail query returns one row per duplicate key group and labels its count `participating_rows`. Evaluate another form against the concrete expected result (one row per duplicate key group and labels its count `participating_rows`) and the verification above.
-- **Edge case:** Add duplicate source candidates for `source_order_key`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
+- **Inputs/evidence:** For sql-test-01 Exercise 2, populate `pro_contract_test_lab.raw_orders` with two `ORD-100` producer rows and one `ORD-101` row, then group by `source_order_key` and retain duplicate groups with `HAVING COUNT(*) > 1`.
+- **Expected result/shape:** For sql-test-01 Exercise 2, expected output: one row per duplicate producer key with columns `source_order_key` and `participating_rows`, ordered by key; the supplied fixture returns `ORD-100` with 2 participating rows.
+- **Independent verification:** For sql-test-01 Exercise 2, independently assert one duplicate group and two participating rows; add another `ORD-100` plus two `ORD-102` rows and prove both groups appear once while `ORD-101` remains absent.
 
 ## Exercise 3 — Constraint contracts
 
@@ -110,13 +102,9 @@ and RLS policies may all be part of a migration contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-test-01 Exercise 3, read from `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, and `pg_constraint`. Compute `conkey` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-- **Expected result/shape:** For sql-test-01 Exercise 3, expected output: exactly one aggregate summary row. The final columns are `conkey`.
-- **Independent verification:** For sql-test-01 Exercise 3, evaluate each of `row_count` in a separate control `SELECT` over `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, and `pg_constraint`; require one final row and compare every value. Add two tied candidates and prove `conkey` identifies both without accidental loss.
-- **Intermediate relation check:** For sql-test-01 Exercise 3, start with the first relation in `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, and `pg_constraint`; after each join, record total rows and distinct `conkey` so the exact fanout or loss is visible.
-- **Clause check:** For sql-test-01 Exercise 3, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, and `SELECT`. Read only those operations: begin at `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, and `pg_constraint`, preserve exactly one summary row, and finish with `conkey`.
-- **Alternative/trade-off:** For sql-test-01 Exercise 3, the chosen form is justified by this lesson-specific rationale: The solution searches `pg_constraint` by schema, relation, type, and rendered definition rather than relying on an auto-generated name. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
-- **Edge case:** Add two tied candidates and prove `conkey` identifies both without accidental loss.
+- **Inputs/evidence:** For sql-test-01 Exercise 3, inspect order defaults through `information_schema.columns` and inspect primary, unique, and foreign-key semantics through `pg_constraint`, `pg_class`, and `pg_namespace` without relying on generated names.
+- **Expected result/shape:** For sql-test-01 Exercise 3, expected output: four named assertions pass for the required defaults, primary key on `order_id`, unique key on `order_key`, and `customer_id` foreign key; no constraint name is contractual.
+- **Independent verification:** For sql-test-01 Exercise 3, render candidates with `pg_get_constraintdef`, require exactly one semantic match per rule, and prove a negative control looking for a nonexistent `UNIQUE (reported_total)` contract raises.
 
 ## Exercise 4 — Zero-line reconciliation
 
@@ -127,13 +115,9 @@ DISTINCT FROM` compares NULL safely.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-test-01 Exercise 4, read from `pro_contract_test_lab.orders`, `pro_contract_test_lab.order_lines`, and `line`. Build the answer toward `order_id`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-test-01 Exercise 4, expected output: one row per `order_id`. The final columns are `order_id`.
-- **Independent verification:** For sql-test-01 Exercise 4, project `order_id` plus the raw source columns from `pro_contract_test_lab.orders`, `pro_contract_test_lab.order_lines`, and `line` at each join stage; record row count and distinct `order_id`, then assert the final `order_id` values match those staged rows without unintended fanout or loss. Add one row for which `(o.order_key = 'ORD-200')` is true and one for which it is false; verify only the matching `order_id` value is returned.
-- **Intermediate relation check:** For sql-test-01 Exercise 4, start with the first relation in `pro_contract_test_lab.orders`, `pro_contract_test_lab.order_lines`, and `line`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
-- **Clause check:** For sql-test-01 Exercise 4, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, and `SELECT`. Read only those operations: begin at `pro_contract_test_lab.orders`, `pro_contract_test_lab.order_lines`, and `line`, preserve one row per `order_id`, and finish with `order_id`.
-- **Alternative/trade-off:** For sql-test-01 Exercise 4, the chosen form is justified by this lesson-specific rationale: A LEFT JOIN retains orders with no line aggregate. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
-- **Edge case:** Add one row for which `(o.order_key = 'ORD-200')` is true and one for which it is false; verify only the matching `order_id` value is returned.
+- **Inputs/evidence:** For sql-test-01 Exercise 4, pre-aggregate `pro_contract_test_lab.order_lines` by `order_id`, LEFT JOIN those totals to every order, and apply the stated policy that no lines means numeric zero.
+- **Expected result/shape:** For sql-test-01 Exercise 4, expected output: one row per order with `order_id`, `order_key`, `reported_total`, `line_total`, and `reconciles`, ordered by `order_id`; zero-line orders remain and show zero.
+- **Independent verification:** For sql-test-01 Exercise 4, reconcile output count and unique IDs with the orders table, prove `ORD-200` totals 5 and `ORD-201` totals 0, then corrupt a reported total under a savepoint and require the assertion to fail.
 
 ## Exercise 5 — Harness reasoning
 
@@ -147,13 +131,9 @@ per-run schema/database, or transaction whose code does not require commits.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-test-01 Exercise 5, complete the harness written analysis and support its claims with read-only evidence from `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders`. Mark unverified assumptions explicitly.
-- **Expected result/shape:** For sql-test-01 Exercise 5, expected output: a completed the harness written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `on_error_stop`.
-- **Independent verification:** For sql-test-01 Exercise 5, check the harness written analysis against `on_error_stop`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
-- **Intermediate relation check:** For sql-test-01 Exercise 5, check the harness written analysis against `on_error_stop`.
-- **Clause check:** For sql-test-01 Exercise 5, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-test-01 Exercise 5, the chosen form is justified by this lesson-specific rationale: Fixtures belong to this test module, carry deterministic keys/content tags, and live in a rollback-isolated schema. Evaluate another form against the concrete expected result (a completed the harness written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
-- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Inputs/evidence:** For sql-test-01 Exercise 5, derive a harness checklist from the fixture manifest, outer transaction, caught negative control, raised assertions, final rollback, and psql `ON_ERROR_STOP=1` behavior.
+- **Expected result/shape:** For sql-test-01 Exercise 5, expected output: exactly four ordered rows with `step_number`, `control_name`, `required_evidence`, and `failure_if_missing`, covering fixture ownership, rollback isolation, negative control, and process failure.
+- **Independent verification:** For sql-test-01 Exercise 5, run one intentionally false assertion in a disposable invocation and require a nonzero psql exit, then rerun the valid suite and confirm rollback leaves no `pro_contract_test_lab` schema.
 
 ## Exercise 6 — Assert the intended error
 
@@ -168,13 +148,9 @@ permissions, missing objects, or syntax defects.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-test-01 Exercise 6, read the target keys from `pro_contract_test_lab.orders` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
-- **Expected result/shape:** For sql-test-01 Exercise 6, expected output: the command tag and an independently counted set of affected `order_id` values. The final columns are `unique_violation`, and `constraint_name`.
-- **Independent verification:** For sql-test-01 Exercise 6, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `pro_contract_test_lab.orders` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.
-- **Intermediate relation check:** For sql-test-01 Exercise 6, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `pro_contract_test_lab.orders` again and prove rollback or idempotent retry.
-- **Clause check:** For sql-test-01 Exercise 6, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pro_contract_test_lab.orders` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-test-01 Exercise 6, the chosen form is justified by this lesson-specific rationale: Wrap the duplicate insert in a nested block, require `unique_violation` (SQLSTATE `23505`), and raise if the insert succeeds. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected `order_id` values) and the verification above.
-- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.
+- **Inputs/evidence:** For sql-test-01 Exercise 6, record the order count, attempt a duplicate `order_key` inside a nested exception block, capture returned SQLSTATE and constraint name, and record the post-attempt count.
+- **Expected result/shape:** For sql-test-01 Exercise 6, expected output: one `negative_test_results` row showing SQLSTATE `23505`, a nonblank constraint name, unchanged before/after counts, and `passed = true`, followed by a passing assertion.
+- **Independent verification:** For sql-test-01 Exercise 6, fail if the insert succeeds or raises any category other than `unique_violation`, compare the before/after counts independently, and verify the duplicate row is absent.
 
 ## Exercise 7 — Table-driven boundaries
 
@@ -189,13 +165,9 @@ its expected outcome so an accidentally filtered case cannot disappear.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-test-01 Exercise 7, read from `pro_contract_test_lab.boundary_probe`, and `pro_contract_test_lab.boundary_results`. Build the answer toward `case_id`, `quantity`, and `expected_accept`; keep `case_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-test-01 Exercise 7, expected output: one row per `case_id`. The final columns are `case_id`, `quantity`, and `expected_accept`. The final order is `case_id LOOP accepted := true`.
-- **Independent verification:** For sql-test-01 Exercise 7, reselect the returned keys directly from the source; require unique `case_id` where the expected grain is one row per key and confirm the projected `case_id`, `quantity`, and `expected_accept` against `pro_contract_test_lab.boundary_probe`, and `pro_contract_test_lab.boundary_results`. Repeat with `NULL` in `case_id`, and `quantity` and state whether the row is kept, rejected, or classified.
-- **Intermediate relation check:** For sql-test-01 Exercise 7, inspect the source keys that survive `WHERE`; then check `case_id LOOP accepted := true` before applying the row cap.
-- **Clause check:** For sql-test-01 Exercise 7, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `pro_contract_test_lab.boundary_probe`, and `pro_contract_test_lab.boundary_results`, preserve one row per `case_id`, and finish with `case_id`, `quantity`, and `expected_accept` ordered by `case_id LOOP accepted := true`.
-- **Alternative/trade-off:** For sql-test-01 Exercise 7, the chosen form is justified by this lesson-specific rationale: Represent cases as rows with case ID, input fields, and expected accept/reject or normalized result. Evaluate another form against the concrete expected result (one row per `case_id`) and the verification above.
-- **Edge case:** Repeat with `NULL` in `case_id`, and `quantity` and state whether the row is kept, rejected, or classified.
+- **Inputs/evidence:** For sql-test-01 Exercise 7, drive six quantity cases—below, lower bound, upper bound, above, NULL, and malformed—from data, executing each insert in its own exception subtransaction and recording observed SQLSTATE.
+- **Expected result/shape:** For sql-test-01 Exercise 7, expected output: six rows with `case_id`, raw value, expected/observed acceptance, observed SQLSTATE, and `matches`; bounds 1 and 100 pass, and all four invalid cases fail with their intended category.
+- **Independent verification:** For sql-test-01 Exercise 7, require exactly six unique case IDs and no false `matches`, independently inspect accepted rows, and prove an omitted or misclassified case makes the final assertion raise.
 
 ## Exercise 8 — Deterministic concurrency test
 
@@ -210,13 +182,9 @@ capture both session logs, and always clean a disposable target after failure.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-test-01 Exercise 8, read from `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders`. Build the answer toward `lock_timeout`, and `statement_timeout`; keep `customer_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-test-01 Exercise 8, expected output: one row per `customer_id`. The final columns are `lock_timeout`, and `statement_timeout`.
-- **Independent verification:** For sql-test-01 Exercise 8, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `lock_timeout`, and `statement_timeout` against `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
-- **Intermediate relation check:** For sql-test-01 Exercise 8, select `customer_id` from `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders` before adding derived columns.
-- **Clause check:** For sql-test-01 Exercise 8, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-test-01 Exercise 8, the chosen form is justified by this lesson-specific rationale: Use two independent sessions because one PostgreSQL transaction cannot observe every competing-transaction anomaly. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
-- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Inputs/evidence:** For sql-test-01 Exercise 8, specify a two-session lock test with named setup, session barriers, bounded lock and statement timeouts, captured outcomes, deterministic final reconciliation, and cleanup.
+- **Expected result/shape:** For sql-test-01 Exercise 8, expected output: seven ordered protocol rows with `step_number`, `session_name`, `action`, `wait_for`, `expected_observation`, and `failure_evidence`, from setup through cleanup.
+- **Independent verification:** For sql-test-01 Exercise 8, execute the protocol only in two disposable sessions, capture both transcripts and the final row, require one committed owner plus the expected losing outcome, and restore the fixture even after failure.
 
 ## Exercise 9 — Stable schema fingerprint
 
@@ -231,13 +199,9 @@ unexpected objects; a one-way expected-subset check misses accidental exposure.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-test-01 Exercise 9, read from `information_schema.columns`, `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace`. Build the answer toward `ordinal_position`, `column_name`, `data_type`, `is_nullable`, and `column_default`; keep `ordinal_position` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-test-01 Exercise 9, expected output: one row per `ordinal_position`. The final columns are `ordinal_position`, `column_name`, `data_type`, `is_nullable`, and `column_default`. The final order is `con.contype, definition`.
-- **Independent verification:** For sql-test-01 Exercise 9, project `ordinal_position` plus the raw source columns from `information_schema.columns`, `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace` at each join stage; record row count and distinct `ordinal_position`, then assert the final `ordinal_position`, `column_name`, `data_type`, `is_nullable`, and `column_default` values match those staged rows without unintended fanout or loss. Give two rows the same `con.contype` value and different `definition` values; verify `con.contype, definition` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-test-01 Exercise 9, start with the first relation in `information_schema.columns`, `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace`; after each join, record total rows and distinct `ordinal_position` so the exact fanout or loss is visible.
-- **Clause check:** For sql-test-01 Exercise 9, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `information_schema.columns`, `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace`, preserve one row per `ordinal_position`, and finish with `ordinal_position`, `column_name`, `data_type`, `is_nullable`, and `column_default` ordered by `con.contype, definition`.
-- **Alternative/trade-off:** For sql-test-01 Exercise 9, the chosen form is justified by this lesson-specific rationale: Canonicalize ordered semantic rows for columns/types/defaults/nullability, constraints and referenced columns, indexes/predicates/operator classes, privileges/policies, and routine signatures/attributes. Evaluate another form against the concrete expected result (one row per `ordinal_position`) and the verification above.
-- **Edge case:** Give two rows the same `con.contype` value and different `definition` values; verify `con.contype, definition` produces the intended rank and display order.
+- **Inputs/evidence:** For sql-test-01 Exercise 9, inventory ordered order-column properties from `information_schema.columns` and semantic constraint definitions from PostgreSQL catalogs, excluding OIDs, statistics, timestamps, and generated names.
+- **Expected result/shape:** For sql-test-01 Exercise 9, expected output: one deterministic result set at one-row-per-column grain and another at one-row-per-constraint grain, with definitions ordered by constraint type and definition.
+- **Independent verification:** For sql-test-01 Exercise 9, compare visible semantic rows before any hash, inject one missing and one unexpected property, and prove both drift directions are diagnosable without depending on an OID or generated name.
 
 ## Exercise 10 — Destructive migration rehearsal
 
@@ -253,13 +217,9 @@ permission from a successful course fixture.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-test-01 Exercise 10, use `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
-- **Expected result/shape:** For sql-test-01 Exercise 10, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `artifact_name`, `restored_object`, `row_count`, and `reconciliation_status`.
-- **Independent verification:** For sql-test-01 Exercise 10, restore into an isolated target and reconcile `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
-- **Intermediate relation check:** For sql-test-01 Exercise 10, restore into an isolated target and reconcile `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
-- **Clause check:** For sql-test-01 Exercise 10, the solution actually uses `WITH`. Read only those operations: begin at `true`, `pro_contract_test_lab.customers`, and `pro_contract_test_lab.orders`, preserve one row per `customer_id`, and finish with `artifact_name`, `restored_object`, `row_count`, and `reconciliation_status`.
-- **Alternative/trade-off:** For sql-test-01 Exercise 10, the chosen form is justified by this lesson-specific rationale: Restore a representative, access-isolated backup to a disposable database, record tool/server versions and baseline contracts, run the exact migration, then reconcile counts/checksums/rejected keys and execute. Evaluate another form against the concrete expected result (a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record) and the verification above.
-- **Edge case:** Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
+- **Inputs/evidence:** For sql-test-01 Exercise 10, describe a destructive-migration rehearsal in an isolated restored database, covering artifact identity, baseline contracts, migration evidence, reconciliation, application checks, recovery decision, approval, and cleanup.
+- **Expected result/shape:** For sql-test-01 Exercise 10, expected output: eight ordered rows with `phase_number`, `phase_name`, and `required_evidence`, beginning with restore and ending with cleanup; the SQL lesson records the plan but does not perform an external restore.
+- **Independent verification:** For sql-test-01 Exercise 10, rehearse against a disposable representative restore, inject one missing or invalid artifact, require validation to stop before cutover, and archive measured duration, rollback limits, approval, and cleanup evidence.
 
 ## Edge cases
 

@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-25-visualization-with-matplotlib-and-seaborn">Day 25 — Visualization with Matplotlib and Seaborn<a class="heading-anchor" href="#guide--day-25-visualization-with-matplotlib-and-seaborn" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
 <p>A chart is an encoding of data into position, color, shape, and size. Choose the encoding for the question, then make the figure legible and reproducible.</p>
@@ -292,6 +331,89 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 24 (<code>python-24</code>): EDA questions, distributions, segmentation, and data-quality caveats.</p>
+<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<ol>
+<li>Confirm the course environment before changing it:</li>
+</ol>
+<pre><code class="language-powershell">   # Windows PowerShell
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   &amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash">   # macOS/Linux
+   .venv/bin/python scripts/course.py doctor</code></pre>
+<ol>
+<li>Read <code>python/ds-60day/companion-guides/day25_viz_matplotlib_seaborn.md</code>, then open <code>python/ds-60day/notebooks/day25_viz_matplotlib_seaborn.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
+<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
+<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
+<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+</ol>
+<p><strong>Lesson outcome:</strong> use day 25 — visualization with matplotlib and seaborn to practice static chart choice, figure/axes ownership, labeling, and reproducible export and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
+<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
+<p>A visualization maps data fields to visual encodings such as position, length, color, shape, or size. Choose a chart from the analytical question and variable types: bars compare categories, histograms show a numeric distribution, lines emphasize ordered/time trends, and scatter plots show relationships between two numeric variables.</p>
+<p>Matplotlib separates a <strong>Figure</strong> (the full canvas) from one or more <strong>Axes</strong> (plot regions). Prefer the object-oriented API: <code>fig, ax = plt.subplots()</code>, plot onto <code>ax</code>, label the axes, then save through <code>fig</code>. State units and denominators, use ordering intentionally, and never encode meaning through color alone.</p>
+<h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>mark:</strong> a visible graphical element such as a point, line, or bar.</li>
+<li><strong>encoding:</strong> the mapping from a data field to a visual property.</li>
+<li><strong>Figure:</strong> the complete Matplotlib canvas.</li>
+<li><strong>Axes:</strong> one plotting region with scales, labels, and marks.</li>
+<li><strong>distribution:</strong> the frequency and shape of a variable&#x27;s values.</li>
+<li><strong>accessibility:</strong> design that remains interpretable across vision and interaction needs.</li>
+</ul>
+<h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<p><code>fig, ax = plt.subplots()</code> creates and returns both ownership objects. <code>ax.hist(values, bins=...)</code> adds marks to the axes; <code>ax.set(...)</code> sets title and labels; <code>fig.tight_layout()</code> adjusts spacing; and <code>fig.savefig(path, dpi=..., bbox_inches=&quot;tight&quot;)</code> serializes the canvas. Save before closing the figure.</p>
+<h5 id="guide--worked-example-1-build-a-labeled-distribution-plot">Worked example 1 — Build a labeled distribution plot<a class="heading-anchor" href="#guide--worked-example-1-build-a-labeled-distribution-plot" aria-label="Link to this section">#</a></h5>
+<p>Constructed data keeps the lesson offline and deterministic. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">import matplotlib.pyplot as plt
+
+durations = [2, 3, 3, 4, 5, 8, 13]
+fig, ax = plt.subplots(figsize=(5, 3))
+ax.hist(durations, bins=[0, 3, 6, 9, 12, 15], edgecolor=&quot;black&quot;)
+ax.set(title=&quot;Task duration distribution&quot;, xlabel=&quot;Duration (minutes)&quot;, ylabel=&quot;Tasks&quot;)
+fig.tight_layout()
+(type(fig).__name__, type(ax).__name__, len(ax.patches))</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">The tuple identifies `Figure`, `Axes`, and five histogram bins. The displayed chart has units on both axes.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--worked-example-2-make-category-ordering-explicit">Worked example 2 — Make category ordering explicit<a class="heading-anchor" href="#guide--worked-example-2-make-category-ordering-explicit" aria-label="Link to this section">#</a></h5>
+<p>Bar positions should reflect the intended comparison, not accidental input order. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">categories = [&quot;bronze&quot;, &quot;silver&quot;, &quot;gold&quot;]
+counts = [8, 5, 2]
+fig2, ax2 = plt.subplots(figsize=(5, 3))
+bars = ax2.bar(categories, counts, color=[&quot;0.45&quot;, &quot;0.65&quot;, &quot;0.85&quot;])
+ax2.set(title=&quot;Accounts by tier&quot;, xlabel=&quot;Tier&quot;, ylabel=&quot;Accounts&quot;)
+ax2.bar_label(bars)
+fig2.tight_layout()
+[bar.get_height() for bar in bars]</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`[8, 5, 2]`. Direct value labels make the quantities readable without relying on color.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
+<p>When the output differs from your prediction, use this order:</p>
+<ol>
+<li>Write the question, audience, field types, units, and denominator before choosing a chart.</li>
+<li>Keep figure/axes references and add labels through the axes object.</li>
+<li>Inspect skew, missing groups, and category order rather than accepting plotting defaults.</li>
+<li>Create the output directory and save through the figure before display/close; reopen the file to verify it is nonblank.</li>
+</ol>
+<h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
+<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
+<ol>
+<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
+<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
+<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
+<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
+<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
+</ol>
+<p><strong>Useful alternative:</strong> Seaborn offers statistical defaults on top of Matplotlib; use the returned axes and retain explicit labeling/export control.</p>
+<p><strong>Boundary to remember:</strong> Long labels, zero/missing groups, extreme skew, overlapping points, color-vision differences, and tiny figures require adaptation. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Figure:</strong> entire output canvas; <strong>Axes:</strong> one plotting area within it.</li>
@@ -324,19 +446,22 @@ plt.close(fig)</code></pre>
 <h4 id="guide--dataset-note">Dataset note<a class="heading-anchor" href="#guide--dataset-note" aria-label="Link to this section">#</a></h4>
 <p>The notebook uses Seaborn&#x27;s <code>tips</code> sample. First uncached use downloads it; later runs use Seaborn&#x27;s cache. Prime the cache while online or substitute a constructed/local frame.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Recreate two Day 24 plots with improved labeling. <strong>Hint:</strong> for each, write the question, intended reader, visual encoding, and required units before changing code.</li>
-<li>Export figures to <code>reports/figures/</code> with a consistent style. <strong>Hint:</strong> use the figure object, create the directory with <code>Path</code>, call <code>tight_layout</code>, and save before any display/close step.</li>
+<li>Recreate two Day 24 plots and improve their communication. <strong>For each:</strong> write the question and reader, choose the mark/encoding, label units and denominator, order categories deliberately, and add accessible non-color cues where needed. <strong>Expected behavior:</strong> a reader can state the intended comparison without reading surrounding code. <strong>Verify:</strong> reconcile plotted counts/summary values to the source DataFrame.</li>
+</ol>
+<ol>
+<li>Export both figures under an ignored learner artifact directory with consistent dimensions, style, filename, and resolution. <strong>Constraints:</strong> use <code>Path</code>, create parents, call <code>fig.tight_layout()</code>, and save through the figure before display/close. <strong>Verify:</strong> files exist, are nonempty, reopen successfully, and contain the expected title/axes rather than a blank canvas.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Choose a chart from the question and data types, then make units, denominators, ordering, uncertainty, and accessibility explicit.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Choose among bar, histogram, line, and scatter plots for category comparison, distribution, time trend, and two-number relationship. <strong>Progressive hint:</strong> Match the mark and axes to the analytical question.</li>
-<li><strong>Tracing:</strong> Trace figure and axes ownership when using <code>fig, ax = plt.subplots()</code> and explain where title, labels, and save operations belong. <strong>Progressive hint:</strong> The figure owns the canvas; the axes owns one plot region.</li>
-<li><strong>Implementation:</strong> Implement a reusable distribution function accepting an axes object, units, and title without calling <code>show</code>. <strong>Progressive hint:</strong> Returning the axes makes composition and testing easier.</li>
-<li><strong>Debugging:</strong> Repair an export that calls <code>show()</code> or closes the figure before <code>savefig</code>, producing a blank file in some environments. <strong>Progressive hint:</strong> Save through the figure before display/close.</li>
-<li><strong>Edge case and explanation:</strong> Adapt a chart for long category labels, color-vision differences, missing groups, and a very skewed distribution. <strong>Progressive hint:</strong> Do not communicate meaning through color alone.</li>
+<li><strong>Prediction:</strong> Choose among bar, histogram, line, and scatter plots for category comparison, distribution, time trend, and two-number relationship. <strong>Progressive hint:</strong> Match the mark and axes to the analytical question. <strong>Verify:</strong> Create a question-to-chart table and assert each of the four questions maps to the intended mark and axis variable types with a one-sentence reason.</li>
+<li><strong>Tracing:</strong> Trace figure and axes ownership when using <code>fig, ax = plt.subplots()</code> and explain where title, labels, and save operations belong. <strong>Progressive hint:</strong> The figure owns the canvas; the axes owns one plot region. <strong>Verify:</strong> Assert the title/x/y labels live on <code>ax</code>, the canvas saves through <code>fig</code>, and the expected number of axes/marks exists.</li>
+<li><strong>Implementation:</strong> Implement a reusable distribution function accepting an axes object, units, and title without calling <code>show</code>. <strong>Progressive hint:</strong> Returning the axes makes composition and testing easier. <strong>Verify:</strong> Call the function on a supplied axes, assert it returns that same axes, labels/units are set, expected marks exist, and no global <code>show</code> is called.</li>
+<li><strong>Debugging:</strong> Repair an export that calls <code>show()</code> or closes the figure before <code>savefig</code>, producing a blank file in some environments. <strong>Progressive hint:</strong> Save through the figure before display/close. <strong>Verify:</strong> Save before close and assert the output file is nonempty/reopenable; reproduce the old blank path once as evidence of operation order.</li>
+<li><strong>Edge case and explanation:</strong> Adapt a chart for long category labels, color-vision differences, missing groups, and a very skewed distribution. <strong>Progressive hint:</strong> Do not communicate meaning through color alone. <strong>Verify:</strong> Inspect a fixture containing all four challenges and assert labels are readable, groups remain distinguishable without color, and skew/missingness policy is visible.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -360,17 +485,33 @@ plt.close(fig)</code></pre>
 <li><a href="python-25.html#learner">Open the learner notebook</a></li>
 <li><a href="python-25.html#solution-1">Check the separate solution</a></li>
 <li><a href="python-26.html#guide">Next: Day 26 — Interactive visualization</a></li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-25`
+(Day 25 — Visualization with Matplotlib and Seaborn). Direct catalog prerequisites: `python-24`.
+I have completed the direct prerequisites: `python-24`. Emphasize static chart choice, figure/axes ownership, labeling, and reproducible export.
+Read `python/ds-60day/companion-guides/day25_viz_matplotlib_seaborn.md` and use the learner notebook
+`python/ds-60day/notebooks/day25_viz_matplotlib_seaborn.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -387,12 +528,12 @@ plt.close(fig)</code></pre>
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-25-visualization-with-matplotlib-seaborn">Day 25 — Visualization with Matplotlib &amp; seaborn<a class="heading-anchor" href="#learner--cell-1--day-25-visualization-with-matplotlib-seaborn" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -401,7 +542,62 @@ plt.close(fig)</code></pre>
 <li>Aesthetics and themes.</li>
 <li>Save figures for reports.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from pathlib import Path</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
+<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>This is the editable learner artifact for <code>python-25</code>. Read <code>python/ds-60day/companion-guides/day25_viz_matplotlib_seaborn.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
+<p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
+<p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--core-mental-model">Core mental model<a class="heading-anchor" href="#learner--cell-3--core-mental-model" aria-label="Link to this section">#</a></h4>
+<p>A visualization maps data fields to visual encodings such as position, length, color, shape, or size. Choose a chart from the analytical question and variable types: bars compare categories, histograms show a numeric distribution, lines emphasize ordered/time trends, and scatter plots show relationships between two numeric variables.</p>
+<p>Matplotlib separates a <strong>Figure</strong> (the full canvas) from one or more <strong>Axes</strong> (plot regions). Prefer the object-oriented API: <code>fig, ax = plt.subplots()</code>, plot onto <code>ax</code>, label the axes, then save through <code>fig</code>. State units and denominators, use ordering intentionally, and never encode meaning through color alone.</p>
+<h5 id="learner--cell-3--vocabulary">Vocabulary<a class="heading-anchor" href="#learner--cell-3--vocabulary" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>mark:</strong> a visible graphical element such as a point, line, or bar.</li>
+<li><strong>encoding:</strong> the mapping from a data field to a visual property.</li>
+<li><strong>Figure:</strong> the complete Matplotlib canvas.</li>
+<li><strong>Axes:</strong> one plotting region with scales, labels, and marks.</li>
+<li><strong>distribution:</strong> the frequency and shape of a variable&#x27;s values.</li>
+<li><strong>accessibility:</strong> design that remains interpretable across vision and interaction needs.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<p><code>fig, ax = plt.subplots()</code> creates and returns both ownership objects. <code>ax.hist(values, bins=...)</code> adds marks to the axes; <code>ax.set(...)</code> sets title and labels; <code>fig.tight_layout()</code> adjusts spacing; and <code>fig.savefig(path, dpi=..., bbox_inches=&quot;tight&quot;)</code> serializes the canvas. Save before closing the figure.</p>
+<h5 id="learner--cell-4--worked-example-1-build-a-labeled-distribution-plot">Worked example 1 — Build a labeled distribution plot<a class="heading-anchor" href="#learner--cell-4--worked-example-1-build-a-labeled-distribution-plot" aria-label="Link to this section">#</a></h5>
+<p>Constructed data keeps the lesson offline and deterministic. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import matplotlib.pyplot as plt</span>
+<span> </span>
+<span>durations = [2, 3, 3, 4, 5, 8, 13]</span>
+<span>fig, ax = plt.subplots(figsize=(5, 3))</span>
+<span>ax.hist(durations, bins=[0, 3, 6, 9, 12, 15], edgecolor=&quot;black&quot;)</span>
+<span>ax.set(title=&quot;Task duration distribution&quot;, xlabel=&quot;Duration (minutes)&quot;, ylabel=&quot;Tasks&quot;)</span>
+<span>fig.tight_layout()</span>
+<span>(type(fig).__name__, type(ax).__name__, len(ax.patches))</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> The tuple identifies <code>Figure</code>, <code>Axes</code>, and five histogram bins. The displayed chart has units on both axes.</p>
+<p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
+<h5 id="learner--cell-6--worked-example-2-make-category-ordering-explicit">Worked example 2 — Make category ordering explicit<a class="heading-anchor" href="#learner--cell-6--worked-example-2-make-category-ordering-explicit" aria-label="Link to this section">#</a></h5>
+<p>Bar positions should reflect the intended comparison, not accidental input order. Predict first; then run the next cell.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>categories = [&quot;bronze&quot;, &quot;silver&quot;, &quot;gold&quot;]</span>
+<span>counts = [8, 5, 2]</span>
+<span>fig2, ax2 = plt.subplots(figsize=(5, 3))</span>
+<span>bars = ax2.bar(categories, counts, color=[&quot;0.45&quot;, &quot;0.65&quot;, &quot;0.85&quot;])</span>
+<span>ax2.set(title=&quot;Accounts by tier&quot;, xlabel=&quot;Tier&quot;, ylabel=&quot;Accounts&quot;)</span>
+<span>ax2.bar_label(bars)</span>
+<span>fig2.tight_layout()</span>
+<span>[bar.get_height() for bar in bars]</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>[8, 5, 2]</code>. Direct value labels make the quantities readable without relying on color.</p>
+<h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
+<p>When evidence differs from your prediction, use this order:</p>
+<ol>
+<li>Write the question, audience, field types, units, and denominator before choosing a chart.</li>
+<li>Keep figure/axes references and add labels through the axes object.</li>
+<li>Inspect skew, missing groups, and category order rather than accepting plotting defaults.</li>
+<li>Create the output directory and save through the figure before display/close; reopen the file to verify it is nonblank.</li>
+</ol>
+<p><strong>Alternative to compare:</strong> Seaborn offers statistical defaults on top of Matplotlib; use the returned axes and retain explicit labeling/export control.</p>
+<p><strong>Boundary to test:</strong> Long labels, zero/missing groups, extreme skew, overlapping points, color-vision differences, and tiny figures require adaptation.</p>
+<p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from pathlib import Path</span>
 <span> </span>
 <span>import matplotlib.pyplot as plt</span>
 <span>import seaborn as sns</span>
@@ -417,52 +613,119 @@ plt.close(fig)</code></pre>
 <span>plt.savefig(artifact_dir / &#x27;fig_scatter.png&#x27;, dpi=150)</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Recreate two Day 24 plots with improved labeling. <strong>Hint:</strong> for each, write the question, intended reader, visual encoding, and required units before changing code.</li>
-<li>Export figures to <code>reports/figures/</code> with a consistent style. <strong>Hint:</strong> use the figure object, create the directory with <code>Path</code>, call <code>tight_layout</code>, and save before any display/close step.</li>
+<li>Recreate two Day 24 plots and improve their communication. <strong>For each:</strong> write the question and reader, choose the mark/encoding, label units and denominator, order categories deliberately, and add accessible non-color cues where needed. <strong>Expected behavior:</strong> a reader can state the intended comparison without reading surrounding code. <strong>Verify:</strong> reconcile plotted counts/summary values to the source DataFrame.</li>
 </ol>
-<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Export both figures under an ignored learner artifact directory with consistent dimensions, style, filename, and resolution. <strong>Constraints:</strong> use <code>Path</code>, create parents, call <code>fig.tight_layout()</code>, and save through the figure before display/close. <strong>Verify:</strong> files exist, are nonempty, reopen successfully, and contain the expected title/axes rather than a blank canvas.</li>
+</ol>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Choose a chart from the question and data types, then make units, denominators, ordering, uncertainty, and accessibility explicit.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Choose among bar, histogram, line, and scatter plots for category comparison, distribution, time trend, and two-number relationship. <strong>Progressive hint:</strong> Match the mark and axes to the analytical question.</li>
-<li><strong>Tracing:</strong> Trace figure and axes ownership when using <code>fig, ax = plt.subplots()</code> and explain where title, labels, and save operations belong. <strong>Progressive hint:</strong> The figure owns the canvas; the axes owns one plot region.</li>
-<li><strong>Implementation:</strong> Implement a reusable distribution function accepting an axes object, units, and title without calling <code>show</code>. <strong>Progressive hint:</strong> Returning the axes makes composition and testing easier.</li>
-<li><strong>Debugging:</strong> Repair an export that calls <code>show()</code> or closes the figure before <code>savefig</code>, producing a blank file in some environments. <strong>Progressive hint:</strong> Save through the figure before display/close.</li>
-<li><strong>Edge case and explanation:</strong> Adapt a chart for long category labels, color-vision differences, missing groups, and a very skewed distribution. <strong>Progressive hint:</strong> Do not communicate meaning through color alone.</li>
+<li><strong>Prediction:</strong> Choose among bar, histogram, line, and scatter plots for category comparison, distribution, time trend, and two-number relationship. <strong>Progressive hint:</strong> Match the mark and axes to the analytical question. <strong>Verify:</strong> Create a question-to-chart table and assert each of the four questions maps to the intended mark and axis variable types with a one-sentence reason.</li>
+<li><strong>Tracing:</strong> Trace figure and axes ownership when using <code>fig, ax = plt.subplots()</code> and explain where title, labels, and save operations belong. <strong>Progressive hint:</strong> The figure owns the canvas; the axes owns one plot region. <strong>Verify:</strong> Assert the title/x/y labels live on <code>ax</code>, the canvas saves through <code>fig</code>, and the expected number of axes/marks exists.</li>
+<li><strong>Implementation:</strong> Implement a reusable distribution function accepting an axes object, units, and title without calling <code>show</code>. <strong>Progressive hint:</strong> Returning the axes makes composition and testing easier. <strong>Verify:</strong> Call the function on a supplied axes, assert it returns that same axes, labels/units are set, expected marks exist, and no global <code>show</code> is called.</li>
+<li><strong>Debugging:</strong> Repair an export that calls <code>show()</code> or closes the figure before <code>savefig</code>, producing a blank file in some environments. <strong>Progressive hint:</strong> Save through the figure before display/close. <strong>Verify:</strong> Save before close and assert the output file is nonempty/reopenable; reproduce the old blank path once as evidence of operation order.</li>
+<li><strong>Edge case and explanation:</strong> Adapt a chart for long category labels, color-vision differences, missing groups, and a very skewed distribution. <strong>Progressive hint:</strong> Do not communicate meaning through color alone. <strong>Verify:</strong> Inspect a fixture containing all four challenges and assert labels are readable, groups remain distinguishable without color, and skew/missingness policy is visible.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Predict first. Then write small code and assertions below each label.</span>
-<span># Keep the official solution closed until you have tested an honest attempt.</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Recreate two Day 24 plots and improve their communication. <strong>For each:</strong> write the question and reader, choose the mark/encoding, label units and denominator, order categories deliberately, and add accessible non-color cues where needed. <strong>Expected behavior:</strong> a reader can state the intended comparison without reading surrounding code. <strong>Verify:</strong> reconcile plotted counts/summary values to the source DataFrame.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
+<span># Short contract: Recreate two Day 24 plots and improve their communication. write the question and reader, choose the mark/encoding, label units and denominator, order categories deliberately, a...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 3 — Prediction</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Export both figures under an ignored learner artifact directory with consistent dimensions, style, filename, and resolution. <strong>Constraints:</strong> use <code>Path</code>, create parents, call <code>fig.tight_layout()</code>, and save through the figure before display/close. <strong>Verify:</strong> files exist, are nonempty, reopen successfully, and contain the expected title/axes rather than a blank canvas.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
+<span># Short contract: Export both figures under an ignored learner artifact directory with consistent dimensions, style, filename, and resolution. use `Path`, create parents, call `fig.tight_layout()...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 4 — Tracing</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Choose among bar, histogram, line, and scatter plots for category comparison, distribution, time trend, and two-number relationship. <strong>Progressive hint:</strong> Match the mark and axes to the analytical question. <strong>Verify:</strong> Create a question-to-chart table and assert each of the four questions maps to the intended mark and axis variable types with a one-sentence reason.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
+<span># Short contract: Choose among bar, histogram, line, and scatter plots for category comparison, distribution, time trend, and two-number relationship. Match the mark and axes to the analytical qu...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 5 — Implementation</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace figure and axes ownership when using <code>fig, ax = plt.subplots()</code> and explain where title, labels, and save operations belong. <strong>Progressive hint:</strong> The figure owns the canvas; the axes owns one plot region. <strong>Verify:</strong> Assert the title/x/y labels live on <code>ax</code>, the canvas saves through <code>fig</code>, and the expected number of axes/marks exists.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
+<span># Short contract: Trace figure and axes ownership when using `fig, ax = plt.subplots()` and explain where title, labels, and save operations belong. The figure owns the canvas; the axes owns one...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 6 — Debugging</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement a reusable distribution function accepting an axes object, units, and title without calling <code>show</code>. <strong>Progressive hint:</strong> Returning the axes makes composition and testing easier. <strong>Verify:</strong> Call the function on a supplied axes, assert it returns that same axes, labels/units are set, expected marks exist, and no global <code>show</code> is called.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
+<span># Short contract: Implement a reusable distribution function accepting an axes object, units, and title without calling `show`. Returning the axes makes composition and testing easier. Call the f...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 7 — Edge case and explanation</span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair an export that calls <code>show()</code> or closes the figure before <code>savefig</code>, producing a blank file in some environments. <strong>Progressive hint:</strong> Save through the figure before display/close. <strong>Verify:</strong> Save before close and assert the output file is nonempty/reopenable; reproduce the old blank path once as evidence of operation order.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
+<span># Short contract: Repair an export that calls `show()` or closes the figure before `savefig`, producing a blank file in some environments. Save through the figure before display/close. Save befor...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Adapt a chart for long category labels, color-vision differences, missing groups, and a very skewed distribution. <strong>Progressive hint:</strong> Do not communicate meaning through color alone. <strong>Verify:</strong> Inspect a fixture containing all four challenges and assert labels are readable, groups remain distinguishable without color, and skew/missingness policy is visible.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
+<span># Short contract: Adapt a chart for long category labels, color-vision differences, missing groups, and a very skewed distribution. Do not communicate meaning through color alone. Inspect a fixtu...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -486,76 +749,126 @@ plt.close(fig)</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-25-solutions-visualization-with-matplotlib-seaborn">Day 25 — Solutions: Visualization with Matplotlib &amp; Seaborn<a class="heading-anchor" href="#solution-1--day-25-solutions-visualization-with-matplotlib-seaborn" aria-label="Link to this section">#</a></h3>
-<p>We recreate EDA visuals with better labeling and export figures with a consistent style.</p>
-<p>Contents</p>
+<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
+<p>These worked answers demonstrate <strong>static chart choice, figure/axes ownership, labeling, and reproducible export</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
+<p>A visualization maps data fields to visual encodings such as position, length, color, shape, or size. Choose a chart from the analytical question and variable types: bars compare categories, histograms show a numeric distribution, lines emphasize ordered/time trends, and scatter plots show relationships between two numeric variables.</p>
+<p>Matplotlib separates a <strong>Figure</strong> (the full canvas) from one or more <strong>Axes</strong> (plot regions). Prefer the object-oriented API: <code>fig, ax = plt.subplots()</code>, plot onto <code>ax</code>, label the axes, then save through <code>fig</code>. State units and denominators, use ordering intentionally, and never encode meaning through color alone.</p>
+<h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
-<li>Exercise 1: Recreate two plots with improved labeling</li>
-<li>Exercise 2: Export figures under the ignored course artifact directory</li>
+<li><strong>mark:</strong> a visible graphical element such as a point, line, or bar.</li>
+<li><strong>encoding:</strong> the mapping from a data field to a visual property.</li>
+<li><strong>Figure:</strong> the complete Matplotlib canvas.</li>
+<li><strong>Axes:</strong> one plotting region with scales, labels, and marks.</li>
+<li><strong>distribution:</strong> the frequency and shape of a variable&#x27;s values.</li>
+<li><strong>accessibility:</strong> design that remains interpretable across vision and interaction needs.</li>
 </ul>
-<hr>
-<p>Setup</p>
-<pre><code class="language-python">import pathlib
+<h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
+<p>For this lesson&#x27;s <strong>static chart choice, figure/axes ownership, labeling, and reproducible export</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Recreate two Day 24 plots and improve their communication. <strong>For each:</strong> write the question and reader, choose the mark/encoding, label units and denominator, order categories deliberately, and add accessible non-color cues where needed. <strong>Expected behavior:</strong> a reader can state the intended comparison without reading surrounding code. <strong>Verify:</strong> reconcile plotted counts/summary values to the source DataFrame.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Recreate two Day 24 plots and improve their communication. For each: write the question and reader, choose the mark/encoding, label units and denominator, order categories deliberately, and add accessible non-color cues where needed. Expected behavior: a reader can state the intended comparison without reading surrounding code. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: reconcile plotted counts/summary values to the source DataFrame. That connects the answer to static chart choice, figure/axes ownership, labeling, and reproducible export.</p>
+<pre><code class="language-python">import matplotlib.pyplot as plt
+import pandas as pd
 
-import matplotlib.pyplot as plt
-import seaborn as sns
+source = pd.DataFrame(
+    {
+        &quot;duration_minutes&quot;: [2, 3, 3, 4, 5, 8],
+        &quot;segment&quot;: [&quot;new&quot;, &quot;new&quot;, &quot;returning&quot;, &quot;new&quot;, &quot;new&quot;, &quot;returning&quot;],
+    }
+)
+values = source[&quot;duration_minutes&quot;]
+category_counts = (
+    source[&quot;segment&quot;].value_counts().reindex([&quot;new&quot;, &quot;returning&quot;])
+)
 
-sns.set_theme(context=&#x27;notebook&#x27;, style=&#x27;whitegrid&#x27;)
-FIG_DIR = pathlib.Path(&#x27;artifacts/day25/figures&#x27;)
-FIG_DIR.mkdir(parents=True, exist_ok=True)</code></pre>
-<p>Exercise 1 — Improved labeling</p>
-<pre><code class="language-python">df = sns.load_dataset(&#x27;tips&#x27;)
+distribution_fig, distribution_ax = plt.subplots(figsize=(5, 3))
+distribution_ax.hist(values, bins=4, edgecolor=&quot;black&quot;)
+distribution_ax.set(
+    title=&quot;Task duration distribution&quot;,
+    xlabel=&quot;Duration (minutes)&quot;,
+    ylabel=&quot;Tasks (n)&quot;,
+)
 
-# Histogram
-fig, ax = plt.subplots(figsize=(6,4))
-sns.histplot(data=df, x=&#x27;total_bill&#x27;, kde=True, ax=ax)
-ax.set(title=&#x27;Distribution of Total Bill&#x27;, xlabel=&#x27;Total bill ($)&#x27;, ylabel=&#x27;Count&#x27;)
-fig.tight_layout(); fig.savefig(FIG_DIR/&#x27;total_bill_hist.png&#x27;, dpi=150)
+category_fig, category_ax = plt.subplots(figsize=(5, 3))
+bars = category_ax.bar(
+    category_counts.index,
+    category_counts.values,
+    color=&quot;0.75&quot;,
+    edgecolor=&quot;black&quot;,
+    hatch=[&quot;//&quot;, &quot;..&quot;],
+)
+category_ax.bar_label(bars)
+category_ax.set(
+    title=&quot;Tasks by account segment&quot;,
+    xlabel=&quot;Account segment&quot;,
+    ylabel=&quot;Tasks (n)&quot;,
+)
+distribution_fig.tight_layout()
+category_fig.tight_layout()
 
-# Scatter with trend
-fig, ax = plt.subplots(figsize=(6,4))
-sns.regplot(data=df, x=&#x27;total_bill&#x27;, y=&#x27;tip&#x27;, scatter_kws={&#x27;alpha&#x27;:0.4}, ax=ax)
-ax.set(title=&#x27;Tip vs Total Bill&#x27;, xlabel=&#x27;Total bill ($)&#x27;, ylabel=&#x27;Tip ($)&#x27;)
-fig.tight_layout(); fig.savefig(FIG_DIR/&#x27;tip_vs_total_bill.png&#x27;, dpi=150)</code></pre>
-<p>Exercise 2 — Consistent style export</p>
-<pre><code class="language-python">plt.style.use(&#x27;seaborn-v0_8-whitegrid&#x27;)
-for ext in [&#x27;png&#x27;,&#x27;pdf&#x27;]:
-    (FIG_DIR/&#x27;total_bill_hist&#x27;).with_suffix(&#x27;.&#x27;+ext)
-    (FIG_DIR/&#x27;tip_vs_total_bill&#x27;).with_suffix(&#x27;.&#x27;+ext)</code></pre>
-<p>Notes</p>
-<ul>
-<li>Use tight_layout to avoid cut labels</li>
-<li>Save both PNG and PDF for web and print</li>
-</ul>
-<hr>
-<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
-<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Recreate two Day 24 plots with improved labeling. <strong>Hint:</strong> for each, write the question, intended reader, visual encoding, and required units before changing code.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Export figures to <code>reports/figures/</code> with a consistent style. <strong>Hint:</strong> use the figure object, create the directory with <code>Path</code>, call <code>tight_layout</code>, and save before any display/close step.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-3-prediction">Exercise 3 — Prediction<a class="heading-anchor" href="#solution-1--exercise-3-prediction" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Choose among bar, histogram, line, and scatter plots for category comparison, distribution, time trend, and two-number relationship.</p>
-<p><strong>Reasoning checkpoint:</strong> Match the mark and axes to the analytical question. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-4-tracing">Exercise 4 — Tracing<a class="heading-anchor" href="#solution-1--exercise-4-tracing" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Trace figure and axes ownership when using <code>fig, ax = plt.subplots()</code> and explain where title, labels, and save operations belong.</p>
-<p><strong>Reasoning checkpoint:</strong> The figure owns the canvas; the axes owns one plot region. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-5-implementation">Exercise 5 — Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Implement a reusable distribution function accepting an axes object, units, and title without calling <code>show</code>.</p>
-<p><strong>Reasoning checkpoint:</strong> Returning the axes makes composition and testing easier. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-6-debugging">Exercise 6 — Debugging<a class="heading-anchor" href="#solution-1--exercise-6-debugging" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Repair an export that calls <code>show()</code> or closes the figure before <code>savefig</code>, producing a blank file in some environments.</p>
-<p><strong>Reasoning checkpoint:</strong> Save through the figure before display/close. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-7-edge-case-and-explanation">Exercise 7 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-7-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Adapt a chart for long category labels, color-vision differences, missing groups, and a very skewed distribution.</p>
-<p><strong>Reasoning checkpoint:</strong> Do not communicate meaning through color alone. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+histogram_total = sum(patch.get_height() for patch in distribution_ax.patches)
+assert histogram_total == source[&quot;duration_minutes&quot;].notna().sum()
+assert [bar.get_height() for bar in bars] == category_counts.tolist()</code></pre>
+<p>The operations reader can now answer two written questions: “How are task durations distributed?” and “How many tasks belong to each segment?” Units, denominators, labels, outlines, hatches, and deliberate category order make both comparisons readable without color alone.</p>
+<p><strong>Verification evidence:</strong> reconcile plotted counts/summary values to the source DataFrame.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Export both figures under an ignored learner artifact directory with consistent dimensions, style, filename, and resolution. <strong>Constraints:</strong> use <code>Path</code>, create parents, call <code>fig.tight_layout()</code>, and save through the figure before display/close. <strong>Verify:</strong> files exist, are nonempty, reopen successfully, and contain the expected title/axes rather than a blank canvas.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Export both figures under an ignored learner artifact directory with consistent dimensions, style, filename, and resolution. Constraints: use <code>Path</code>, create parents, call <code>fig.tight_layout()</code>, and save through the figure before display/close. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: files exist, are nonempty, reopen successfully, and contain the expected title/axes rather than a blank canvas. That connects the answer to static chart choice, figure/axes ownership, labeling, and reproducible export.</p>
+<pre><code class="language-python">from pathlib import Path
+from PIL import Image
+
+artifact_dir = Path(&quot;artifacts/day25&quot;)
+artifact_dir.mkdir(parents=True, exist_ok=True)
+exports = [
+    (
+        distribution_fig,
+        artifact_dir / &quot;task-duration-distribution.png&quot;,
+        &quot;Task duration distribution&quot;,
+    ),
+    (
+        category_fig,
+        artifact_dir / &quot;tasks-by-segment.png&quot;,
+        &quot;Tasks by account segment&quot;,
+    ),
+]
+for figure, destination, expected_title in exports:
+    figure.tight_layout()
+    assert figure.axes[0].get_title() == expected_title
+    figure.savefig(destination, dpi=150, bbox_inches=&quot;tight&quot;)
+    assert destination.exists() and destination.stat().st_size &gt; 0
+    with Image.open(destination) as image:
+        image.verify()
+    plt.close(figure)</code></pre>
+<p>Both figures use the same 5-by-3-inch dimensions, 150 DPI, naming convention, and ignored artifact directory. Titles and axes are checked before saving; Pillow then proves each nonempty PNG can be reopened.</p>
+<p><strong>Verification evidence:</strong> files exist, are nonempty, reopen successfully, and contain the expected title/axes rather than a blank canvas.</p>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Prediction:</strong> Choose among bar, histogram, line, and scatter plots for category comparison, distribution, time trend, and two-number relationship. <strong>Progressive hint:</strong> Match the mark and axes to the analytical question. <strong>Verify:</strong> Create a question-to-chart table and assert each of the four questions maps to the intended mark and axis variable types with a one-sentence reason.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Choose among bar, histogram, line, and scatter plots for category comparison, distribution, time trend, and two-number relationship. Progressive hint: Match the mark and axes to the analytical question. Then compare the prediction with this proof target: Create a question-to-chart table and assert each of the four questions maps to the intended mark and axis variable types with a one-sentence reason. This makes static chart choice, figure/axes ownership, labeling, and reproducible export observable instead of relying on intuition.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Create a question-to-chart table and assert each of the four questions maps to the intended mark and axis variable types with a one-sentence reason.</p>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace figure and axes ownership when using <code>fig, ax = plt.subplots()</code> and explain where title, labels, and save operations belong. <strong>Progressive hint:</strong> The figure owns the canvas; the axes owns one plot region. <strong>Verify:</strong> Assert the title/x/y labels live on <code>ax</code>, the canvas saves through <code>fig</code>, and the expected number of axes/marks exists.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace figure and axes ownership when using <code>fig, ax = plt.subplots()</code> and explain where title, labels, and save operations belong. Progressive hint: The figure owns the canvas; the axes owns one plot region. Record the named value, shape, label, or iterator position needed to establish: Assert the title/x/y labels live on <code>ax</code>, the canvas saves through <code>fig</code>, and the expected number of axes/marks exists. The trace exposes static chart choice, figure/axes ownership, labeling, and reproducible export directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert the title/x/y labels live on <code>ax</code>, the canvas saves through <code>fig</code>, and the expected number of axes/marks exists.</p>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement a reusable distribution function accepting an axes object, units, and title without calling <code>show</code>. <strong>Progressive hint:</strong> Returning the axes makes composition and testing easier. <strong>Verify:</strong> Call the function on a supplied axes, assert it returns that same axes, labels/units are set, expected marks exist, and no global <code>show</code> is called.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement a reusable distribution function accepting an axes object, units, and title without calling <code>show</code>. Progressive hint: Returning the axes makes composition and testing easier. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Call the function on a supplied axes, assert it returns that same axes, labels/units are set, expected marks exist, and no global <code>show</code> is called. That connects the answer to static chart choice, figure/axes ownership, labeling, and reproducible export.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Call the function on a supplied axes, assert it returns that same axes, labels/units are set, expected marks exist, and no global <code>show</code> is called.</p>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair an export that calls <code>show()</code> or closes the figure before <code>savefig</code>, producing a blank file in some environments. <strong>Progressive hint:</strong> Save through the figure before display/close. <strong>Verify:</strong> Save before close and assert the output file is nonempty/reopenable; reproduce the old blank path once as evidence of operation order.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair an export that calls <code>show()</code> or closes the figure before <code>savefig</code>, producing a blank file in some environments. Progressive hint: Save through the figure before display/close. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Save before close and assert the output file is nonempty/reopenable; reproduce the old blank path once as evidence of operation order. The diagnosis depends on static chart choice, figure/axes ownership, labeling, and reproducible export.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Save before close and assert the output file is nonempty/reopenable; reproduce the old blank path once as evidence of operation order.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Adapt a chart for long category labels, color-vision differences, missing groups, and a very skewed distribution. <strong>Progressive hint:</strong> Do not communicate meaning through color alone. <strong>Verify:</strong> Inspect a fixture containing all four challenges and assert labels are readable, groups remain distinguishable without color, and skew/missingness policy is visible.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Adapt a chart for long category labels, color-vision differences, missing groups, and a very skewed distribution. Progressive hint: Do not communicate meaning through color alone. Values below, at, and above the named boundary must produce the evidence Inspect a fixture containing all four challenges and assert labels are readable, groups remain distinguishable without color, and skew/missingness policy is visible. Those cases show how static chart choice, figure/axes ownership, labeling, and reproducible export behaves at its edge.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Inspect a fixture containing all four challenges and assert labels are readable, groups remain distinguishable without color, and skew/missingness policy is visible.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Choose a chart from the question and data types, then make units, denominators, ordering, uncertainty, and accessibility explicit.</p>
-<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
-<h5 id="solution-1--practices-1-2-chart-choice-and-object-ownership">Practices 1–2 — Chart choice and object ownership<a class="heading-anchor" href="#solution-1--practices-1-2-chart-choice-and-object-ownership" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-chart-choice-and-object-ownership">Shared implementation for Exercises 3–4 — Chart choice and object ownership<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-chart-choice-and-object-ownership" aria-label="Link to this section">#</a></h5>
 <p>Use bars for category comparisons, histograms for distributions, lines for ordered time trends, and scatterplots for relationships between two numeric variables. <code>Axes</code> owns labels and marks; <code>Figure</code> owns layout and saving.</p>
-<h5 id="solution-1--practices-3-5-reusable-testable-plotting">Practices 3–5 — Reusable, testable plotting<a class="heading-anchor" href="#solution-1--practices-3-5-reusable-testable-plotting" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-reusable-testable-plotting">Shared implementation for Exercises 5–7 — Reusable, testable plotting<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-reusable-testable-plotting" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -592,7 +905,7 @@ figure.tight_layout()
 plt.close(figure)</code></pre>
 <p>For long labels, use a horizontal bar chart or wrap labels. Add direct labels, markers, or line styles so color is not the only encoding. Report missing groups and consider a log scale or robust inset only when its interpretation is clearly labeled.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -600,7 +913,7 @@ plt.close(figure)</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -713,7 +1026,38 @@ plt.close(figure)</code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>For long labels, use a horizontal bar chart or wrap labels. Add direct labels, markers, or line styles so color is not the only encoding. Report missing groups and consider a log scale or robust inset only when its interpretation is clearly labeled.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-25`
+(Day 25 — Visualization with Matplotlib and Seaborn). Direct catalog prerequisites: `python-24`.
+I have completed the direct prerequisites: `python-24`. Emphasize static chart choice, figure/axes ownership, labeling, and reproducible export.
+Read `python/ds-60day/companion-guides/day25_viz_matplotlib_seaborn.md` and use the learner notebook
+`python/ds-60day/notebooks/day25_viz_matplotlib_seaborn.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-24.html"><small>Previous lesson</small><strong>python-24</strong><span>EDA Best Practices</span></a>
@@ -805,6 +1149,23 @@ plt.close(figure)</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

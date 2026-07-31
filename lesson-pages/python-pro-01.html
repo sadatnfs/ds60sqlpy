@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this Python file from the repository environment</h2>
           <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_pro_01_package_engineering.py</code>.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,12 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
-          
+
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--package-engineering-and-a-local-release-workflow">Package engineering and a local release workflow<a class="heading-anchor" href="#guide--package-engineering-and-a-local-release-workflow" aria-label="Link to this section">#</a></h3>
 <p><strong>Stable ID:</strong> <code>python-pro-01</code></p>
 <p><strong>Level:</strong> intermediate</p>
@@ -341,23 +380,80 @@
 <li>Inspect or retain the sdist when downstream builders need source.</li>
 <li>Do not assume that successfully importing from the checkout proves either artifact works.</li>
 </ul>
+<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_pro_01_package_engineering.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_pro_01_package_engineering.py</code></pre>
+<p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
+<h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
+<p>A source tree is not the deliverable. The build backend reads <code>pyproject.toml</code> and creates a wheel containing import packages plus distribution metadata. The <strong>distribution name</strong> used by installers may differ from the Python <strong>import name</strong>. A src layout prevents an accidental import from the repository root from masquerading as a successful installation.</p>
+<p>A release check therefore builds a wheel, inspects its contents and metadata, installs it into a clean environment, imports it from outside the source tree, runs tests, and records hashes. Editable installs are useful for development but do not prove the wheel.</p>
+<ul>
+<li><strong><code>[build-system]</code>:</strong> declares the backend and bootstrap requirements that turn source into a distribution artifact.</li>
+<li><strong><code>[project]</code> metadata:</strong> defines distribution identity, version, Python range, dependencies, and entry points.</li>
+<li><strong><code>python -m build</code> then clean install:</strong> proves the built wheel, not repository-path import behavior.</li>
+</ul>
+<h5 id="guide--micro-example-a-distinguish-distribution-and-import-identities">Micro-example A — distinguish distribution and import identities<a class="heading-anchor" href="#guide--micro-example-a-distinguish-distribution-and-import-identities" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">import importlib.util
+
+distribution_name = &quot;beautiful-soup4&quot;
+import_name = &quot;bs4&quot;
+print({&quot;installer_name&quot;: distribution_name, &quot;import_name&quot;: import_name})
+# The names are contracts for different tools and need not match.
+assert distribution_name.replace(&quot;-&quot;, &quot;_&quot;) != import_name
+print(&quot;installed import available:&quot;, importlib.util.find_spec(import_name) is not None)</code></pre>
+<p><strong>Expected observation:</strong> Installer and import identifiers can differ; availability must be checked through the intended interface.</p>
+<p><strong>Why it matters:</strong> This mechanics example does not install anything and does not require <code>bs4</code> to be present.</p>
+<h5 id="guide--micro-example-b-create-a-deterministic-source-manifest-digest">Micro-example B — create a deterministic source manifest digest<a class="heading-anchor" href="#guide--micro-example-b-create-a-deterministic-source-manifest-digest" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">import hashlib
+
+files = {
+    &quot;src/tiny/__init__.py&quot;: b&#x27;__version__ = &quot;1.0.0&quot;\n&#x27;,
+    &quot;src/tiny/core.py&quot;: b&quot;def add(a, b): return a + b\n&quot;,
+}
+manifest = &quot;\n&quot;.join(
+    f&quot;{path}:{hashlib.sha256(content).hexdigest()}&quot; for path, content in sorted(files.items())
+)
+digest = hashlib.sha256(manifest.encode(&quot;utf-8&quot;)).hexdigest()
+print(manifest, digest, sep=&quot;\n&quot;)
+assert len(digest) == 64</code></pre>
+<p><strong>Expected observation:</strong> Sorting paths and hashing exact bytes gives a repeatable content identity, not a claim about package quality.</p>
+<p><strong>Why it matters:</strong> The manifest includes every release-relevant file and normalizes no bytes silently.</p>
+<h5 id="guide--debugging-and-transfer">Debugging and transfer<a class="heading-anchor" href="#guide--debugging-and-transfer" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Running an import from the repo root and concluding that the wheel contains the right packages and data.</p>
+<p><strong>Diagnostic:</strong> Inspect wheel ZIP paths/METADATA/RECORD, install into a new environment, change the working directory, and print <code>module.<strong>file</strong></code> plus distribution version.</p>
+<p><strong>Transfer question:</strong> What extra checks would a package with a console script, typed marker, and package data need before publication?</p>
+<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <p>Work in <a href="python-pro-01.html#learner"><code>lessons/py_pro_01_package_engineering.py</code></a> or a copy under <code>.learning/</code>.</p>
 <h5 id="guide--exercise-1-classify-artifacts">Exercise 1 — classify artifacts<a class="heading-anchor" href="#guide--exercise-1-classify-artifacts" aria-label="Link to this section">#</a></h5>
 <p>Implement <code>classify_artifact</code>. Use complete final suffixes and reject <code>package.whl.txt</code>. Add checks for one wheel, one sdist, and one unsupported file.</p>
 <p>Hint: <code>Path.suffix</code> handles <code>.whl</code>; <code>Path.name.endswith(&quot;.tar.gz&quot;)</code> handles the two-part sdist suffix.</p>
+<p><strong>Verify:</strong> classify artifacts — assert classify_artifact accepts project-1.0.whl as wheel and project-1.0.tar.gz as sdist, while package.whl.txt and project.zip return the documented unsupported result/error.</p>
 <h5 id="guide--exercise-2-create-an-offline-build-command">Exercise 2 — create an offline build command<a class="heading-anchor" href="#guide--exercise-2-create-an-offline-build-command" aria-label="Link to this section">#</a></h5>
 <p>Implement <code>offline_build_command</code> as an argument list. Use the running interpreter, invoke the <code>build</code> module, request both formats, disable isolation, and choose an explicit output directory.</p>
 <p>Why an argument list? It avoids a second round of shell parsing and behaves the same way in PowerShell, Command Prompt, Bash, and zsh.</p>
+<p><strong>Verify:</strong> create an offline build command — assert the argument list starts with sys.executable and contains -m build --no-isolation --sdist --wheel --outdir followed by the explicit destination; execute no shell and test a path containing spaces.</p>
 <h5 id="guide--exercise-3-inspect-dependency-intent">Exercise 3 — inspect dependency intent<a class="heading-anchor" href="#guide--exercise-3-inspect-dependency-intent" aria-label="Link to this section">#</a></h5>
 <p>For each fixture entry, decide whether it is:</p>
-<ol>
+<ul>
 <li>a runtime dependency,</li>
+</ul>
+<ul>
 <li>an optional installed feature,</li>
+</ul>
+<ul>
 <li>a development-only dependency group, or</li>
+</ul>
+<ul>
 <li>a build bootstrap requirement.</li>
-</ol>
+</ul>
 <p>Explain when <code>colorama</code>&#x27;s environment marker is true. Confirm that building metadata does not install the <code>test</code> or <code>quality</code> groups.</p>
+<p><strong>Verify:</strong> inspect dependency intent — for each fixture entry, decide whether it is: - a runtime dependency, - an optional installed feature, - a development-only dependency group, or - a build bootstrap requirement; explain when colorama&#x27;s environment marker is true; confirm that building metadata does not install the test or quality groups.</p>
 <h5 id="guide--exercise-4-build-in-a-disposable-directory">Exercise 4 — build in a disposable directory<a class="heading-anchor" href="#guide--exercise-4-build-in-a-disposable-directory" aria-label="Link to this section">#</a></h5>
 <p>Use a temporary or ignored directory. A production-quality helper should first copy the source tree to a disposable staging directory because some backends write metadata beside the source even when <code>--outdir</code> is elsewhere. These commands intentionally prevent online build isolation.</p>
 <p>Windows PowerShell:</p>
@@ -370,6 +466,7 @@ Get-ChildItem $work</code></pre>
 .venv/bin/python -m build --no-isolation --sdist --wheel --outdir &quot;$work_dir&quot; python/professional/fixtures/tiny_package
 find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 <p>If the frontend reports a missing build requirement, return to connected setup and install the build tools. Do not remove <code>--no-isolation</code> merely to make an offline test pass.</p>
+<p><strong>Verify:</strong> build in a disposable directory — run the platform command in disposable storage with network disabled; require exit code 0, exactly one sdist and one wheel, no build artifacts beside the staged source, and an explicit missing-build-tool error when unavailable.</p>
 <h5 id="guide--exercise-5-prove-the-installed-origin">Exercise 5 — prove the installed origin<a class="heading-anchor" href="#guide--exercise-5-prove-the-installed-origin" aria-label="Link to this section">#</a></h5>
 <p>Install the wheel into a fresh target using <code>pip install --no-index --no-deps --target &lt;directory&gt; &lt;wheel&gt;</code>. Start Python from outside the fixture source tree, put only that target on <code>PYTHONPATH</code>, and print:</p>
 <ul>
@@ -379,23 +476,29 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 <li><code>greeting(&quot;wheel&quot;)</code>.</li>
 </ul>
 <p>Implement <code>installed_origin_is_safe</code> so it accepts only a resolved path under the fresh target.</p>
+<p><strong>Verify:</strong> prove the installed origin — from outside the source tree, install with --no-index --no-deps into a fresh target and assert module.<strong>file</strong> resolves under that target, version/entry point match metadata, and greeting(&#x27;wheel&#x27;) has the expected value.</p>
 <h5 id="guide--extended-professional-practice">Extended professional practice<a class="heading-anchor" href="#guide--extended-professional-practice" aria-label="Link to this section">#</a></h5>
 <p>These exercises move from prediction and implementation through debugging, operational trade-offs, and review. Keep the default path deterministic and offline; optional connected behavior must remain explicit.</p>
 <h5 id="guide--exercise-6-build-a-wheel-from-the-source-distribution">Exercise 6 — build a wheel from the source distribution<a class="heading-anchor" href="#guide--exercise-6-build-a-wheel-from-the-source-distribution" aria-label="Link to this section">#</a></h5>
 <p>Build the fixture sdist in disposable storage, unpack it, build a wheel from that unpacked sdist with <code>--no-isolation</code>, and compare the result with the direct wheel build. Record every required local tool.</p>
 <p><strong>Progressive hint:</strong> A direct wheel and an sdist exercise different inclusion paths. Use temporary directories and inspect archive members before rebuilding.</p>
+<p><strong>Verify:</strong> build a wheel from the source distribution — build the fixture sdist in disposable storage, unpack it, build a wheel from that unpacked sdist with --no-isolation, and compare the result with the direct wheel build; record every required local tool.</p>
 <h5 id="guide--exercise-7-inspect-installed-metadata-without-importing">Exercise 7 — inspect installed metadata without importing<a class="heading-anchor" href="#guide--exercise-7-inspect-installed-metadata-without-importing" aria-label="Link to this section">#</a></h5>
 <p>Use <code>importlib.metadata</code> against the fresh target to inspect name, version, requirements, extras, and console scripts before importing the package. Reject unexpected or missing metadata.</p>
 <p><strong>Progressive hint:</strong> Distribution metadata and import packages are related but distinct. Place only the target on the child process search path.</p>
+<p><strong>Verify:</strong> inspect installed metadata without importing — use importlib.metadata against the fresh target to inspect name, version, requirements, extras, and console scripts before importing the package; reject unexpected or missing metadata.</p>
 <h5 id="guide--exercise-8-separate-reproducibility-from-equivalence">Exercise 8 — separate reproducibility from equivalence<a class="heading-anchor" href="#guide--exercise-8-separate-reproducibility-from-equivalence" aria-label="Link to this section">#</a></h5>
 <p>Build twice from the same clean staged source. Compare file hashes, archive member lists, metadata contents, and installed behavior. Explain which differences are harmless and which invalidate the release.</p>
 <p><strong>Progressive hint:</strong> Start with semantic equivalence. Byte-for-byte reproducibility requires controlled timestamps, toolchains, environment variables, and ordering.</p>
+<p><strong>Verify:</strong> separate reproducibility from equivalence — build twice from the same clean staged source; compare file hashes, archive member lists, metadata contents, and installed behavior; explain which differences are harmless and which invalidate the release.</p>
 <h5 id="guide--exercise-9-test-dependency-markers-across-targets">Exercise 9 — test dependency markers across targets<a class="heading-anchor" href="#guide--exercise-9-test-dependency-markers-across-targets" aria-label="Link to this section">#</a></h5>
 <p>Create a review matrix for the fixture&#x27;s build, runtime, optional, development, and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and Python 3.12.</p>
 <p><strong>Progressive hint:</strong> Parse marker intent with packaging metadata; do not infer it from the developer machine where the lesson happens to run.</p>
+<p><strong>Verify:</strong> test dependency markers across targets — create a review matrix for the fixture&#x27;s build, runtime, optional, development, and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and Python 3.12.</p>
 <h5 id="guide--exercise-10-design-a-local-release-gate">Exercise 10 — design a local release gate<a class="heading-anchor" href="#guide--exercise-10-design-a-local-release-gate" aria-label="Link to this section">#</a></h5>
 <p>Write an offline release checklist that verifies clean source, tests, type/lint checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and secret scan without publishing anything.</p>
 <p><strong>Progressive hint:</strong> Every gate should produce bounded evidence and fail closed. Keep index credentials, signing services, and publication outside this local lab.</p>
+<p><strong>Verify:</strong> design a local release gate — write an offline release checklist that verifies clean source, tests, type/lint checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and secret scan without publishing anything.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <p>You are done when all statements are true:</p>
 <ul>
@@ -427,17 +530,46 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 <li>Compare the solution code with your implementation only after the self-check.</li>
 <li>Add a package fixture of your own beneath <code>.learning/</code> with two modules and one entry point.</li>
 <li>Continue to <code>python-svc-01</code> to package a reliable service boundary or <code>python-pro-02</code> to choose a concurrency model deliberately.</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<pre><code class="language-text">Tutor me through `python-pro-01` — Package engineering and a local release workflow.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize src-layout packaging, build artifacts, metadata, and clean installation. Use exactly these maintained learner materials:
+- guide: `python/professional/companion-guides/py_pro_01_package_engineering.md`
+- learner artifact: `python/professional/lessons/py_pro_01_package_engineering.py`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-15`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -454,17 +586,77 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
               type="button"
               data-launch-artifact="Python source file"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-pro-01 learner lab: package engineering and local releases.</span>
 <span> </span>
 <span>Run this file from the repository root. The worked example reads the fixture</span>
 <span>metadata without building anything. Complete the TODO functions in your own</span>
 <span>copy, then use the companion guide&#x27;s temporary-directory build procedure.</span>
+<span> </span>
+<span>Professional learner deep dive (python-pro-01)</span>
+<span>------------------------------------------------</span>
+<span> </span>
+<span>Mental model:</span>
+<span>A source tree is not the deliverable. The build backend reads `pyproject.toml` and creates a</span>
+<span>wheel containing import packages plus distribution metadata. The **distribution name** used by</span>
+<span>installers may differ from the Python **import name**. A src layout prevents an accidental</span>
+<span>import from the repository root from masquerading as a successful installation.  A release check</span>
+<span>therefore builds a wheel, inspects its contents and metadata, installs it into a clean</span>
+<span>environment, imports it from outside the source tree, runs tests, and records hashes. Editable</span>
+<span>installs are useful for development but do not prove the wheel.</span>
+<span> </span>
+<span>API/boundary anatomy:</span>
+<span>* `[build-system]`: declares the backend and bootstrap requirements that turn source into a</span>
+<span>  distribution artifact.</span>
+<span>* `[project]` metadata: defines distribution identity, version, Python range, dependencies, and</span>
+<span>  entry points.</span>
+<span>* `python -m build` then clean install: proves the built wheel, not repository-path import</span>
+<span>  behavior.</span>
+<span> </span>
+<span>Micro-example A — distinguish distribution and import identities::</span>
+<span> </span>
+<span>    import importlib.util</span>
+<span> </span>
+<span>    distribution_name = &quot;beautiful-soup4&quot;</span>
+<span>    import_name = &quot;bs4&quot;</span>
+<span>    print({&quot;installer_name&quot;: distribution_name, &quot;import_name&quot;: import_name})</span>
+<span>    # The names are contracts for different tools and need not match.</span>
+<span>    assert distribution_name.replace(&quot;-&quot;, &quot;_&quot;) != import_name</span>
+<span>    print(&quot;installed import available:&quot;, importlib.util.find_spec(import_name) is not None)</span>
+<span> </span>
+<span>Expected: Installer and import identifiers can differ; availability must be checked through the</span>
+<span>          intended interface.</span>
+<span> </span>
+<span>Micro-example B — create a deterministic source manifest digest::</span>
+<span> </span>
+<span>    import hashlib</span>
+<span> </span>
+<span>    files = {</span>
+<span>        &quot;src/tiny/__init__.py&quot;: b&#x27;__version__ = &quot;1.0.0&quot;\n&#x27;,</span>
+<span>        &quot;src/tiny/core.py&quot;: b&quot;def add(a, b): return a + b\n&quot;,</span>
+<span>    }</span>
+<span>    manifest = &quot;\n&quot;.join(</span>
+<span>        f&quot;{path}:{hashlib.sha256(content).hexdigest()}&quot;</span>
+<span>        for path, content in sorted(files.items())</span>
+<span>    )</span>
+<span>    digest = hashlib.sha256(manifest.encode(&quot;utf-8&quot;)).hexdigest()</span>
+<span>    print(manifest, digest, sep=&quot;\n&quot;)</span>
+<span>    assert len(digest) == 64</span>
+<span> </span>
+<span>Expected: Sorting paths and hashing exact bytes gives a repeatable content identity, not a claim</span>
+<span>          about package quality.</span>
+<span> </span>
+<span>Debugging rule: Inspect wheel ZIP paths/METADATA/RECORD, install into a new environment, change</span>
+<span>                the working directory, and print `module.__file__` plus distribution version.</span>
+<span> </span>
+<span>The snippets demonstrate mechanics only. They do not complete the</span>
+<span>numbered TODOs below; implement those from their stated contracts and</span>
+<span>prove normal, boundary, and failure behavior.</span>
 <span>&quot;&quot;&quot;</span>
 <span> </span>
 <span>from __future__ import annotations</span>
@@ -563,21 +755,21 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 <span># Exercise 1 — classify artifacts</span>
 <span># Prompt: Implement `classify_artifact`. Use complete final suffixes and reject</span>
 <span># `package.whl.txt`. Add checks for one wheel, one sdist, and one unsupported file.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 2 — create an offline build command</span>
 <span># Prompt: Implement `offline_build_command` as an argument list. Use the running</span>
 <span># interpreter, invoke the `build` module, request both formats, disable isolation, and</span>
 <span># choose an explicit output directory. Why an argument list? It avoids a second round of</span>
 <span># shell parsing and behaves the same way in PowerShell, Command Prompt, Bash, and zsh.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 3 — inspect dependency intent</span>
 <span># Prompt: For each fixture entry, decide whether it is: 1. a runtime dependency, 2. an</span>
 <span># optional installed feature, 3. a development-only dependency group, or 4. a build</span>
 <span># bootstrap requirement. Explain when `colorama`&#x27;s environment marker is true. Confirm</span>
 <span># that building metadata does not install the `test` or `quality` groups.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 4 — build in a disposable directory</span>
 <span># Prompt: Use a temporary or ignored directory. A production-quality helper should first</span>
@@ -586,7 +778,7 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 <span># intentionally prevent online build isolation. Invoke the running interpreter with</span>
 <span># `-m build --no-isolation --sdist --wheel --outdir &lt;temporary-dir&gt; &lt;fixture&gt;`. If a</span>
 <span># backend requirement is missing, return to connected setup instead of relaxing policy.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 5 — prove the installed origin</span>
 <span># Prompt: Install the wheel into a fresh target using `pip install --no-index --no-deps</span>
@@ -595,37 +787,37 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 <span># installed distribution version, - its `console_scripts` entry points, and -</span>
 <span># `greeting(&quot;wheel&quot;)`. Implement `installed_origin_is_safe` so it accepts only a resolved</span>
 <span># import path under the fresh installation target, never the fixture source tree.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 6 — build a wheel from the source distribution</span>
 <span># Prompt: Build the fixture sdist in disposable storage, unpack it, build a wheel from</span>
 <span># that unpacked sdist with `--no-isolation`, and compare the result with the direct wheel</span>
 <span># build. Record every required local tool.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 7 — inspect installed metadata without importing</span>
 <span># Prompt: Use `importlib.metadata` against the fresh target to inspect name, version,</span>
 <span># requirements, extras, and console scripts before importing the package. Reject</span>
 <span># unexpected or missing metadata.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 8 — separate reproducibility from equivalence</span>
 <span># Prompt: Build twice from the same clean staged source. Compare file hashes, archive</span>
 <span># member lists, metadata contents, and installed behavior. Explain which differences are</span>
 <span># harmless and which invalidate the release.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 9 — test dependency markers across targets</span>
 <span># Prompt: Create a review matrix for the fixture&#x27;s build, runtime, optional, development,</span>
 <span># and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and</span>
 <span># Python 3.12.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 10 — design a local release gate</span>
 <span># Prompt: Write an offline release checklist that verifies clean source, tests, type/lint</span>
 <span># checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and</span>
 <span># secret scan without publishing anything.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># === End numbered professional practice ===</span>
 <span> </span>
@@ -633,15 +825,15 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 <span>    self_check()</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -700,6 +892,32 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 <h4 id="solution-1--expected-result">Expected result<a class="heading-anchor" href="#solution-1--expected-result" aria-label="Link to this section">#</a></h4>
 <p>With local build tools installed, the solution reports one wheel, one sdist, an import path under a temporary <code>site</code> directory, version <code>0.1.0</code>, console script <code>ds60-greet</code>, and <code>Hello, wheel!</code>. Without those optional tools, it identifies the missing bootstrap dependency without attempting a download.</p>
 <hr>
+<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-1--reasoning-before-implementation">Reasoning before implementation<a class="heading-anchor" href="#solution-1--reasoning-before-implementation" aria-label="Link to this section">#</a></h4>
+<p>The reference workflow separates source, build, artifact inspection, installation, and runtime proof so each failure has a clear owner.</p>
+<ol>
+<li><strong><code>[build-system]</code>:</strong> declares the backend and bootstrap requirements that turn source into a distribution artifact.</li>
+<li><strong><code>[project]</code> metadata:</strong> defines distribution identity, version, Python range, dependencies, and entry points.</li>
+<li><strong><code>python -m build</code> then clean install:</strong> proves the built wheel, not repository-path import behavior.</li>
+<li><strong>Prove the failure boundary:</strong> Exercise one normal case, one boundary case, and one injected failure without relying on hidden state.</li>
+</ol>
+<p><strong>Alternative:</strong> A single-module project or application bundle may not need a published library, but it still benefits from explicit dependency and artifact identity.</p>
+<p><strong>Trade-off:</strong> Dynamic versioning and broad build automation reduce repetition while making source-of-truth and reproducibility harder to inspect.</p>
+<p><strong>Failure boundary:</strong> Missing package data, stale editable installs, namespace packages, platform wheels, incorrect Python ranges, and undeclared imports can pass source tests but fail consumers.</p>
+<p><strong>Verification:</strong> Build twice, inspect wheel metadata/content, install in a clean environment from outside the repo, run entry points/tests, and compare artifact hashes.</p>
+<h5 id="solution-1--verification-micro-example">Verification micro-example<a class="heading-anchor" href="#solution-1--verification-micro-example" aria-label="Link to this section">#</a></h5>
+<p>Run this small, deterministic case before adapting the reference to a larger system. It gives the reasoning above an executable anchor:</p>
+<pre><code class="language-python">import importlib.util
+
+distribution_name = &quot;beautiful-soup4&quot;
+import_name = &quot;bs4&quot;
+print({&quot;installer_name&quot;: distribution_name, &quot;import_name&quot;: import_name})
+# The names are contracts for different tools and need not match.
+assert distribution_name.replace(&quot;-&quot;, &quot;_&quot;) != import_name
+print(&quot;installed import available:&quot;, importlib.util.find_spec(import_name) is not None)</code></pre>
+<p><strong>Expected observation:</strong> Installer and import identifiers can differ; availability must be checked through the intended interface.</p>
+<p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
+<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-pro-01.html#solution-2"><code>py_pro_01_package_engineering_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
 <h5 id="solution-1--exercise-1-classify-artifacts">Exercise 1 — classify artifacts<a class="heading-anchor" href="#solution-1--exercise-1-classify-artifacts" aria-label="Link to this section">#</a></h5>
@@ -707,26 +925,31 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 <p><strong>Reference reasoning:</strong> Packaging evidence must come from standards metadata and a fresh installed artifact, never from an import that can fall back to the source tree. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> classify artifacts — assert classify_artifact accepts project-1.0.whl as wheel and project-1.0.tar.gz as sdist, while package.whl.txt and project.zip return the documented unsupported result/error.</p>
 <h5 id="solution-1--exercise-2-create-an-offline-build-command">Exercise 2 — create an offline build command<a class="heading-anchor" href="#solution-1--exercise-2-create-an-offline-build-command" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Implement <code>offline_build_command</code> as an argument list. Use the running interpreter, invoke the <code>build</code> module, request both formats, disable isolation, and choose an explicit output directory. Why an argument list? It avoids a second round of shell parsing and behaves the same way in PowerShell, Command Prompt, Bash, and zsh.</p>
 <p><strong>Reference reasoning:</strong> Packaging evidence must come from standards metadata and a fresh installed artifact, never from an import that can fall back to the source tree. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> create an offline build command — assert the argument list starts with sys.executable and contains -m build --no-isolation --sdist --wheel --outdir followed by the explicit destination; execute no shell and test a path containing spaces.</p>
 <h5 id="solution-1--exercise-3-inspect-dependency-intent">Exercise 3 — inspect dependency intent<a class="heading-anchor" href="#solution-1--exercise-3-inspect-dependency-intent" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> For each fixture entry, decide whether it is: 1. a runtime dependency, 2. an optional installed feature, 3. a development-only dependency group, or 4. a build bootstrap requirement. Explain when <code>colorama</code>&#x27;s environment marker is true. Confirm that building metadata does not install the <code>test</code> or <code>quality</code> groups.</p>
 <p><strong>Reference reasoning:</strong> Packaging evidence must come from standards metadata and a fresh installed artifact, never from an import that can fall back to the source tree. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> inspect dependency intent — for each fixture entry, decide whether it is: - a runtime dependency, - an optional installed feature, - a development-only dependency group, or - a build bootstrap requirement; explain when colorama&#x27;s environment marker is true; confirm that building metadata does not install the test or quality groups.</p>
 <h5 id="solution-1--exercise-4-build-in-a-disposable-directory">Exercise 4 — build in a disposable directory<a class="heading-anchor" href="#solution-1--exercise-4-build-in-a-disposable-directory" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Use disposable staging and output directories because a backend may write metadata beside its source. Invoke the running interpreter with <code>-m build --no-isolation --sdist --wheel --outdir &lt;temporary-dir&gt; &lt;fixture&gt;</code>. If a backend requirement is missing, return to connected setup instead of weakening the offline policy.</p>
 <p><strong>Reference reasoning:</strong> Packaging evidence must come from standards metadata and a fresh installed artifact, never from an import that can fall back to the source tree. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> build in a disposable directory — run the platform command in disposable storage with network disabled; require exit code 0, exactly one sdist and one wheel, no build artifacts beside the staged source, and an explicit missing-build-tool error when unavailable.</p>
 <h5 id="solution-1--exercise-5-prove-the-installed-origin">Exercise 5 — prove the installed origin<a class="heading-anchor" href="#solution-1--exercise-5-prove-the-installed-origin" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Install the wheel into a fresh target using <code>pip install --no-index --no-deps --target &lt;directory&gt; &lt;wheel&gt;</code>. Start Python outside the fixture source tree, expose only the target, and inspect the module origin, distribution version, console entry points, and greeting behavior. <code>installed_origin_is_safe</code> must accept only a resolved path beneath that fresh target.</p>
 <p><strong>Reference reasoning:</strong> Packaging evidence must come from standards metadata and a fresh installed artifact, never from an import that can fall back to the source tree. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> prove the installed origin — from outside the source tree, install with --no-index --no-deps into a fresh target and assert module.<strong>file</strong> resolves under that target, version/entry point match metadata, and greeting(&#x27;wheel&#x27;) has the expected value.</p>
 <h5 id="solution-1--exercise-6-build-a-wheel-from-the-source-distribution">Exercise 6 — build a wheel from the source distribution<a class="heading-anchor" href="#solution-1--exercise-6-build-a-wheel-from-the-source-distribution" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Build the fixture sdist in disposable storage, unpack it, build a wheel from that unpacked sdist with <code>--no-isolation</code>, and compare the result with the direct wheel build. Record every required local tool.</p>
 <p><strong>Reasoning path:</strong> A direct wheel and an sdist exercise different inclusion paths. Use temporary directories and inspect archive members before rebuilding.</p>
@@ -734,6 +957,7 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 <p>Compare normalized wheel member names and installed behavior rather than requiring byte-identical archives: ZIP timestamps and tool versions can vary. If the sdist-built wheel fails, the release is incomplete even when a direct wheel succeeded.</p>
 <p><strong>Common trap:</strong> A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> build a wheel from the source distribution — build the fixture sdist in disposable storage, unpack it, build a wheel from that unpacked sdist with --no-isolation, and compare the result with the direct wheel build; record every required local tool.</p>
 <h5 id="solution-1--exercise-7-inspect-installed-metadata-without-importing">Exercise 7 — inspect installed metadata without importing<a class="heading-anchor" href="#solution-1--exercise-7-inspect-installed-metadata-without-importing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Use <code>importlib.metadata</code> against the fresh target to inspect name, version, requirements, extras, and console scripts before importing the package. Reject unexpected or missing metadata.</p>
 <p><strong>Reasoning path:</strong> Distribution metadata and import packages are related but distinct. Place only the target on the child process search path.</p>
@@ -741,6 +965,7 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 <p>This catches a wheel that contains importable code but incorrect release metadata. It also avoids using <code>package.<strong>version</strong></code> as the only authority when the project intentionally derives version from distribution metadata.</p>
 <p><strong>Common trap:</strong> A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> inspect installed metadata without importing — use importlib.metadata against the fresh target to inspect name, version, requirements, extras, and console scripts before importing the package; reject unexpected or missing metadata.</p>
 <h5 id="solution-1--exercise-8-separate-reproducibility-from-equivalence">Exercise 8 — separate reproducibility from equivalence<a class="heading-anchor" href="#solution-1--exercise-8-separate-reproducibility-from-equivalence" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Build twice from the same clean staged source. Compare file hashes, archive member lists, metadata contents, and installed behavior. Explain which differences are harmless and which invalidate the release.</p>
 <p><strong>Reasoning path:</strong> Start with semantic equivalence. Byte-for-byte reproducibility requires controlled timestamps, toolchains, environment variables, and ordering.</p>
@@ -748,6 +973,7 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 <p>Do not claim reproducible builds until identical bytes are demonstrated under a documented controlled procedure. Semantic equivalence is useful evidence but a narrower claim.</p>
 <p><strong>Common trap:</strong> A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> separate reproducibility from equivalence — build twice from the same clean staged source; compare file hashes, archive member lists, metadata contents, and installed behavior; explain which differences are harmless and which invalidate the release.</p>
 <h5 id="solution-1--exercise-9-test-dependency-markers-across-targets">Exercise 9 — test dependency markers across targets<a class="heading-anchor" href="#solution-1--exercise-9-test-dependency-markers-across-targets" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Create a review matrix for the fixture&#x27;s build, runtime, optional, development, and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and Python 3.12.</p>
 <p><strong>Reasoning path:</strong> Parse marker intent with packaging metadata; do not infer it from the developer machine where the lesson happens to run.</p>
@@ -755,15 +981,17 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 <p>The matrix is a test plan, not proof of every target. CI or local target environments must actually build, install, and exercise the declared supported combinations. Avoid unconditional imports of platform-selected packages.</p>
 <p><strong>Common trap:</strong> A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> test dependency markers across targets — create a review matrix for the fixture&#x27;s build, runtime, optional, development, and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and Python 3.12.</p>
 <h5 id="solution-1--exercise-10-design-a-local-release-gate">Exercise 10 — design a local release gate<a class="heading-anchor" href="#solution-1--exercise-10-design-a-local-release-gate" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Write an offline release checklist that verifies clean source, tests, type/lint checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and secret scan without publishing anything.</p>
 <p><strong>Reasoning path:</strong> Every gate should produce bounded evidence and fail closed. Keep index credentials, signing services, and publication outside this local lab.</p>
 <p>Order the gate so cheap correctness checks run before builds. Use disposable directories, <code>--no-isolation</code>, <code>--no-index</code>, and <code>--no-deps</code>; capture tool versions and artifact hashes in a manifest. The final child-process smoke test must execute outside the source tree.</p>
 <p>Signing, attestations, and index upload are separate authorized workflows. Document them as future controls without inventing credentials or claiming the unsigned local fixture has supply-chain provenance.</p>
 <p><strong>Common trap:</strong> A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.</p>
-<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p></div>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> design a local release gate — write an offline release checklist that verifies clean source, tests, type/lint checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and secret scan without publishing anything.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -771,7 +999,7 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -1080,7 +1308,51 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
 <span>    raise SystemExit(main())</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-pro-01` — Package engineering and a local release workflow.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize src-layout packaging, build artifacts, metadata, and clean installation. Use exactly these maintained learner materials:
+- guide: `python/professional/companion-guides/py_pro_01_package_engineering.md`
+- learner artifact: `python/professional/lessons/py_pro_01_package_engineering.py`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-15`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-60.html"><small>Previous lesson</small><strong>python-60</strong><span>Capstone Completion Presentation</span></a>
@@ -1172,6 +1444,23 @@ find &quot;$work_dir&quot; -maxdepth 1 -type f</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

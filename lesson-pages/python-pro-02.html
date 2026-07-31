@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this Python file from the repository environment</h2>
           <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_pro_02_concurrency_parallelism.py</code>.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,12 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
-          
+
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--concurrency-and-parallelism-decision-lab">Concurrency and parallelism decision lab<a class="heading-anchor" href="#guide--concurrency-and-parallelism-decision-lab" aria-label="Link to this section">#</a></h3>
 <p><strong>Stable ID:</strong> <code>python-pro-02</code></p>
 <p><strong>Level:</strong> advanced</p>
@@ -366,6 +405,70 @@
 <p>A semaphore limits active operations, but a producer can still create a million waiting task objects. A bounded queue controls pending work as well:</p>
 <pre><code class="language-text">producer -&gt; queue(maxsize=2) -&gt; three long-lived consumers</code></pre>
 <p>When the queue is full, <code>await queue.put(...)</code> pauses the producer. This is backpressure. The consumer count bounds active worker calls.</p>
+<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_pro_02_concurrency_parallelism.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_pro_02_concurrency_parallelism.py</code></pre>
+<p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
+<h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
+<p>Concurrency overlaps work; parallelism executes work simultaneously. <code>asyncio</code> is effective when many operations spend time awaiting nonblocking I/O. Threads can overlap blocking I/O behind a synchronous API. Processes bypass the Global Interpreter Lock for CPU-bound Python work but require serialization, startup, and platform-safe entry points.</p>
+<p>Unlimited fan-out converts latency into memory, connection, and rate pressure. A production design needs admission bounds, result/error accounting, cancellation cleanup, timeouts, ordering semantics, and measurement against a sequential baseline.</p>
+<ul>
+<li><strong>workload classification:</strong> identifies CPU time, blocking/nonblocking I/O, data transfer, and external capacity before selecting a primitive.</li>
+<li><strong>semaphore/worker queue:</strong> bounds active and queued work rather than creating one task per input.</li>
+<li><strong>structured result:</strong> associates each input with success/failure/cancellation so no work disappears.</li>
+</ul>
+<h5 id="guide--micro-example-a-state-the-execution-choice-from-the-blocking-behavior">Micro-example A — state the execution choice from the blocking behavior<a class="heading-anchor" href="#guide--micro-example-a-state-the-execution-choice-from-the-blocking-behavior" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">def choose_execution(*, waits_nonblocking=False, waits_blocking=False, cpu_python=False):
+    if sum((waits_nonblocking, waits_blocking, cpu_python)) != 1:
+        raise ValueError(&quot;classify one dominant workload&quot;)
+    if waits_nonblocking:
+        return &quot;asyncio&quot;
+    if waits_blocking:
+        return &quot;threads&quot;
+    return &quot;processes-or-native-vectorization&quot;
+
+
+assert choose_execution(waits_nonblocking=True) == &quot;asyncio&quot;
+assert choose_execution(cpu_python=True) == &quot;processes-or-native-vectorization&quot;</code></pre>
+<p><strong>Expected observation:</strong> The decision follows where time is spent, not a belief that one primitive is universally faster.</p>
+<p><strong>Why it matters:</strong> One dominant local bottleneck was measured; mixed pipelines may need multiple bounded stages.</p>
+<h5 id="guide--micro-example-b-prove-an-async-concurrency-ceiling">Micro-example B — prove an async concurrency ceiling<a class="heading-anchor" href="#guide--micro-example-b-prove-an-async-concurrency-ceiling" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">import asyncio
+
+
+async def demo():
+    gate = asyncio.Semaphore(2)
+    active = 0
+    peak = 0
+
+    async def work(value):
+        nonlocal active, peak
+        async with gate:
+            active += 1
+            peak = max(peak, active)
+            await asyncio.sleep(0)
+            active -= 1
+            return value * 2
+
+    results = await asyncio.gather(*(work(i) for i in range(6)))
+    return results, peak
+
+
+results, peak = asyncio.run(demo())
+print(results, peak)
+assert results == [0, 2, 4, 6, 8, 10] and peak == 2</code></pre>
+<p><strong>Expected observation:</strong> All inputs are accounted for while no more than two operations enter the protected section.</p>
+<p><strong>Why it matters:</strong> The task count is tiny; a large stream also needs bounded task creation or a worker queue.</p>
+<h5 id="guide--debugging-and-transfer">Debugging and transfer<a class="heading-anchor" href="#guide--debugging-and-transfer" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Wrapping CPU-bound Python in threads or constructing millions of async tasks behind a semaphore.</p>
+<p><strong>Diagnostic:</strong> Measure sequential and candidate paths, record active/queued counts, per-item results, timeout/cancellation cleanup, serialization size, and platform start method.</p>
+<p><strong>Transfer question:</strong> Design a two-stage pipeline with blocking file reads followed by CPU parsing; where are the two separate bounds?</p>
+<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--exercise-1-choose-a-model">Exercise 1 — choose a model<a class="heading-anchor" href="#guide--exercise-1-choose-a-model" aria-label="Link to this section">#</a></h5>
 <p>Implement <code>choose_execution_model</code> in the learner artifact. For each case, write one sentence explaining the choice:</p>
@@ -376,23 +479,37 @@
 <li>three tiny computations.</li>
 </ul>
 <p>Reject labels that contradict each other. An async function that performs computation without <code>await</code> is still CPU work and blocks the event loop.</p>
+<p><strong>Verify:</strong> choose a model — implement choose execution model in the learner artifact; for each case, write one sentence explaining the choice: - an async database driver, - a synchronous file metadata API, - image transforms written in pure Python, - three tiny computations; reject labels that contradict each other.</p>
 <h5 id="guide--exercise-2-build-a-bounded-async-map">Exercise 2 — build a bounded async map<a class="heading-anchor" href="#guide--exercise-2-build-a-bounded-async-map" aria-label="Link to this section">#</a></h5>
 <p>Implement <code>bounded_map</code> with:</p>
-<ol>
+<ul>
 <li><code>asyncio.Queue(maxsize=queue_capacity)</code>,</li>
+</ul>
+<ul>
 <li>one producer,</li>
+</ul>
+<ul>
 <li>a fixed number of consumers,</li>
+</ul>
+<ul>
 <li>indexed items so results retain input order,</li>
+</ul>
+<ul>
 <li>a unique sentinel per consumer, and</li>
+</ul>
+<ul>
 <li><code>asyncio.TaskGroup</code>.</li>
-</ol>
+</ul>
 <p>Place <code>queue.task_done()</code> in <code>finally</code>. Let exceptions propagate. Do not catch <code>CancelledError</code> unless cleanup requires it; if caught, re-raise it.</p>
+<p><strong>Verify:</strong> build a bounded async map — on ten indexed inputs with queue capacity 2 and two consumers, assert output order equals input order, peak queued/active work stays bounded, queue acknowledgements reach zero, and an injected worker exception cancels siblings cleanly.</p>
 <h5 id="guide--exercise-3-add-per-item-timeouts">Exercise 3 — add per-item timeouts<a class="heading-anchor" href="#guide--exercise-3-add-per-item-timeouts" aria-label="Link to this section">#</a></h5>
 <p>Wrap each worker call with <code>asyncio.timeout</code>. Test one worker slower than the limit. Inspect the <code>ExceptionGroup</code> from <code>TaskGroup</code>, and verify a <code>finally</code> block returns the active count to zero.</p>
 <p>Prediction: what happens to sibling consumers when one item times out?</p>
+<p><strong>Verify:</strong> add per-item timeouts — test one worker slower than the limit; inspect the ExceptionGroup from TaskGroup, and verify a finally block returns the active count to zero; prediction: what happens to sibling consumers when one item times out?.</p>
 <h5 id="guide--exercise-4-adapt-blocking-i-o">Exercise 4 — adapt blocking I/O<a class="heading-anchor" href="#guide--exercise-4-adapt-blocking-i-o" aria-label="Link to this section">#</a></h5>
 <p>Use <code>ThreadPoolExecutor(max_workers=N)</code> for deterministic <code>time.sleep</code> jobs. Compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion.</p>
 <p>Explain why a thread pool requires a deliberate <code>max_workers</code>, even if the remote service could theoretically accept more requests.</p>
+<p><strong>Verify:</strong> adapt blocking I/O — use ThreadPoolExecutor(max workers=N) for deterministic time.sleep jobs; compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion; explain why a thread pool requires a deliberate max workers, even if the remote service could theoretically accept more requests.</p>
 <h5 id="guide--exercise-5-isolate-cpu-work">Exercise 5 — isolate CPU work<a class="heading-anchor" href="#guide--exercise-5-isolate-cpu-work" aria-label="Link to this section">#</a></h5>
 <p>Make the CPU function a top-level function with serializable arguments and results. Use:</p>
 <pre><code class="language-python">multiprocessing.get_context(&quot;spawn&quot;)</code></pre>
@@ -404,6 +521,7 @@
 <p>macOS/Linux:</p>
 <pre><code class="language-bash">.venv/bin/python python/professional/solutions/py_pro_02_concurrency_parallelism_solution.py --with-processes</code></pre>
 <p>The workload is intentionally small for safety; process startup may make it slower than sequential execution. That observation is part of the lesson.</p>
+<p><strong>Verify:</strong> isolate CPU work — make the CPU function a top-level function with serializable arguments and results; use: and ProcessPoolExecutor; run process creation only beneath: Windows PowerShell: macOS/Linux: The workload is intentionally small for safety; process startup may make it slower than sequential execution.</p>
 <h5 id="guide--exercise-6-reason-about-shared-state">Exercise 6 — reason about shared state<a class="heading-anchor" href="#guide--exercise-6-reason-about-shared-state" aria-label="Link to this section">#</a></h5>
 <p>Implement <code>deterministic_lost_update</code>. Force two workers to read the same snapshot, then apply both writes. Compare with two serialized increments.</p>
 <p>List three repairs:</p>
@@ -412,26 +530,33 @@
 <li>a lock protects the complete read/modify/write unit, or</li>
 <li>an external system performs an atomic update.</li>
 </ul>
+<p><strong>Verify:</strong> reason about shared state — use barriers to make two workers read counter=0 before either writes; assert the lost-update result is 1, then protect the same two increments and assert the serialized result is 2 without timing sleeps.</p>
 <h5 id="guide--extended-professional-practice">Extended professional practice<a class="heading-anchor" href="#guide--extended-professional-practice" aria-label="Link to this section">#</a></h5>
 <p>These exercises move from prediction and implementation through debugging, operational trade-offs, and review. Keep the default path deterministic and offline; optional connected behavior must remain explicit.</p>
 <h5 id="guide--exercise-7-prove-cancellation-cleanup">Exercise 7 — prove cancellation cleanup<a class="heading-anchor" href="#guide--exercise-7-prove-cancellation-cleanup" aria-label="Link to this section">#</a></h5>
 <p>Cancel <code>bounded_map</code> while workers are active. Instrument acquired resources and prove active count, queued acknowledgements, and child tasks return to zero before the parent finishes.</p>
 <p><strong>Progressive hint:</strong> Put cleanup in <code>finally</code>, do not suppress <code>CancelledError</code>, and use TaskGroup as the child ownership boundary.</p>
+<p><strong>Verify:</strong> prove cancellation cleanup — cancel bounded map while workers are active; instrument acquired resources and prove active count, queued acknowledgements, and child tasks return to zero before the parent finishes.</p>
 <h5 id="guide--exercise-8-inspect-structured-failures">Exercise 8 — inspect structured failures<a class="heading-anchor" href="#guide--exercise-8-inspect-structured-failures" aria-label="Link to this section">#</a></h5>
 <p>Run multiple workers that fail with different typed exceptions. Use <code>except*</code> to handle one expected category while preserving unexpected failures and their original tracebacks.</p>
 <p><strong>Progressive hint:</strong> ExceptionGroup is a tree. Match by exception type and re-raise what the current layer cannot translate.</p>
+<p><strong>Verify:</strong> inspect structured failures — run multiple workers that fail with different typed exceptions; use except to handle one expected category while preserving unexpected failures and their original tracebacks.</p>
 <h5 id="guide--exercise-9-stream-a-backpressured-producer">Exercise 9 — stream a backpressured producer<a class="heading-anchor" href="#guide--exercise-9-stream-a-backpressured-producer" aria-label="Link to this section">#</a></h5>
 <p>Adapt <code>bounded_map</code> from a finite Sequence to an async iterator whose length is unknown. Preserve output order without retaining every input or creating one task per item.</p>
 <p><strong>Progressive hint:</strong> Assign increasing indexes at production, use a bounded queue, and emit completed results through a second bounded channel.</p>
+<p><strong>Verify:</strong> stream a backpressured producer — adapt bounded map from a finite Sequence to an async iterator whose length is unknown; preserve output order without retaining every input or creating one task per item.</p>
 <h5 id="guide--exercise-10-trace-context-across-boundaries">Exercise 10 — trace context across boundaries<a class="heading-anchor" href="#guide--exercise-10-trace-context-across-boundaries" aria-label="Link to this section">#</a></h5>
 <p>Set a request ID in <code>contextvars</code>, then observe propagation through an async task, <code>asyncio.to_thread</code>, a raw thread-pool submission, and a spawned process. Make any explicit propagation visible.</p>
 <p><strong>Progressive hint:</strong> Async tasks and <code>to_thread</code> copy context by design; arbitrary executors and processes need deliberate value transfer.</p>
+<p><strong>Verify:</strong> trace context across boundaries — set a request ID in contextvars, then observe propagation through an async task, asyncio.to thread, a raw thread-pool submission, and a spawned process; make any explicit propagation visible.</p>
 <h5 id="guide--exercise-11-design-graceful-executor-shutdown">Exercise 11 — design graceful executor shutdown<a class="heading-anchor" href="#guide--exercise-11-design-graceful-executor-shutdown" aria-label="Link to this section">#</a></h5>
 <p>Own a thread or process pool through a context manager. Stop accepting new work, wait with a bounded policy, cancel pending futures when allowed, and report unfinished work without hanging interpreter exit.</p>
 <p><strong>Progressive hint:</strong> Lifecycle ownership belongs to the component that created the executor. Differentiate pending work from already-running calls.</p>
+<p><strong>Verify:</strong> design graceful executor shutdown — own a thread or process pool through a context manager; stop accepting new work, wait with a bounded policy, cancel pending futures when allowed, and report unfinished work without hanging interpreter exit.</p>
 <h5 id="guide--exercise-12-make-an-evidence-based-model-decision">Exercise 12 — make an evidence-based model decision<a class="heading-anchor" href="#guide--exercise-12-make-an-evidence-based-model-decision" aria-label="Link to this section">#</a></h5>
 <p>Benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures. Record correctness, startup, throughput, peak active work, transfer size, and cleanup—not just fastest elapsed time.</p>
 <p><strong>Progressive hint:</strong> Use generous repeated measurements and interpret each model only for the workload it matches. A tiny workload can legitimately stay sequential.</p>
+<p><strong>Verify:</strong> make an evidence-based model decision — benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures; record correctness, startup, throughput, peak active work, transfer size, and cleanup—not just fastest elapsed time.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Async results preserve input order even when completion order differs.</li>
@@ -464,17 +589,46 @@
 <li>Use Bridge Day 7 for database-specific bounded asyncio patterns.</li>
 <li>Continue to <code>python-svc-01</code> and apply retry/rate-limit policy without creating unbounded HTTP work.</li>
 <li>Investigate producer/consumer shutdown, signal handling, and process worker recycling in a project after mastering this deterministic core.</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<pre><code class="language-text">Tutor me through `python-pro-02` — Concurrency and parallelism decision lab.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize choosing async, threads, or processes and bounding concurrent work. Use exactly these maintained learner materials:
+- guide: `python/professional/companion-guides/py_pro_02_concurrency_parallelism.md`
+- learner artifact: `python/professional/lessons/py_pro_02_concurrency_parallelism.py`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-15`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -491,16 +645,88 @@
               type="button"
               data-launch-artifact="Python source file"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-pro-02 learner lab: concurrency and parallelism.</span>
 <span> </span>
 <span>The worked example measures a sequential local wait. Complete the TODO</span>
 <span>functions before comparing your design with the reference implementation.</span>
+<span> </span>
+<span>Professional learner deep dive (python-pro-02)</span>
+<span>------------------------------------------------</span>
+<span> </span>
+<span>Mental model:</span>
+<span>Concurrency overlaps work; parallelism executes work simultaneously. `asyncio` is effective when</span>
+<span>many operations spend time awaiting nonblocking I/O. Threads can overlap blocking I/O behind a</span>
+<span>synchronous API. Processes bypass the Global Interpreter Lock for CPU-bound Python work but</span>
+<span>require serialization, startup, and platform-safe entry points.  Unlimited fan-out converts</span>
+<span>latency into memory, connection, and rate pressure. A production design needs admission bounds,</span>
+<span>result/error accounting, cancellation cleanup, timeouts, ordering semantics, and measurement</span>
+<span>against a sequential baseline.</span>
+<span> </span>
+<span>API/boundary anatomy:</span>
+<span>* workload classification: identifies CPU time, blocking/nonblocking I/O, data transfer, and</span>
+<span>  external capacity before selecting a primitive.</span>
+<span>* semaphore/worker queue: bounds active and queued work rather than creating one task per input.</span>
+<span>* structured result: associates each input with success/failure/cancellation so no work</span>
+<span>  disappears.</span>
+<span> </span>
+<span>Micro-example A — state the execution choice from the blocking behavior::</span>
+<span> </span>
+<span>    def choose_execution(*, waits_nonblocking=False, waits_blocking=False, cpu_python=False):</span>
+<span>        if sum((waits_nonblocking, waits_blocking, cpu_python)) != 1:</span>
+<span>            raise ValueError(&quot;classify one dominant workload&quot;)</span>
+<span>        if waits_nonblocking:</span>
+<span>            return &quot;asyncio&quot;</span>
+<span>        if waits_blocking:</span>
+<span>            return &quot;threads&quot;</span>
+<span>        return &quot;processes-or-native-vectorization&quot;</span>
+<span> </span>
+<span>    assert choose_execution(waits_nonblocking=True) == &quot;asyncio&quot;</span>
+<span>    assert choose_execution(cpu_python=True) == &quot;processes-or-native-vectorization&quot;</span>
+<span> </span>
+<span>Expected: The decision follows where time is spent, not a belief that one primitive is</span>
+<span>          universally faster.</span>
+<span> </span>
+<span>Micro-example B — prove an async concurrency ceiling::</span>
+<span> </span>
+<span>    import asyncio</span>
+<span> </span>
+<span>    async def demo():</span>
+<span>        gate = asyncio.Semaphore(2)</span>
+<span>        active = 0</span>
+<span>        peak = 0</span>
+<span> </span>
+<span>        async def work(value):</span>
+<span>            nonlocal active, peak</span>
+<span>            async with gate:</span>
+<span>                active += 1</span>
+<span>                peak = max(peak, active)</span>
+<span>                await asyncio.sleep(0)</span>
+<span>                active -= 1</span>
+<span>                return value * 2</span>
+<span> </span>
+<span>        results = await asyncio.gather(*(work(i) for i in range(6)))</span>
+<span>        return results, peak</span>
+<span> </span>
+<span>    results, peak = asyncio.run(demo())</span>
+<span>    print(results, peak)</span>
+<span>    assert results == [0, 2, 4, 6, 8, 10] and peak == 2</span>
+<span> </span>
+<span>Expected: All inputs are accounted for while no more than two operations enter the protected</span>
+<span>          section.</span>
+<span> </span>
+<span>Debugging rule: Measure sequential and candidate paths, record active/queued counts, per-item</span>
+<span>                results, timeout/cancellation cleanup, serialization size, and platform start</span>
+<span>                method.</span>
+<span> </span>
+<span>The snippets demonstrate mechanics only. They do not complete the</span>
+<span>numbered TODOs below; implement those from their stated contracts and</span>
+<span>prove normal, boundary, and failure behavior.</span>
 <span>&quot;&quot;&quot;</span>
 <span> </span>
 <span>from __future__ import annotations</span>
@@ -604,7 +830,7 @@
 <span># metadata API, - image transforms written in pure Python, - three tiny computations.</span>
 <span># Reject labels that contradict each other. An async function that performs computation</span>
 <span># without `await` is still CPU work and blocks the event loop.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 2 — build a bounded async map</span>
 <span># Prompt: Implement `bounded_map` with: 1. `asyncio.Queue(maxsize=queue_capacity)`, 2. one</span>
@@ -612,14 +838,14 @@
 <span># order, 5. a unique sentinel per consumer, and 6. `asyncio.TaskGroup`. Place</span>
 <span># `queue.task_done()` in `finally`. Let exceptions propagate. Do not catch</span>
 <span># `CancelledError` unless cleanup requires it; if caught, re-raise it.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 3 — add per-item timeouts</span>
 <span># Prompt: Wrap each worker call with `asyncio.timeout`. Test one worker slower than the</span>
 <span># limit. Inspect the `ExceptionGroup` from `TaskGroup`, and verify a `finally` block</span>
 <span># returns the active count to zero. Prediction: what happens to sibling consumers when one</span>
 <span># item times out?</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 4 — adapt blocking I/O</span>
 <span># Prompt: Use `ThreadPoolExecutor(max_workers=N)` for deterministic `time.sleep` jobs.</span>
@@ -627,57 +853,57 @@
 <span># results rather than treating speed as the correctness assertion. Explain why a thread</span>
 <span># pool requires a deliberate `max_workers`, even if the remote service could theoretically</span>
 <span># accept more requests.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 5 — isolate CPU work</span>
 <span># Prompt: Make the CPU function a top-level function with serializable arguments and</span>
 <span># results. Use `multiprocessing.get_context(&quot;spawn&quot;)` with `ProcessPoolExecutor`, and</span>
 <span># create processes only beneath an `if __name__ == &quot;__main__&quot;:` guard. Run the solution</span>
 <span># with `--with-processes`; explain when startup makes a small workload slower.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 6 — reason about shared state</span>
 <span># Prompt: Implement `deterministic_lost_update`. Force two workers to read the same</span>
 <span># snapshot, then apply both writes. Compare with two serialized increments. List three</span>
 <span># repairs: - one owner task/process receives update messages, - a lock protects the</span>
 <span># complete read/modify/write unit, or - an external system performs an atomic update.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 7 — prove cancellation cleanup</span>
 <span># Prompt: Cancel `bounded_map` while workers are active. Instrument acquired resources and</span>
 <span># prove active count, queued acknowledgements, and child tasks return to zero before the</span>
 <span># parent finishes.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 8 — inspect structured failures</span>
 <span># Prompt: Run multiple workers that fail with different typed exceptions. Use `except*` to</span>
 <span># handle one expected category while preserving unexpected failures and their original</span>
 <span># tracebacks.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 9 — stream a backpressured producer</span>
 <span># Prompt: Adapt `bounded_map` from a finite Sequence to an async iterator whose length is</span>
 <span># unknown. Preserve output order without retaining every input or creating one task per</span>
 <span># item.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 10 — trace context across boundaries</span>
 <span># Prompt: Set a request ID in `contextvars`, then observe propagation through an async</span>
 <span># task, `asyncio.to_thread`, a raw thread-pool submission, and a spawned process. Make any</span>
 <span># explicit propagation visible.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 11 — design graceful executor shutdown</span>
 <span># Prompt: Own a thread or process pool through a context manager. Stop accepting new work,</span>
 <span># wait with a bounded policy, cancel pending futures when allowed, and report unfinished</span>
 <span># work without hanging interpreter exit.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 12 — make an evidence-based model decision</span>
 <span># Prompt: Benchmark sequential, bounded asyncio/threads, and spawned processes on</span>
 <span># representative I/O and CPU fixtures. Record correctness, startup, throughput, peak</span>
 <span># active work, transfer size, and cleanup—not just fastest elapsed time.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># === End numbered professional practice ===</span>
 <span> </span>
@@ -685,15 +911,15 @@
 <span>    asyncio.run(worked_example())</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -753,6 +979,36 @@
 <h4 id="solution-1--expected-behavior">Expected behavior<a class="heading-anchor" href="#solution-1--expected-behavior" aria-label="Link to this section">#</a></h4>
 <p>The tests prove ordered results, peak active work at or below the limit, timeout and failure propagation, cancellation cleanup, deterministic lost updates, thread output, and a small spawned-process calculation. No test relies on a narrow elapsed-time threshold, random scheduling, or external I/O.</p>
 <hr>
+<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-1--reasoning-before-implementation">Reasoning before implementation<a class="heading-anchor" href="#solution-1--reasoning-before-implementation" aria-label="Link to this section">#</a></h4>
+<p>The solution treats primitive choice, admission control, lifecycle, and result accounting as separate contracts validated under forced interleavings.</p>
+<ol>
+<li><strong>workload classification:</strong> identifies CPU time, blocking/nonblocking I/O, data transfer, and external capacity before selecting a primitive.</li>
+<li><strong>semaphore/worker queue:</strong> bounds active and queued work rather than creating one task per input.</li>
+<li><strong>structured result:</strong> associates each input with success/failure/cancellation so no work disappears.</li>
+<li><strong>Prove the failure boundary:</strong> Exercise one normal case, one boundary case, and one injected failure without relying on hidden state.</li>
+</ol>
+<p><strong>Alternative:</strong> Vectorized/native libraries often outperform Python processes; a simple sequential loop is best when overhead dominates.</p>
+<p><strong>Trade-off:</strong> Higher concurrency may reduce latency until external or local saturation, then worsens queuing, memory, and failure amplification.</p>
+<p><strong>Failure boundary:</strong> Cancellation during acquisition, task exception, process pickle failure, Windows spawn recursion, lost ordering, and executor shutdown need tests.</p>
+<p><strong>Verification:</strong> Benchmark against sequential, prove peak active/queued bounds, account for every input, inject failures/cancellation, and run process examples behind a main guard.</p>
+<h5 id="solution-1--verification-micro-example">Verification micro-example<a class="heading-anchor" href="#solution-1--verification-micro-example" aria-label="Link to this section">#</a></h5>
+<p>Run this small, deterministic case before adapting the reference to a larger system. It gives the reasoning above an executable anchor:</p>
+<pre><code class="language-python">def choose_execution(*, waits_nonblocking=False, waits_blocking=False, cpu_python=False):
+    if sum((waits_nonblocking, waits_blocking, cpu_python)) != 1:
+        raise ValueError(&quot;classify one dominant workload&quot;)
+    if waits_nonblocking:
+        return &quot;asyncio&quot;
+    if waits_blocking:
+        return &quot;threads&quot;
+    return &quot;processes-or-native-vectorization&quot;
+
+
+assert choose_execution(waits_nonblocking=True) == &quot;asyncio&quot;
+assert choose_execution(cpu_python=True) == &quot;processes-or-native-vectorization&quot;</code></pre>
+<p><strong>Expected observation:</strong> The decision follows where time is spent, not a belief that one primitive is universally faster.</p>
+<p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
+<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-pro-02.html#solution-2"><code>py_pro_02_concurrency_parallelism_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
 <h5 id="solution-1--exercise-1-choose-a-model">Exercise 1 — choose a model<a class="heading-anchor" href="#solution-1--exercise-1-choose-a-model" aria-label="Link to this section">#</a></h5>
@@ -760,31 +1016,37 @@
 <p><strong>Reference reasoning:</strong> Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> choose a model — implement choose execution model in the learner artifact; for each case, write one sentence explaining the choice: - an async database driver, - a synchronous file metadata API, - image transforms written in pure Python, - three tiny computations; reject labels that contradict each other.</p>
 <h5 id="solution-1--exercise-2-build-a-bounded-async-map">Exercise 2 — build a bounded async map<a class="heading-anchor" href="#solution-1--exercise-2-build-a-bounded-async-map" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Implement <code>bounded_map</code> with: 1. <code>asyncio.Queue(maxsize=queue_capacity)</code>, 2. one producer, 3. a fixed number of consumers, 4. indexed items so results retain input order, 5. a unique sentinel per consumer, and 6. <code>asyncio.TaskGroup</code>. Place <code>queue.task_done()</code> in <code>finally</code>. Let exceptions propagate. Do not catch <code>CancelledError</code> unless cleanup requires it; if caught, re-raise it.</p>
 <p><strong>Reference reasoning:</strong> Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> build a bounded async map — on ten indexed inputs with queue capacity 2 and two consumers, assert output order equals input order, peak queued/active work stays bounded, queue acknowledgements reach zero, and an injected worker exception cancels siblings cleanly.</p>
 <h5 id="solution-1--exercise-3-add-per-item-timeouts">Exercise 3 — add per-item timeouts<a class="heading-anchor" href="#solution-1--exercise-3-add-per-item-timeouts" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Wrap each worker call with <code>asyncio.timeout</code>. Test one worker slower than the limit. Inspect the <code>ExceptionGroup</code> from <code>TaskGroup</code>, and verify a <code>finally</code> block returns the active count to zero. Prediction: what happens to sibling consumers when one item times out?</p>
 <p><strong>Reference reasoning:</strong> Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> add per-item timeouts — test one worker slower than the limit; inspect the ExceptionGroup from TaskGroup, and verify a finally block returns the active count to zero; prediction: what happens to sibling consumers when one item times out?.</p>
 <h5 id="solution-1--exercise-4-adapt-blocking-i-o">Exercise 4 — adapt blocking I/O<a class="heading-anchor" href="#solution-1--exercise-4-adapt-blocking-i-o" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Use <code>ThreadPoolExecutor(max_workers=N)</code> for deterministic <code>time.sleep</code> jobs. Compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion. Explain why a thread pool requires a deliberate <code>max_workers</code>, even if the remote service could theoretically accept more requests.</p>
 <p><strong>Reference reasoning:</strong> Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> adapt blocking I/O — use ThreadPoolExecutor(max workers=N) for deterministic time.sleep jobs; compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion; explain why a thread pool requires a deliberate max workers, even if the remote service could theoretically accept more requests.</p>
 <h5 id="solution-1--exercise-5-isolate-cpu-work">Exercise 5 — isolate CPU work<a class="heading-anchor" href="#solution-1--exercise-5-isolate-cpu-work" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Make the CPU function top-level with serializable arguments and results. Use <code>multiprocessing.get_context(&quot;spawn&quot;)</code> with <code>ProcessPoolExecutor</code>, and create processes only beneath an <code>if <strong>name</strong> == &quot;<strong>main</strong>&quot;:</code> guard. Run the solution with <code>--with-processes</code>; explain why startup can make a small workload slower.</p>
 <p><strong>Reference reasoning:</strong> Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> isolate CPU work — make the CPU function a top-level function with serializable arguments and results; use: and ProcessPoolExecutor; run process creation only beneath: Windows PowerShell: macOS/Linux: The workload is intentionally small for safety; process startup may make it slower than sequential execution.</p>
 <h5 id="solution-1--exercise-6-reason-about-shared-state">Exercise 6 — reason about shared state<a class="heading-anchor" href="#solution-1--exercise-6-reason-about-shared-state" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Implement <code>deterministic_lost_update</code>. Force two workers to read the same snapshot, then apply both writes. Compare with two serialized increments. List three repairs: - one owner task/process receives update messages, - a lock protects the complete read/modify/write unit, or - an external system performs an atomic update.</p>
 <p><strong>Reference reasoning:</strong> Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> reason about shared state — use barriers to make two workers read counter=0 before either writes; assert the lost-update result is 1, then protect the same two increments and assert the serialized result is 2 without timing sleeps.</p>
 <h5 id="solution-1--exercise-7-prove-cancellation-cleanup">Exercise 7 — prove cancellation cleanup<a class="heading-anchor" href="#solution-1--exercise-7-prove-cancellation-cleanup" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Cancel <code>bounded_map</code> while workers are active. Instrument acquired resources and prove active count, queued acknowledgements, and child tasks return to zero before the parent finishes.</p>
 <p><strong>Reasoning path:</strong> Put cleanup in <code>finally</code>, do not suppress <code>CancelledError</code>, and use TaskGroup as the child ownership boundary.</p>
@@ -792,6 +1054,7 @@
 <p>Queue accounting must still call <code>task_done</code> for an item already removed. Cancellation is a normal control path; logging it as an application error or continuing with partial results is incorrect.</p>
 <p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> prove cancellation cleanup — cancel bounded map while workers are active; instrument acquired resources and prove active count, queued acknowledgements, and child tasks return to zero before the parent finishes.</p>
 <h5 id="solution-1--exercise-8-inspect-structured-failures">Exercise 8 — inspect structured failures<a class="heading-anchor" href="#solution-1--exercise-8-inspect-structured-failures" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Run multiple workers that fail with different typed exceptions. Use <code>except*</code> to handle one expected category while preserving unexpected failures and their original tracebacks.</p>
 <p><strong>Reasoning path:</strong> ExceptionGroup is a tree. Match by exception type and re-raise what the current layer cannot translate.</p>
@@ -799,6 +1062,7 @@
 <p>Do not flatten everything into one string or return only the first exception; that destroys evidence. Cancellation caused by sibling failure is distinct from an independent worker defect.</p>
 <p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> inspect structured failures — run multiple workers that fail with different typed exceptions; use except to handle one expected category while preserving unexpected failures and their original tracebacks.</p>
 <h5 id="solution-1--exercise-9-stream-a-backpressured-producer">Exercise 9 — stream a backpressured producer<a class="heading-anchor" href="#solution-1--exercise-9-stream-a-backpressured-producer" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Adapt <code>bounded_map</code> from a finite Sequence to an async iterator whose length is unknown. Preserve output order without retaining every input or creating one task per item.</p>
 <p><strong>Reasoning path:</strong> Assign increasing indexes at production, use a bounded queue, and emit completed results through a second bounded channel.</p>
@@ -806,6 +1070,7 @@
 <p>Define cancellation and partial-output semantics before implementation. Preserving all results in a final list is incompatible with truly unbounded input, so expose an async result iterator instead.</p>
 <p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> stream a backpressured producer — adapt bounded map from a finite Sequence to an async iterator whose length is unknown; preserve output order without retaining every input or creating one task per item.</p>
 <h5 id="solution-1--exercise-10-trace-context-across-boundaries">Exercise 10 — trace context across boundaries<a class="heading-anchor" href="#solution-1--exercise-10-trace-context-across-boundaries" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Set a request ID in <code>contextvars</code>, then observe propagation through an async task, <code>asyncio.to_thread</code>, a raw thread-pool submission, and a spawned process. Make any explicit propagation visible.</p>
 <p><strong>Reasoning path:</strong> Async tasks and <code>to_thread</code> copy context by design; arbitrary executors and processes need deliberate value transfer.</p>
@@ -813,6 +1078,7 @@
 <p>Context propagation must never become credential propagation. Keep security tokens in a reviewed credential boundary, not a general diagnostic context.</p>
 <p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> trace context across boundaries — set a request ID in contextvars, then observe propagation through an async task, asyncio.to thread, a raw thread-pool submission, and a spawned process; make any explicit propagation visible.</p>
 <h5 id="solution-1--exercise-11-design-graceful-executor-shutdown">Exercise 11 — design graceful executor shutdown<a class="heading-anchor" href="#solution-1--exercise-11-design-graceful-executor-shutdown" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Own a thread or process pool through a context manager. Stop accepting new work, wait with a bounded policy, cancel pending futures when allowed, and report unfinished work without hanging interpreter exit.</p>
 <p><strong>Reasoning path:</strong> Lifecycle ownership belongs to the component that created the executor. Differentiate pending work from already-running calls.</p>
@@ -820,15 +1086,17 @@
 <p>Process pools also need import-safe top-level callables and a main guard. Avoid relying only on garbage collection or interpreter teardown.</p>
 <p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> design graceful executor shutdown — own a thread or process pool through a context manager; stop accepting new work, wait with a bounded policy, cancel pending futures when allowed, and report unfinished work without hanging interpreter exit.</p>
 <h5 id="solution-1--exercise-12-make-an-evidence-based-model-decision">Exercise 12 — make an evidence-based model decision<a class="heading-anchor" href="#solution-1--exercise-12-make-an-evidence-based-model-decision" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures. Record correctness, startup, throughput, peak active work, transfer size, and cleanup—not just fastest elapsed time.</p>
 <p><strong>Reasoning path:</strong> Use generous repeated measurements and interpret each model only for the workload it matches. A tiny workload can legitimately stay sequential.</p>
 <p>First assert identical ordered results and failure behavior. Then run warmups and repeated local measurements, reporting distributions rather than flaky speed assertions. For processes, include serialization and startup; for async and threads, include dependency capacity and caller deadline.</p>
 <p>Choose the simplest model that satisfies the measured requirement and resource budget. Preserve the benchmark plan so future workloads can invalidate the decision honestly.</p>
 <p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
-<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p></div>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> make an evidence-based model decision — benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures; record correctness, startup, throughput, peak active work, transfer size, and cleanup—not just fastest elapsed time.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -836,7 +1104,7 @@
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -1154,7 +1422,51 @@
 <span>    raise SystemExit(main())</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-pro-02` — Concurrency and parallelism decision lab.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize choosing async, threads, or processes and bounding concurrent work. Use exactly these maintained learner materials:
+- guide: `python/professional/companion-guides/py_pro_02_concurrency_parallelism.md`
+- learner artifact: `python/professional/lessons/py_pro_02_concurrency_parallelism.py`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-15`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-svc-01.html"><small>Previous lesson</small><strong>python-svc-01</strong><span>Reliable HTTP Clients and External-Service Boundaries</span></a>
@@ -1246,6 +1558,23 @@
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

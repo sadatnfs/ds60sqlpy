@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-41/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-41-complex-aggregations">Day 41 — Complex Aggregations<a class="heading-anchor" href="#guide--day-41-complex-aggregations" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -285,34 +384,133 @@
 <li><strong>Prerequisites:</strong> <a href="sql-40.html#guide">Day 40 — advanced analytic functions</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-41.html#learner">learner SQL</a> · <a href="sql-41.html#solution-1">solution reasoning</a> · <a href="sql-41.html#solution-2">executable solution</a></li>
 </ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-41 — Complex Aggregations</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-41/lesson/workspace/sql/postgres-60day/day41_complex_aggregations.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day41_complex_aggregations.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/day41_complex_aggregations.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is FILTER clause, Conditional aggregate, Ordered aggregation. Its worked SQL reads or creates <code>order_items</code>, <code>products</code>, <code>orders</code>, <code>customers</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: Establish one order-line relation, then calculate 30-day revenue, 90-day revenue, order count, and customer count in one category group using FILTER. Reconcile each measure with a simpler single-purpose query before trusting the combined dashboard. The first runnable example has a concrete contract: Example 1 returns one grouped row per <code>category</code> with columns <code>category</code>, <code>total_qty</code>, <code>qty_30d</code>, <code>qty_90d</code>, <code>revenue</code>, and <code>revenue_30d</code> from <code>order_items</code>, <code>products</code>, and <code>orders</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>category</code>, <code>total_qty</code>, <code>qty_30d</code>, <code>qty_90d</code>, <code>revenue</code>, and <code>revenue_30d</code>. Independently group <code>order_items</code>, <code>products</code>, and <code>orders</code> by the shown grouping expressions and compare every displayed aggregate at that exact grain. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day41_complex_aggregations.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">SELECT p.category,
+       SUM(oi.quantity)                                                   AS total_qty,
+       SUM(oi.quantity) FILTER (WHERE o.order_date &gt;= now() - interval &#x27;30 days&#x27;) AS qty_30d,
+       SUM(oi.quantity) FILTER (WHERE o.order_date &gt;= now() - interval &#x27;90 days&#x27;) AS qty_90d,
+       ROUND(SUM(oi.unit_price*oi.quantity*(1-oi.discount)),2)           AS revenue,
+       ROUND(SUM(oi.unit_price*oi.quantity*(1-oi.discount))
+             FILTER (WHERE o.order_date &gt;= now() - interval &#x27;30 days&#x27;),2) AS revenue_30d
+FROM order_items oi
+JOIN products p ON p.product_id = oi.product_id
+JOIN orders o   ON o.order_id = oi.order_id
+GROUP BY p.category
+ORDER BY revenue DESC;</code></pre>
+<p><strong>How to read it:</strong> Example 1: Start with <code>order_items</code>, <code>products</code>, and <code>orders</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>category</code>, <code>total_qty</code>, <code>qty_30d</code>, <code>qty_90d</code>, <code>revenue</code>, and <code>revenue_30d</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>category</code> with columns <code>category</code>, <code>total_qty</code>, <code>qty_30d</code>, <code>qty_90d</code>, <code>revenue</code>, and <code>revenue_30d</code> from <code>order_items</code>, <code>products</code>, and <code>orders</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">SELECT c.country,
+       SUM(CASE WHEN o.status IN (&#x27;paid&#x27;,&#x27;shipped&#x27;,&#x27;delivered&#x27;) THEN 1 ELSE 0 END) AS successful_orders,
+       SUM(CASE WHEN o.status = &#x27;returned&#x27; THEN 1 ELSE 0 END)                      AS returned_orders,
+       ROUND(SUM(CASE WHEN o.status &lt;&gt; &#x27;returned&#x27; THEN o.total_amount ELSE 0 END),2) AS net_revenue
+FROM orders o
+JOIN customers c ON c.customer_id = o.customer_id
+GROUP BY c.country
+ORDER BY net_revenue DESC;</code></pre>
+<p><strong>How to read it:</strong> Example 2: Start with <code>orders</code>, and <code>customers</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>country</code>, <code>successful_orders</code>, <code>returned_orders</code>, and <code>net_revenue</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 2 returns one grouped row per <code>country</code> with columns <code>country</code>, <code>successful_orders</code>, <code>returned_orders</code>, and <code>net_revenue</code> from <code>orders</code>, and <code>customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Produce several conditional measures from one controlled fact grain.</li>
 <li>Build deterministic ordered labels after ranking within a partition.</li>
+<li>Generate detail rows, one-dimensional subtotals, and a grand total with <code>CUBE</code>.</li>
+<li>Use <code>GROUPING</code> to identify the grain of every subtotal row without confusing a generated subtotal marker with a stored SQL <code>NULL</code>.</li>
 </ul>
 <h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>FILTER clause:</strong> a per-aggregate condition written after the aggregate.</li>
 <li><strong>Conditional aggregate:</strong> a measure calculated only for qualifying rows.</li>
 <li><strong>Ordered aggregation:</strong> concatenation or collection under a specified order.</li>
+<li><strong>Grouping set:</strong> one explicit list of columns that defines an aggregate grain. <code>GROUPING SETS</code> asks PostgreSQL for several such grains in one query.</li>
+<li><strong>CUBE:</strong> shorthand for every grouping set that can be formed from the listed dimensions. Two dimensions produce four levels.</li>
+<li><strong>GROUPING:</strong> a function evaluated on grouping expressions. It returns <code>1</code> when an expression was omitted to create the current subtotal and <code>0</code> when the expression participates in that row&#x27;s grouping key.</li>
+<li><strong>Grouping mask:</strong> the integer returned by multi-argument <code>GROUPING</code>. Read its bits from right to left in the same order as the arguments.</li>
 </ul>
+<h4 id="guide--how-to-read-a-two-dimensional-cube">How to read a two-dimensional CUBE<a class="heading-anchor" href="#guide--how-to-read-a-two-dimensional-cube" aria-label="Link to this section">#</a></h4>
+<p><code>CUBE(country, category)</code> is equivalent to:</p>
+<pre><code class="language-sql">GROUP BY GROUPING SETS (
+  (country, category), -- detail
+  (country),           -- one country across all categories
+  (category),          -- one category across all countries
+  ()                   -- grand total
+)</code></pre>
+<p>PostgreSQL encodes which expressions were omitted with <code>GROUPING(country, category)</code>. The rightmost argument, <code>category</code>, is the least-significant bit:</p>
+<div class="table-wrap"><table><thead><tr>
+<th><code>grouping_mask</code></th>
+<th>Included grouping key</th>
+<th>Meaning</th>
+</tr></thead><tbody>
+<tr>
+<td><code>0</code></td>
+<td><code>country, category</code></td>
+<td>detail</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td><code>country</code></td>
+<td>country subtotal</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td><code>category</code></td>
+<td>category subtotal</td>
+</tr>
+<tr>
+<td><code>3</code></td>
+<td>none</td>
+<td>grand total</td>
+</tr>
+</tbody></table></div>
+<p>This mask is a grain label, not a data-cleaning test. A stored <code>NULL</code> country in a detail group still has a country grouping bit of <code>0</code>; a generated country subtotal marker has that bit set to <code>1</code>. Test <code>GROUPING(country)</code>, not <code>country IS NULL</code>, when you need to distinguish them.</p>
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <p>Establish one order-line relation, then calculate 30-day revenue, 90-day revenue, order count, and customer count in one category group using <code>FILTER</code>. Reconcile each measure with a simpler single-purpose query before trusting the combined dashboard.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <p>Complete these in the <a href="sql-41.html#learner">learner SQL</a>:</p>
 <ol>
-<li>Build six category metrics with <code>FILTER</code>.</li>
-<li>List each country&#x27;s top five products with <code>string_agg</code>.</li>
-<li>Predict explicit grouping sets versus a two-column <code>CUBE</code>.</li>
-<li>Build country status/revenue/customer metrics with <code>FILTER</code>.</li>
-<li>Distinguish stored NULLs from subtotal NULLs with <code>GROUPING</code>.</li>
-<li>Return a typed empty array for an empty aggregate input.</li>
+<li>Build six category metrics with <code>FILTER</code>. <strong>Inputs/evidence:</strong> For sql-41 Exercise 1, read from <code>orders</code>, <code>order_items</code>, <code>products</code>, and <code>training.products</code>. Build the answer toward <code>category</code>, <code>revenue_30d</code>, <code>revenue_90d</code>, <code>orders_30d</code>, <code>units_30d</code>, <code>customers_90d</code>, and <code>revenue_per_order_30d</code>; keep <code>category</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-41 Exercise 1, expected output: one row for each category in <code>training.products</code>, with six metric columns. The final columns are <code>category</code>, <code>revenue_30d</code>, <code>revenue_90d</code>, <code>orders_30d</code>, <code>units_30d</code>, <code>customers_90d</code>, and <code>revenue_per_order_30d</code>. The final order is <code>revenue_30d DESC NULLS LAST, category</code>. <strong>Verify:</strong> For sql-41 Exercise 1, independently aggregate <code>orders</code>, <code>order_items</code>, <code>products</code>, and <code>training.products</code> by <code>category</code>; require one output row for every distinct <code>category</code> tuple and compare <code>revenue_30d</code>, <code>revenue_90d</code>, <code>orders_30d</code>, <code>units_30d</code>, <code>customers_90d</code>, and <code>revenue_per_order_30d</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>revenue_30d</code>, <code>revenue_90d</code>, and <code>orders_30d</code> for the existing <code>category</code> tuple and verify the new tuple appears exactly once.</li>
+<li>List each country&#x27;s top five products with <code>string_agg</code>. <strong>Inputs/evidence:</strong> For sql-41 Exercise 2, read from <code>customers</code>, <code>orders</code>, <code>order_items</code>, and <code>products</code>. First aggregate at (<code>country</code>, <code>product_id</code>, <code>name</code>) grain, then rank products within each country; build the answer toward <code>country</code> and <code>top_five_products</code>. <strong>Expected result/shape:</strong> For sql-41 Exercise 2, expected output: one row per represented country. <code>top_five_products</code> contains at most five product names ordered by <code>revenue DESC, product_id</code>; <code>product_id</code> is the deterministic tie-breaker. The final columns are <code>country</code> and <code>top_five_products</code>. The final order is <code>country</code>. <strong>Verify:</strong> For sql-41 Exercise 2, independently aggregate line revenue at (<code>country</code>, <code>product_id</code>, <code>name</code>) grain and rank with <code>ROW_NUMBER() OVER (PARTITION BY country ORDER BY revenue DESC, product_id)</code>. For every country, compare the ordered products used by <code>string_agg</code>, require no more than five ranked products, and confirm a country with fewer than five products is not padded.</li>
+<li>Predict explicit grouping sets versus a two-column <code>CUBE</code>. <strong>Inputs/evidence:</strong> For sql-41 Exercise 3, calculate line revenue from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>, then aggregate with <code>CUBE(country, category)</code>. Build the answer toward <code>country</code>, <code>category</code>, <code>revenue</code>, <code>grouping_mask</code>, and <code>grouping_level</code>. <strong>Expected result/shape:</strong> For sql-41 Exercise 3, expected output: every grouping level emitted by the two-dimensional cube. <code>grouping_mask</code> is <code>0</code> for detail, <code>1</code> for a country subtotal, <code>2</code> for a category subtotal, and <code>3</code> for the grand total. The final columns are <code>country</code>, <code>category</code>, <code>revenue</code>, <code>grouping_mask</code>, and <code>grouping_level</code>. The final order is <code>grouping_mask, country, category</code>. <strong>Verify:</strong> For sql-41 Exercise 3, compare mask <code>0</code> with an independent (<code>country</code>, <code>category</code>) aggregate, mask <code>1</code> with a country aggregate, and mask <code>2</code> with a category aggregate; require exactly one mask <code>3</code> row. Within each mask, the sum of <code>revenue</code> must equal the independent all-lines revenue total.</li>
+<li>Build country status/revenue/customer metrics with <code>FILTER</code>. <strong>Inputs/evidence:</strong> For sql-41 Exercise 4, read from <code>orders</code>, and <code>customers</code>. Build the answer toward <code>country</code>, <code>orders</code>, <code>paid_orders</code>, <code>paid_revenue</code>, <code>returned_revenue</code>, and <code>customers</code>; keep <code>country</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-41 Exercise 4, expected output: one row per <code>country</code>. The final columns are <code>country</code>, <code>orders</code>, <code>paid_orders</code>, <code>paid_revenue</code>, <code>returned_revenue</code>, and <code>customers</code>. The final order is <code>c.country</code>. <strong>Verify:</strong> For sql-41 Exercise 4, independently aggregate <code>orders</code>, and <code>customers</code> by <code>country</code>; require one output row for every distinct <code>country</code> tuple and compare <code>orders</code>, <code>paid_orders</code>, <code>paid_revenue</code>, <code>returned_revenue</code>, and <code>customers</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>orders</code>, <code>paid_orders</code>, and <code>paid_revenue</code> for the existing <code>country</code> tuple and verify the new tuple appears exactly once.</li>
+<li>Distinguish stored NULLs from subtotal NULLs with <code>GROUPING</code>. <strong>Inputs/evidence:</strong> For sql-41 Exercise 5, read <code>customers.country</code> and append one controlled <code>NULL::text</code> input row in a <code>country_input</code> CTE. Apply <code>GROUPING(country)</code> to the grouped expression and build <code>country_label</code>, <code>is_subtotal</code>, and <code>customers</code>. <strong>Expected result/shape:</strong> For sql-41 Exercise 5, expected output: one detail row per distinct input country with <code>is_subtotal = 0</code>, including a <code>(stored null)</code> row, plus exactly one <code>ALL COUNTRIES</code> row with <code>is_subtotal = 1</code>. The final columns are <code>country_label</code>, <code>is_subtotal</code>, and <code>customers</code>. The final order is <code>is_subtotal, country_label</code>. <strong>Verify:</strong> For sql-41 Exercise 5, require exactly one row with <code>is_subtotal = 1</code>, require the <code>(stored null)</code> row to have <code>is_subtotal = 0</code>, and verify that detail-row <code>customers</code> sum to the grand-total <code>customers</code>. <code>GROUPING</code> receives the grouped <code>country</code> expression; do not try to call <code>GROUPING(NULL)</code>.</li>
+<li>Return a typed empty array for an empty aggregate input. <strong>Inputs/evidence:</strong> For sql-41 Exercise 6, read <code>customers.email</code> through <code>array_agg(email) FILTER (WHERE false)</code> and use a same-type <code>COALESCE</code> fallback. Build the answer toward <code>empty_email_array</code>. <strong>Expected result/shape:</strong> For sql-41 Exercise 6, expected output: exactly one scalar row with one column, <code>empty_email_array</code>, whose value is the non-NULL empty <code>text[]</code> value <code>{}</code>. There is no customer-level key because the query has no <code>GROUP BY</code>. <strong>Verify:</strong> For sql-41 Exercise 6, assert that the uncoalesced filtered <code>array_agg</code> result is <code>NULL</code>, while the final result satisfies <code>empty_email_array IS NOT NULL</code> and <code>cardinality(empty_email_array) = 0</code>.</li>
 </ol>
 <p>Decide explicitly when an absent measure should be <code>NULL</code> or zero.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Are order and customer counts protected from line-level fanout?</li>
 <li>Is the top-five label order stable under metric ties?</li>
+<li>Can you expand <code>CUBE(country, category)</code> into its four explicit grouping sets without looking?</li>
+<li>Can you explain why masks <code>1</code> and <code>2</code> mean different subtotal grains even though each prints one NULL dimension?</li>
+<li>If <code>country</code> contains a stored NULL, can you prove why <code>GROUPING(country) = 0</code> for that detail row?</li>
+<li>Why does a scalar aggregate over no qualifying rows return one row, and why must the empty-array fallback be typed as <code>text[]</code>?</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Continue to <a href="sql-42.html#guide">Day 42 — data quality and validation</a>.</p>
@@ -333,11 +531,8 @@
 <li>Guard every denominator with <code>NULLIF</code>.</li>
 <li>Conditional sums can be <code>NULL</code> when no row qualifies; decide whether display policy should use <code>COALESCE</code>.</li>
 </ul>
-<h4 id="guide--practice-match-the-learner-prompts-exactly">Practice — match the learner prompts exactly<a class="heading-anchor" href="#guide--practice-match-the-learner-prompts-exactly" aria-label="Link to this section">#</a></h4>
-<ol>
-<li>Build a six-metric dashboard by category with <code>FILTER</code>: 30-day revenue, 90-day revenue, 30-day orders, 30-day units, 90-day customers, and 30-day revenue per order.</li>
-<li>For each country, rank products by net line revenue, keep the top five, then <code>string_agg</code> their names in revenue-rank order.</li>
-</ol>
+<h4 id="guide--practice-map">Practice map<a class="heading-anchor" href="#guide--practice-map" aria-label="Link to this section">#</a></h4>
+<p>Use the numbered <strong>Exercises</strong> section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.</p>
 <h4 id="guide--pitfalls-and-validation">Pitfalls and validation<a class="heading-anchor" href="#guide--pitfalls-and-validation" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Applying a global <code>LIMIT 5</code> does not produce five products per country; rank within country first.</li>
@@ -347,17 +542,45 @@
 </ul>
 <h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
 <p>Prompts 3–6 make aggregate grain and subtotal identity explicit. A two-column <code>CUBE</code> emits detail, both one-dimensional subtotals, and a grand total; the listed <code>GROUPING SETS</code> intentionally omits detail. Use <code>GROUPING(column)</code> rather than <code>column IS NULL</code> to detect a subtotal.</p>
-<p><code>FILTER</code> keeps several metric definitions readable in one grouped query. Aggregates over no input rows often return NULL, so <code>COALESCE(array_agg(...), &#x27;{}&#x27;::text[])</code> needs an explicit type matching the aggregate result.</p></div>
+<p><code>FILTER</code> keeps several metric definitions readable in one grouped query. Aggregates over no input rows often return NULL, so <code>COALESCE(array_agg(...), &#x27;{}&#x27;::text[])</code> needs an explicit type matching the aggregate result.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-41 — Complex Aggregations.
+
+I have completed the direct catalog prerequisite: `sql-40`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day41_complex_aggregations.md
+- Answer-free learner SQL: sql/postgres-60day/day41_complex_aggregations.sql
+
+Key terms to teach in context: FILTER clause, Conditional aggregate, Ordered aggregation. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Establish one order-line relation, then calculate 30-day revenue, 90-day revenue, order count, and customer count in one category group using FILTER. Reconcile each measure with a simpler single-purpose query before trusting the combined dashboard.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-41/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -374,13 +597,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 41: Complex Aggregations (FILTER, conditional metrics, string aggregation)</span>
+<span>-- BEGINNER WORKFLOW — sql-41: Complex Aggregations</span>
+<span>-- Guide: sql/postgres-60day/companion-guides/day41_complex_aggregations.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-41/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: order_items, products, orders, customers.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
@@ -416,30 +656,64 @@
 <span>ORDER BY p.category</span>
 <span>LIMIT 10;</span>
 <span> </span>
+<span>-- CUBE / GROUPING reading key</span>
+<span>-- CUBE(country, category) expands to four grouping sets:</span>
+<span>--   (country, category) -&gt; detail</span>
+<span>--   (country)           -&gt; country subtotal</span>
+<span>--   (category)          -&gt; category subtotal</span>
+<span>--   ()                  -&gt; grand total</span>
+<span>-- GROUPING(country, category) encodes those levels as 0, 1, 2, and 3.</span>
+<span>-- The rightmost argument is the least-significant bit. A stored NULL in a</span>
+<span>-- grouped column still has bit 0; only omission by a grouping set produces 1.</span>
+<span> </span>
 <span>-- Exercises</span>
 <span>-- 1. Build a 6-metric dashboard by category using FILTER for various time windows.</span>
+<span>--    Inputs: For sql-41 Exercise 1, read from `orders`, `order_items`, `products`, and `training.products`. Build the answer toward `category`, `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d`; keep `category` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-41 Exercise 1, expected output: one row for each category in `training.products`, with six metric columns. The final columns are `category`, `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d`. The final order is `revenue_30d DESC NULLS LAST, category`.</span>
+<span>--    Verify: For sql-41 Exercise 1, independently aggregate `orders`, `order_items`, `products`, and `training.products` by `category`; require one output row for every distinct `category` tuple and compare `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue_30d`, `revenue_90d`, and `orders_30d` for the existing `category` tuple and verify the new tuple appears exactly once.</span>
+<span>--    Hint ladder, rung 1: For sql-41 Exercise 1, run `lines` one at a time. Record each CTE&#x27;s row count and `category` uniqueness before the next stage uses it.</span>
 <span>-- 2. Create a per-country string_agg of top 5 product names by revenue.</span>
+<span>--    Inputs: For sql-41 Exercise 2, read from `customers`, `orders`, `order_items`, and `products`. First aggregate at (`country`, `product_id`, `name`) grain, then rank products within each country; build the answer toward `country` and `top_five_products`.</span>
+<span>--    Expected result/shape: For sql-41 Exercise 2, expected output: one row per represented country. `top_five_products` contains at most five product names ordered by `revenue DESC, product_id`; `product_id` is the deterministic tie-breaker. The final columns are `country` and `top_five_products`. The final order is `country`.</span>
+<span>--    Verify: For sql-41 Exercise 2, independently aggregate line revenue at (`country`, `product_id`, `name`) grain and rank with `ROW_NUMBER() OVER (PARTITION BY country ORDER BY revenue DESC, product_id)`. For every country, compare the ordered products used by `string_agg`, require no more than five ranked products, and confirm a country with fewer than five products is not padded.</span>
+<span>--    Hint ladder, rung 1: For sql-41 Exercise 2, run `product_revenue`, and `ranked` one at a time. Record each CTE&#x27;s row count and `country` uniqueness before the next stage uses it.</span>
 <span>-- 3. Prediction: compare GROUPING SETS ((country), (category), ()) with CUBE</span>
 <span>--    (country, category). Predict which country/category detail level is absent.</span>
+<span>--    Inputs: For sql-41 Exercise 3, calculate line revenue from `orders`, `customers`, `order_items`, and `products`, then aggregate with `CUBE(country, category)`. Build the answer toward `country`, `category`, `revenue`, `grouping_mask`, and `grouping_level`.</span>
+<span>--    Expected result/shape: For sql-41 Exercise 3, expected output: every grouping level emitted by the two-dimensional cube. `grouping_mask` is `0` for detail, `1` for a country subtotal, `2` for a category subtotal, and `3` for the grand total. The final columns are `country`, `category`, `revenue`, `grouping_mask`, and `grouping_level`. The final order is `grouping_mask, country, category`.</span>
+<span>--    Verify: For sql-41 Exercise 3, compare mask `0` with an independent (`country`, `category`) aggregate, mask `1` with a country aggregate, and mask `2` with a category aggregate; require exactly one mask `3` row. Within each mask, the sum of `revenue` must equal the independent all-lines revenue total.</span>
+<span>--    Hint ladder, rung 1: For sql-41 Exercise 3, run `lines` one at a time. Record each CTE&#x27;s row count and `country`, and `category` uniqueness before the next stage uses it.</span>
 <span>-- 4. Construction: report order count, paid revenue, returned revenue, and</span>
 <span>--    distinct customers per country using FILTER.</span>
+<span>--    Inputs: For sql-41 Exercise 4, read from `orders`, and `customers`. Build the answer toward `country`, `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers`; keep `country` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-41 Exercise 4, expected output: one row per `country`. The final columns are `country`, `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers`. The final order is `c.country`.</span>
+<span>--    Verify: For sql-41 Exercise 4, independently aggregate `orders`, and `customers` by `country`; require one output row for every distinct `country` tuple and compare `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `orders`, `paid_orders`, and `paid_revenue` for the existing `country` tuple and verify the new tuple appears exactly once.</span>
+<span>--    Hint ladder, rung 1: For sql-41 Exercise 4, start with the first relation in `orders`, and `customers`; after each join, record total rows and distinct `country` so the exact fanout or loss is visible.</span>
 <span>-- 5. Debugging: distinguish a real NULL country from a subtotal NULL by adding</span>
 <span>--    GROUPING(country) and a safe display label.</span>
+<span>--    Inputs: For sql-41 Exercise 5, read `customers.country` and append one controlled `NULL::text` input row in a `country_input` CTE. Apply `GROUPING(country)` to the grouped expression and build `country_label`, `is_subtotal`, and `customers`.</span>
+<span>--    Expected result/shape: For sql-41 Exercise 5, expected output: one detail row per distinct input country with `is_subtotal = 0`, including a `(stored null)` row, plus exactly one `ALL COUNTRIES` row with `is_subtotal = 1`. The final columns are `country_label`, `is_subtotal`, and `customers`. The final order is `is_subtotal, country_label`.</span>
+<span>--    Verify: For sql-41 Exercise 5, require exactly one row with `is_subtotal = 1`, require the `(stored null)` row to have `is_subtotal = 0`, and verify that detail-row `customers` sum to the grand-total `customers`. `GROUPING` receives the grouped `country` expression; do not try to call `GROUPING(NULL)`.</span>
+<span>--    Hint ladder, rung 1: For sql-41 Exercise 5, confirm the groups are `country_label`, and `is_subtotal`; then check `is_subtotal, country_label` before applying the row cap.</span>
 <span>-- 6. Edge case: return an empty array rather than NULL when an aggregate input</span>
 <span>--    set is empty, and explain the COALESCE type cast.</span>
+<span>--    Inputs: For sql-41 Exercise 6, read `customers.email` through `array_agg(email) FILTER (WHERE false)` and use a same-type `COALESCE` fallback. Build the answer toward `empty_email_array`.</span>
+<span>--    Expected result/shape: For sql-41 Exercise 6, expected output: exactly one scalar row with one column, `empty_email_array`, whose value is the non-NULL empty `text[]` value `{}`. There is no customer-level key because the query has no `GROUP BY`.</span>
+<span>--    Verify: For sql-41 Exercise 6, assert that the uncoalesced filtered `array_agg` result is `NULL`, while the final result satisfies `empty_email_array IS NOT NULL` and `cardinality(empty_email_array) = 0`.</span>
+<span>--    Hint ladder, rung 1: For sql-41 Exercise 6, inspect the source keys that survive `WHERE`.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -463,6 +737,26 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-41-solutions-complex-aggregations">Day 41 Solutions — Complex Aggregations<a class="heading-anchor" href="#solution-1--day-41-solutions-complex-aggregations" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day41_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day41_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are FILTER clause, Conditional aggregate, Ordered aggregation. Its worked-model focus is: Establish one order-line relation, then calculate 30-day revenue, 90-day revenue, order count, and customer count in one category group using FILTER. Reconcile each measure with a simpler single-purpose query before trusting the combined dashboard.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>The learner script introduces <code>FILTER</code>, conditional aggregation, and <code>string_agg</code>. The two exercises turn those techniques into a category dashboard and a country-level top-product label. The canonical runnable answer is also in <a href="sql-41.html#solution-2"><code>day41_solutions.sql</code></a>.</p>
 <h4 id="solution-1--exercise-1-six-category-dashboard-metrics">Exercise 1 — Six category dashboard metrics<a class="heading-anchor" href="#solution-1--exercise-1-six-category-dashboard-metrics" aria-label="Link to this section">#</a></h4>
 <p>Build one row per product category containing:</p>
@@ -519,6 +813,16 @@ FROM lines
 GROUP BY category
 ORDER BY revenue_30d DESC NULLS LAST, category;</code></pre>
 <p>Expected shape: one row for each category in <code>training.products</code>, with six metric columns. A category with no qualifying recent activity can have <code>NULL</code> windowed sums. <code>NULLIF</code> makes revenue per order <code>NULL</code> instead of raising a division-by-zero error.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-41 Exercise 1, read from <code>orders</code>, <code>order_items</code>, <code>products</code>, and <code>training.products</code>. Build the answer toward <code>category</code>, <code>revenue_30d</code>, <code>revenue_90d</code>, <code>orders_30d</code>, <code>units_30d</code>, <code>customers_90d</code>, and <code>revenue_per_order_30d</code>; keep <code>category</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-41 Exercise 1, expected output: one row for each category in <code>training.products</code>, with six metric columns. The final columns are <code>category</code>, <code>revenue_30d</code>, <code>revenue_90d</code>, <code>orders_30d</code>, <code>units_30d</code>, <code>customers_90d</code>, and <code>revenue_per_order_30d</code>. The final order is <code>revenue_30d DESC NULLS LAST, category</code>.</li>
+<li><strong>Independent verification:</strong> For sql-41 Exercise 1, independently aggregate <code>orders</code>, <code>order_items</code>, <code>products</code>, and <code>training.products</code> by <code>category</code>; require one output row for every distinct <code>category</code> tuple and compare <code>revenue_30d</code>, <code>revenue_90d</code>, <code>orders_30d</code>, <code>units_30d</code>, <code>customers_90d</code>, and <code>revenue_per_order_30d</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>revenue_30d</code>, <code>revenue_90d</code>, and <code>orders_30d</code> for the existing <code>category</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Intermediate relation check:</strong> For sql-41 Exercise 1, run <code>lines</code> one at a time. Record each CTE&#x27;s row count and <code>category</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-41 Exercise 1, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>WHERE</code>, aggregate <code>FILTER</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>orders</code>, <code>order_items</code>, <code>products</code>, and <code>training.products</code>, preserve one row per <code>category</code>, and finish with <code>category</code>, <code>revenue_30d</code>, <code>revenue_90d</code>, <code>orders_30d</code>, <code>units_30d</code>, <code>customers_90d</code>, and <code>revenue_per_order_30d</code> ordered by <code>revenue_30d DESC NULLS LAST, category</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-41 Exercise 1, the chosen form is justified by this lesson-specific rationale: Build one row per product category containing: 1. Evaluate another form against the concrete expected result (one row for each category in <code>training.products</code>, with six metric columns) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>revenue_30d</code>, <code>revenue_90d</code>, and <code>orders_30d</code> for the existing <code>category</code> tuple and verify the new tuple appears exactly once.</li>
+</ul>
 <h4 id="solution-1--exercise-2-top-five-product-names-per-country">Exercise 2 — Top five product names per country<a class="heading-anchor" href="#solution-1--exercise-2-top-five-product-names-per-country" aria-label="Link to this section">#</a></h4>
 <p>Rank at <code>(country, product)</code> grain before aggregating names. This avoids the common mistake of applying <code>LIMIT 5</code> to the entire result instead of five products per country.</p>
 <pre><code class="language-sql">SET search_path TO training, public;
@@ -547,6 +851,16 @@ WHERE product_rank &lt;= 5
 GROUP BY country
 ORDER BY country;</code></pre>
 <p>Expected shape: one row per represented country and one comma-separated label ordered from highest to lowest product revenue.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-41 Exercise 2, read from <code>customers</code>, <code>orders</code>, <code>order_items</code>, and <code>products</code>. First aggregate at (<code>country</code>, <code>product_id</code>, <code>name</code>) grain, then rank products within each country; build the answer toward <code>country</code> and <code>top_five_products</code>.</li>
+<li><strong>Expected result/shape:</strong> For sql-41 Exercise 2, expected output: one row per represented country. <code>top_five_products</code> contains at most five product names ordered by <code>revenue DESC, product_id</code>; <code>product_id</code> is the deterministic tie-breaker. The final columns are <code>country</code> and <code>top_five_products</code>. The final order is <code>country</code>.</li>
+<li><strong>Independent verification:</strong> For sql-41 Exercise 2, independently aggregate line revenue at (<code>country</code>, <code>product_id</code>, <code>name</code>) grain and rank with <code>ROW_NUMBER() OVER (PARTITION BY country ORDER BY revenue DESC, product_id)</code>. For every country, compare the ordered products used by <code>string_agg</code>, require no more than five ranked products, and confirm a country with fewer than five products is not padded.</li>
+<li><strong>Intermediate relation check:</strong> For sql-41 Exercise 2, run <code>product_revenue</code> and confirm (<code>country</code>, <code>product_id</code>) is unique. Run <code>ranked</code> and confirm ranks restart at one inside every country before filtering to ranks 1–5.</li>
+<li><strong>Clause check:</strong> For sql-41 Exercise 2, the joins first produce order-line rows, the first <code>GROUP BY</code> reduces them to one row per country/product, <code>ROW_NUMBER</code> ranks without changing that row count, <code>WHERE product_rank &lt;= 5</code> keeps the local top five, and the final <code>GROUP BY country</code> builds one ordered label per country.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-41 Exercise 2, the chosen form is justified by this lesson-specific rationale: Rank at <code>(country, product)</code> grain before aggregating names. Evaluate another form against the concrete expected result (one row per represented country and one comma-separated label ordered from highest to lowest product revenue) and the verification above.</li>
+<li><strong>Edge case:</strong> Give two rows the same <code>country</code> value and different <code>country</code> values; verify <code>country</code> produces the intended rank and display order.</li>
+</ul>
 <h4 id="solution-1--reasoning-safety-and-pitfalls">Reasoning, safety, and pitfalls<a class="heading-anchor" href="#solution-1--reasoning-safety-and-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Compute line revenue from <code>order_items</code>; do not multiply <code>orders.total_amount</code> after joining to items because that would repeat the order total per line.</li>
@@ -556,14 +870,110 @@ ORDER BY country;</code></pre>
 </ul>
 <h4 id="solution-1--exercise-3-compare-grouping-sets-and-cube">Exercise 3 — Compare grouping sets and CUBE<a class="heading-anchor" href="#solution-1--exercise-3-compare-grouping-sets-and-cube" aria-label="Link to this section">#</a></h4>
 <p>The <code>CUBE(country, category)</code> answer emits detail, both one-dimensional subtotals, and the grand total. <code>GROUPING(country, category)</code> identifies each generated level.</p>
+<pre><code class="language-sql">WITH lines AS (
+  SELECT c.country,
+         p.category,
+         oi.quantity * oi.unit_price * (1 - oi.discount) AS revenue
+  FROM orders o
+  JOIN customers c USING (customer_id)
+  JOIN order_items oi USING (order_id)
+  JOIN products p USING (product_id)
+), cube_rows AS (
+  SELECT country,
+         category,
+         SUM(revenue) AS revenue,
+         GROUPING(country, category) AS grouping_mask
+  FROM lines
+  GROUP BY CUBE (country, category)
+)
+SELECT country,
+       category,
+       revenue,
+       grouping_mask,
+       CASE grouping_mask
+         WHEN 0 THEN &#x27;detail&#x27;
+         WHEN 1 THEN &#x27;country subtotal&#x27;
+         WHEN 2 THEN &#x27;category subtotal&#x27;
+         WHEN 3 THEN &#x27;grand total&#x27;
+       END AS grouping_level
+FROM cube_rows
+ORDER BY grouping_mask, country, category;</code></pre>
+<p>Read this in three stages:</p>
+<ol>
+<li><code>lines</code> establishes the additive order-line measure once. It does not use <code>orders.total_amount</code>, which would be repeated by the item join.</li>
+<li><code>CUBE(country, category)</code> expands to four grouping sets: <code>(country, category)</code>, <code>(country)</code>, <code>(category)</code>, and <code>()</code>.</li>
+<li><code>GROUPING(country, category)</code> encodes omitted expressions from right to left. Therefore <code>1</code> means category was omitted (a country subtotal), while <code>2</code> means country was omitted (a category subtotal). The <code>CASE</code> translates that machine-friendly mask for a human reader.</li>
+</ol>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-41 Exercise 3, calculate line revenue from <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>, then aggregate with <code>CUBE(country, category)</code>. Build the answer toward <code>country</code>, <code>category</code>, <code>revenue</code>, <code>grouping_mask</code>, and <code>grouping_level</code>.</li>
+<li><strong>Expected result/shape:</strong> For sql-41 Exercise 3, expected output: every grouping level emitted by the two-dimensional cube. <code>grouping_mask</code> is <code>0</code> for detail, <code>1</code> for a country subtotal, <code>2</code> for a category subtotal, and <code>3</code> for the grand total. The final columns are <code>country</code>, <code>category</code>, <code>revenue</code>, <code>grouping_mask</code>, and <code>grouping_level</code>. The final order is <code>grouping_mask, country, category</code>.</li>
+<li><strong>Independent verification:</strong> For sql-41 Exercise 3, compare mask <code>0</code> with an independent (<code>country</code>, <code>category</code>) aggregate, mask <code>1</code> with a country aggregate, and mask <code>2</code> with a category aggregate; require exactly one mask <code>3</code> row. Within each mask, the sum of <code>revenue</code> must equal the independent all-lines revenue total.</li>
+<li><strong>Intermediate relation check:</strong> For sql-41 Exercise 3, confirm <code>lines</code> is at order-line grain. In <code>cube_rows</code>, confirm (<code>grouping_mask</code>, <code>country</code>, <code>category</code>) identifies a row at its applicable level and inspect counts separately for masks 0, 1, 2, and 3.</li>
+<li><strong>Clause check:</strong> For sql-41 Exercise 3, <code>FROM</code>/<code>JOIN</code> establishes line grain, <code>GROUP BY CUBE</code> emits four aggregate grains, <code>GROUPING</code> labels which dimensions were omitted, the outer <code>SELECT</code> translates the mask, and <code>ORDER BY</code> presents detail before progressively broader totals.</li>
+<li><strong>Alternative/trade-off:</strong> Spell out <code>GROUPING SETS ((country, category), (country), (category), ())</code> when the requested levels should be especially visible. Use <code>CUBE</code> when all combinations are intended. Omitting <code>(country, category)</code> would omit detail.</li>
+<li><strong>Edge case:</strong> A stored <code>NULL</code> in a dimension and a generated subtotal marker can print the same dimension value. Use <code>grouping_mask</code>, not <code>country IS NULL</code> or <code>category IS NULL</code>, to identify the row&#x27;s grain.</li>
+</ul>
 <h4 id="solution-1--exercise-4-state-metric-populations-with-filter">Exercise 4 — State metric populations with FILTER<a class="heading-anchor" href="#solution-1--exercise-4-state-metric-populations-with-filter" aria-label="Link to this section">#</a></h4>
 <p>Each status/time population appears beside its aggregate, making several country metrics readable without repeating the whole grouped relation.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-41 Exercise 4, read from <code>orders</code>, and <code>customers</code>. Build the answer toward <code>country</code>, <code>orders</code>, <code>paid_orders</code>, <code>paid_revenue</code>, <code>returned_revenue</code>, and <code>customers</code>; keep <code>country</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-41 Exercise 4, expected output: one row per <code>country</code>. The final columns are <code>country</code>, <code>orders</code>, <code>paid_orders</code>, <code>paid_revenue</code>, <code>returned_revenue</code>, and <code>customers</code>. The final order is <code>c.country</code>.</li>
+<li><strong>Independent verification:</strong> For sql-41 Exercise 4, independently aggregate <code>orders</code>, and <code>customers</code> by <code>country</code>; require one output row for every distinct <code>country</code> tuple and compare <code>orders</code>, <code>paid_orders</code>, <code>paid_revenue</code>, <code>returned_revenue</code>, and <code>customers</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>orders</code>, <code>paid_orders</code>, and <code>paid_revenue</code> for the existing <code>country</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Intermediate relation check:</strong> For sql-41 Exercise 4, start with the first relation in <code>orders</code>, and <code>customers</code>; after each join, record total rows and distinct <code>country</code> so the exact fanout or loss is visible.</li>
+<li><strong>Clause check:</strong> For sql-41 Exercise 4, the solution actually uses <code>FROM</code>, <code>JOIN ... ON</code>, <code>WHERE</code>, aggregate <code>FILTER</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>orders</code>, and <code>customers</code>, preserve one row per <code>country</code>, and finish with <code>country</code>, <code>orders</code>, <code>paid_orders</code>, <code>paid_revenue</code>, <code>returned_revenue</code>, and <code>customers</code> ordered by <code>c.country</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-41 Exercise 4, the chosen form is justified by this lesson-specific rationale: Each status/time population appears beside its aggregate, making several country metrics readable without repeating the whole grouped relation. Evaluate another form against the concrete expected result (one row per <code>country</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>orders</code>, <code>paid_orders</code>, and <code>paid_revenue</code> for the existing <code>country</code> tuple and verify the new tuple appears exactly once.</li>
+</ul>
 <h4 id="solution-1--exercise-5-distinguish-stored-and-generated-nulls">Exercise 5 — Distinguish stored and generated NULLs<a class="heading-anchor" href="#solution-1--exercise-5-distinguish-stored-and-generated-nulls" aria-label="Link to this section">#</a></h4>
 <p><code>GROUPING(country)</code> is one only for the generated subtotal. A stored NULL, if allowed by the model, keeps grouping flag zero and receives a different label.</p>
+<pre><code class="language-sql">WITH country_input AS (
+  SELECT country
+  FROM customers
+  UNION ALL
+  SELECT NULL::text
+)
+SELECT CASE
+         WHEN GROUPING(country) = 1 THEN &#x27;ALL COUNTRIES&#x27;
+         ELSE COALESCE(country, &#x27;(stored null)&#x27;)
+       END AS country_label,
+       GROUPING(country) AS is_subtotal,
+       COUNT(*) AS customers
+FROM country_input
+GROUP BY GROUPING SETS ((country), ())
+ORDER BY is_subtotal, country_label;</code></pre>
+<p>The extra <code>NULL::text</code> is input data inside a CTE; it is not passed to <code>GROUPING</code>. PostgreSQL evaluates <code>GROUPING(country)</code> for each output group: the stored-NULL detail group receives <code>0</code>, and the generated grand total receives <code>1</code>. The labels branch on that flag before using <code>COALESCE</code>.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-41 Exercise 5, read <code>customers.country</code> and append one controlled <code>NULL::text</code> input row in a <code>country_input</code> CTE. Apply <code>GROUPING(country)</code> to the grouped expression and build <code>country_label</code>, <code>is_subtotal</code>, and <code>customers</code>.</li>
+<li><strong>Expected result/shape:</strong> For sql-41 Exercise 5, expected output: one detail row per distinct input country with <code>is_subtotal = 0</code>, including a <code>(stored null)</code> row, plus exactly one <code>ALL COUNTRIES</code> row with <code>is_subtotal = 1</code>. The final columns are <code>country_label</code>, <code>is_subtotal</code>, and <code>customers</code>. The final order is <code>is_subtotal, country_label</code>.</li>
+<li><strong>Independent verification:</strong> For sql-41 Exercise 5, require exactly one row with <code>is_subtotal = 1</code>, require the <code>(stored null)</code> row to have <code>is_subtotal = 0</code>, and verify that detail-row <code>customers</code> sum to the grand-total <code>customers</code>. <code>GROUPING</code> receives the grouped <code>country</code> expression; do not try to call <code>GROUPING(NULL)</code>.</li>
+<li><strong>Intermediate relation check:</strong> For sql-41 Exercise 5, first count <code>country_input</code> and confirm it has exactly one more row than <code>customers</code>. Then inspect detail groups (<code>is_subtotal = 0</code>) separately from the one grand-total group (<code>is_subtotal = 1</code>).</li>
+<li><strong>Clause check:</strong> For sql-41 Exercise 5, <code>UNION ALL</code> appends the controlled stored NULL, <code>GROUPING SETS</code> creates detail and grand-total grains, <code>GROUPING(country)</code> distinguishes them, and <code>CASE</code> assigns non-overlapping labels.</li>
+<li><strong>Alternative/trade-off:</strong> On a production table that already permits and contains stored NULL countries, omit the fixture row. Keep the <code>GROUPING</code>-first label logic unchanged.</li>
+<li><strong>Edge case:</strong> Never write <code>GROUPING(NULL)</code> to simulate data. <code>GROUPING</code> must refer to an expression in the current grouping specification; put a NULL in the input relation to test stored-NULL behavior.</li>
+</ul>
 <h4 id="solution-1--exercise-6-return-a-typed-empty-collection">Exercise 6 — Return a typed empty collection<a class="heading-anchor" href="#solution-1--exercise-6-return-a-typed-empty-collection" aria-label="Link to this section">#</a></h4>
-<p><code>array_agg</code> over no qualifying inputs is NULL. The answer uses <code>COALESCE(..., &#x27;{}&#x27;::text[])</code>; the explicit type must match the aggregate type.</p></div>
+<p><code>array_agg</code> over no qualifying inputs is NULL. The answer uses <code>COALESCE(..., &#x27;{}&#x27;::text[])</code>; the explicit type must match the aggregate type.</p>
+<pre><code class="language-sql">SELECT COALESCE(
+         array_agg(email) FILTER (WHERE false),
+         &#x27;{}&#x27;::text[]
+       ) AS empty_email_array
+FROM customers;</code></pre>
+<p>There is no <code>GROUP BY</code>, so the aggregate query returns one scalar row even though no input qualifies for the aggregate. <code>array_agg</code> first produces SQL <code>NULL</code>; <code>COALESCE</code> then substitutes an empty array of the same <code>text[]</code> type. An empty array is a real, non-NULL value whose <code>cardinality</code> is zero.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-41 Exercise 6, read <code>customers.email</code> through <code>array_agg(email) FILTER (WHERE false)</code> and use a same-type <code>COALESCE</code> fallback. Build the answer toward <code>empty_email_array</code>.</li>
+<li><strong>Expected result/shape:</strong> For sql-41 Exercise 6, expected output: exactly one scalar row with one column, <code>empty_email_array</code>, whose value is the non-NULL empty <code>text[]</code> value <code>{}</code>. There is no customer-level key because the query has no <code>GROUP BY</code>.</li>
+<li><strong>Independent verification:</strong> For sql-41 Exercise 6, assert that the uncoalesced filtered <code>array_agg</code> result is <code>NULL</code>, while the final result satisfies <code>empty_email_array IS NOT NULL</code> and <code>cardinality(empty_email_array) = 0</code>.</li>
+<li><strong>Intermediate relation check:</strong> For sql-41 Exercise 6, run <code>SELECT array_agg(email) FILTER (WHERE false) FROM customers</code> first and observe one row containing SQL NULL. Then add <code>COALESCE</code> and observe one row containing <code>{}</code>.</li>
+<li><strong>Clause check:</strong> For sql-41 Exercise 6, <code>FROM customers</code> supplies the input relation, aggregate <code>FILTER</code> gives <code>array_agg</code> zero qualifying rows, the aggregate still creates one scalar group, and <code>SELECT</code> applies the typed fallback.</li>
+<li><strong>Alternative/trade-off:</strong> Return SQL NULL when “not computed” is materially different from “computed and empty.” Return an empty array when downstream callers should be able to iterate without a NULL branch.</li>
+<li><strong>Edge case:</strong> A table with zero rows behaves the same for this scalar aggregate: one output row, NULL before <code>COALESCE</code>, and an empty <code>text[]</code> afterwards.</li>
+</ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -571,7 +981,7 @@ ORDER BY country;</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -595,6 +1005,19 @@ ORDER BY country;</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 41 solutions: complex aggregations</span>
+<span>-- SOLUTION READING MAP — sql-41: Complex Aggregations</span>
+<span>-- Explanation: sql/postgres-60day/solutions/day41_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day41_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
 <span>-- Exercise 1: six category dashboard metrics over useful windows.</span>
@@ -667,7 +1090,9 @@ ORDER BY country;</code></pre>
 <span>ORDER BY country;</span>
 <span> </span>
 <span>-- Exercise 3: explicit grouping sets omit country/category detail. CUBE emits</span>
-<span>-- detail, each one-column subtotal, and the grand total.</span>
+<span>-- detail, each one-column subtotal, and the grand total. GROUPING packs the</span>
+<span>-- omitted dimensions into a right-to-left bit mask: category is bit 0 and</span>
+<span>-- country is bit 1.</span>
 <span>WITH lines AS (</span>
 <span>  SELECT c.country, p.category,</span>
 <span>         oi.quantity * oi.unit_price * (1 - oi.discount) AS revenue</span>
@@ -675,11 +1100,25 @@ ORDER BY country;</code></pre>
 <span>  JOIN customers c USING (customer_id)</span>
 <span>  JOIN order_items oi USING (order_id)</span>
 <span>  JOIN products p USING (product_id)</span>
+<span>), cube_rows AS (</span>
+<span>  SELECT country,</span>
+<span>         category,</span>
+<span>         SUM(revenue) AS revenue,</span>
+<span>         GROUPING(country, category) AS grouping_mask</span>
+<span>  FROM lines</span>
+<span>  GROUP BY CUBE (country, category)</span>
 <span>)</span>
-<span>SELECT country, category, SUM(revenue) AS revenue,</span>
-<span>       GROUPING(country, category) AS grouping_mask</span>
-<span>FROM lines</span>
-<span>GROUP BY CUBE (country, category)</span>
+<span>SELECT country,</span>
+<span>       category,</span>
+<span>       revenue,</span>
+<span>       grouping_mask,</span>
+<span>       CASE grouping_mask</span>
+<span>         WHEN 0 THEN &#x27;detail&#x27;</span>
+<span>         WHEN 1 THEN &#x27;country subtotal&#x27;</span>
+<span>         WHEN 2 THEN &#x27;category subtotal&#x27;</span>
+<span>         WHEN 3 THEN &#x27;grand total&#x27;</span>
+<span>       END AS grouping_level</span>
+<span>FROM cube_rows</span>
 <span>ORDER BY grouping_mask, country, category;</span>
 <span> </span>
 <span>-- Exercise 4: FILTER states each metric population next to its measure.</span>
@@ -694,12 +1133,20 @@ ORDER BY country;</code></pre>
 <span>GROUP BY c.country</span>
 <span>ORDER BY c.country;</span>
 <span> </span>
-<span>-- Exercise 5: GROUPING distinguishes generated subtotal NULL from a stored NULL.</span>
+<span>-- Exercise 5: GROUPING distinguishes generated subtotal NULL from a stored</span>
+<span>-- NULL. The controlled NULL row makes both cases observable even though the</span>
+<span>-- course customers table normally requires a country.</span>
+<span>WITH country_input AS (</span>
+<span>  SELECT country</span>
+<span>  FROM customers</span>
+<span>  UNION ALL</span>
+<span>  SELECT NULL::text</span>
+<span>)</span>
 <span>SELECT CASE WHEN GROUPING(country) = 1 THEN &#x27;ALL COUNTRIES&#x27;</span>
 <span>            ELSE COALESCE(country, &#x27;(stored null)&#x27;) END AS country_label,</span>
 <span>       GROUPING(country) AS is_subtotal,</span>
 <span>       COUNT(*) AS customers</span>
-<span>FROM customers</span>
+<span>FROM country_input</span>
 <span>GROUP BY GROUPING SETS ((country), ())</span>
 <span>ORDER BY is_subtotal, country_label;</span>
 <span> </span>
@@ -710,7 +1157,50 @@ ORDER BY country;</code></pre>
 <span>FROM customers;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-41 — Complex Aggregations.
+
+I have completed the direct catalog prerequisite: `sql-40`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day41_complex_aggregations.md
+- Answer-free learner SQL: sql/postgres-60day/day41_complex_aggregations.sql
+
+Key terms to teach in context: FILTER clause, Conditional aggregate, Ordered aggregation. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Establish one order-line relation, then calculate 30-day revenue, 90-day revenue, order count, and customer count in one category group using FILTER. Reconcile each measure with a simpler single-purpose query before trusting the combined dashboard.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-41/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-40.html"><small>Previous lesson</small><strong>sql-40</strong><span>Analytic Functions Advanced</span></a>
@@ -802,6 +1292,23 @@ ORDER BY country;</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

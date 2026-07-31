@@ -9,9 +9,9 @@ explanatory solution artifact.
 - Lessons passing all three surfaces: **154/154**
 - Audited baseline prompts: **534**
 - Required prompts per surface: **1228**
-- Current learner-artifact prompts: **1268**
-- Current companion-guide prompts: **1323**
-- Current explanatory-solution prompts: **1265**
+- Current learner-artifact prompts: **1269**
+- Current companion-guide prompts: **1267**
+- Current explanatory-solution prompts: **1267**
 
 | Lesson | Baseline | Target | Learner | Guide | Solution minimum | Status |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -25,15 +25,15 @@ explanatory solution artifact.
 | `python-08` | 2 | 6 | 7 | 7 | 7 | PASS |
 | `python-09` | 2 | 6 | 7 | 7 | 7 | PASS |
 | `python-10` | 2 | 6 | 7 | 7 | 7 | PASS |
-| `python-11` | 2 | 6 | 7 | 7 | 7 | PASS |
+| `python-11` | 2 | 6 | 8 | 8 | 7 | PASS |
 | `python-12` | 2 | 6 | 7 | 7 | 7 | PASS |
 | `python-13` | 2 | 6 | 7 | 7 | 7 | PASS |
-| `python-14` | 1 | 6 | 6 | 6 | 6 | PASS |
+| `python-14` | 1 | 6 | 7 | 7 | 6 | PASS |
 | `python-15` | 5 | 10 | 10 | 10 | 10 | PASS |
 | `python-16` | 3 | 6 | 8 | 8 | 8 | PASS |
 | `python-17` | 3 | 6 | 8 | 8 | 8 | PASS |
 | `python-18` | 3 | 6 | 8 | 8 | 8 | PASS |
-| `python-19` | 3 | 6 | 8 | 8 | 8 | PASS |
+| `python-19` | 3 | 6 | 7 | 7 | 7 | PASS |
 | `python-20` | 3 | 6 | 8 | 8 | 8 | PASS |
 | `python-21` | 2 | 6 | 7 | 7 | 7 | PASS |
 | `python-22` | 2 | 6 | 7 | 7 | 7 | PASS |
@@ -85,8 +85,6 @@ explanatory solution artifact.
 | `python-ml-01` | 8 | 16 | 17 | 17 | 16 | PASS |
 | `python-svc-02` | 10 | 20 | 21 | 20 | 20 | PASS |
 | `python-perf-01` | 9 | 18 | 18 | 18 | 18 | PASS |
-| `sql-found-01` | 4 | 8 | 8 | 8 | 8 | PASS |
-| `sql-found-02` | 4 | 8 | 8 | 8 | 8 | PASS |
 | `sql-01` | 3 | 6 | 6 | 6 | 6 | PASS |
 | `sql-02` | 3 | 6 | 6 | 6 | 6 | PASS |
 | `sql-03` | 3 | 6 | 6 | 6 | 6 | PASS |
@@ -102,6 +100,7 @@ explanatory solution artifact.
 | `sql-13` | 2 | 6 | 6 | 6 | 6 | PASS |
 | `sql-14` | 2 | 6 | 6 | 6 | 6 | PASS |
 | `sql-15` | 1 | 6 | 6 | 6 | 6 | PASS |
+| `sql-found-01` | 4 | 8 | 8 | 8 | 8 | PASS |
 | `sql-16` | 2 | 6 | 6 | 6 | 6 | PASS |
 | `sql-17` | 2 | 6 | 6 | 6 | 6 | PASS |
 | `sql-18` | 2 | 6 | 6 | 6 | 6 | PASS |
@@ -117,34 +116,35 @@ explanatory solution artifact.
 | `sql-28` | 2 | 6 | 6 | 6 | 6 | PASS |
 | `sql-29` | 2 | 6 | 6 | 6 | 6 | PASS |
 | `sql-30` | 1 | 6 | 6 | 6 | 6 | PASS |
-| `sql-31` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-32` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-33` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-34` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-35` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-36` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-37` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-38` | 3 | 6 | 7 | 10 | 7 | PASS |
-| `sql-39` | 3 | 6 | 7 | 10 | 7 | PASS |
-| `sql-40` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-41` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-42` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-43` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-44` | 2 | 6 | 6 | 8 | 6 | PASS |
+| `sql-31` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-32` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-33` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-34` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-35` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-36` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-37` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-38` | 3 | 6 | 7 | 7 | 7 | PASS |
+| `sql-39` | 3 | 6 | 7 | 7 | 7 | PASS |
+| `sql-found-02` | 4 | 8 | 8 | 8 | 8 | PASS |
+| `sql-40` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-41` | 2 | 6 | 6 | 6 | 9 | PASS |
+| `sql-42` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-43` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-44` | 2 | 6 | 6 | 6 | 6 | PASS |
 | `sql-45` | 1 | 6 | 6 | 6 | 6 | PASS |
-| `sql-46` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-47` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-48` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-49` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-50` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-51` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-52` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-53` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-54` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-55` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-56` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-57` | 2 | 6 | 6 | 8 | 6 | PASS |
-| `sql-58` | 5 | 10 | 10 | 13 | 10 | PASS |
+| `sql-46` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-47` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-48` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-49` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-50` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-51` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-52` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-53` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-54` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-55` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-56` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-57` | 2 | 6 | 6 | 6 | 6 | PASS |
+| `sql-58` | 5 | 10 | 10 | 10 | 10 | PASS |
 | `sql-59` | 4 | 8 | 8 | 8 | 8 | PASS |
 | `sql-60` | 5 | 10 | 10 | 10 | 10 | PASS |
 | `sql-sec-01` | 5 | 10 | 10 | 10 | 10 | PASS |

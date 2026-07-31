@@ -7,7 +7,12 @@ prerequisites and artifact paths:
 
 ```powershell
 # Windows PowerShell
-.\.venv\Scripts\python.exe scripts\course.py catalog
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+& $CoursePython scripts\course.py catalog
 ```
 
 ```bash
@@ -99,11 +104,13 @@ A module is complete when the learner can:
 4. distinguish local/fake evidence from any optional live or platform-specific
    evidence.
 
-Use the exact stable ID when recording optional progress:
+Use the exact stable ID when recording optional progress. On Windows, reuse
+the `$CoursePython` value resolved at the top of this page; rerun that resolver
+first if this is a new PowerShell window.
 
 ```powershell
 # Windows PowerShell
-.\.venv\Scripts\python.exe scripts\course.py progress complete python-pro-01 `
+& $CoursePython scripts\course.py progress complete python-pro-01 `
     --notes "Built and inspected a wheel from a clean target."
 ```
 

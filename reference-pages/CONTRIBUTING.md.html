@@ -156,15 +156,17 @@
 <li>A clear title and level</li>
 <li>Prerequisites</li>
 <li>Learning objectives</li>
-<li>A concise explanation of why the topic matters</li>
-<li>Runnable examples using local or generated data by default</li>
-<li>Exercises that progress from recall to application</li>
-<li>Expected behavior or a way to self-check</li>
-<li>A short knowledge check</li>
-<li>Next steps</li>
-<li>A separately located solution</li>
+<li>A complete-amateur mental model and defined vocabulary</li>
+<li>Syntax or query anatomy</li>
+<li>At least two topic-specific runnable examples with expected observations</li>
+<li>Exercises that progress from prediction through transfer</li>
+<li>An explicit <strong>Expected</strong> or <strong>Verify</strong> contract for every numbered exercise</li>
+<li>Common-error symptoms, causes, and recovery</li>
+<li>Retrieval questions and next steps</li>
+<li>A separately located, clause- or line-explained solution</li>
+<li>A final, copy-ready <strong>Ask Codex about this lesson</strong> prompt that names the stable ID and exact paths while keeping <code>solutions/</code> closed until an attempt</li>
 </ol>
-<p>Do not put the complete answer directly below an exercise in the learner artifact. Preserve the hint-first experience. Every cataloged learner, guide, and explanatory-solution artifact must also meet its immutable <code>curriculum/practice_baseline.json</code> target: <code>max(6, 2 × audited baseline)</code>. Run <code>python scripts/audit_practice.py</code>; do not lower the baseline or inflate counts with answer steps.</p>
+<p>Do not put the complete answer directly below an exercise in the learner artifact. Preserve the hint-first experience. Every cataloged learner, guide, and explanatory-solution artifact must also meet its immutable <code>curriculum/practice_baseline.json</code> target: <code>max(6, 2 × audited baseline)</code>. Run <code>python scripts/audit_practice.py</code>; do not lower the baseline or inflate counts with answer steps. Also run <code>python scripts/audit_lesson_depth.py</code>. The structural audit is a minimum floor; review technical accuracy, progression, and teaching quality by reading and executing the changed lesson.</p>
 <h3 id="cross-platform-requirements">Cross-platform requirements<a class="heading-anchor" href="#cross-platform-requirements" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Support Windows PowerShell and POSIX shells explicitly.</li>
@@ -246,6 +248,7 @@ git diff --exit-code -- curriculum/catalog.json</code></pre>
 <pre><code class="language-text">python scripts/course.py doctor
 python scripts/course.py validate
 python scripts/audit_practice.py
+python scripts/audit_lesson_depth.py
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check
 python scripts/scan_secrets.py --history</code></pre>

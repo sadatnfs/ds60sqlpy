@@ -671,7 +671,13 @@ def build_html(payload: dict[str, Any]) -> str:
     @media (max-width: 620px) {
       .shell { width: min(100% - 1.15rem, 1180px); }
       .topbar-inner { align-items: flex-start; flex-direction: column; padding: 0.6rem 0; }
-      nav { width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 0.25rem; }
+      .topbar nav {
+        display: grid;
+        width: 100%;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.25rem;
+      }
+      .topbar nav a { padding: 0.4rem 0.25rem; text-align: center; }
       .hero { padding-top: 2.5rem; }
       h1 { font-size: clamp(2.8rem, 17vw, 4.4rem); }
       .grid.three, .grid.two, .lesson-grid, .workflow, .sql-run-grid, .controls { grid-template-columns: 1fr; }
@@ -930,7 +936,9 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           </p>
           <p class="microcopy">
             See <a href="docs/learning-portal.md">portal modes, portability,
-            and security</a>.
+            and security</a>, plus the
+            <a href="docs/lesson-readers.md">offline lesson-reader guide</a>
+            for the exact static and private-mode controls.
           </p>
           <div class="launcher-actions">
             <button type="button" data-launch-action="open-repo">Open repository in VS Code</button>

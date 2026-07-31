@@ -152,7 +152,7 @@ code --version</code></pre>
 <p><code>py -3.12 --version</code>, <code>python --version</code>, and <code>psql --version</code> may fail at this point; that is exactly what the discovery bootstrap handles. If <code>code</code> is not found, open VS Code from the Start menu and use <strong>File → Open Folder</strong> instead.</p>
 <h3 id="2-clone-and-open-the-repository">2. Clone and open the repository<a class="heading-anchor" href="#2-clone-and-open-the-repository" aria-label="Link to this section">#</a></h3>
 <p>Choose a normal user-owned folder. Paths containing spaces are supported.</p>
-<pre><code class="language-powershell">git clone &lt;repository-url&gt; ds60sqlpy
+<pre><code class="language-powershell">git clone https://github.com/sadatnfs/ds60sqlpy.git ds60sqlpy
 Set-Location .\ds60sqlpy
 code .</code></pre>
 <p>If the repository is already cloned:</p>
@@ -212,6 +212,27 @@ psql --version</code></pre>
 <pre><code class="language-powershell">psql -X -v ON_ERROR_STOP=1 -h localhost -U postgres -d advanced_sql_training -f .\sql\postgres-60day\00_setup.sql
 psql -X -v ON_ERROR_STOP=1 -h localhost -U postgres -d advanced_sql_training -f .\sql\postgres-60day\00_verify.sql</code></pre>
 <p>The setup file drops and recreates the disposable <code>training</code> schema. Do not point it at a database containing valuable data. The verification file raises an error if expected counts, coverage, chronology, totals, or foreign keys are wrong.</p>
+<h5 id="let-the-guided-notebook-authenticate-without-a-hidden-prompt">Let the guided notebook authenticate without a hidden prompt<a class="heading-anchor" href="#let-the-guided-notebook-authenticate-without-a-hidden-prompt" aria-label="Link to this section">#</a></h5>
+<p>The native Windows installer normally requires the <code>postgres</code> password. Terminal <code>psql</code> can ask for it visibly, but the guided notebook intentionally uses <code>--no-password</code> so a Jupyter cell can never hang at an invisible prompt. Configure libpq—PostgreSQL&#x27;s client connection library—once, outside this repository:</p>
+<ol>
+<li>In PowerShell, create PostgreSQL&#x27;s per-user configuration directory and open its password file:</li>
+</ol>
+<pre><code class="language-powershell">   $PgConfig = Join-Path $env:APPDATA &quot;postgresql&quot;
+   New-Item -ItemType Directory -Force $PgConfig | Out-Null
+   notepad (Join-Path $PgConfig &quot;pgpass.conf&quot;)</code></pre>
+<ol>
+<li>Add exactly one line for this local disposable database, replacing the final placeholder with the password chosen during PostgreSQL installation:</li>
+</ol>
+<pre><code class="language-text">   localhost:5432:advanced_sql_training:postgres:YOUR_LOCAL_POSTGRES_PASSWORD</code></pre>
+<p>Save and close Notepad. <code>pgpass.conf</code> lives under your Windows profile, not in the Git repository. Never copy, commit, paste into Codex, or share it. If the password contains <code>:</code> or <code>\</code>, prefix that character with <code>\</code> in this file.</p>
+<ol>
+<li>In the PowerShell window that will start the portal, set a password-free target. This tells the runner which local role and host should match the password-file entry:</li>
+</ol>
+<pre><code class="language-powershell">   $env:DS60_DATABASE_URL = &quot;postgresql://postgres@localhost:5432/advanced_sql_training&quot;
+   &amp; $CoursePython scripts\course.py doctor</code></pre>
+<p>Doctor should report <code>Course database: advanced_sql_training is reachable</code>. The setting lasts only for that PowerShell process. Start the portal from this same window so Jupyter inherits it:</p>
+<pre><code class="language-powershell">   &amp; $CoursePython scripts\learning_portal.py</code></pre>
+<p>For the repository&#x27;s Docker Compose service, do not create this native password-file entry. Its disposable <code>ds60</code> connection is already the course runner&#x27;s default.</p>
 <h4 id="option-b-canonical-container-environment">Option B: Canonical container environment<a class="heading-anchor" href="#option-b-canonical-container-environment" aria-label="Link to this section">#</a></h4>
 <p>Docker-based automation uses PostgreSQL 17 and gives every operating system the same database behavior. Docker Desktop requires virtualization support and a one-time image download.</p>
 <p>From PowerShell at the repository root:</p>
@@ -231,6 +252,7 @@ docker compose down</code></pre>
 <h3 id="6-verify-a-lesson">6. Verify a lesson<a class="heading-anchor" href="#6-verify-a-lesson" aria-label="Link to this section">#</a></h3>
 <p>Start the private course dashboard. It saves completion in ignored <code>.learning\progress.json</code> and can open allowlisted VS Code/Jupyter targets:</p>
 <pre><code class="language-powershell">&amp; $CoursePython scripts\learning_portal.py</code></pre>
+<p>If you chose native PostgreSQL, run this in the same PowerShell window where you set the password-free <code>DS60_DATABASE_URL</code> in section 5. If you chose Docker Compose, make sure the <code>postgres</code> service is running.</p>
 <p>Python:</p>
 <pre><code class="language-powershell">&amp; $CoursePython -m jupyter lab .\python\ds-60day\notebooks</code></pre>
 <p>SQL:</p>

@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-prog-01/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--sql-prog-01-functions-procedures-and-triggers">SQL-PROG-01 — Functions, Procedures, and Triggers<a class="heading-anchor" href="#guide--sql-prog-01-functions-procedures-and-triggers" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -289,6 +388,56 @@
 <p>Run from the repository root on Windows PowerShell, macOS, or Linux:</p>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_prog_01_routines_triggers.sql</code></pre>
 <p>The schema, functions, procedures, triggers, and audit rows are created inside one transaction and removed by <code>ROLLBACK</code>.</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-PROG-01 — Functions, Procedures, and Triggers</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-prog-01/lesson/workspace/sql/professional/lessons/sql_prog_01_routines_triggers.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\professional\lessons\sql_prog_01_routines_triggers.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/professional/lessons/sql_prog_01_routines_triggers.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Routine, Function, Procedure, Volatility, Security invoker/definer, Trigger. Its worked SQL reads or creates <code>pro_routines_lab.work_items</code>, <code>pro_routines_lab.work_item_audit</code>, <code>pro_routines_lab.statement_audit</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: openitemcount(text) is a STABLE, PARALLEL SAFE, SECURITY INVOKER SQL function. It reads one statement snapshot and composes inside SELECT. Do not label a routine IMMUTABLE merely because its source text looks simple: a table-reading function changes when table data changes. The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for <code>pro_routines_lab.work_items</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final <code>SELECT</code>. Verify the command tag in <code>pg_catalog</code>/<code>information_schema</code>, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit <code>NULL</code>, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/professional/lessons/sql_prog_01_routines_triggers.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">CREATE TABLE pro_routines_lab.work_items (
+    item_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    owner_name text NOT NULL CHECK (btrim(owner_name) &lt;&gt; &#x27;&#x27;),
+    title text NOT NULL CHECK (btrim(title) &lt;&gt; &#x27;&#x27;),
+    status text NOT NULL DEFAULT &#x27;open&#x27;
+        CHECK (status IN (&#x27;open&#x27;, &#x27;in_progress&#x27;, &#x27;closed&#x27;)),
+    created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+    updated_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);</code></pre>
+<p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
+<p><strong>Expected result/shape:</strong> Example 1 must print the expected DDL command tag for <code>pro_routines_lab.work_items</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">CREATE TABLE pro_routines_lab.work_item_audit (
+    audit_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    item_id bigint NOT NULL,
+    old_status text NOT NULL,
+    new_status text NOT NULL,
+    changed_by text NOT NULL,
+    changed_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);</code></pre>
+<p><strong>How to read it:</strong> Example 2 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
+<p><strong>Expected result/shape:</strong> Example 2 must print the expected DDL command tag for <code>pro_routines_lab.work_item_audit</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Create composable SQL functions, caller-transaction procedures, and <code>BEFORE</code>/<code>AFTER</code> triggers.</li>
@@ -322,16 +471,16 @@
 <p>The guard exercise is intentionally debatable. A complex workflow may deserve an explicit transition table and service command rather than a growing trigger. State the trade-off in your answer.</p>
 <p>Use a scratch transaction and label routine volatility, caller/owner identity, input contract, output grain, side effects, and failure behavior:</p>
 <ol>
-<li><strong>Audit count function:</strong> define NULL behavior and verify zero, one, and multiple matching rows.</li>
-<li><strong>Reassignment procedure:</strong> reject blank owners and prove closed rows remain unchanged.</li>
-<li><strong>Transition guard:</strong> catch the expected denial and compare a trigger with an explicit workflow model.</li>
-<li><strong>Audit grain:</strong> reconcile one row per changed row with one row per statement.</li>
-<li><strong>Declarative boundary:</strong> explain checks, trigger use, function transactions, and top-level procedure transactions.</li>
-<li><strong>Routine promises:</strong> justify volatility and parallel-safety declarations; identify the failure caused by an over-strong promise.</li>
-<li><strong>Transition tables:</strong> record a statement summary, including the zero-row update contract, and reconcile it to row audit.</li>
-<li><strong>Expected error:</strong> catch one exact SQLSTATE in a nested block, prove outer work survives, and re-raise anything unexpected.</li>
-<li><strong>Definer hardening:</strong> review fixed search path, qualified objects, owner, inputs, PUBLIC revocation, and explicit execution grants.</li>
-<li><strong>Concurrent claims:</strong> design deterministic <code>FOR UPDATE SKIP LOCKED</code> batching with transaction, retry, fairness, and starvation boundaries.</li>
+<li><strong>Audit count function:</strong> define NULL behavior and verify zero, one, and multiple matching rows. <strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 1, create the STABLE SQL function <code>status_change_count(p_item_id bigint)</code> over <code>work_item_audit</code>, with the explicit policy that NULL or an unknown ID returns zero. <strong>Expected result/shape:</strong> For sql-prog-01 Exercise 1, expected output: one scalar count per invocation plus a four-row probe matrix demonstrating zero, one, multiple, and NULL-input cases; every count is a nonnegative bigint. <strong>Verify:</strong> For sql-prog-01 Exercise 1, compare each function result with an independent filtered <code>COUNT(*)</code>, assert item 1 has multiple audits, item 3 has one, an absent ID has zero, and NULL has zero because SQL equality matches no row.</li>
+<li><strong>Reassignment procedure:</strong> reject blank owners and prove closed rows remain unchanged. <strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 2, create and call <code>reassign_open_items(p_from_owner, p_to_owner)</code>, rejecting NULL/blank destinations before updating only source-owner rows whose status is not <code>closed</code>. <strong>Expected result/shape:</strong> For sql-prog-01 Exercise 2, expected output: a successful CALL that moves Morgan&#x27;s eligible item to Taylor, while Morgan&#x27;s closed item remains unchanged; a blank destination is caught as SQLSTATE class <code>check_violation</code>. <strong>Verify:</strong> For sql-prog-01 Exercise 2, snapshot eligible and closed source rows before CALL, reconcile the changed target set afterward, and prove the nested invalid CALL changes no owner values.</li>
+<li><strong>Transition guard:</strong> catch the expected denial and compare a trigger with an explicit workflow model. <strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 3, use a BEFORE UPDATE row trigger to reject direct <code>closed</code> to <code>open</code> transitions and primary-key mutation, returning NEW for allowed updates. <strong>Expected result/shape:</strong> For sql-prog-01 Exercise 3, expected output: allowed transitions succeed, direct reopen and identity mutation each emit an expected rejection notice, and rejected rows retain their original values. <strong>Verify:</strong> For sql-prog-01 Exercise 3, attempt both an allowed <code>closed</code> to <code>in_progress</code> transition and a forbidden <code>closed</code> to <code>open</code> transition, record SQLSTATE <code>23514</code>, and reselect the row after each attempt.</li>
+<li><strong>Audit grain:</strong> reconcile one row per changed row with one row per statement. <strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 4, compare row-level status audits with the statement-level summary produced by one two-row status UPDATE. <strong>Expected result/shape:</strong> For sql-prog-01 Exercise 4, expected output: one reconciliation row with <code>row_audit_records = 2</code>, <code>statement_audit_records = 1</code>, and <code>statement_changed_status_rows = 2</code>. <strong>Verify:</strong> For sql-prog-01 Exercise 4, filter row audits to the two known item IDs and transition, identify the one matching statement summary, and explain that row-audit grain is one changed item while statement-audit grain is one UPDATE statement.</li>
+<li><strong>Declarative boundary:</strong> explain checks, trigger use, function transactions, and top-level procedure transactions. <strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 5, return a rule-to-mechanism decision matrix covering a row-local CHECK, OLD/NEW trigger, query function, and multi-step procedure. <strong>Expected result/shape:</strong> For sql-prog-01 Exercise 5, expected output: four rows with <code>rule</code>, <code>mechanism</code>, and <code>reason</code>, ordered deterministically by rule. <strong>Verify:</strong> For sql-prog-01 Exercise 5, reject one disallowed status through the CHECK, prove the transition trigger sees OLD/NEW, and state that functions cannot transaction-control while a procedure may do so only at an allowed top-level CALL boundary.</li>
+<li><strong>Routine promises:</strong> justify volatility and parallel-safety declarations; identify the failure caused by an over-strong promise. <strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 6, inspect <code>pg_proc</code>/<code>pg_namespace</code> for every lab function and procedure, including kind, name, identity arguments, volatility, parallel mode, security mode, and routine settings. <strong>Expected result/shape:</strong> For sql-prog-01 Exercise 6, expected output: one row per routine signature, ordered by routine name, with overloaded routines distinguishable through <code>identity_arguments</code>. <strong>Verify:</strong> For sql-prog-01 Exercise 6, compare catalog values with every <code>CREATE FUNCTION/PROCEDURE</code> declaration and explain that falsely promising STABLE/IMMUTABLE or PARALLEL SAFE can permit invalid planner assumptions and wrong results.</li>
+<li><strong>Transition tables:</strong> record a statement summary, including the zero-row update contract, and reconcile it to row audit. <strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 7, create an AFTER UPDATE statement trigger with OLD/NEW transition tables, joining on the enforced immutable <code>item_id</code>, then run a multirow title update and a truly zero-target <code>WHERE false</code> update. <strong>Expected result/shape:</strong> For sql-prog-01 Exercise 7, expected output: one summary row <code>(matched_rows=2, changed_status_rows=0)</code>, one <code>(0,0)</code> row for the empty target, and one <code>(2,2)</code> row for a two-item status change. <strong>Verify:</strong> For sql-prog-01 Exercise 7, assert exactly one summary per UPDATE statement, reconcile changed-status counts with row audits, prove the zero-target statement records <code>(0,0)</code>, and keep <code>item_id</code> immutable so transition-table pairing cannot undercount.</li>
+<li><strong>Expected error:</strong> catch one exact SQLSTATE in a nested block, prove outer work survives, and re-raise anything unexpected. <strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 8, insert an outer marker, provoke one duplicate key inside a nested PL/pgSQL exception block, and catch only <code>unique_violation</code>. <strong>Expected result/shape:</strong> For sql-prog-01 Exercise 8, expected output: one expected NOTICE; the outer marker remains, while both inner <code>duplicate</code> inserts are absent because the inner block rolled back. <strong>Verify:</strong> For sql-prog-01 Exercise 8, query <code>exception_probe</code> for both keys after the handler and fail unless outer count is one and duplicate count is zero; never use a silent <code>WHEN OTHERS</code> branch.</li>
+<li><strong>Definer hardening:</strong> review fixed search path, qualified objects, owner, inputs, PUBLIC revocation, and explicit execution grants. <strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 9, inventory actual routine owner/security/path/ACL metadata, then return an explicitly design-only six-step SECURITY DEFINER hardening checklist; this lesson creates no definer routine. <strong>Expected result/shape:</strong> For sql-prog-01 Exercise 9, expected output: catalog rows proving every lab routine is security-invoker, followed by six ordered controls covering NOLOGIN ownership, fixed path, qualified objects, validation, PUBLIC revocation, narrow grant, and catalog verification. <strong>Verify:</strong> For sql-prog-01 Exercise 9, require <code>prosecdef = false</code> for the executable lab and treat the checklist as proposed policy; perform privileged role/grant validation only in SQL-SEC-01 rather than implying it happened here.</li>
+<li><strong>Concurrent claims:</strong> design deterministic <code>FOR UPDATE SKIP LOCKED</code> batching with transaction, retry, fairness, and starvation boundaries. <strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 10, select the first two unclaimed queue rows by <code>queue_id</code> under <code>FOR UPDATE SKIP LOCKED</code>, then update those exact rows with a worker and timestamp. <strong>Expected result/shape:</strong> For sql-prog-01 Exercise 10, expected output: two <code>RETURNING</code> rows with <code>queue_id</code>, <code>claimed_by</code>, and <code>claimed_at</code>, ordered by the deterministic claim selection. <strong>Verify:</strong> For sql-prog-01 Exercise 10, reconcile returned IDs with the preselected batch, simulate a second transaction seeing different unlocked rows, keep the lock transaction short, and define retry, stale-lease, and starvation monitoring policies.</li>
 </ol>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -355,17 +504,45 @@
 <li>DDL and routine changes belong in ordered migrations, not manual production console edits.</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-types-01.html#guide">SQL-TYPES-01 — PostgreSQL-native types and searchable documents</a>. Later, combine routines with the migration and contract-test modules so their signatures, owners, grants, triggers, and side effects are release-tested.</p></div>
+<p>Continue to <a href="sql-types-01.html#guide">SQL-TYPES-01 — PostgreSQL-native types and searchable documents</a>. Later, combine routines with the migration and contract-test modules so their signatures, owners, grants, triggers, and side effects are release-tested.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-prog-01 — Functions, Procedures, and Triggers.
+
+I have completed the direct catalog prerequisite: `sql-found-02`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/professional/companion-guides/sql_prog_01_routines_triggers.md
+- Answer-free learner SQL: sql/professional/lessons/sql_prog_01_routines_triggers.sql
+
+Key terms to teach in context: Routine, Function, Procedure, Volatility, Security invoker/definer, Trigger. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: openitemcount(text) is a STABLE, PARALLEL SAFE, SECURITY INVOKER SQL function. It reads one statement snapshot and composes inside SELECT. Do not label a routine IMMUTABLE merely because its source text looks simple: a table-reading function changes when table data changes.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-prog-01/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -382,13 +559,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-PROG-01: Functions, procedures, and triggers</span>
+<span>-- BEGINNER WORKFLOW — sql-prog-01: Functions, Procedures, and Triggers</span>
+<span>-- Guide: sql/professional/companion-guides/sql_prog_01_routines_triggers.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-prog-01/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: pro_routines_lab.work_items, pro_routines_lab.work_item_audit, pro_routines_lab.statement_audit.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>-- Target: PostgreSQL 16+</span>
 <span>-- All objects are rolled back.</span>
 <span> </span>
@@ -590,37 +784,73 @@
 <span>-- 1. Write a STABLE SQL function status_change_count(item_id) that returns the</span>
 <span>--    number of audit rows for one item. Decide what NULL input should return.</span>
 <span>--</span>
+<span>--    Inputs: For sql-prog-01 Exercise 1, create the STABLE SQL function `status_change_count(p_item_id bigint)` over `work_item_audit`, with the explicit policy that NULL or an unknown ID returns zero.</span>
+<span>--    Expected result/shape: For sql-prog-01 Exercise 1, expected output: one scalar count per invocation plus a four-row probe matrix demonstrating zero, one, multiple, and NULL-input cases; every count is a nonnegative bigint.</span>
+<span>--    Verify: For sql-prog-01 Exercise 1, compare each function result with an independent filtered `COUNT(*)`, assert item 1 has multiple audits, item 3 has one, an absent ID has zero, and NULL has zero because SQL equality matches no row.</span>
+<span>--    Hint ladder, rung 1: For sql-prog-01 Exercise 1, inspect the source keys that survive `WHERE`; then check `wi.item_id` before applying the row cap.</span>
 <span>-- 2. Write a procedure reassign_open_items(from_owner, to_owner) that changes</span>
 <span>--    only non-closed items and rejects a blank destination owner.</span>
 <span>--</span>
+<span>--    Inputs: For sql-prog-01 Exercise 2, create and call `reassign_open_items(p_from_owner, p_to_owner)`, rejecting NULL/blank destinations before updating only source-owner rows whose status is not `closed`.</span>
+<span>--    Expected result/shape: For sql-prog-01 Exercise 2, expected output: a successful CALL that moves Morgan&#x27;s eligible item to Taylor, while Morgan&#x27;s closed item remains unchanged; a blank destination is caught as SQLSTATE class `check_violation`.</span>
+<span>--    Verify: For sql-prog-01 Exercise 2, snapshot eligible and closed source rows before CALL, reconcile the changed target set afterward, and prove the nested invalid CALL changes no owner values.</span>
+<span>--    Hint ladder, rung 1: For sql-prog-01 Exercise 2, check the reassignment procedure written analysis against `update`.</span>
 <span>-- 3. Add a BEFORE UPDATE trigger that rejects a direct closed -&gt; open</span>
 <span>--    transition. Safely prove the rejection and explain when application code</span>
 <span>--    or a dedicated transition table would be clearer.</span>
 <span>--</span>
+<span>--    Inputs: For sql-prog-01 Exercise 3, use a BEFORE UPDATE row trigger to reject direct `closed` to `open` transitions and primary-key mutation, returning NEW for allowed updates.</span>
+<span>--    Expected result/shape: For sql-prog-01 Exercise 3, expected output: allowed transitions succeed, direct reopen and identity mutation each emit an expected rejection notice, and rejected rows retain their original values.</span>
+<span>--    Verify: For sql-prog-01 Exercise 3, attempt both an allowed `closed` to `in_progress` transition and a forbidden `closed` to `open` transition, record SQLSTATE `23514`, and reselect the row after each attempt.</span>
+<span>--    Hint ladder, rung 1: For sql-prog-01 Exercise 3, check the transition guard written analysis against `check_violation`, and `if`.</span>
 <span>-- 4. Compare the number of row-audit records with statement-audit records after</span>
 <span>--    a multirow update. State the grain of each audit table.</span>
 <span>--</span>
+<span>--    Inputs: For sql-prog-01 Exercise 4, compare row-level status audits with the statement-level summary produced by one two-row status UPDATE.</span>
+<span>--    Expected result/shape: For sql-prog-01 Exercise 4, expected output: one reconciliation row with `row_audit_records = 2`, `statement_audit_records = 1`, and `statement_changed_status_rows = 2`.</span>
+<span>--    Verify: For sql-prog-01 Exercise 4, filter row audits to the two known item IDs and transition, identify the one matching statement summary, and explain that row-audit grain is one changed item while statement-audit grain is one UPDATE statement.</span>
+<span>--    Hint ladder, rung 1: For sql-prog-01 Exercise 4, select `changed_rows` from `pro_routines_lab.work_items`, `ON`, and `NEW.status` before adding derived columns.</span>
 <span>-- 5. Explain why a CHECK constraint, not a trigger, enforces the allowed status</span>
 <span>--    values. Explain why functions cannot COMMIT, and when a top-level procedure</span>
 <span>--    may control transactions.</span>
 <span>--</span>
+<span>--    Inputs: For sql-prog-01 Exercise 5, return a rule-to-mechanism decision matrix covering a row-local CHECK, OLD/NEW trigger, query function, and multi-step procedure.</span>
+<span>--    Expected result/shape: For sql-prog-01 Exercise 5, expected output: four rows with `rule`, `mechanism`, and `reason`, ordered deterministically by rule.</span>
+<span>--    Verify: For sql-prog-01 Exercise 5, reject one disallowed status through the CHECK, prove the transition trigger sees OLD/NEW, and state that functions cannot transaction-control while a procedure may do so only at an allowed top-level CALL boundary.</span>
+<span>--    Hint ladder, rung 1: For sql-prog-01 Exercise 5, check the declarative boundary written analysis against `call`.</span>
 <span>-- 6. Classify the lesson routines as VOLATILE, STABLE, or IMMUTABLE and decide</span>
 <span>--    whether each can be PARALLEL SAFE. Explain why an incorrect promise can</span>
 <span>--    produce wrong plans or results even when a demo appears to work.</span>
 <span>--</span>
+<span>--    Inputs: For sql-prog-01 Exercise 6, inspect `pg_proc`/`pg_namespace` for every lab function and procedure, including kind, name, identity arguments, volatility, parallel mode, security mode, and routine settings.</span>
+<span>--    Expected result/shape: For sql-prog-01 Exercise 6, expected output: one row per routine signature, ordered by routine name, with overloaded routines distinguishable through `identity_arguments`.</span>
+<span>--    Verify: For sql-prog-01 Exercise 6, compare catalog values with every `CREATE FUNCTION/PROCEDURE` declaration and explain that falsely promising STABLE/IMMUTABLE or PARALLEL SAFE can permit invalid planner assumptions and wrong results.</span>
+<span>--    Hint ladder, rung 1: For sql-prog-01 Exercise 6, start with the first relation in `pg_catalog.pg_proc`, and `pg_catalog.pg_namespace`; after each join, record total rows and distinct `proname` so the exact fanout or loss is visible.</span>
 <span>-- 7. Add an AFTER UPDATE statement trigger with transition tables that records</span>
 <span>--    one summary row per statement. Reconcile affected rows against the</span>
 <span>--    row-level audit and define behavior for an update that changes zero rows.</span>
 <span>--</span>
+<span>--    Inputs: For sql-prog-01 Exercise 7, create an AFTER UPDATE statement trigger with OLD/NEW transition tables, joining on the enforced immutable `item_id`, then run a multirow title update and a truly zero-target `WHERE false` update.</span>
+<span>--    Expected result/shape: For sql-prog-01 Exercise 7, expected output: one summary row `(matched_rows=2, changed_status_rows=0)`, one `(0,0)` row for the empty target, and one `(2,2)` row for a two-item status change.</span>
+<span>--    Verify: For sql-prog-01 Exercise 7, assert exactly one summary per UPDATE statement, reconcile changed-status counts with row audits, prove the zero-target statement records `(0,0)`, and keep `item_id` immutable so transition-table pairing cannot undercount.</span>
+<span>--    Hint ladder, rung 1: For sql-prog-01 Exercise 7, start with the first relation in `pro_routines_lab.statement_status_summary`, `n.status`, `old_rows`, `new_rows`, and `ON`; after each join, record total rows and distinct `integer` so the exact fanout or loss is visible.</span>
 <span>-- 8. Use a nested PL/pgSQL block to catch one expected unique_violation, then</span>
 <span>--    prove only the inner subtransaction was rolled back. Re-raise every</span>
 <span>--    unexpected SQLSTATE instead of using WHEN OTHERS as silent control flow.</span>
 <span>--</span>
+<span>--    Inputs: For sql-prog-01 Exercise 8, insert an outer marker, provoke one duplicate key inside a nested PL/pgSQL exception block, and catch only `unique_violation`.</span>
+<span>--    Expected result/shape: For sql-prog-01 Exercise 8, expected output: one expected NOTICE; the outer marker remains, while both inner `duplicate` inserts are absent because the inner block rolled back.</span>
+<span>--    Verify: For sql-prog-01 Exercise 8, query `exception_probe` for both keys after the handler and fail unless outer count is one and duplicate count is zero; never use a silent `WHEN OTHERS` branch.</span>
+<span>--    Hint ladder, rung 1: For sql-prog-01 Exercise 8, materialize the intended `unique_violation` target set first; require the command tag/`RETURNING` set to match it, then query `pro_routines_lab.exception_probe` again and prove rollback or idempotent retry.</span>
 <span>-- 9. Harden a SECURITY DEFINER reporting function: fixed search_path,</span>
 <span>--    schema-qualified objects, validated parameters, revoked PUBLIC execution,</span>
 <span>--    narrow owner privileges, and explicit grants. State why ownership itself</span>
 <span>--    is part of the security boundary.</span>
 <span>--</span>
+<span>--    Inputs: For sql-prog-01 Exercise 9, inventory actual routine owner/security/path/ACL metadata, then return an explicitly design-only six-step SECURITY DEFINER hardening checklist; this lesson creates no definer routine.</span>
+<span>--    Expected result/shape: For sql-prog-01 Exercise 9, expected output: catalog rows proving every lab routine is security-invoker, followed by six ordered controls covering NOLOGIN ownership, fixed path, qualified objects, validation, PUBLIC revocation, narrow grant, and catalog verification.</span>
+<span>--    Verify: For sql-prog-01 Exercise 9, require `prosecdef = false` for the executable lab and treat the checklist as proposed policy; perform privileged role/grant validation only in SQL-SEC-01 rather than implying it happened here.</span>
+<span>--    Hint ladder, rung 1: For sql-prog-01 Exercise 9, select `search_path` from `pro_routines_lab.work_items`, `ON`, and `NEW.status` before adding derived columns.</span>
 <span>-- 10. Simulate two workers claiming open items. Design one solution using</span>
 <span>--     SELECT ... FOR UPDATE SKIP LOCKED, define deterministic batch order, and</span>
 <span>--     explain starvation, retry, and transaction-length trade-offs.</span>
@@ -641,20 +871,24 @@
 <span>    END IF;</span>
 <span>END</span>
 <span>$self_check$;</span>
+<span>--    Inputs: For sql-prog-01 Exercise 10, select the first two unclaimed queue rows by `queue_id` under `FOR UPDATE SKIP LOCKED`, then update those exact rows with a worker and timestamp.</span>
+<span>--    Expected result/shape: For sql-prog-01 Exercise 10, expected output: two `RETURNING` rows with `queue_id`, `claimed_by`, and `claimed_at`, ordered by the deterministic claim selection.</span>
+<span>--    Verify: For sql-prog-01 Exercise 10, reconcile returned IDs with the preselected batch, simulate a second transaction seeing different unlocked rows, keep the lock transaction short, and define retry, stale-lease, and starvation monitoring policies.</span>
+<span>--    Hint ladder, rung 1: For sql-prog-01 Exercise 10, run `claimable` one at a time. Record each CTE&#x27;s row count and `affected_row_count` uniqueness before the next stage uses it.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span>\echo &#x27;SQL-PROG-01 complete: pro_routines_lab was rolled back&#x27;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -678,38 +912,118 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--sql-prog-01-solutions-routines-and-triggers">SQL-PROG-01 Solutions — Routines and Triggers<a class="heading-anchor" href="#solution-1--sql-prog-01-solutions-routines-and-triggers" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\professional\solutions\sql_prog_01_routines_triggers_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/professional/solutions/sql_prog_01_routines_triggers_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are Routine, Function, Procedure, Volatility, Security invoker/definer, Trigger. Its worked-model focus is: openitemcount(text) is a STABLE, PARALLEL SAFE, SECURITY INVOKER SQL function. It reads one statement snapshot and composes inside SELECT. Do not label a routine IMMUTABLE merely because its source text looks simple: a table-reading function changes when table data changes.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>Run:</p>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_prog_01_routines_triggers_solutions.sql</code></pre>
 <p>The solution is transactional and leaves no schema behind.</p>
 <h4 id="solution-1--exercise-1-audit-count-function">Exercise 1 — Audit-count function<a class="heading-anchor" href="#solution-1--exercise-1-audit-count-function" aria-label="Link to this section">#</a></h4>
 <p><code>status_change_count(bigint)</code> is <code>STABLE</code>, <code>PARALLEL SAFE</code>, and security invoker. It uses <code>COUNT(*)</code>, so a NULL or unknown item returns zero rather than NULL. That behavior is part of the function contract and should be tested.</p>
 <p>It is not immutable: inserting an audit row changes the result for the same argument.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 1, create the STABLE SQL function <code>status_change_count(p_item_id bigint)</code> over <code>work_item_audit</code>, with the explicit policy that NULL or an unknown ID returns zero.</li>
+<li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 1, expected output: one scalar count per invocation plus a four-row probe matrix demonstrating zero, one, multiple, and NULL-input cases; every count is a nonnegative bigint.</li>
+<li><strong>Independent verification:</strong> For sql-prog-01 Exercise 1, compare each function result with an independent filtered <code>COUNT(*)</code>, assert item 1 has multiple audits, item 3 has one, an absent ID has zero, and NULL has zero because SQL equality matches no row.</li>
+</ul>
 <h4 id="solution-1--exercise-2-reassignment-procedure">Exercise 2 — Reassignment procedure<a class="heading-anchor" href="#solution-1--exercise-2-reassignment-procedure" aria-label="Link to this section">#</a></h4>
 <p>The procedure rejects a NULL/blank destination and updates only rows whose status is not closed. It participates in the caller&#x27;s transaction. Closed items remain with their historical owner.</p>
 <p>An alternative is one parameterized <code>UPDATE</code> from application code. A procedure is justified when the command is shared by several trusted callers and its permissions, migration, observability, and tests are maintained as an API.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 2, create and call <code>reassign_open_items(p_from_owner, p_to_owner)</code>, rejecting NULL/blank destinations before updating only source-owner rows whose status is not <code>closed</code>.</li>
+<li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 2, expected output: a successful CALL that moves Morgan&#x27;s eligible item to Taylor, while Morgan&#x27;s closed item remains unchanged; a blank destination is caught as SQLSTATE class <code>check_violation</code>.</li>
+<li><strong>Independent verification:</strong> For sql-prog-01 Exercise 2, snapshot eligible and closed source rows before CALL, reconcile the changed target set afterward, and prove the nested invalid CALL changes no owner values.</li>
+</ul>
 <h4 id="solution-1--exercise-3-transition-guard">Exercise 3 — Transition guard<a class="heading-anchor" href="#solution-1--exercise-3-transition-guard" aria-label="Link to this section">#</a></h4>
 <p>The BEFORE trigger compares OLD and NEW status and raises <code>check_violation</code> for <code>closed -&gt; open</code>. The solution catches that expected condition and raises a different exception if the forbidden update succeeds.</p>
 <p>A richer workflow should usually model allowed transitions in data or expose named application commands. A growing chain of trigger <code>IF</code> statements hides business policy and can be difficult to version.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 3, use a BEFORE UPDATE row trigger to reject direct <code>closed</code> to <code>open</code> transitions and primary-key mutation, returning NEW for allowed updates.</li>
+<li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 3, expected output: allowed transitions succeed, direct reopen and identity mutation each emit an expected rejection notice, and rejected rows retain their original values.</li>
+<li><strong>Independent verification:</strong> For sql-prog-01 Exercise 3, attempt both an allowed <code>closed</code> to <code>in_progress</code> transition and a forbidden <code>closed</code> to <code>open</code> transition, record SQLSTATE <code>23514</code>, and reselect the row after each attempt.</li>
+</ul>
 <h4 id="solution-1--exercise-4-audit-grain">Exercise 4 — Audit grain<a class="heading-anchor" href="#solution-1--exercise-4-audit-grain" aria-label="Link to this section">#</a></h4>
 <p>The learner row audit has grain “one changed item status.” The statement audit has grain “one UPDATE statement,” with an array of affected item IDs. Therefore two changed rows can legitimately produce two rows in one table and one row in the other. Reconcile <code>SUM(changed_rows)</code> to the row-audit count, not raw table row counts.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 4, compare row-level status audits with the statement-level summary produced by one two-row status UPDATE.</li>
+<li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 4, expected output: one reconciliation row with <code>row_audit_records = 2</code>, <code>statement_audit_records = 1</code>, and <code>statement_changed_status_rows = 2</code>.</li>
+<li><strong>Independent verification:</strong> For sql-prog-01 Exercise 4, filter row audits to the two known item IDs and transition, identify the one matching statement summary, and explain that row-audit grain is one changed item while statement-audit grain is one UPDATE statement.</li>
+</ul>
 <h4 id="solution-1--exercise-5-declarative-and-transaction-boundaries">Exercise 5 — Declarative and transaction boundaries<a class="heading-anchor" href="#solution-1--exercise-5-declarative-and-transaction-boundaries" aria-label="Link to this section">#</a></h4>
 <p>Allowed status values are row-local and declarative, so a <code>CHECK</code> is visible, automatically enforced for every writer, and simpler than a trigger. Audit history needs OLD/NEW event context, which fits a trigger.</p>
 <p>Functions execute within their statement and cannot commit. Procedures may control transactions only in permitted top-level <code>CALL</code> contexts; nested calls, explicit outer transactions, exception blocks, and certain procedure attributes restrict that ability. Default to caller-owned transactions unless the procedure&#x27;s transaction contract is deliberate and integration-tested.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 5, return a rule-to-mechanism decision matrix covering a row-local CHECK, OLD/NEW trigger, query function, and multi-step procedure.</li>
+<li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 5, expected output: four rows with <code>rule</code>, <code>mechanism</code>, and <code>reason</code>, ordered deterministically by rule.</li>
+<li><strong>Independent verification:</strong> For sql-prog-01 Exercise 5, reject one disallowed status through the CHECK, prove the transition trigger sees OLD/NEW, and state that functions cannot transaction-control while a procedure may do so only at an allowed top-level CALL boundary.</li>
+</ul>
 <h4 id="solution-1--exercise-6-volatility-and-parallel-promises">Exercise 6 — Volatility and parallel promises<a class="heading-anchor" href="#solution-1--exercise-6-volatility-and-parallel-promises" aria-label="Link to this section">#</a></h4>
 <p>The audit-count function is STABLE because it reads tables and should see one statement snapshot; it is not IMMUTABLE because table contents can change. Procedures and trigger functions that write are VOLATILE. A pure immutable arithmetic function can be IMMUTABLE only when its result does not depend on tables, configuration, collation changes, clock, or session state.</p>
 <p>Read-only SQL may be parallel safe, but routines that write, manipulate sequences, use unsafe functions, or depend on backend-local state are unsafe. PostgreSQL trusts these declarations for planning and constant folding, so an incorrect promise can reuse a stale result or execute in an invalid worker.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 6, inspect <code>pg_proc</code>/<code>pg_namespace</code> for every lab function and procedure, including kind, name, identity arguments, volatility, parallel mode, security mode, and routine settings.</li>
+<li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 6, expected output: one row per routine signature, ordered by routine name, with overloaded routines distinguishable through <code>identity_arguments</code>.</li>
+<li><strong>Independent verification:</strong> For sql-prog-01 Exercise 6, compare catalog values with every <code>CREATE FUNCTION/PROCEDURE</code> declaration and explain that falsely promising STABLE/IMMUTABLE or PARALLEL SAFE can permit invalid planner assumptions and wrong results.</li>
+</ul>
 <h4 id="solution-1--exercise-7-statement-trigger-with-transition-tables">Exercise 7 — Statement trigger with transition tables<a class="heading-anchor" href="#solution-1--exercise-7-statement-trigger-with-transition-tables" aria-label="Link to this section">#</a></h4>
-<p>Define an AFTER UPDATE ... REFERENCING OLD TABLE/NEW TABLE trigger. Its function counts rows whose status is distinct and stores one summary row for that statement. Transition tables expose the whole affected set and are unavailable to row triggers.</p>
+<p>Define an AFTER UPDATE statement trigger with REFERENCING OLD TABLE and NEW TABLE. Its function counts rows whose status is distinct and stores one summary row for that statement. Transition tables expose the whole affected set and are unavailable to row triggers.</p>
 <p>An UPDATE matching zero rows still fires an applicable statement trigger, so decide whether to store a zero summary. Reconcile <code>sum(changed_rows)</code> to the row-audit count over the same transaction/test window; raw statement rows have a different grain.</p>
+<h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 7, create an AFTER UPDATE statement trigger with OLD/NEW transition tables, joining on the enforced immutable <code>item_id</code>, then run a multirow title update and a truly zero-target <code>WHERE false</code> update.</li>
+<li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 7, expected output: one summary row <code>(matched_rows=2, changed_status_rows=0)</code>, one <code>(0,0)</code> row for the empty target, and one <code>(2,2)</code> row for a two-item status change.</li>
+<li><strong>Independent verification:</strong> For sql-prog-01 Exercise 7, assert exactly one summary per UPDATE statement, reconcile changed-status counts with row audits, prove the zero-target statement records <code>(0,0)</code>, and keep <code>item_id</code> immutable so transition-table pairing cannot undercount.</li>
+</ul>
 <h4 id="solution-1--exercise-8-exact-expected-failure">Exercise 8 — Exact expected failure<a class="heading-anchor" href="#solution-1--exercise-8-exact-expected-failure" aria-label="Link to this section">#</a></h4>
 <p>A PL/pgSQL block with an inner <code>BEGIN ... EXCEPTION WHEN unique_violation</code> creates a subtransaction. Changes inside the failed inner block roll back, while earlier outer-block changes remain. After the handler, assert both facts.</p>
 <p>The handler must raise if the statement succeeds and re-raise an unexpected condition. <code>WHEN OTHERS THEN NULL</code> makes permission errors, missing tables, and programmer mistakes look like passing negative tests.</p>
+<h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 8, insert an outer marker, provoke one duplicate key inside a nested PL/pgSQL exception block, and catch only <code>unique_violation</code>.</li>
+<li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 8, expected output: one expected NOTICE; the outer marker remains, while both inner <code>duplicate</code> inserts are absent because the inner block rolled back.</li>
+<li><strong>Independent verification:</strong> For sql-prog-01 Exercise 8, query <code>exception_probe</code> for both keys after the handler and fail unless outer count is one and duplicate count is zero; never use a silent <code>WHEN OTHERS</code> branch.</li>
+</ul>
 <h4 id="solution-1--exercise-9-security-definer-hardening">Exercise 9 — SECURITY DEFINER hardening<a class="heading-anchor" href="#solution-1--exercise-9-security-definer-hardening" aria-label="Link to this section">#</a></h4>
 <p>Own the function with a NOLOGIN role that has only the required read access, set a fixed safe <code>search_path</code>, qualify every relation/operator-sensitive object, avoid writable helper schemas and unsafe dynamic SQL, validate parameters, and return a bounded result. Revoke PUBLIC execution before granting named callers.</p>
 <p>The routine executes with owner privileges, so changing its owner can silently change its authority. Test identity, RLS behavior, error leakage, overloads, temporary-object attacks, grants, and dependency changes as part of the API.</p>
+<h5 id="solution-1--reasoning-and-verification-9">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-9" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 9, inventory actual routine owner/security/path/ACL metadata, then return an explicitly design-only six-step SECURITY DEFINER hardening checklist; this lesson creates no definer routine.</li>
+<li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 9, expected output: catalog rows proving every lab routine is security-invoker, followed by six ordered controls covering NOLOGIN ownership, fixed path, qualified objects, validation, PUBLIC revocation, narrow grant, and catalog verification.</li>
+<li><strong>Independent verification:</strong> For sql-prog-01 Exercise 9, require <code>prosecdef = false</code> for the executable lab and treat the checklist as proposed policy; perform privileged role/grant validation only in SQL-SEC-01 rather than implying it happened here.</li>
+</ul>
 <h4 id="solution-1--exercise-10-concurrent-work-claiming">Exercise 10 — Concurrent work claiming<a class="heading-anchor" href="#solution-1--exercise-10-concurrent-work-claiming" aria-label="Link to this section">#</a></h4>
 <p>In a short transaction, select eligible IDs in a deterministic order <code>FOR UPDATE SKIP LOCKED LIMIT n</code>, then update only those IDs and commit. Competing workers skip locks instead of blocking and cannot claim the same row.</p>
 <p>This favors throughput, not fairness: a repeatedly locked early row can starve. Use bounded batches, lease/attempt metadata, retry/backoff, stale-claim recovery, and monitoring. Keep external work outside the lock transaction or use an outbox so slow calls do not retain row locks.</p>
+<h5 id="solution-1--reasoning-and-verification-10">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-10" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-prog-01 Exercise 10, select the first two unclaimed queue rows by <code>queue_id</code> under <code>FOR UPDATE SKIP LOCKED</code>, then update those exact rows with a worker and timestamp.</li>
+<li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 10, expected output: two <code>RETURNING</code> rows with <code>queue_id</code>, <code>claimed_by</code>, and <code>claimed_at</code>, ordered by the deterministic claim selection.</li>
+<li><strong>Independent verification:</strong> For sql-prog-01 Exercise 10, reconcile returned IDs with the preselected batch, simulate a second transaction seeing different unlocked rows, keep the lock transaction short, and define retry, stale-lease, and starvation monitoring policies.</li>
+</ul>
 <h4 id="solution-1--edge-cases">Edge cases<a class="heading-anchor" href="#solution-1--edge-cases" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Concurrent updates may interleave audit timestamps; use keys and transaction metadata rather than timestamp order alone.</li>
@@ -718,7 +1032,7 @@
 <li>Trigger functions should avoid unqualified objects and unexpected recursive writes.</li>
 </ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -726,7 +1040,7 @@
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -750,6 +1064,19 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-PROG-01 executable solutions</span>
+<span>-- SOLUTION READING MAP — sql-prog-01: Functions, Procedures, and Triggers</span>
+<span>-- Explanation: sql/professional/solutions/sql_prog_01_routines_triggers_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_prog_01_routines_triggers_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>\set ON_ERROR_STOP on</span>
 <span>BEGIN;</span>
 <span>SET LOCAL search_path TO pg_catalog, public;</span>
@@ -773,7 +1100,8 @@
 <span>VALUES</span>
 <span>    (&#x27;Avery&#x27;, &#x27;One&#x27;, &#x27;open&#x27;),</span>
 <span>    (&#x27;Avery&#x27;, &#x27;Two&#x27;, &#x27;closed&#x27;),</span>
-<span>    (&#x27;Morgan&#x27;, &#x27;Three&#x27;, &#x27;in_progress&#x27;);</span>
+<span>    (&#x27;Morgan&#x27;, &#x27;Three&#x27;, &#x27;in_progress&#x27;),</span>
+<span>    (&#x27;Morgan&#x27;, &#x27;Four stays closed&#x27;, &#x27;closed&#x27;);</span>
 <span> </span>
 <span>CREATE FUNCTION pro_routines_lab.audit_status()</span>
 <span>RETURNS trigger</span>
@@ -840,6 +1168,10 @@
 <span>SET search_path = pg_catalog</span>
 <span>AS $function$</span>
 <span>BEGIN</span>
+<span>    IF OLD.item_id IS DISTINCT FROM NEW.item_id THEN</span>
+<span>        RAISE EXCEPTION &#x27;item_id is immutable (% -&gt; %)&#x27;, OLD.item_id, NEW.item_id</span>
+<span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>    END IF;</span>
 <span>    IF OLD.status = &#x27;closed&#x27; AND NEW.status = &#x27;open&#x27; THEN</span>
 <span>        RAISE EXCEPTION &#x27;closed item % cannot reopen directly&#x27;, OLD.item_id</span>
 <span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
@@ -849,7 +1181,7 @@
 <span>$function$;</span>
 <span> </span>
 <span>CREATE TRIGGER work_items_prevent_direct_reopen</span>
-<span>BEFORE UPDATE OF status ON pro_routines_lab.work_items</span>
+<span>BEFORE UPDATE ON pro_routines_lab.work_items</span>
 <span>FOR EACH ROW</span>
 <span>EXECUTE FUNCTION pro_routines_lab.prevent_direct_reopen();</span>
 <span> </span>
@@ -859,9 +1191,38 @@
 <span> </span>
 <span>SELECT</span>
 <span>    pro_routines_lab.status_change_count(1) AS item_1_changes,</span>
+<span>    pro_routines_lab.status_change_count(3) AS item_3_changes,</span>
 <span>    pro_routines_lab.status_change_count(NULL) AS null_item_changes;</span>
 <span> </span>
 <span>CALL pro_routines_lab.reassign_open_items(&#x27;Morgan&#x27;, &#x27;Taylor&#x27;);</span>
+<span> </span>
+<span>DO $solution$</span>
+<span>BEGIN</span>
+<span>    BEGIN</span>
+<span>        CALL pro_routines_lab.reassign_open_items(&#x27;Taylor&#x27;, &#x27;   &#x27;);</span>
+<span>        RAISE EXCEPTION &#x27;blank destination unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected blank-owner rejection: %&#x27;, SQLERRM;</span>
+<span>    END;</span>
+<span> </span>
+<span>    IF NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_routines_lab.work_items AS wi</span>
+<span>        WHERE wi.title = &#x27;Three&#x27;</span>
+<span>          AND wi.owner_name = &#x27;Taylor&#x27;</span>
+<span>          AND wi.status = &#x27;in_progress&#x27;</span>
+<span>    ) OR NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_routines_lab.work_items AS wi</span>
+<span>        WHERE wi.title = &#x27;Four stays closed&#x27;</span>
+<span>          AND wi.owner_name = &#x27;Morgan&#x27;</span>
+<span>          AND wi.status = &#x27;closed&#x27;</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION &#x27;procedure changed the wrong eligibility set&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$solution$;</span>
 <span> </span>
 <span>DO $solution$</span>
 <span>BEGIN</span>
@@ -877,6 +1238,43 @@
 <span>END</span>
 <span>$solution$;</span>
 <span> </span>
+<span>DO $solution$</span>
+<span>BEGIN</span>
+<span>    BEGIN</span>
+<span>        UPDATE pro_routines_lab.work_items</span>
+<span>        SET item_id = DEFAULT</span>
+<span>        WHERE item_id = 1;</span>
+<span>        RAISE EXCEPTION &#x27;item_id mutation unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected immutable-identity rejection: %&#x27;, SQLERRM;</span>
+<span>    END;</span>
+<span>END</span>
+<span>$solution$;</span>
+<span> </span>
+<span>-- A second valid transition makes Exercise 1&#x27;s multiple-row boundary visible.</span>
+<span>UPDATE pro_routines_lab.work_items AS wi</span>
+<span>SET status = &#x27;in_progress&#x27;</span>
+<span>WHERE wi.item_id = 1;</span>
+<span> </span>
+<span>UPDATE pro_routines_lab.work_items AS wi</span>
+<span>SET status = &#x27;closed&#x27;</span>
+<span>WHERE wi.item_id = 3;</span>
+<span> </span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (&#x27;zero matching audit rows&#x27;::text, 999::bigint,</span>
+<span>         pro_routines_lab.status_change_count(999)),</span>
+<span>        (&#x27;one matching audit row&#x27;, 3::bigint,</span>
+<span>         pro_routines_lab.status_change_count(3)),</span>
+<span>        (&#x27;multiple matching audit rows&#x27;, 1::bigint,</span>
+<span>         pro_routines_lab.status_change_count(1)),</span>
+<span>        (&#x27;NULL input policy&#x27;, NULL::bigint,</span>
+<span>         pro_routines_lab.status_change_count(NULL))</span>
+<span>) AS probes(probe, item_id, observed_change_count)</span>
+<span>ORDER BY probe;</span>
+<span> </span>
 <span>SELECT</span>
 <span>    wi.item_id,</span>
 <span>    wi.owner_name,</span>
@@ -886,7 +1284,7 @@
 <span> </span>
 <span>DO $solution$</span>
 <span>BEGIN</span>
-<span>    IF pro_routines_lab.status_change_count(1) &lt;&gt; 1 THEN</span>
+<span>    IF pro_routines_lab.status_change_count(1) &lt;&gt; 2 THEN</span>
 <span>        RAISE EXCEPTION &#x27;status-change function returned wrong count&#x27;;</span>
 <span>    END IF;</span>
 <span>    IF NOT EXISTS (</span>
@@ -900,15 +1298,32 @@
 <span>END</span>
 <span>$solution$;</span>
 <span> </span>
-<span>-- Exercise 4: the row audit grain is one changed item. A statement-level</span>
-<span>-- transition-table summary below records one row per UPDATE statement.</span>
+<span>-- Exercise 4 is reconciled after Exercise 7 creates the statement-level audit.</span>
 <span> </span>
-<span>-- Exercise 5: status vocabulary is row-local and belongs in CHECK. Trigger</span>
-<span>-- logic is reserved here for OLD/NEW transition and audit behavior.</span>
+<span>-- Exercise 5: choose the narrowest mechanism whose authority matches the rule.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (&#x27;allowed status vocabulary&#x27;, &#x27;CHECK constraint&#x27;,</span>
+<span>         &#x27;row-local and declarative; all writers receive the same rule&#x27;),</span>
+<span>        (&#x27;OLD-to-NEW transition&#x27;, &#x27;row trigger&#x27;,</span>
+<span>         &#x27;requires both stored versions and may reject or audit a transition&#x27;),</span>
+<span>        (&#x27;queryable reusable calculation&#x27;, &#x27;function&#x27;,</span>
+<span>         &#x27;composes in SQL but cannot COMMIT or ROLLBACK&#x27;),</span>
+<span>        (&#x27;multi-step command&#x27;, &#x27;procedure called with CALL&#x27;,</span>
+<span>         &#x27;may control transactions only when invoked at an allowed top-level boundary&#x27;)</span>
+<span>) AS decision(rule, mechanism, reason)</span>
+<span>ORDER BY rule;</span>
 <span> </span>
 <span>-- Exercise 6: inspect the promises PostgreSQL&#x27;s planner relies on.</span>
 <span>SELECT</span>
+<span>    CASE p.prokind</span>
+<span>        WHEN &#x27;f&#x27; THEN &#x27;function&#x27;</span>
+<span>        WHEN &#x27;p&#x27; THEN &#x27;procedure&#x27;</span>
+<span>        ELSE p.prokind::text</span>
+<span>    END AS routine_kind,</span>
 <span>    p.proname,</span>
+<span>    pg_get_function_identity_arguments(p.oid) AS identity_arguments,</span>
 <span>    CASE p.provolatile</span>
 <span>        WHEN &#x27;i&#x27; THEN &#x27;immutable&#x27;</span>
 <span>        WHEN &#x27;s&#x27; THEN &#x27;stable&#x27;</span>
@@ -919,6 +1334,9 @@
 <span>        WHEN &#x27;r&#x27; THEN &#x27;restricted&#x27;</span>
 <span>        ELSE &#x27;unsafe&#x27;</span>
 <span>    END AS parallel_mode</span>
+<span>    ,</span>
+<span>    p.prosecdef AS security_definer,</span>
+<span>    p.proconfig AS routine_settings</span>
 <span>FROM pg_catalog.pg_proc AS p</span>
 <span>JOIN pg_catalog.pg_namespace AS n</span>
 <span>  ON n.oid = p.pronamespace</span>
@@ -964,12 +1382,67 @@
 <span>SET title = wi.title || &#x27; (reviewed)&#x27;</span>
 <span>WHERE wi.item_id IN (1, 3);</span>
 <span> </span>
+<span>-- A statement trigger fires even when the target set is genuinely empty.</span>
+<span>UPDATE pro_routines_lab.work_items AS wi</span>
+<span>SET title = wi.title</span>
+<span>WHERE false;</span>
+<span> </span>
+<span>-- This two-row status transition supports the Exercise 4 reconciliation:</span>
+<span>-- two row-level audit facts but one statement-level summary fact.</span>
+<span>UPDATE pro_routines_lab.work_items AS wi</span>
+<span>SET status = &#x27;in_progress&#x27;</span>
+<span>WHERE wi.item_id IN (2, 4);</span>
+<span> </span>
 <span>SELECT</span>
 <span>    s.summary_id,</span>
 <span>    s.matched_rows,</span>
 <span>    s.changed_status_rows</span>
 <span>FROM pro_routines_lab.statement_status_summary AS s</span>
 <span>ORDER BY s.summary_id;</span>
+<span> </span>
+<span>SELECT</span>
+<span>    (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pro_routines_lab.work_item_audit AS a</span>
+<span>        WHERE a.item_id IN (2, 4)</span>
+<span>          AND a.old_status = &#x27;closed&#x27;</span>
+<span>          AND a.new_status = &#x27;in_progress&#x27;</span>
+<span>    ) AS row_audit_records,</span>
+<span>    (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pro_routines_lab.statement_status_summary AS s</span>
+<span>        WHERE s.matched_rows = 2</span>
+<span>          AND s.changed_status_rows = 2</span>
+<span>    ) AS statement_audit_records,</span>
+<span>    (</span>
+<span>        SELECT MAX(s.changed_status_rows)</span>
+<span>        FROM pro_routines_lab.statement_status_summary AS s</span>
+<span>        WHERE s.matched_rows = 2</span>
+<span>          AND s.changed_status_rows = 2</span>
+<span>    ) AS statement_changed_status_rows;</span>
+<span> </span>
+<span>DO $solution$</span>
+<span>BEGIN</span>
+<span>    IF NOT EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM pro_routines_lab.statement_status_summary AS s</span>
+<span>        WHERE s.matched_rows = 0</span>
+<span>          AND s.changed_status_rows = 0</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION &#x27;zero-row UPDATE did not record (0, 0)&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    IF (</span>
+<span>        SELECT COUNT(*)</span>
+<span>        FROM pro_routines_lab.work_item_audit AS a</span>
+<span>        WHERE a.item_id IN (2, 4)</span>
+<span>          AND a.old_status = &#x27;closed&#x27;</span>
+<span>          AND a.new_status = &#x27;in_progress&#x27;</span>
+<span>    ) &lt;&gt; 2 THEN</span>
+<span>        RAISE EXCEPTION &#x27;row-level audit reconciliation failed&#x27;;</span>
+<span>    END IF;</span>
+<span>END</span>
+<span>$solution$;</span>
 <span> </span>
 <span>-- Exercise 8: only the inner duplicate insert rolls back. The outer marker</span>
 <span>-- remains, and an unexpected condition is never swallowed.</span>
@@ -1003,9 +1476,33 @@
 <span>END</span>
 <span>$solution$;</span>
 <span> </span>
-<span>-- Exercise 9: SECURITY DEFINER would additionally require a narrow NOLOGIN</span>
-<span>-- owner, fixed path, qualified objects, validated inputs, PUBLIC revocation,</span>
-<span>-- and explicit EXECUTE grants. Security-invoker remains the safer default.</span>
+<span>-- Exercise 9: this lesson deliberately creates no SECURITY DEFINER routine.</span>
+<span>-- Inventory the actual state, then return a design-only hardening checklist;</span>
+<span>-- SQL-SEC-01 performs the privileged role/grant exercise.</span>
+<span>SELECT</span>
+<span>    p.proname,</span>
+<span>    pg_get_function_identity_arguments(p.oid) AS identity_arguments,</span>
+<span>    p.prosecdef AS security_definer,</span>
+<span>    pg_get_userbyid(p.proowner) AS owner_name,</span>
+<span>    p.proconfig AS routine_settings,</span>
+<span>    p.proacl AS execute_acl</span>
+<span>FROM pg_catalog.pg_proc AS p</span>
+<span>JOIN pg_catalog.pg_namespace AS n</span>
+<span>  ON n.oid = p.pronamespace</span>
+<span>WHERE n.nspname = &#x27;pro_routines_lab&#x27;</span>
+<span>ORDER BY p.proname, identity_arguments;</span>
+<span> </span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (1, &#x27;dedicated owner&#x27;, &#x27;NOLOGIN role with only required object privileges&#x27;),</span>
+<span>        (2, &#x27;fixed path&#x27;, &#x27;SET search_path = pg_catalog and schema-qualify every object&#x27;),</span>
+<span>        (3, &#x27;validated input&#x27;, &#x27;reject NULL, blank, out-of-range, and unauthorized values&#x27;),</span>
+<span>        (4, &#x27;closed execution surface&#x27;, &#x27;REVOKE ALL ON FUNCTION ... FROM PUBLIC&#x27;),</span>
+<span>        (5, &#x27;explicit caller&#x27;, &#x27;GRANT EXECUTE only to the reviewed application role&#x27;),</span>
+<span>        (6, &#x27;catalog verification&#x27;, &#x27;inspect owner, prosecdef, proconfig, and proacl&#x27;)</span>
+<span>) AS hardening(step_number, control, required_evidence)</span>
+<span>ORDER BY step_number;</span>
 <span> </span>
 <span>-- Exercise 10: claim a deterministic batch under row locks. Production workers</span>
 <span>-- commit quickly, recover stale leases, and keep external work out of this lock.</span>
@@ -1036,7 +1533,50 @@
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-prog-01 — Functions, Procedures, and Triggers.
+
+I have completed the direct catalog prerequisite: `sql-found-02`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/professional/companion-guides/sql_prog_01_routines_triggers.md
+- Answer-free learner SQL: sql/professional/lessons/sql_prog_01_routines_triggers.sql
+
+Key terms to teach in context: Routine, Function, Procedure, Volatility, Security invoker/definer, Trigger. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: openitemcount(text) is a STABLE, PARALLEL SAFE, SECURITY INVOKER SQL function. It reads one statement snapshot and composes inside SELECT. Do not label a routine IMMUTABLE merely because its source text looks simple: a table-reading function changes when table data changes.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-prog-01/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-sec-01.html"><small>Previous lesson</small><strong>sql-sec-01</strong><span>Schemas, Roles, Privileges, and Row-Level Security</span></a>
@@ -1128,6 +1668,23 @@
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

@@ -60,6 +60,9 @@ def test_portable_course_guide_has_no_remote_runtime_dependencies() -> None:
     assert "if (lesson.codex_prompt)" in rendered
     assert "eager collection building, and lazy generators" in rendered
     assert "Projection, Predicate, Deterministic ordering" in rendered
+    assert ".topbar nav {" in rendered
+    assert "grid-template-columns: repeat(3, minmax(0, 1fr));" in rendered
+    assert "overflow-x: auto; flex-wrap: nowrap;" not in rendered
     assert RAW_LOCAL_ARTIFACT_HREF.search(rendered) is None
     for source_path in COURSE_GUIDE_REFERENCE_PATHS:
         assert f'href="{reference_relative_path(source_path)}"' in rendered

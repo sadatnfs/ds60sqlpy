@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-51-target-encoding-and-leakage-safe-features">Day 51 — Target Encoding and Leakage-Safe Features<a class="heading-anchor" href="#guide--day-51-target-encoding-and-leakage-safe-features" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-51</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> first-run Seaborn cache</p>
 <p>Target encoding replaces a category with a statistic derived from the target. It can represent high-cardinality categories compactly, but a naive implementation leaks the answer into its own feature.</p>
@@ -336,6 +375,8 @@
 <p>There are two mappings:</p>
 <ol>
 <li>training rows need out-of-fold encodings; and</li>
+</ol>
+<ol>
 <li>validation/test/inference rows need a map learned from all available training rows.</li>
 </ol>
 <p>Using the first procedure for both, or the second procedure on training rows, creates subtle errors.</p>
@@ -351,12 +392,112 @@ training = pd.DataFrame(
 summary = training.groupby(&quot;category&quot;)[&quot;target&quot;].agg([&quot;mean&quot;, &quot;count&quot;])
 print(summary)</code></pre>
 <p>The rare category has an extreme mean based on one row. Smoothing combines its estimate with the global training mean, with the count determining how strongly to trust the category-specific value.</p>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Open the Day 51 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
+<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
+<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
+<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
+</ol>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
+<h4 id="guide--concept-deep-dive-out-of-fold-target-encoding-smoothing-and-transform-time-unknowns">Concept deep dive — out-of-fold target encoding, smoothing, and transform-time unknowns<a class="heading-anchor" href="#guide--concept-deep-dive-out-of-fold-target-encoding-smoothing-and-transform-time-unknowns" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
+<p>Target encoding replaces a category with a statistic of the target. Computing that statistic from the row&#x27;s own target leaks the answer. Training rows therefore need <strong>out-of-fold</strong> encodings: each row is transformed by a map learned from other folds only.</p>
+<p>Validation/test rows use a map learned from the corresponding training data. Rare categories are noisy, so smoothing shrinks their mean toward the training prior. Missing and unseen categories need an explicit fallback. Temporal or grouped data requires a compatible split rather than ordinary shuffled folds.</p>
+<h5 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>groupby(category)[target].agg([&#x27;mean&#x27;, &#x27;count&#x27;])</code>:</strong> builds category evidence only from the allowed training subset.</li>
+<li><strong><code>(count * mean + strength * prior) / (count + strength)</code>:</strong> smooths low-support categories toward the training-wide prior.</li>
+<li><strong>out-of-fold transform:</strong> fits one map per training fold and writes values only to that fold&#x27;s held-out rows.</li>
+</ul>
+<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
+<h5 id="guide--focused-example-a-show-why-a-one-row-category-leaks-perfectly">Focused example A — show why a one-row category leaks perfectly<a class="heading-anchor" href="#guide--focused-example-a-show-why-a-one-row-category-leaks-perfectly" aria-label="Link to this section">#</a></h5>
+<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
+<pre><code class="language-python">import pandas as pd
+
+category = pd.Series([&quot;common&quot;, &quot;common&quot;, &quot;only_zero&quot;, &quot;only_one&quot;])
+target = pd.Series([0, 1, 0, 1], dtype=float)
+full_map = target.groupby(category).mean()
+leaked = category.map(full_map)
+print(pd.DataFrame({&quot;category&quot;: category, &quot;target&quot;: target, &quot;leaked&quot;: leaked}))
+assert leaked.iloc[2] == target.iloc[2]
+assert leaked.iloc[3] == target.iloc[3]</code></pre>
+<p><strong>Expected observation:</strong> Singleton categories receive their own targets exactly, creating a feature that memorizes training labels.</p>
+<p><strong>Assumption to name:</strong> Category identity is available at prediction time, but the current row&#x27;s target is not.</p>
+<h5 id="guide--focused-example-b-smooth-known-categories-and-fall-back-for-unknowns">Focused example B — smooth known categories and fall back for unknowns<a class="heading-anchor" href="#guide--focused-example-b-smooth-known-categories-and-fall-back-for-unknowns" aria-label="Link to this section">#</a></h5>
+<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
+<pre><code class="language-python">import pandas as pd
+
+train_category = pd.Series([&quot;a&quot;, &quot;a&quot;, &quot;a&quot;, &quot;b&quot;])
+train_target = pd.Series([1, 1, 0, 1], dtype=float)
+prior = train_target.mean()
+stats = train_target.groupby(train_category).agg([&quot;mean&quot;, &quot;count&quot;])
+strength = 3.0
+smoothed = (
+    stats[&quot;mean&quot;] * stats[&quot;count&quot;] + prior * strength
+) / (stats[&quot;count&quot;] + strength)
+new_category = pd.Series([&quot;a&quot;, &quot;b&quot;, &quot;unseen&quot;, None])
+encoded = new_category.map(smoothed).fillna(prior)
+print({&quot;prior&quot;: prior, &quot;map&quot;: smoothed.to_dict(),
+       &quot;encoded&quot;: encoded.tolist()})
+assert encoded.iloc[2] == prior and encoded.iloc[3] == prior</code></pre>
+<p><strong>Expected observation:</strong> The low-support <code>b</code> estimate is pulled toward the prior; unseen and missing values use the declared prior.</p>
+<p><strong>Assumption to name:</strong> Using one shared prior for missing/unseen categories matches the model contract.</p>
+<h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>What to do</th>
+<th>Evidence to keep</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define out-of-fold target encoding, smoothing, and transform-time unknowns in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<h5 id="guide--common-mistake-and-debugging-path">Common mistake and debugging path<a class="heading-anchor" href="#guide--common-mistake-and-debugging-path" aria-label="Link to this section">#</a></h5>
+<p><strong>Mistake:</strong> Building one full-training target map and applying it back to those same training rows.</p>
+<p><strong>Debug it deliberately:</strong> Attach source fold and map-training row IDs to a tiny example; assert every encoded training row is absent from its map&#x27;s target aggregation.</p>
+<p><strong>Stop condition:</strong> Do not use target encoding until the split unit, unseen fallback, smoothing strength, and fit/transform boundaries are testable.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Add K-fold target encoding to a scikit-learn pipeline through a custom transformer or <code>FunctionTransformer</code>.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — out-of-fold target encoding, smoothing, and transform-time unknowns — produce one out-of-fold encoded value per training row, assert that row&#x27;s target was excluded from its category statistic, and test missing/unseen categories through the fitted pipeline without NaN or leakage.</p>
+<ol>
 <li>Add an appropriate prior and smoothing; experiment with <code>n_splits</code>.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — out-of-fold target encoding, smoothing, and transform-time unknowns — print global prior, smoothing formula, n_splits, category count/support, and encoded values for rare/common/unseen categories; compare at least three n_splits values on identical folds.</p>
+<ol>
 <li>Compare ROC AUC with one-hot encoding across multiple seeded train/test splits.</li>
 </ol>
+<p><strong>Verify:</strong> Practice 3 — out-of-fold target encoding, smoothing, and transform-time unknowns — over multiple declared seeded splits, print ROC-AUC pairs for target encoding and one-hot encoding plus mean/std/difference; keep all encoding fits inside each training fold.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>A robust custom transformer needs distinct fitting and transform behavior. During training, generate out-of-fold values; for new rows, use a mapping fit only on training data. Write down index-alignment rules first.</li>
@@ -369,9 +510,16 @@ print(summary)</code></pre>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Out-of-fold invariant:</strong> Create a unique category for every training row and show that a leaky full-data target mean reproduces each label. Then prove that your out-of-fold encoder falls back to the prior instead. <strong>Progressive hint:</strong> For a category absent from the fold&#x27;s training partition, there is no valid category statistic; use the fold training prior.</li>
+</ol>
+<p><strong>Verify:</strong> Out-of-fold invariant — on unique-per-row categories, assert full-data encoding equals each label while every out-of-fold value equals the training-fold prior; print row, fold, label, leaky value, and OOF value.</p>
+<ol>
 <li><strong>Unknown and missing categories:</strong> Define distinct policies for a missing category, an unseen category, and a known category with one observation. Write tests for all three. <strong>Progressive hint:</strong> Normalize missing values to an explicit sentinel if missingness is a category; unseen categories generally receive the training global prior.</li>
+</ol>
+<p><strong>Verify:</strong> Unknown and missing categories — assert missing, unseen, one-observation-known, and well-supported-known fixtures return their separately documented prior/smoothed values without NaN; print support and mapping source for each.</p>
+<ol>
 <li><strong>Temporal leakage:</strong> Design target encoding for timestamped events where later labels cannot inform earlier rows. Compare random K-fold encoding with an expanding-time implementation. <strong>Progressive hint:</strong> Sort by event time and compute each row&#x27;s category statistics from strictly earlier labeled rows; handle ties deliberately.</li>
 </ol>
+<p><strong>Verify:</strong> Temporal leakage — print each event timestamp, training cutoff, category support, and encoded value under expanding time; assert no source label timestamp is later than the row cutoff and compare with random-K-fold leakage.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -419,17 +567,46 @@ print(summary)</code></pre>
 <li>Work in the <a href="python-51.html#learner">Day 51 learner notebook</a>.</li>
 <li>Then consult the <a href="python-51.html#solution-1">Day 51 solution</a>.</li>
 <li>Continue to <a href="python-52.html#guide">Day 52 — Dask</a>.</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<pre><code class="language-text">Tutor me through `python-51` — Day 51 — Target Encoding and Leakage-Safe Features.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize out-of-fold target encoding, smoothing, and transform-time unknowns. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day51_advanced_feature_engineering_target_encoding.md`
+- learner artifact: `python/ds-60day/notebooks/day51_advanced_feature_engineering_target_encoding.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-50`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -446,12 +623,12 @@ print(summary)</code></pre>
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-51-advanced-feature-engineering-target-encoding-leakage-prevention">Day 51 — Advanced feature engineering: target encoding &amp; leakage prevention<a class="heading-anchor" href="#learner--cell-1--day-51-advanced-feature-engineering-target-encoding-leakage-prevention" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -513,29 +690,127 @@ print(summary)</code></pre>
 <span>auc_ohe, auc_te</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-7--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-7--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-7--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-7--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
+<h4 id="learner--cell-7--concept-lab-out-of-fold-target-encoding-smoothing-and-transform-time-unknowns">Concept lab — out-of-fold target encoding, smoothing, and transform-time unknowns<a class="heading-anchor" href="#learner--cell-7--concept-lab-out-of-fold-target-encoding-smoothing-and-transform-time-unknowns" aria-label="Link to this section">#</a></h4>
+<h5 id="learner--cell-7--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-7--mental-model" aria-label="Link to this section">#</a></h5>
+<p>Target encoding replaces a category with a statistic of the target. Computing that statistic from the row&#x27;s own target leaks the answer. Training rows therefore need <strong>out-of-fold</strong> encodings: each row is transformed by a map learned from other folds only.</p>
+<p>Validation/test rows use a map learned from the corresponding training data. Rare categories are noisy, so smoothing shrinks their mean toward the training prior. Missing and unseen categories need an explicit fallback. Temporal or grouped data requires a compatible split rather than ordinary shuffled folds.</p>
+<h5 id="learner--cell-7--read-the-api-before-running-it">Read the API before running it<a class="heading-anchor" href="#learner--cell-7--read-the-api-before-running-it" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>groupby(category)[target].agg([&#x27;mean&#x27;, &#x27;count&#x27;])</code>:</strong> builds category evidence only from the allowed training subset.</li>
+<li><strong><code>(count * mean + strength * prior) / (count + strength)</code>:</strong> smooths low-support categories toward the training-wide prior.</li>
+<li><strong>out-of-fold transform:</strong> fits one map per training fold and writes values only to that fold&#x27;s held-out rows.</li>
+</ul>
+<p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-8--focused-example-a-show-why-a-one-row-category-leaks-perfectly">Focused example A — show why a one-row category leaks perfectly<a class="heading-anchor" href="#learner--cell-8--focused-example-a-show-why-a-one-row-category-leaks-perfectly" aria-label="Link to this section">#</a></h5>
+<p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
+<p><strong>Assumption:</strong> Category identity is available at prediction time, but the current row&#x27;s target is not.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>import pandas as pd</span>
+<span> </span>
+<span>category = pd.Series([&quot;common&quot;, &quot;common&quot;, &quot;only_zero&quot;, &quot;only_one&quot;])</span>
+<span>target = pd.Series([0, 1, 0, 1], dtype=float)</span>
+<span>full_map = target.groupby(category).mean()</span>
+<span>leaked = category.map(full_map)</span>
+<span>print(pd.DataFrame({&quot;category&quot;: category, &quot;target&quot;: target, &quot;leaked&quot;: leaked}))</span>
+<span>assert leaked.iloc[2] == target.iloc[2]</span>
+<span>assert leaked.iloc[3] == target.iloc[3]</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> Singleton categories receive their own targets exactly, creating a feature that memorizes training labels.</p>
+<p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h5 id="learner--cell-11--focused-example-b-smooth-known-categories-and-fall-back-for-unknowns">Focused example B — smooth known categories and fall back for unknowns<a class="heading-anchor" href="#learner--cell-11--focused-example-b-smooth-known-categories-and-fall-back-for-unknowns" aria-label="Link to this section">#</a></h5>
+<p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
+<p><strong>Assumption:</strong> Using one shared prior for missing/unseen categories matches the model contract.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span>import pandas as pd</span>
+<span> </span>
+<span>train_category = pd.Series([&quot;a&quot;, &quot;a&quot;, &quot;a&quot;, &quot;b&quot;])</span>
+<span>train_target = pd.Series([1, 1, 0, 1], dtype=float)</span>
+<span>prior = train_target.mean()</span>
+<span>stats = train_target.groupby(train_category).agg([&quot;mean&quot;, &quot;count&quot;])</span>
+<span>strength = 3.0</span>
+<span>smoothed = (</span>
+<span>    stats[&quot;mean&quot;] * stats[&quot;count&quot;] + prior * strength</span>
+<span>) / (stats[&quot;count&quot;] + strength)</span>
+<span>new_category = pd.Series([&quot;a&quot;, &quot;b&quot;, &quot;unseen&quot;, None])</span>
+<span>encoded = new_category.map(smoothed).fillna(prior)</span>
+<span>print({&quot;prior&quot;: prior, &quot;map&quot;: smoothed.to_dict(),</span>
+<span>       &quot;encoded&quot;: encoded.tolist()})</span>
+<span>assert encoded.iloc[2] == prior and encoded.iloc[3] == prior</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><p><strong>Expected observation:</strong> The low-support <code>b</code> estimate is pulled toward the prior; unseen and missing values use the declared prior.</p>
+<h5 id="learner--cell-13--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-13--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Building one full-training target map and applying it back to those same training rows.</p>
+<p><strong>Diagnostic:</strong> Attach source fold and map-training row IDs to a tiny example; assert every encoded training row is absent from its map&#x27;s target aggregation.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>Action</th>
+<th>Evidence</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define out-of-fold target encoding, smoothing, and transform-time unknowns in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<p><strong>Stop condition:</strong> Do not use target encoding until the split unit, unseen fallback, smoothing strength, and fit/transform boundaries are testable.</p>
+<p>Continue to the numbered practice only after you can explain both examples without rereading their code.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h4 id="learner--cell-14--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-14--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Add K-fold target encoding to a scikit-learn pipeline through a custom transformer or <code>FunctionTransformer</code>.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — out-of-fold target encoding, smoothing, and transform-time unknowns — produce one out-of-fold encoded value per training row, assert that row&#x27;s target was excluded from its category statistic, and test missing/unseen categories through the fitted pipeline without NaN or leakage.</p>
+<ol>
 <li>Add an appropriate prior and smoothing; experiment with <code>n_splits</code>.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — out-of-fold target encoding, smoothing, and transform-time unknowns — print global prior, smoothing formula, n_splits, category count/support, and encoded values for rare/common/unseen categories; compare at least three n_splits values on identical folds.</p>
+<ol>
 <li>Compare ROC AUC with one-hot encoding across multiple seeded train/test splits.</li>
 </ol>
-<h5 id="learner--cell-7--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-7--progressive-hints" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3 — out-of-fold target encoding, smoothing, and transform-time unknowns — over multiple declared seeded splits, print ROC-AUC pairs for target encoding and one-hot encoding plus mean/std/difference; keep all encoding fits inside each training fold.</p>
+<h5 id="learner--cell-14--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-14--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>A robust custom transformer needs distinct fitting and transform behavior. During training, generate out-of-fold values; for new rows, use a mapping fit only on training data. Write down index-alignment rules first.</li>
 <li>Blend a category mean with the global prior using its support count. Test an unseen category and a one-row category deliberately.</li>
 <li>Reuse each split for both methods and report score differences per seed, not only the best run.</li>
 </ol>
 <p>The notebook&#x27;s <code>kfold_target_encode</code> is an instructional utility, not a drop-in production transformer. Its Series indexes and positional fold indexes must remain aligned.</p>
-<h5 id="learner--cell-7--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-7--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="learner--cell-14--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-14--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Implement target-derived features with row-level lineage. Training encodings must be out-of-fold; validation, test, and future rows use mappings fitted only on prior data.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Out-of-fold invariant:</strong> Create a unique category for every training row and show that a leaky full-data target mean reproduces each label. Then prove that your out-of-fold encoder falls back to the prior instead. <strong>Progressive hint:</strong> For a category absent from the fold&#x27;s training partition, there is no valid category statistic; use the fold training prior.</li>
+</ol>
+<p><strong>Verify:</strong> Out-of-fold invariant — on unique-per-row categories, assert full-data encoding equals each label while every out-of-fold value equals the training-fold prior; print row, fold, label, leaky value, and OOF value.</p>
+<ol>
 <li><strong>Unknown and missing categories:</strong> Define distinct policies for a missing category, an unseen category, and a known category with one observation. Write tests for all three. <strong>Progressive hint:</strong> Normalize missing values to an explicit sentinel if missingness is a category; unseen categories generally receive the training global prior.</li>
+</ol>
+<p><strong>Verify:</strong> Unknown and missing categories — assert missing, unseen, one-observation-known, and well-supported-known fixtures return their separately documented prior/smoothed values without NaN; print support and mapping source for each.</p>
+<ol>
 <li><strong>Temporal leakage:</strong> Design target encoding for timestamped events where later labels cannot inform earlier rows. Compare random K-fold encoding with an expanding-time implementation. <strong>Progressive hint:</strong> Sort by event time and compute each row&#x27;s category statistics from strictly earlier labeled rows; handle ties deliberately.</li>
 </ol>
+<p><strong>Verify:</strong> Temporal leakage — print each event timestamp, training cutoff, category support, and encoded value under expanding time; assert no source label timestamp is later than the row cutoff and compare with random-K-fold leakage.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
 <span>#</span>
 <span># Keep the official solution closed until you have attempted each task.</span>
 <span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
@@ -550,15 +825,15 @@ print(summary)</code></pre>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -618,7 +893,7 @@ train_df, test_df = train_test_split(
 )
 train_df = train_df.reset_index(drop=True)
 test_df = test_df.reset_index(drop=True)</code></pre>
-<p>Exercise 1 — K‑fold target encoding</p>
+<p>Worked reference for Exercise 1 — K‑fold target encoding</p>
 <pre><code class="language-python">kf = KFold(n_splits=5, shuffle=True, random_state=0)
 train_target_encoded = pd.Series(index=train_df.index, dtype=float)
 
@@ -684,7 +959,7 @@ print({&quot;AUC_target_encoding&quot;: target_auc, &quot;AUC_one_hot&quot;: one
 <li><code>sparse_output=True</code> is the supported scikit-learn parameter (<code>sparse</code> was renamed)</li>
 </ul>
 <hr>
-<p>Exercise 2 — Feature hashing</p>
+<p>Worked reference for Exercise 2 — Feature hashing</p>
 <pre><code class="language-python">from sklearn.feature_extraction import FeatureHasher
 
 hasher = FeatureHasher(n_features=2**12, input_type=&quot;string&quot;)
@@ -715,7 +990,7 @@ print({&quot;AUC_hashing&quot;: hash_auc})</code></pre>
 <li>Adjust n_features to control dimensionality and collision rate</li>
 </ul>
 <hr>
-<p>Exercise 3 — Rolling group means in time without leakage</p>
+<p>Worked reference for Exercise 3 — Rolling group means in time without leakage</p>
 <pre><code class="language-python"># Add a time column and group id
 T = len(df)
 df = df.sample(frac=1.0, random_state=0).reset_index(drop=True)
@@ -736,40 +1011,62 @@ print(df[[&quot;group&quot;, &quot;ts&quot;, &quot;y&quot;, &quot;grp_roll_mean_
 <li><code>min_periods=5</code> intentionally leaves early rows as NaN until enough history exists</li>
 </ul>
 <hr>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong><code>groupby(category)[target].agg([&#x27;mean&#x27;, &#x27;count&#x27;])</code>:</strong> builds category evidence only from the allowed training subset.</li>
+<li><strong><code>(count * mean + strength * prior) / (count + strength)</code>:</strong> smooths low-support categories toward the training-wide prior.</li>
+<li><strong>out-of-fold transform:</strong> fits one map per training fold and writes values only to that fold&#x27;s held-out rows.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> Out-of-fold construction prevents self-label leakage, while smoothing and the prior make low-support and unknown categories explicit.</p>
+<p><strong>Useful alternative:</strong> One-hot, hashing, count/frequency encoding, or learned embeddings avoid direct target statistics with different dimension and information trade-offs.</p>
+<p><strong>Trade-off:</strong> Target encoding is compact for high cardinality but adds leakage, split, smoothing, and drift risks.</p>
+<p><strong>Edge case to test:</strong> Singletons, all-missing categories, unseen values, multiclass targets, time-dependent meaning, and grouped duplicates need explicit policy.</p>
+<p><strong>Evidence of correctness:</strong> Prove each training row is excluded from its map, compare against one-hot on identical folds, test unseen/missing categories, and report category support plus smoothing.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add K-fold target encoding to a scikit-learn pipeline through a custom transformer or <code>FunctionTransformer</code>.</p>
 <p><strong>How to reason about it:</strong> A target encoder needs distinct training and inference behavior. Training rows receive out-of-fold values; unseen rows receive a mapping fit on all allowed training rows, with index alignment tested explicitly.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1 — out-of-fold target encoding, smoothing, and transform-time unknowns — produce one out-of-fold encoded value per training row, assert that row&#x27;s target was excluded from its category statistic, and test missing/unseen categories through the fitted pipeline without NaN or leakage.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add an appropriate prior and smoothing; experiment with <code>n_splits</code>.</p>
 <p><strong>How to reason about it:</strong> Smoothing blends category evidence with a global prior based on support. Test singleton, dominant, missing, and unseen categories and document the formula rather than treating library defaults as universal.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2 — out-of-fold target encoding, smoothing, and transform-time unknowns — print global prior, smoothing formula, n_splits, category count/support, and encoded values for rare/common/unseen categories; compare at least three n_splits values on identical folds.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare ROC AUC with one-hot encoding across multiple seeded train/test splits.</p>
 <p><strong>How to reason about it:</strong> Compare one-hot and target encoding on exactly paired splits and multiple seeds. Target encoding may help high-cardinality features but adds leakage risk and operational state that score alone does not capture.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 3 — out-of-fold target encoding, smoothing, and transform-time unknowns — over multiple declared seeded splits, print ROC-AUC pairs for target encoding and one-hot encoding plus mean/std/difference; keep all encoding fits inside each training fold.</p>
 <h5 id="solution-1--exercise-4-out-of-fold-invariant">Exercise 4 — Out-of-fold invariant<a class="heading-anchor" href="#solution-1--exercise-4-out-of-fold-invariant" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a unique category for every training row and show that a leaky full-data target mean reproduces each label. Then prove that your out-of-fold encoder falls back to the prior instead.</p>
 <p><strong>Reasoning before implementation:</strong> For a category absent from the fold&#x27;s training partition, there is no valid category statistic; use the fold training prior.</p>
 <p>This is a powerful unit test: if unique-category training encodings equal the targets, the implementation leaked. For each fold, fit category sums/counts and the global prior on the other folds only, transform the held-out fold, and restore original row order by index.</p>
 <p>After generating all training encodings, fit a separate full-training mapping for future validation/test/inference rows. Never replace the out-of-fold training column with that full mapping.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Out-of-fold invariant — on unique-per-row categories, assert full-data encoding equals each label while every out-of-fold value equals the training-fold prior; print row, fold, label, leaky value, and OOF value.</p>
 <h5 id="solution-1--exercise-5-unknown-and-missing-categories">Exercise 5 — Unknown and missing categories<a class="heading-anchor" href="#solution-1--exercise-5-unknown-and-missing-categories" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Define distinct policies for a missing category, an unseen category, and a known category with one observation. Write tests for all three.</p>
 <p><strong>Reasoning before implementation:</strong> Normalize missing values to an explicit sentinel if missingness is a category; unseen categories generally receive the training global prior.</p>
 <p>Do not conflate missing with unseen unless that is the documented contract. A missing sentinel can learn a smoothed value when present during training; an unseen value has no support and should receive the fitted prior (and optionally set an <code>is_unknown</code> indicator).</p>
 <p>The singleton known category should be strongly shrunk toward the prior. Save normalization, mapping, support counts, prior, and smoothing parameters in the fitted transformer.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Unknown and missing categories — assert missing, unseen, one-observation-known, and well-supported-known fixtures return their separately documented prior/smoothed values without NaN; print support and mapping source for each.</p>
 <h5 id="solution-1--exercise-6-temporal-leakage">Exercise 6 — Temporal leakage<a class="heading-anchor" href="#solution-1--exercise-6-temporal-leakage" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design target encoding for timestamped events where later labels cannot inform earlier rows. Compare random K-fold encoding with an expanding-time implementation.</p>
 <p><strong>Reasoning before implementation:</strong> Sort by event time and compute each row&#x27;s category statistics from strictly earlier labeled rows; handle ties deliberately.</p>
 <p>Random folds can allow future outcomes to shape past features even though each row is technically out of fold. Use forward-chaining splits or cumulative category sums/counts shifted by one time block. Rows sharing a timestamp should not leak into one another unless ordering within that timestamp is genuinely known at prediction time.</p>
 <p>Evaluate with a forward time split and preserve label-availability delay; event time and label-arrival time may differ.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></div>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Temporal leakage — print each event timestamp, training cutoff, category support, and encoded value under expanding time; assert no source label timestamp is later than the row cutoff and compare with random-K-fold leakage.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -777,7 +1074,7 @@ print(df[[&quot;group&quot;, &quot;ts&quot;, &quot;y&quot;, &quot;grp_roll_mean_
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -841,7 +1138,7 @@ print(df[[&quot;group&quot;, &quot;ts&quot;, &quot;y&quot;, &quot;grp_roll_mean_
 <span>test_df = test_df.reset_index(drop=True)</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Exercise 1 — K‑fold target encoding</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Worked reference for Exercise 1 — K‑fold target encoding</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>kf = KFold(n_splits=5, shuffle=True, random_state=0)</span>
 <span>train_target_encoded = pd.Series(index=train_df.index, dtype=float)</span>
 <span> </span>
@@ -909,7 +1206,7 @@ print(df[[&quot;group&quot;, &quot;ts&quot;, &quot;y&quot;, &quot;grp_roll_mean_
 <li><code>sparse_output=True</code> is the supported scikit-learn parameter (<code>sparse</code> was renamed)</li>
 </ul>
 <hr>
-<p>Exercise 2 — Feature hashing</p></article>
+<p>Worked reference for Exercise 2 — Feature hashing</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from sklearn.feature_extraction import FeatureHasher</span>
 <span> </span>
 <span>hasher = FeatureHasher(n_features=2**12, input_type=&quot;string&quot;)</span>
@@ -942,7 +1239,7 @@ print(df[[&quot;group&quot;, &quot;ts&quot;, &quot;y&quot;, &quot;grp_roll_mean_
 <li>Adjust n_features to control dimensionality and collision rate</li>
 </ul>
 <hr>
-<p>Exercise 3 — Rolling group means in time without leakage</p></article>
+<p>Worked reference for Exercise 3 — Rolling group means in time without leakage</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Add a time column and group id</span>
 <span>T = len(df)</span>
 <span>df = df.sample(frac=1.0, random_state=0).reset_index(drop=True)</span>
@@ -965,40 +1262,106 @@ print(df[[&quot;group&quot;, &quot;ts&quot;, &quot;y&quot;, &quot;grp_roll_mean_
 <li><code>min_periods=5</code> intentionally leaves early rows as NaN until enough history exists</li>
 </ul>
 <hr>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-2--cell-9--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-9--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong><code>groupby(category)[target].agg([&#x27;mean&#x27;, &#x27;count&#x27;])</code>:</strong> builds category evidence only from the allowed training subset.</li>
+<li><strong><code>(count * mean + strength * prior) / (count + strength)</code>:</strong> smooths low-support categories toward the training-wide prior.</li>
+<li><strong>out-of-fold transform:</strong> fits one map per training fold and writes values only to that fold&#x27;s held-out rows.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> Out-of-fold construction prevents self-label leakage, while smoothing and the prior make low-support and unknown categories explicit.</p>
+<p><strong>Useful alternative:</strong> One-hot, hashing, count/frequency encoding, or learned embeddings avoid direct target statistics with different dimension and information trade-offs.</p>
+<p><strong>Trade-off:</strong> Target encoding is compact for high cardinality but adds leakage, split, smoothing, and drift risks.</p>
+<p><strong>Edge case to test:</strong> Singletons, all-missing categories, unseen values, multiclass targets, time-dependent meaning, and grouped duplicates need explicit policy.</p>
+<p><strong>Evidence of correctness:</strong> Prove each training row is excluded from its map, compare against one-hot on identical folds, test unseen/missing categories, and report category support plus smoothing.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-9--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-9--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-9--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add K-fold target encoding to a scikit-learn pipeline through a custom transformer or <code>FunctionTransformer</code>.</p>
 <p><strong>How to reason about it:</strong> A target encoder needs distinct training and inference behavior. Training rows receive out-of-fold values; unseen rows receive a mapping fit on all allowed training rows, with index alignment tested explicitly.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1 — out-of-fold target encoding, smoothing, and transform-time unknowns — produce one out-of-fold encoded value per training row, assert that row&#x27;s target was excluded from its category statistic, and test missing/unseen categories through the fitted pipeline without NaN or leakage.</p>
 <h5 id="solution-2--cell-9--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add an appropriate prior and smoothing; experiment with <code>n_splits</code>.</p>
 <p><strong>How to reason about it:</strong> Smoothing blends category evidence with a global prior based on support. Test singleton, dominant, missing, and unseen categories and document the formula rather than treating library defaults as universal.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2 — out-of-fold target encoding, smoothing, and transform-time unknowns — print global prior, smoothing formula, n_splits, category count/support, and encoded values for rare/common/unseen categories; compare at least three n_splits values on identical folds.</p>
 <h5 id="solution-2--cell-9--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare ROC AUC with one-hot encoding across multiple seeded train/test splits.</p>
 <p><strong>How to reason about it:</strong> Compare one-hot and target encoding on exactly paired splits and multiple seeds. Target encoding may help high-cardinality features but adds leakage risk and operational state that score alone does not capture.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 3 — out-of-fold target encoding, smoothing, and transform-time unknowns — over multiple declared seeded splits, print ROC-AUC pairs for target encoding and one-hot encoding plus mean/std/difference; keep all encoding fits inside each training fold.</p>
 <h5 id="solution-2--cell-9--exercise-4-out-of-fold-invariant">Exercise 4 — Out-of-fold invariant<a class="heading-anchor" href="#solution-2--cell-9--exercise-4-out-of-fold-invariant" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a unique category for every training row and show that a leaky full-data target mean reproduces each label. Then prove that your out-of-fold encoder falls back to the prior instead.</p>
 <p><strong>Reasoning before implementation:</strong> For a category absent from the fold&#x27;s training partition, there is no valid category statistic; use the fold training prior.</p>
 <p>This is a powerful unit test: if unique-category training encodings equal the targets, the implementation leaked. For each fold, fit category sums/counts and the global prior on the other folds only, transform the held-out fold, and restore original row order by index.</p>
 <p>After generating all training encodings, fit a separate full-training mapping for future validation/test/inference rows. Never replace the out-of-fold training column with that full mapping.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Out-of-fold invariant — on unique-per-row categories, assert full-data encoding equals each label while every out-of-fold value equals the training-fold prior; print row, fold, label, leaky value, and OOF value.</p>
 <h5 id="solution-2--cell-9--exercise-5-unknown-and-missing-categories">Exercise 5 — Unknown and missing categories<a class="heading-anchor" href="#solution-2--cell-9--exercise-5-unknown-and-missing-categories" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Define distinct policies for a missing category, an unseen category, and a known category with one observation. Write tests for all three.</p>
 <p><strong>Reasoning before implementation:</strong> Normalize missing values to an explicit sentinel if missingness is a category; unseen categories generally receive the training global prior.</p>
 <p>Do not conflate missing with unseen unless that is the documented contract. A missing sentinel can learn a smoothed value when present during training; an unseen value has no support and should receive the fitted prior (and optionally set an <code>is_unknown</code> indicator).</p>
 <p>The singleton known category should be strongly shrunk toward the prior. Save normalization, mapping, support counts, prior, and smoothing parameters in the fitted transformer.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Unknown and missing categories — assert missing, unseen, one-observation-known, and well-supported-known fixtures return their separately documented prior/smoothed values without NaN; print support and mapping source for each.</p>
 <h5 id="solution-2--cell-9--exercise-6-temporal-leakage">Exercise 6 — Temporal leakage<a class="heading-anchor" href="#solution-2--cell-9--exercise-6-temporal-leakage" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design target encoding for timestamped events where later labels cannot inform earlier rows. Compare random K-fold encoding with an expanding-time implementation.</p>
 <p><strong>Reasoning before implementation:</strong> Sort by event time and compute each row&#x27;s category statistics from strictly earlier labeled rows; handle ties deliberately.</p>
 <p>Random folds can allow future outcomes to shape past features even though each row is technically out of fold. Use forward-chaining splits or cumulative category sums/counts shifted by one time block. Rows sharing a timestamp should not leak into one another unless ordering within that timestamp is genuinely known at prediction time.</p>
 <p>Evaluate with a forward time split and preserve label-availability delay; event time and label-arrival time may differ.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></article></div>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Temporal leakage — print each event timestamp, training cutoff, category support, and encoded value under expanding time; assert no source label timestamp is later than the row cutoff and compare with random-K-fold leakage.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-51` — Day 51 — Target Encoding and Leakage-Safe Features.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize out-of-fold target encoding, smoothing, and transform-time unknowns. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day51_advanced_feature_engineering_target_encoding.md`
+- learner artifact: `python/ds-60day/notebooks/day51_advanced_feature_engineering_target_encoding.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-50`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-50.html"><small>Previous lesson</small><strong>python-50</strong><span>Time Series Modeling</span></a>
@@ -1090,6 +1453,23 @@ print(df[[&quot;group&quot;, &quot;ts&quot;, &quot;y&quot;, &quot;grp_roll_mean_
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

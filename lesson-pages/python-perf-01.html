@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this Python file from the repository environment</h2>
           <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_perf_01_measurement_optimization.py</code>.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,12 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
-          
+
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--measurement-first-performance-engineering">Measurement-first performance engineering<a class="heading-anchor" href="#guide--measurement-first-performance-engineering" aria-label="Link to this section">#</a></h3>
 <p><strong>Stable ID:</strong> <code>python-perf-01</code></p>
 <p><strong>Level:</strong> advanced</p>
@@ -340,20 +379,86 @@
 <p>macOS/Linux:</p>
 <pre><code class="language-bash">.venv/bin/python python/professional/solutions/py_perf_01_measurement_optimization_solution.py</code></pre>
 <p>Numbers will differ by machine. Compare report structure and conclusions about where work occurs, not exact seconds.</p>
+<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_perf_01_measurement_optimization.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_perf_01_measurement_optimization.py</code></pre>
+<p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
+<h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
+<p>Performance engineering begins with a user-visible budget and a reproducible workload. Wall-clock timing includes noise from warm-up, caching, scheduling, CPU frequency, allocation, and I/O. Repeat measurements, report a distribution, and keep correctness checks beside the benchmark.</p>
+<p>Profiling locates where time or memory is spent; algorithmic analysis explains how cost grows. Optimize the measured bottleneck, then rerun correctness and end-to-end evidence. Faster code that changes results, ordering, errors, or resource bounds is a regression.</p>
+<ul>
+<li><strong>benchmark contract:</strong> fixes data size/distribution, environment, warm-up, repetitions, statistic, and correctness invariant.</li>
+<li><strong>profile → hypothesis → one change:</strong> connects an observed hotspot to a scoped optimization rather than guessing.</li>
+<li><strong>scale curve + budget:</strong> measures several input sizes and checks latency/memory against an explicit threshold.</li>
+</ul>
+<h5 id="guide--micro-example-a-report-repeat-timing-instead-of-one-lucky-run">Micro-example A — report repeat timing instead of one lucky run<a class="heading-anchor" href="#guide--micro-example-a-report-repeat-timing-instead-of-one-lucky-run" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">import statistics
+import timeit
+
+samples = timeit.repeat(
+    &quot;sum(range(10_000))&quot;,
+    repeat=7,
+    number=200,
+)
+report = {
+    &quot;median_seconds&quot;: statistics.median(samples),
+    &quot;min_seconds&quot;: min(samples),
+    &quot;max_seconds&quot;: max(samples),
+}
+print(report)
+assert report[&quot;min_seconds&quot;] &lt;= report[&quot;median_seconds&quot;] &lt;= report[&quot;max_seconds&quot;]</code></pre>
+<p><strong>Expected observation:</strong> Repeated timings vary; median and range reveal noise that one measurement hides.</p>
+<p><strong>Why it matters:</strong> The setup/workload matches the real bottleneck and <code>number=200</code> is included consistently in interpretation.</p>
+<h5 id="guide--micro-example-b-contrast-quadratic-and-linear-duplicate-detection">Micro-example B — contrast quadratic and linear duplicate detection<a class="heading-anchor" href="#guide--micro-example-b-contrast-quadratic-and-linear-duplicate-detection" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">def has_duplicate_quadratic(values):
+    return any(values[i] in values[:i] for i in range(len(values)))
+
+
+def has_duplicate_linear(values):
+    seen = set()
+    for value in values:
+        if value in seen:
+            return True
+        seen.add(value)
+    return False
+
+
+for size in (100, 1_000):
+    data = list(range(size))
+    assert has_duplicate_quadratic(data) == has_duplicate_linear(data) == False
+print(&quot;both implementations agree on measured inputs&quot;)</code></pre>
+<p><strong>Expected observation:</strong> Both functions preserve the Boolean contract, while the set-based design has expected linear rather than quadratic growth.</p>
+<p><strong>Why it matters:</strong> Values are hashable and set memory/order semantics are acceptable.</p>
+<h5 id="guide--debugging-and-transfer">Debugging and transfer<a class="heading-anchor" href="#guide--debugging-and-transfer" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Optimizing a microbenchmark that excludes the actual I/O/serialization bottleneck or accepting a speedup that changes semantics.</p>
+<p><strong>Diagnostic:</strong> Reproduce the workload, record environment, profile CPU/memory/I/O, validate outputs, change one hotspot, and compare repeated end-to-end distributions.</p>
+<p><strong>Transfer question:</strong> Which evidence would distinguish Python-loop overhead from file I/O, database latency, or native NumPy work?</p>
+<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--1-define-semantics-before-speed">1. Define semantics before speed<a class="heading-anchor" href="#guide--1-define-semantics-before-speed" aria-label="Link to this section">#</a></h5>
 <p>For <code>[4, 1, 3, 2, 3, 4]</code>, the answer is <code>3</code>: the duplicate whose <em>second</em> occurrence appears first. Complete <code>first_duplicate_linear</code> with a set and prove equivalence for empty, unique, immediate, and competing duplicates.</p>
+<p><strong>Verify:</strong> Define semantics before speed — assert first_duplicate_linear([4,1,3,2,3,4]) == 3, [] and unique input return None, [2,2] returns 2, and competing duplicates follow earliest second occurrence; compare all cases with the baseline oracle.</p>
 <h5 id="guide--2-build-a-representative-timing-plan">2. Build a representative timing plan<a class="heading-anchor" href="#guide--2-build-a-representative-timing-plan" aria-label="Link to this section">#</a></h5>
 <p>Choose a workload size large enough to rise above timer noise but small enough for quick study. Warm up separately, then collect at least five repeated batches with <code>timeit</code>. Record Python version, platform, input size, and plan.</p>
 <p>Do not assert “candidate &lt; baseline” in the test suite. CI hosts, antivirus, power state, and schedulers make that flaky.</p>
+<p><strong>Verify:</strong> Build a representative timing plan — choose a workload size large enough to rise above timer noise but small enough for quick study; record Python version, platform, input size, and plan; do not assert “candidate &lt; baseline” in the test suite.</p>
 <h5 id="guide--3-ask-cprofile-a-different-question">3. Ask cProfile a different question<a class="heading-anchor" href="#guide--3-ask-cprofile-a-different-question" aria-label="Link to this section">#</a></h5>
 <p>Profile one complete representative call and sort by cumulative time. Locate the call path, not just the leaf with the largest self time. Reduce the workload if profiling overhead dominates, and do not compare profiled seconds directly with unprofiled <code>timeit</code> seconds.</p>
+<p><strong>Verify:</strong> Ask cProfile a different question — profile one complete representative call and sort by cumulative time; locate the call path, not just the leaf with the largest self time; reduce the workload if profiling overhead dominates, and do not compare profiled seconds directly with unprofiled timeit seconds.</p>
 <h5 id="guide--4-measure-allocation-pressure">4. Measure allocation pressure<a class="heading-anchor" href="#guide--4-measure-allocation-pressure" aria-label="Link to this section">#</a></h5>
 <p>Compare materialized-list and generator sums with <code>tracemalloc</code>. Assert equal results and report bounds (<code>peak &gt;= current &gt;= 0</code>). Explain why <code>tracemalloc</code> may not see memory allocated inside every native library.</p>
+<p><strong>Verify:</strong> Measure allocation pressure — compare materialized-list and generator sums with tracemalloc; assert equal results and report bounds (peak &gt;= current &gt;= 0); explain why tracemalloc may not see memory allocated inside every native library.</p>
 <h5 id="guide--5-compare-optional-vectorization">5. Compare optional vectorization<a class="heading-anchor" href="#guide--5-compare-optional-vectorization" aria-label="Link to this section">#</a></h5>
 <p>With NumPy installed, compare a Python loop with <code>np.square(array).sum()</code>. Include conversion from Python values when that conversion exists in the real workflow. Small input can favor the loop; already-resident large arrays can favor vectorized native work. Measure both representative cases.</p>
+<p><strong>Verify:</strong> Compare optional vectorization — with NumPy installed, compare a Python loop with np.square(array).sum(); include conversion from Python values when that conversion exists in the real workflow; measure both representative cases.</p>
 <h5 id="guide--6-model-process-transfer">6. Model process transfer<a class="heading-anchor" href="#guide--6-model-process-transfer" aria-label="Link to this section">#</a></h5>
 <p>Serialize a safe local JSON payload and measure its byte length. Complete <code>estimated_transfer_bytes</code>. Four workers each receiving two copies move eight payload equivalents before computation. Real process protocols may add framing, copies, or shared-memory complexity.</p>
+<p><strong>Verify:</strong> Model process transfer — measure one JSON payload&#x27;s encoded byte length and assert estimated_transfer_bytes(payload_bytes, workers=4, copies=2) equals 8 * payload_bytes; reject negative counts and state protocol overhead is excluded.</p>
 <h5 id="guide--7-evaluate-caching">7. Evaluate caching<a class="heading-anchor" href="#guide--7-evaluate-caching" aria-label="Link to this section">#</a></h5>
 <p>Use <code>cached_fibonacci.cache_info()</code> to observe hits. Then evaluate a real candidate by:</p>
 <ul>
@@ -364,47 +469,67 @@
 <li>whether retained objects prevent memory release.</li>
 </ul>
 <p>Caching a low-reuse, high-cardinality result can make performance worse.</p>
+<p><strong>Verify:</strong> Evaluate caching — use cached fibonacci.cache info() to observe hits; then evaluate a real candidate by: - measured reuse, - entry count and bytes, - invalidation/freshness rules, - key cardinality, and - whether retained objects prevent memory release; caching a low-reuse, high-cardinality result can make performance worse.</p>
 <h5 id="guide--8-bound-native-ffi-work">8. Bound native/FFI work<a class="heading-anchor" href="#guide--8-bound-native-ffi-work" aria-label="Link to this section">#</a></h5>
 <p>Use the policy to prefer an available algorithm improvement. If a measured hotspot remains, batch native calls and cap transfer. Survey Cython, Rust/PyO3, C/C++ extensions, and <code>ctypes</code>/<code>cffi</code>; record build wheels, ABI, ownership, error, and safety obligations before choosing one.</p>
+<p><strong>Verify:</strong> Bound native/FFI work — use the policy to prefer an available algorithm improvement; if a measured hotspot remains, batch native calls and cap transfer; survey Cython, Rust/PyO3, C/C++ extensions, and ctypes/cffi; record build wheels, ABI, ownership, error, and safety obligations before choosing one.</p>
 <h5 id="guide--9-apply-the-evidence-decision">9. Apply the evidence decision<a class="heading-anchor" href="#guide--9-apply-the-evidence-decision" aria-label="Link to this section">#</a></h5>
 <p>Complete <code>choose_next_step</code> in priority order:</p>
-<ol>
+<ul>
 <li>fix unequal behavior,</li>
+</ul>
+<ul>
 <li>reduce peak memory beyond budget,</li>
+</ul>
+<ul>
 <li>reduce transfer consuming at least 30 percent,</li>
+</ul>
+<ul>
 <li>optimize a hotspot consuming at least 50 percent, or</li>
+</ul>
+<ul>
 <li>keep the current implementation.</li>
-</ol>
+</ul>
 <p>Thresholds are a transparent lesson policy, not universal laws.</p>
+<p><strong>Verify:</strong> Apply the evidence decision — table-test choose_next_step so unequal outputs select correctness, over-budget memory selects memory, transfer &gt;=30% selects transfer, hotspot &gt;=50% selects optimization, and the below-threshold case selects keep.</p>
 <h5 id="guide--extended-professional-practice">Extended professional practice<a class="heading-anchor" href="#guide--extended-professional-practice" aria-label="Link to this section">#</a></h5>
 <p>These exercises move from prediction and implementation through debugging, operational trade-offs, and review. Keep the default path deterministic and offline; optional connected behavior must remain explicit.</p>
 <h5 id="guide--exercise-10-compare-timing-distributions">Exercise 10 — compare timing distributions<a class="heading-anchor" href="#guide--exercise-10-compare-timing-distributions" aria-label="Link to this section">#</a></h5>
 <p>Run interleaved repeated batches for baseline and candidate, report median, spread, paired ratios/differences, environment, and correctness. Avoid a binary CI speed assertion.</p>
 <p><strong>Progressive hint:</strong> Alternate order to reduce drift and choose repetitions from timer resolution/runtime. Keep raw measurements for review.</p>
+<p><strong>Verify:</strong> compare timing distributions — run interleaved repeated batches for baseline and candidate, report median, spread, paired ratios/differences, environment, and correctness; avoid a binary CI speed assertion.</p>
 <h5 id="guide--exercise-11-diagnose-warmup-gc-and-environment-noise">Exercise 11 — diagnose warmup, GC, and environment noise<a class="heading-anchor" href="#guide--exercise-11-diagnose-warmup-gc-and-environment-noise" aria-label="Link to this section">#</a></h5>
 <p>Measure cold import/first call separately from steady state. Repeat with garbage collection controlled, background load noted, and process affinity/power assumptions documented rather than hidden.</p>
 <p><strong>Progressive hint:</strong> GC configuration can change real semantics/latency. Report it; do not simply disable GC to obtain a preferred number.</p>
+<p><strong>Verify:</strong> diagnose warmup, GC, and environment noise — measure cold import/first call separately from steady state; repeat with garbage collection controlled, background load noted, and process affinity/power assumptions documented rather than hidden.</p>
 <h5 id="guide--exercise-12-trade-algorithm-speed-for-memory">Exercise 12 — trade algorithm speed for memory<a class="heading-anchor" href="#guide--exercise-12-trade-algorithm-speed-for-memory" aria-label="Link to this section">#</a></h5>
 <p>Compare set-based first-duplicate search with a sorted/indexed alternative under a strict memory budget. Preserve &#x27;first second occurrence&#x27; semantics and report time/peak memory across unique-heavy and duplicate-early inputs.</p>
 <p><strong>Progressive hint:</strong> An algorithm with lower expected time can retain O(n) state. Alternative semantics or external sorting must be stated honestly.</p>
+<p><strong>Verify:</strong> trade algorithm speed for memory — compare set-based first-duplicate search with a sorted/indexed alternative under a strict memory budget; preserve &#x27;first second occurrence&#x27; semantics and report time/peak memory across unique-heavy and duplicate-early inputs.</p>
 <h5 id="guide--exercise-13-test-vectorized-dtype-boundaries">Exercise 13 — test vectorized dtype boundaries<a class="heading-anchor" href="#guide--exercise-13-test-vectorized-dtype-boundaries" aria-label="Link to this section">#</a></h5>
 <p>Compare Python integer sum-of-squares with NumPy int32, int64, float, and object arrays near overflow. Detect silent overflow and choose a validated dtype.</p>
 <p><strong>Progressive hint:</strong> Python integers grow; fixed-width NumPy integers wrap unless the operation/dtype is widened deliberately.</p>
+<p><strong>Verify:</strong> test vectorized dtype boundaries — compare Python integer sum-of-squares with NumPy int32, int64, float, and object arrays near overflow; detect silent overflow and choose a validated dtype.</p>
 <h5 id="guide--exercise-14-evaluate-shared-memory-process-input">Exercise 14 — evaluate shared-memory process input<a class="heading-anchor" href="#guide--exercise-14-evaluate-shared-memory-process-input" aria-label="Link to this section">#</a></h5>
 <p>Compare normal process serialization with read-only shared memory for one large numeric payload. Include setup/copy, worker mapping, cleanup, spawn compatibility, and ownership failure cases.</p>
 <p><strong>Progressive hint:</strong> Pass only shared-memory name/shape/dtype to spawned workers. One owner closes/unlinks after every worker releases.</p>
+<p><strong>Verify:</strong> evaluate shared-memory process input — compare normal process serialization with read-only shared memory for one large numeric payload; include setup/copy, worker mapping, cleanup, spawn compatibility, and ownership failure cases.</p>
 <h5 id="guide--exercise-15-separate-i-o-concurrency-from-cpu-optimization">Exercise 15 — separate I/O concurrency from CPU optimization<a class="heading-anchor" href="#guide--exercise-15-separate-i-o-concurrency-from-cpu-optimization" aria-label="Link to this section">#</a></h5>
 <p>Benchmark a local fake I/O wait and a pure-Python CPU loop under sequential, async/thread, and process designs. Explain why each model helps one workload and may hurt another.</p>
 <p><strong>Progressive hint:</strong> Use deterministic waits and fixed computations; include scheduling/startup and bounded active work.</p>
+<p><strong>Verify:</strong> separate I/O concurrency from CPU optimization — benchmark a local fake I/O wait and a pure-Python CPU loop under sequential, async/thread, and process designs; explain why each model helps one workload and may hurt another.</p>
 <h5 id="guide--exercise-16-prevent-a-cache-stampede">Exercise 16 — prevent a cache stampede<a class="heading-anchor" href="#guide--exercise-16-prevent-a-cache-stampede" aria-label="Link to this section">#</a></h5>
 <p>Model many callers missing one expensive cache key. Add single-flight ownership, bounded wait, success publication, failure cleanup, and stale/retry policy with injected time.</p>
 <p><strong>Progressive hint:</strong> One caller computes; others await the same owned result. A failed owner must wake waiters and remove poisoned in-flight state.</p>
+<p><strong>Verify:</strong> prevent a cache stampede — model many callers missing one expensive cache key; add single-flight ownership, bounded wait, success publication, failure cleanup, and stale/retry policy with injected time.</p>
 <h5 id="guide--exercise-17-review-an-ffi-ownership-boundary">Exercise 17 — review an FFI ownership boundary<a class="heading-anchor" href="#guide--exercise-17-review-an-ffi-ownership-boundary" aria-label="Link to this section">#</a></h5>
 <p>Specify one batched native function: accepted buffer dtype/layout, length, ownership/lifetime, mutability, error mapping, GIL behavior, panic/exception containment, and platform wheel matrix.</p>
 <p><strong>Progressive hint:</strong> Batch work across the boundary and validate before calling native code. Never let a borrowed buffer outlive its Python owner.</p>
+<p><strong>Verify:</strong> review an FFI ownership boundary — specify one batched native function: accepted buffer dtype/layout, length, ownership/lifetime, mutability, error mapping, GIL behavior, panic/exception containment, and platform wheel matrix.</p>
 <h5 id="guide--exercise-18-design-a-continuous-performance-gate">Exercise 18 — design a continuous performance gate<a class="heading-anchor" href="#guide--exercise-18-design-a-continuous-performance-gate" aria-label="Link to this section">#</a></h5>
 <p>Define a stable local/CI benchmark artifact with workload version, correctness hash, environment, raw timings, peak memory, practical regression budget, comparison policy, and an investigation path instead of an immediate flaky fail.</p>
 <p><strong>Progressive hint:</strong> Separate noisy pull-request signal from controlled scheduled runs. Gate only after runner variance and minimum practical effect are characterized.</p>
+<p><strong>Verify:</strong> design a continuous performance gate — define a stable local/CI benchmark artifact with workload version, correctness hash, environment, raw timings, peak memory, practical regression budget, comparison policy, and an investigation path instead of an immediate flaky fail.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Baseline and candidate return the same first duplicate for every test case.</li>
@@ -437,17 +562,46 @@
 <li><strong><code>tracemalloc</code> equals process RSS:</strong> native and operating-system memory are not fully represented.</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Apply the measurement record to one capstone hotspot and keep the before/after correctness evidence. Combine with <code>python-pro-02</code> when processes or threads are considered, and with <code>python-data-01</code> when columnar/vectorized execution changes the data boundary.</p></div>
+<p>Apply the measurement record to one capstone hotspot and keep the before/after correctness evidence. Combine with <code>python-pro-02</code> when processes or threads are considered, and with <code>python-data-01</code> when columnar/vectorized execution changes the data boundary.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<pre><code class="language-text">Tutor me through `python-perf-01` — Measurement-first performance engineering.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize measurement design, complexity, profiling, and performance budgets. Use exactly these maintained learner materials:
+- guide: `python/professional/companion-guides/py_perf_01_measurement_optimization.md`
+- learner artifact: `python/professional/lessons/py_perf_01_measurement_optimization.py`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-23`, `python-pro-02`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -464,13 +618,81 @@
               type="button"
               data-launch-artifact="Python source file"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-perf-01 learner lab: measurement-first optimization.&quot;&quot;&quot;</span>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-perf-01 learner lab: measurement-first optimization.</span>
+<span> </span>
+<span>Professional learner deep dive (python-perf-01)</span>
+<span>------------------------------------------------</span>
+<span> </span>
+<span>Mental model:</span>
+<span>Performance engineering begins with a user-visible budget and a reproducible workload. Wall-</span>
+<span>clock timing includes noise from warm-up, caching, scheduling, CPU frequency, allocation, and</span>
+<span>I/O. Repeat measurements, report a distribution, and keep correctness checks beside the</span>
+<span>benchmark.  Profiling locates where time or memory is spent; algorithmic analysis explains how</span>
+<span>cost grows. Optimize the measured bottleneck, then rerun correctness and end-to-end evidence.</span>
+<span>Faster code that changes results, ordering, errors, or resource bounds is a regression.</span>
+<span> </span>
+<span>API/boundary anatomy:</span>
+<span>* benchmark contract: fixes data size/distribution, environment, warm-up, repetitions,</span>
+<span>  statistic, and correctness invariant.</span>
+<span>* profile → hypothesis → one change: connects an observed hotspot to a scoped optimization</span>
+<span>  rather than guessing.</span>
+<span>* scale curve + budget: measures several input sizes and checks latency/memory against an</span>
+<span>  explicit threshold.</span>
+<span> </span>
+<span>Micro-example A — report repeat timing instead of one lucky run::</span>
+<span> </span>
+<span>    import statistics</span>
+<span>    import timeit</span>
+<span> </span>
+<span>    samples = timeit.repeat(</span>
+<span>        &quot;sum(range(10_000))&quot;,</span>
+<span>        repeat=7,</span>
+<span>        number=200,</span>
+<span>    )</span>
+<span>    report = {</span>
+<span>        &quot;median_seconds&quot;: statistics.median(samples),</span>
+<span>        &quot;min_seconds&quot;: min(samples),</span>
+<span>        &quot;max_seconds&quot;: max(samples),</span>
+<span>    }</span>
+<span>    print(report)</span>
+<span>    assert report[&quot;min_seconds&quot;] &lt;= report[&quot;median_seconds&quot;] &lt;= report[&quot;max_seconds&quot;]</span>
+<span> </span>
+<span>Expected: Repeated timings vary; median and range reveal noise that one measurement hides.</span>
+<span> </span>
+<span>Micro-example B — contrast quadratic and linear duplicate detection::</span>
+<span> </span>
+<span>    def has_duplicate_quadratic(values):</span>
+<span>        return any(values[i] in values[:i] for i in range(len(values)))</span>
+<span> </span>
+<span>    def has_duplicate_linear(values):</span>
+<span>        seen = set()</span>
+<span>        for value in values:</span>
+<span>            if value in seen:</span>
+<span>                return True</span>
+<span>            seen.add(value)</span>
+<span>        return False</span>
+<span> </span>
+<span>    for size in (100, 1_000):</span>
+<span>        data = list(range(size))</span>
+<span>        assert has_duplicate_quadratic(data) == has_duplicate_linear(data) == False</span>
+<span>    print(&quot;both implementations agree on measured inputs&quot;)</span>
+<span> </span>
+<span>Expected: Both functions preserve the Boolean contract, while the set-based design has expected</span>
+<span>          linear rather than quadratic growth.</span>
+<span> </span>
+<span>Debugging rule: Reproduce the workload, record environment, profile CPU/memory/I/O, validate</span>
+<span>                outputs, change one hotspot, and compare repeated end-to-end distributions.</span>
+<span> </span>
+<span>The snippets demonstrate mechanics only. They do not complete the</span>
+<span>numbered TODOs below; implement those from their stated contracts and</span>
+<span>prove normal, boundary, and failure behavior.</span>
+<span>&quot;&quot;&quot;</span>
 <span> </span>
 <span>from __future__ import annotations</span>
 <span> </span>
@@ -566,7 +788,7 @@
 <span># Prompt: For `[4, 1, 3, 2, 3, 4]`, the answer is `3`: the duplicate whose *second*</span>
 <span># occurrence appears first. Complete `first_duplicate_linear` with a set and prove</span>
 <span># equivalence for empty, unique, immediate, and competing duplicates.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 2 — Build a representative timing plan</span>
 <span># Prompt: Choose a workload size large enough to rise above timer noise but small enough</span>
@@ -574,48 +796,48 @@
 <span># `timeit`. Record Python version, platform, input size, and plan. Do not assert</span>
 <span># “candidate &lt; baseline” in the test suite. CI hosts, antivirus, power state, and</span>
 <span># schedulers make that flaky.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 3 — Ask cProfile a different question</span>
 <span># Prompt: Profile one complete representative call and sort by cumulative time. Locate the</span>
 <span># call path, not just the leaf with the largest self time. Reduce the workload if</span>
 <span># profiling overhead dominates, and do not compare profiled seconds directly with</span>
 <span># unprofiled `timeit` seconds.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 4 — Measure allocation pressure</span>
 <span># Prompt: Compare materialized-list and generator sums with `tracemalloc`. Assert equal</span>
 <span># results and report bounds (`peak &gt;= current &gt;= 0`). Explain why `tracemalloc` may not</span>
 <span># see memory allocated inside every native library.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 5 — Compare optional vectorization</span>
 <span># Prompt: With NumPy installed, compare a Python loop with `np.square(array).sum()`.</span>
 <span># Include conversion from Python values when that conversion exists in the real workflow.</span>
 <span># Small input can favor the loop; already-resident large arrays can favor vectorized</span>
 <span># native work. Measure both representative cases.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 6 — Model process transfer</span>
 <span># Prompt: Serialize a safe local JSON payload and measure its byte length. Complete</span>
 <span># `estimated_transfer_bytes`. Four workers each receiving two copies move eight payload</span>
 <span># equivalents before computation. Real process protocols may add framing, copies, or</span>
 <span># shared-memory complexity.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 7 — Evaluate caching</span>
 <span># Prompt: Use `cached_fibonacci.cache_info()` to observe hits. Then evaluate a real</span>
 <span># candidate by: - measured reuse, - entry count and bytes, - invalidation/freshness rules,</span>
 <span># - key cardinality, and - whether retained objects prevent memory release. Caching a low-</span>
 <span># reuse, high-cardinality result can make performance worse.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 8 — Bound native/FFI work</span>
 <span># Prompt: Use the policy to prefer an available algorithm improvement. If a measured</span>
 <span># hotspot remains, batch native calls and cap transfer. Survey Cython, Rust/PyO3, C/C++</span>
 <span># extensions, and `ctypes`/`cffi`; record build wheels, ABI, ownership, error, and safety</span>
 <span># obligations before choosing one.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 9 — Apply the evidence decision</span>
 <span># Prompt: Complete `choose_next_step` in priority order: 1. fix unequal behavior, 2.</span>
@@ -623,60 +845,60 @@
 <span># optimize a hotspot consuming at least 50 percent, or 5. keep the current implementation.</span>
 <span># Thresholds are a transparent lesson policy, not universal laws. Return the evidence and</span>
 <span># selected action so a reviewer can reproduce the decision.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 10 — compare timing distributions</span>
 <span># Prompt: Run interleaved repeated batches for baseline and candidate, report median,</span>
 <span># spread, paired ratios/differences, environment, and correctness. Avoid a binary CI speed</span>
 <span># assertion.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 11 — diagnose warmup, GC, and environment noise</span>
 <span># Prompt: Measure cold import/first call separately from steady state. Repeat with garbage</span>
 <span># collection controlled, background load noted, and process affinity/power assumptions</span>
 <span># documented rather than hidden.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 12 — trade algorithm speed for memory</span>
 <span># Prompt: Compare set-based first-duplicate search with a sorted/indexed alternative under</span>
 <span># a strict memory budget. Preserve &#x27;first second occurrence&#x27; semantics and report</span>
 <span># time/peak memory across unique-heavy and duplicate-early inputs.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 13 — test vectorized dtype boundaries</span>
 <span># Prompt: Compare Python integer sum-of-squares with NumPy int32, int64, float, and object</span>
 <span># arrays near overflow. Detect silent overflow and choose a validated dtype.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 14 — evaluate shared-memory process input</span>
 <span># Prompt: Compare normal process serialization with read-only shared memory for one large</span>
 <span># numeric payload. Include setup/copy, worker mapping, cleanup, spawn compatibility, and</span>
 <span># ownership failure cases.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 15 — separate I/O concurrency from CPU optimization</span>
 <span># Prompt: Benchmark a local fake I/O wait and a pure-Python CPU loop under sequential,</span>
 <span># async/thread, and process designs. Explain why each model helps one workload and may</span>
 <span># hurt another.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 16 — prevent a cache stampede</span>
 <span># Prompt: Model many callers missing one expensive cache key. Add single-flight ownership,</span>
 <span># bounded wait, success publication, failure cleanup, and stale/retry policy with injected</span>
 <span># time.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 17 — review an FFI ownership boundary</span>
 <span># Prompt: Specify one batched native function: accepted buffer dtype/layout, length,</span>
 <span># ownership/lifetime, mutability, error mapping, GIL behavior, panic/exception</span>
 <span># containment, and platform wheel matrix.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 18 — design a continuous performance gate</span>
 <span># Prompt: Define a stable local/CI benchmark artifact with workload version, correctness</span>
 <span># hash, environment, raw timings, peak memory, practical regression budget, comparison</span>
 <span># policy, and an investigation path instead of an immediate flaky fail.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># === End numbered professional practice ===</span>
 <span> </span>
@@ -684,15 +906,15 @@
 <span>    self_check()</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -724,6 +946,39 @@
 <p>Native extensions and foreign-function interfaces (FFIs) add packaging, portability, safety, and boundary-transfer costs. Improve the algorithm first. When native work owns a measured hotspot, batch calls and data transfer rather than crossing the boundary in a tight Python loop.</p>
 <p>Edge cases include benchmarks smaller than timer noise, cold imports, thermal or background-load variation, changed semantics, hash/cache keys that retain large objects, process copies hidden by copy-on-write assumptions, native allocations invisible to <code>tracemalloc</code>, and microbenchmarks that do not represent production data.</p>
 <hr>
+<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-1--reasoning-before-implementation">Reasoning before implementation<a class="heading-anchor" href="#solution-1--reasoning-before-implementation" aria-label="Link to this section">#</a></h4>
+<p>The workflow preserves a correctness oracle and performance budget while using profiles and scaling evidence to justify each change.</p>
+<ol>
+<li><strong>benchmark contract:</strong> fixes data size/distribution, environment, warm-up, repetitions, statistic, and correctness invariant.</li>
+<li><strong>profile → hypothesis → one change:</strong> connects an observed hotspot to a scoped optimization rather than guessing.</li>
+<li><strong>scale curve + budget:</strong> measures several input sizes and checks latency/memory against an explicit threshold.</li>
+<li><strong>Prove the failure boundary:</strong> Exercise one normal case, one boundary case, and one injected failure without relying on hidden state.</li>
+</ol>
+<p><strong>Alternative:</strong> Caching, batching, vectorization, database pushdown, native libraries, concurrency, or a better algorithm solve different bottlenecks.</p>
+<p><strong>Trade-off:</strong> Optimizations can increase memory, latency variance, startup cost, code complexity, and platform dependence even when median runtime improves.</p>
+<p><strong>Failure boundary:</strong> Warm/cold cache, tiny inputs, skew, GC, first-run imports, thread oversubscription, nonhashable values, and Windows process startup need separate evidence.</p>
+<p><strong>Verification:</strong> Assert output equivalence and failures, benchmark repeated realistic workloads/sizes, report distribution and resources, profile the hotspot, and enforce the stated budget.</p>
+<h5 id="solution-1--verification-micro-example">Verification micro-example<a class="heading-anchor" href="#solution-1--verification-micro-example" aria-label="Link to this section">#</a></h5>
+<p>Run this small, deterministic case before adapting the reference to a larger system. It gives the reasoning above an executable anchor:</p>
+<pre><code class="language-python">import statistics
+import timeit
+
+samples = timeit.repeat(
+    &quot;sum(range(10_000))&quot;,
+    repeat=7,
+    number=200,
+)
+report = {
+    &quot;median_seconds&quot;: statistics.median(samples),
+    &quot;min_seconds&quot;: min(samples),
+    &quot;max_seconds&quot;: max(samples),
+}
+print(report)
+assert report[&quot;min_seconds&quot;] &lt;= report[&quot;median_seconds&quot;] &lt;= report[&quot;max_seconds&quot;]</code></pre>
+<p><strong>Expected observation:</strong> Repeated timings vary; median and range reveal noise that one measurement hides.</p>
+<p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
+<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-perf-01.html#solution-2"><code>py_perf_01_measurement_optimization_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
 <h5 id="solution-1--exercise-1-define-semantics-before-speed">Exercise 1 — Define semantics before speed<a class="heading-anchor" href="#solution-1--exercise-1-define-semantics-before-speed" aria-label="Link to this section">#</a></h5>
@@ -731,46 +986,55 @@
 <p><strong>Reference reasoning:</strong> Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Define semantics before speed — assert first_duplicate_linear([4,1,3,2,3,4]) == 3, [] and unique input return None, [2,2] returns 2, and competing duplicates follow earliest second occurrence; compare all cases with the baseline oracle.</p>
 <h5 id="solution-1--exercise-2-build-a-representative-timing-plan">Exercise 2 — Build a representative timing plan<a class="heading-anchor" href="#solution-1--exercise-2-build-a-representative-timing-plan" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Choose a workload size large enough to rise above timer noise but small enough for quick study. Warm up separately, then collect at least five repeated batches with <code>timeit</code>. Record Python version, platform, input size, and plan. Do not assert “candidate &lt; baseline” in the test suite. CI hosts, antivirus, power state, and schedulers make that flaky.</p>
 <p><strong>Reference reasoning:</strong> Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Build a representative timing plan — choose a workload size large enough to rise above timer noise but small enough for quick study; record Python version, platform, input size, and plan; do not assert “candidate &lt; baseline” in the test suite.</p>
 <h5 id="solution-1--exercise-3-ask-cprofile-a-different-question">Exercise 3 — Ask cProfile a different question<a class="heading-anchor" href="#solution-1--exercise-3-ask-cprofile-a-different-question" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Profile one complete representative call and sort by cumulative time. Locate the call path, not just the leaf with the largest self time. Reduce the workload if profiling overhead dominates, and do not compare profiled seconds directly with unprofiled <code>timeit</code> seconds.</p>
 <p><strong>Reference reasoning:</strong> Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Ask cProfile a different question — profile one complete representative call and sort by cumulative time; locate the call path, not just the leaf with the largest self time; reduce the workload if profiling overhead dominates, and do not compare profiled seconds directly with unprofiled timeit seconds.</p>
 <h5 id="solution-1--exercise-4-measure-allocation-pressure">Exercise 4 — Measure allocation pressure<a class="heading-anchor" href="#solution-1--exercise-4-measure-allocation-pressure" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Compare materialized-list and generator sums with <code>tracemalloc</code>. Assert equal results and report bounds (<code>peak &gt;= current &gt;= 0</code>). Explain why <code>tracemalloc</code> may not see memory allocated inside every native library.</p>
 <p><strong>Reference reasoning:</strong> Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Measure allocation pressure — compare materialized-list and generator sums with tracemalloc; assert equal results and report bounds (peak &gt;= current &gt;= 0); explain why tracemalloc may not see memory allocated inside every native library.</p>
 <h5 id="solution-1--exercise-5-compare-optional-vectorization">Exercise 5 — Compare optional vectorization<a class="heading-anchor" href="#solution-1--exercise-5-compare-optional-vectorization" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> With NumPy installed, compare a Python loop with <code>np.square(array).sum()</code>. Include conversion from Python values when that conversion exists in the real workflow. Small input can favor the loop; already-resident large arrays can favor vectorized native work. Measure both representative cases.</p>
 <p><strong>Reference reasoning:</strong> Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Compare optional vectorization — with NumPy installed, compare a Python loop with np.square(array).sum(); include conversion from Python values when that conversion exists in the real workflow; measure both representative cases.</p>
 <h5 id="solution-1--exercise-6-model-process-transfer">Exercise 6 — Model process transfer<a class="heading-anchor" href="#solution-1--exercise-6-model-process-transfer" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Serialize a safe local JSON payload and measure its byte length. Complete <code>estimated_transfer_bytes</code>. Four workers each receiving two copies move eight payload equivalents before computation. Real process protocols may add framing, copies, or shared-memory complexity.</p>
 <p><strong>Reference reasoning:</strong> Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Model process transfer — measure one JSON payload&#x27;s encoded byte length and assert estimated_transfer_bytes(payload_bytes, workers=4, copies=2) equals 8 * payload_bytes; reject negative counts and state protocol overhead is excluded.</p>
 <h5 id="solution-1--exercise-7-evaluate-caching">Exercise 7 — Evaluate caching<a class="heading-anchor" href="#solution-1--exercise-7-evaluate-caching" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Use <code>cached_fibonacci.cache_info()</code> to observe hits. Then evaluate a real candidate by: - measured reuse, - entry count and bytes, - invalidation/freshness rules, - key cardinality, and - whether retained objects prevent memory release. Caching a low-reuse, high-cardinality result can make performance worse.</p>
 <p><strong>Reference reasoning:</strong> Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Evaluate caching — use cached fibonacci.cache info() to observe hits; then evaluate a real candidate by: - measured reuse, - entry count and bytes, - invalidation/freshness rules, - key cardinality, and - whether retained objects prevent memory release; caching a low-reuse, high-cardinality result can make performance worse.</p>
 <h5 id="solution-1--exercise-8-bound-native-ffi-work">Exercise 8 — Bound native/FFI work<a class="heading-anchor" href="#solution-1--exercise-8-bound-native-ffi-work" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Use the policy to prefer an available algorithm improvement. If a measured hotspot remains, batch native calls and cap transfer. Survey Cython, Rust/PyO3, C/C++ extensions, and <code>ctypes</code>/<code>cffi</code>; record build wheels, ABI, ownership, error, and safety obligations before choosing one.</p>
 <p><strong>Reference reasoning:</strong> Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Bound native/FFI work — use the policy to prefer an available algorithm improvement; if a measured hotspot remains, batch native calls and cap transfer; survey Cython, Rust/PyO3, C/C++ extensions, and ctypes/cffi; record build wheels, ABI, ownership, error, and safety obligations before choosing one.</p>
 <h5 id="solution-1--exercise-9-apply-the-evidence-decision">Exercise 9 — Apply the evidence decision<a class="heading-anchor" href="#solution-1--exercise-9-apply-the-evidence-decision" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Complete <code>choose_next_step</code> in priority order: 1. fix unequal behavior, 2. reduce peak memory beyond budget, 3. reduce transfer consuming at least 30 percent, 4. optimize a hotspot consuming at least 50 percent, or 5. keep the current implementation. Thresholds are a transparent lesson policy, not universal laws.</p>
 <p><strong>Reference reasoning:</strong> Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Apply the evidence decision — table-test choose_next_step so unequal outputs select correctness, over-budget memory selects memory, transfer &gt;=30% selects transfer, hotspot &gt;=50% selects optimization, and the below-threshold case selects keep.</p>
 <h5 id="solution-1--exercise-10-compare-timing-distributions">Exercise 10 — compare timing distributions<a class="heading-anchor" href="#solution-1--exercise-10-compare-timing-distributions" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Run interleaved repeated batches for baseline and candidate, report median, spread, paired ratios/differences, environment, and correctness. Avoid a binary CI speed assertion.</p>
 <p><strong>Reasoning path:</strong> Alternate order to reduce drift and choose repetitions from timer resolution/runtime. Keep raw measurements for review.</p>
@@ -778,6 +1042,7 @@
 <p>The evidence supports a local estimate, not a universal guarantee. A CI performance gate needs a separately reviewed stable runner and practical regression budget.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> compare timing distributions — run interleaved repeated batches for baseline and candidate, report median, spread, paired ratios/differences, environment, and correctness; avoid a binary CI speed assertion.</p>
 <h5 id="solution-1--exercise-11-diagnose-warmup-gc-and-environment-noise">Exercise 11 — diagnose warmup, GC, and environment noise<a class="heading-anchor" href="#solution-1--exercise-11-diagnose-warmup-gc-and-environment-noise" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Measure cold import/first call separately from steady state. Repeat with garbage collection controlled, background load noted, and process affinity/power assumptions documented rather than hidden.</p>
 <p><strong>Reasoning path:</strong> GC configuration can change real semantics/latency. Report it; do not simply disable GC to obtain a preferred number.</p>
@@ -785,6 +1050,7 @@
 <p>Restart the interpreter when import/cache state matters. Do not discard outliers automatically—identify scheduler, I/O, thermal, or allocation causes.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> diagnose warmup, GC, and environment noise — measure cold import/first call separately from steady state; repeat with garbage collection controlled, background load noted, and process affinity/power assumptions documented rather than hidden.</p>
 <h5 id="solution-1--exercise-12-trade-algorithm-speed-for-memory">Exercise 12 — trade algorithm speed for memory<a class="heading-anchor" href="#solution-1--exercise-12-trade-algorithm-speed-for-memory" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Compare set-based first-duplicate search with a sorted/indexed alternative under a strict memory budget. Preserve &#x27;first second occurrence&#x27; semantics and report time/peak memory across unique-heavy and duplicate-early inputs.</p>
 <p><strong>Reasoning path:</strong> An algorithm with lower expected time can retain O(n) state. Alternative semantics or external sorting must be stated honestly.</p>
@@ -792,6 +1058,7 @@
 <p>Measure representative distributions and choose based on both time and peak budget. Approximate probabilistic structures require an explicit false-positive contract and cannot silently replace exact output.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> trade algorithm speed for memory — compare set-based first-duplicate search with a sorted/indexed alternative under a strict memory budget; preserve &#x27;first second occurrence&#x27; semantics and report time/peak memory across unique-heavy and duplicate-early inputs.</p>
 <h5 id="solution-1--exercise-13-test-vectorized-dtype-boundaries">Exercise 13 — test vectorized dtype boundaries<a class="heading-anchor" href="#solution-1--exercise-13-test-vectorized-dtype-boundaries" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Compare Python integer sum-of-squares with NumPy int32, int64, float, and object arrays near overflow. Detect silent overflow and choose a validated dtype.</p>
 <p><strong>Reasoning path:</strong> Python integers grow; fixed-width NumPy integers wrap unless the operation/dtype is widened deliberately.</p>
@@ -799,6 +1066,7 @@
 <p>Vectorization that returns a faster wrong number is a correctness failure and must route <code>choose_next_step</code> to fix correctness first.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> test vectorized dtype boundaries — compare Python integer sum-of-squares with NumPy int32, int64, float, and object arrays near overflow; detect silent overflow and choose a validated dtype.</p>
 <h5 id="solution-1--exercise-14-evaluate-shared-memory-process-input">Exercise 14 — evaluate shared-memory process input<a class="heading-anchor" href="#solution-1--exercise-14-evaluate-shared-memory-process-input" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Compare normal process serialization with read-only shared memory for one large numeric payload. Include setup/copy, worker mapping, cleanup, spawn compatibility, and ownership failure cases.</p>
 <p><strong>Reasoning path:</strong> Pass only shared-memory name/shape/dtype to spawned workers. One owner closes/unlinks after every worker releases.</p>
@@ -806,6 +1074,7 @@
 <p>Shared memory reduces repeated transfer but adds lifecycle, synchronization, and crash-cleanup complexity. It is justified only when measured payload cost is material.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> evaluate shared-memory process input — compare normal process serialization with read-only shared memory for one large numeric payload; include setup/copy, worker mapping, cleanup, spawn compatibility, and ownership failure cases.</p>
 <h5 id="solution-1--exercise-15-separate-i-o-concurrency-from-cpu-optimization">Exercise 15 — separate I/O concurrency from CPU optimization<a class="heading-anchor" href="#solution-1--exercise-15-separate-i-o-concurrency-from-cpu-optimization" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Benchmark a local fake I/O wait and a pure-Python CPU loop under sequential, async/thread, and process designs. Explain why each model helps one workload and may hurt another.</p>
 <p><strong>Reasoning path:</strong> Use deterministic waits and fixed computations; include scheduling/startup and bounded active work.</p>
@@ -813,6 +1082,7 @@
 <p>Report correctness, throughput, latency, peak concurrency, transfer, and cleanup. Do not generalize from one task label such as “data processing.”</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> separate I/O concurrency from CPU optimization — benchmark a local fake I/O wait and a pure-Python CPU loop under sequential, async/thread, and process designs; explain why each model helps one workload and may hurt another.</p>
 <h5 id="solution-1--exercise-16-prevent-a-cache-stampede">Exercise 16 — prevent a cache stampede<a class="heading-anchor" href="#solution-1--exercise-16-prevent-a-cache-stampede" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Model many callers missing one expensive cache key. Add single-flight ownership, bounded wait, success publication, failure cleanup, and stale/retry policy with injected time.</p>
 <p><strong>Reasoning path:</strong> One caller computes; others await the same owned result. A failed owner must wake waiters and remove poisoned in-flight state.</p>
@@ -820,6 +1090,7 @@
 <p>Single-flight prevents duplicate work but does not define freshness, eviction, distributed coordination, or whether stale data is acceptable.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> prevent a cache stampede — model many callers missing one expensive cache key; add single-flight ownership, bounded wait, success publication, failure cleanup, and stale/retry policy with injected time.</p>
 <h5 id="solution-1--exercise-17-review-an-ffi-ownership-boundary">Exercise 17 — review an FFI ownership boundary<a class="heading-anchor" href="#solution-1--exercise-17-review-an-ffi-ownership-boundary" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Specify one batched native function: accepted buffer dtype/layout, length, ownership/lifetime, mutability, error mapping, GIL behavior, panic/exception containment, and platform wheel matrix.</p>
 <p><strong>Reasoning path:</strong> Batch work across the boundary and validate before calling native code. Never let a borrowed buffer outlive its Python owner.</p>
@@ -827,15 +1098,17 @@
 <p>Test empty, maximum bounded size, invalid layout, native failure, and repeated calls under sanitizers/native tooling where available. Packaging evidence is required for every supported target.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> review an FFI ownership boundary — specify one batched native function: accepted buffer dtype/layout, length, ownership/lifetime, mutability, error mapping, GIL behavior, panic/exception containment, and platform wheel matrix.</p>
 <h5 id="solution-1--exercise-18-design-a-continuous-performance-gate">Exercise 18 — design a continuous performance gate<a class="heading-anchor" href="#solution-1--exercise-18-design-a-continuous-performance-gate" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Define a stable local/CI benchmark artifact with workload version, correctness hash, environment, raw timings, peak memory, practical regression budget, comparison policy, and an investigation path instead of an immediate flaky fail.</p>
 <p><strong>Reasoning path:</strong> Separate noisy pull-request signal from controlled scheduled runs. Gate only after runner variance and minimum practical effect are characterized.</p>
 <p>Version fixtures and benchmark plan, save machine-readable raw observations, and compare against a reviewed baseline from equivalent hardware/software. Require correctness first. A regression exceeding both practical threshold and uncertainty triggers repeat/investigation; a stable controlled pipeline may then block.</p>
 <p>Never optimize solely to the benchmark. Periodically reconcile it with production/representative profiles and update through reviewed evidence.</p>
 <p><strong>Common trap:</strong> One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.</p>
-<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p></div>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> design a continuous performance gate — define a stable local/CI benchmark artifact with workload version, correctness hash, environment, raw timings, peak memory, practical regression budget, comparison policy, and an investigation path instead of an immediate flaky fail.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -843,7 +1116,7 @@
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -1177,11 +1450,55 @@
 <span>    raise SystemExit(main())</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-perf-01` — Measurement-first performance engineering.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize measurement design, complexity, profiling, and performance budgets. Use exactly these maintained learner materials:
+- guide: `python/professional/companion-guides/py_perf_01_measurement_optimization.md`
+- learner artifact: `python/professional/lessons/py_perf_01_measurement_optimization.py`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-23`, `python-pro-02`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-svc-02.html"><small>Previous lesson</small><strong>python-svc-02</strong><span>Service Hardening and Observability</span></a>
-        <a class="nav-card next" href="sql-found-01.html"><small>Next lesson</small><strong>sql-found-01</strong><span>Relational Design, DDL, and Integrity Constraints</span></a>
+        <a class="nav-card next" href="sql-01.html"><small>Next lesson</small><strong>sql-01</strong><span>Select Where Orderby</span></a>
       </nav>
     </div>
   </main>
@@ -1269,6 +1586,23 @@
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

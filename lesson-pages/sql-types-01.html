@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-types-01/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--sql-types-01-postgresql-native-types-and-searchable-documents">SQL-TYPES-01 — PostgreSQL-Native Types and Searchable Documents<a class="heading-anchor" href="#guide--sql-types-01-postgresql-native-types-and-searchable-documents" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -289,6 +388,114 @@
 <p>Run on Windows PowerShell, macOS, or Linux:</p>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_types_01_native_types_search.sql</code></pre>
 <p>Only built-in PostgreSQL 16 features are used. The script inspects <code>pg_trgm</code> availability but does not enable any extension.</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-TYPES-01 — PostgreSQL-Native Types and Searchable Documents</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-types-01/lesson/workspace/sql/professional/lessons/sql_types_01_native_types_search.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\professional\lessons\sql_types_01_native_types_search.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/professional/lessons/sql_types_01_native_types_search.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Domain, Enum, UUID, Array, Range/multirange, JSONB. Its worked SQL reads or creates <code>pro_types_lab.documents</code>, <code>pg_catalog.pg_indexes</code>, <code>pg_catalog.pg_available_extensions</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: The model uses a domain for a reusable email-shape rule and an enum for a small database-owned lifecycle. Enums are compact and clear, but adding/removing labels is migration work; a reference table is more flexible when labels carry metadata or change frequently. The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for <code>pro_types_lab.documents</code>. Verify the object in <code>pg_catalog.pg_class</code>, and <code>information_schema.columns</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final <code>SELECT</code>. Verify the command tag in <code>pg_catalog</code>/<code>information_schema</code>, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit <code>NULL</code>, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/professional/lessons/sql_types_01_native_types_search.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">CREATE TABLE pro_types_lab.documents (
+    document_id uuid PRIMARY KEY,
+    owner_email pro_types_lab.email_address NOT NULL,
+    state pro_types_lab.document_state NOT NULL DEFAULT &#x27;draft&#x27;,
+    title text NOT NULL CHECK (btrim(title) &lt;&gt; &#x27;&#x27;),
+    body text NOT NULL,
+    tags text[] NOT NULL DEFAULT ARRAY[]::text[],
+    availability daterange NOT NULL
+        CHECK (NOT isempty(availability)),
+    blackout_windows datemultirange NOT NULL
+        DEFAULT &#x27;{}&#x27;::datemultirange,
+    metadata jsonb NOT NULL DEFAULT &#x27;{}&#x27;::jsonb
+        CHECK (jsonb_typeof(metadata) = &#x27;object&#x27;),
+    search_vector tsvector GENERATED ALWAYS AS (
+        setweight(
+            to_tsvector(&#x27;english&#x27;::regconfig, COALESCE(title, &#x27;&#x27;)),
+            &#x27;A&#x27;
+        )
+        ||
+        setweight(
+            to_tsvector(&#x27;english&#x27;::regconfig, COALESCE(body, &#x27;&#x27;)),
+            &#x27;B&#x27;
+        )
+    ) STORED
+);</code></pre>
+<p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
+<p><strong>Expected result/shape:</strong> Example 1 must print the expected DDL command tag for <code>pro_types_lab.documents</code>. Verify the object in <code>pg_catalog.pg_class</code>, and <code>information_schema.columns</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">INSERT INTO pro_types_lab.documents (
+    document_id,
+    owner_email,
+    state,
+    title,
+    body,
+    tags,
+    availability,
+    blackout_windows,
+    metadata
+)
+VALUES
+    (
+        &#x27;00000000-0000-0000-0000-000000000101&#x27;,
+        &#x27;avery@example.test&#x27;,
+        &#x27;published&#x27;,
+        &#x27;Safe schema migrations&#x27;,
+        &#x27;Plan additive changes, backfill data, verify invariants, and contract later.&#x27;,
+        ARRAY[&#x27;postgresql&#x27;, &#x27;sql&#x27;, &#x27;operations&#x27;],
+        daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2027-01-01&#x27;, &#x27;[)&#x27;),
+        datemultirange(
+            daterange(DATE &#x27;2026-07-01&#x27;, DATE &#x27;2026-07-08&#x27;, &#x27;[)&#x27;)
+        ),
+        &#x27;{&quot;audience&quot;:[&quot;developer&quot;,&quot;operator&quot;],&quot;difficulty&quot;:&quot;advanced&quot;,&quot;minutes&quot;:45}&#x27;
+    ),
+    (
+        &#x27;00000000-0000-0000-0000-000000000102&#x27;,
+        &#x27;morgan@example.test&#x27;,
+        &#x27;published&#x27;,
+        &#x27;Analytical SQL patterns&#x27;,
+        &#x27;Use windows and explicit grain for sessions, funnels, and retention.&#x27;,
+        ARRAY[&#x27;postgresql&#x27;, &#x27;sql&#x27;, &#x27;analytics&#x27;],
+        daterange(DATE &#x27;2026-03-01&#x27;, DATE &#x27;2026-10-01&#x27;, &#x27;[)&#x27;),
+        &#x27;{}&#x27;::datemultirange,
+        &#x27;{&quot;audience&quot;:[&quot;analyst&quot;],&quot;difficulty&quot;:&quot;intermediate&quot;,&quot;minutes&quot;:35}&#x27;
+    ),
+    (
+        &#x27;00000000-0000-0000-0000-000000000103&#x27;,
+        &#x27;taylor@example.test&#x27;,
+        &#x27;draft&#x27;,
+        &#x27;Python service notes&#x27;,
+        &#x27;Validate configuration and add request identifiers to structured logs.&#x27;,
+        ARRAY[&#x27;python&#x27;, &#x27;services&#x27;],
+        daterange(DATE &#x27;2026-05-01&#x27;, DATE &#x27;2026-12-01&#x27;, &#x27;[)&#x27;),
+        datemultirange(
+            daterange(DATE &#x27;2026-08-10&#x27;, DATE &#x27;2026-08-12&#x27;, &#x27;[)&#x27;),
+            daterange(DATE &#x27;2026-09-03&#x27;, DATE &#x27;2026-09-05&#x27;, &#x27;[)&#x27;)
+        ),
+        &#x27;{&quot;audience&quot;:[&quot;developer&quot;],&quot;difficulty&quot;:&quot;intermediate&quot;,&quot;minutes&quot;:25}&#x27;
+    );</code></pre>
+<p><strong>How to read it:</strong> Example 2 changes rows inside the lesson&#x27;s declared transaction. The command tag reports affected rows, but a follow-up query must prove the intended before/after invariant.</p>
+<p><strong>Expected result/shape:</strong> Example 2 must complete through <code>psql</code> with its documented command tag or notice for <code>pro_types_lab.documents</code>. Treat an unexpected error as failure, and prove the stated catalog/behavior invariant plus cleanup.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Model and query domains, enums, UUIDs, arrays, ranges, multiranges, JSONB, and JSONPath.</li>
@@ -322,18 +529,18 @@
 <p>For JSON, first guard shape/type when data is not controlled. A cast from an arbitrary string to integer can fail before a predicate excludes it.</p>
 <p>For each choice, name the operators, constraints, index support, boundary rules, write cost, and migration cost:</p>
 <ol>
-<li><strong>Tag containment:</strong> require both tags, preserve published status, and order ties deterministically.</li>
-<li><strong>Range subtraction:</strong> apply the half-open rule and prove both range boundaries.</li>
-<li><strong>Typed JSONPath:</strong> guard shape/type before numeric comparison.</li>
-<li><strong>Full-text query:</strong> parse the web-style phrase, rank, and add a stable secondary order.</li>
-<li><strong>Index comparison:</strong> map JSONB, text-search, and trigram operators to their useful operator classes.</li>
-<li><strong>Type decision:</strong> defend domain, enum, lookup, array, range, JSONB, or normalized-relation choices field by field.</li>
-<li><strong>Multirange:</strong> normalize availability, find August gaps, and define whether adjacency merges.</li>
-<li><strong>Networks:</strong> match addresses to their most-specific containing <code>cidr</code> and identify an operator-compatible index.</li>
-<li><strong>Money:</strong> compare fixed-scale numeric, minor-unit bigint, and floating point using explicit precision and rounding tests.</li>
-<li><strong>Promoted JSON:</strong> validate a generated typed value, index it, and test an old payload against the evolved contract.</li>
-<li><strong>Language search:</strong> inspect lexemes and design configuration selection for non-English rows.</li>
-<li><strong>Normalize tags:</strong> compare normalized keys and joins with array containment, duplicates, order, constraints, and writes.</li>
+<li><strong>Tag containment:</strong> require both tags, preserve published status, and order ties deterministically. <strong>Inputs/evidence:</strong> For sql-types-01 Exercise 1, filter <code>documents</code> to published rows whose <code>tags</code> array contains both <code>postgresql</code> and <code>operations</code> using one <code>@&gt;</code> containment predicate. <strong>Expected result/shape:</strong> For sql-types-01 Exercise 1, expected output: exactly one row at document grain with <code>document_id</code> and <code>title</code>, ordered by <code>document_id</code>. <strong>Verify:</strong> For sql-types-01 Exercise 1, compare the result with an independent unnest/distinct-tag control, prove both required tags—not either one—are present, and explain that array GIN supports containment while two <code>= ANY</code> predicates express separate membership tests.</li>
+<li><strong>Range subtraction:</strong> apply the half-open rule and prove both range boundaries. <strong>Inputs/evidence:</strong> For sql-types-01 Exercise 2, require <code>availability @&gt; probe_date</code> and NOT <code>blackout_windows @&gt; probe_date</code>, then probe the lower and upper endpoints of both <code>[)</code> ranges for document 201. <strong>Expected result/shape:</strong> For sql-types-01 Exercise 2, expected output: document 202 for 2026-08-11 plus four boundary rows showing availability lower included, blackout lower excluded from use, blackout upper available, and availability upper excluded. <strong>Verify:</strong> For sql-types-01 Exercise 2, assert the <code>[lower, upper)</code> truth table directly and distinguish an unavailable document from a missing result row; test both range and multirange containment at exact endpoints.</li>
+<li><strong>Typed JSONPath:</strong> guard shape/type before numeric comparison. <strong>Inputs/evidence:</strong> For sql-types-01 Exercise 3, use JSONPath to require a JSON number greater than 30 before casting its text representation to unbounded <code>numeric</code>. <strong>Expected result/shape:</strong> For sql-types-01 Exercise 3, expected output: one row per matching document with <code>document_id</code>, <code>title</code>, and <code>minutes_numeric</code>; the supplied fixture returns documents 201 and 202. <strong>Verify:</strong> For sql-types-01 Exercise 3, add string, missing, fractional, and very large numeric values; prove JSONPath excludes nonnumbers, numeric preserves fractional/range values, and no arbitrary JSON value reaches an unsafe integer cast.</li>
+<li><strong>Full-text query:</strong> parse the web-style phrase, rank, and add a stable secondary order. <strong>Inputs/evidence:</strong> For sql-types-01 Exercise 4, build one English <code>websearch_to_tsquery</code> for the phrase and term, match it against the stored weighted search vector, and compute <code>ts_rank_cd</code>. <strong>Expected result/shape:</strong> For sql-types-01 Exercise 4, expected output: matching <code>document_id</code>, <code>title</code>, and <code>rank_score</code>, ordered by rank descending then <code>document_id</code>; the fixture returns document 201. <strong>Verify:</strong> For sql-types-01 Exercise 4, display the parsed tsquery and source lexemes, assert every returned vector satisfies <code>@@</code>, and retain the document-ID tie-breaker because equal rank scores are possible.</li>
+<li><strong>Index comparison:</strong> map JSONB, text-search, and trigram operators to their useful operator classes. <strong>Inputs/evidence:</strong> For sql-types-01 Exercise 5, return an operator-first matrix mapping four real predicates to candidate index families and one superficially related query that each index does not serve. <strong>Expected result/shape:</strong> For sql-types-01 Exercise 5, expected output: four rows with <code>workload</code>, <code>matching_operator</code>, <code>candidate_index</code>, <code>nonmatching_query</code>, and <code>reason</code>, covering arrays, JSONB, full-text, and ranges. <strong>Verify:</strong> For sql-types-01 Exercise 5, inspect operator classes and compare EXPLAIN plans only after representative data exists; distinguish <code>jsonb_ops</code> flexibility from <code>jsonb_path_ops</code> size/supported-operator trade-offs and treat pg_trgm as optional.</li>
+<li><strong>Type decision:</strong> defend domain, enum, lookup, array, range, JSONB, or normalized-relation choices field by field. <strong>Inputs/evidence:</strong> For sql-types-01 Exercise 6, classify modeled field shapes against domain, CHECK/enum, reference table, array, range/multirange, JSONB, and normalized relation choices. <strong>Expected result/shape:</strong> For sql-types-01 Exercise 6, expected output: seven deterministic rows with <code>field_shape</code>, <code>candidate_type</code>, and a concrete <code>decision_rule</code>. <strong>Verify:</strong> For sql-types-01 Exercise 6, challenge each choice with one evolution/query/integrity counterexample, and prefer the type whose operators and constraints match the domain rather than the most exotic type.</li>
+<li><strong>Multirange:</strong> normalize availability, find August gaps, and define whether adjacency merges. <strong>Inputs/evidence:</strong> For sql-types-01 Exercise 7, construct a <code>datemultirange</code> from overlapping and adjacent half-open date ranges, then subtract it from the August 2026 month range. <strong>Expected result/shape:</strong> For sql-types-01 Exercise 7, expected output: exactly one row with canonical <code>normalized_availability</code> and <code>august_gaps</code>; adjacent/overlapping discrete ranges merge. <strong>Verify:</strong> For sql-types-01 Exercise 7, independently test every August date for membership in either availability or gaps, require no overlap and complete month coverage, and state whether adjacency should merge in this business domain.</li>
+<li><strong>Networks:</strong> match addresses to their most-specific containing <code>cidr</code> and identify an operator-compatible index. <strong>Inputs/evidence:</strong> For sql-types-01 Exercise 8, preserve every client with <code>LEFT JOIN LATERAL</code>; inside the lateral query choose the containing CIDR with greatest mask length and <code>rule_id</code> tie-breaker. <strong>Expected result/shape:</strong> For sql-types-01 Exercise 8, expected output: one row per client with <code>client_id</code>, <code>address</code>, <code>rule_id</code>, and <code>network</code>; matched clients receive their longest prefix and the unmatched client retains NULL rule fields. <strong>Verify:</strong> For sql-types-01 Exercise 8, assert output count equals client count, validate each chosen network contains its address, prove no more-specific candidate exists, and test both IPv4, IPv6, and unmatched addresses.</li>
+<li><strong>Money:</strong> compare fixed-scale numeric, minor-unit bigint, and floating point using explicit precision and rounding tests. <strong>Inputs/evidence:</strong> For sql-types-01 Exercise 9, define a nonnegative <code>numeric(12,2)</code> domain, demonstrate exact arithmetic and rounding, and compare it with bigint minor units and double precision. <strong>Expected result/shape:</strong> For sql-types-01 Exercise 9, expected output: one scalar evidence row plus a three-row storage matrix; the domain cast of NULL remains NULL because NOT NULL belongs on the consuming column. <strong>Verify:</strong> For sql-types-01 Exercise 9, reject a negative value, assert exact sum <code>30.30</code> and declared rounding <code>10.13</code>, test NULL at both domain and NOT NULL column boundaries, and document currency/scale when using minor units.</li>
+<li><strong>Promoted JSON:</strong> validate a generated typed value, index it, and test an old payload against the evolved contract. <strong>Inputs/evidence:</strong> For sql-types-01 Exercise 10, add a stored generated integer that accepts only JSON numbers that are integral and within PostgreSQL integer range; otherwise return NULL, then index it. <strong>Expected result/shape:</strong> For sql-types-01 Exercise 10, expected output: boundary rows for string, missing, fractional, and out-of-range minutes, all safely classified as NULL; valid integral seed values remain queryable. <strong>Verify:</strong> For sql-types-01 Exercise 10, prove all four malformed-for-the-property payloads insert without cast errors, valid 35/45 values materialize, the index exists, and the application policy distinguishes invalid from absent rather than silently treating both as zero.</li>
+<li><strong>Language search:</strong> inspect lexemes and design configuration selection for non-English rows. <strong>Inputs/evidence:</strong> For sql-types-01 Exercise 11, convert each title/body pair with an explicit English text-search configuration and expose the resulting lexemes. <strong>Expected result/shape:</strong> For sql-types-01 Exercise 11, expected output: one row per document with <code>document_id</code> and <code>lexemes</code>, ordered by <code>document_id</code>. <strong>Verify:</strong> For sql-types-01 Exercise 11, inspect stemming and stop-word behavior with known tokens, compare a non-English sample under the English and appropriate configurations, and keep the configured language explicit in stored-vector policy.</li>
+<li><strong>Normalize tags:</strong> compare normalized keys and joins with array containment, duplicates, order, constraints, and writes. <strong>Inputs/evidence:</strong> For sql-types-01 Exercise 12, normalize legacy tag arrays with <code>lower(btrim(tag))</code>, insert distinct vocabulary rows, and insert distinct <code>(document_id, tag_id)</code> bridge rows. <strong>Expected result/shape:</strong> For sql-types-01 Exercise 12, expected output: one normalized vocabulary row per canonical tag, one bridge row per document/tag pair despite duplicate legacy spellings, and document 201 for the two-tag relational query. <strong>Verify:</strong> For sql-types-01 Exercise 12, inject <code>python</code>, <code> Python </code>, and duplicate <code>python</code> in one array, assert only one bridge pair survives, verify foreign-key and composite-primary-key enforcement, and record that array order/case/whitespace are intentionally discarded.</li>
 </ol>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -358,17 +565,45 @@
 <li>UUIDs hide sequence order but do not provide secrecy or tenant isolation.</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-ops-01.html#guide">SQL-OPS-01 — index types, statistics, and maintenance</a> to connect these operators to planner evidence and lifecycle cost. Revisit the relational-design module whenever a convenient native type begins hiding a cross-row invariant.</p></div>
+<p>Continue to <a href="sql-ops-01.html#guide">SQL-OPS-01 — index types, statistics, and maintenance</a> to connect these operators to planner evidence and lifecycle cost. Revisit the relational-design module whenever a convenient native type begins hiding a cross-row invariant.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-types-01 — PostgreSQL-Native Types and Searchable Documents.
+
+I have completed the direct catalog prerequisite: `sql-29`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/professional/companion-guides/sql_types_01_native_types_search.md
+- Answer-free learner SQL: sql/professional/lessons/sql_types_01_native_types_search.sql
+
+Key terms to teach in context: Domain, Enum, UUID, Array, Range/multirange, JSONB. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: The model uses a domain for a reusable email-shape rule and an enum for a small database-owned lifecycle. Enums are compact and clear, but adding/removing labels is migration work; a reference table is more flexible when labels carry metadata or change frequently.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-types-01/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -385,13 +620,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-TYPES-01: PostgreSQL-native types and searchable documents</span>
+<span>-- BEGINNER WORKFLOW — sql-types-01: PostgreSQL-Native Types and Searchable Documents</span>
+<span>-- Guide: sql/professional/companion-guides/sql_types_01_native_types_search.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-types-01/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: pro_types_lab.documents, pg_catalog.pg_indexes, pg_catalog.pg_available_extensions.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>-- Target: PostgreSQL 16+</span>
 <span> </span>
 <span>\set ON_ERROR_STOP on</span>
@@ -577,42 +829,86 @@
 <span>-- 1. Return published documents tagged with both postgresql and operations.</span>
 <span>--    Explain why @&gt; is a better fit than two ANY expressions for this question.</span>
 <span>--</span>
+<span>--    Inputs: For sql-types-01 Exercise 1, filter `documents` to published rows whose `tags` array contains both `postgresql` and `operations` using one `@&gt;` containment predicate.</span>
+<span>--    Expected result/shape: For sql-types-01 Exercise 1, expected output: exactly one row at document grain with `document_id` and `title`, ordered by `document_id`.</span>
+<span>--    Verify: For sql-types-01 Exercise 1, compare the result with an independent unnest/distinct-tag control, prove both required tags—not either one—are present, and explain that array GIN supports containment while two `= ANY` predicates express separate membership tests.</span>
+<span>--    Hint ladder, rung 1: For sql-types-01 Exercise 1, check the tag containment written analysis against `any`.</span>
 <span>-- 2. Find documents available on 2026-08-11 but not inside a blackout window.</span>
 <span>--    State the inclusive/exclusive boundary rule.</span>
 <span>--</span>
+<span>--    Inputs: For sql-types-01 Exercise 2, require `availability @&gt; probe_date` and NOT `blackout_windows @&gt; probe_date`, then probe the lower and upper endpoints of both `[)` ranges for document 201.</span>
+<span>--    Expected result/shape: For sql-types-01 Exercise 2, expected output: document 202 for 2026-08-11 plus four boundary rows showing availability lower included, blackout lower excluded from use, blackout upper available, and availability upper excluded.</span>
+<span>--    Verify: For sql-types-01 Exercise 2, assert the `[lower, upper)` truth table directly and distinguish an unavailable document from a missing result row; test both range and multirange containment at exact endpoints.</span>
+<span>--    Hint ladder, rung 1: For sql-types-01 Exercise 2, check the range subtraction written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.</span>
 <span>-- 3. Use JSONPath to return documents whose numeric minutes exceed 30. Avoid</span>
 <span>--    assuming that every arbitrary JSON value can be cast safely.</span>
 <span>--</span>
+<span>--    Inputs: For sql-types-01 Exercise 3, use JSONPath to require a JSON number greater than 30 before casting its text representation to unbounded `numeric`.</span>
+<span>--    Expected result/shape: For sql-types-01 Exercise 3, expected output: one row per matching document with `document_id`, `title`, and `minutes_numeric`; the supplied fixture returns documents 201 and 202.</span>
+<span>--    Verify: For sql-types-01 Exercise 3, add string, missing, fractional, and very large numeric values; prove JSONPath excludes nonnumbers, numeric preserves fractional/range values, and no arbitrary JSON value reaches an unsafe integer cast.</span>
+<span>--    Hint ladder, rung 1: For sql-types-01 Exercise 3, check the typed jsonpath written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.</span>
 <span>-- 4. Search for the web-style query &#x27;&quot;schema migration&quot; verify&#x27; and rank</span>
 <span>--    matches deterministically.</span>
 <span>--</span>
+<span>--    Inputs: For sql-types-01 Exercise 4, build one English `websearch_to_tsquery` for the phrase and term, match it against the stored weighted search vector, and compute `ts_rank_cd`.</span>
+<span>--    Expected result/shape: For sql-types-01 Exercise 4, expected output: matching `document_id`, `title`, and `rank_score`, ordered by rank descending then `document_id`; the fixture returns document 201.</span>
+<span>--    Verify: For sql-types-01 Exercise 4, display the parsed tsquery and source lexemes, assert every returned vector satisfies `@@`, and retain the document-ID tie-breaker because equal rank scores are possible.</span>
+<span>--    Hint ladder, rung 1: For sql-types-01 Exercise 4, check the full-text query written analysis against `websearch_to_tsquery`.</span>
 <span>-- 5. Compare jsonb_ops with jsonb_path_ops, and GIN full-text search with an</span>
 <span>--    optional pg_trgm similarity index. State which operators and update costs</span>
 <span>--    matter before choosing.</span>
 <span>--</span>
+<span>--    Inputs: For sql-types-01 Exercise 5, return an operator-first matrix mapping four real predicates to candidate index families and one superficially related query that each index does not serve.</span>
+<span>--    Expected result/shape: For sql-types-01 Exercise 5, expected output: four rows with `workload`, `matching_operator`, `candidate_index`, `nonmatching_query`, and `reason`, covering arrays, JSONB, full-text, and ranges.</span>
+<span>--    Verify: For sql-types-01 Exercise 5, inspect operator classes and compare EXPLAIN plans only after representative data exists; distinguish `jsonb_ops` flexibility from `jsonb_path_ops` size/supported-operator trade-offs and treat pg_trgm as optional.</span>
+<span>--    Hint ladder, rung 1: For sql-types-01 Exercise 5, select `jsonb_ops` from `pg_trgm` before adding derived columns.</span>
 <span>-- 6. Decide which modeled fields deserve a domain, enum, reference table,</span>
 <span>--    array, range, JSONB document, or ordinary normalized relation.</span>
 <span>--</span>
+<span>--    Inputs: For sql-types-01 Exercise 6, classify modeled field shapes against domain, CHECK/enum, reference table, array, range/multirange, JSONB, and normalized relation choices.</span>
+<span>--    Expected result/shape: For sql-types-01 Exercise 6, expected output: seven deterministic rows with `field_shape`, `candidate_type`, and a concrete `decision_rule`.</span>
+<span>--    Verify: For sql-types-01 Exercise 6, challenge each choice with one evolution/query/integrity counterexample, and prefer the type whose operators and constraints match the domain rather than the most exotic type.</span>
+<span>--    Hint ladder, rung 1: For sql-types-01 Exercise 6, check the type decision written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.</span>
 <span>-- 7. Model recurring availability with datemultirange. Normalize overlapping</span>
 <span>--    input ranges, find gaps inside August 2026, and state whether adjacent</span>
 <span>--    ranges should merge for this domain.</span>
 <span>--</span>
+<span>--    Inputs: For sql-types-01 Exercise 7, construct a `datemultirange` from overlapping and adjacent half-open date ranges, then subtract it from the August 2026 month range.</span>
+<span>--    Expected result/shape: For sql-types-01 Exercise 7, expected output: exactly one row with canonical `normalized_availability` and `august_gaps`; adjacent/overlapping discrete ranges merge.</span>
+<span>--    Verify: For sql-types-01 Exercise 7, independently test every August date for membership in either availability or gaps, require no overlap and complete month coverage, and state whether adjacency should merge in this business domain.</span>
+<span>--    Hint ladder, rung 1: For sql-types-01 Exercise 7, run `schedule` one at a time. Record each CTE&#x27;s row count and `day` uniqueness before the next stage uses it.</span>
 <span>-- 8. Add inet client addresses and cidr network rules. Return the most-specific</span>
 <span>--    containing network for each address using network operators, prefix length,</span>
 <span>--    and deterministic tie-breaking; identify a suitable index family.</span>
 <span>--</span>
+<span>--    Inputs: For sql-types-01 Exercise 8, preserve every client with `LEFT JOIN LATERAL`; inside the lateral query choose the containing CIDR with greatest mask length and `rule_id` tie-breaker.</span>
+<span>--    Expected result/shape: For sql-types-01 Exercise 8, expected output: one row per client with `client_id`, `address`, `rule_id`, and `network`; matched clients receive their longest prefix and the unmatched client retains NULL rule fields.</span>
+<span>--    Verify: For sql-types-01 Exercise 8, assert output count equals client count, validate each chosen network contains its address, prove no more-specific candidate exists, and test both IPv4, IPv6, and unmatched addresses.</span>
+<span>--    Hint ladder, rung 1: For sql-types-01 Exercise 8, run `ranked` one at a time. Record each CTE&#x27;s row count and `client_id` uniqueness before the next stage uses it.</span>
 <span>-- 9. Define a domain for a nonnegative monetary amount with fixed scale.</span>
 <span>--    Compare numeric with bigint minor units and double precision for equality,</span>
 <span>--    aggregation, range, rounding, and application interoperability.</span>
 <span>--</span>
+<span>--    Inputs: For sql-types-01 Exercise 9, define a nonnegative `numeric(12,2)` domain, demonstrate exact arithmetic and rounding, and compare it with bigint minor units and double precision.</span>
+<span>--    Expected result/shape: For sql-types-01 Exercise 9, expected output: one scalar evidence row plus a three-row storage matrix; the domain cast of NULL remains NULL because NOT NULL belongs on the consuming column.</span>
+<span>--    Verify: For sql-types-01 Exercise 9, reject a negative value, assert exact sum `30.30` and declared rounding `10.13`, test NULL at both domain and NOT NULL column boundaries, and document currency/scale when using minor units.</span>
+<span>--    Hint ladder, rung 1: For sql-types-01 Exercise 9, select `declared_rounding_example` from `pro_types_lab.nonnegative_money` before adding derived columns.</span>
 <span>-- 10. Promote one frequently queried JSONB property into a stored generated</span>
 <span>--     column. Guard shape and type, index the promoted value, and explain how</span>
 <span>--     schema evolution can make a formerly valid payload fail on write.</span>
 <span>--</span>
+<span>--    Inputs: For sql-types-01 Exercise 10, add a stored generated integer that accepts only JSON numbers that are integral and within PostgreSQL integer range; otherwise return NULL, then index it.</span>
+<span>--    Expected result/shape: For sql-types-01 Exercise 10, expected output: boundary rows for string, missing, fractional, and out-of-range minutes, all safely classified as NULL; valid integral seed values remain queryable.</span>
+<span>--    Verify: For sql-types-01 Exercise 10, prove all four malformed-for-the-property payloads insert without cast errors, valid 35/45 values materialize, the index exists, and the application policy distinguishes invalid from absent rather than silently treating both as zero.</span>
+<span>--    Hint ladder, rung 1: For sql-types-01 Exercise 10, inspect the source keys that survive `WHERE`; then check `d.document_id` before applying the row cap.</span>
 <span>-- 11. Inspect to_tsvector output and explain dictionaries, stop words,</span>
 <span>--     stemming, weights, and language configuration. Design a policy for rows</span>
 <span>--     whose language differs from the default English configuration.</span>
 <span>--</span>
+<span>--    Inputs: For sql-types-01 Exercise 11, convert each title/body pair with an explicit English text-search configuration and expose the resulting lexemes.</span>
+<span>--    Expected result/shape: For sql-types-01 Exercise 11, expected output: one row per document with `document_id` and `lexemes`, ordered by `document_id`.</span>
+<span>--    Verify: For sql-types-01 Exercise 11, inspect stemming and stop-word behavior with known tokens, compare a non-English sample under the English and appropriate configurations, and keep the configured language explicit in stored-vector policy.</span>
+<span>--    Hint ladder, rung 1: For sql-types-01 Exercise 11, check `d.document_id` before applying the row cap.</span>
 <span>-- 12. Replace the tags array with normalized document_tags rows and a foreign</span>
 <span>--     key to tags. Compare containment queries, order/duplicates, constraints,</span>
 <span>--     write amplification, and when an array remains the clearer model.</span>
@@ -634,20 +930,24 @@
 <span>    END IF;</span>
 <span>END</span>
 <span>$self_check$;</span>
+<span>--    Inputs: For sql-types-01 Exercise 12, normalize legacy tag arrays with `lower(btrim(tag))`, insert distinct vocabulary rows, and insert distinct `(document_id, tag_id)` bridge rows.</span>
+<span>--    Expected result/shape: For sql-types-01 Exercise 12, expected output: one normalized vocabulary row per canonical tag, one bridge row per document/tag pair despite duplicate legacy spellings, and document 201 for the two-tag relational query.</span>
+<span>--    Verify: For sql-types-01 Exercise 12, inject `python`, ` Python `, and duplicate `python` in one array, assert only one bridge pair survives, verify foreign-key and composite-primary-key enforcement, and record that array order/case/whitespace are intentionally discarded.</span>
+<span>--    Hint ladder, rung 1: For sql-types-01 Exercise 12, start with the first relation in `pro_types_lab.documents`, `pro_types_lab.tags`, and `pro_types_lab.document_tags`; after each join, record total rows and distinct `document_id`, and `title` so the exact fanout or loss is visible.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span>\echo &#x27;SQL-TYPES-01 complete: pro_types_lab was rolled back&#x27;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -671,22 +971,66 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--sql-types-01-solutions-native-types-and-search">SQL-TYPES-01 Solutions — Native Types and Search<a class="heading-anchor" href="#solution-1--sql-types-01-solutions-native-types-and-search" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\professional\solutions\sql_types_01_native_types_search_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/professional/solutions/sql_types_01_native_types_search_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are Domain, Enum, UUID, Array, Range/multirange, JSONB. Its worked-model focus is: The model uses a domain for a reusable email-shape rule and an enum for a small database-owned lifecycle. Enums are compact and clear, but adding/removing labels is migration work; a reference table is more flexible when labels carry metadata or change frequently.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>Run:</p>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_types_01_native_types_search_solutions.sql</code></pre>
 <p>The solution creates and rolls back only <code>pro_types_lab</code>.</p>
 <h4 id="solution-1--exercise-1-multi-tag-containment">Exercise 1 — Multi-tag containment<a class="heading-anchor" href="#solution-1--exercise-1-multi-tag-containment" aria-label="Link to this section">#</a></h4>
 <p><code>tags @&gt; ARRAY[&#x27;postgresql&#x27;,&#x27;operations&#x27;]</code> asks whether the stored array contains both required values. Two scalar <code>ANY</code> predicates can express the same fixture result, but containment maps directly to the set-like question and a GIN array operator class.</p>
 <p>Arrays preserve order and duplicates, so they are not literally mathematical sets. If duplicate/order semantics matter, test them explicitly.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-types-01 Exercise 1, filter <code>documents</code> to published rows whose <code>tags</code> array contains both <code>postgresql</code> and <code>operations</code> using one <code>@&gt;</code> containment predicate.</li>
+<li><strong>Expected result/shape:</strong> For sql-types-01 Exercise 1, expected output: exactly one row at document grain with <code>document_id</code> and <code>title</code>, ordered by <code>document_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-types-01 Exercise 1, compare the result with an independent unnest/distinct-tag control, prove both required tags—not either one—are present, and explain that array GIN supports containment while two <code>= ANY</code> predicates express separate membership tests.</li>
+</ul>
 <h4 id="solution-1--exercise-2-availability-minus-blackout">Exercise 2 — Availability minus blackout<a class="heading-anchor" href="#solution-1--exercise-2-availability-minus-blackout" aria-label="Link to this section">#</a></h4>
 <p>The predicate combines:</p>
 <pre><code class="language-sql">availability @&gt; DATE &#x27;2026-08-11&#x27;
 AND NOT (blackout_windows @&gt; DATE &#x27;2026-08-11&#x27;)</code></pre>
 <p>The fixture uses <code>[start,end)</code>, including start and excluding end. The migration document is generally available that day but specifically blacked out, so it is excluded.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-types-01 Exercise 2, require <code>availability @&gt; probe_date</code> and NOT <code>blackout_windows @&gt; probe_date</code>, then probe the lower and upper endpoints of both <code>[)</code> ranges for document 201.</li>
+<li><strong>Expected result/shape:</strong> For sql-types-01 Exercise 2, expected output: document 202 for 2026-08-11 plus four boundary rows showing availability lower included, blackout lower excluded from use, blackout upper available, and availability upper excluded.</li>
+<li><strong>Independent verification:</strong> For sql-types-01 Exercise 2, assert the <code>[lower, upper)</code> truth table directly and distinguish an unavailable document from a missing result row; test both range and multirange containment at exact endpoints.</li>
+</ul>
 <h4 id="solution-1--exercise-3-numeric-jsonpath">Exercise 3 — Numeric JSONPath<a class="heading-anchor" href="#solution-1--exercise-3-numeric-jsonpath" aria-label="Link to this section">#</a></h4>
 <p>The JSONPath predicate checks both JSON number type and value above 30. The selected cast is safe because this controlled fixture owns the metadata shape. With untrusted JSON, use shape validation or a normalized typed column before casting; SQL predicate evaluation order is not a universal error guard.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-types-01 Exercise 3, use JSONPath to require a JSON number greater than 30 before casting its text representation to unbounded <code>numeric</code>.</li>
+<li><strong>Expected result/shape:</strong> For sql-types-01 Exercise 3, expected output: one row per matching document with <code>document_id</code>, <code>title</code>, and <code>minutes_numeric</code>; the supplied fixture returns documents 201 and 202.</li>
+<li><strong>Independent verification:</strong> For sql-types-01 Exercise 3, add string, missing, fractional, and very large numeric values; prove JSONPath excludes nonnumbers, numeric preserves fractional/range values, and no arbitrary JSON value reaches an unsafe integer cast.</li>
+</ul>
 <h4 id="solution-1--exercise-4-phrase-aware-full-text">Exercise 4 — Phrase-aware full text<a class="heading-anchor" href="#solution-1--exercise-4-phrase-aware-full-text" aria-label="Link to this section">#</a></h4>
 <p><code>websearch_to_tsquery(&#x27;english&#x27;, &#x27;&quot;schema migration&quot; verify&#x27;)</code> builds a query requiring the phrase plus <code>verify</code>. The generated vector weights titles above bodies, and ordering uses rank then UUID to break ties deterministically.</p>
 <p>Different configurations stem words differently. Always use the same explicit configuration when generating vectors and queries.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-types-01 Exercise 4, build one English <code>websearch_to_tsquery</code> for the phrase and term, match it against the stored weighted search vector, and compute <code>ts_rank_cd</code>.</li>
+<li><strong>Expected result/shape:</strong> For sql-types-01 Exercise 4, expected output: matching <code>document_id</code>, <code>title</code>, and <code>rank_score</code>, ordered by rank descending then <code>document_id</code>; the fixture returns document 201.</li>
+<li><strong>Independent verification:</strong> For sql-types-01 Exercise 4, display the parsed tsquery and source lexemes, assert every returned vector satisfies <code>@@</code>, and retain the document-ID tie-breaker because equal rank scores are possible.</li>
+</ul>
 <h4 id="solution-1--exercise-5-index-choices">Exercise 5 — Index choices<a class="heading-anchor" href="#solution-1--exercise-5-index-choices" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Default <code>jsonb_ops</code> supports a wider operator family and indexes keys and values.</li>
@@ -695,26 +1039,74 @@ AND NOT (blackout_windows @&gt; DATE &#x27;2026-08-11&#x27;)</code></pre>
 <li><code>pg_trgm</code> supports similarity and many substring patterns, but requires an approved extension and adds index/write cost.</li>
 </ul>
 <p>Choose from observed operators and workload, then measure plans and maintenance; do not stack every candidate index.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-types-01 Exercise 5, return an operator-first matrix mapping four real predicates to candidate index families and one superficially related query that each index does not serve.</li>
+<li><strong>Expected result/shape:</strong> For sql-types-01 Exercise 5, expected output: four rows with <code>workload</code>, <code>matching_operator</code>, <code>candidate_index</code>, <code>nonmatching_query</code>, and <code>reason</code>, covering arrays, JSONB, full-text, and ranges.</li>
+<li><strong>Independent verification:</strong> For sql-types-01 Exercise 5, inspect operator classes and compare EXPLAIN plans only after representative data exists; distinguish <code>jsonb_ops</code> flexibility from <code>jsonb_path_ops</code> size/supported-operator trade-offs and treat pg_trgm as optional.</li>
+</ul>
 <h4 id="solution-1--exercise-6-modelling-choices">Exercise 6 — Modelling choices<a class="heading-anchor" href="#solution-1--exercise-6-modelling-choices" aria-label="Link to this section">#</a></h4>
 <p>Use a domain for a stable reusable scalar rule, an enum for a small database-owned closed lifecycle, a reference table when labels need metadata or frequent change, an array for a small row-owned homogeneous collection, a range for interval algebra, JSONB for genuinely variable document-shaped attributes, and normalized relations for independently identified facts and cross-row constraints.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-types-01 Exercise 6, classify modeled field shapes against domain, CHECK/enum, reference table, array, range/multirange, JSONB, and normalized relation choices.</li>
+<li><strong>Expected result/shape:</strong> For sql-types-01 Exercise 6, expected output: seven deterministic rows with <code>field_shape</code>, <code>candidate_type</code>, and a concrete <code>decision_rule</code>.</li>
+<li><strong>Independent verification:</strong> For sql-types-01 Exercise 6, challenge each choice with one evolution/query/integrity counterexample, and prefer the type whose operators and constraints match the domain rather than the most exotic type.</li>
+</ul>
 <h4 id="solution-1--exercise-7-multirange-normalization-and-gaps">Exercise 7 — Multirange normalization and gaps<a class="heading-anchor" href="#solution-1--exercise-7-multirange-normalization-and-gaps" aria-label="Link to this section">#</a></h4>
 <p>Construct a <code>datemultirange</code> from input ranges; PostgreSQL canonicalizes and merges overlapping or adjacent discrete date ranges. The August gap is the bounded month range minus the normalized availability multirange. Expand only for display/testing when the domain is small—range algebra avoids one row per day.</p>
 <p>Adjacency merging is correct when uninterrupted consecutive dates are one availability period. If a handoff at the boundary has business meaning, store separate identified periods rather than relying on a multirange that canonicalizes them together.</p>
+<h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-types-01 Exercise 7, construct a <code>datemultirange</code> from overlapping and adjacent half-open date ranges, then subtract it from the August 2026 month range.</li>
+<li><strong>Expected result/shape:</strong> For sql-types-01 Exercise 7, expected output: exactly one row with canonical <code>normalized_availability</code> and <code>august_gaps</code>; adjacent/overlapping discrete ranges merge.</li>
+<li><strong>Independent verification:</strong> For sql-types-01 Exercise 7, independently test every August date for membership in either availability or gaps, require no overlap and complete month coverage, and state whether adjacency should merge in this business domain.</li>
+</ul>
 <h4 id="solution-1--exercise-8-network-containment">Exercise 8 — Network containment<a class="heading-anchor" href="#solution-1--exercise-8-network-containment" aria-label="Link to this section">#</a></h4>
 <p>Store client endpoints as <code>inet</code> and rules as <code>cidr</code>. Join where the network contains the address (<code>network &gt;&gt;= address</code>), then rank by <code>masklen(network) DESC, rule_id</code> so the longest prefix wins deterministically. GiST or SP-GiST network operator classes can support containment; confirm the exact operator and plan.</p>
 <p>Do not compare addresses as text: lexical order and spelling variants do not express network containment. Explicitly define IPv4/IPv6 coexistence and the default rule when no network matches.</p>
+<h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-types-01 Exercise 8, preserve every client with <code>LEFT JOIN LATERAL</code>; inside the lateral query choose the containing CIDR with greatest mask length and <code>rule_id</code> tie-breaker.</li>
+<li><strong>Expected result/shape:</strong> For sql-types-01 Exercise 8, expected output: one row per client with <code>client_id</code>, <code>address</code>, <code>rule_id</code>, and <code>network</code>; matched clients receive their longest prefix and the unmatched client retains NULL rule fields.</li>
+<li><strong>Independent verification:</strong> For sql-types-01 Exercise 8, assert output count equals client count, validate each chosen network contains its address, prove no more-specific candidate exists, and test both IPv4, IPv6, and unmatched addresses.</li>
+</ul>
 <h4 id="solution-1--exercise-9-monetary-representation">Exercise 9 — Monetary representation<a class="heading-anchor" href="#solution-1--exercise-9-monetary-representation" aria-label="Link to this section">#</a></h4>
 <p><code>numeric(p,s)</code> gives exact decimal arithmetic and a declared scale; validate rounding at ingestion and choose capacity from maximum business value. Bigint minor units are exact and interoperable but require an explicit currency scale that may differ by currency. Double precision is approximate and is unsuitable for exact equality/accounting totals.</p>
 <p>A domain can centralize nonnegative/range rules, but currency compatibility is cross-column and usually needs a composite model or reference table. Test sum, rounding, multiplication, overflow, serialization, and mixed-currency rejection.</p>
+<h5 id="solution-1--reasoning-and-verification-9">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-9" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-types-01 Exercise 9, define a nonnegative <code>numeric(12,2)</code> domain, demonstrate exact arithmetic and rounding, and compare it with bigint minor units and double precision.</li>
+<li><strong>Expected result/shape:</strong> For sql-types-01 Exercise 9, expected output: one scalar evidence row plus a three-row storage matrix; the domain cast of NULL remains NULL because NOT NULL belongs on the consuming column.</li>
+<li><strong>Independent verification:</strong> For sql-types-01 Exercise 9, reject a negative value, assert exact sum <code>30.30</code> and declared rounding <code>10.13</code>, test NULL at both domain and NOT NULL column boundaries, and document currency/scale when using minor units.</li>
+</ul>
 <h4 id="solution-1--exercise-10-promote-a-json-property">Exercise 10 — Promote a JSON property<a class="heading-anchor" href="#solution-1--exercise-10-promote-a-json-property" aria-label="Link to this section">#</a></h4>
 <p>Validate that the payload property is a JSON number before casting it in a generated expression, or constrain accepted payload shape first. Index the stored typed column and query that column directly; this makes the frequently used contract visible to statistics and tools.</p>
-<p>The trade-off is stricter writes: a legacy string such as <code>&quot;30&quot;</code> may have been accepted JSON but now fails the promoted contract. Inventory/backfill bad rows, deploy compatible writers, validate, and only then enforce the generated value.</p>
+<p>This implementation keeps writes compatible while making the typed contract observable: a legacy string such as <code>&quot;30&quot;</code>, a missing property, a fractional number, or an out-of-range number materializes as SQL <code>NULL</code>. Consumers must distinguish “not a valid promoted integer” from zero. A stricter design can add a validated <code>CHECK</code> later, after inventorying old rows and updating writers.</p>
+<h5 id="solution-1--reasoning-and-verification-10">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-10" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-types-01 Exercise 10, add a stored generated integer that accepts only JSON numbers that are integral and within PostgreSQL integer range; otherwise return NULL, then index it.</li>
+<li><strong>Expected result/shape:</strong> For sql-types-01 Exercise 10, expected output: boundary rows for string, missing, fractional, and out-of-range minutes, all safely classified as NULL; valid integral seed values remain queryable.</li>
+<li><strong>Independent verification:</strong> For sql-types-01 Exercise 10, prove all four malformed-for-the-property payloads insert without cast errors, valid 35/45 values materialize, the index exists, and the application policy distinguishes invalid from absent rather than silently treating both as zero.</li>
+</ul>
 <h4 id="solution-1--exercise-11-language-aware-full-text">Exercise 11 — Language-aware full text<a class="heading-anchor" href="#solution-1--exercise-11-language-aware-full-text" aria-label="Link to this section">#</a></h4>
 <p><code>to_tsvector</code> reveals normalized lexemes and positions after parsing, dictionary stop-word removal, and stemming. Weight title/body lexemes before ranking. Generate and query with the same explicit configuration.</p>
 <p>For multilingual data, store/validate a language configuration per row or route rows into language-specific vectors/indexes. A generic <code>simple</code> configuration avoids stemming but is not automatically better. Evaluate relevance against a labeled corpus, including unsupported/mixed-language fallback.</p>
+<h5 id="solution-1--reasoning-and-verification-11">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-11" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-types-01 Exercise 11, convert each title/body pair with an explicit English text-search configuration and expose the resulting lexemes.</li>
+<li><strong>Expected result/shape:</strong> For sql-types-01 Exercise 11, expected output: one row per document with <code>document_id</code> and <code>lexemes</code>, ordered by <code>document_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-types-01 Exercise 11, inspect stemming and stop-word behavior with known tokens, compare a non-English sample under the English and appropriate configurations, and keep the configured language explicit in stored-vector policy.</li>
+</ul>
 <h4 id="solution-1--exercise-12-normalize-tags">Exercise 12 — Normalize tags<a class="heading-anchor" href="#solution-1--exercise-12-normalize-tags" aria-label="Link to this section">#</a></h4>
 <p>Create a <code>tags</code> vocabulary and a <code>document_tags(document_id, tag_id)</code> relation with a composite primary key. Containment becomes grouping/HAVING or joins, and foreign keys enforce vocabulary and prevent duplicates.</p>
 <p>Arrays are simpler for a small row-owned list queried by containment, but cannot foreign-key individual elements and preserve duplicates/order. Normalization adds join/write cost while supporting tag metadata, independent identity, cross-row constraints, and referential updates.</p>
+<h5 id="solution-1--reasoning-and-verification-12">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-12" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-types-01 Exercise 12, normalize legacy tag arrays with <code>lower(btrim(tag))</code>, insert distinct vocabulary rows, and insert distinct <code>(document_id, tag_id)</code> bridge rows.</li>
+<li><strong>Expected result/shape:</strong> For sql-types-01 Exercise 12, expected output: one normalized vocabulary row per canonical tag, one bridge row per document/tag pair despite duplicate legacy spellings, and document 201 for the two-tag relational query.</li>
+<li><strong>Independent verification:</strong> For sql-types-01 Exercise 12, inject <code>python</code>, <code> Python </code>, and duplicate <code>python</code> in one array, assert only one bridge pair survives, verify foreign-key and composite-primary-key enforcement, and record that array order/case/whitespace are intentionally discarded.</li>
+</ul>
 <h4 id="solution-1--edge-cases">Edge cases<a class="heading-anchor" href="#solution-1--edge-cases" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Empty arrays and empty ranges have distinct semantics.</li>
@@ -723,7 +1115,7 @@ AND NOT (blackout_windows @&gt; DATE &#x27;2026-08-11&#x27;)</code></pre>
 <li>Search ranking and phrase behavior require corpus-level relevance tests.</li>
 </ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -731,7 +1123,7 @@ AND NOT (blackout_windows @&gt; DATE &#x27;2026-08-11&#x27;)</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -755,6 +1147,19 @@ AND NOT (blackout_windows @&gt; DATE &#x27;2026-08-11&#x27;)</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-TYPES-01 executable solutions</span>
+<span>-- SOLUTION READING MAP — sql-types-01: PostgreSQL-Native Types and Searchable Documents</span>
+<span>-- Explanation: sql/professional/solutions/sql_types_01_native_types_search_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_types_01_native_types_search_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>\set ON_ERROR_STOP on</span>
 <span>BEGIN;</span>
 <span>SET LOCAL search_path TO pg_catalog, public;</span>
@@ -829,7 +1234,7 @@ AND NOT (blackout_windows @&gt; DATE &#x27;2026-08-11&#x27;)</code></pre>
 <span>  AND d.tags @&gt; ARRAY[&#x27;postgresql&#x27;, &#x27;operations&#x27;]::text[]</span>
 <span>ORDER BY d.document_id;</span>
 <span> </span>
-<span>-- Exercise 2. The first document is blacked out, so no row is expected.</span>
+<span>-- Exercise 2. Document 201 is excluded by its blackout; document 202 remains.</span>
 <span>SELECT</span>
 <span>    d.document_id,</span>
 <span>    d.title</span>
@@ -838,11 +1243,30 @@ AND NOT (blackout_windows @&gt; DATE &#x27;2026-08-11&#x27;)</code></pre>
 <span>  AND NOT (d.blackout_windows @&gt; DATE &#x27;2026-08-11&#x27;)</span>
 <span>ORDER BY d.document_id;</span>
 <span> </span>
-<span>-- Exercise 3. Fixture ownership guarantees numeric JSON minutes.</span>
+<span>SELECT</span>
+<span>    probe.probe_name,</span>
+<span>    probe.probe_date,</span>
+<span>    d.availability @&gt; probe.probe_date AS inside_availability,</span>
+<span>    d.blackout_windows @&gt; probe.probe_date AS inside_blackout,</span>
+<span>    (d.availability @&gt; probe.probe_date)</span>
+<span>        AND NOT (d.blackout_windows @&gt; probe.probe_date) AS is_available</span>
+<span>FROM pro_types_lab.documents AS d</span>
+<span>CROSS JOIN (</span>
+<span>    VALUES</span>
+<span>        (&#x27;availability lower bound&#x27;::text, DATE &#x27;2026-01-01&#x27;),</span>
+<span>        (&#x27;blackout lower bound&#x27;, DATE &#x27;2026-08-10&#x27;),</span>
+<span>        (&#x27;blackout upper bound&#x27;, DATE &#x27;2026-08-12&#x27;),</span>
+<span>        (&#x27;availability upper bound&#x27;, DATE &#x27;2027-01-01&#x27;)</span>
+<span>) AS probe(probe_name, probe_date)</span>
+<span>WHERE d.document_id = &#x27;00000000-0000-0000-0000-000000000201&#x27;::uuid</span>
+<span>ORDER BY probe.probe_date;</span>
+<span> </span>
+<span>-- Exercise 3. JSONPath tests the JSON type and numeric threshold before a</span>
+<span>-- numeric cast. It does not promise that every JSON number fits an integer.</span>
 <span>SELECT</span>
 <span>    d.document_id,</span>
 <span>    d.title,</span>
-<span>    (d.metadata -&gt;&gt; &#x27;minutes&#x27;)::integer AS minutes</span>
+<span>    (d.metadata -&gt;&gt; &#x27;minutes&#x27;)::numeric AS minutes_numeric</span>
 <span>FROM pro_types_lab.documents AS d</span>
 <span>WHERE d.metadata @? &#x27;$.minutes ? (@.type() == &quot;number&quot; &amp;&amp; @ &gt; 30)&#x27;</span>
 <span>ORDER BY d.document_id;</span>
@@ -886,12 +1310,53 @@ AND NOT (blackout_windows @&gt; DATE &#x27;2026-08-11&#x27;)</code></pre>
 <span>END</span>
 <span>$solution$;</span>
 <span> </span>
-<span>-- Exercise 5: operator-first index notes are in the Markdown solution. This</span>
-<span>-- executable fixture deliberately creates no optional extension or extra GIN.</span>
+<span>-- Exercise 5: choose an access method from the operators the workload really</span>
+<span>-- uses. `nonmatching_query` makes a common false assumption explicit.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (&#x27;tags contains all values&#x27;::text, &#x27;tags @&gt; ARRAY[...]&#x27;::text,</span>
+<span>         &#x27;GIN array_ops&#x27;::text, &#x27;tags[1] = ...&#x27;::text,</span>
+<span>         &#x27;array element position is a different expression&#x27;),</span>
+<span>        (&#x27;JSON containment/path&#x27;, &#x27;metadata @&gt; ... or metadata @? ...&#x27;,</span>
+<span>         &#x27;GIN jsonb_ops or jsonb_path_ops&#x27;,</span>
+<span>         &#x27;metadata -&gt;&gt; &#x27;&#x27;minutes&#x27;&#x27; &gt; ...&#x27;,</span>
+<span>         &#x27;extracted scalar comparison needs an expression/generated-column index&#x27;),</span>
+<span>        (&#x27;full-text match&#x27;, &#x27;search_vector @@ tsquery&#x27;,</span>
+<span>         &#x27;GIN tsvector_ops&#x27;, &#x27;title ILIKE &#x27;&#x27;%term%&#x27;&#x27;&#x27;,</span>
+<span>         &#x27;substring similarity needs optional pg_trgm, not tsvector GIN&#x27;),</span>
+<span>        (&#x27;range overlap/containment&#x27;, &#x27;availability @&gt; date&#x27;,</span>
+<span>         &#x27;GiST range_ops&#x27;, &#x27;lower(availability) = date&#x27;,</span>
+<span>         &#x27;a lower-bound expression is not a range-containment search&#x27;)</span>
+<span>) AS index_choice(</span>
+<span>    workload,</span>
+<span>    matching_operator,</span>
+<span>    candidate_index,</span>
+<span>    nonmatching_query,</span>
+<span>    reason</span>
+<span>)</span>
+<span>ORDER BY workload;</span>
 <span> </span>
-<span>-- Exercise 6: type selection is a domain decision; the following exercises</span>
-<span>-- demonstrate multirange, network, domain, generated, search, and normalized</span>
-<span>-- relation alternatives without claiming one universal choice.</span>
+<span>-- Exercise 6: type selection is a domain decision, not a fashion choice.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (&#x27;money with a reusable nonnegative rule&#x27;::text, &#x27;domain over numeric&#x27;::text,</span>
+<span>         &#x27;fixed scale plus reusable validation; column still declares NOT NULL&#x27;::text),</span>
+<span>        (&#x27;small stable workflow vocabulary&#x27;, &#x27;CHECK or enum&#x27;,</span>
+<span>         &#x27;CHECK is easier to evolve; enum is strongly typed but migration-heavy&#x27;),</span>
+<span>        (&#x27;operator-managed vocabulary&#x27;, &#x27;reference table&#x27;,</span>
+<span>         &#x27;rows carry metadata, lifecycle, and foreign-key identity&#x27;),</span>
+<span>        (&#x27;small owned tag bag&#x27;, &#x27;array&#x27;,</span>
+<span>         &#x27;containment is concise when order and duplicates are not business facts&#x27;),</span>
+<span>        (&#x27;time window&#x27;, &#x27;range or multirange&#x27;,</span>
+<span>         &#x27;boundary and overlap operators encode interval semantics&#x27;),</span>
+<span>        (&#x27;sparse evolving payload&#x27;, &#x27;JSONB&#x27;,</span>
+<span>         &#x27;flexible shape, but frequently queried properties need validation/index policy&#x27;),</span>
+<span>        (&#x27;many-to-many tags&#x27;, &#x27;normalized relation&#x27;,</span>
+<span>         &#x27;foreign keys, canonical identity, and duplicate prevention&#x27;)</span>
+<span>) AS type_decision(field_shape, candidate_type, decision_rule)</span>
+<span>ORDER BY field_shape;</span>
 <span> </span>
 <span>-- Exercise 7: discrete date multiranges canonicalize overlapping/adjacent</span>
 <span>-- members. Subtracting from the month produces the uncovered gaps.</span>
@@ -919,26 +1384,24 @@ AND NOT (blackout_windows @&gt; DATE &#x27;2026-08-11&#x27;)</code></pre>
 <span>clients(client_id, address) AS (</span>
 <span>    VALUES</span>
 <span>        (&#x27;client-a&#x27;::text, &#x27;10.20.1.5&#x27;::inet),</span>
-<span>        (&#x27;client-b&#x27;::text, &#x27;2001:db8::42&#x27;::inet)</span>
-<span>),</span>
-<span>ranked AS (</span>
-<span>    SELECT</span>
-<span>        c.client_id,</span>
-<span>        c.address,</span>
-<span>        r.rule_id,</span>
-<span>        r.network,</span>
-<span>        row_number() OVER (</span>
-<span>            PARTITION BY c.client_id</span>
-<span>            ORDER BY masklen(r.network) DESC, r.rule_id</span>
-<span>        ) AS match_rank</span>
-<span>    FROM clients AS c</span>
-<span>    JOIN rules AS r</span>
-<span>      ON r.network &gt;&gt;= c.address</span>
+<span>        (&#x27;client-b&#x27;::text, &#x27;2001:db8::42&#x27;::inet),</span>
+<span>        (&#x27;client-unmatched&#x27;::text, &#x27;192.0.2.10&#x27;::inet)</span>
 <span>)</span>
-<span>SELECT client_id, address, rule_id, network</span>
-<span>FROM ranked</span>
-<span>WHERE match_rank = 1</span>
-<span>ORDER BY client_id;</span>
+<span>SELECT</span>
+<span>    c.client_id,</span>
+<span>    c.address,</span>
+<span>    best.rule_id,</span>
+<span>    best.network</span>
+<span>FROM clients AS c</span>
+<span>LEFT JOIN LATERAL (</span>
+<span>    SELECT r.rule_id, r.network</span>
+<span>    FROM rules AS r</span>
+<span>    WHERE r.network &gt;&gt;= c.address</span>
+<span>    ORDER BY masklen(r.network) DESC, r.rule_id</span>
+<span>    LIMIT 1</span>
+<span>) AS best</span>
+<span>  ON true</span>
+<span>ORDER BY c.client_id;</span>
 <span> </span>
 <span>-- Exercise 9: exact decimal storage with an explicit nonnegative reusable rule.</span>
 <span>CREATE DOMAIN pro_types_lab.nonnegative_money AS numeric(12, 2)</span>
@@ -947,15 +1410,59 @@ AND NOT (blackout_windows @&gt; DATE &#x27;2026-08-11&#x27;)</code></pre>
 <span>SELECT</span>
 <span>    10.10::pro_types_lab.nonnegative_money</span>
 <span>    + 20.20::pro_types_lab.nonnegative_money AS exact_decimal_sum,</span>
-<span>    round(10.125::numeric, 2) AS declared_rounding_example;</span>
+<span>    round(10.125::numeric, 2) AS declared_rounding_example,</span>
+<span>    NULL::pro_types_lab.nonnegative_money AS domain_null_without_column_rule;</span>
 <span> </span>
-<span>-- Exercise 10: promote a controlled, frequently queried JSON number. The CASE</span>
-<span>-- prevents a non-number JSON value from reaching the cast.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (&#x27;numeric(12,2)&#x27;::text, &#x27;exact decimal&#x27;, &#x27;declared half-away-from-zero example&#x27;, &#x27;common database money model&#x27;),</span>
+<span>        (&#x27;bigint minor units&#x27;, &#x27;exact integer&#x27;, &#x27;application supplies currency scale&#x27;, &#x27;fast and interoperable if scale/currency are explicit&#x27;),</span>
+<span>        (&#x27;double precision&#x27;, &#x27;binary approximation&#x27;, &#x27;not exact for decimal equality&#x27;, &#x27;scientific measurement, not contractual money&#x27;)</span>
+<span>) AS money_choice(storage, equality_model, rounding_policy, suitable_use)</span>
+<span>ORDER BY storage;</span>
+<span> </span>
+<span>-- Exercise 10: add malformed-for-this-property-but-valid-JSON probes before</span>
+<span>-- defining the generated column. The CASE must classify all of them safely.</span>
+<span>INSERT INTO pro_types_lab.documents (</span>
+<span>    document_id,</span>
+<span>    state,</span>
+<span>    title,</span>
+<span>    body,</span>
+<span>    tags,</span>
+<span>    availability,</span>
+<span>    blackout_windows,</span>
+<span>    metadata</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    probe.document_id,</span>
+<span>    &#x27;draft&#x27;,</span>
+<span>    probe.title,</span>
+<span>    &#x27;Boundary fixture&#x27;,</span>
+<span>    ARRAY[&#x27;boundary&#x27;],</span>
+<span>    daterange(DATE &#x27;2026-01-01&#x27;, DATE &#x27;2027-01-01&#x27;, &#x27;[)&#x27;),</span>
+<span>    &#x27;{}&#x27;::datemultirange,</span>
+<span>    probe.metadata</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (&#x27;00000000-0000-0000-0000-000000000210&#x27;::uuid, &#x27;String minutes&#x27;::text,</span>
+<span>         &#x27;{&quot;minutes&quot;:&quot;45&quot;}&#x27;::jsonb),</span>
+<span>        (&#x27;00000000-0000-0000-0000-000000000211&#x27;::uuid, &#x27;Missing minutes&#x27;,</span>
+<span>         &#x27;{&quot;audience&quot;:[]}&#x27;::jsonb),</span>
+<span>        (&#x27;00000000-0000-0000-0000-000000000212&#x27;::uuid, &#x27;Fractional minutes&#x27;,</span>
+<span>         &#x27;{&quot;minutes&quot;:12.5}&#x27;::jsonb),</span>
+<span>        (&#x27;00000000-0000-0000-0000-000000000213&#x27;::uuid, &#x27;Out-of-range minutes&#x27;,</span>
+<span>         &#x27;{&quot;minutes&quot;:999999999999}&#x27;::jsonb)</span>
+<span>) AS probe(document_id, title, metadata);</span>
+<span> </span>
 <span>ALTER TABLE pro_types_lab.documents</span>
 <span>ADD COLUMN estimated_minutes integer GENERATED ALWAYS AS (</span>
 <span>    CASE</span>
 <span>        WHEN jsonb_typeof(metadata -&gt; &#x27;minutes&#x27;) = &#x27;number&#x27;</span>
-<span>        THEN (metadata -&gt;&gt; &#x27;minutes&#x27;)::integer</span>
+<span>         AND (metadata -&gt;&gt; &#x27;minutes&#x27;)::numeric</span>
+<span>             = trunc((metadata -&gt;&gt; &#x27;minutes&#x27;)::numeric)</span>
+<span>         AND (metadata -&gt;&gt; &#x27;minutes&#x27;)::numeric BETWEEN 0 AND 2147483647</span>
+<span>        THEN ((metadata -&gt;&gt; &#x27;minutes&#x27;)::numeric)::integer</span>
 <span>        ELSE NULL</span>
 <span>    END</span>
 <span>) STORED;</span>
@@ -965,7 +1472,7 @@ AND NOT (blackout_windows @&gt; DATE &#x27;2026-08-11&#x27;)</code></pre>
 <span> </span>
 <span>SELECT d.document_id, d.estimated_minutes</span>
 <span>FROM pro_types_lab.documents AS d</span>
-<span>WHERE d.estimated_minutes &gt; 30</span>
+<span>WHERE d.document_id &gt;= &#x27;00000000-0000-0000-0000-000000000210&#x27;::uuid</span>
 <span>ORDER BY d.document_id;</span>
 <span> </span>
 <span>-- Exercise 11: inspect lexemes after the explicit English configuration.</span>
@@ -992,18 +1499,26 @@ AND NOT (blackout_windows @&gt; DATE &#x27;2026-08-11&#x27;)</code></pre>
 <span>    PRIMARY KEY (document_id, tag_id)</span>
 <span>);</span>
 <span> </span>
+<span>-- Deliberately inject duplicate/case/whitespace legacy spellings. The</span>
+<span>-- normalized bridge policy is lower(btrim(tag)); array order is discarded.</span>
+<span>UPDATE pro_types_lab.documents</span>
+<span>SET tags = ARRAY[&#x27;python&#x27;, &#x27; Python &#x27;, &#x27;python&#x27;]</span>
+<span>WHERE document_id = &#x27;00000000-0000-0000-0000-000000000203&#x27;::uuid;</span>
+<span> </span>
 <span>INSERT INTO pro_types_lab.tags (tag_name)</span>
-<span>SELECT DISTINCT tag_name</span>
+<span>SELECT DISTINCT lower(btrim(tag_name))</span>
 <span>FROM pro_types_lab.documents AS d</span>
 <span>CROSS JOIN LATERAL unnest(d.tags) AS tag_name</span>
-<span>ORDER BY tag_name;</span>
+<span>WHERE btrim(tag_name) &lt;&gt; &#x27;&#x27;</span>
+<span>ORDER BY lower(btrim(tag_name));</span>
 <span> </span>
 <span>INSERT INTO pro_types_lab.document_tags (document_id, tag_id)</span>
-<span>SELECT d.document_id, t.tag_id</span>
+<span>SELECT DISTINCT d.document_id, t.tag_id</span>
 <span>FROM pro_types_lab.documents AS d</span>
 <span>CROSS JOIN LATERAL unnest(d.tags) AS item(tag_name)</span>
 <span>JOIN pro_types_lab.tags AS t</span>
-<span>  ON t.tag_name = item.tag_name;</span>
+<span>  ON t.tag_name = lower(btrim(item.tag_name))</span>
+<span>WHERE btrim(item.tag_name) &lt;&gt; &#x27;&#x27;;</span>
 <span> </span>
 <span>SELECT</span>
 <span>    d.document_id,</span>
@@ -1021,7 +1536,50 @@ AND NOT (blackout_windows @&gt; DATE &#x27;2026-08-11&#x27;)</code></pre>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-types-01 — PostgreSQL-Native Types and Searchable Documents.
+
+I have completed the direct catalog prerequisite: `sql-29`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/professional/companion-guides/sql_types_01_native_types_search.md
+- Answer-free learner SQL: sql/professional/lessons/sql_types_01_native_types_search.sql
+
+Key terms to teach in context: Domain, Enum, UUID, Array, Range/multirange, JSONB. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: The model uses a domain for a reusable email-shape rule and an enum for a small database-owned lifecycle. Enums are compact and clear, but adding/removing labels is migration work; a reference table is more flexible when labels carry metadata or change frequently.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-types-01/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-prog-01.html"><small>Previous lesson</small><strong>sql-prog-01</strong><span>Functions, Procedures, and Triggers</span></a>
@@ -1113,6 +1671,23 @@ AND NOT (blackout_windows @&gt; DATE &#x27;2026-08-11&#x27;)</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

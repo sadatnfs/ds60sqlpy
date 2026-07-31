@@ -119,7 +119,12 @@
 <p>DS60 contains two substantial 60-lesson cores, an eight-lesson engineering bridge, and 26 named foundation, professional, and specialization modules. The day number is an ordering key, not a promise that every learner should finish in that many calendar days.</p>
 <p>Use the repository environment directly so navigation does not depend on an activated shell:</p>
 <pre><code class="language-powershell"># Windows PowerShell
-.\.venv\Scripts\python.exe scripts\course.py catalog</code></pre>
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython scripts\course.py catalog</code></pre>
 <pre><code class="language-bash"># macOS/Linux
 .venv/bin/python scripts/course.py catalog</code></pre>
 <p>for the checked-in generated inventory in <code>curriculum/catalog.json</code>. The index is built from lesson artifact filenames plus metadata rules in <code>src/ds60sqlpy/catalog_builder.py</code>; do not edit the JSON by hand.</p>
@@ -127,14 +132,15 @@
 <h4 id="new-to-programming-and-databases">New to programming and databases<a class="heading-anchor" href="#new-to-programming-and-databases" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Complete Python Days 1–15.</li>
-<li>Complete <code>sql-found-01</code> and <code>sql-found-02</code>, then begin SQL Days 1–15.</li>
+<li>Complete SQL Days 1–15, beginning with a small <code>SELECT</code>.</li>
 <li>Continue Python Days 16–30.</li>
-<li>Continue SQL Days 16–30.</li>
+<li>Complete <code>sql-found-01</code> for relational design, then continue SQL Days 16–30.</li>
 <li>Add the engineering bridge after Python Day 15 and SQL Day 15 when you want application-oriented integration practice.</li>
+<li>After SQL Day 39, complete <code>sql-found-02</code> for versioned schema evolution before Day 40.</li>
 <li>Choose advanced data science, advanced SQL, or alternate both.</li>
 </ol>
 <h4 id="comfortable-with-another-programming-language">Comfortable with another programming language<a class="heading-anchor" href="#comfortable-with-another-programming-language" aria-label="Link to this section">#</a></h4>
-<p>Review Python Days 1–9, then focus on testing, tooling, data work, and projects. Complete the two SQL foundations before Day 1 unless you can already design constraints and explain a versioned migration workflow.</p>
+<p>Review Python Days 1–9, then focus on testing, tooling, data work, and projects. Begin SQL at Day 1 unless a placement check shows that you should skip basic querying; take the relational-design and migration modules only after their declared catalog prerequisites.</p>
 <h4 id="comfortable-with-sql">Comfortable with SQL<a class="heading-anchor" href="#comfortable-with-sql" aria-label="Link to this section">#</a></h4>
 <p>Use the SQL companion guides and project lessons as a diagnostic. Do not skip PostgreSQL setup, transaction behavior, or query-plan lessons merely because SELECT syntax is familiar.</p>
 <h4 id="focused-on-data-science">Focused on data science<a class="heading-anchor" href="#focused-on-data-science" aria-label="Link to this section">#</a></h4>
@@ -212,7 +218,7 @@
 <li>Companion guides: Days 1–60</li>
 <li>Markdown solutions: Days 1–60</li>
 <li>Executable solution SQL: Days 1–60</li>
-<li>Relational foundations: 2 named modules before Day 1</li>
+<li>Relational engineering: 2 named modules after the relevant querying, transaction, and locking prerequisites</li>
 <li>Professional and specialization SQL: 10 named modules after the shared core</li>
 </ul>
 <p>Runnable material and the maintained high-level plan both target PostgreSQL 16 or newer.</p>

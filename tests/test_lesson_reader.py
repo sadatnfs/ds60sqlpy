@@ -49,6 +49,8 @@ def test_every_catalog_entry_has_a_current_portable_reader() -> None:
         assert '<link rel="stylesheet"' not in rendered
         assert 'const SERVER_TOKEN = "";' in rendered
         assert RAW_LOCAL_ARTIFACT_HREF.search(rendered) is None
+        assert rendered.endswith("\n")
+        assert all(line == line.rstrip() for line in rendered.splitlines())
 
 
 def test_reader_renders_notebooks_and_sql_as_html_not_raw_downloads() -> None:
@@ -160,6 +162,7 @@ def test_rendered_references_cover_recursive_local_markdown_and_sql_links() -> N
 
     assert len(expected) >= 30
     assert reference_relative_path("README.md") in expected
+    assert reference_relative_path("docs/lesson-readers.md") in expected
     assert reference_relative_path("docs/setup/windows.md") in expected
     assert reference_relative_path("sql/professional/fixtures/migrations/cleanup.sql") in expected
     assert reference_drift(expected, repo_root=REPO_ROOT) == []
@@ -171,6 +174,8 @@ def test_rendered_references_cover_recursive_local_markdown_and_sql_links() -> N
         assert RAW_LOCAL_ARTIFACT_HREF.search(rendered) is None
         assert '<script src="' not in rendered
         assert '<link rel="stylesheet"' not in rendered
+        assert rendered.endswith("\n")
+        assert all(line == line.rstrip() for line in rendered.splitlines())
 
 
 def test_static_reader_defers_completion_to_dashboard() -> None:

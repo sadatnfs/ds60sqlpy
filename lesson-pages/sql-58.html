@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-58/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-58-final-capstone-part-1-ingestion-and-data-quality">Day 58 — Final Capstone, Part 1: Ingestion and Data Quality<a class="heading-anchor" href="#guide--day-58-final-capstone-part-1-ingestion-and-data-quality" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -285,6 +384,52 @@
 <li><strong>Prerequisites:</strong> <a href="sql-57.html#guide">Day 57 — trends and anomalies</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-58.html#learner">learner SQL</a> · <a href="sql-58.html#solution-1">solution reasoning</a> · <a href="sql-58.html#solution-2">executable solution</a></li>
 </ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-58 — Final Capstone Part1</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-58/lesson/workspace/sql/postgres-60day/day58_final_capstone_part1.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day58_final_capstone_part1.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/day58_final_capstone_part1.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Raw staging, Rejection reason, Upsert count. Its worked SQL reads or creates <code>stg_customers_raw</code>, <code>customers</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: For each timestamp format, test a format-specific regular expression before casting. Keep raw text and parsed value together, collect explicit rejection reasons, and upsert only accepted rows inside the rollback-only transaction. Return staged, valid, invalid, and affected counts that reconcile. The first runnable example has a concrete contract: Example 1 must complete through <code>psql</code> with its documented command tag or notice for the lesson evidence named below. Treat an unexpected error as failure, and prove the stated catalog/behavior invariant plus cleanup. Its final projection is the columns written in the final <code>SELECT</code>. Reselect the returned key columns from the columns written in the final <code>SELECT</code>, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day58_final_capstone_part1.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">CREATE TEMP TABLE stg_customers_raw (
+  full_name TEXT,
+  email     TEXT,
+  country   TEXT,
+  segment   TEXT,
+  created_at TEXT,
+  attributes TEXT
+);</code></pre>
+<p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
+<p><strong>Expected result/shape:</strong> Example 1 must complete through <code>psql</code> with its documented command tag or notice for the lesson evidence named below. Treat an unexpected error as failure, and prove the stated catalog/behavior invariant plus cleanup.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">INSERT INTO stg_customers_raw(full_name, email, country, segment, created_at, attributes)
+VALUES
+  (&#x27;  Customer 501  &#x27;, &#x27;CUSTOMER501@EXAMPLE.COM &#x27;, &#x27; us &#x27;, &#x27; GOLD &#x27;, &#x27;2025/01/03 10:00&#x27;, &#x27;{&quot;channel&quot;:&quot;Web&quot;,&quot;referrer&quot;:&quot;SEO&quot;}&#x27;),
+  (&#x27;Customer 502&#x27;, &#x27;customer-502@example.com&#x27;, &#x27;GB&#x27;, NULL, &#x27;03-01-2025&#x27;, &#x27;{&quot;channel&quot;:&quot;mobile&quot;,&quot;referrer&quot;:&quot;email&quot;}&#x27;),
+  (&#x27;Customer 503&#x27;, &#x27;invalid-email&#x27;, &#x27;DE&#x27;, &#x27;silver&#x27;, &#x27;2025-01-05T12:34:56Z&#x27;, &#x27;{&quot;channel&quot;:&quot;store&quot;}&#x27;);</code></pre>
+<p><strong>How to read it:</strong> Example 2 changes rows inside the lesson&#x27;s declared transaction. The command tag reports affected rows, but a follow-up query must prove the intended before/after invariant.</p>
+<p><strong>Expected result/shape:</strong> Example 2 must complete through <code>psql</code> with its documented command tag or notice for <code>stg_customers_raw</code>. Treat an unexpected error as failure, and prove the stated catalog/behavior invariant plus cleanup.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Preserve raw staged input while deriving validated, normalized fields.</li>
@@ -301,18 +446,26 @@
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <p>Complete these in the <a href="sql-58.html#learner">learner SQL</a>:</p>
 <ol>
-<li>Parse additional datetime formats safely.</li>
-<li>Normalize/validate staged phone values.</li>
-<li>Build a transactional ingest procedure with DQ counts.</li>
-<li>Make source-duplicate winner selection deterministic.</li>
-<li>Split accepted/rejected rows with reason codes and reconcile counts.</li>
-<li>Normalize email before deduplication.</li>
-<li>Distinguish missing from unrecognized countries and retain raw values.</li>
-<li>Add source batch/row identity and make replay idempotent.</li>
-<li>Quarantine malformed JSON without aborting the batch.</li>
-<li>Reconcile staged, accepted, rejected, inserted, and updated outcomes.</li>
+<li>Parse additional datetime formats safely. <strong>Inputs/evidence:</strong> For sql-58 Exercise 1, read from <code>stg_customers_raw</code>, <code>customers</code>, and <code>country_map</code>. Build the answer toward <code>parse_additional_datetime_formats_safely_answer</code>; keep <code>customer_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-58 Exercise 1, expected output: one row per <code>customer_id</code>. The final columns are <code>parse_additional_datetime_formats_safely_answer</code>. <strong>Verify:</strong> For sql-58 Exercise 1, reselect the returned keys directly from the source; require unique <code>customer_id</code> where the expected grain is one row per key and confirm the projected <code>parse_additional_datetime_formats_safely_answer</code> against <code>stg_customers_raw</code>, <code>customers</code>, and <code>country_map</code>. Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
+<li>Normalize/validate staged phone values. <strong>Inputs/evidence:</strong> For sql-58 Exercise 2, read from <code>training.customers</code>. Build the answer toward <code>normalizevalidate_staged_phone_values_answer</code>; keep <code>customer_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-58 Exercise 2, expected output: one row per <code>customer_id</code>. The final columns are <code>normalizevalidate_staged_phone_values_answer</code>. <strong>Verify:</strong> For sql-58 Exercise 2, reselect the returned keys directly from the source; require unique <code>customer_id</code> where the expected grain is one row per key and confirm the projected <code>normalizevalidate_staged_phone_values_answer</code> against <code>training.customers</code>. Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
+<li>Build a transactional ingest procedure with DQ counts. <strong>Inputs/evidence:</strong> For sql-58 Exercise 3, stage every source row with <code>source_row_number</code> and raw text/JSON evidence; derive normalized fields plus timestamp, phone, email, and country validity flags, then upsert exactly one validated winner per normalized email. <strong>Expected result/shape:</strong> For sql-58 Exercise 3, expected output: the procedure CALL returns one row with <code>upserted_rows</code> and <code>invalid_rows</code> (3 and 1 for the seed), while the cleaned detail remains one row per staged source row with raw evidence, normalized fields, and all four validity decisions. <strong>Verify:</strong> For sql-58 Exercise 3, require <code>staged_rows = accepted_rows + rejected_rows</code>, every accepted row has all validity flags true, every rejection preserves <code>source_row_number</code> and raw attributes, malformed JSON never aborts the batch, valid winners reconcile to customer upserts, and rerun reaches the same final state.</li>
+<li>Make source-duplicate winner selection deterministic. <strong>Inputs/evidence:</strong> For sql-58 Exercise 4, rank only cleaned rows whose timestamp, phone, email, and country flags are all true; partition by normalized email and order by parsed creation time descending then <code>source_row_number</code> descending. <strong>Expected result/shape:</strong> For sql-58 Exercise 4, expected output: exactly one valid winner per <code>normalized_email</code>, with the normalized email, source row identity, parsed timestamp, and <code>winner_rank = 1</code>, ordered by normalized email. <strong>Verify:</strong> For sql-58 Exercise 4, assert every winner has all validity flags true, normalized emails are unique, an equal-timestamp duplicate chooses the higher <code>source_row_number</code>, an invalid newer duplicate never wins, and the winner set matches the rows used by the upsert.</li>
+<li>Split accepted/rejected rows with reason codes and reconcile counts. <strong>Inputs/evidence:</strong> For sql-58 Exercise 5, read from <code>cleaned_customer_ingest_solution</code>. Build the answer toward <code>outcome</code>, and <code>rows</code>; keep <code>outcome</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-58 Exercise 5, expected output: one row per <code>outcome</code>. The final columns are <code>outcome</code>, and <code>rows</code>. The final order is <code>outcome</code>. <strong>Verify:</strong> For sql-58 Exercise 5, independently aggregate <code>cleaned_customer_ingest_solution</code> by <code>outcome</code>; require one output row for every distinct <code>outcome</code> tuple and compare <code>rows</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>rows</code> for the existing <code>outcome</code> tuple and verify the new tuple appears exactly once.</li>
+<li>Normalize email before deduplication. <strong>Inputs/evidence:</strong> For sql-58 Exercise 6, read from <code>cleaned_customer_ingest_solution</code>. Build the answer toward <code>normalized_email</code>, and <code>candidate_rows</code>; keep <code>email</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-58 Exercise 6, expected output: one row per <code>email</code>. The final columns are <code>normalized_email</code>, and <code>candidate_rows</code>. The final order is <code>email</code>. <strong>Verify:</strong> For sql-58 Exercise 6, independently aggregate <code>cleaned_customer_ingest_solution</code> by <code>email</code>; require one output row for every distinct <code>email</code> tuple and compare <code>candidate_rows</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>candidate_rows</code> for the existing <code>email</code> tuple and verify the new tuple appears exactly once.</li>
+<li>Distinguish missing from unrecognized countries and retain raw values. <strong>Inputs/evidence:</strong> For sql-58 Exercise 7, read from <code>stg_customer_ingest_solution</code>. Build the answer toward <code>raw_country</code>, <code>normalized_candidate</code>, and <code>country_status</code>; keep <code>raw_country</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-58 Exercise 7, expected output: one row per <code>raw_country</code>. The final columns are <code>raw_country</code>, <code>normalized_candidate</code>, and <code>country_status</code>. The final order is <code>raw_country NULLS FIRST</code>. <strong>Verify:</strong> For sql-58 Exercise 7, reselect the returned keys directly from the source; require unique <code>raw_country</code> where the expected grain is one row per key and confirm the projected <code>raw_country</code>, <code>normalized_candidate</code>, and <code>country_status</code> against <code>stg_customer_ingest_solution</code>. Add one source row with a new <code>raw_country</code>; verify the result gains exactly one row carrying that <code>raw_country</code> value.</li>
+<li>Add source batch/row identity and make replay idempotent. <strong>Inputs/evidence:</strong> For sql-58 Exercise 8, read from <code>staged_batch_identity</code>, and <code>stg_customer_ingest_solution</code>. Build the answer toward <code>email</code>; keep <code>email</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-58 Exercise 8, expected output: one row per <code>email</code>. The final columns are <code>email</code>. <strong>Verify:</strong> For sql-58 Exercise 8, choose one complete partition from <code>staged_batch_identity</code>, and <code>stg_customer_ingest_solution</code>; hand-calculate its first, middle, and final window values for <code>row_count</code>, then verify output keys remain <code>email</code>. Add duplicate source candidates for <code>email</code>; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</li>
+<li>Quarantine malformed JSON without aborting the batch. <strong>Inputs/evidence:</strong> For sql-58 Exercise 9, read from <code>stg_customer_ingest_solution</code>. Build the answer toward <code>email</code>, <code>raw_attributes</code>, and <code>json_status</code>; keep <code>email</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-58 Exercise 9, expected output: one row per <code>email</code>. The final columns are <code>email</code>, <code>raw_attributes</code>, and <code>json_status</code>. The final order is <code>email</code>. <strong>Verify:</strong> For sql-58 Exercise 9, reselect the returned keys directly from the source; require unique <code>email</code> where the expected grain is one row per key and confirm the projected <code>email</code>, <code>raw_attributes</code>, and <code>json_status</code> against <code>stg_customer_ingest_solution</code>. Add one source row with a new <code>email</code>; verify the result gains exactly one row carrying that <code>email</code> value.</li>
+<li>Reconcile staged, accepted, rejected, inserted, and updated outcomes. <strong>Inputs/evidence:</strong> For sql-58 Exercise 10, read from <code>cleaned_customer_ingest_solution</code>, and <code>stg_customer_ingest_solution</code>. Build the answer toward <code>staged_rows</code>, <code>accepted_rows</code>, <code>rejected_rows</code>, and <code>reconciled_rows</code>; keep <code>staged_rows</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-58 Exercise 10, expected output: one row per <code>staged_rows</code>. The final columns are <code>staged_rows</code>, <code>accepted_rows</code>, <code>rejected_rows</code>, and <code>reconciled_rows</code>. <strong>Verify:</strong> For sql-58 Exercise 10, reselect the returned keys directly from the source; require unique <code>staged_rows</code> where the expected grain is one row per key and confirm the projected <code>staged_rows</code>, <code>accepted_rows</code>, <code>rejected_rows</code>, and <code>reconciled_rows</code> against <code>cleaned_customer_ingest_solution</code>, and <code>stg_customer_ingest_solution</code>. Add one source row with a new <code>staged_rows</code>; verify the result gains exactly one row carrying that <code>staged_rows</code> value.</li>
 </ol>
 <p>Malformed inputs must become explained rejections.</p>
+<h4 id="guide--common-mistakes-and-how-to-recover">Common mistakes and how to recover<a class="heading-anchor" href="#guide--common-mistakes-and-how-to-recover" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Lesson-specific semantic mistake:</strong> Do not skip this worked-model requirement: For each timestamp format, test a format-specific regular expression before casting. Keep raw text and parsed value together, collect explicit rejection reasons, and upsert only accepted rows inside the rollback-only transaction. Return staged, valid, invalid, and affected counts that reconcile.</li>
+<li><strong>Unexpected row count:</strong> display keys before aggregates, count rows after each join/filter stage, and find the first stage whose grain differs from the contract. Do not hide fanout with <code>DISTINCT</code>.</li>
+<li><strong>Unexpected <code>NULL</code> or missing row:</strong> decide whether the fact is unknown, inapplicable, zero, or absent before using <code>COALESCE</code>; inspect outer-join predicate placement and empty-input aggregate behavior.</li>
+<li><strong>Unstable top/first/last output:</strong> add <code>ORDER BY</code> with a unique final tie-breaker before <code>LIMIT</code> or order-sensitive windows/aggregates.</li>
+<li><strong><code>psql</code> stops on an error:</strong> fix the first error shown by <code>ON_ERROR_STOP</code>, restore the declared transaction/setup state, and rerun the complete file. A later successful statement does not validate a partial run.</li>
+</ul>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Can every normalized value be traced to preserved raw input?</li>
@@ -329,12 +482,8 @@
 </ul>
 <h4 id="guide--how-the-learner-script-works">How the learner script works<a class="heading-anchor" href="#guide--how-the-learner-script-works" aria-label="Link to this section">#</a></h4>
 <p>The rollback-only starter creates <code>stg_customers_raw</code>, inserts three varied records, parses three timestamp patterns, validates email/country, upserts valid rows by unique email, reports invalid counts, and demonstrates a country map.</p>
-<h4 id="guide--practice-match-the-learner-prompts-exactly">Practice — match the learner prompts exactly<a class="heading-anchor" href="#guide--practice-match-the-learner-prompts-exactly" aria-label="Link to this section">#</a></h4>
-<ol>
-<li>Extend the guarded timestamp parser for additional explicit formats.</li>
-<li>Add a staged phone value, strip non-digits with regex, and return a <code>phone_valid</code> flag under a clearly stated numbering policy.</li>
-<li>Create a PostgreSQL stored procedure that truncates/rebuilds a cleaned stage, validates it, upserts accepted customers, and returns upserted/invalid counts through <code>INOUT</code> parameters.</li>
-</ol>
+<h4 id="guide--practice-map">Practice map<a class="heading-anchor" href="#guide--practice-map" aria-label="Link to this section">#</a></h4>
+<p>Use the numbered <strong>Exercises</strong> section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.</p>
 <h4 id="guide--pipeline-reasoning">Pipeline reasoning<a class="heading-anchor" href="#guide--pipeline-reasoning" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Guard every timestamp cast with a format-specific regex; ambiguous dates need an explicit locale policy.</li>
@@ -345,17 +494,45 @@
 </ul>
 <h4 id="guide--schema-and-safety-limits">Schema and safety limits<a class="heading-anchor" href="#guide--schema-and-safety-limits" aria-label="Link to this section">#</a></h4>
 <p><code>training.customers</code> has no phone column. Validate phone in staging, but do not invent a destination. Persisting phone requires a reviewed schema migration. The sample phone regex is intentionally narrow and is not global normalization.</p>
-<p>Keep the entire demonstration in a transaction and roll it back. A procedure is appropriate for side effects and can expose <code>INOUT</code> counts; a table-returning function would be a different interface.</p></div>
+<p>Keep the entire demonstration in a transaction and roll it back. A procedure is appropriate for side effects and can expose <code>INOUT</code> counts; a table-returning function would be a different interface.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-58 — Final Capstone Part1.
+
+I have completed the direct catalog prerequisite: `sql-57`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day58_final_capstone_part1.md
+- Answer-free learner SQL: sql/postgres-60day/day58_final_capstone_part1.sql
+
+Key terms to teach in context: Raw staging, Rejection reason, Upsert count. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: For each timestamp format, test a format-specific regular expression before casting. Keep raw text and parsed value together, collect explicit rejection reasons, and upsert only accepted rows inside the rollback-only transaction. Return staged, valid, invalid, and affected counts that reconcile.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-58/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -372,13 +549,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 58: Final Capstone - Integrated Data Challenge (Part 1)</span>
+<span>-- BEGINNER WORKFLOW — sql-58: Final Capstone Part1</span>
+<span>-- Guide: sql/postgres-60day/companion-guides/day58_final_capstone_part1.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-58/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: stg_customers_raw, customers.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>-- Focus: Real-world messy data, data quality fixes, staging, and normalization</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
@@ -472,35 +666,75 @@
 <span> </span>
 <span>-- Exercises</span>
 <span>-- 1. Extend the parser to handle additional datetime formats.</span>
+<span>--    Inputs: For sql-58 Exercise 1, read from `stg_customers_raw`, `customers`, and `country_map`. Build the answer toward `parse_additional_datetime_formats_safely_answer`; keep `customer_id` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-58 Exercise 1, expected output: one row per `customer_id`. The final columns are `parse_additional_datetime_formats_safely_answer`.</span>
+<span>--    Verify: For sql-58 Exercise 1, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `parse_additional_datetime_formats_safely_answer` against `stg_customers_raw`, `customers`, and `country_map`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.</span>
+<span>--    Hint ladder, rung 1: For sql-58 Exercise 1, select `customer_id` from `stg_customers_raw`, `customers`, and `country_map` before adding derived columns.</span>
 <span>-- 2. Add phone number and normalize it using regex; flag invalid formats.</span>
+<span>--    Inputs: For sql-58 Exercise 2, read from `training.customers`. Build the answer toward `normalizevalidate_staged_phone_values_answer`; keep `customer_id` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-58 Exercise 2, expected output: one row per `customer_id`. The final columns are `normalizevalidate_staged_phone_values_answer`.</span>
+<span>--    Verify: For sql-58 Exercise 2, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `normalizevalidate_staged_phone_values_answer` against `training.customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.</span>
+<span>--    Hint ladder, rung 1: For sql-58 Exercise 2, select `customer_id` from `training.customers` before adding derived columns.</span>
 <span>-- 3. Write a stored procedure that ingests stg_ rows, cleans, validates, and upserts, returning a DQ summary.</span>
+<span>--    Inputs: For sql-58 Exercise 3, stage every source row with `source_row_number` and raw text/JSON evidence; derive normalized fields plus timestamp, phone, email, and country validity flags, then upsert exactly one validated winner per normalized email.</span>
+<span>--    Expected result/shape: For sql-58 Exercise 3, expected output: the procedure CALL returns one row with `upserted_rows` and `invalid_rows` (3 and 1 for the seed), while the cleaned detail remains one row per staged source row with raw evidence, normalized fields, and all four validity decisions.</span>
+<span>--    Verify: For sql-58 Exercise 3, require `staged_rows = accepted_rows + rejected_rows`, every accepted row has all validity flags true, every rejection preserves `source_row_number` and raw attributes, malformed JSON never aborts the batch, valid winners reconcile to customer upserts, and rerun reaches the same final state.</span>
+<span>--    Hint ladder, rung 1: For sql-58 Exercise 3, run `normalized` one at a time. Record each CTE&#x27;s row count and `country`, and `segment` uniqueness before the next stage uses it.</span>
 <span>-- 4. Prediction: identify which source duplicates survive ON CONFLICT DO</span>
 <span>--    NOTHING and explain why input order must not decide production outcomes.</span>
+<span>--    Inputs: For sql-58 Exercise 4, rank only cleaned rows whose timestamp, phone, email, and country flags are all true; partition by normalized email and order by parsed creation time descending then `source_row_number` descending.</span>
+<span>--    Expected result/shape: For sql-58 Exercise 4, expected output: exactly one valid winner per `normalized_email`, with the normalized email, source row identity, parsed timestamp, and `winner_rank = 1`, ordered by normalized email.</span>
+<span>--    Verify: For sql-58 Exercise 4, assert every winner has all validity flags true, normalized emails are unique, an equal-timestamp duplicate chooses the higher `source_row_number`, an invalid newer duplicate never wins, and the winner set matches the rows used by the upsert.</span>
+<span>--    Hint ladder, rung 1: For sql-58 Exercise 4, run `candidates` one at a time. Record each CTE&#x27;s row count and `make_source_duplicate_winner_selection_determini` uniqueness before the next stage uses it.</span>
 <span>-- 5. Construction: create accepted and rejected result sets with a reason code</span>
 <span>--    for every rejected row; reconcile both counts to the staging count.</span>
+<span>--    Inputs: For sql-58 Exercise 5, read from `cleaned_customer_ingest_solution`. Build the answer toward `outcome`, and `rows`; keep `outcome` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-58 Exercise 5, expected output: one row per `outcome`. The final columns are `outcome`, and `rows`. The final order is `outcome`.</span>
+<span>--    Verify: For sql-58 Exercise 5, independently aggregate `cleaned_customer_ingest_solution` by `outcome`; require one output row for every distinct `outcome` tuple and compare `rows` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `rows` for the existing `outcome` tuple and verify the new tuple appears exactly once.</span>
+<span>--    Hint ladder, rung 1: For sql-58 Exercise 5, run `classified` one at a time. Record each CTE&#x27;s row count and `outcome` uniqueness before the next stage uses it.</span>
 <span>-- 6. Debugging: normalize email before deduplication so case-only variants do</span>
 <span>--    not become two competing records.</span>
+<span>--    Inputs: For sql-58 Exercise 6, read from `cleaned_customer_ingest_solution`. Build the answer toward `normalized_email`, and `candidate_rows`; keep `email` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-58 Exercise 6, expected output: one row per `email`. The final columns are `normalized_email`, and `candidate_rows`. The final order is `email`.</span>
+<span>--    Verify: For sql-58 Exercise 6, independently aggregate `cleaned_customer_ingest_solution` by `email`; require one output row for every distinct `email` tuple and compare `candidate_rows` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `candidate_rows` for the existing `email` tuple and verify the new tuple appears exactly once.</span>
+<span>--    Hint ladder, rung 1: For sql-58 Exercise 6, confirm the groups are `email`; then check `email` before applying the row cap.</span>
 <span>-- 7. Edge case: distinguish a missing country from an unrecognized country and</span>
 <span>--    preserve the raw value for audit rather than coercing both to one default.</span>
+<span>--    Inputs: For sql-58 Exercise 7, read from `stg_customer_ingest_solution`. Build the answer toward `raw_country`, `normalized_candidate`, and `country_status`; keep `raw_country` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-58 Exercise 7, expected output: one row per `raw_country`. The final columns are `raw_country`, `normalized_candidate`, and `country_status`. The final order is `raw_country NULLS FIRST`.</span>
+<span>--    Verify: For sql-58 Exercise 7, reselect the returned keys directly from the source; require unique `raw_country` where the expected grain is one row per key and confirm the projected `raw_country`, `normalized_candidate`, and `country_status` against `stg_customer_ingest_solution`. Add one source row with a new `raw_country`; verify the result gains exactly one row carrying that `raw_country` value.</span>
+<span>--    Hint ladder, rung 1: For sql-58 Exercise 7, check `raw_country NULLS FIRST` before applying the row cap.</span>
 <span>-- 8. Construction: make the staging load idempotent by assigning a source batch</span>
 <span>--    ID and source row number, then reject repeated natural source records.</span>
+<span>--    Inputs: For sql-58 Exercise 8, read from `staged_batch_identity`, and `stg_customer_ingest_solution`. Build the answer toward `email`; keep `email` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-58 Exercise 8, expected output: one row per `email`. The final columns are `email`.</span>
+<span>--    Verify: For sql-58 Exercise 8, choose one complete partition from `staged_batch_identity`, and `stg_customer_ingest_solution`; hand-calculate its first, middle, and final window values for `row_count`, then verify output keys remain `email`. Add duplicate source candidates for `email`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</span>
+<span>--    Hint ladder, rung 1: For sql-58 Exercise 8, inspect one window partition before projecting.</span>
 <span>-- 9. Debugging: prevent a single malformed JSON value from aborting the whole</span>
 <span>--    batch; preserve the raw text and emit an invalid_json reason code.</span>
+<span>--    Inputs: For sql-58 Exercise 9, read from `stg_customer_ingest_solution`. Build the answer toward `email`, `raw_attributes`, and `json_status`; keep `email` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-58 Exercise 9, expected output: one row per `email`. The final columns are `email`, `raw_attributes`, and `json_status`. The final order is `email`.</span>
+<span>--    Verify: For sql-58 Exercise 9, reselect the returned keys directly from the source; require unique `email` where the expected grain is one row per key and confirm the projected `email`, `raw_attributes`, and `json_status` against `stg_customer_ingest_solution`. Add one source row with a new `email`; verify the result gains exactly one row carrying that `email` value.</span>
+<span>--    Hint ladder, rung 1: For sql-58 Exercise 9, check `email` before applying the row cap.</span>
 <span>-- 10. Explanation: reconcile staged, accepted, rejected, inserted, and updated</span>
 <span>--     counts, and state why each row must end in exactly one outcome.</span>
+<span>--    Inputs: For sql-58 Exercise 10, read from `cleaned_customer_ingest_solution`, and `stg_customer_ingest_solution`. Build the answer toward `staged_rows`, `accepted_rows`, `rejected_rows`, and `reconciled_rows`; keep `staged_rows` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-58 Exercise 10, expected output: one row per `staged_rows`. The final columns are `staged_rows`, `accepted_rows`, `rejected_rows`, and `reconciled_rows`.</span>
+<span>--    Verify: For sql-58 Exercise 10, reselect the returned keys directly from the source; require unique `staged_rows` where the expected grain is one row per key and confirm the projected `staged_rows`, `accepted_rows`, `rejected_rows`, and `reconciled_rows` against `cleaned_customer_ingest_solution`, and `stg_customer_ingest_solution`. Add one source row with a new `staged_rows`; verify the result gains exactly one row carrying that `staged_rows` value.</span>
+<span>--    Hint ladder, rung 1: For sql-58 Exercise 10, run `classified` one at a time. Record each CTE&#x27;s row count and `staged_rows` uniqueness before the next stage uses it.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -524,6 +758,26 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-58-solutions-staging-cleaning-and-ingestion">Day 58 Solutions — Staging, Cleaning, and Ingestion<a class="heading-anchor" href="#solution-1--day-58-solutions-staging-cleaning-and-ingestion" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day58_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day58_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are Raw staging, Rejection reason, Upsert count. Its worked-model focus is: For each timestamp format, test a format-specific regular expression before casting. Keep raw text and parsed value together, collect explicit rejection reasons, and upsert only accepted rows inside the rollback-only transaction. Return staged, valid, invalid, and affected counts that reconcile.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>The three capstone deliverables are additional timestamp parsing, phone normalization/validation, and a stored procedure that cleans, validates, upserts, and returns load counts. The full transaction-safe answer is <a href="sql-58.html#solution-2"><code>day58_solutions.sql</code></a>.</p>
 <h4 id="solution-1--exercises-1-and-2-dates-and-phone-numbers">Exercises 1 and 2 — Dates and phone numbers<a class="heading-anchor" href="#solution-1--exercises-1-and-2-dates-and-phone-numbers" aria-label="Link to this section">#</a></h4>
 <p>The staged answer supports these guarded timestamp formats:</p>
@@ -565,12 +819,13 @@ FROM (
     (&#x27;123&#x27;)
 ) AS sample(phone);</code></pre>
 <p>Expected shape: one row per raw phone with normalized digits and a Boolean validation flag. This regex is a simplified North American course rule, not a global phone-number standard.</p>
-<h4 id="solution-1--exercise-3-inout-ingestion-procedure">Exercise 3 — <code>INOUT</code> ingestion procedure<a class="heading-anchor" href="#solution-1--exercise-3-inout-ingestion-procedure" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--capstone-implementation-exercise-3-ingestion-procedure">Capstone implementation — Exercise 3 ingestion procedure<a class="heading-anchor" href="#solution-1--capstone-implementation-exercise-3-ingestion-procedure" aria-label="Link to this section">#</a></h4>
 <p>The procedure uses an <code>INOUT</code> pair because PostgreSQL procedures do not return a query result like table-returning functions. <code>CALL</code> returns the final parameter values as a one-row result.</p>
 <pre><code class="language-sql">BEGIN;
 SET search_path TO training, public;
 
 CREATE TEMP TABLE stg_customer_ingest_solution (
+  source_row_number bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   full_name text,
   email text,
   country text,
@@ -580,7 +835,9 @@ CREATE TEMP TABLE stg_customer_ingest_solution (
   attributes text
 );
 
-INSERT INTO stg_customer_ingest_solution
+INSERT INTO stg_customer_ingest_solution(
+  full_name, email, country, segment, created_at, phone, attributes
+)
 VALUES
   (&#x27; Customer 601 &#x27;, &#x27;CUSTOMER601@EXAMPLE.COM &#x27;, &#x27;USA&#x27;, &#x27;gold&#x27;,
    &#x27;2026/01/03 10:00&#x27;, &#x27;(415) 555-0101&#x27;, &#x27;{&quot;channel&quot;:&quot;web&quot;}&#x27;),
@@ -592,6 +849,7 @@ VALUES
    &#x27;not-a-date&#x27;, &#x27;123&#x27;, &#x27;not-json&#x27;);
 
 CREATE TEMP TABLE cleaned_customer_ingest_solution (
+  source_row_number bigint PRIMARY KEY,
   full_name text,
   email text,
   country text,
@@ -601,8 +859,15 @@ CREATE TEMP TABLE cleaned_customer_ingest_solution (
   phone_valid boolean,
   email_valid boolean,
   country_valid boolean,
-  attributes jsonb
+  raw_attributes text,
+  attributes jsonb,
+  json_valid boolean
 ) ON COMMIT DROP;
+
+-- The complete executable defines pg_temp.try_parse_customer_timestamp before
+-- the procedure. It uses exact-format guards, round-trip checks, exception
+-- handling, and STABLE volatility after SET LOCAL TIME ZONE &#x27;UTC&#x27;. STABLE is
+-- required because parsing timestamptz can depend on session settings.
 
 CREATE OR REPLACE PROCEDURE ingest_customer_stage_solution(
   INOUT upserted_rows integer,
@@ -615,7 +880,8 @@ BEGIN
 
   INSERT INTO cleaned_customer_ingest_solution
   WITH normalized AS (
-    SELECT trim(full_name) AS full_name,
+    SELECT source_row_number,
+           trim(full_name) AS full_name,
            lower(trim(email)) AS email,
            CASE upper(trim(country))
              WHEN &#x27;USA&#x27; THEN &#x27;US&#x27;
@@ -623,46 +889,56 @@ BEGIN
              ELSE upper(trim(country))
            END AS country,
            lower(NULLIF(trim(segment), &#x27;&#x27;)) AS segment,
-           CASE
-             WHEN created_at ~ &#x27;^[0-9]{4}/[0-9]{2}/[0-9]{2} &#x27;
-               THEN to_timestamp(created_at, &#x27;YYYY/MM/DD HH24:MI&#x27;)
-             WHEN created_at ~ &#x27;^[0-9]{2}/[0-9]{2}/[0-9]{4} &#x27;
-               THEN to_timestamp(created_at, &#x27;MM/DD/YYYY HH24:MI&#x27;)
-             WHEN created_at ~ &#x27;^[0-9]{2}-[A-Za-z]{3}-[0-9]{4} &#x27;
-               THEN to_timestamp(created_at, &#x27;DD-Mon-YYYY HH24:MI&#x27;)
-             WHEN created_at ~ &#x27;^[0-9]{4}-[0-9]{2}-[0-9]{2}&#x27;
-               THEN created_at::timestamptz
-             ELSE NULL
-           END AS parsed_created_at,
+           pg_temp.try_parse_customer_timestamp(created_at) AS parsed_created_at,
            regexp_replace(phone, &#x27;[^0-9]&#x27;, &#x27;&#x27;, &#x27;g&#x27;) AS phone_digits,
-           CASE
-             WHEN attributes IS JSON THEN attributes::jsonb
-             ELSE &#x27;{}&#x27;::jsonb
-           END AS attributes
+           attributes AS raw_attributes,
+           CASE WHEN attributes IS JSON THEN attributes::jsonb END AS attributes,
+           attributes IS JSON AS json_valid
     FROM stg_customer_ingest_solution
   )
-  SELECT full_name,
+  SELECT source_row_number,
+         full_name,
          email,
          country,
          segment,
          parsed_created_at,
          phone_digits,
-         phone_digits ~ &#x27;^(1)?[0-9]{10}$&#x27; AS phone_valid,
+         phone_digits ~ &#x27;^[0-9]{10,15}$&#x27; AS phone_valid,
          email ~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27; AS email_valid,
          country IN (&#x27;US&#x27;,&#x27;CA&#x27;,&#x27;GB&#x27;,&#x27;DE&#x27;,&#x27;FR&#x27;,&#x27;IN&#x27;,&#x27;AU&#x27;,&#x27;BR&#x27;) AS country_valid,
-         attributes
+         raw_attributes,
+         attributes,
+         json_valid
   FROM normalized;
 
   SELECT COUNT(*)
   INTO invalid_rows
   FROM cleaned_customer_ingest_solution
-  WHERE NOT email_valid
-     OR NOT country_valid
-     OR NOT phone_valid
+  WHERE email_valid IS NOT TRUE
+     OR country_valid IS NOT TRUE
+     OR phone_valid IS NOT TRUE
+     OR json_valid IS NOT TRUE
      OR created_at IS NULL
      OR full_name IS NULL
      OR full_name = &#x27;&#x27;;
 
+  WITH valid_rows AS (
+    SELECT *
+    FROM cleaned_customer_ingest_solution
+    WHERE email_valid IS TRUE
+      AND country_valid IS TRUE
+      AND phone_valid IS TRUE
+      AND json_valid IS TRUE
+      AND created_at IS NOT NULL
+      AND full_name &lt;&gt; &#x27;&#x27;
+  ), deduped AS (
+    SELECT valid_rows.*,
+           ROW_NUMBER() OVER (
+             PARTITION BY email
+             ORDER BY created_at DESC, source_row_number DESC
+           ) AS winner_rank
+    FROM valid_rows
+  )
   INSERT INTO customers(full_name, email, country, created_at, segment, attributes)
   SELECT full_name,
          email,
@@ -670,16 +946,13 @@ BEGIN
          created_at,
          segment,
          attributes
-  FROM cleaned_customer_ingest_solution
-  WHERE email_valid
-    AND country_valid
-    AND phone_valid
-    AND created_at IS NOT NULL
-    AND full_name &lt;&gt; &#x27;&#x27;
+  FROM deduped
+  WHERE winner_rank = 1
   ON CONFLICT (email) DO UPDATE
   SET full_name = EXCLUDED.full_name,
       country = EXCLUDED.country,
       segment = EXCLUDED.segment,
+      -- Preserve the existing created_at as the first-seen/signup timestamp.
       attributes = EXCLUDED.attributes;
 
   GET DIAGNOSTICS upserted_rows = ROW_COUNT;
@@ -693,35 +966,140 @@ FROM cleaned_customer_ingest_solution
 ORDER BY email;
 
 ROLLBACK;</code></pre>
-<p>Expected results: <code>CALL</code> returns <code>upserted_rows</code> and <code>invalid_rows</code>; the cleaned table provides row-level evidence behind those counts. The whole demo rolls back, including the procedure and customer changes.</p>
+<p>Expected seed results: <code>CALL</code> returns <code>upserted_rows = 3</code> and <code>invalid_rows = 1</code>; the cleaned table retains four source rows, including the raw malformed JSON. The accepted and rejected counts must sum to the staged count. The whole demo rolls back, including the procedure and customer changes.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-58 Exercise 3, stage every source row with <code>source_row_number</code> and raw text/JSON evidence; derive normalized fields plus timestamp, phone, email, and country validity flags, then upsert exactly one validated winner per normalized email.</li>
+<li><strong>Expected result/shape:</strong> For sql-58 Exercise 3, expected output: the procedure CALL returns one row with <code>upserted_rows</code> and <code>invalid_rows</code> (3 and 1 for the seed), while the cleaned detail remains one row per staged source row with raw evidence, normalized fields, and all four validity decisions.</li>
+<li><strong>Independent verification:</strong> For sql-58 Exercise 3, require <code>staged_rows = accepted_rows + rejected_rows</code>, every accepted row has all validity flags true, every rejection preserves <code>source_row_number</code> and raw attributes, malformed JSON never aborts the batch, valid winners reconcile to customer upserts, and rerun reaches the same final state.</li>
+<li><strong>Intermediate relation check:</strong> For sql-58 Exercise 3, run <code>normalized</code> one at a time. Record each CTE&#x27;s row count and <code>country</code>, and <code>segment</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-58 Exercise 3, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>stg_customer_ingest_solution</code>, <code>cleaned_customer_ingest_solution</code>, <code>customers</code>, and <code>ingest_customer_stage_solution</code>, preserve one row per <code>country</code>, and <code>segment</code>, and finish with <code>full_name</code>, <code>email</code>, <code>country</code>, <code>segment</code>, <code>parsed_created_at</code>, <code>phone_digits</code>, <code>phone_valid</code>, <code>email_valid</code>, <code>country_valid</code>, and <code>attributes</code> ordered by <code>email</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-58 Exercise 3, the chosen form is justified by this lesson-specific rationale: The procedure uses an <code>INOUT</code> pair because PostgreSQL procedures do not return a query result like table-returning functions. Evaluate another form against the concrete expected result (one row per <code>country</code>, and <code>segment</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row for which <code>(NOT email_valid OR NOT country_valid OR NOT phone_valid OR created_at IS NULL OR full_name IS NULL OR full_name = &#x27;&#x27;) OR (email_valid AND country_valid AND phone_valid AND created_at IS NOT NULL AND full_name &lt;&gt; &#x27;&#x27; ON CONFLICT (email) DO UPDATE SET full_name = EXCLUDED.full_name, country = EXCLUDED.country, segment = EXCLUDED.segment, attributes = EXCLUDED.att)</code> is true and one for which it is false; verify only the matching <code>country</code>, and <code>segment</code> value is returned.</li>
+</ul>
 <h4 id="solution-1--reasoning-safety-and-limits">Reasoning, safety, and limits<a class="heading-anchor" href="#solution-1--reasoning-safety-and-limits" aria-label="Link to this section">#</a></h4>
 <ul>
-<li>Regex guards prevent known malformed strings from reaching timestamp casts. Add formats deliberately; ambiguous dates such as <code>03/04/2026</code> require an explicit locale policy.</li>
-<li>Invalid JSON becomes <code>{}</code> in this exercise. A production pipeline should also retain the raw value and rejection reason.</li>
+<li>Exact-format regex guards, round-trip formatting, and caught datetime exceptions prevent malformed strings from aborting the batch. The parser is <code>STABLE</code>, not <code>IMMUTABLE</code>, because <code>timestamptz</code> parsing is session-sensitive. Ambiguous dates such as <code>03/04/2026</code> still require an explicit locale policy.</li>
+<li>Invalid JSON remains visible in <code>raw_attributes</code>, produces <code>json_valid = false</code>, and keeps parsed <code>attributes</code> as SQL <code>NULL</code>; it never becomes an accepted unexplained empty object.</li>
+<li>Validation uses <code>IS TRUE</code> and rejection uses <code>IS NOT TRUE</code>, so an unknown Boolean cannot slip through either population.</li>
+<li>Valid rows are ranked by normalized email before <code>ON CONFLICT</code>; this avoids PostgreSQL trying to update the same target twice in one statement. The stable <code>source_row_number</code> breaks equal-timestamp ties.</li>
 <li><code>ON CONFLICT (email)</code> makes repeat loads deterministic, but the procedure&#x27;s <code>upserted_rows</code> counts rows affected, not inserts versus updates separately.</li>
+<li>The update preserves the existing <code>customers.created_at</code> as the immutable first-seen/signup timestamp; profile corrections update descriptive fields.</li>
 <li>The canonical <code>training.customers</code> table has no phone column. The solution validates phone in staging but does not discard the schema boundary by inventing a destination. Persisting phone requires a reviewed migration.</li>
 <li>The phone regex is intentionally narrow; use country-aware normalization for international data.</li>
 </ul>
 <h4 id="solution-1--exercise-1-parse-multiple-datetime-formats">Exercise 1 — Parse multiple datetime formats<a class="heading-anchor" href="#solution-1--exercise-1-parse-multiple-datetime-formats" aria-label="Link to this section">#</a></h4>
 <p>Guard each cast with a pattern-specific CASE branch. Unrecognized text maps to NULL and an invalid-datetime reason instead of aborting the batch.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-58 Exercise 1, read from <code>stg_customers_raw</code>, <code>customers</code>, and <code>country_map</code>. Build the answer toward <code>parse_additional_datetime_formats_safely_answer</code>; keep <code>customer_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-58 Exercise 1, expected output: one row per <code>customer_id</code>. The final columns are <code>parse_additional_datetime_formats_safely_answer</code>.</li>
+<li><strong>Independent verification:</strong> For sql-58 Exercise 1, reselect the returned keys directly from the source; require unique <code>customer_id</code> where the expected grain is one row per key and confirm the projected <code>parse_additional_datetime_formats_safely_answer</code> against <code>stg_customers_raw</code>, <code>customers</code>, and <code>country_map</code>. Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-58 Exercise 1, select <code>customer_id</code> from <code>stg_customers_raw</code>, <code>customers</code>, and <code>country_map</code> before adding derived columns.</li>
+<li><strong>Clause check:</strong> For sql-58 Exercise 1, this is a written operational artifact rather than a clause-reading exercise; trace each claim to <code>stg_customers_raw</code>, <code>customers</code>, and <code>country_map</code> or label it as proposed policy.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-58 Exercise 1, the chosen form is justified by this lesson-specific rationale: Guard each cast with a pattern-specific CASE branch. Evaluate another form against the concrete expected result (one row per <code>customer_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
+</ul>
 <h4 id="solution-1--exercise-2-normalize-phone-safely">Exercise 2 — Normalize phone safely<a class="heading-anchor" href="#solution-1--exercise-2-normalize-phone-safely" aria-label="Link to this section">#</a></h4>
 <p>The answer removes non-digits, then applies a deliberately narrow length check. It retains the normalized staging value but does not invent a destination column absent from <code>training.customers</code>.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-58 Exercise 2, read from <code>training.customers</code>. Build the answer toward <code>normalizevalidate_staged_phone_values_answer</code>; keep <code>customer_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-58 Exercise 2, expected output: one row per <code>customer_id</code>. The final columns are <code>normalizevalidate_staged_phone_values_answer</code>.</li>
+<li><strong>Independent verification:</strong> For sql-58 Exercise 2, reselect the returned keys directly from the source; require unique <code>customer_id</code> where the expected grain is one row per key and confirm the projected <code>normalizevalidate_staged_phone_values_answer</code> against <code>training.customers</code>. Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-58 Exercise 2, select <code>customer_id</code> from <code>training.customers</code> before adding derived columns.</li>
+<li><strong>Clause check:</strong> For sql-58 Exercise 2, this is a written operational artifact rather than a clause-reading exercise; trace each claim to <code>training.customers</code> or label it as proposed policy.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-58 Exercise 2, the chosen form is justified by this lesson-specific rationale: The answer removes non-digits, then applies a deliberately narrow length check. Evaluate another form against the concrete expected result (one row per <code>customer_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
+</ul>
+<h4 id="solution-1--exercise-3-build-the-inout-ingestion-procedure">Exercise 3 — Build the <code>INOUT</code> ingestion procedure<a class="heading-anchor" href="#solution-1--exercise-3-build-the-inout-ingestion-procedure" aria-label="Link to this section">#</a></h4>
+<p>The complete transaction-safe procedure, its <code>CALL</code>, row-level evidence, and reasoning appear in the <a href="#solution-1--capstone-implementation-exercise-3-ingestion-procedure">capstone implementation above</a>. Use that runnable implementation to compare your attempt clause by clause, including its validation rules, deterministic upsert, returned counts, and rollback boundary.</p>
 <h4 id="solution-1--exercise-4-choose-duplicate-winners-deterministically">Exercise 4 — Choose duplicate winners deterministically<a class="heading-anchor" href="#solution-1--exercise-4-choose-duplicate-winners-deterministically" aria-label="Link to this section">#</a></h4>
 <p>Normalize email before partitioning. Newest parsed timestamp wins, followed by stable name/email tie-breakers; source input order never decides.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-58 Exercise 4, rank only cleaned rows whose timestamp, phone, email, and country flags are all true; partition by normalized email and order by parsed creation time descending then <code>source_row_number</code> descending.</li>
+<li><strong>Expected result/shape:</strong> For sql-58 Exercise 4, expected output: exactly one valid winner per <code>normalized_email</code>, with the normalized email, source row identity, parsed timestamp, and <code>winner_rank = 1</code>, ordered by normalized email.</li>
+<li><strong>Independent verification:</strong> For sql-58 Exercise 4, assert every winner has all validity flags true, normalized emails are unique, an equal-timestamp duplicate chooses the higher <code>source_row_number</code>, an invalid newer duplicate never wins, and the winner set matches the rows used by the upsert.</li>
+<li><strong>Intermediate relation check:</strong> For sql-58 Exercise 4, run <code>candidates</code> one at a time. Record each CTE&#x27;s row count and <code>make_source_duplicate_winner_selection_determini</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-58 Exercise 4, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>WHERE</code>, window <code>OVER</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>stg_customer_ingest_solution</code>, preserve one row per <code>make_source_duplicate_winner_selection_determini</code>, and finish with <code>make_source_duplicate_winner_selection_determini</code> ordered by <code>normalized_email</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-58 Exercise 4, the chosen form is justified by this lesson-specific rationale: Normalize email before partitioning. Evaluate another form against the concrete expected result (one row per <code>make_source_duplicate_winner_selection_determini</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add duplicate source candidates for <code>make_source_duplicate_winner_selection_determini</code>; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</li>
+</ul>
 <h4 id="solution-1--exercise-5-partition-accepted-and-rejected-outcomes">Exercise 5 — Partition accepted and rejected outcomes<a class="heading-anchor" href="#solution-1--exercise-5-partition-accepted-and-rejected-outcomes" aria-label="Link to this section">#</a></h4>
 <p>A CASE expression assigns one diagnostic outcome per cleaned row. Grouped counts are useful for monitoring, while detail remains available for remediation.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-58 Exercise 5, read from <code>cleaned_customer_ingest_solution</code>. Build the answer toward <code>outcome</code>, and <code>rows</code>; keep <code>outcome</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-58 Exercise 5, expected output: one row per <code>outcome</code>. The final columns are <code>outcome</code>, and <code>rows</code>. The final order is <code>outcome</code>.</li>
+<li><strong>Independent verification:</strong> For sql-58 Exercise 5, independently aggregate <code>cleaned_customer_ingest_solution</code> by <code>outcome</code>; require one output row for every distinct <code>outcome</code> tuple and compare <code>rows</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>rows</code> for the existing <code>outcome</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Intermediate relation check:</strong> For sql-58 Exercise 5, run <code>classified</code> one at a time. Record each CTE&#x27;s row count and <code>outcome</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-58 Exercise 5, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>cleaned_customer_ingest_solution</code>, preserve one row per <code>outcome</code>, and finish with <code>outcome</code>, and <code>rows</code> ordered by <code>outcome</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-58 Exercise 5, the chosen form is justified by this lesson-specific rationale: A CASE expression assigns one diagnostic outcome per cleaned row. Evaluate another form against the concrete expected result (one row per <code>outcome</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>rows</code> for the existing <code>outcome</code> tuple and verify the new tuple appears exactly once.</li>
+</ul>
 <h4 id="solution-1--exercise-6-normalize-before-conflict-handling">Exercise 6 — Normalize before conflict handling<a class="heading-anchor" href="#solution-1--exercise-6-normalize-before-conflict-handling" aria-label="Link to this section">#</a></h4>
 <p>The lowercased, trimmed email is both deduplication key and target conflict key. Case-only variants therefore compete under one declared identity.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-58 Exercise 6, read from <code>cleaned_customer_ingest_solution</code>. Build the answer toward <code>normalized_email</code>, and <code>candidate_rows</code>; keep <code>email</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-58 Exercise 6, expected output: one row per <code>email</code>. The final columns are <code>normalized_email</code>, and <code>candidate_rows</code>. The final order is <code>email</code>.</li>
+<li><strong>Independent verification:</strong> For sql-58 Exercise 6, independently aggregate <code>cleaned_customer_ingest_solution</code> by <code>email</code>; require one output row for every distinct <code>email</code> tuple and compare <code>candidate_rows</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>candidate_rows</code> for the existing <code>email</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Intermediate relation check:</strong> For sql-58 Exercise 6, confirm the groups are <code>email</code>; then check <code>email</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-58 Exercise 6, the solution actually uses <code>FROM</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>cleaned_customer_ingest_solution</code>, preserve one row per <code>email</code>, and finish with <code>normalized_email</code>, and <code>candidate_rows</code> ordered by <code>email</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-58 Exercise 6, the chosen form is justified by this lesson-specific rationale: The lowercased, trimmed email is both deduplication key and target conflict key. Evaluate another form against the concrete expected result (one row per <code>email</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>candidate_rows</code> for the existing <code>email</code> tuple and verify the new tuple appears exactly once.</li>
+</ul>
 <h4 id="solution-1--exercise-7-separate-missing-and-unrecognized-countries">Exercise 7 — Separate missing and unrecognized countries<a class="heading-anchor" href="#solution-1--exercise-7-separate-missing-and-unrecognized-countries" aria-label="Link to this section">#</a></h4>
 <p>Missing raw text, recognized codes/aliases, and unknown values receive distinct states. Raw source text remains alongside its normalized candidate for audit.</p>
+<h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-58 Exercise 7, read from <code>stg_customer_ingest_solution</code>. Build the answer toward <code>raw_country</code>, <code>normalized_candidate</code>, and <code>country_status</code>; keep <code>raw_country</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-58 Exercise 7, expected output: one row per <code>raw_country</code>. The final columns are <code>raw_country</code>, <code>normalized_candidate</code>, and <code>country_status</code>. The final order is <code>raw_country NULLS FIRST</code>.</li>
+<li><strong>Independent verification:</strong> For sql-58 Exercise 7, reselect the returned keys directly from the source; require unique <code>raw_country</code> where the expected grain is one row per key and confirm the projected <code>raw_country</code>, <code>normalized_candidate</code>, and <code>country_status</code> against <code>stg_customer_ingest_solution</code>. Add one source row with a new <code>raw_country</code>; verify the result gains exactly one row carrying that <code>raw_country</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-58 Exercise 7, check <code>raw_country NULLS FIRST</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-58 Exercise 7, the solution actually uses <code>FROM</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>stg_customer_ingest_solution</code>, preserve one row per <code>raw_country</code>, and finish with <code>raw_country</code>, <code>normalized_candidate</code>, and <code>country_status</code> ordered by <code>raw_country NULLS FIRST</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-58 Exercise 7, the chosen form is justified by this lesson-specific rationale: Missing raw text, recognized codes/aliases, and unknown values receive distinct states. Evaluate another form against the concrete expected result (one row per <code>raw_country</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>raw_country</code>; verify the result gains exactly one row carrying that <code>raw_country</code> value.</li>
+</ul>
 <h4 id="solution-1--exercise-8-make-batch-replay-idempotent">Exercise 8 — Make batch replay idempotent<a class="heading-anchor" href="#solution-1--exercise-8-make-batch-replay-idempotent" aria-label="Link to this section">#</a></h4>
 <p><code>(batch_id, source_row_number)</code> is a stable source identity. Replaying the same batch uses <code>ON CONFLICT DO NOTHING</code>; the count remains unchanged.</p>
+<h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-58 Exercise 8, read from <code>staged_batch_identity</code>, and <code>stg_customer_ingest_solution</code>. Build the answer toward <code>email</code>; keep <code>email</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-58 Exercise 8, expected output: one row per <code>email</code>. The final columns are <code>email</code>.</li>
+<li><strong>Independent verification:</strong> For sql-58 Exercise 8, choose one complete partition from <code>staged_batch_identity</code>, and <code>stg_customer_ingest_solution</code>; hand-calculate its first, middle, and final window values for <code>row_count</code>, then verify output keys remain <code>email</code>. Add duplicate source candidates for <code>email</code>; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</li>
+<li><strong>Intermediate relation check:</strong> For sql-58 Exercise 8, inspect one window partition before projecting.</li>
+<li><strong>Clause check:</strong> For sql-58 Exercise 8, the solution actually uses <code>FROM</code>, window <code>OVER</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>staged_batch_identity</code>, and <code>stg_customer_ingest_solution</code>, preserve one row per <code>email</code>, and finish with <code>email</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-58 Exercise 8, the chosen form is justified by this lesson-specific rationale: <code>(batch_id, source_row_number)</code> is a stable source identity. Evaluate another form against the concrete expected result (one row per <code>email</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add duplicate source candidates for <code>email</code>; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</li>
+</ul>
 <h4 id="solution-1--exercise-9-quarantine-malformed-json">Exercise 9 — Quarantine malformed JSON<a class="heading-anchor" href="#solution-1--exercise-9-quarantine-malformed-json" aria-label="Link to this section">#</a></h4>
 <p>PostgreSQL 16&#x27;s <code>IS JSON</code> predicate checks text without raising. Invalid text is kept with an <code>invalid_json</code> code instead of becoming an unexplained <code>{}</code> default.</p>
+<h5 id="solution-1--reasoning-and-verification-9">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-9" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-58 Exercise 9, read from <code>stg_customer_ingest_solution</code>. Build the answer toward <code>email</code>, <code>raw_attributes</code>, and <code>json_status</code>; keep <code>email</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-58 Exercise 9, expected output: one row per <code>email</code>. The final columns are <code>email</code>, <code>raw_attributes</code>, and <code>json_status</code>. The final order is <code>email</code>.</li>
+<li><strong>Independent verification:</strong> For sql-58 Exercise 9, reselect the returned keys directly from the source; require unique <code>email</code> where the expected grain is one row per key and confirm the projected <code>email</code>, <code>raw_attributes</code>, and <code>json_status</code> against <code>stg_customer_ingest_solution</code>. Add one source row with a new <code>email</code>; verify the result gains exactly one row carrying that <code>email</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-58 Exercise 9, check <code>email</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-58 Exercise 9, the solution actually uses <code>FROM</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>stg_customer_ingest_solution</code>, preserve one row per <code>email</code>, and finish with <code>email</code>, <code>raw_attributes</code>, and <code>json_status</code> ordered by <code>email</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-58 Exercise 9, the chosen form is justified by this lesson-specific rationale: PostgreSQL 16&#x27;s <code>IS JSON</code> predicate checks text without raising. Evaluate another form against the concrete expected result (one row per <code>email</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>email</code>; verify the result gains exactly one row carrying that <code>email</code> value.</li>
+</ul>
 <h4 id="solution-1--exercise-10-reconcile-every-row-outcome">Exercise 10 — Reconcile every row outcome<a class="heading-anchor" href="#solution-1--exercise-10-reconcile-every-row-outcome" aria-label="Link to this section">#</a></h4>
-<p>Staged count must equal accepted plus rejected count. The procedure&#x27;s affected row count does not distinguish inserts from updates, so a production contract needs explicit merge/audit evidence for those sub-outcomes.</p></div>
+<p>Staged count must equal accepted plus rejected count. The procedure&#x27;s affected row count does not distinguish inserts from updates, so a production contract needs explicit merge/audit evidence for those sub-outcomes.</p>
+<h5 id="solution-1--reasoning-and-verification-10">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-10" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-58 Exercise 10, read from <code>cleaned_customer_ingest_solution</code>, and <code>stg_customer_ingest_solution</code>. Build the answer toward <code>staged_rows</code>, <code>accepted_rows</code>, <code>rejected_rows</code>, and <code>reconciled_rows</code>; keep <code>staged_rows</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-58 Exercise 10, expected output: one row per <code>staged_rows</code>. The final columns are <code>staged_rows</code>, <code>accepted_rows</code>, <code>rejected_rows</code>, and <code>reconciled_rows</code>.</li>
+<li><strong>Independent verification:</strong> For sql-58 Exercise 10, reselect the returned keys directly from the source; require unique <code>staged_rows</code> where the expected grain is one row per key and confirm the projected <code>staged_rows</code>, <code>accepted_rows</code>, <code>rejected_rows</code>, and <code>reconciled_rows</code> against <code>cleaned_customer_ingest_solution</code>, and <code>stg_customer_ingest_solution</code>. Add one source row with a new <code>staged_rows</code>; verify the result gains exactly one row carrying that <code>staged_rows</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-58 Exercise 10, run <code>classified</code> one at a time. Record each CTE&#x27;s row count and <code>staged_rows</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-58 Exercise 10, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>WHERE</code>, aggregate <code>FILTER</code>, and <code>SELECT</code>. Read only those operations: begin at <code>cleaned_customer_ingest_solution</code>, and <code>stg_customer_ingest_solution</code>, preserve one row per <code>staged_rows</code>, and finish with <code>staged_rows</code>, <code>accepted_rows</code>, <code>rejected_rows</code>, and <code>reconciled_rows</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-58 Exercise 10, the chosen form is justified by this lesson-specific rationale: Staged count must equal accepted plus rejected count. Evaluate another form against the concrete expected result (one row per <code>staged_rows</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>staged_rows</code>; verify the result gains exactly one row carrying that <code>staged_rows</code> value.</li>
+</ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -729,7 +1107,7 @@ ROLLBACK;</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -753,10 +1131,24 @@ ROLLBACK;</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 58 solutions: robust staging, normalization, and ingestion</span>
+<span>-- SOLUTION READING MAP — sql-58: Final Capstone Part1</span>
+<span>-- Explanation: sql/postgres-60day/solutions/day58_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day58_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
 <span>CREATE TEMP TABLE stg_customer_ingest_solution (</span>
+<span>  source_row_number bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,</span>
 <span>  full_name text,</span>
 <span>  email text,</span>
 <span>  country text,</span>
@@ -766,7 +1158,9 @@ ROLLBACK;</code></pre>
 <span>  attributes text</span>
 <span>);</span>
 <span> </span>
-<span>INSERT INTO stg_customer_ingest_solution</span>
+<span>INSERT INTO stg_customer_ingest_solution(</span>
+<span>  full_name, email, country, segment, created_at, phone, attributes</span>
+<span>)</span>
 <span>VALUES</span>
 <span>  (&#x27; Customer 601 &#x27;, &#x27;CUSTOMER601@EXAMPLE.COM &#x27;, &#x27;USA&#x27;, &#x27;gold&#x27;,</span>
 <span>   &#x27;2026/01/03 10:00&#x27;, &#x27;(415) 555-0101&#x27;, &#x27;{&quot;channel&quot;:&quot;web&quot;}&#x27;),</span>
@@ -778,6 +1172,7 @@ ROLLBACK;</code></pre>
 <span>   &#x27;not-a-date&#x27;, &#x27;123&#x27;, &#x27;not-json&#x27;);</span>
 <span> </span>
 <span>CREATE TEMP TABLE cleaned_customer_ingest_solution (</span>
+<span>  source_row_number bigint PRIMARY KEY,</span>
 <span>  full_name text,</span>
 <span>  email text,</span>
 <span>  country text,</span>
@@ -787,8 +1182,52 @@ ROLLBACK;</code></pre>
 <span>  phone_valid boolean,</span>
 <span>  email_valid boolean,</span>
 <span>  country_valid boolean,</span>
-<span>  attributes jsonb</span>
+<span>  raw_attributes text,</span>
+<span>  attributes jsonb,</span>
+<span>  json_valid boolean</span>
 <span>) ON COMMIT DROP;</span>
+<span> </span>
+<span>-- Parse only the supported formats, in a declared source time zone, and turn</span>
+<span>-- malformed-but-regex-shaped input into NULL rather than aborting the batch.</span>
+<span>SET LOCAL TIME ZONE &#x27;UTC&#x27;;</span>
+<span>CREATE OR REPLACE FUNCTION pg_temp.try_parse_customer_timestamp(raw_value text)</span>
+<span>RETURNS timestamptz</span>
+<span>LANGUAGE plpgsql</span>
+<span>-- Parsing text as timestamptz depends on session time-zone/date settings even</span>
+<span>-- though this lesson pins UTC above. STABLE is the honest volatility promise;</span>
+<span>-- IMMUTABLE would let PostgreSQL cache a value across changed settings.</span>
+<span>STABLE</span>
+<span>AS $function$</span>
+<span>DECLARE</span>
+<span>  parsed_value timestamptz;</span>
+<span>BEGIN</span>
+<span>  IF raw_value ~ &#x27;^[0-9]{4}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}$&#x27; THEN</span>
+<span>    parsed_value := to_timestamp(raw_value, &#x27;FXYYYY/MM/DD HH24:MI&#x27;);</span>
+<span>    IF to_char(parsed_value AT TIME ZONE &#x27;UTC&#x27;, &#x27;YYYY/MM/DD HH24:MI&#x27;) &lt;&gt; raw_value THEN</span>
+<span>      RETURN NULL;</span>
+<span>    END IF;</span>
+<span>  ELSIF raw_value ~ &#x27;^[0-9]{2}/[0-9]{2}/[0-9]{4} [0-9]{2}:[0-9]{2}$&#x27; THEN</span>
+<span>    parsed_value := to_timestamp(raw_value, &#x27;FXMM/DD/YYYY HH24:MI&#x27;);</span>
+<span>    IF to_char(parsed_value AT TIME ZONE &#x27;UTC&#x27;, &#x27;MM/DD/YYYY HH24:MI&#x27;) &lt;&gt; raw_value THEN</span>
+<span>      RETURN NULL;</span>
+<span>    END IF;</span>
+<span>  ELSIF raw_value ~ &#x27;^[0-9]{2}-[A-Za-z]{3}-[0-9]{4} [0-9]{2}:[0-9]{2}$&#x27; THEN</span>
+<span>    parsed_value := to_timestamp(raw_value, &#x27;FXDD-Mon-YYYY HH24:MI&#x27;);</span>
+<span>    IF lower(to_char(parsed_value AT TIME ZONE &#x27;UTC&#x27;, &#x27;DD-Mon-YYYY HH24:MI&#x27;))</span>
+<span>       &lt;&gt; lower(raw_value) THEN</span>
+<span>      RETURN NULL;</span>
+<span>    END IF;</span>
+<span>  ELSIF raw_value ~ &#x27;^[0-9]{4}-[0-9]{2}-[0-9]{2}[ T][0-9]{2}:[0-9]{2}&#x27; THEN</span>
+<span>    parsed_value := raw_value::timestamptz;</span>
+<span>  ELSE</span>
+<span>    RETURN NULL;</span>
+<span>  END IF;</span>
+<span>  RETURN parsed_value;</span>
+<span>EXCEPTION</span>
+<span>  WHEN datetime_field_overflow OR invalid_datetime_format THEN</span>
+<span>    RETURN NULL;</span>
+<span>END</span>
+<span>$function$;</span>
 <span> </span>
 <span>-- Exercise 1: guarded CASE branches parse each supported datetime format and</span>
 <span>-- leave unrecognized input NULL instead of raising.</span>
@@ -806,7 +1245,8 @@ ROLLBACK;</code></pre>
 <span> </span>
 <span>  INSERT INTO cleaned_customer_ingest_solution</span>
 <span>  WITH normalized AS (</span>
-<span>    SELECT trim(full_name) AS full_name,</span>
+<span>    SELECT source_row_number,</span>
+<span>           trim(full_name) AS full_name,</span>
 <span>           lower(trim(email)) AS email,</span>
 <span>           CASE upper(trim(country))</span>
 <span>             WHEN &#x27;USA&#x27; THEN &#x27;US&#x27;</span>
@@ -814,25 +1254,15 @@ ROLLBACK;</code></pre>
 <span>             ELSE upper(trim(country))</span>
 <span>           END AS country,</span>
 <span>           lower(NULLIF(trim(segment), &#x27;&#x27;)) AS segment,</span>
-<span>           CASE</span>
-<span>             WHEN created_at ~ &#x27;^[0-9]{4}/[0-9]{2}/[0-9]{2} &#x27;</span>
-<span>               THEN to_timestamp(created_at, &#x27;YYYY/MM/DD HH24:MI&#x27;)</span>
-<span>             WHEN created_at ~ &#x27;^[0-9]{2}/[0-9]{2}/[0-9]{4} &#x27;</span>
-<span>               THEN to_timestamp(created_at, &#x27;MM/DD/YYYY HH24:MI&#x27;)</span>
-<span>             WHEN created_at ~ &#x27;^[0-9]{2}-[A-Za-z]{3}-[0-9]{4} &#x27;</span>
-<span>               THEN to_timestamp(created_at, &#x27;DD-Mon-YYYY HH24:MI&#x27;)</span>
-<span>             WHEN created_at ~ &#x27;^[0-9]{4}-[0-9]{2}-[0-9]{2}&#x27;</span>
-<span>               THEN created_at::timestamptz</span>
-<span>             ELSE NULL</span>
-<span>           END AS parsed_created_at,</span>
+<span>           pg_temp.try_parse_customer_timestamp(created_at) AS parsed_created_at,</span>
 <span>           regexp_replace(phone, &#x27;[^0-9]&#x27;, &#x27;&#x27;, &#x27;g&#x27;) AS phone_digits,</span>
-<span>           CASE</span>
-<span>             WHEN attributes IS JSON THEN attributes::jsonb</span>
-<span>             ELSE &#x27;{}&#x27;::jsonb</span>
-<span>           END AS attributes</span>
+<span>           attributes AS raw_attributes,</span>
+<span>           CASE WHEN attributes IS JSON THEN attributes::jsonb END AS attributes,</span>
+<span>           attributes IS JSON AS json_valid</span>
 <span>    FROM stg_customer_ingest_solution</span>
 <span>  )</span>
-<span>  SELECT full_name,</span>
+<span>  SELECT source_row_number,</span>
+<span>         full_name,</span>
 <span>         email,</span>
 <span>         country,</span>
 <span>         segment,</span>
@@ -841,19 +1271,42 @@ ROLLBACK;</code></pre>
 <span>         phone_digits ~ &#x27;^[0-9]{10,15}$&#x27; AS phone_valid,</span>
 <span>         email ~* &#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27; AS email_valid,</span>
 <span>         country IN (&#x27;US&#x27;,&#x27;CA&#x27;,&#x27;GB&#x27;,&#x27;DE&#x27;,&#x27;FR&#x27;,&#x27;IN&#x27;,&#x27;AU&#x27;,&#x27;BR&#x27;) AS country_valid,</span>
-<span>         attributes</span>
+<span>         raw_attributes,</span>
+<span>         attributes,</span>
+<span>         json_valid</span>
 <span>  FROM normalized;</span>
 <span> </span>
 <span>  SELECT COUNT(*)</span>
 <span>  INTO invalid_rows</span>
 <span>  FROM cleaned_customer_ingest_solution</span>
-<span>  WHERE NOT email_valid</span>
-<span>     OR NOT country_valid</span>
-<span>     OR NOT phone_valid</span>
+<span>  WHERE email_valid IS NOT TRUE</span>
+<span>     OR country_valid IS NOT TRUE</span>
+<span>     OR phone_valid IS NOT TRUE</span>
+<span>     OR json_valid IS NOT TRUE</span>
 <span>     OR created_at IS NULL</span>
 <span>     OR full_name IS NULL</span>
 <span>     OR full_name = &#x27;&#x27;;</span>
 <span> </span>
+<span>  -- PostgreSQL cannot update the same conflict target twice in one</span>
+<span>  -- INSERT ... ON CONFLICT statement. Rank validated normalized rows first,</span>
+<span>  -- then send exactly one winner per email to the upsert.</span>
+<span>  WITH valid_rows AS (</span>
+<span>    SELECT *</span>
+<span>    FROM cleaned_customer_ingest_solution</span>
+<span>    WHERE email_valid IS TRUE</span>
+<span>      AND country_valid IS TRUE</span>
+<span>      AND phone_valid IS TRUE</span>
+<span>      AND json_valid IS TRUE</span>
+<span>      AND created_at IS NOT NULL</span>
+<span>      AND full_name &lt;&gt; &#x27;&#x27;</span>
+<span>  ), deduped AS (</span>
+<span>    SELECT valid_rows.*,</span>
+<span>           ROW_NUMBER() OVER (</span>
+<span>             PARTITION BY email</span>
+<span>             ORDER BY created_at DESC, source_row_number DESC</span>
+<span>           ) AS winner_rank</span>
+<span>    FROM valid_rows</span>
+<span>  )</span>
 <span>  INSERT INTO customers(full_name, email, country, created_at, segment, attributes)</span>
 <span>  SELECT full_name,</span>
 <span>         email,</span>
@@ -861,16 +1314,14 @@ ROLLBACK;</code></pre>
 <span>         created_at,</span>
 <span>         segment,</span>
 <span>         attributes</span>
-<span>  FROM cleaned_customer_ingest_solution</span>
-<span>  WHERE email_valid</span>
-<span>    AND country_valid</span>
-<span>    AND phone_valid</span>
-<span>    AND created_at IS NOT NULL</span>
-<span>    AND full_name &lt;&gt; &#x27;&#x27;</span>
+<span>  FROM deduped</span>
+<span>  WHERE winner_rank = 1</span>
 <span>  ON CONFLICT (email) DO UPDATE</span>
 <span>  SET full_name = EXCLUDED.full_name,</span>
 <span>      country = EXCLUDED.country,</span>
 <span>      segment = EXCLUDED.segment,</span>
+<span>      -- `created_at` is the immutable first-seen/signup timestamp; a replay or</span>
+<span>      -- profile correction must not rewrite it.</span>
 <span>      attributes = EXCLUDED.attributes;</span>
 <span> </span>
 <span>  GET DIAGNOSTICS upserted_rows = ROW_COUNT;</span>
@@ -889,14 +1340,22 @@ ROLLBACK;</code></pre>
 <span>-- Exercise 4: deterministic winner selection happens after normalization and</span>
 <span>-- before upsert. Newest valid timestamp wins; email/full_name break any ties.</span>
 <span>WITH candidates AS (</span>
-<span>  SELECT lower(trim(email)) AS normalized_email,</span>
+<span>  SELECT email AS normalized_email,</span>
 <span>         full_name,</span>
 <span>         created_at,</span>
+<span>         source_row_number,</span>
 <span>         ROW_NUMBER() OVER (</span>
-<span>           PARTITION BY lower(trim(email))</span>
-<span>           ORDER BY created_at DESC NULLS LAST, trim(full_name), email</span>
+<span>           PARTITION BY email</span>
+<span>           ORDER BY created_at DESC NULLS LAST, source_row_number DESC</span>
 <span>         ) AS winner_rank</span>
-<span>  FROM stg_customer_ingest_solution</span>
+<span>  FROM cleaned_customer_ingest_solution</span>
+<span>  WHERE email_valid IS TRUE</span>
+<span>    AND country_valid IS TRUE</span>
+<span>    AND phone_valid IS TRUE</span>
+<span>    AND json_valid IS TRUE</span>
+<span>    AND created_at IS NOT NULL</span>
+<span>    AND full_name IS NOT NULL</span>
+<span>    AND full_name &lt;&gt; &#x27;&#x27;</span>
 <span>)</span>
 <span>SELECT * FROM candidates WHERE winner_rank = 1 ORDER BY normalized_email;</span>
 <span> </span>
@@ -906,10 +1365,11 @@ ROLLBACK;</code></pre>
 <span>  SELECT *,</span>
 <span>         CASE</span>
 <span>           WHEN full_name IS NULL OR full_name = &#x27;&#x27; THEN &#x27;invalid_name&#x27;</span>
-<span>           WHEN NOT email_valid THEN &#x27;invalid_email&#x27;</span>
-<span>           WHEN NOT country_valid THEN &#x27;invalid_country&#x27;</span>
+<span>           WHEN email_valid IS NOT TRUE THEN &#x27;invalid_email&#x27;</span>
+<span>           WHEN country_valid IS NOT TRUE THEN &#x27;invalid_country&#x27;</span>
 <span>           WHEN created_at IS NULL THEN &#x27;invalid_datetime&#x27;</span>
-<span>           WHEN NOT phone_valid THEN &#x27;invalid_phone&#x27;</span>
+<span>           WHEN phone_valid IS NOT TRUE THEN &#x27;invalid_phone&#x27;</span>
+<span>           WHEN json_valid IS NOT TRUE THEN &#x27;invalid_json&#x27;</span>
 <span>           ELSE &#x27;accepted&#x27;</span>
 <span>         END AS outcome</span>
 <span>  FROM cleaned_customer_ingest_solution</span>
@@ -929,7 +1389,11 @@ ROLLBACK;</code></pre>
 <span>-- Exercise 7: missing and unknown are different quality states. Preserve the</span>
 <span>-- raw input beside its normalized candidate.</span>
 <span>SELECT country AS raw_country,</span>
-<span>       NULLIF(upper(trim(country)), &#x27;&#x27;) AS normalized_candidate,</span>
+<span>       CASE upper(trim(country))</span>
+<span>         WHEN &#x27;USA&#x27; THEN &#x27;US&#x27;</span>
+<span>         WHEN &#x27;U S&#x27; THEN &#x27;US&#x27;</span>
+<span>         ELSE NULLIF(upper(trim(country)), &#x27;&#x27;)</span>
+<span>       END AS normalized_candidate,</span>
 <span>       CASE WHEN country IS NULL OR trim(country) = &#x27;&#x27; THEN &#x27;missing&#x27;</span>
 <span>            WHEN upper(trim(country)) IN (&#x27;US&#x27;,&#x27;USA&#x27;,&#x27;CA&#x27;,&#x27;GB&#x27;,&#x27;DE&#x27;,&#x27;FR&#x27;,&#x27;IN&#x27;,&#x27;AU&#x27;,&#x27;BR&#x27;)</span>
 <span>              THEN &#x27;recognized&#x27;</span>
@@ -945,11 +1409,11 @@ ROLLBACK;</code></pre>
 <span>  PRIMARY KEY (batch_id, source_row_number)</span>
 <span>);</span>
 <span>INSERT INTO staged_batch_identity</span>
-<span>SELECT &#x27;day58-demo&#x27;, row_number() OVER (ORDER BY email), email</span>
+<span>SELECT &#x27;day58-demo&#x27;, source_row_number, email</span>
 <span>FROM stg_customer_ingest_solution</span>
 <span>ON CONFLICT (batch_id, source_row_number) DO NOTHING;</span>
 <span>INSERT INTO staged_batch_identity</span>
-<span>SELECT &#x27;day58-demo&#x27;, row_number() OVER (ORDER BY email), email</span>
+<span>SELECT &#x27;day58-demo&#x27;, source_row_number, email</span>
 <span>FROM stg_customer_ingest_solution</span>
 <span>ON CONFLICT (batch_id, source_row_number) DO NOTHING;</span>
 <span>SELECT COUNT(*) AS replay_safe_rows FROM staged_batch_identity;</span>
@@ -967,21 +1431,68 @@ ROLLBACK;</code></pre>
 <span>-- separately using an explicit merge/audit strategy.</span>
 <span>WITH classified AS (</span>
 <span>  SELECT *,</span>
-<span>         email_valid AND country_valid AND phone_valid</span>
+<span>         email_valid IS TRUE</span>
+<span>           AND country_valid IS TRUE</span>
+<span>           AND phone_valid IS TRUE</span>
+<span>           AND json_valid IS TRUE</span>
 <span>           AND created_at IS NOT NULL</span>
-<span>           AND full_name IS NOT NULL AND full_name &lt;&gt; &#x27;&#x27; AS accepted</span>
+<span>           AND full_name IS NOT NULL</span>
+<span>           AND full_name &lt;&gt; &#x27;&#x27; AS accepted</span>
 <span>  FROM cleaned_customer_ingest_solution</span>
 <span>)</span>
 <span>SELECT (SELECT COUNT(*) FROM stg_customer_ingest_solution) AS staged_rows,</span>
-<span>       COUNT(*) FILTER (WHERE accepted) AS accepted_rows,</span>
-<span>       COUNT(*) FILTER (WHERE NOT accepted) AS rejected_rows,</span>
+<span>       COUNT(*) FILTER (WHERE accepted IS TRUE) AS accepted_rows,</span>
+<span>       COUNT(*) FILTER (WHERE accepted IS NOT TRUE) AS rejected_rows,</span>
 <span>       COUNT(*) AS reconciled_rows</span>
 <span>FROM classified;</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-58 — Final Capstone Part1.
+
+I have completed the direct catalog prerequisite: `sql-57`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day58_final_capstone_part1.md
+- Answer-free learner SQL: sql/postgres-60day/day58_final_capstone_part1.sql
+
+Key terms to teach in context: Raw staging, Rejection reason, Upsert count. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: For each timestamp format, test a format-specific regular expression before casting. Keep raw text and parsed value together, collect explicit rejection reasons, and upsert only accepted rows inside the rollback-only transaction. Return staged, valid, invalid, and affected counts that reconcile.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-58/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-57.html"><small>Previous lesson</small><strong>sql-57</strong><span>Project4 BI Part3</span></a>
@@ -1073,6 +1584,23 @@ ROLLBACK;</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

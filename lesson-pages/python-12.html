@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-12-oop-basics-and-dataclasses">Day 12 — OOP Basics and Dataclasses<a class="heading-anchor" href="#guide--day-12-oop-basics-and-dataclasses" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>Use a class when data and behavior form one meaningful concept with invariants. Use a plain function or collection when they do not.</p>
@@ -292,6 +331,94 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 11 (<code>python-11</code>): function contracts, logging, tests, and type hints.</p>
+<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<ol>
+<li>Confirm the course environment before changing it:</li>
+</ol>
+<pre><code class="language-powershell">   # Windows PowerShell
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   &amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash">   # macOS/Linux
+   .venv/bin/python scripts/course.py doctor</code></pre>
+<ol>
+<li>Read <code>python/ds-60day/companion-guides/day12_oop_dataclasses.md</code>, then open <code>python/ds-60day/notebooks/day12_oop_dataclasses.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
+<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
+<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
+<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+</ol>
+<p><strong>Lesson outcome:</strong> use day 12 — oop basics and dataclasses to practice objects that keep related state and behavior together and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
+<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
+<p>A class defines how a family of objects is constructed and behaves; an instance is one concrete object. Instance attributes hold per-object state, and methods are functions retrieved through an instance so that the instance is passed as <code>self</code>. Use a class when state and invariant- preserving behavior genuinely belong together, not merely to wrap a dictionary.</p>
+<p>A dataclass generates common record behavior such as initialization, representation, and equality from annotated fields. It does not validate values automatically. Use <code><strong>post_init</strong></code> for small invariant checks and distinguish class attributes shared by all instances from fields owned by each instance.</p>
+<h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>class:</strong> a definition of construction and behavior for related objects.</li>
+<li><strong>instance:</strong> one concrete object created from a class.</li>
+<li><strong>attribute:</strong> a named value stored on or resolved through an object.</li>
+<li><strong>method:</strong> a function accessed through an object, normally receiving <code>self</code>.</li>
+<li><strong>invariant:</strong> a condition that must remain true for a valid object.</li>
+<li><strong>dataclass:</strong> a class whose record-oriented methods are generated from fields.</li>
+</ul>
+<h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<p><code>@dataclass</code> decorates the following class. In <code>quantity: int</code>, the annotation declares a field and generated constructor parameter. <code>self.quantity</code> refers to the current instance&#x27;s field. A method that returns a calculation without mutation is easier to reason about than one that silently changes several attributes.</p>
+<h5 id="guide--worked-example-1-model-a-validated-record-with-a-computed-method">Worked example 1 — Model a validated record with a computed method<a class="heading-anchor" href="#guide--worked-example-1-model-a-validated-record-with-a-computed-method" aria-label="Link to this section">#</a></h5>
+<p>Keep line-item state and its subtotal behavior together. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">from dataclasses import dataclass
+
+@dataclass
+class LineItem:
+    name: str
+    unit_price: float
+    quantity: int = 1
+
+    def __post_init__(self) -&gt; None:
+        if self.unit_price &lt; 0 or self.quantity &lt; 0:
+            raise ValueError(&quot;price and quantity must be non-negative&quot;)
+
+    def subtotal(self) -&gt; float:
+        return self.unit_price * self.quantity
+
+item = LineItem(&quot;notebook&quot;, 4.5, 3)
+(item, item.subtotal())</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`LineItem(name=&#x27;notebook&#x27;, unit_price=4.5, quantity=3)` and `13.5`. Construction enforces the invariant.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--worked-example-2-show-that-fields-belong-to-each-instance">Worked example 2 — Show that fields belong to each instance<a class="heading-anchor" href="#guide--worked-example-2-show-that-fields-belong-to-each-instance" aria-label="Link to this section">#</a></h5>
+<p>Mutating one instance should not alter another independent record. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">first = LineItem(&quot;pen&quot;, 1.5, 2)
+second = LineItem(&quot;pen&quot;, 1.5, 2)
+first.quantity = 5
+(first.quantity, second.quantity, first == second)</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`(5, 2, False)`. Each instance owns its quantity; dataclass equality compares current field values.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
+<p>When the output differs from your prediction, use this order:</p>
+<ol>
+<li>When an attribute is missing, inspect whether it was assigned on every constructor path and spell it consistently.</li>
+<li>Do not use a mutable object as a shared class attribute for per-instance state.</li>
+<li>Put invariant checks at construction and mutation boundaries, not only in a later calculation.</li>
+<li>Prefer composition when one object has another; use inheritance only for a genuine substitutable relationship.</li>
+</ol>
+<h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
+<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
+<ol>
+<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
+<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
+<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
+<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
+<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
+</ol>
+<p><strong>Useful alternative:</strong> A dictionary suits loose, dynamic records; a named tuple suits immutable records; a dataclass suits named fields with modest behavior and validation.</p>
+<p><strong>Boundary to remember:</strong> Negative quantities, mutable default fields, equality after mutation, subclass invariants, and serialization of nested objects need explicit policy. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Class:</strong> definition of a data-and-behavior type; <strong>instance:</strong> one value of that type.</li>
@@ -304,7 +431,6 @@
 <h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-python">from dataclasses import dataclass
 
-
 @dataclass(frozen=True, slots=True)
 class Temperature:
     celsius: float
@@ -316,19 +442,22 @@ class Temperature:
         return f&quot;{self.celsius:.1f} °C&quot;</code></pre>
 <p><code>frozen=True</code> prevents normal reassignment; it does not make every possible nested value deeply immutable. <code>slots=True</code> avoids a per-instance attribute dictionary and rejects unexpected attributes.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Model an <code>Order</code> and compute its total after discounts. <strong>Hint:</strong> represent the input fields first, then put the pricing rule in a method; state whether discounts are fractions or currency amounts.</li>
-<li>Add readable <code><strong>str</strong></code> output and explore generated representation/equality. <strong>Hint:</strong> dataclass equality compares declared fields between compatible instances; create two equivalent and one different instance.</li>
+<li>Create a <code>BankAccount</code> class with owner and private-by-convention balance state plus <code>deposit</code>, <code>withdraw</code>, and <code>balance</code> behavior. <strong>Contract:</strong> deposits are positive, withdrawals cannot exceed the balance, and invalid operations raise <code>ValueError</code> without changing state. <strong>Verify:</strong> assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus <code>ValueError</code> after a zero deposit and an overdraw.</li>
+</ol>
+<ol>
+<li>Convert a plain product record to <code>@dataclass Product(name: str, price: float, quantity: int = 0)</code>. Add <code><strong>post_init</strong></code> validation and a <code>stock_value()</code> method. <strong>Expected behavior:</strong> <code>Product(&#x27;tea&#x27;, 4.0, 3).stock_value() == 12.0</code>; negative values raise. <strong>Constraint:</strong> use <code>field(default_factory=...)</code> if you add any mutable collection field. <strong>Verify:</strong> Assert <code>stock_value()</code> is <code>12.0</code>, equality uses field values, and separate negative-price and negative-quantity constructions raise.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Put behavior with the data it protects, while keeping ownership and mutation explicit. Prefer composition unless the subtype truly is-a base.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict how a class attribute shared by instances differs from an instance attribute assigned through <code>self</code>. <strong>Progressive hint:</strong> Class lookup is shared until an instance shadows the name.</li>
-<li><strong>Tracing:</strong> Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using <code>is</code>. <strong>Progressive hint:</strong> Value equality and identity answer different questions.</li>
-<li><strong>Implementation:</strong> Create immutable <code>OrderLine</code> and <code>Order</code> dataclasses whose total sums quantity × unit price and applies a validated fractional discount. <strong>Progressive hint:</strong> Validate non-negative values in <code><strong>post_init</strong></code>.</li>
-<li><strong>Debugging:</strong> Repair a dataclass field declared as <code>items: list[str] = []</code>. <strong>Progressive hint:</strong> Use <code>field(default_factory=list)</code> to create one list per instance.</li>
-<li><strong>Edge case and explanation:</strong> Decide whether a discount policy should be a subclass of <code>Order</code> or a composed callable; justify the dependency direction. <strong>Progressive hint:</strong> A replaceable rule is usually behavior the order uses, not a kind of order.</li>
+<li><strong>Prediction:</strong> Predict how a class attribute shared by instances differs from an instance attribute assigned through <code>self</code>. <strong>Progressive hint:</strong> Class lookup is shared until an instance shadows the name. <strong>Verify:</strong> Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly.</li>
+<li><strong>Tracing:</strong> Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using <code>is</code>. <strong>Progressive hint:</strong> Value equality and identity answer different questions. <strong>Verify:</strong> Assert two equal-field dataclass values satisfy <code>==</code> but not <code>is</code>; mutate or replace a field and confirm equality changes as expected.</li>
+<li><strong>Implementation:</strong> Create immutable <code>OrderLine</code> and <code>Order</code> dataclasses whose total sums quantity × unit price and applies a validated fractional discount. <strong>Progressive hint:</strong> Validate non-negative values in <code><strong>post_init</strong></code>. <strong>Verify:</strong> Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail.</li>
+<li><strong>Debugging:</strong> Repair a dataclass field declared as <code>items: list[str] = []</code>. <strong>Progressive hint:</strong> Use <code>field(default_factory=list)</code> to create one list per instance. <strong>Verify:</strong> Create two default instances, mutate one <code>items</code> list, and assert the other remains empty and the list objects are not identical.</li>
+<li><strong>Edge case and explanation:</strong> Decide whether a discount policy should be a subclass of <code>Order</code> or a composed callable; justify the dependency direction. <strong>Progressive hint:</strong> A replaceable rule is usually behavior the order uses, not a kind of order. <strong>Verify:</strong> Swap two discount callables without changing <code>Order</code>; assert totals follow each policy and explain why composition preserves the dependency direction.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -352,17 +481,33 @@ class Temperature:
 <li><a href="python-12.html#learner">Open the learner notebook</a></li>
 <li><a href="python-12.html#solution-1">Check the separate solution</a></li>
 <li><a href="python-13.html#guide">Next: Day 13 — Functional tools</a></li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-12`
+(Day 12 — OOP Basics and Dataclasses). Direct catalog prerequisites: `python-11`.
+I have completed the direct prerequisites: `python-11`. Emphasize objects that keep related state and behavior together.
+Read `python/ds-60day/companion-guides/day12_oop_dataclasses.md` and use the learner notebook
+`python/ds-60day/notebooks/day12_oop_dataclasses.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -379,12 +524,12 @@ class Temperature:
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-12-oop-basics-dataclasses">Day 12 — OOP basics &amp; dataclasses<a class="heading-anchor" href="#learner--cell-1--day-12-oop-basics-dataclasses" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -393,7 +538,67 @@ class Temperature:
 <li>Use @dataclass for concise models.</li>
 <li>Inheritance basics.</li>
 </ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
+<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>This is the editable learner artifact for <code>python-12</code>. Read <code>python/ds-60day/companion-guides/day12_oop_dataclasses.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
+<p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
+<p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--core-mental-model">Core mental model<a class="heading-anchor" href="#learner--cell-3--core-mental-model" aria-label="Link to this section">#</a></h4>
+<p>A class defines how a family of objects is constructed and behaves; an instance is one concrete object. Instance attributes hold per-object state, and methods are functions retrieved through an instance so that the instance is passed as <code>self</code>. Use a class when state and invariant- preserving behavior genuinely belong together, not merely to wrap a dictionary.</p>
+<p>A dataclass generates common record behavior such as initialization, representation, and equality from annotated fields. It does not validate values automatically. Use <code><strong>post_init</strong></code> for small invariant checks and distinguish class attributes shared by all instances from fields owned by each instance.</p>
+<h5 id="learner--cell-3--vocabulary">Vocabulary<a class="heading-anchor" href="#learner--cell-3--vocabulary" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>class:</strong> a definition of construction and behavior for related objects.</li>
+<li><strong>instance:</strong> one concrete object created from a class.</li>
+<li><strong>attribute:</strong> a named value stored on or resolved through an object.</li>
+<li><strong>method:</strong> a function accessed through an object, normally receiving <code>self</code>.</li>
+<li><strong>invariant:</strong> a condition that must remain true for a valid object.</li>
+<li><strong>dataclass:</strong> a class whose record-oriented methods are generated from fields.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<p><code>@dataclass</code> decorates the following class. In <code>quantity: int</code>, the annotation declares a field and generated constructor parameter. <code>self.quantity</code> refers to the current instance&#x27;s field. A method that returns a calculation without mutation is easier to reason about than one that silently changes several attributes.</p>
+<h5 id="learner--cell-4--worked-example-1-model-a-validated-record-with-a-computed-method">Worked example 1 — Model a validated record with a computed method<a class="heading-anchor" href="#learner--cell-4--worked-example-1-model-a-validated-record-with-a-computed-method" aria-label="Link to this section">#</a></h5>
+<p>Keep line-item state and its subtotal behavior together. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from dataclasses import dataclass</span>
+<span> </span>
+<span>@dataclass</span>
+<span>class LineItem:</span>
+<span>    name: str</span>
+<span>    unit_price: float</span>
+<span>    quantity: int = 1</span>
+<span> </span>
+<span>    def __post_init__(self) -&gt; None:</span>
+<span>        if self.unit_price &lt; 0 or self.quantity &lt; 0:</span>
+<span>            raise ValueError(&quot;price and quantity must be non-negative&quot;)</span>
+<span> </span>
+<span>    def subtotal(self) -&gt; float:</span>
+<span>        return self.unit_price * self.quantity</span>
+<span> </span>
+<span>item = LineItem(&quot;notebook&quot;, 4.5, 3)</span>
+<span>(item, item.subtotal())</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> <code>LineItem(name=&#x27;notebook&#x27;, unit_price=4.5, quantity=3)</code> and <code>13.5</code>. Construction enforces the invariant.</p>
+<p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
+<h5 id="learner--cell-6--worked-example-2-show-that-fields-belong-to-each-instance">Worked example 2 — Show that fields belong to each instance<a class="heading-anchor" href="#learner--cell-6--worked-example-2-show-that-fields-belong-to-each-instance" aria-label="Link to this section">#</a></h5>
+<p>Mutating one instance should not alter another independent record. Predict first; then run the next cell.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>first = LineItem(&quot;pen&quot;, 1.5, 2)</span>
+<span>second = LineItem(&quot;pen&quot;, 1.5, 2)</span>
+<span>first.quantity = 5</span>
+<span>(first.quantity, second.quantity, first == second)</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>(5, 2, False)</code>. Each instance owns its quantity; dataclass equality compares current field values.</p>
+<h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
+<p>When evidence differs from your prediction, use this order:</p>
+<ol>
+<li>When an attribute is missing, inspect whether it was assigned on every constructor path and spell it consistently.</li>
+<li>Do not use a mutable object as a shared class attribute for per-instance state.</li>
+<li>Put invariant checks at construction and mutation boundaries, not only in a later calculation.</li>
+<li>Prefer composition when one object has another; use inheritance only for a genuine substitutable relationship.</li>
+</ol>
+<p><strong>Alternative to compare:</strong> A dictionary suits loose, dynamic records; a named tuple suits immutable records; a dataclass suits named fields with modest behavior and validation.</p>
+<p><strong>Boundary to test:</strong> Negative quantities, mutable default fields, equality after mutation, subclass invariants, and serialization of nested objects need explicit policy.</p>
+<p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from dataclasses import dataclass</span>
 <span>from datetime import date</span>
 <span> </span>
 <span>@dataclass</span>
@@ -408,52 +613,119 @@ class Temperature:
 <span>Customer(1,&#x27;Ada&#x27;, date(2024,1,1)).age_days()</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Model an <code>Order</code> and compute its total after discounts. <strong>Hint:</strong> represent the input fields first, then put the pricing rule in a method; state whether discounts are fractions or currency amounts.</li>
-<li>Add readable <code><strong>str</strong></code> output and explore generated representation/equality. <strong>Hint:</strong> dataclass equality compares declared fields between compatible instances; create two equivalent and one different instance.</li>
+<li>Create a <code>BankAccount</code> class with owner and private-by-convention balance state plus <code>deposit</code>, <code>withdraw</code>, and <code>balance</code> behavior. <strong>Contract:</strong> deposits are positive, withdrawals cannot exceed the balance, and invalid operations raise <code>ValueError</code> without changing state. <strong>Verify:</strong> assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus <code>ValueError</code> after a zero deposit and an overdraw.</li>
 </ol>
-<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Convert a plain product record to <code>@dataclass Product(name: str, price: float, quantity: int = 0)</code>. Add <code><strong>post_init</strong></code> validation and a <code>stock_value()</code> method. <strong>Expected behavior:</strong> <code>Product(&#x27;tea&#x27;, 4.0, 3).stock_value() == 12.0</code>; negative values raise. <strong>Constraint:</strong> use <code>field(default_factory=...)</code> if you add any mutable collection field. <strong>Verify:</strong> Assert <code>stock_value()</code> is <code>12.0</code>, equality uses field values, and separate negative-price and negative-quantity constructions raise.</li>
+</ol>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Put behavior with the data it protects, while keeping ownership and mutation explicit. Prefer composition unless the subtype truly is-a base.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict how a class attribute shared by instances differs from an instance attribute assigned through <code>self</code>. <strong>Progressive hint:</strong> Class lookup is shared until an instance shadows the name.</li>
-<li><strong>Tracing:</strong> Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using <code>is</code>. <strong>Progressive hint:</strong> Value equality and identity answer different questions.</li>
-<li><strong>Implementation:</strong> Create immutable <code>OrderLine</code> and <code>Order</code> dataclasses whose total sums quantity × unit price and applies a validated fractional discount. <strong>Progressive hint:</strong> Validate non-negative values in <code><strong>post_init</strong></code>.</li>
-<li><strong>Debugging:</strong> Repair a dataclass field declared as <code>items: list[str] = []</code>. <strong>Progressive hint:</strong> Use <code>field(default_factory=list)</code> to create one list per instance.</li>
-<li><strong>Edge case and explanation:</strong> Decide whether a discount policy should be a subclass of <code>Order</code> or a composed callable; justify the dependency direction. <strong>Progressive hint:</strong> A replaceable rule is usually behavior the order uses, not a kind of order.</li>
+<li><strong>Prediction:</strong> Predict how a class attribute shared by instances differs from an instance attribute assigned through <code>self</code>. <strong>Progressive hint:</strong> Class lookup is shared until an instance shadows the name. <strong>Verify:</strong> Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly.</li>
+<li><strong>Tracing:</strong> Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using <code>is</code>. <strong>Progressive hint:</strong> Value equality and identity answer different questions. <strong>Verify:</strong> Assert two equal-field dataclass values satisfy <code>==</code> but not <code>is</code>; mutate or replace a field and confirm equality changes as expected.</li>
+<li><strong>Implementation:</strong> Create immutable <code>OrderLine</code> and <code>Order</code> dataclasses whose total sums quantity × unit price and applies a validated fractional discount. <strong>Progressive hint:</strong> Validate non-negative values in <code><strong>post_init</strong></code>. <strong>Verify:</strong> Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail.</li>
+<li><strong>Debugging:</strong> Repair a dataclass field declared as <code>items: list[str] = []</code>. <strong>Progressive hint:</strong> Use <code>field(default_factory=list)</code> to create one list per instance. <strong>Verify:</strong> Create two default instances, mutate one <code>items</code> list, and assert the other remains empty and the list objects are not identical.</li>
+<li><strong>Edge case and explanation:</strong> Decide whether a discount policy should be a subclass of <code>Order</code> or a composed callable; justify the dependency direction. <strong>Progressive hint:</strong> A replaceable rule is usually behavior the order uses, not a kind of order. <strong>Verify:</strong> Swap two discount callables without changing <code>Order</code>; assert totals follow each policy and explain why composition preserves the dependency direction.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Predict first. Then write small code and assertions below each label.</span>
-<span># Keep the official solution closed until you have tested an honest attempt.</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Create a <code>BankAccount</code> class with owner and private-by-convention balance state plus <code>deposit</code>, <code>withdraw</code>, and <code>balance</code> behavior. <strong>Contract:</strong> deposits are positive, withdrawals cannot exceed the balance, and invalid operations raise <code>ValueError</code> without changing state. <strong>Verify:</strong> assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus <code>ValueError</code> after a zero deposit and an overdraw.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
+<span># Short contract: Create a `BankAccount` class with owner and private-by-convention balance state plus `deposit`, `withdraw`, and `balance` behavior. deposits are positive, withdrawals cannot exc...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 3 — Prediction</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Convert a plain product record to <code>@dataclass Product(name: str, price: float, quantity: int = 0)</code>. Add <code><strong>post_init</strong></code> validation and a <code>stock_value()</code> method. <strong>Expected behavior:</strong> <code>Product(&#x27;tea&#x27;, 4.0, 3).stock_value() == 12.0</code>; negative values raise. <strong>Constraint:</strong> use <code>field(default_factory=...)</code> if you add any mutable collection field. <strong>Verify:</strong> Assert <code>stock_value()</code> is <code>12.0</code>, equality uses field values, and separate negative-price and negative-quantity constructions raise.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
+<span># Short contract: Convert a plain product record to `@dataclass Product(name: str, price: float, quantity: int = 0)`. Add `__post_init__` validation and a `stock_value()` method. `Product(&#x27;tea&#x27;,...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 4 — Tracing</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict how a class attribute shared by instances differs from an instance attribute assigned through <code>self</code>. <strong>Progressive hint:</strong> Class lookup is shared until an instance shadows the name. <strong>Verify:</strong> Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
+<span># Short contract: Predict how a class attribute shared by instances differs from an instance attribute assigned through `self`. Class lookup is shared until an instance shadows the name. Construc...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 5 — Implementation</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using <code>is</code>. <strong>Progressive hint:</strong> Value equality and identity answer different questions. <strong>Verify:</strong> Assert two equal-field dataclass values satisfy <code>==</code> but not <code>is</code>; mutate or replace a field and confirm equality changes as expected.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
+<span># Short contract: Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using `is`. Value equality and identity answer different que...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 6 — Debugging</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Create immutable <code>OrderLine</code> and <code>Order</code> dataclasses whose total sums quantity × unit price and applies a validated fractional discount. <strong>Progressive hint:</strong> Validate non-negative values in <code><strong>post_init</strong></code>. <strong>Verify:</strong> Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
+<span># Short contract: Create immutable `OrderLine` and `Order` dataclasses whose total sums quantity × unit price and applies a validated fractional discount. Validate non-negative values in `__post_...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 7 — Edge case and explanation</span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair a dataclass field declared as <code>items: list[str] = []</code>. <strong>Progressive hint:</strong> Use <code>field(default_factory=list)</code> to create one list per instance. <strong>Verify:</strong> Create two default instances, mutate one <code>items</code> list, and assert the other remains empty and the list objects are not identical.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
+<span># Short contract: Repair a dataclass field declared as `items: list[str] = []`. Use `field(default_factory=list)` to create one list per instance. Create two default instances, mutate one `items`...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Decide whether a discount policy should be a subclass of <code>Order</code> or a composed callable; justify the dependency direction. <strong>Progressive hint:</strong> A replaceable rule is usually behavior the order uses, not a kind of order. <strong>Verify:</strong> Swap two discount callables without changing <code>Order</code>; assert totals follow each policy and explain why composition preserves the dependency direction.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
+<span># Short contract: Decide whether a discount policy should be a subclass of `Order` or a composed callable; justify the dependency direction. A replaceable rule is usually behavior the order uses,...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -477,125 +749,135 @@ class Temperature:
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-12-solutions-oop-basics-and-dataclasses">Day 12 — Solutions: OOP Basics and Dataclasses<a class="heading-anchor" href="#solution-1--day-12-solutions-oop-basics-and-dataclasses" aria-label="Link to this section">#</a></h3>
-<p>We model Orders with dataclasses, compute totals with discounts, and add rich representations and equality.</p>
-<p>Contents</p>
+<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
+<p>These worked answers demonstrate <strong>objects that keep related state and behavior together</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
+<p>A class defines how a family of objects is constructed and behaves; an instance is one concrete object. Instance attributes hold per-object state, and methods are functions retrieved through an instance so that the instance is passed as <code>self</code>. Use a class when state and invariant- preserving behavior genuinely belong together, not merely to wrap a dictionary.</p>
+<p>A dataclass generates common record behavior such as initialization, representation, and equality from annotated fields. It does not validate values automatically. Use <code><strong>post_init</strong></code> for small invariant checks and distinguish class attributes shared by all instances from fields owned by each instance.</p>
+<h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
-<li>Exercise 1: Order model with total and discounts</li>
-<li>Exercise 2: <strong>repr</strong>/<strong>str</strong> and equality checks</li>
+<li><strong>class:</strong> a definition of construction and behavior for related objects.</li>
+<li><strong>instance:</strong> one concrete object created from a class.</li>
+<li><strong>attribute:</strong> a named value stored on or resolved through an object.</li>
+<li><strong>method:</strong> a function accessed through an object, normally receiving <code>self</code>.</li>
+<li><strong>invariant:</strong> a condition that must remain true for a valid object.</li>
+<li><strong>dataclass:</strong> a class whose record-oriented methods are generated from fields.</li>
 </ul>
-<hr>
-<p>Exercise 1 — Order model</p>
-<pre><code class="language-python">from __future__ import annotations
-from dataclasses import dataclass
-from datetime import date
-from typing import Iterable
+<h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
+<p>For this lesson&#x27;s <strong>objects that keep related state and behavior together</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Create a <code>BankAccount</code> class with owner and private-by-convention balance state plus <code>deposit</code>, <code>withdraw</code>, and <code>balance</code> behavior. <strong>Contract:</strong> deposits are positive, withdrawals cannot exceed the balance, and invalid operations raise <code>ValueError</code> without changing state. <strong>Verify:</strong> assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus <code>ValueError</code> after a zero deposit and an overdraw.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Create a <code>BankAccount</code> class with owner and private-by-convention balance state plus <code>deposit</code>, <code>withdraw</code>, and <code>balance</code> behavior. Contract: deposits are positive, withdrawals cannot exceed the balance, and invalid operations raise <code>ValueError</code> without changing state. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus <code>ValueError</code> after a zero deposit and an overdraw. That connects the answer to objects that keep related state and behavior together.</p>
+<pre><code class="language-python">class BankAccount:
+    def __init__(self, owner: str, opening_balance: float = 0.0) -&gt; None:
+        if not owner.strip():
+            raise ValueError(&quot;owner must not be blank&quot;)
+        if opening_balance &lt; 0:
+            raise ValueError(&quot;opening balance must be non-negative&quot;)
+        self.owner = owner.strip()
+        self._balance = float(opening_balance)
 
-@dataclass(frozen=True)
-class OrderItem:
-    sku: str
-    price: float
-    qty: int
-    discount: float = 0.0  # per-item absolute discount
+    @property
+    def balance(self) -&gt; float:
+        return self._balance
 
-    def total(self) -&gt; float:
-        # price*qty minus discount*qty, not dropping below 0
-        gross = self.price * self.qty
-        net = max(gross - self.discount * self.qty, 0.0)
-        return round(net, 2)
+    def deposit(self, amount: float) -&gt; None:
+        if amount &lt;= 0:
+            raise ValueError(&quot;deposit must be positive&quot;)
+        self._balance += amount
+
+    def withdraw(self, amount: float) -&gt; None:
+        if amount &lt;= 0:
+            raise ValueError(&quot;withdrawal must be positive&quot;)
+        if amount &gt; self._balance:
+            raise ValueError(&quot;insufficient funds&quot;)
+        self._balance -= amount
+
+
+account = BankAccount(&quot;Ada&quot;, 10.0)
+account.deposit(5.0)
+assert account.balance == 15.0
+account.withdraw(4.0)
+assert account.balance == 11.0
+
+for invalid_operation in (
+    lambda: account.deposit(0),
+    lambda: account.withdraw(12.0),
+):
+    before = account.balance
+    try:
+        invalid_operation()
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(&quot;invalid operation should raise ValueError&quot;)
+    assert account.balance == before</code></pre>
+<p><code>_balance</code> communicates internal state by convention. The property allows read access while all mutation passes through validated methods.</p>
+<p><strong>Verification evidence:</strong> assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus <code>ValueError</code> after a zero deposit and an overdraw.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Convert a plain product record to <code>@dataclass Product(name: str, price: float, quantity: int = 0)</code>. Add <code><strong>post_init</strong></code> validation and a <code>stock_value()</code> method. <strong>Expected behavior:</strong> <code>Product(&#x27;tea&#x27;, 4.0, 3).stock_value() == 12.0</code>; negative values raise. <strong>Constraint:</strong> use <code>field(default_factory=...)</code> if you add any mutable collection field. <strong>Verify:</strong> Assert <code>stock_value()</code> is <code>12.0</code>, equality uses field values, and separate negative-price and negative-quantity constructions raise.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Convert a plain product record to <code>@dataclass Product(name: str, price: float, quantity: int = 0)</code>. Add <code><strong>post_init</strong></code> validation and a <code>stock_value()</code> method. Expected behavior: <code>Product(&#x27;tea&#x27;, 4.0, 3).stock_value() == 12.0</code>; negative values raise. Constraint: use <code>field(default_factory=...)</code> if you add any mutable collection field. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert <code>stock_value()</code> is <code>12.0</code>, equality uses field values, and separate negative-price and negative-quantity constructions raise. That connects the answer to objects that keep related state and behavior together.</p>
+<pre><code class="language-python">from dataclasses import dataclass
 
 
 @dataclass
-class Order:
-    id: int
-    customer: str
-    placed: date
-    items: list[OrderItem]
-    percent_off: float = 0.0  # order-level percent discount (0..1)
-
-    def subtotal(self) -&gt; float:
-        return round(sum(it.total() for it in self.items), 2)
-
-    def total(self) -&gt; float:
-        sub = self.subtotal()
-        total = sub * (1.0 - self.percent_off)
-        return round(total, 2)
-
-# Demo
-order = Order(
-    id=1, customer=&quot;Ada&quot;, placed=date(2025,1,1),
-    items=[OrderItem(&quot;A&quot;, 10.0, 2, discount=1.0), OrderItem(&quot;B&quot;, 5.0, 1)] ,
-    percent_off=0.10,
-)
-print(order.subtotal(), order.total())  #  (10*2-1*2)+5 = 23 -&gt; 20.7</code></pre>
-<p>Line-by-line</p>
-<ul>
-<li>OrderItem is frozen (immutable) so it can be safely used in sets/dicts.</li>
-<li>total clamps at zero to prevent negative totals when discounts exceed price.</li>
-<li>Order applies an additional percent discount at the order level.</li>
-</ul>
-<p>Validation (optional): use <strong>post_init</strong> to validate fields.</p>
-<pre><code class="language-python">@dataclass(frozen=True)
-class OrderItem:
-    sku: str
+class Product:
+    name: str
     price: float
-    qty: int
-    discount: float = 0.0
-    def __post_init__(self):
-        if self.price &lt; 0 or self.qty &lt; 0 or self.discount &lt; 0:
-            raise ValueError(&quot;price/qty/discount must be non-negative&quot;)</code></pre>
-<hr>
-<p>Exercise 2 — <strong>repr</strong>/<strong>str</strong> and equality Dataclasses generate nice <strong>repr</strong> and equality by default. Customize <strong>str</strong> for user-friendly printing.</p>
-<pre><code class="language-python">@dataclass
-class Order:
-    id: int
-    customer: str
-    placed: date
-    items: list[OrderItem]
-    percent_off: float = 0.0
+    quantity: int = 0
 
-    def __str__(self) -&gt; str:
-        return f&quot;Order #{self.id} for {self.customer} on {self.placed:%Y-%m-%d}: total=${self.total():.2f}&quot;
+    def __post_init__(self) -&gt; None:
+        if not self.name.strip():
+            raise ValueError(&quot;name must not be blank&quot;)
+        if self.price &lt; 0:
+            raise ValueError(&quot;price must be non-negative&quot;)
+        if self.quantity &lt; 0:
+            raise ValueError(&quot;quantity must be non-negative&quot;)
 
-# Equality demo
-o1 = Order(1, &quot;Ada&quot;, date(2025,1,1), [OrderItem(&quot;A&quot;, 10.0, 1)])
-o2 = Order(1, &quot;Ada&quot;, date(2025,1,1), [OrderItem(&quot;A&quot;, 10.0, 1)])
-assert o1 == o2                # dataclass compares field-by-field
-print(str(o1))</code></pre>
-<p>Notes</p>
-<ul>
-<li>dataclass eq=True by default; set order=True if you want ordering comparisons.</li>
-<li>For performance and memory, consider slots=True on large models.</li>
-</ul>
-<hr>
-<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
-<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Model an <code>Order</code> and compute its total after discounts. <strong>Hint:</strong> represent the input fields first, then put the pricing rule in a method; state whether discounts are fractions or currency amounts.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Add readable <code><strong>str</strong></code> output and explore generated representation/equality. <strong>Hint:</strong> dataclass equality compares declared fields between compatible instances; create two equivalent and one different instance.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-3-prediction">Exercise 3 — Prediction<a class="heading-anchor" href="#solution-1--exercise-3-prediction" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Predict how a class attribute shared by instances differs from an instance attribute assigned through <code>self</code>.</p>
-<p><strong>Reasoning checkpoint:</strong> Class lookup is shared until an instance shadows the name. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-4-tracing">Exercise 4 — Tracing<a class="heading-anchor" href="#solution-1--exercise-4-tracing" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using <code>is</code>.</p>
-<p><strong>Reasoning checkpoint:</strong> Value equality and identity answer different questions. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-5-implementation">Exercise 5 — Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Create immutable <code>OrderLine</code> and <code>Order</code> dataclasses whose total sums quantity × unit price and applies a validated fractional discount.</p>
-<p><strong>Reasoning checkpoint:</strong> Validate non-negative values in <code><strong>post_init</strong></code>. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-6-debugging">Exercise 6 — Debugging<a class="heading-anchor" href="#solution-1--exercise-6-debugging" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Repair a dataclass field declared as <code>items: list[str] = []</code>.</p>
-<p><strong>Reasoning checkpoint:</strong> Use <code>field(default_factory=list)</code> to create one list per instance. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-7-edge-case-and-explanation">Exercise 7 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-7-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Decide whether a discount policy should be a subclass of <code>Order</code> or a composed callable; justify the dependency direction.</p>
-<p><strong>Reasoning checkpoint:</strong> A replaceable rule is usually behavior the order uses, not a kind of order. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+    def stock_value(self) -&gt; float:
+        return self.price * self.quantity
+
+
+tea = Product(&quot;tea&quot;, 4.0, 3)
+assert tea.stock_value() == 12.0
+assert Product(&quot;cup&quot;, 2.5).quantity == 0
+
+for arguments in ((&quot;tea&quot;, -0.01, 1), (&quot;tea&quot;, 4.0, -1)):
+    try:
+        Product(*arguments)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f&quot;invalid product should fail: {arguments!r}&quot;)</code></pre>
+<p>No collection field is needed here. If one is added later, use <code>field(default_factory=list)</code> so instances do not share one mutable default.</p>
+<p><strong>Verification evidence:</strong> Assert <code>stock_value()</code> is <code>12.0</code>, equality uses field values, and separate negative-price and negative-quantity constructions raise.</p>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict how a class attribute shared by instances differs from an instance attribute assigned through <code>self</code>. <strong>Progressive hint:</strong> Class lookup is shared until an instance shadows the name. <strong>Verify:</strong> Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict how a class attribute shared by instances differs from an instance attribute assigned through <code>self</code>. Progressive hint: Class lookup is shared until an instance shadows the name. Then compare the prediction with this proof target: Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly. This makes objects that keep related state and behavior together observable instead of relying on intuition.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly.</p>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using <code>is</code>. <strong>Progressive hint:</strong> Value equality and identity answer different questions. <strong>Verify:</strong> Assert two equal-field dataclass values satisfy <code>==</code> but not <code>is</code>; mutate or replace a field and confirm equality changes as expected.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using <code>is</code>. Progressive hint: Value equality and identity answer different questions. Record the named value, shape, label, or iterator position needed to establish: Assert two equal-field dataclass values satisfy <code>==</code> but not <code>is</code>; mutate or replace a field and confirm equality changes as expected. The trace exposes objects that keep related state and behavior together directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert two equal-field dataclass values satisfy <code>==</code> but not <code>is</code>; mutate or replace a field and confirm equality changes as expected.</p>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Implementation:</strong> Create immutable <code>OrderLine</code> and <code>Order</code> dataclasses whose total sums quantity × unit price and applies a validated fractional discount. <strong>Progressive hint:</strong> Validate non-negative values in <code><strong>post_init</strong></code>. <strong>Verify:</strong> Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Create immutable <code>OrderLine</code> and <code>Order</code> dataclasses whose total sums quantity × unit price and applies a validated fractional discount. Progressive hint: Validate non-negative values in <code><strong>post_init</strong></code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail. That connects the answer to objects that keep related state and behavior together.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail.</p>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a dataclass field declared as <code>items: list[str] = []</code>. <strong>Progressive hint:</strong> Use <code>field(default_factory=list)</code> to create one list per instance. <strong>Verify:</strong> Create two default instances, mutate one <code>items</code> list, and assert the other remains empty and the list objects are not identical.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a dataclass field declared as <code>items: list[str] = []</code>. Progressive hint: Use <code>field(default_factory=list)</code> to create one list per instance. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Create two default instances, mutate one <code>items</code> list, and assert the other remains empty and the list objects are not identical. The diagnosis depends on objects that keep related state and behavior together.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Create two default instances, mutate one <code>items</code> list, and assert the other remains empty and the list objects are not identical.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Decide whether a discount policy should be a subclass of <code>Order</code> or a composed callable; justify the dependency direction. <strong>Progressive hint:</strong> A replaceable rule is usually behavior the order uses, not a kind of order. <strong>Verify:</strong> Swap two discount callables without changing <code>Order</code>; assert totals follow each policy and explain why composition preserves the dependency direction.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Decide whether a discount policy should be a subclass of <code>Order</code> or a composed callable; justify the dependency direction. Progressive hint: A replaceable rule is usually behavior the order uses, not a kind of order. Values below, at, and above the named boundary must produce the evidence Swap two discount callables without changing <code>Order</code>; assert totals follow each policy and explain why composition preserves the dependency direction. Those cases show how objects that keep related state and behavior together behaves at its edge.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Swap two discount callables without changing <code>Order</code>; assert totals follow each policy and explain why composition preserves the dependency direction.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Put behavior with the data it protects, while keeping ownership and mutation explicit. Prefer composition unless the subtype truly is-a base.</p>
-<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
-<h5 id="solution-1--practices-1-2-shared-state-equality-and-identity">Practices 1–2 — Shared state, equality, and identity<a class="heading-anchor" href="#solution-1--practices-1-2-shared-state-equality-and-identity" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-shared-state-equality-and-identity">Shared implementation for Exercises 3–4 — Shared state, equality, and identity<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-shared-state-equality-and-identity" aria-label="Link to this section">#</a></h5>
 <p>Class attributes are found through the class and shared by default; assigning <code>self.name</code> creates/updates an instance attribute. Dataclasses compare declared fields by default, so equal values can still be distinct objects.</p>
-<h5 id="solution-1--practices-3-5-validated-value-objects-and-composition">Practices 3–5 — Validated value objects and composition<a class="heading-anchor" href="#solution-1--practices-3-5-validated-value-objects-and-composition" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-validated-value-objects-and-composition">Shared implementation for Exercises 5–7 — Validated value objects and composition<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-validated-value-objects-and-composition" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">from dataclasses import dataclass, field
 from collections.abc import Callable
 
@@ -641,7 +923,7 @@ no_discount: DiscountPolicy = lambda total: total
 assert no_discount(8.0) == 8.0</code></pre>
 <p>Composition lets an order use a policy without claiming every pricing rule is a new kind of order.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -649,7 +931,7 @@ assert no_discount(8.0) == 8.0</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -782,7 +1064,38 @@ assert no_discount(8.0) == 8.0</code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Composition lets an order use a policy without claiming every pricing rule is a new kind of order.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-12`
+(Day 12 — OOP Basics and Dataclasses). Direct catalog prerequisites: `python-11`.
+I have completed the direct prerequisites: `python-11`. Emphasize objects that keep related state and behavior together.
+Read `python/ds-60day/companion-guides/day12_oop_dataclasses.md` and use the learner notebook
+`python/ds-60day/notebooks/day12_oop_dataclasses.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-11.html"><small>Previous lesson</small><strong>python-11</strong><span>Debug Logging Profiling</span></a>
@@ -874,6 +1187,23 @@ assert no_discount(8.0) == 8.0</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

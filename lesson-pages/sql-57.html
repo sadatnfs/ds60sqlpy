@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-57/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-57-complex-bi-project-part-3-trends-and-anomalies">Day 57 — Complex BI Project, Part 3: Trends and Anomalies<a class="heading-anchor" href="#guide--day-57-complex-bi-project-part-3-trends-and-anomalies" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -285,6 +384,97 @@
 <li><strong>Prerequisites:</strong> <a href="sql-56.html#guide">Day 56 — percentiles and CUBE</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-57.html#learner">learner SQL</a> · <a href="sql-57.html#solution-1">solution reasoning</a> · <a href="sql-57.html#solution-2">executable solution</a></li>
 </ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-57 — Project4 BI Part3</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-57/lesson/workspace/sql/postgres-60day/day57_project4_bi_part3.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day57_project4_bi_part3.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/day57_project4_bi_part3.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Seasonal naive, MAD, Anomaly candidate. Its worked SQL reads or creates <code>orders</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: Build a complete daily spine before LAG(revenue, 7) so the offset means seven calendar days. Calculate a trailing forecast that excludes the current actual, then score the same six-month rows. For anomaly output, retain raw revenue, center, dispersion, and both scores beside the rank. The first runnable example has a concrete contract: Example 1 returns one grouped row per <code>d</code>, <code>avg14</code>, and <code>sd14</code>, capped at 60 rows with columns <code>d</code>, <code>revenue</code>, <code>avg14</code>, <code>sd14</code>, <code>rolling_avg14</code>, and <code>rolling_sd14</code> from <code>orders</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>d</code>, <code>revenue</code>, <code>rolling_avg14</code>, <code>rolling_sd14</code>, <code>z_score</code>, and <code>flag</code>. Independently group <code>orders</code>, <code>daily</code>, and <code>stats</code> by the shown grouping expressions and compare every displayed aggregate at that exact grain. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day57_project4_bi_part3.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">WITH daily AS (
+  SELECT date_trunc(&#x27;day&#x27;, o.order_date)::date AS d,
+         SUM(o.total_amount) AS revenue
+  FROM orders o
+  GROUP BY 1
+), stats AS (
+  -- Rolling 14-day window to compute z-score style anomaly score
+  SELECT d,
+         revenue,
+         AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND 1 PRECEDING) AS avg14,
+         STDDEV_SAMP(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND 1 PRECEDING) AS sd14
+  FROM daily
+)
+SELECT d,
+       ROUND(revenue,2) AS revenue,
+       ROUND(avg14,2)   AS rolling_avg14,
+       ROUND(sd14,2)    AS rolling_sd14,
+       CASE WHEN sd14 IS NULL OR sd14 = 0 THEN 0 ELSE ROUND((revenue - avg14)/sd14, 2) END AS z_score,
+       CASE WHEN sd14 IS NOT NULL AND sd14 &gt; 0 AND ABS((revenue-avg14)/sd14) &gt;= 3 THEN &#x27;anomaly&#x27; ELSE &#x27;normal&#x27; END AS flag
+FROM stats
+ORDER BY d DESC
+LIMIT 60;</code></pre>
+<p><strong>How to read it:</strong> Example 1: Start with <code>orders</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys; let each <code>OVER</code> expression calculate across related rows without collapsing them. The final <code>SELECT</code> displays <code>d</code>, <code>revenue</code>, <code>rolling_avg14</code>, <code>rolling_sd14</code>, <code>z_score</code>, and <code>flag</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 60</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>d</code>, <code>avg14</code>, and <code>sd14</code>, capped at 60 rows with columns <code>d</code>, <code>revenue</code>, <code>avg14</code>, <code>sd14</code>, <code>rolling_avg14</code>, and <code>rolling_sd14</code> from <code>orders</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">WITH daily AS (
+  SELECT date_trunc(&#x27;day&#x27;, o.order_date)::date AS d,
+         SUM(o.total_amount) AS revenue
+  FROM orders o
+  GROUP BY 1
+), med AS (
+  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY revenue) AS median_rev FROM daily
+), dev AS (
+  SELECT d.revenue, d.d,
+         ABS(d.revenue - m.median_rev) AS abs_dev,
+         m.median_rev
+  FROM daily d CROSS JOIN med m
+), mad AS (
+  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY abs_dev) AS mad
+  FROM dev
+)
+SELECT dev.d,
+       ROUND(dev.revenue, 2) AS revenue,
+       ROUND(dev.median_rev::numeric, 2) AS median_rev,
+       CASE
+         WHEN mad.mad = 0 THEN 0
+         ELSE ROUND(
+           (0.6745 * (dev.revenue - dev.median_rev) / mad.mad)::numeric,
+           2
+         )
+       END AS modified_z,
+       CASE
+         WHEN mad.mad &gt; 0
+          AND ABS(0.6745 * (dev.revenue - dev.median_rev) / mad.mad) &gt;= 3.5
+         THEN &#x27;anomaly&#x27;
+         ELSE &#x27;normal&#x27;
+       END AS flag
+FROM dev
+CROSS JOIN mad
+ORDER BY dev.d DESC
+LIMIT 60;</code></pre>
+<p><strong>How to read it:</strong> Example 2: Start with <code>orders</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>d</code>, <code>revenue</code>, <code>median_rev</code>, <code>modified_z</code>, and <code>flag</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 60</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 2 returns one grouped row per <code>d</code>, <code>abs_dev</code>, and <code>mad</code>, capped at 60 rows with columns <code>d</code>, <code>revenue</code>, <code>median_rev</code>, <code>abs_dev</code>, <code>mad</code>, and <code>modified_z</code> from <code>orders</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Backtest observation-based moving average and calendar-week seasonal naive without leakage.</li>
@@ -301,14 +491,22 @@
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <p>Complete these in the <a href="sql-57.html#learner">learner SQL</a>:</p>
 <ol>
-<li>Compare MA(7) with calendar-week seasonal naive using MAPE.</li>
-<li>Rank positive/negative anomalies with SD and MAD scores.</li>
-<li>Predict how removing the date spine changes <code>LAG(..., 7)</code>.</li>
-<li>Compare MAE, RMSE, MAPE, and scored-row counts on one window.</li>
-<li>Detect and remove current-row forecast leakage.</li>
-<li>Preserve undefined scores for a constant series.</li>
+<li>Compare MA(7) with calendar-week seasonal naive using MAPE. <strong>Inputs/evidence:</strong> For sql-57 Exercise 1, read <code>orders</code> into a one-row-per-day calendar spine, calculate <code>ma7_forecast</code> and <code>seasonal_naive</code> in <code>forecasts</code>, and aggregate the final <code>model</code> and <code>mape</code>; the output grain is model, not order. <strong>Expected result/shape:</strong> For sql-57 Exercise 1, expected output: two model rows. Zero-revenue days are excluded from MAPE by <code>NULLIF</code>; disclose that choice. The final columns are <code>model</code>, and <code>mape</code>. The final order is <code>model</code>. <strong>Verify:</strong> For sql-57 Exercise 1, require exactly two rows with model values <code>MA(7)</code> and <code>seasonal naive (lag 7)</code> and require unique <code>model</code>. From the same <code>forecasts</code> rows and 180-day evaluation window, independently recompute each model&#x27;s absolute percentage-error numerator and eligible denominator, compare the resulting <code>mape</code>, and disclose that zero-revenue days and NULL forecasts are excluded.</li>
+<li>Rank positive/negative anomalies with SD and MAD scores. <strong>Inputs/evidence:</strong> For sql-57 Exercise 2, read from <code>orders</code>. Build the answer toward <code>direction</code>, <code>anomaly_rank</code>, <code>day</code>, <code>revenue</code>, <code>sd_z</code>, and <code>modified_z</code>; keep <code>day</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-57 Exercise 2, expected output: up to ten positive and ten negative rows. The combined absolute score is a ranking heuristic; it is not a calibrated probability. The final columns are <code>direction</code>, <code>anomaly_rank</code>, <code>day</code>, <code>revenue</code>, <code>sd_z</code>, and <code>modified_z</code>. The final order is <code>direction DESC, anomaly_rank</code>. <strong>Verify:</strong> For sql-57 Exercise 2, project <code>day</code> plus the raw source columns from <code>orders</code> at each join stage; record row count and distinct <code>day</code>, then assert the final <code>direction</code>, <code>anomaly_rank</code>, <code>day</code>, <code>revenue</code>, <code>sd_z</code>, and <code>modified_z</code> values match those staged rows without unintended fanout or loss. Give two rows the same <code>direction DESC</code> value and different <code>anomaly_rank</code> values; verify <code>direction DESC, anomaly_rank</code> produces the intended rank and display order.</li>
+<li>Predict how removing the date spine changes <code>LAG(..., 7)</code>. <strong>Inputs/evidence:</strong> For sql-57 Exercise 3, read from <code>orders</code>. Build the answer toward <code>day</code>, <code>revenue</code>, <code>observed_row_lag7</code>, and <code>calendar_day_lag7</code>; keep <code>day</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-57 Exercise 3, expected output: at most 30 rows keyed by <code>day</code>. The final columns are <code>day</code>, <code>revenue</code>, <code>observed_row_lag7</code>, and <code>calendar_day_lag7</code>. The final order is <code>c.day DESC</code>. <strong>Verify:</strong> For sql-57 Exercise 3, assert no more than 30 rows, no duplicate <code>day</code>, and no adjacent pair that violates <code>c.day DESC</code>. Rejoin the returned keys to <code>orders</code> to confirm <code>day</code>, <code>revenue</code>, <code>observed_row_lag7</code>, and <code>calendar_day_lag7</code> came from the same source rows. Run with 30 minus one and 30 plus one eligible rows; require the output cap of 30 while retaining <code>c.day DESC</code>.</li>
+<li>Compare MAE, RMSE, MAPE, and scored-row counts on one window. <strong>Inputs/evidence:</strong> For sql-57 Exercise 4, derive <code>common_scoring_rows</code> from <code>orders</code>, reshape both forecasts to <code>model_name</code> rows, and build <code>scored_rows</code>, <code>mae</code>, <code>rmse</code>, <code>mape</code>, and <code>zero_actual_rows</code>; keep <code>model_name</code> as the final grouping key. <strong>Expected result/shape:</strong> For sql-57 Exercise 4, expected output: one row per <code>model_name</code>. The final columns are <code>model_name</code>, <code>scored_rows</code>, <code>mae</code>, <code>rmse</code>, <code>mape</code>, and <code>zero_actual_rows</code>. The final order is <code>model_name</code>. <strong>Verify:</strong> For sql-57 Exercise 4, independently aggregate <code>common_scoring_rows</code> by <code>model_name</code> and require exactly two unique <code>model_name</code> rows. Require both models to have the same <code>scored_rows</code> and <code>zero_actual_rows</code> because they share one evaluation population; recompute <code>scored_rows</code>, <code>mae</code>, <code>rmse</code>, <code>mape</code>, and <code>zero_actual_rows</code> for each model and compare every value, preserving NULL <code>mape</code> when the eligible percentage-error denominator is zero.</li>
+<li>Detect and remove current-row forecast leakage. <strong>Inputs/evidence:</strong> For sql-57 Exercise 5, read from <code>orders</code>. Build the answer toward <code>day</code>, <code>revenue</code>, <code>leaky_window</code>, and <code>forecast_window</code>; keep <code>day</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-57 Exercise 5, expected output: at most 20 rows keyed by <code>day</code>. The final columns are <code>day</code>, <code>revenue</code>, <code>leaky_window</code>, and <code>forecast_window</code>. The final order is <code>day DESC</code>. <strong>Verify:</strong> For sql-57 Exercise 5, assert no more than 20 rows, no duplicate <code>day</code>, and no adjacent pair that violates <code>day DESC</code>. Rejoin the returned keys to <code>orders</code> to confirm <code>day</code>, <code>revenue</code>, <code>leaky_window</code>, and <code>forecast_window</code> came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining <code>day DESC</code>.</li>
+<li>Preserve undefined scores for a constant series. <strong>Inputs/evidence:</strong> For sql-57 Exercise 6, read from <code>constant</code>. Build the answer toward <code>day</code>, <code>revenue</code>, <code>sd_z</code>, and <code>modified_mad_z</code>; keep <code>day</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-57 Exercise 6, expected output: one row per <code>day</code>. The final columns are <code>day</code>, <code>revenue</code>, <code>sd_z</code>, and <code>modified_mad_z</code>. The final order is <code>d.day</code>. <strong>Verify:</strong> For sql-57 Exercise 6, project <code>day</code> plus the raw source columns from <code>constant</code> at each join stage; record row count and distinct <code>day</code>, then assert the final <code>day</code>, <code>revenue</code>, <code>sd_z</code>, and <code>modified_mad_z</code> values match those staged rows without unintended fanout or loss. Add one source row with a new <code>day</code>; verify the result gains exactly one row carrying that <code>day</code> value.</li>
 </ol>
 <p>Compare absent no-order days with explicit zero-revenue days.</p>
+<h4 id="guide--common-mistakes-and-how-to-recover">Common mistakes and how to recover<a class="heading-anchor" href="#guide--common-mistakes-and-how-to-recover" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Lesson-specific semantic mistake:</strong> Guard zero standard deviation and zero MAD with NULLIF.</li>
+<li><strong>Unexpected row count:</strong> display keys before aggregates, count rows after each join/filter stage, and find the first stage whose grain differs from the contract. Do not hide fanout with <code>DISTINCT</code>.</li>
+<li><strong>Unexpected <code>NULL</code> or missing row:</strong> decide whether the fact is unknown, inapplicable, zero, or absent before using <code>COALESCE</code>; inspect outer-join predicate placement and empty-input aggregate behavior.</li>
+<li><strong>Unstable top/first/last output:</strong> add <code>ORDER BY</code> with a unique final tie-breaker before <code>LIMIT</code> or order-sensitive windows/aggregates.</li>
+<li><strong><code>psql</code> stops on an error:</strong> fix the first error shown by <code>ON_ERROR_STOP</code>, restore the declared transaction/setup state, and rerun the complete file. A later successful statement does not validate a partial run.</li>
+</ul>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Do forecast windows end before the current actual and use a common scoring set?</li>
@@ -325,11 +523,8 @@
 </ul>
 <h4 id="guide--how-the-learner-script-uses-the-current-schema">How the learner script uses the current schema<a class="heading-anchor" href="#guide--how-the-learner-script-uses-the-current-schema" aria-label="Link to this section">#</a></h4>
 <p>Daily revenue is <code>SUM(orders.total_amount)</code> by order date. The starter shows a 14-prior-observation rolling mean/standard deviation, a global MAD score, and a seven-prior-observation moving-average forecast with APE.</p>
-<h4 id="guide--practice-match-the-learner-prompts-exactly">Practice — match the learner prompts exactly<a class="heading-anchor" href="#guide--practice-match-the-learner-prompts-exactly" aria-label="Link to this section">#</a></h4>
-<ol>
-<li>Replace MA(7) with <code>LAG(revenue, 7)</code> seasonal naive and compare MAPE for the last six months.</li>
-<li>Over the last six months, calculate both SD z-score and modified MAD z-score, then return the top ten positive and top ten negative anomalies.</li>
-</ol>
+<h4 id="guide--practice-map">Practice map<a class="heading-anchor" href="#guide--practice-map" aria-label="Link to this section">#</a></h4>
+<p>Use the numbered <strong>Exercises</strong> section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.</p>
 <h4 id="guide--time-series-reasoning">Time-series reasoning<a class="heading-anchor" href="#guide--time-series-reasoning" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Build a complete date spine before <code>LAG(..., 7)</code> when “seven days ago” must mean calendar days; otherwise it means seven observed rows.</li>
@@ -343,17 +538,45 @@
 <li>State whether no-order days are absent or represented as zero.</li>
 <li>Rank anomaly candidates deterministically and retain both score types.</li>
 <li>Synthetic anomalies are investigation examples, not operational alerts or calibrated probabilities.</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-57 — Project4 BI Part3.
+
+I have completed the direct catalog prerequisite: `sql-56`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day57_project4_bi_part3.md
+- Answer-free learner SQL: sql/postgres-60day/day57_project4_bi_part3.sql
+
+Key terms to teach in context: Seasonal naive, MAD, Anomaly candidate. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Build a complete daily spine before LAG(revenue, 7) so the offset means seven calendar days. Calculate a trailing forecast that excludes the current actual, then score the same six-month rows. For anomaly output, retain raw revenue, center, dispersion, and both scores beside the rank.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-57/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -370,13 +593,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 57: Project 4 - Complex BI (Part 3)</span>
+<span>-- BEGINNER WORKFLOW — sql-57: Project4 BI Part3</span>
+<span>-- Guide: sql/postgres-60day/companion-guides/day57_project4_bi_part3.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-57/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: orders.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>-- Trend analysis, anomaly detection, and forecast accuracy</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
@@ -466,28 +706,52 @@
 <span> </span>
 <span>-- Exercises</span>
 <span>-- 1. Replace MA(7) with seasonal naive (value from 7 days ago) and compare MAPE.</span>
+<span>--    Inputs: For sql-57 Exercise 1, read `orders` into a one-row-per-day calendar spine, calculate `ma7_forecast` and `seasonal_naive` in `forecasts`, and aggregate the final `model` and `mape`; the output grain is model, not order.</span>
+<span>--    Expected result/shape: For sql-57 Exercise 1, expected output: two model rows. Zero-revenue days are excluded from MAPE by `NULLIF`; disclose that choice. The final columns are `model`, and `mape`. The final order is `model`.</span>
+<span>--    Verify: For sql-57 Exercise 1, require exactly two rows with model values `MA(7)` and `seasonal naive (lag 7)` and require unique `model`. From the same `forecasts` rows and 180-day evaluation window, independently recompute each model&#x27;s absolute percentage-error numerator and eligible denominator, compare the resulting `mape`, and disclose that zero-revenue days and NULL forecasts are excluded.</span>
+<span>--    Hint ladder, rung 1: For sql-57 Exercise 1, run `bounds`, `calendar`, `daily`, `complete`, and `forecasts` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span>
 <span>-- 2. Flag top-10 positive and negative anomalies in the last 6 months with both SD and MAD methods.</span>
+<span>--    Inputs: For sql-57 Exercise 2, read from `orders`. Build the answer toward `direction`, `anomaly_rank`, `day`, `revenue`, `sd_z`, and `modified_z`; keep `day` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-57 Exercise 2, expected output: up to ten positive and ten negative rows. The combined absolute score is a ranking heuristic; it is not a calibrated probability. The final columns are `direction`, `anomaly_rank`, `day`, `revenue`, `sd_z`, and `modified_z`. The final order is `direction DESC, anomaly_rank`.</span>
+<span>--    Verify: For sql-57 Exercise 2, project `day` plus the raw source columns from `orders` at each join stage; record row count and distinct `day`, then assert the final `direction`, `anomaly_rank`, `day`, `revenue`, `sd_z`, and `modified_z` values match those staged rows without unintended fanout or loss. Give two rows the same `direction DESC` value and different `anomaly_rank` values; verify `direction DESC, anomaly_rank` produces the intended rank and display order.</span>
+<span>--    Hint ladder, rung 1: For sql-57 Exercise 2, run `daily`, `moments`, `median`, `deviations`, `mad`, `scored`, and `ranked` one at a time. Record each CTE&#x27;s row count and `day` uniqueness before the next stage uses it.</span>
 <span>-- 3. Prediction: remove the calendar spine and explain why LAG(revenue, 7) now</span>
 <span>--    means seven observed rows rather than seven calendar days.</span>
+<span>--    Inputs: For sql-57 Exercise 3, read from `orders`. Build the answer toward `day`, `revenue`, `observed_row_lag7`, and `calendar_day_lag7`; keep `day` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-57 Exercise 3, expected output: at most 30 rows keyed by `day`. The final columns are `day`, `revenue`, `observed_row_lag7`, and `calendar_day_lag7`. The final order is `c.day DESC`.</span>
+<span>--    Verify: For sql-57 Exercise 3, assert no more than 30 rows, no duplicate `day`, and no adjacent pair that violates `c.day DESC`. Rejoin the returned keys to `orders` to confirm `day`, `revenue`, `observed_row_lag7`, and `calendar_day_lag7` came from the same source rows. Run with 30 minus one and 30 plus one eligible rows; require the output cap of 30 while retaining `c.day DESC`.</span>
+<span>--    Hint ladder, rung 1: For sql-57 Exercise 3, run `bounds`, `observed_daily`, `observed_lag`, `calendar_daily`, and `calendar_lag` one at a time. Record each CTE&#x27;s row count and `day` uniqueness before the next stage uses it.</span>
 <span>-- 4. Construction: calculate MAE, RMSE, MAPE, and the number of scored rows for</span>
 <span>--    both models over one identical evaluation window.</span>
+<span>--    Inputs: For sql-57 Exercise 4, derive `common_scoring_rows` from `orders`, reshape both forecasts to `model_name` rows, and build `scored_rows`, `mae`, `rmse`, `mape`, and `zero_actual_rows`; keep `model_name` as the final grouping key.</span>
+<span>--    Expected result/shape: For sql-57 Exercise 4, expected output: one row per `model_name`. The final columns are `model_name`, `scored_rows`, `mae`, `rmse`, `mape`, and `zero_actual_rows`. The final order is `model_name`.</span>
+<span>--    Verify: For sql-57 Exercise 4, independently aggregate `common_scoring_rows` by `model_name` and require exactly two unique `model_name` rows. Require both models to have the same `scored_rows` and `zero_actual_rows` because they share one evaluation population; recompute `scored_rows`, `mae`, `rmse`, `mape`, and `zero_actual_rows` for each model and compare every value, preserving NULL `mape` when the eligible percentage-error denominator is zero.</span>
+<span>--    Hint ladder, rung 1: For sql-57 Exercise 4, run `bounds`, `daily`, `calendar_daily`, `forecasts`, and `common_scoring_rows` one at a time. Record each CTE&#x27;s row count and `model_name` uniqueness before the next stage uses it.</span>
 <span>-- 5. Debugging: repair a backtest whose moving-average frame includes CURRENT</span>
 <span>--    ROW, and prove the corrected forecast uses no information from the target day.</span>
+<span>--    Inputs: For sql-57 Exercise 5, read from `orders`. Build the answer toward `day`, `revenue`, `leaky_window`, and `forecast_window`; keep `day` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-57 Exercise 5, expected output: at most 20 rows keyed by `day`. The final columns are `day`, `revenue`, `leaky_window`, and `forecast_window`. The final order is `day DESC`.</span>
+<span>--    Verify: For sql-57 Exercise 5, assert no more than 20 rows, no duplicate `day`, and no adjacent pair that violates `day DESC`. Rejoin the returned keys to `orders` to confirm `day`, `revenue`, `leaky_window`, and `forecast_window` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `day DESC`.</span>
+<span>--    Hint ladder, rung 1: For sql-57 Exercise 5, run `daily` one at a time. Record each CTE&#x27;s row count and `day` uniqueness before the next stage uses it.</span>
 <span>-- 6. Edge case: create a constant-valued test series and preserve NULL SD/MAD</span>
 <span>--    scores when dispersion is zero; do not silently label them normal.</span>
+<span>--    Inputs: For sql-57 Exercise 6, read from `constant`. Build the answer toward `day`, `revenue`, `sd_z`, and `modified_mad_z`; keep `day` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-57 Exercise 6, expected output: one row per `day`. The final columns are `day`, `revenue`, `sd_z`, and `modified_mad_z`. The final order is `d.day`.</span>
+<span>--    Verify: For sql-57 Exercise 6, project `day` plus the raw source columns from `constant` at each join stage; record row count and distinct `day`, then assert the final `day`, `revenue`, `sd_z`, and `modified_mad_z` values match those staged rows without unintended fanout or loss. Add one source row with a new `day`; verify the result gains exactly one row carrying that `day` value.</span>
+<span>--    Hint ladder, rung 1: For sql-57 Exercise 6, run `center`, `deviations`, and `dispersion` one at a time. Record each CTE&#x27;s row count and `day` uniqueness before the next stage uses it.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -511,6 +775,26 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-57-solutions-forecast-accuracy-and-anomalies">Day 57 Solutions — Forecast Accuracy and Anomalies<a class="heading-anchor" href="#solution-1--day-57-solutions-forecast-accuracy-and-anomalies" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day57_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day57_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are Seasonal naive, MAD, Anomaly candidate. Its worked-model focus is: Build a complete daily spine before LAG(revenue, 7) so the offset means seven calendar days. Calculate a trailing forecast that excludes the current actual, then score the same six-month rows. For anomaly output, retain raw revenue, center, dispersion, and both scores beside the rank.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>The exercises compare a seven-day moving average with a weekly seasonal naive, then rank recent positive and negative anomalies using standard-deviation and MAD scores. See <a href="sql-57.html#solution-2"><code>day57_solutions.sql</code></a>.</p>
 <h4 id="solution-1--exercise-1-compare-ma-7-and-lag-7-mape">Exercise 1 — Compare MA(7) and lag-7 MAPE<a class="heading-anchor" href="#solution-1--exercise-1-compare-ma-7-and-lag-7-mape" aria-label="Link to this section">#</a></h4>
 <p>The calendar spine makes “seven days ago” mean seven calendar days, including days with no orders as zero revenue.</p>
@@ -554,6 +838,16 @@ WHERE day &gt;= CURRENT_DATE - 180
   AND seasonal_naive IS NOT NULL
 ORDER BY model;</code></pre>
 <p>Expected shape: two model rows. Zero-revenue days are excluded from MAPE by <code>NULLIF</code>; disclose that choice.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-57 Exercise 1, read <code>orders</code> into a one-row-per-day calendar spine, calculate <code>ma7_forecast</code> and <code>seasonal_naive</code> in <code>forecasts</code>, and aggregate the final <code>model</code> and <code>mape</code>; the output grain is model, not order.</li>
+<li><strong>Expected result/shape:</strong> For sql-57 Exercise 1, expected output: two model rows. Zero-revenue days are excluded from MAPE by <code>NULLIF</code>; disclose that choice. The final columns are <code>model</code>, and <code>mape</code>. The final order is <code>model</code>.</li>
+<li><strong>Independent verification:</strong> For sql-57 Exercise 1, require exactly two rows with model values <code>MA(7)</code> and <code>seasonal naive (lag 7)</code> and require unique <code>model</code>. From the same <code>forecasts</code> rows and 180-day evaluation window, independently recompute each model&#x27;s absolute percentage-error numerator and eligible denominator, compare the resulting <code>mape</code>, and disclose that zero-revenue days and NULL forecasts are excluded.</li>
+<li><strong>Intermediate relation check:</strong> For sql-57 Exercise 1, run <code>bounds</code>, <code>calendar</code>, <code>daily</code>, <code>complete</code>, and <code>forecasts</code> one at a time. Confirm that <code>calendar</code>, <code>complete</code>, and <code>forecasts</code> have unique <code>day</code> values before the final aggregation changes the grain to model.</li>
+<li><strong>Clause check:</strong> For sql-57 Exercise 1, the solution uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>WHERE</code>, <code>GROUP BY</code>, window <code>OVER</code>, <code>SELECT</code>, <code>UNION ALL</code>, and <code>ORDER BY</code>. It begins at <code>orders</code>, establishes one row per <code>day</code>, and then returns one aggregate row per <code>model</code> ordered by <code>model</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-57 Exercise 1, the chosen form is justified by this lesson-specific rationale: The calendar spine makes “seven days ago” mean seven calendar days, including days with no orders as zero revenue. Evaluate another form against the concrete expected result (two model rows. Zero-revenue days are excluded from MAPE by <code>NULLIF</code>; disclose that choice) and the verification above.</li>
+<li><strong>Edge case:</strong> If every eligible actual is zero, MAPE is NULL because its denominator is empty after <code>NULLIF</code>; report that state rather than replacing it with zero.</li>
+</ul>
 <h4 id="solution-1--exercise-2-top-ten-positive-and-negative-anomalies">Exercise 2 — Top ten positive and negative anomalies<a class="heading-anchor" href="#solution-1--exercise-2-top-ten-positive-and-negative-anomalies" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-sql">SET search_path TO training, public;
 
@@ -610,6 +904,16 @@ FROM ranked
 WHERE anomaly_rank &lt;= 10
 ORDER BY direction DESC, anomaly_rank;</code></pre>
 <p>Expected shape: up to ten positive and ten negative rows. The combined absolute score is a ranking heuristic; it is not a calibrated probability.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-57 Exercise 2, read from <code>orders</code>. Build the answer toward <code>direction</code>, <code>anomaly_rank</code>, <code>day</code>, <code>revenue</code>, <code>sd_z</code>, and <code>modified_z</code>; keep <code>day</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-57 Exercise 2, expected output: up to ten positive and ten negative rows. The combined absolute score is a ranking heuristic; it is not a calibrated probability. The final columns are <code>direction</code>, <code>anomaly_rank</code>, <code>day</code>, <code>revenue</code>, <code>sd_z</code>, and <code>modified_z</code>. The final order is <code>direction DESC, anomaly_rank</code>.</li>
+<li><strong>Independent verification:</strong> For sql-57 Exercise 2, project <code>day</code> plus the raw source columns from <code>orders</code> at each join stage; record row count and distinct <code>day</code>, then assert the final <code>direction</code>, <code>anomaly_rank</code>, <code>day</code>, <code>revenue</code>, <code>sd_z</code>, and <code>modified_z</code> values match those staged rows without unintended fanout or loss. Give two rows the same <code>direction DESC</code> value and different <code>anomaly_rank</code> values; verify <code>direction DESC, anomaly_rank</code> produces the intended rank and display order.</li>
+<li><strong>Intermediate relation check:</strong> For sql-57 Exercise 2, run <code>daily</code>, <code>moments</code>, <code>median</code>, <code>deviations</code>, <code>mad</code>, <code>scored</code>, and <code>ranked</code> one at a time. Record each CTE&#x27;s row count and <code>day</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-57 Exercise 2, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>WHERE</code>, <code>GROUP BY</code>, window <code>OVER</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>orders</code>, preserve one row per <code>day</code>, and finish with <code>direction</code>, <code>anomaly_rank</code>, <code>day</code>, <code>revenue</code>, <code>sd_z</code>, and <code>modified_z</code> ordered by <code>direction DESC, anomaly_rank</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-57 Exercise 2, the chosen form is justified by this lesson-specific rationale: Expected shape: up to ten positive and ten negative rows. Evaluate another form against the concrete expected result (up to ten positive and ten negative rows. The combined absolute score is a ranking heuristic; it is not a calibrated probability) and the verification above.</li>
+<li><strong>Edge case:</strong> Give two rows the same <code>direction DESC</code> value and different <code>anomaly_rank</code> values; verify <code>direction DESC, anomaly_rank</code> produces the intended rank and display order.</li>
+</ul>
 <h4 id="solution-1--reasoning-safety-and-pitfalls">Reasoning, safety, and pitfalls<a class="heading-anchor" href="#solution-1--reasoning-safety-and-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>A moving average must exclude the current day to avoid leakage.</li>
@@ -620,7 +924,7 @@ ORDER BY direction DESC, anomaly_rank;</code></pre>
 </ul>
 <h4 id="solution-1--annotated-query-anatomy">Annotated query anatomy<a class="heading-anchor" href="#solution-1--annotated-query-anatomy" aria-label="Link to this section">#</a></h4>
 <p>The exact runnable answers are in <a href="sql-57.html#solution-2"><code>day57_solutions.sql</code></a>. The notes below explain why every stage exists, so the query can be rebuilt rather than memorized.</p>
-<h4 id="solution-1--exercise-1-compare-two-forecasts-without-leakage">Exercise 1 — Compare two forecasts without leakage<a class="heading-anchor" href="#solution-1--exercise-1-compare-two-forecasts-without-leakage" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--clause-map-for-exercise-1-compare-two-forecasts-without-leakage">Clause map for Exercise 1 — Compare two forecasts without leakage<a class="heading-anchor" href="#solution-1--clause-map-for-exercise-1-compare-two-forecasts-without-leakage" aria-label="Link to this section">#</a></h5>
 <ul>
 <li><code>bounds</code> finds the observed date extent; it avoids assuming that course data ends today.</li>
 <li><code>calendar</code> generates one row per date. Without it, <code>LAG(..., 7)</code> means seven observed rows rather than seven calendar days.</li>
@@ -630,7 +934,7 @@ ORDER BY direction DESC, anomaly_rank;</code></pre>
 <li>The two final SELECT branches use the same window and eligibility rules. <code>NULLIF(revenue, 0)</code> removes undefined percentage errors; that exclusion must be reported.</li>
 </ul>
 <p><code>UNION ALL</code> retains one row per model. <code>ORDER BY model</code> makes the small result stable but has no analytical effect.</p>
-<h4 id="solution-1--exercise-2-rank-robust-anomaly-candidates">Exercise 2 — Rank robust anomaly candidates<a class="heading-anchor" href="#solution-1--exercise-2-rank-robust-anomaly-candidates" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--clause-map-for-exercise-2-rank-robust-anomaly-candidates">Clause map for Exercise 2 — Rank robust anomaly candidates<a class="heading-anchor" href="#solution-1--clause-map-for-exercise-2-rank-robust-anomaly-candidates" aria-label="Link to this section">#</a></h5>
 <ul>
 <li><code>daily</code> establishes one observation per represented order date.</li>
 <li><code>moments</code> calculates the mean and sample standard deviation used by the conventional z-score.</li>
@@ -643,6 +947,16 @@ ORDER BY direction DESC, anomaly_rank;</code></pre>
 <p>The final filter keeps ten per direction <em>after</em> ranking. Ordering direction then rank makes review reproducible.</p>
 <h4 id="solution-1--exercise-3-prove-what-seven-means">Exercise 3 — Prove what seven means<a class="heading-anchor" href="#solution-1--exercise-3-prove-what-seven-means" aria-label="Link to this section">#</a></h4>
 <p>The answer calculates <code>observed_row_lag7</code> before building a spine and <code>calendar_day_lag7</code> after it. Joining the outputs by date makes any gaps visible. Neither population is automatically correct; the metric contract decides.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-57 Exercise 3, read from <code>orders</code>. Build the answer toward <code>day</code>, <code>revenue</code>, <code>observed_row_lag7</code>, and <code>calendar_day_lag7</code>; keep <code>day</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-57 Exercise 3, expected output: at most 30 rows keyed by <code>day</code>. The final columns are <code>day</code>, <code>revenue</code>, <code>observed_row_lag7</code>, and <code>calendar_day_lag7</code>. The final order is <code>c.day DESC</code>.</li>
+<li><strong>Independent verification:</strong> For sql-57 Exercise 3, assert no more than 30 rows, no duplicate <code>day</code>, and no adjacent pair that violates <code>c.day DESC</code>. Rejoin the returned keys to <code>orders</code> to confirm <code>day</code>, <code>revenue</code>, <code>observed_row_lag7</code>, and <code>calendar_day_lag7</code> came from the same source rows. Run with 30 minus one and 30 plus one eligible rows; require the output cap of 30 while retaining <code>c.day DESC</code>.</li>
+<li><strong>Intermediate relation check:</strong> For sql-57 Exercise 3, run <code>bounds</code>, <code>observed_daily</code>, <code>observed_lag</code>, <code>calendar_daily</code>, and <code>calendar_lag</code> one at a time. Record each CTE&#x27;s row count and <code>day</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-57 Exercise 3, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>GROUP BY</code>, window <code>OVER</code>, <code>SELECT</code>, <code>ORDER BY</code>, and <code>LIMIT</code>. Read only those operations: begin at <code>orders</code>, preserve one row per <code>day</code>, and finish with <code>day</code>, <code>revenue</code>, <code>observed_row_lag7</code>, and <code>calendar_day_lag7</code> ordered by <code>c.day DESC</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-57 Exercise 3, the chosen form is justified by this lesson-specific rationale: The answer calculates <code>observed_row_lag7</code> before building a spine and <code>calendar_day_lag7</code> after it. Evaluate another form against the concrete expected result (at most 30 rows keyed by <code>day</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Run with 30 minus one and 30 plus one eligible rows; require the output cap of 30 while retaining <code>c.day DESC</code>.</li>
+</ul>
 <h4 id="solution-1--exercise-4-compare-mae-rmse-and-mape-fairly">Exercise 4 — Compare MAE, RMSE, and MAPE fairly<a class="heading-anchor" href="#solution-1--exercise-4-compare-mae-rmse-and-mape-fairly" aria-label="Link to this section">#</a></h4>
 <p><code>calendar_daily</code> and <code>forecasts</code> repeat the leakage-free foundation. <code>common_scoring_rows</code> uses LATERAL <code>VALUES</code> to reshape model columns into <code>(model_name, forecast)</code> rows and requires both forecasts to exist. This gives both models one evaluation population.</p>
 <ul>
@@ -651,12 +965,42 @@ ORDER BY direction DESC, anomaly_rank;</code></pre>
 <li>MAPE reports relative error but is undefined at zero actual.</li>
 <li><code>scored_rows</code> and <code>zero_actual_rows</code> disclose denominators and exclusions.</li>
 </ul>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-57 Exercise 4, derive <code>common_scoring_rows</code> from <code>orders</code>, reshape both forecasts to <code>model_name</code> rows, and build <code>scored_rows</code>, <code>mae</code>, <code>rmse</code>, <code>mape</code>, and <code>zero_actual_rows</code>; keep <code>model_name</code> as the final grouping key.</li>
+<li><strong>Expected result/shape:</strong> For sql-57 Exercise 4, expected output: one row per <code>model_name</code>. The final columns are <code>model_name</code>, <code>scored_rows</code>, <code>mae</code>, <code>rmse</code>, <code>mape</code>, and <code>zero_actual_rows</code>. The final order is <code>model_name</code>.</li>
+<li><strong>Independent verification:</strong> For sql-57 Exercise 4, independently aggregate <code>common_scoring_rows</code> by <code>model_name</code> and require exactly two unique <code>model_name</code> rows. Require both models to have the same <code>scored_rows</code> and <code>zero_actual_rows</code> because they share one evaluation population; recompute <code>scored_rows</code>, <code>mae</code>, <code>rmse</code>, <code>mape</code>, and <code>zero_actual_rows</code> for each model and compare every value, preserving NULL <code>mape</code> when the eligible percentage-error denominator is zero.</li>
+<li><strong>Intermediate relation check:</strong> For sql-57 Exercise 4, run <code>bounds</code>, <code>daily</code>, <code>calendar_daily</code>, <code>forecasts</code>, and <code>common_scoring_rows</code> one at a time. Record each CTE&#x27;s row count and <code>model_name</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-57 Exercise 4, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>WHERE</code>, aggregate <code>FILTER</code>, <code>GROUP BY</code>, window <code>OVER</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>orders</code>, preserve one row per <code>model_name</code>, and finish with <code>model_name</code>, <code>scored_rows</code>, <code>mae</code>, <code>rmse</code>, <code>mape</code>, and <code>zero_actual_rows</code> ordered by <code>model_name</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-57 Exercise 4, the chosen form is justified by this lesson-specific rationale: <code>calendar_daily</code> and <code>forecasts</code> repeat the leakage-free foundation. Evaluate another form against the concrete expected result (one row per <code>model_name</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> A zero-revenue day remains in <code>scored_rows</code> and <code>zero_actual_rows</code>, contributes to MAE and RMSE, and contributes no percentage term to MAPE.</li>
+</ul>
 <h4 id="solution-1--exercise-5-detect-a-leaky-frame">Exercise 5 — Detect a leaky frame<a class="heading-anchor" href="#solution-1--exercise-5-detect-a-leaky-frame" aria-label="Link to this section">#</a></h4>
 <p>The leaky window ends at <code>CURRENT ROW</code>, so the day&#x27;s actual helps predict itself. The corrected frame ends at <code>1 PRECEDING</code>. Displaying both columns is a direct proof of the semantic difference.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-57 Exercise 5, read from <code>orders</code>. Build the answer toward <code>day</code>, <code>revenue</code>, <code>leaky_window</code>, and <code>forecast_window</code>; keep <code>day</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-57 Exercise 5, expected output: at most 20 rows keyed by <code>day</code>. The final columns are <code>day</code>, <code>revenue</code>, <code>leaky_window</code>, and <code>forecast_window</code>. The final order is <code>day DESC</code>.</li>
+<li><strong>Independent verification:</strong> For sql-57 Exercise 5, assert no more than 20 rows, no duplicate <code>day</code>, and no adjacent pair that violates <code>day DESC</code>. Rejoin the returned keys to <code>orders</code> to confirm <code>day</code>, <code>revenue</code>, <code>leaky_window</code>, and <code>forecast_window</code> came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining <code>day DESC</code>.</li>
+<li><strong>Intermediate relation check:</strong> For sql-57 Exercise 5, run <code>daily</code> one at a time. Record each CTE&#x27;s row count and <code>day</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-57 Exercise 5, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>GROUP BY</code>, window <code>OVER</code>, <code>SELECT</code>, <code>ORDER BY</code>, and <code>LIMIT</code>. Read only those operations: begin at <code>orders</code>, preserve one row per <code>day</code>, and finish with <code>day</code>, <code>revenue</code>, <code>leaky_window</code>, and <code>forecast_window</code> ordered by <code>day DESC</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-57 Exercise 5, the chosen form is justified by this lesson-specific rationale: The leaky window ends at <code>CURRENT ROW</code>, so the day&#x27;s actual helps predict itself. Evaluate another form against the concrete expected result (at most 20 rows keyed by <code>day</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining <code>day DESC</code>.</li>
+</ul>
 <h4 id="solution-1--exercise-6-preserve-undefined-zero-dispersion-scores">Exercise 6 — Preserve undefined zero-dispersion scores<a class="heading-anchor" href="#solution-1--exercise-6-preserve-undefined-zero-dispersion-scores" aria-label="Link to this section">#</a></h4>
-<p>The constant three-day fixture has standard deviation and MAD equal to zero. Both score formulas divide by <code>NULLIF(dispersion, 0)</code>, yielding NULL. That means “this scoring method is undefined for this population,” not “the observation is normal.”</p></div>
+<p>The constant three-day fixture has standard deviation and MAD equal to zero. Both score formulas divide by <code>NULLIF(dispersion, 0)</code>, yielding NULL. That means “this scoring method is undefined for this population,” not “the observation is normal.”</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-57 Exercise 6, read from <code>constant</code>. Build the answer toward <code>day</code>, <code>revenue</code>, <code>sd_z</code>, and <code>modified_mad_z</code>; keep <code>day</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-57 Exercise 6, expected output: one row per <code>day</code>. The final columns are <code>day</code>, <code>revenue</code>, <code>sd_z</code>, and <code>modified_mad_z</code>. The final order is <code>d.day</code>.</li>
+<li><strong>Independent verification:</strong> For sql-57 Exercise 6, project <code>day</code> plus the raw source columns from <code>constant</code> at each join stage; record row count and distinct <code>day</code>, then assert the final <code>day</code>, <code>revenue</code>, <code>sd_z</code>, and <code>modified_mad_z</code> values match those staged rows without unintended fanout or loss. Add one source row with a new <code>day</code>; verify the result gains exactly one row carrying that <code>day</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-57 Exercise 6, run <code>center</code>, <code>deviations</code>, and <code>dispersion</code> one at a time. Record each CTE&#x27;s row count and <code>day</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-57 Exercise 6, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>constant</code>, preserve one row per <code>day</code>, and finish with <code>day</code>, <code>revenue</code>, <code>sd_z</code>, and <code>modified_mad_z</code> ordered by <code>d.day</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-57 Exercise 6, the chosen form is justified by this lesson-specific rationale: The constant three-day fixture has standard deviation and MAD equal to zero. Evaluate another form against the concrete expected result (one row per <code>day</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>day</code>; verify the result gains exactly one row carrying that <code>day</code> value.</li>
+</ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -664,7 +1008,7 @@ ORDER BY direction DESC, anomaly_rank;</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -688,6 +1032,19 @@ ORDER BY direction DESC, anomaly_rank;</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 57 solutions: forecast accuracy and robust anomaly detection</span>
+<span>-- SOLUTION READING MAP — sql-57: Project4 BI Part3</span>
+<span>-- Explanation: sql/postgres-60day/solutions/day57_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day57_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
 <span>-- Exercise 1: compare prior-seven-day average with seven-day seasonal naive.</span>
@@ -926,7 +1283,50 @@ ORDER BY direction DESC, anomaly_rank;</code></pre>
 <span>ORDER BY d.day;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-57 — Project4 BI Part3.
+
+I have completed the direct catalog prerequisite: `sql-56`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day57_project4_bi_part3.md
+- Answer-free learner SQL: sql/postgres-60day/day57_project4_bi_part3.sql
+
+Key terms to teach in context: Seasonal naive, MAD, Anomaly candidate. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Build a complete daily spine before LAG(revenue, 7) so the offset means seven calendar days. Calculate a trailing forecast that excludes the current actual, then score the same six-month rows. For anomaly output, retain raw revenue, center, dispersion, and both scores beside the rank.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-57/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-56.html"><small>Previous lesson</small><strong>sql-56</strong><span>Project4 BI Part2</span></a>
@@ -1018,6 +1418,23 @@ ORDER BY direction DESC, anomaly_rank;</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

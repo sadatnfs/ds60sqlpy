@@ -6,7 +6,20 @@ Start from the repository root and run:
 python scripts/course.py doctor
 ```
 
-On Windows, use `.\.venv\Scripts\python.exe`; on macOS/Linux, use `.venv/bin/python` if `python` points elsewhere.
+If `python` points elsewhere, use the repository interpreter directly. On
+Windows PowerShell, resolve the standard-`venv` or conda-prefix layout once per
+window:
+
+```powershell
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+& $CoursePython scripts\course.py doctor
+```
+
+On macOS/Linux, run `.venv/bin/python scripts/course.py doctor`.
 
 For the difference between `.venv`, disposable caches, offline model data,
 learner progress, and Docker state, see
@@ -34,7 +47,20 @@ Change to the directory containing the root README and retry.
 
 ## `python` or `py` is not found
 
-- Windows: reinstall Python 3.12 with the Python launcher, then open a new terminal and run `py -3.12 --version`.
+- Windows: do not reinstall merely because an existing Python or Anaconda
+  installation is missing from `PATH`. From the repository root, run the
+  read-only discovery preview first:
+
+  ```powershell
+  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+  & .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -WhatIf
+  ```
+
+  If it finds a supported Python, Anaconda, or Miniconda installation, rerun
+  without `-WhatIf` to prepare the repository environment. Only if discovery
+  reports that no supported interpreter exists should you install Python 3.12
+  manually or explicitly preview the optional winget path with
+  `& .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -InstallMissingWithWinget -WhatIf`.
 - macOS/Linux: run `python3.12 --version`; do not replace the operating system’s Python.
 - In VS Code: select the repository `.venv` from **Python: Select Interpreter**.
 
@@ -43,8 +69,13 @@ Change to the directory containing the root README and retry.
 Windows:
 
 ```powershell
-py -3.12 -m venv .venv
+& .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -WhatIf
+& .\scripts\bootstrap_windows.ps1 -SkipPostgreSql
 ```
+
+The preview discovers Python.org and Anaconda/Miniconda installations before
+the real run chooses either the standard `venv` layout or the conda-prefix
+fallback. It does not delete a partial environment.
 
 Linux may need the venv package:
 
@@ -59,7 +90,12 @@ Remove a partially created `.venv` only after confirming it is the repository en
 Activation is not required:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\course.py doctor
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+& $CoursePython scripts\course.py doctor
 ```
 
 For a temporary activated session:
@@ -69,7 +105,9 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\.venv\Scripts\Activate.ps1
 ```
 
-Do not change machine-wide execution policy for this course.
+The activation script exists only in the standard `venv` layout. The
+conda-prefix fallback continues to use `& $CoursePython ...`. Do not change
+machine-wide execution policy for this course.
 
 ## A package installs but the notebook cannot import it
 
@@ -97,7 +135,12 @@ Use the environment’s Python:
 Windows:
 
 ```powershell
-.\.venv\Scripts\python.exe -m jupyterlab
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+& $CoursePython -m jupyterlab
 ```
 
 macOS/Linux:
@@ -138,7 +181,12 @@ The model or weights are not yet cached.
 
 ## `psql` is not found
 
-- Windows: add the PostgreSQL `bin` directory to `PATH`, or use SQL Shell.
+- Windows: first run
+  `& .\scripts\bootstrap_windows.ps1 -WhatIf`; it searches `PATH`, the
+  registry, and versioned PostgreSQL installation directories before any
+  install advice. Use the discovered executable in the current session, or
+  rerun with `-PersistUserPath` only if you want the narrowly scoped user
+  `PATH` change.
 - macOS Homebrew: add `$(brew --prefix postgresql@17)/bin` to `PATH`.
 - Linux: install the PostgreSQL client package.
 
@@ -250,7 +298,8 @@ the step as optional.
    Windows PowerShell:
 
    ```powershell
-   powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced
+   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+   & .\scripts\bootstrap_windows.ps1 -Profile Advanced
    ```
 
    macOS/Linux:

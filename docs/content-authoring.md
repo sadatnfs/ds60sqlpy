@@ -234,10 +234,16 @@ plain text, static HTML, and private portal modes.
 - Add direct imports to the appropriate dependency group.
 
 For PostgreSQL-in-Jupyter lessons, use JupySQL from the selected course kernel.
-Read `DS60_DATABASE_URL`, select SQLAlchemy's explicit Psycopg 3 dialect, pass
-the engine object to `%sql`, disable connection display, bound results, and use
-named binding for values. Never add `%pip`, a credential, or an untrusted Jinja
-fragment to a lesson notebook.
+Read `DS60_DATABASE_URL` and validate it with
+`ds60sqlpy.sql_notebook.validate_course_database_target()` before passing it to
+SQLAlchemy. This keeps every notebook on the exact course boundary: the
+disposable `advanced_sql_training` database through a native local socket or
+loopback host, with remote/multi-host targets and routing, service,
+file-reading, or unsupported query overrides rejected. Then select
+SQLAlchemy's explicit Psycopg 3 dialect, pass the engine object to `%sql`,
+disable connection display, bound results, and use named binding for values.
+Never add `%pip`, a credential, or an untrusted Jinja fragment to a lesson
+notebook.
 
 ## PostgreSQL
 
@@ -280,7 +286,12 @@ When commands differ, give separately labeled blocks:
 
 ```powershell
 # Windows PowerShell
-.\.venv\Scripts\python.exe scripts\course.py doctor
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+& $CoursePython scripts\course.py doctor
 ```
 
 ```bash

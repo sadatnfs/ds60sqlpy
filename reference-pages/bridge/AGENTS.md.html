@@ -128,7 +128,7 @@
 <li>deterministic, fake-backed coverage in <code>tests/</code>.</li>
 </ul>
 <p>Named modules under <code>bridge/professional/</code> follow the same separation but may use a clean notebook as the learner/reference executable when the objective is interactive SQL. PostgreSQL magic cells must be tagged <code>skip-static-validation</code> and live cells must also be tagged <code>live-postgres</code>.</p>
-<p>Companion guides include objectives, prerequisites, vocabulary, worked examples, exercises, self-checks, common pitfalls, and a next step. Solution notes discuss tradeoffs and failure behavior instead of merely repeating code. Each cataloged bridge module must meet its immutable <code>curriculum/practice_baseline.json</code> target on learner, guide, and explanatory solution surfaces with aligned, distinct numbered prompts.</p>
+<p>Companion guides include objectives, prerequisites, vocabulary, worked examples, exercises, self-checks, common pitfalls, and a next step. Solution notes discuss tradeoffs and failure behavior instead of merely repeating code. Every guide must include a novice-safe <code>## How to run this lesson</code>, at least two runnable topic-specific examples, an explicit Expected/Verify contract for each exercise, and a final copy-ready <code>## Ask Codex about this lesson</code> prompt using the exact stable ID and paths. The guide and solution must remain self-contained when Codex is unavailable. Each cataloged bridge module must meet its immutable <code>curriculum/practice_baseline.json</code> target on learner, guide, and explanatory solution surfaces with aligned, distinct numbered prompts.</p>
 <h3 id="database-and-security-rules">Database and security rules<a class="heading-anchor" href="#database-and-security-rules" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Target Python 3.11–3.12, PostgreSQL 16+, and Psycopg 3.</li>
@@ -157,6 +157,7 @@
 python -m pytest bridge/tests -q
 python bridge/scripts/validate_bridge.py
 python scripts/audit_practice.py
+python scripts/audit_lesson_depth.py
 ruff check bridge
 ruff format --check bridge</code></pre>
 <p>Also check local Markdown links and <code>git diff --check</code>. Remove any generated <code><strong>pycache</strong></code>, <code>.pytest_cache</code>, coverage, or learner-output files before handoff.</p></article>

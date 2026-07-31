@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-33/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-33-composite-covering-and-partial-indexes">Day 33 — Composite, Covering, and Partial Indexes<a class="heading-anchor" href="#guide--day-33-composite-covering-and-partial-indexes" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -285,6 +384,41 @@
 <li><strong>Prerequisites:</strong> <a href="sql-32.html#guide">Day 32 — index fundamentals</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-33.html#learner">learner SQL</a> · <a href="sql-33.html#solution-1">solution reasoning</a> · <a href="sql-33.html#solution-2">executable solution</a></li>
 </ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-33 — Index Optimization Strategies</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-33/lesson/workspace/sql/postgres-60day/day33_index_optimization_strategies.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day33_index_optimization_strategies.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/day33_index_optimization_strategies.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Leftmost prefix, Included column, Partial index. Its worked SQL reads or creates <code>orders</code>, <code>order_items</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: For a query filtering customerid and a date range, compare (customerid, orderdate) with the reversed key order. Then check whether the query predicate logically implies a partial-index predicate; mere overlap is not enough for PostgreSQL to use that index safely. The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for <code>idx_orders_customer_date</code>, and <code>orders</code>. Verify the object in <code>pg_catalog.pg_index</code>, and <code>pg_catalog.pg_indexes</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final <code>SELECT</code>. Verify the command tag in <code>pg_catalog</code>/<code>information_schema</code>, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day33_index_optimization_strategies.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">CREATE INDEX idx_orders_customer_date ON orders(customer_id, order_date);</code></pre>
+<p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
+<p><strong>Expected result/shape:</strong> Example 1 must print the expected DDL command tag for <code>idx_orders_customer_date</code>, and <code>orders</code>. Verify the object in <code>pg_catalog.pg_index</code>, and <code>pg_catalog.pg_indexes</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">CREATE INDEX idx_oi_order_product_inc ON order_items(order_id, product_id) INCLUDE (quantity, unit_price, discount);</code></pre>
+<p><strong>How to read it:</strong> Example 2 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
+<p><strong>Expected result/shape:</strong> Example 2 must print the expected DDL command tag for <code>idx_oi_order_product_inc</code>, and <code>order_items</code>. Verify the object in <code>pg_catalog.pg_index</code>, and <code>pg_catalog.pg_indexes</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Order composite search keys from real predicate and ordering requirements.</li>
@@ -301,12 +435,12 @@
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <p>Complete these in the <a href="sql-33.html#learner">learner SQL</a>:</p>
 <ol>
-<li>Test <code>(category, created_at)</code> on products.</li>
-<li>Build/test a partial index for orders above 1000.</li>
-<li>Predict how the product composite index behaves for <code>created_at</code> alone.</li>
-<li>Design an <code>INCLUDE</code> index for customer order history.</li>
-<li>Compare a query that implies a partial predicate with one that does not.</li>
-<li>Evaluate a NULL-only partial index for <code>customers.segment</code>.</li>
+<li>Test <code>(category, created_at)</code> on products. <strong>Inputs/evidence:</strong> For sql-33 Exercise 1, run the underlying read-only query over <code>products</code>, <code>training.idx_products_category_created_solution</code>, and <code>idx_products_category_created_solution</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison. <strong>Expected result/shape:</strong> For sql-33 Exercise 1, expected output: one row per <code>product_id</code>. The final columns are <code>product_id</code>, <code>name</code>, and <code>created_at</code>. The final order is <code>created_at DESC</code>. <strong>Verify:</strong> For sql-33 Exercise 1, run the underlying query without <code>EXPLAIN</code> and preserve its <code>product_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li>Build/test a partial index for orders above 1000. <strong>Inputs/evidence:</strong> For sql-33 Exercise 2, run the underlying read-only query over <code>orders</code>, <code>training.idx_orders_high_value_solution</code>, and <code>idx_orders_high_value_solution</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison. <strong>Expected result/shape:</strong> For sql-33 Exercise 2, expected output: one row per <code>order_id</code>. The final columns are <code>order_id</code>, <code>total_amount</code>, and <code>order_date</code>. The final order is <code>total_amount DESC</code>. <strong>Verify:</strong> For sql-33 Exercise 2, run the underlying query without <code>EXPLAIN</code> and preserve its <code>order_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li>Predict how the product composite index behaves for <code>created_at</code> alone. <strong>Inputs/evidence:</strong> For sql-33 Exercise 3, run the underlying read-only query over <code>products</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison. <strong>Expected result/shape:</strong> For sql-33 Exercise 3, expected output: one row per <code>product_id</code>. The final columns are <code>product_id</code>, and <code>created_at</code>. <strong>Verify:</strong> For sql-33 Exercise 3, run the underlying query without <code>EXPLAIN</code> and preserve its <code>product_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li>Design an <code>INCLUDE</code> index for customer order history. <strong>Inputs/evidence:</strong> For sql-33 Exercise 4, run the underlying read-only query over <code>orders</code>, and <code>idx_orders_history_cover_solution</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison. <strong>Expected result/shape:</strong> For sql-33 Exercise 4, expected output: one row per <code>order_id</code>. The final columns are <code>order_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code>. The final order is <code>order_date DESC</code>. <strong>Verify:</strong> For sql-33 Exercise 4, run the underlying query without <code>EXPLAIN</code> and preserve its <code>order_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li>Compare a query that implies a partial predicate with one that does not. <strong>Inputs/evidence:</strong> For sql-33 Exercise 5, run the underlying read-only query over <code>orders</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison. <strong>Expected result/shape:</strong> For sql-33 Exercise 5, expected output: one row per <code>order_id</code>. The final columns are <code>order_id</code>. <strong>Verify:</strong> For sql-33 Exercise 5, run the underlying query without <code>EXPLAIN</code> and preserve its <code>order_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li>Evaluate a NULL-only partial index for <code>customers.segment</code>. <strong>Inputs/evidence:</strong> For sql-33 Exercise 6, run the underlying read-only query over <code>customers</code>, <code>idx_customers_null_segment_solution</code>, and <code>customers.segment</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison. <strong>Expected result/shape:</strong> For sql-33 Exercise 6, expected output: one row per <code>customer_id</code>. The final columns are <code>all_customers</code>, and <code>null_segments</code>. <strong>Verify:</strong> For sql-33 Exercise 6, run the underlying query without <code>EXPLAIN</code> and preserve its <code>customer_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
 </ol>
 <p>For each candidate, name the exact query and maintenance tradeoff.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -338,12 +472,8 @@
 <li>A partial index is used only when the query predicate logically implies its stored predicate.</li>
 <li>Index-only scans are possible, not guaranteed; visibility and cost still matter.</li>
 </ul>
-<h4 id="guide--practice-match-the-learner-prompts-exactly">Practice — match the learner prompts exactly<a class="heading-anchor" href="#guide--practice-match-the-learner-prompts-exactly" aria-label="Link to this section">#</a></h4>
-<ol>
-<li>Add a composite index on <code>products(category, created_at)</code> and test a query that filters category and a created-at range.</li>
-<li>Add a partial index for <code>orders.total_amount &gt; 1000</code> and test a query whose predicate implies that exact high-value subset.</li>
-</ol>
-<p>For each exercise, compare the same query before and after the index and record plan, row estimate, timing, and index size if useful.</p>
+<h4 id="guide--practice-map">Practice map<a class="heading-anchor" href="#guide--practice-map" aria-label="Link to this section">#</a></h4>
+<p>Use the numbered <strong>Exercises</strong> section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.</p>
 <h4 id="guide--pitfalls-and-validation">Pitfalls and validation<a class="heading-anchor" href="#guide--pitfalls-and-validation" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><code>products</code> has no <code>active</code> column. Do not import an “active products” example from another schema.</li>
@@ -353,17 +483,45 @@
 </ul>
 <h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
 <p>Prompts 3–6 test the contracts behind composite, covering, and partial indexes. For <code>(category, created_at)</code>, queries anchored on the leftmost equality have a more useful search prefix than <code>created_at</code> alone. <code>INCLUDE</code> columns can satisfy the output list without changing the index&#x27;s search key.</p>
-<p>A partial index is eligible only when PostgreSQL can prove the query predicate implies its stored predicate; eligibility does not guarantee selection. For nullable segments, measure the NULL subset before deciding whether a tiny partial index earns its write and maintenance cost.</p></div>
+<p>A partial index is eligible only when PostgreSQL can prove the query predicate implies its stored predicate; eligibility does not guarantee selection. For nullable segments, measure the NULL subset before deciding whether a tiny partial index earns its write and maintenance cost.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-33 — Index Optimization Strategies.
+
+I have completed the direct catalog prerequisite: `sql-32`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day33_index_optimization_strategies.md
+- Answer-free learner SQL: sql/postgres-60day/day33_index_optimization_strategies.sql
+
+Key terms to teach in context: Leftmost prefix, Included column, Partial index. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: For a query filtering customerid and a date range, compare (customerid, orderdate) with the reversed key order. Then check whether the query predicate logically implies a partial-index predicate; mere overlap is not enough for PostgreSQL to use that index safely.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-33/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -380,13 +538,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 33: Index Optimization Strategies (composite, covering, partial)</span>
+<span>-- BEGINNER WORKFLOW — sql-33: Index Optimization Strategies</span>
+<span>-- Guide: sql/postgres-60day/companion-guides/day33_index_optimization_strategies.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-33/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: orders, order_items.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
@@ -421,29 +596,53 @@
 <span> </span>
 <span>-- Exercises</span>
 <span>-- 1. Add a composite index for (category, created_at) on products and test.</span>
+<span>--    Inputs: For sql-33 Exercise 1, run the underlying read-only query over `products`, `training.idx_products_category_created_solution`, and `idx_products_category_created_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
+<span>--    Expected result/shape: For sql-33 Exercise 1, expected output: one row per `product_id`. The final columns are `product_id`, `name`, and `created_at`. The final order is `created_at DESC`.</span>
+<span>--    Verify: For sql-33 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `product_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
+<span>--    Hint ladder, rung 1: For sql-33 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `product_id` rows.</span>
 <span>-- 2. Create a partial index for high-value orders (total_amount &gt; 1000) and test.</span>
+<span>--    Inputs: For sql-33 Exercise 2, run the underlying read-only query over `orders`, `training.idx_orders_high_value_solution`, and `idx_orders_high_value_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
+<span>--    Expected result/shape: For sql-33 Exercise 2, expected output: one row per `order_id`. The final columns are `order_id`, `total_amount`, and `order_date`. The final order is `total_amount DESC`.</span>
+<span>--    Verify: For sql-33 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
+<span>--    Hint ladder, rung 1: For sql-33 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.</span>
 <span>-- 3. Prediction: test the composite product index with created_at alone. Explain</span>
 <span>--    why the leftmost category column affects how useful the index can be.</span>
+<span>--    Inputs: For sql-33 Exercise 3, run the underlying read-only query over `products` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
+<span>--    Expected result/shape: For sql-33 Exercise 3, expected output: one row per `product_id`. The final columns are `product_id`, and `created_at`.</span>
+<span>--    Verify: For sql-33 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `product_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
+<span>--    Hint ladder, rung 1: For sql-33 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `product_id` rows.</span>
 <span>-- 4. Construction: build an INCLUDE index for a customer order-history query</span>
 <span>--    that returns order_id, order_date, status, and total_amount.</span>
+<span>--    Inputs: For sql-33 Exercise 4, run the underlying read-only query over `orders`, and `idx_orders_history_cover_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
+<span>--    Expected result/shape: For sql-33 Exercise 4, expected output: one row per `order_id`. The final columns are `order_id`, `order_date`, `status`, and `total_amount`. The final order is `order_date DESC`.</span>
+<span>--    Verify: For sql-33 Exercise 4, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
+<span>--    Hint ladder, rung 1: For sql-33 Exercise 4, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.</span>
 <span>-- 5. Debugging: write a query whose WHERE clause does not imply the partial</span>
 <span>--    index predicate. Compare it with a query that does and explain eligibility</span>
 <span>--    separately from the planner&#x27;s final cost choice.</span>
+<span>--    Inputs: For sql-33 Exercise 5, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
+<span>--    Expected result/shape: For sql-33 Exercise 5, expected output: one row per `order_id`. The final columns are `order_id`.</span>
+<span>--    Verify: For sql-33 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
+<span>--    Hint ladder, rung 1: For sql-33 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.</span>
 <span>-- 6. Edge case: query a nullable column (customers.segment) with IS NULL and</span>
 <span>--    discuss whether a partial index for only NULL rows would be worthwhile.</span>
+<span>--    Inputs: For sql-33 Exercise 6, run the underlying read-only query over `customers`, `idx_customers_null_segment_solution`, and `customers.segment` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
+<span>--    Expected result/shape: For sql-33 Exercise 6, expected output: one row per `customer_id`. The final columns are `all_customers`, and `null_segments`.</span>
+<span>--    Verify: For sql-33 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
+<span>--    Hint ladder, rung 1: For sql-33 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -467,6 +666,26 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-33-solutions-composite-and-partial-indexes">Day 33 — Solutions: Composite and Partial Indexes<a class="heading-anchor" href="#solution-1--day-33-solutions-composite-and-partial-indexes" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day33_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day33_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are Leftmost prefix, Included column, Partial index. Its worked-model focus is: For a query filtering customerid and a date range, compare (customerid, orderdate) with the reversed key order. Then check whether the query predicate logically implies a partial-index predicate; mere overlap is not enough for PostgreSQL to use that index safely.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>Composite indexes are most useful when their leading columns match common filter or ordering patterns. Partial indexes contain only rows satisfying an immutable predicate.</p>
 <h4 id="solution-1--exercise-1-composite-index-on-category-createdat">Exercise 1 — Composite index on <code>(category, created_at)</code><a class="heading-anchor" href="#solution-1--exercise-1-composite-index-on-category-createdat" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-sql">BEGIN;
@@ -486,7 +705,17 @@ WHERE category = &#x27;Electronics&#x27;
 ORDER BY created_at DESC;
 
 ROLLBACK;</code></pre>
-<p>The equality condition on the leading <code>category</code> column lets the B-tree narrow the search before applying the <code>created_at</code> range and can also support the requested order. A predicate on <code>created_at</code> alone cannot use the leftmost <code>category</code> key as efficiently.</p>
+<p>The equality condition on the leading <code>category</code> column lets the B-tree narrow the search before applying the <code>created_at</code> range and can also support the <code>ORDER BY created_at, product_id</code>. A predicate on <code>created_at</code> alone cannot use the leftmost <code>category</code> key as efficiently.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-33 Exercise 1, run the underlying read-only query over <code>products</code>, <code>training.idx_products_category_created_solution</code>, and <code>idx_products_category_created_solution</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</li>
+<li><strong>Expected result/shape:</strong> For sql-33 Exercise 1, expected output: one row per <code>product_id</code>. The final columns are <code>product_id</code>, <code>name</code>, and <code>created_at</code>. The final order is <code>created_at DESC</code>.</li>
+<li><strong>Independent verification:</strong> For sql-33 Exercise 1, run the underlying query without <code>EXPLAIN</code> and preserve its <code>product_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li><strong>Intermediate relation check:</strong> For sql-33 Exercise 1, run the underlying query without <code>EXPLAIN</code> and preserve its <code>product_id</code> rows.</li>
+<li><strong>Clause check:</strong> For sql-33 Exercise 1, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>products</code>, <code>training.idx_products_category_created_solution</code>, and <code>idx_products_category_created_solution</code>, preserve one row per <code>product_id</code>, and finish with <code>product_id</code>, <code>name</code>, and <code>created_at</code> ordered by <code>created_at DESC</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-33 Exercise 1, the chosen form is justified by this lesson-specific rationale: The equality condition on the leading <code>category</code> column lets the B-tree narrow the search before applying the <code>created_at</code> range and can also support <code>ORDER BY created_at, product_id</code>. Evaluate another form against the concrete expected result (one row per <code>product_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+</ul>
 <h4 id="solution-1--exercise-2-partial-index-for-high-value-orders">Exercise 2 — Partial index for high-value orders<a class="heading-anchor" href="#solution-1--exercise-2-partial-index-for-high-value-orders" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-sql">BEGIN;
 SET LOCAL search_path TO training, public;
@@ -507,6 +736,16 @@ ORDER BY total_amount DESC;
 
 ROLLBACK;</code></pre>
 <p>The query repeats the partial predicate in a form the planner can prove implies the index condition. The index excludes lower-value orders, reducing its size.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-33 Exercise 2, run the underlying read-only query over <code>orders</code>, <code>training.idx_orders_high_value_solution</code>, and <code>idx_orders_high_value_solution</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</li>
+<li><strong>Expected result/shape:</strong> For sql-33 Exercise 2, expected output: one row per <code>order_id</code>. The final columns are <code>order_id</code>, <code>total_amount</code>, and <code>order_date</code>. The final order is <code>total_amount DESC</code>.</li>
+<li><strong>Independent verification:</strong> For sql-33 Exercise 2, run the underlying query without <code>EXPLAIN</code> and preserve its <code>order_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li><strong>Intermediate relation check:</strong> For sql-33 Exercise 2, run the underlying query without <code>EXPLAIN</code> and preserve its <code>order_id</code> rows.</li>
+<li><strong>Clause check:</strong> For sql-33 Exercise 2, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>orders</code>, <code>training.idx_orders_high_value_solution</code>, and <code>idx_orders_high_value_solution</code>, preserve one row per <code>order_id</code>, and finish with <code>order_id</code>, <code>total_amount</code>, and <code>order_date</code> ordered by <code>total_amount DESC</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-33 Exercise 2, the chosen form is justified by this lesson-specific rationale: The query repeats the partial predicate in a form the planner can prove implies the index condition. Evaluate another form against the concrete expected result (one row per <code>order_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+</ul>
 <h4 id="solution-1--pitfalls">Pitfalls<a class="heading-anchor" href="#solution-1--pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Partial-index predicates cannot contain volatile or merely stable expressions such as <code>CURRENT_TIMESTAMP - interval &#x27;90 days&#x27;</code>. A fixed business condition such as <code>total_amount &gt; 1000</code> is valid.</li>
@@ -516,14 +755,54 @@ ROLLBACK;</code></pre>
 </ul>
 <h4 id="solution-1--exercise-3-test-the-leftmost-prefix-limitation">Exercise 3 — Test the leftmost-prefix limitation<a class="heading-anchor" href="#solution-1--exercise-3-test-the-leftmost-prefix-limitation" aria-label="Link to this section">#</a></h4>
 <p>Filtering only <code>created_at</code> omits the composite index&#x27;s first search column. PostgreSQL may still inspect the index in some conditions, but the query cannot seek through a known category prefix.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-33 Exercise 3, run the underlying read-only query over <code>products</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</li>
+<li><strong>Expected result/shape:</strong> For sql-33 Exercise 3, expected output: one row per <code>product_id</code>. The final columns are <code>product_id</code>, and <code>created_at</code>.</li>
+<li><strong>Independent verification:</strong> For sql-33 Exercise 3, run the underlying query without <code>EXPLAIN</code> and preserve its <code>product_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li><strong>Intermediate relation check:</strong> For sql-33 Exercise 3, run the underlying query without <code>EXPLAIN</code> and preserve its <code>product_id</code> rows.</li>
+<li><strong>Clause check:</strong> For sql-33 Exercise 3, the solution actually uses <code>FROM</code>, <code>WHERE</code>, and <code>SELECT</code>. Read only those operations: begin at <code>products</code>, preserve one row per <code>product_id</code>, and finish with <code>product_id</code>, and <code>created_at</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-33 Exercise 3, the chosen form is justified by this lesson-specific rationale: Filtering only <code>created_at</code> omits the composite index&#x27;s first search column. Evaluate another form against the concrete expected result (one row per <code>product_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+</ul>
 <h4 id="solution-1--exercise-4-cover-customer-order-history">Exercise 4 — Cover customer order history<a class="heading-anchor" href="#solution-1--exercise-4-cover-customer-order-history" aria-label="Link to this section">#</a></h4>
 <p><code>customer_id, order_date</code> are search/order keys. <code>status</code> and <code>total_amount</code> are included payload, which can support an index-only scan without widening the search key.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-33 Exercise 4, run the underlying read-only query over <code>orders</code>, and <code>idx_orders_history_cover_solution</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</li>
+<li><strong>Expected result/shape:</strong> For sql-33 Exercise 4, expected output: one row per <code>order_id</code>. The final columns are <code>order_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code>. The final order is <code>order_date DESC</code>.</li>
+<li><strong>Independent verification:</strong> For sql-33 Exercise 4, run the underlying query without <code>EXPLAIN</code> and preserve its <code>order_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li><strong>Intermediate relation check:</strong> For sql-33 Exercise 4, run the underlying query without <code>EXPLAIN</code> and preserve its <code>order_id</code> rows.</li>
+<li><strong>Clause check:</strong> For sql-33 Exercise 4, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>orders</code>, and <code>idx_orders_history_cover_solution</code>, preserve one row per <code>order_id</code>, and finish with <code>order_id</code>, <code>order_date</code>, <code>status</code>, and <code>total_amount</code> ordered by <code>order_date DESC</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-33 Exercise 4, the chosen form is justified by this lesson-specific rationale: <code>customer_id, order_date</code> are search/order keys. Evaluate another form against the concrete expected result (one row per <code>order_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+</ul>
 <h4 id="solution-1--exercise-5-prove-partial-index-eligibility">Exercise 5 — Prove partial-index eligibility<a class="heading-anchor" href="#solution-1--exercise-5-prove-partial-index-eligibility" aria-label="Link to this section">#</a></h4>
 <p><code>total_amount &gt; 1200</code> implies the stored <code>&gt; 1000</code> predicate; <code>&gt; 500</code> does not. Eligibility and final selection are separate planner decisions.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-33 Exercise 5, run the underlying read-only query over <code>orders</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</li>
+<li><strong>Expected result/shape:</strong> For sql-33 Exercise 5, expected output: one row per <code>order_id</code>. The final columns are <code>order_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-33 Exercise 5, run the underlying query without <code>EXPLAIN</code> and preserve its <code>order_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li><strong>Intermediate relation check:</strong> For sql-33 Exercise 5, run the underlying query without <code>EXPLAIN</code> and preserve its <code>order_id</code> rows.</li>
+<li><strong>Clause check:</strong> For sql-33 Exercise 5, the solution actually uses <code>FROM</code>, <code>WHERE</code>, and <code>SELECT</code>. Read only those operations: begin at <code>orders</code>, preserve one row per <code>order_id</code>, and finish with <code>order_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-33 Exercise 5, the chosen form is justified by this lesson-specific rationale: <code>total_amount &gt; 1200</code> implies the stored <code>&gt; 1000</code> predicate; <code>&gt; 500</code> does not. Evaluate another form against the concrete expected result (one row per <code>order_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+</ul>
 <h4 id="solution-1--exercise-6-evaluate-the-null-subset">Exercise 6 — Evaluate the NULL subset<a class="heading-anchor" href="#solution-1--exercise-6-evaluate-the-null-subset" aria-label="Link to this section">#</a></h4>
-<p>The answer first measures NULL prevalence, then builds a NULL-only index. Whether it is worthwhile depends on query frequency, subset size, and added write/storage cost—not on syntax alone.</p></div>
+<p>The answer first measures NULL prevalence, then builds a NULL-only index. Whether it is worthwhile depends on query frequency, subset size, and added write/storage cost—not on syntax alone.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-33 Exercise 6, run the underlying read-only query over <code>customers</code>, <code>idx_customers_null_segment_solution</code>, and <code>customers.segment</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</li>
+<li><strong>Expected result/shape:</strong> For sql-33 Exercise 6, expected output: one row per <code>customer_id</code>. The final columns are <code>all_customers</code>, and <code>null_segments</code>.</li>
+<li><strong>Independent verification:</strong> For sql-33 Exercise 6, run the underlying query without <code>EXPLAIN</code> and preserve its <code>customer_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li><strong>Intermediate relation check:</strong> For sql-33 Exercise 6, run the underlying query without <code>EXPLAIN</code> and preserve its <code>customer_id</code> rows.</li>
+<li><strong>Clause check:</strong> For sql-33 Exercise 6, the solution actually uses <code>FROM</code>, <code>WHERE</code>, aggregate <code>FILTER</code>, and <code>SELECT</code>. Read only those operations: begin at <code>customers</code>, <code>idx_customers_null_segment_solution</code>, and <code>customers.segment</code>, preserve one row per <code>customer_id</code>, and finish with <code>all_customers</code>, and <code>null_segments</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-33 Exercise 6, the chosen form is justified by this lesson-specific rationale: The answer first measures NULL prevalence, then builds a NULL-only index. Evaluate another form against the concrete expected result (one row per <code>customer_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+</ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -531,7 +810,7 @@ ROLLBACK;</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -555,6 +834,19 @@ ROLLBACK;</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 33 solutions: index optimization strategies</span>
+<span>-- SOLUTION READING MAP — sql-33: Index Optimization Strategies</span>
+<span>-- Explanation: sql/postgres-60day/solutions/day33_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day33_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
@@ -616,7 +908,50 @@ ROLLBACK;</code></pre>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-33 — Index Optimization Strategies.
+
+I have completed the direct catalog prerequisite: `sql-32`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day33_index_optimization_strategies.md
+- Answer-free learner SQL: sql/postgres-60day/day33_index_optimization_strategies.sql
+
+Key terms to teach in context: Leftmost prefix, Included column, Partial index. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: For a query filtering customerid and a date range, compare (customerid, orderdate) with the reversed key order. Then check whether the query predicate logically implies a partial-index predicate; mere overlap is not enough for PostgreSQL to use that index safely.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-33/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-32.html"><small>Previous lesson</small><strong>sql-32</strong><span>Index Fundamentals</span></a>
@@ -708,6 +1043,23 @@ ROLLBACK;</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

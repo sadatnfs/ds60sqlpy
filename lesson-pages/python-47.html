@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-47-pytorch-tensors-modules-and-training-loops">Day 47 — PyTorch Tensors, Modules, and Training Loops<a class="heading-anchor" href="#guide--day-47-pytorch-tensors-modules-and-training-loops" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-47</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>deep-learning</code> · <strong>Network:</strong> offline</p>
 <p>Day 46 exposed the core update sequence. Today you make the training procedure more realistic with minibatches, explicit training/evaluation modes, and validation-aware extensions.</p>
@@ -338,7 +377,6 @@
 <h4 id="guide--worked-example-one-minibatch-safe-epoch">Worked example: one minibatch-safe epoch<a class="heading-anchor" href="#guide--worked-example-one-minibatch-safe-epoch" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-python">import torch
 
-
 def train_one_epoch(
     model: torch.nn.Module,
     loader: torch.utils.data.DataLoader,
@@ -362,11 +400,109 @@ def train_one_epoch(
     return total_loss / total_rows</code></pre>
 <p>Average by row rather than by batch so a smaller final batch does not receive the same weight as every full batch. Evaluation should use <code>model.eval()</code> and <code>torch.inference_mode()</code>.</p>
 <p>The learner notebook scales before splitting for compactness. In your exercise, improve the boundary: split first, fit <code>StandardScaler</code> only on training features, then transform train and test separately.</p>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Open the Day 47 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
+<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
+<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
+<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
+</ol>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
+<h4 id="guide--concept-deep-dive-logits-minibatches-modes-and-a-correct-pytorch-training-loop">Concept deep dive — logits, minibatches, modes, and a correct PyTorch training loop<a class="heading-anchor" href="#guide--concept-deep-dive-logits-minibatches-modes-and-a-correct-pytorch-training-loop" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
+<p><code>nn.Module</code> composes registered parameters and operations. For multiclass classification, the final layer returns one <strong>logit</strong> per class; <code>CrossEntropyLoss</code> combines log-softmax and negative log-likelihood, so the model should not apply softmax first. Targets are integer class indices with <code>torch.long</code> dtype.</p>
+<p>A <code>DataLoader</code> defines batch and shuffle behavior. Training mode enables dropout and batch-normalization updates; evaluation mode disables those training behaviors but does not itself disable gradients. Use <code>model.eval()</code> together with <code>torch.no_grad()</code> for validation.</p>
+<h5 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>DataLoader(dataset, batch_size=..., shuffle=...)</code>:</strong> yields bounded feature/target batches and controls training order.</li>
+<li><strong><code>model(features)</code>:</strong> returns logits shaped <code>(batch, classes)</code> for multiclass classification.</li>
+<li><strong><code>CrossEntropyLoss(logits, labels)</code>:</strong> expects floating logits and <code>long</code> class indices shaped <code>(batch,)</code>.</li>
+</ul>
+<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
+<h5 id="guide--focused-example-a-make-the-logits-and-label-contract-executable">Focused example A — make the logits-and-label contract executable<a class="heading-anchor" href="#guide--focused-example-a-make-the-logits-and-label-contract-executable" aria-label="Link to this section">#</a></h5>
+<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
+<pre><code class="language-python">import torch
+from torch import nn
+
+model = nn.Linear(3, 2)
+features = torch.tensor([[1.0, 0.0, -1.0], [0.5, 2.0, 1.0]])
+labels = torch.tensor([0, 1], dtype=torch.long)
+logits = model(features)
+loss = nn.CrossEntropyLoss()(logits, labels)
+print({&quot;logit_shape&quot;: tuple(logits.shape),
+       &quot;label_shape&quot;: tuple(labels.shape), &quot;loss&quot;: loss.item()})
+assert logits.shape == (2, 2) and loss.ndim == 0</code></pre>
+<p><strong>Expected observation:</strong> Two rows and two classes produce a <code>(2, 2)</code> logit tensor and one scalar batch loss.</p>
+<p><strong>Assumption to name:</strong> Class labels are zero-based indices and no softmax was applied before the loss.</p>
+<h5 id="guide--focused-example-b-observe-dropout-differ-between-train-and-eval-modes">Focused example B — observe dropout differ between train and eval modes<a class="heading-anchor" href="#guide--focused-example-b-observe-dropout-differ-between-train-and-eval-modes" aria-label="Link to this section">#</a></h5>
+<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
+<pre><code class="language-python">import torch
+from torch import nn
+
+torch.manual_seed(4702)
+layer = nn.Dropout(p=0.5)
+values = torch.ones(12)
+layer.train()
+train_output = layer(values)
+layer.eval()
+with torch.no_grad():
+    eval_output = layer(values)
+print({&quot;train_zeros&quot;: int((train_output == 0).sum()),
+       &quot;eval_unchanged&quot;: bool(torch.equal(eval_output, values))})
+assert torch.equal(eval_output, values)</code></pre>
+<p><strong>Expected observation:</strong> Dropout randomly masks/scales values in training but becomes an identity operation in evaluation.</p>
+<p><strong>Assumption to name:</strong> A fixed seed controls the demonstration; production quality is not inferred from one mask.</p>
+<h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>What to do</th>
+<th>Evidence to keep</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define logits, minibatches, modes, and a correct PyTorch training loop in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<h5 id="guide--common-mistake-and-debugging-path">Common mistake and debugging path<a class="heading-anchor" href="#guide--common-mistake-and-debugging-path" aria-label="Link to this section">#</a></h5>
+<p><strong>Mistake:</strong> Passing probabilities to <code>CrossEntropyLoss</code>, float labels, or evaluating while the model remains in training mode.</p>
+<p><strong>Debug it deliberately:</strong> Assert every batch&#x27;s shape/dtype/device, inspect one loss and gradient norm, and compare repeated predictions in train versus eval mode.</p>
+<p><strong>Stop condition:</strong> Do not add schedulers, early stopping, or mixed precision until the basic loop overfits one tiny batch and validates correctly.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Add dropout to the MLP and compare results.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — logits, minibatches, modes, and a correct PyTorch training loop — from identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.</p>
+<ol>
 <li>Implement a small minibatch training loop with <code>DataLoader</code>.</li>
 </ol>
+<p><strong>Verify:</strong> Practice 2 — logits, minibatches, modes, and a correct PyTorch training loop — for a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Place <code>Dropout(p=...)</code> after an activation. Compare multiple seeded runs or validation curves, because one final accuracy is noisy.</li>
@@ -378,10 +514,20 @@ def train_one_epoch(
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Shape and dtype contract:</strong> Write assertions at the start of a classification training step for feature shape/dtype, target shape/dtype, and logits shape. <strong>Progressive hint:</strong> CrossEntropyLoss expects floating logits <code>(batch, classes)</code> and integer class indices <code>(batch,)</code> with dtype long.</li>
+</ol>
+<p><strong>Verify:</strong> Shape and dtype contract — assert features are floating shape (batch,input_features), targets are long shape (batch,), and logits are floating shape (batch,num_classes); include one wrong-dtype and one wrong-width fixture that raise clear errors.</p>
+<ol>
 <li><strong>Validation implementation:</strong> Implement an evaluation function that returns sample-weighted loss and accuracy, restores the caller&#x27;s prior train/eval mode, and never retains an autograd graph. <strong>Progressive hint:</strong> Remember <code>was_training = model.training</code>, call eval and no_grad, aggregate counts, then restore train mode only if it was previously active.</li>
+</ol>
+<p><strong>Verify:</strong> Validation implementation — call evaluation from both prior train and eval modes; assert returned loss/accuracy use all sample counts, outputs carry no grad graph, parameters have no new gradients, and the original mode is restored.</p>
+<ol>
 <li><strong>DataLoader reproducibility:</strong> Run two shuffled DataLoaders with the same seed and compare batch order. Then state what changes when using worker processes. <strong>Progressive hint:</strong> Pass a seeded <code>torch.Generator</code>; worker initialization and external NumPy/Python randomness need their own deliberate seeds.</li>
+</ol>
+<p><strong>Verify:</strong> DataLoader reproducibility — with identical torch.Generator seeds, assert two num_workers=0 loaders emit identical sample-ID order; with worker processes, record worker seeding/persistent-worker settings and rerun the equality check.</p>
+<ol>
 <li><strong>Portable checkpoint:</strong> Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resume one step. Explain <code>state_dict</code> versus serializing the entire model object. <strong>Progressive hint:</strong> Save plain state dictionaries plus architecture/config metadata. Use <code>map_location=&#x27;cpu&#x27;</code> and recreate the model class before loading.</li>
 </ol>
+<p><strong>Verify:</strong> Portable checkpoint — save state dicts, epoch, metric history, config, and RNG/seed metadata; load with map_location=&#x27;cpu&#x27;, assert fixed-fixture prediction parity, then resume one step and increment epoch/history.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -429,17 +575,46 @@ def train_one_epoch(
 <li>Work in the <a href="python-47.html#learner">Day 47 learner notebook</a>.</li>
 <li>Then consult the <a href="python-47.html#solution-1">Day 47 solution</a>.</li>
 <li>Continue to <a href="python-48.html#guide">Day 48 — Transfer Learning</a>.</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<pre><code class="language-text">Tutor me through `python-47` — Day 47 — PyTorch Tensors, Modules, and Training Loops.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize logits, minibatches, modes, and a correct PyTorch training loop. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day47_pytorch_basics_nn_training_loop.md`
+- learner artifact: `python/ds-60day/notebooks/day47_pytorch_basics_nn_training_loop.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-46`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -456,12 +631,12 @@ def train_one_epoch(
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-47-pytorch-basics-tensors-autograd-simple-nn">Day 47 — PyTorch basics: tensors, autograd, simple NN<a class="heading-anchor" href="#learner--cell-1--day-47-pytorch-basics-tensors-autograd-simple-nn" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -488,28 +663,127 @@ def train_one_epoch(
 <span>pred = model(Xte).argmax(1); acc = (pred==yte).float().mean().item(); acc</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-3--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
+<h4 id="learner--cell-3--concept-lab-logits-minibatches-modes-and-a-correct-pytorch-training-loop">Concept lab — logits, minibatches, modes, and a correct PyTorch training loop<a class="heading-anchor" href="#learner--cell-3--concept-lab-logits-minibatches-modes-and-a-correct-pytorch-training-loop" aria-label="Link to this section">#</a></h4>
+<h5 id="learner--cell-3--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-3--mental-model" aria-label="Link to this section">#</a></h5>
+<p><code>nn.Module</code> composes registered parameters and operations. For multiclass classification, the final layer returns one <strong>logit</strong> per class; <code>CrossEntropyLoss</code> combines log-softmax and negative log-likelihood, so the model should not apply softmax first. Targets are integer class indices with <code>torch.long</code> dtype.</p>
+<p>A <code>DataLoader</code> defines batch and shuffle behavior. Training mode enables dropout and batch-normalization updates; evaluation mode disables those training behaviors but does not itself disable gradients. Use <code>model.eval()</code> together with <code>torch.no_grad()</code> for validation.</p>
+<h5 id="learner--cell-3--read-the-api-before-running-it">Read the API before running it<a class="heading-anchor" href="#learner--cell-3--read-the-api-before-running-it" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>DataLoader(dataset, batch_size=..., shuffle=...)</code>:</strong> yields bounded feature/target batches and controls training order.</li>
+<li><strong><code>model(features)</code>:</strong> returns logits shaped <code>(batch, classes)</code> for multiclass classification.</li>
+<li><strong><code>CrossEntropyLoss(logits, labels)</code>:</strong> expects floating logits and <code>long</code> class indices shaped <code>(batch,)</code>.</li>
+</ul>
+<p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-make-the-logits-and-label-contract-executable">Focused example A — make the logits-and-label contract executable<a class="heading-anchor" href="#learner--cell-4--focused-example-a-make-the-logits-and-label-contract-executable" aria-label="Link to this section">#</a></h5>
+<p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
+<p><strong>Assumption:</strong> Class labels are zero-based indices and no softmax was applied before the loss.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>import torch</span>
+<span>from torch import nn</span>
+<span> </span>
+<span>model = nn.Linear(3, 2)</span>
+<span>features = torch.tensor([[1.0, 0.0, -1.0], [0.5, 2.0, 1.0]])</span>
+<span>labels = torch.tensor([0, 1], dtype=torch.long)</span>
+<span>logits = model(features)</span>
+<span>loss = nn.CrossEntropyLoss()(logits, labels)</span>
+<span>print({&quot;logit_shape&quot;: tuple(logits.shape),</span>
+<span>       &quot;label_shape&quot;: tuple(labels.shape), &quot;loss&quot;: loss.item()})</span>
+<span>assert logits.shape == (2, 2) and loss.ndim == 0</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> Two rows and two classes produce a <code>(2, 2)</code> logit tensor and one scalar batch loss.</p>
+<p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-observe-dropout-differ-between-train-and-eval-modes">Focused example B — observe dropout differ between train and eval modes<a class="heading-anchor" href="#learner--cell-7--focused-example-b-observe-dropout-differ-between-train-and-eval-modes" aria-label="Link to this section">#</a></h5>
+<p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
+<p><strong>Assumption:</strong> A fixed seed controls the demonstration; production quality is not inferred from one mask.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import torch</span>
+<span>from torch import nn</span>
+<span> </span>
+<span>torch.manual_seed(4702)</span>
+<span>layer = nn.Dropout(p=0.5)</span>
+<span>values = torch.ones(12)</span>
+<span>layer.train()</span>
+<span>train_output = layer(values)</span>
+<span>layer.eval()</span>
+<span>with torch.no_grad():</span>
+<span>    eval_output = layer(values)</span>
+<span>print({&quot;train_zeros&quot;: int((train_output == 0).sum()),</span>
+<span>       &quot;eval_unchanged&quot;: bool(torch.equal(eval_output, values))})</span>
+<span>assert torch.equal(eval_output, values)</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> Dropout randomly masks/scales values in training but becomes an identity operation in evaluation.</p>
+<h5 id="learner--cell-9--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-9--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Passing probabilities to <code>CrossEntropyLoss</code>, float labels, or evaluating while the model remains in training mode.</p>
+<p><strong>Diagnostic:</strong> Assert every batch&#x27;s shape/dtype/device, inspect one loss and gradient norm, and compare repeated predictions in train versus eval mode.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>Action</th>
+<th>Evidence</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define logits, minibatches, modes, and a correct PyTorch training loop in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<p><strong>Stop condition:</strong> Do not add schedulers, early stopping, or mixed precision until the basic loop overfits one tiny batch and validates correctly.</p>
+<p>Continue to the numbered practice only after you can explain both examples without rereading their code.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Add dropout to the MLP and compare results.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — logits, minibatches, modes, and a correct PyTorch training loop — from identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.</p>
+<ol>
 <li>Implement a small minibatch training loop with <code>DataLoader</code>.</li>
 </ol>
-<h5 id="learner--cell-3--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-3--progressive-hints" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2 — logits, minibatches, modes, and a correct PyTorch training loop — for a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().</p>
+<h5 id="learner--cell-10--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-10--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Place <code>Dropout(p=...)</code> after an activation. Compare multiple seeded runs or validation curves, because one final accuracy is noisy.</li>
 <li>Wrap float32 features and long labels in a <code>TensorDataset</code>; shuffle only the training loader. Move <code>zero_grad</code>, forward, loss, backward, and step inside the batch loop.</li>
 </ol>
 <p>The separate solution proceeds to early stopping, <code>StepLR</code>, and CUDA mixed precision. Mixed precision is an optional GPU optimization; the code path must remain correct on CPU.</p>
-<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Build a training loop whose dtype, shape, mode, randomness, and checkpoint state can be inspected and resumed on CPU without hidden notebook state.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Shape and dtype contract:</strong> Write assertions at the start of a classification training step for feature shape/dtype, target shape/dtype, and logits shape. <strong>Progressive hint:</strong> CrossEntropyLoss expects floating logits <code>(batch, classes)</code> and integer class indices <code>(batch,)</code> with dtype long.</li>
+</ol>
+<p><strong>Verify:</strong> Shape and dtype contract — assert features are floating shape (batch,input_features), targets are long shape (batch,), and logits are floating shape (batch,num_classes); include one wrong-dtype and one wrong-width fixture that raise clear errors.</p>
+<ol>
 <li><strong>Validation implementation:</strong> Implement an evaluation function that returns sample-weighted loss and accuracy, restores the caller&#x27;s prior train/eval mode, and never retains an autograd graph. <strong>Progressive hint:</strong> Remember <code>was_training = model.training</code>, call eval and no_grad, aggregate counts, then restore train mode only if it was previously active.</li>
+</ol>
+<p><strong>Verify:</strong> Validation implementation — call evaluation from both prior train and eval modes; assert returned loss/accuracy use all sample counts, outputs carry no grad graph, parameters have no new gradients, and the original mode is restored.</p>
+<ol>
 <li><strong>DataLoader reproducibility:</strong> Run two shuffled DataLoaders with the same seed and compare batch order. Then state what changes when using worker processes. <strong>Progressive hint:</strong> Pass a seeded <code>torch.Generator</code>; worker initialization and external NumPy/Python randomness need their own deliberate seeds.</li>
+</ol>
+<p><strong>Verify:</strong> DataLoader reproducibility — with identical torch.Generator seeds, assert two num_workers=0 loaders emit identical sample-ID order; with worker processes, record worker seeding/persistent-worker settings and rerun the equality check.</p>
+<ol>
 <li><strong>Portable checkpoint:</strong> Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resume one step. Explain <code>state_dict</code> versus serializing the entire model object. <strong>Progressive hint:</strong> Save plain state dictionaries plus architecture/config metadata. Use <code>map_location=&#x27;cpu&#x27;</code> and recreate the model class before loading.</li>
 </ol>
+<p><strong>Verify:</strong> Portable checkpoint — save state dicts, epoch, metric history, config, and RNG/seed metadata; load with map_location=&#x27;cpu&#x27;, assert fixed-fixture prediction parity, then resume one step and increment epoch/history.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
 <span>#</span>
 <span># Keep the official solution closed until you have attempted each task.</span>
 <span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
@@ -527,15 +801,15 @@ def train_one_epoch(
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -613,7 +887,7 @@ opt = torch.optim.Adam(model.parameters(), lr=1e-3)</code></pre>
 <li>CrossEntropyLoss expects logits and Long labels 0..C-1</li>
 </ul>
 <hr>
-<p>Exercise 1 — Early stopping on validation loss</p>
+<p>Worked reference for Exercise 1 — Early stopping on validation loss</p>
 <pre><code class="language-python">class EarlyStopper:
     def __init__(self, patience=10, min_delta=0.0):
         self.patience, self.min_delta = patience, min_delta
@@ -665,7 +939,7 @@ print(f&quot;Best val acc: {max(hist[&#x27;va_acc&#x27;]):.3f}&quot;)</code></pr
 <li>Loop: record metrics, check stopper; plot to verify no overfitting after stop</li>
 </ul>
 <hr>
-<p>Exercise 2 — StepLR scheduler</p>
+<p>Worked reference for Exercise 2 — StepLR scheduler</p>
 <pre><code class="language-python"># Reset model and optimizer for a fair comparison
 model2 = MLP(20, 128, 2).to(device)
 opt2 = torch.optim.SGD(model2.parameters(), lr=0.1, momentum=0.9)
@@ -686,7 +960,7 @@ print(&#x27;Final LR:&#x27;, sched.get_last_lr()[0])</code></pre>
 <li>StepLR reduces LR by gamma every step_size epochs; observe loss drops after LR steps</li>
 </ul>
 <hr>
-<p>Exercise 3 — Mixed precision training</p>
+<p>Worked reference for Exercise 3 — Mixed precision training</p>
 <pre><code class="language-python">scaler = torch.cuda.amp.GradScaler(enabled=(device.type==&#x27;cuda&#x27;))
 model3 = MLP(20, 128, 2).to(device)
 opt3 = torch.optim.Adam(model3.parameters(), lr=1e-3)
@@ -714,16 +988,34 @@ plt.plot(tr3); plt.yscale(&#x27;log&#x27;); plt.title(&#x27;AMP training loss&#x
 <li>On CPU, enabled=False makes this a no‑op; code still runs</li>
 </ul>
 <hr>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong><code>DataLoader(dataset, batch_size=..., shuffle=...)</code>:</strong> yields bounded feature/target batches and controls training order.</li>
+<li><strong><code>model(features)</code>:</strong> returns logits shaped <code>(batch, classes)</code> for multiclass classification.</li>
+<li><strong><code>CrossEntropyLoss(logits, labels)</code>:</strong> expects floating logits and <code>long</code> class indices shaped <code>(batch,)</code>.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> The solution establishes tensor contracts first, then separates training updates from evaluation measurement and checkpoint policy.</p>
+<p><strong>Useful alternative:</strong> Full-batch training is simpler for tiny data; high-level trainers reduce boilerplate but can hide the exact state transitions learners need to understand.</p>
+<p><strong>Trade-off:</strong> Smaller batches add gradient noise and more updates; larger batches use more memory and may generalize differently.</p>
+<p><strong>Edge case to test:</strong> Empty loaders, a final partial batch, wrong class count, device mismatch, non-finite loss, and checkpointing optimizer state require tests.</p>
+<p><strong>Evidence of correctness:</strong> Overfit a tiny batch, assert logits/label contracts, show dropout mode behavior, use no-grad validation, aggregate loss by example, and reload a portable checkpoint.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add dropout to the MLP and compare results.</p>
 <p><strong>How to reason about it:</strong> Dropout is active only in training mode and its effect is noisy. Compare seeded runs or validation curves, and place it deliberately after an activation rather than assuming one final score proves benefit.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1 — logits, minibatches, modes, and a correct PyTorch training loop — from identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement a small minibatch training loop with <code>DataLoader</code>.</p>
 <p><strong>How to reason about it:</strong> A minibatch loop keeps zero-grad, forward, loss, backward, and step inside the batch iteration. Shuffle training only, use float features and class-index long targets, and aggregate epoch metrics by support.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2 — logits, minibatches, modes, and a correct PyTorch training loop — for a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().</p>
 <h5 id="solution-1--exercise-3-shape-and-dtype-contract">Exercise 3 — Shape and dtype contract<a class="heading-anchor" href="#solution-1--exercise-3-shape-and-dtype-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write assertions at the start of a classification training step for feature shape/dtype, target shape/dtype, and logits shape.</p>
 <p><strong>Reasoning before implementation:</strong> CrossEntropyLoss expects floating logits <code>(batch, classes)</code> and integer class indices <code>(batch,)</code> with dtype long.</p>
@@ -734,26 +1026,30 @@ plt.plot(tr3); plt.yscale(&#x27;log&#x27;); plt.title(&#x27;AMP training loss&#x
     assert torch.isfinite(logits).all()</code></pre>
 <p>One-hot targets require a different explicit contract. Avoid <code>squeeze()</code> without a dimension because a batch of size one can lose its batch axis.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Shape and dtype contract — assert features are floating shape (batch,input_features), targets are long shape (batch,), and logits are floating shape (batch,num_classes); include one wrong-dtype and one wrong-width fixture that raise clear errors.</p>
 <h5 id="solution-1--exercise-4-validation-implementation">Exercise 4 — Validation implementation<a class="heading-anchor" href="#solution-1--exercise-4-validation-implementation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement an evaluation function that returns sample-weighted loss and accuracy, restores the caller&#x27;s prior train/eval mode, and never retains an autograd graph.</p>
 <p><strong>Reasoning before implementation:</strong> Remember <code>was_training = model.training</code>, call eval and no_grad, aggregate counts, then restore train mode only if it was previously active.</p>
 <p>Save mode before validation so a reusable helper does not unexpectedly alter its caller. Sum loss times batch size and correct predictions, divide by the total, and raise for an empty loader.</p>
 <p><code>torch.inference_mode()</code> is an even stronger evaluation context when its restrictions fit. Keep all returned values as plain Python numbers so the history does not retain tensors or device memory.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Validation implementation — call evaluation from both prior train and eval modes; assert returned loss/accuracy use all sample counts, outputs carry no grad graph, parameters have no new gradients, and the original mode is restored.</p>
 <h5 id="solution-1--exercise-5-dataloader-reproducibility">Exercise 5 — DataLoader reproducibility<a class="heading-anchor" href="#solution-1--exercise-5-dataloader-reproducibility" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Run two shuffled DataLoaders with the same seed and compare batch order. Then state what changes when using worker processes.</p>
 <p><strong>Reasoning before implementation:</strong> Pass a seeded <code>torch.Generator</code>; worker initialization and external NumPy/Python randomness need their own deliberate seeds.</p>
 <p>Use a generator created specifically for the training loader so other random draws do not silently advance its state. With multiple workers, seed each worker&#x27;s Python/NumPy operations and keep transforms deterministic for the comparison.</p>
 <p>Exact reproducibility can vary across devices and algorithms. Record device, PyTorch version, deterministic settings, and seed; also test that conclusions hold across more than one seed.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> DataLoader reproducibility — with identical torch.Generator seeds, assert two num_workers=0 loaders emit identical sample-ID order; with worker processes, record worker seeding/persistent-worker settings and rerun the equality check.</p>
 <h5 id="solution-1--exercise-6-portable-checkpoint">Exercise 6 — Portable checkpoint<a class="heading-anchor" href="#solution-1--exercise-6-portable-checkpoint" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resume one step. Explain <code>state_dict</code> versus serializing the entire model object.</p>
 <p><strong>Reasoning before implementation:</strong> Save plain state dictionaries plus architecture/config metadata. Use <code>map_location=&#x27;cpu&#x27;</code> and recreate the model class before loading.</p>
 <p>State dictionaries are less coupled to source-module paths than pickling a whole model object. Validate configuration and tensor shapes before loading, then set the intended mode explicitly.</p>
 <p>Checkpoint files are still loaded through PyTorch serialization and should be treated as trusted artifacts. Save RNG state as well when exact mid-run resume is a requirement.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></div>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Portable checkpoint — save state dicts, epoch, metric history, config, and RNG/seed metadata; load with map_location=&#x27;cpu&#x27;, assert fixed-fixture prediction parity, then resume one step and increment epoch/history.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -761,7 +1057,7 @@ plt.plot(tr3); plt.yscale(&#x27;log&#x27;); plt.title(&#x27;AMP training loss&#x
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -843,7 +1139,7 @@ plt.plot(tr3); plt.yscale(&#x27;log&#x27;); plt.title(&#x27;AMP training loss&#x
 <li>CrossEntropyLoss expects logits and Long labels 0..C-1</li>
 </ul>
 <hr>
-<p>Exercise 1 — Early stopping on validation loss</p></article>
+<p>Worked reference for Exercise 1 — Early stopping on validation loss</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>class EarlyStopper:</span>
 <span>    def __init__(self, patience=10, min_delta=0.0):</span>
 <span>        self.patience, self.min_delta = patience, min_delta</span>
@@ -897,7 +1193,7 @@ plt.plot(tr3); plt.yscale(&#x27;log&#x27;); plt.title(&#x27;AMP training loss&#x
 <li>Loop: record metrics, check stopper; plot to verify no overfitting after stop</li>
 </ul>
 <hr>
-<p>Exercise 2 — StepLR scheduler</p></article>
+<p>Worked reference for Exercise 2 — StepLR scheduler</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># Reset model and optimizer for a fair comparison</span>
 <span>model2 = MLP(20, 128, 2).to(device)</span>
 <span>opt2 = torch.optim.SGD(model2.parameters(), lr=0.1, momentum=0.9)</span>
@@ -920,7 +1216,7 @@ plt.plot(tr3); plt.yscale(&#x27;log&#x27;); plt.title(&#x27;AMP training loss&#x
 <li>StepLR reduces LR by gamma every step_size epochs; observe loss drops after LR steps</li>
 </ul>
 <hr>
-<p>Exercise 3 — Mixed precision training</p></article>
+<p>Worked reference for Exercise 3 — Mixed precision training</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>scaler = torch.cuda.amp.GradScaler(enabled=(device.type==&#x27;cuda&#x27;))</span>
 <span>model3 = MLP(20, 128, 2).to(device)</span>
 <span>opt3 = torch.optim.Adam(model3.parameters(), lr=1e-3)</span>
@@ -950,16 +1246,34 @@ plt.plot(tr3); plt.yscale(&#x27;log&#x27;); plt.title(&#x27;AMP training loss&#x
 <li>On CPU, enabled=False makes this a no‑op; code still runs</li>
 </ul>
 <hr>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-2--cell-9--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-9--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong><code>DataLoader(dataset, batch_size=..., shuffle=...)</code>:</strong> yields bounded feature/target batches and controls training order.</li>
+<li><strong><code>model(features)</code>:</strong> returns logits shaped <code>(batch, classes)</code> for multiclass classification.</li>
+<li><strong><code>CrossEntropyLoss(logits, labels)</code>:</strong> expects floating logits and <code>long</code> class indices shaped <code>(batch,)</code>.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> The solution establishes tensor contracts first, then separates training updates from evaluation measurement and checkpoint policy.</p>
+<p><strong>Useful alternative:</strong> Full-batch training is simpler for tiny data; high-level trainers reduce boilerplate but can hide the exact state transitions learners need to understand.</p>
+<p><strong>Trade-off:</strong> Smaller batches add gradient noise and more updates; larger batches use more memory and may generalize differently.</p>
+<p><strong>Edge case to test:</strong> Empty loaders, a final partial batch, wrong class count, device mismatch, non-finite loss, and checkpointing optimizer state require tests.</p>
+<p><strong>Evidence of correctness:</strong> Overfit a tiny batch, assert logits/label contracts, show dropout mode behavior, use no-grad validation, aggregate loss by example, and reload a portable checkpoint.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-9--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-9--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-9--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add dropout to the MLP and compare results.</p>
 <p><strong>How to reason about it:</strong> Dropout is active only in training mode and its effect is noisy. Compare seeded runs or validation curves, and place it deliberately after an activation rather than assuming one final score proves benefit.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1 — logits, minibatches, modes, and a correct PyTorch training loop — from identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.</p>
 <h5 id="solution-2--cell-9--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement a small minibatch training loop with <code>DataLoader</code>.</p>
 <p><strong>How to reason about it:</strong> A minibatch loop keeps zero-grad, forward, loss, backward, and step inside the batch iteration. Shuffle training only, use float features and class-index long targets, and aggregate epoch metrics by support.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2 — logits, minibatches, modes, and a correct PyTorch training loop — for a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().</p>
 <h5 id="solution-2--cell-9--exercise-3-shape-and-dtype-contract">Exercise 3 — Shape and dtype contract<a class="heading-anchor" href="#solution-2--cell-9--exercise-3-shape-and-dtype-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write assertions at the start of a classification training step for feature shape/dtype, target shape/dtype, and logits shape.</p>
 <p><strong>Reasoning before implementation:</strong> CrossEntropyLoss expects floating logits <code>(batch, classes)</code> and integer class indices <code>(batch,)</code> with dtype long.</p></article>
@@ -972,26 +1286,74 @@ plt.plot(tr3); plt.yscale(&#x27;log&#x27;); plt.title(&#x27;AMP training loss&#x
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p>One-hot targets require a different explicit contract. Avoid <code>squeeze()</code> without a dimension because a batch of size one can lose its batch axis.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Shape and dtype contract — assert features are floating shape (batch,input_features), targets are long shape (batch,), and logits are floating shape (batch,num_classes); include one wrong-dtype and one wrong-width fixture that raise clear errors.</p>
 <h5 id="solution-2--cell-11--exercise-4-validation-implementation">Exercise 4 — Validation implementation<a class="heading-anchor" href="#solution-2--cell-11--exercise-4-validation-implementation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement an evaluation function that returns sample-weighted loss and accuracy, restores the caller&#x27;s prior train/eval mode, and never retains an autograd graph.</p>
 <p><strong>Reasoning before implementation:</strong> Remember <code>was_training = model.training</code>, call eval and no_grad, aggregate counts, then restore train mode only if it was previously active.</p>
 <p>Save mode before validation so a reusable helper does not unexpectedly alter its caller. Sum loss times batch size and correct predictions, divide by the total, and raise for an empty loader.</p>
 <p><code>torch.inference_mode()</code> is an even stronger evaluation context when its restrictions fit. Keep all returned values as plain Python numbers so the history does not retain tensors or device memory.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Validation implementation — call evaluation from both prior train and eval modes; assert returned loss/accuracy use all sample counts, outputs carry no grad graph, parameters have no new gradients, and the original mode is restored.</p>
 <h5 id="solution-2--cell-11--exercise-5-dataloader-reproducibility">Exercise 5 — DataLoader reproducibility<a class="heading-anchor" href="#solution-2--cell-11--exercise-5-dataloader-reproducibility" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Run two shuffled DataLoaders with the same seed and compare batch order. Then state what changes when using worker processes.</p>
 <p><strong>Reasoning before implementation:</strong> Pass a seeded <code>torch.Generator</code>; worker initialization and external NumPy/Python randomness need their own deliberate seeds.</p>
 <p>Use a generator created specifically for the training loader so other random draws do not silently advance its state. With multiple workers, seed each worker&#x27;s Python/NumPy operations and keep transforms deterministic for the comparison.</p>
 <p>Exact reproducibility can vary across devices and algorithms. Record device, PyTorch version, deterministic settings, and seed; also test that conclusions hold across more than one seed.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> DataLoader reproducibility — with identical torch.Generator seeds, assert two num_workers=0 loaders emit identical sample-ID order; with worker processes, record worker seeding/persistent-worker settings and rerun the equality check.</p>
 <h5 id="solution-2--cell-11--exercise-6-portable-checkpoint">Exercise 6 — Portable checkpoint<a class="heading-anchor" href="#solution-2--cell-11--exercise-6-portable-checkpoint" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resume one step. Explain <code>state_dict</code> versus serializing the entire model object.</p>
 <p><strong>Reasoning before implementation:</strong> Save plain state dictionaries plus architecture/config metadata. Use <code>map_location=&#x27;cpu&#x27;</code> and recreate the model class before loading.</p>
 <p>State dictionaries are less coupled to source-module paths than pickling a whole model object. Validate configuration and tensor shapes before loading, then set the intended mode explicitly.</p>
 <p>Checkpoint files are still loaded through PyTorch serialization and should be treated as trusted artifacts. Save RNG state as well when exact mid-run resume is a requirement.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></article></div>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Portable checkpoint — save state dicts, epoch, metric history, config, and RNG/seed metadata; load with map_location=&#x27;cpu&#x27;, assert fixed-fixture prediction parity, then resume one step and increment epoch/history.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-47` — Day 47 — PyTorch Tensors, Modules, and Training Loops.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize logits, minibatches, modes, and a correct PyTorch training loop. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day47_pytorch_basics_nn_training_loop.md`
+- learner artifact: `python/ds-60day/notebooks/day47_pytorch_basics_nn_training_loop.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-46`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-46.html"><small>Previous lesson</small><strong>python-46</strong><span>Deep Learning Overview</span></a>
@@ -1083,6 +1445,23 @@ plt.plot(tr3); plt.yscale(&#x27;log&#x27;); plt.title(&#x27;AMP training loss&#x
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

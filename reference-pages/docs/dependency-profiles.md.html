@@ -188,14 +188,22 @@
 <td>Run the aggregate advanced setup; there is intentionally no <code>advanced</code> extra</td>
 </tr>
 </tbody></table></div>
+<p>The <code>deep-learning</code> extra uses platform markers rather than assuming one wheel works everywhere. Windows and Linux use the current compatible PyTorch/TorchVision pair. Intel macOS uses the final published Intel-wheel pair, while Apple Silicon uses a pair that remains installable on macOS 13. These versions still support the tensor, training-loop, and transfer-learning APIs used by the course.</p>
 <p>The setup scripts are the simplest route:</p>
 <pre><code class="language-powershell"># Windows PowerShell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced</code></pre>
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+&amp; .\scripts\bootstrap_windows.ps1 -Profile Advanced
+
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}</code></pre>
 <pre><code class="language-bash"># macOS or Linux
 bash scripts/setup.sh --advanced</code></pre>
 <p>Maintainers or learners conserving disk space may install one exact extra after the normal setup has installed the shared notebook/data/quality baseline:</p>
 <pre><code class="language-powershell"># Example on Windows
-.\.venv\Scripts\python.exe -m pip install -e &quot;.[bridge]&quot;</code></pre>
+&amp; $CoursePython -m pip install -e &quot;.[bridge]&quot;</code></pre>
 <pre><code class="language-bash"># Example on macOS or Linux
 .venv/bin/python -m pip install -e &quot;.[bridge]&quot;</code></pre>
 <p>Replace <code>bridge</code> only with a real extra listed in <code>pyproject.toml</code>. First-run data/model downloads are separate from package installation; consult the lesson&#x27;s catalog <code>network</code> value and companion guide before going offline.</p></article>

@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-42-k-means-and-anomaly-detection">Day 42 — K-Means and Anomaly Detection<a class="heading-anchor" href="#guide--day-42-k-means-and-anomaly-detection" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-42</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
 <p>Unsupervised algorithms find structure without target labels. Their outputs are hypotheses to investigate—not automatically true customer segments, root causes, or fraud labels.</p>
@@ -354,12 +393,116 @@ for k in range(2, 7):
     labels = model.fit_predict(X_scaled)
     print(k, model.inertia_, silhouette_score(X_scaled, labels))</code></pre>
 <p>Scaling is appropriate when each numeric dimension should contribute comparably to Euclidean distance. Do not scale mechanically when original distances have a meaningful common unit.</p>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Open the Day 42 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
+<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
+<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
+<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
+</ol>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
+<h4 id="guide--concept-deep-dive-unsupervised-geometry-cluster-stability-and-anomaly-ranking">Concept deep dive — unsupervised geometry, cluster stability, and anomaly ranking<a class="heading-anchor" href="#guide--concept-deep-dive-unsupervised-geometry-cluster-stability-and-anomaly-ranking" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
+<p>Unsupervised algorithms optimize a mathematical objective without known target labels. K-Means alternates between assigning points to the nearest centroid and recomputing centroid means. It therefore favors roughly spherical, similarly scaled clusters under Euclidean distance.</p>
+<p>Anomaly detectors produce a score or ranking relative to the fitted reference distribution. A contamination setting often converts that ranking into a fixed fraction of labels; it does not prove those cases are errors or threats. Stability, synthetic controls, and domain review are essential evidence.</p>
+<h5 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>KMeans(n_clusters=k, n_init=..., random_state=...)</code>:</strong> declares cluster count and repeated initialization so a local optimum is not mistaken for truth.</li>
+<li><strong><code>silhouette_score(X, labels)</code>:</strong> compares cohesion and separation under the selected distance; it needs at least two nontrivial clusters.</li>
+<li><strong><code>decision_function(X)</code>:</strong> returns a continuous anomaly score; inspect ordering before applying a threshold.</li>
+</ul>
+<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
+<h5 id="guide--focused-example-a-show-that-feature-scale-changes-k-means-geometry">Focused example A — show that feature scale changes K-Means geometry<a class="heading-anchor" href="#guide--focused-example-a-show-that-feature-scale-changes-k-means-geometry" aria-label="Link to this section">#</a></h5>
+<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
+<pre><code class="language-python">import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+rng = np.random.default_rng(4201)
+left = np.column_stack([rng.normal(-2, 0.4, 80), rng.normal(0, 100, 80)])
+right = np.column_stack([rng.normal(2, 0.4, 80), rng.normal(0, 100, 80)])
+X = np.vstack([left, right])
+
+raw_labels = KMeans(n_clusters=2, n_init=10, random_state=4201).fit_predict(X)
+scaled_labels = KMeans(n_clusters=2, n_init=10, random_state=4201).fit_predict(
+    StandardScaler().fit_transform(X)
+)
+print({&quot;raw_agreement_with_x_sign&quot;: np.mean(raw_labels == (X[:, 0] &gt; 0)),
+       &quot;scaled_unique_labels&quot;: np.unique(scaled_labels).size})</code></pre>
+<p><strong>Expected observation:</strong> The large-unit noise dimension can dominate raw Euclidean distance; scaling changes assignments.</p>
+<p><strong>Assumption to name:</strong> Standard-deviation scaling represents the intended similarity, rather than erasing meaningful units.</p>
+<h5 id="guide--focused-example-b-treat-anomaly-output-as-a-ranking-not-a-verdict">Focused example B — treat anomaly output as a ranking, not a verdict<a class="heading-anchor" href="#guide--focused-example-b-treat-anomaly-output-as-a-ranking-not-a-verdict" aria-label="Link to this section">#</a></h5>
+<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
+<pre><code class="language-python">import numpy as np
+from sklearn.ensemble import IsolationForest
+
+rng = np.random.default_rng(4202)
+ordinary = rng.normal(size=(200, 2))
+obvious = np.array([[8.0, 8.0], [-8.0, -8.0]])
+X = np.vstack([ordinary, obvious])
+detector = IsolationForest(contamination=0.02, random_state=4202).fit(X)
+scores = detector.decision_function(X)
+most_unusual = np.argsort(scores)[:5]
+print({&quot;lowest_score_indices&quot;: most_unusual.tolist(),
+       &quot;injected_indices&quot;: [200, 201]})
+assert {200, 201}.issubset(set(most_unusual))</code></pre>
+<p><strong>Expected observation:</strong> The injected extremes rank among the lowest scores, but the threshold also labels a configured fraction of ordinary data.</p>
+<p><strong>Assumption to name:</strong> The synthetic extremes are only a control; domain review determines whether a real unusual case is harmful or valuable.</p>
+<h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>What to do</th>
+<th>Evidence to keep</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define unsupervised geometry, cluster stability, and anomaly ranking in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<h5 id="guide--common-mistake-and-debugging-path">Common mistake and debugging path<a class="heading-anchor" href="#guide--common-mistake-and-debugging-path" aria-label="Link to this section">#</a></h5>
+<p><strong>Mistake:</strong> Naming clusters as real customer types or anomalies as fraud solely because the algorithm produced labels.</p>
+<p><strong>Debug it deliberately:</strong> Check scaling, seed/init stability, cluster sizes, centroid movement, score distribution, synthetic controls, and representative reviewed cases.</p>
+<p><strong>Stop condition:</strong> Do not operationalize unsupervised labels without a semantic validation and false-positive handling plan.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Try several values of <code>k</code> and plot inertia versus <code>k</code> (the elbow plot).</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — unsupervised geometry, cluster stability, and anomaly ranking — for each declared k, print inertia, cluster sizes, and seed and save a labeled elbow curve; assert inertia is non-increasing and do not call the visual bend proof of true classes.</p>
+<ol>
 <li>Compute silhouette scores for <code>k</code> from 2 through 6 and discuss the result.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — unsupervised geometry, cluster stability, and anomaly ranking — for k=2..6 on identical scaled rows, print silhouette score and cluster sizes, choose the largest score only after checking no tiny/empty cluster, and repeat with at least three seeds to report stability.</p>
+<ol>
 <li>Compare Isolation Forest with Local Outlier Factor.</li>
 </ol>
+<p><strong>Verify:</strong> Practice 3 — unsupervised geometry, cluster stability, and anomaly ranking — on identical scaled data and declared contamination/neighbors, print each method&#x27;s continuous anomaly score and top-n row IDs; report overlap and inspect injected normal/outlier controls instead of equating labels blindly.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Include <code>k=1</code> for inertia, but not for silhouette. Record the same fitted model&#x27;s <code>inertia_</code> rather than fitting again accidentally.</li>
@@ -371,9 +514,16 @@ for k in range(2, 7):
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Scaling sensitivity:</strong> Create two features with equal structure but scales of 1 and 10,000. Compare K-Means assignments before and after standardization. <strong>Progressive hint:</strong> Euclidean distance squares numeric differences, so the large-unit feature dominates unless that weighting is intentional.</li>
+</ol>
+<p><strong>Verify:</strong> Scaling sensitivity — print feature ranges and K-Means assignments before/after StandardScaler, then report adjusted Rand agreement; verify the 10,000-scale feature dominates the unscaled distance calculation.</p>
+<ol>
 <li><strong>Cluster stability:</strong> Refit K-Means across at least ten seeds and bootstrap samples. Compare inertia, silhouette, and assignment agreement without assuming numeric cluster labels line up. <strong>Progressive hint:</strong> Labels can permute. Use adjusted Rand index or align centers before comparing assignments.</li>
+</ol>
+<p><strong>Verify:</strong> Cluster stability — over at least ten seeds and bootstrap samples, print inertia, silhouette, cluster sizes, and label-aligned adjusted Rand scores; report distributions rather than comparing raw numeric labels.</p>
+<ol>
 <li><strong>Anomaly validation without labels:</strong> Design an evaluation plan for an anomaly detector when historical anomaly labels are incomplete. Include synthetic injection, review capacity, and contamination sensitivity. <strong>Progressive hint:</strong> Use multiple evidence sources: known incidents, injected anomalies, top-k expert review, and stability across reasonable settings.</li>
 </ol>
+<p><strong>Verify:</strong> Anomaly validation without labels — deliver an evaluation table naming synthetic anomaly fixtures, domain-review sample/precision-at-k, review capacity, contamination sweep, stability metric, owner, and a stop threshold for each check.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -421,17 +571,46 @@ for k in range(2, 7):
 <li>Work in the <a href="python-42.html#learner">Day 42 learner notebook</a>.</li>
 <li>Then review the <a href="python-42.html#solution-1">Day 42 solution</a>.</li>
 <li>Continue to <a href="python-43.html#guide">Day 43 — Model Interpretation</a>.</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<pre><code class="language-text">Tutor me through `python-42` — Day 42 — K-Means and Anomaly Detection.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize unsupervised geometry, cluster stability, and anomaly ranking. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day42_unsupervised_kmeans_anomaly.md`
+- learner artifact: `python/ds-60day/notebooks/day42_unsupervised_kmeans_anomaly.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-41`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -448,12 +627,12 @@ for k in range(2, 7):
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-42-unsupervised-learning-kmeans-anomaly-detection">Day 42 — Unsupervised learning: KMeans &amp; anomaly detection<a class="heading-anchor" href="#learner--cell-1--day-42-unsupervised-learning-kmeans-anomaly-detection" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -482,28 +661,130 @@ for k in range(2, 7):
 <span>(pred==-1).mean()</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-4--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-4--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-4--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-4--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
+<h4 id="learner--cell-4--concept-lab-unsupervised-geometry-cluster-stability-and-anomaly-ranking">Concept lab — unsupervised geometry, cluster stability, and anomaly ranking<a class="heading-anchor" href="#learner--cell-4--concept-lab-unsupervised-geometry-cluster-stability-and-anomaly-ranking" aria-label="Link to this section">#</a></h4>
+<h5 id="learner--cell-4--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-4--mental-model" aria-label="Link to this section">#</a></h5>
+<p>Unsupervised algorithms optimize a mathematical objective without known target labels. K-Means alternates between assigning points to the nearest centroid and recomputing centroid means. It therefore favors roughly spherical, similarly scaled clusters under Euclidean distance.</p>
+<p>Anomaly detectors produce a score or ranking relative to the fitted reference distribution. A contamination setting often converts that ranking into a fixed fraction of labels; it does not prove those cases are errors or threats. Stability, synthetic controls, and domain review are essential evidence.</p>
+<h5 id="learner--cell-4--read-the-api-before-running-it">Read the API before running it<a class="heading-anchor" href="#learner--cell-4--read-the-api-before-running-it" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>KMeans(n_clusters=k, n_init=..., random_state=...)</code>:</strong> declares cluster count and repeated initialization so a local optimum is not mistaken for truth.</li>
+<li><strong><code>silhouette_score(X, labels)</code>:</strong> compares cohesion and separation under the selected distance; it needs at least two nontrivial clusters.</li>
+<li><strong><code>decision_function(X)</code>:</strong> returns a continuous anomaly score; inspect ordering before applying a threshold.</li>
+</ul>
+<p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-5--focused-example-a-show-that-feature-scale-changes-k-means-geometry">Focused example A — show that feature scale changes K-Means geometry<a class="heading-anchor" href="#learner--cell-5--focused-example-a-show-that-feature-scale-changes-k-means-geometry" aria-label="Link to this section">#</a></h5>
+<p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
+<p><strong>Assumption:</strong> Standard-deviation scaling represents the intended similarity, rather than erasing meaningful units.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import numpy as np</span>
+<span>from sklearn.cluster import KMeans</span>
+<span>from sklearn.preprocessing import StandardScaler</span>
+<span> </span>
+<span>rng = np.random.default_rng(4201)</span>
+<span>left = np.column_stack([rng.normal(-2, 0.4, 80), rng.normal(0, 100, 80)])</span>
+<span>right = np.column_stack([rng.normal(2, 0.4, 80), rng.normal(0, 100, 80)])</span>
+<span>X = np.vstack([left, right])</span>
+<span> </span>
+<span>raw_labels = KMeans(n_clusters=2, n_init=10, random_state=4201).fit_predict(X)</span>
+<span>scaled_labels = KMeans(n_clusters=2, n_init=10, random_state=4201).fit_predict(</span>
+<span>    StandardScaler().fit_transform(X)</span>
+<span>)</span>
+<span>print({&quot;raw_agreement_with_x_sign&quot;: np.mean(raw_labels == (X[:, 0] &gt; 0)),</span>
+<span>       &quot;scaled_unique_labels&quot;: np.unique(scaled_labels).size})</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> The large-unit noise dimension can dominate raw Euclidean distance; scaling changes assignments.</p>
+<p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-8--focused-example-b-treat-anomaly-output-as-a-ranking-not-a-verdict">Focused example B — treat anomaly output as a ranking, not a verdict<a class="heading-anchor" href="#learner--cell-8--focused-example-b-treat-anomaly-output-as-a-ranking-not-a-verdict" aria-label="Link to this section">#</a></h5>
+<p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
+<p><strong>Assumption:</strong> The synthetic extremes are only a control; domain review determines whether a real unusual case is harmful or valuable.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>import numpy as np</span>
+<span>from sklearn.ensemble import IsolationForest</span>
+<span> </span>
+<span>rng = np.random.default_rng(4202)</span>
+<span>ordinary = rng.normal(size=(200, 2))</span>
+<span>obvious = np.array([[8.0, 8.0], [-8.0, -8.0]])</span>
+<span>X = np.vstack([ordinary, obvious])</span>
+<span>detector = IsolationForest(contamination=0.02, random_state=4202).fit(X)</span>
+<span>scores = detector.decision_function(X)</span>
+<span>most_unusual = np.argsort(scores)[:5]</span>
+<span>print({&quot;lowest_score_indices&quot;: most_unusual.tolist(),</span>
+<span>       &quot;injected_indices&quot;: [200, 201]})</span>
+<span>assert {200, 201}.issubset(set(most_unusual))</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> The injected extremes rank among the lowest scores, but the threshold also labels a configured fraction of ordinary data.</p>
+<h5 id="learner--cell-10--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-10--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Naming clusters as real customer types or anomalies as fraud solely because the algorithm produced labels.</p>
+<p><strong>Diagnostic:</strong> Check scaling, seed/init stability, cluster sizes, centroid movement, score distribution, synthetic controls, and representative reviewed cases.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>Action</th>
+<th>Evidence</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define unsupervised geometry, cluster stability, and anomaly ranking in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<p><strong>Stop condition:</strong> Do not operationalize unsupervised labels without a semantic validation and false-positive handling plan.</p>
+<p>Continue to the numbered practice only after you can explain both examples without rereading their code.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-11--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-11--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Try several values of <code>k</code> and plot inertia versus <code>k</code> (the elbow plot).</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — unsupervised geometry, cluster stability, and anomaly ranking — for each declared k, print inertia, cluster sizes, and seed and save a labeled elbow curve; assert inertia is non-increasing and do not call the visual bend proof of true classes.</p>
+<ol>
 <li>Compute silhouette scores for <code>k</code> from 2 through 6 and discuss the result.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — unsupervised geometry, cluster stability, and anomaly ranking — for k=2..6 on identical scaled rows, print silhouette score and cluster sizes, choose the largest score only after checking no tiny/empty cluster, and repeat with at least three seeds to report stability.</p>
+<ol>
 <li>Compare Isolation Forest with Local Outlier Factor.</li>
 </ol>
-<h5 id="learner--cell-4--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-4--progressive-hints" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3 — unsupervised geometry, cluster stability, and anomaly ranking — on identical scaled data and declared contamination/neighbors, print each method&#x27;s continuous anomaly score and top-n row IDs; report overlap and inspect injected normal/outlier controls instead of equating labels blindly.</p>
+<h5 id="learner--cell-11--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-11--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Include <code>k=1</code> for inertia, but not for silhouette. Record the same fitted model&#x27;s <code>inertia_</code> rather than fitting again accidentally.</li>
 <li>The maximum is a candidate, not an unquestionable answer. Compare the plot and whether known generated structure is recovered.</li>
 <li>Both label outliers as <code>-1</code>, but LOF usually uses <code>fit_predict</code> for the training set. Match their <code>contamination</code> values before comparing counts.</li>
 </ol>
-<h5 id="learner--cell-4--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-4--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="learner--cell-11--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-11--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Make unsupervised assumptions observable through scaling, stability, domain checks, and synthetic controls. A cluster ID or anomaly label is not ground truth.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Scaling sensitivity:</strong> Create two features with equal structure but scales of 1 and 10,000. Compare K-Means assignments before and after standardization. <strong>Progressive hint:</strong> Euclidean distance squares numeric differences, so the large-unit feature dominates unless that weighting is intentional.</li>
+</ol>
+<p><strong>Verify:</strong> Scaling sensitivity — print feature ranges and K-Means assignments before/after StandardScaler, then report adjusted Rand agreement; verify the 10,000-scale feature dominates the unscaled distance calculation.</p>
+<ol>
 <li><strong>Cluster stability:</strong> Refit K-Means across at least ten seeds and bootstrap samples. Compare inertia, silhouette, and assignment agreement without assuming numeric cluster labels line up. <strong>Progressive hint:</strong> Labels can permute. Use adjusted Rand index or align centers before comparing assignments.</li>
+</ol>
+<p><strong>Verify:</strong> Cluster stability — over at least ten seeds and bootstrap samples, print inertia, silhouette, cluster sizes, and label-aligned adjusted Rand scores; report distributions rather than comparing raw numeric labels.</p>
+<ol>
 <li><strong>Anomaly validation without labels:</strong> Design an evaluation plan for an anomaly detector when historical anomaly labels are incomplete. Include synthetic injection, review capacity, and contamination sensitivity. <strong>Progressive hint:</strong> Use multiple evidence sources: known incidents, injected anomalies, top-k expert review, and stability across reasonable settings.</li>
 </ol>
+<p><strong>Verify:</strong> Anomaly validation without labels — deliver an evaluation table naming synthetic anomaly fixtures, domain-review sample/precision-at-k, review capacity, contamination sweep, stability metric, owner, and a stop threshold for each check.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
 <span>#</span>
 <span># Keep the official solution closed until you have attempted each task.</span>
 <span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
@@ -518,15 +799,15 @@ for k in range(2, 7):
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -566,7 +847,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 X, y_true = make_blobs(n_samples=600, centers=3, cluster_std=1.2, random_state=42)</code></pre>
-<p>Exercise 1 — Elbow (inertia vs K)</p>
+<p>Worked reference for Exercise 1 — Elbow (inertia vs K)</p>
 <pre><code class="language-python">Ks = range(1, 10)
 inertias = []
 for k in Ks:
@@ -583,7 +864,7 @@ plt.tight_layout(); plt.show()</code></pre>
 <li>Elbow can be ambiguous; use it with other signals (silhouette, domain insight)</li>
 </ul>
 <hr>
-<p>Exercise 2 — Silhouette for K in [2..6]</p>
+<p>Worked reference for Exercise 2 — Silhouette for K in [2..6]</p>
 <pre><code class="language-python">sil_scores = {}
 for k in range(2, 7):
     km = KMeans(n_clusters=k, n_init=&#x27;auto&#x27;, random_state=42).fit(X)
@@ -603,7 +884,7 @@ plt.scatter(X2[:,0], X2[:,1], c=km.labels_, cmap=&#x27;viridis&#x27;, s=15)
 plt.title(f&#x27;KMeans clusters (K={k_best}, silhouette={sil_scores[k_best]:.3f})&#x27;)
 plt.tight_layout(); plt.show()</code></pre>
 <hr>
-<p>Exercise 3 — Anomaly detection: IsolationForest vs LOF</p>
+<p>Worked reference for Exercise 3 — Anomaly detection: IsolationForest vs LOF</p>
 <pre><code class="language-python">from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
 
@@ -625,40 +906,62 @@ lof_rate = (pred_lof == -1).mean()
 <li>Always validate detected anomalies with domain knowledge; synthetic labels can be used for benchmarking if available</li>
 </ul>
 <hr>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong><code>KMeans(n_clusters=k, n_init=..., random_state=...)</code>:</strong> declares cluster count and repeated initialization so a local optimum is not mistaken for truth.</li>
+<li><strong><code>silhouette_score(X, labels)</code>:</strong> compares cohesion and separation under the selected distance; it needs at least two nontrivial clusters.</li>
+<li><strong><code>decision_function(X)</code>:</strong> returns a continuous anomaly score; inspect ordering before applying a threshold.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> Geometry and stability checks establish what the algorithm optimized; domain evidence supplies meaning the objective cannot.</p>
+<p><strong>Useful alternative:</strong> Density-based clustering handles irregular shapes, while robust statistical rules or supervised detection may better match labeled anomalies.</p>
+<p><strong>Trade-off:</strong> More clusters reduce inertia mechanically but increase complexity; stricter anomaly thresholds reduce review volume while missing more unusual cases.</p>
+<p><strong>Edge case to test:</strong> Duplicate points, all-identical data, fewer rows than clusters, high-dimensional distance concentration, or changing contamination break naive interpretations.</p>
+<p><strong>Evidence of correctness:</strong> Compare scaled/unscaled results, repeat seeds, report cluster sizes and stability, retain continuous anomaly scores, and review synthetic plus domain controls.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Try several values of <code>k</code> and plot inertia versus <code>k</code> (the elbow plot).</p>
 <p><strong>How to reason about it:</strong> Inertia always falls as k increases, so the elbow is a judgment rather than an optimizer. Fit each candidate on the same scaled representation and inspect stability and usefulness alongside the curve.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1 — unsupervised geometry, cluster stability, and anomaly ranking — for each declared k, print inertia, cluster sizes, and seed and save a labeled elbow curve; assert inertia is non-increasing and do not call the visual bend proof of true classes.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compute silhouette scores for <code>k</code> from 2 through 6 and discuss the result.</p>
 <p><strong>How to reason about it:</strong> Silhouette requires at least two clusters and rewards compact separation under its distance metric. A maximum is a candidate, not proof that the data contains that many real-world groups.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2 — unsupervised geometry, cluster stability, and anomaly ranking — for k=2..6 on identical scaled rows, print silhouette score and cluster sizes, choose the largest score only after checking no tiny/empty cluster, and repeat with at least three seeds to report stability.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare Isolation Forest with Local Outlier Factor.</p>
 <p><strong>How to reason about it:</strong> Isolation Forest and LOF use different notions of unusualness. Match contamination, understand LOF&#x27;s novelty mode, and compare known synthetic outliers or reviewed cases instead of label overlap alone.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 3 — unsupervised geometry, cluster stability, and anomaly ranking — on identical scaled data and declared contamination/neighbors, print each method&#x27;s continuous anomaly score and top-n row IDs; report overlap and inspect injected normal/outlier controls instead of equating labels blindly.</p>
 <h5 id="solution-1--exercise-4-scaling-sensitivity">Exercise 4 — Scaling sensitivity<a class="heading-anchor" href="#solution-1--exercise-4-scaling-sensitivity" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create two features with equal structure but scales of 1 and 10,000. Compare K-Means assignments before and after standardization.</p>
 <p><strong>Reasoning before implementation:</strong> Euclidean distance squares numeric differences, so the large-unit feature dominates unless that weighting is intentional.</p>
 <p>Scaling changes the geometry, not just presentation. Place the scaler and K-Means in one pipeline and fit on the intended training/reference population. Compare cluster centers after inverse transformation so stakeholders can read them in original units.</p>
 <p>Standardization is not automatically correct: a domain-approved unit or feature weight can be meaningful. State why the chosen metric represents similarity for this problem.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Scaling sensitivity — print feature ranges and K-Means assignments before/after StandardScaler, then report adjusted Rand agreement; verify the 10,000-scale feature dominates the unscaled distance calculation.</p>
 <h5 id="solution-1--exercise-5-cluster-stability">Exercise 5 — Cluster stability<a class="heading-anchor" href="#solution-1--exercise-5-cluster-stability" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Refit K-Means across at least ten seeds and bootstrap samples. Compare inertia, silhouette, and assignment agreement without assuming numeric cluster labels line up.</p>
 <p><strong>Reasoning before implementation:</strong> Labels can permute. Use adjusted Rand index or align centers before comparing assignments.</p>
 <p>A solution that appears only for one initialization is weak evidence of structure. Summarize score distributions and pairwise adjusted Rand index. Inspect whether small or ambiguous clusters dissolve across resamples.</p>
 <p>High stability still does not prove business meaning; it only shows the algorithm consistently finds the same geometry. Validate profiles with domain knowledge and downstream usefulness.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Cluster stability — over at least ten seeds and bootstrap samples, print inertia, silhouette, cluster sizes, and label-aligned adjusted Rand scores; report distributions rather than comparing raw numeric labels.</p>
 <h5 id="solution-1--exercise-6-anomaly-validation-without-labels">Exercise 6 — Anomaly validation without labels<a class="heading-anchor" href="#solution-1--exercise-6-anomaly-validation-without-labels" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design an evaluation plan for an anomaly detector when historical anomaly labels are incomplete. Include synthetic injection, review capacity, and contamination sensitivity.</p>
 <p><strong>Reasoning before implementation:</strong> Use multiple evidence sources: known incidents, injected anomalies, top-k expert review, and stability across reasonable settings.</p>
 <p>Measure recall on carefully designed synthetic anomalies only as a unit test of detectable patterns—not as full real-world accuracy. Review a bounded top-k sample with blinded domain experts and track confirmed-yield plus false-alarm cost. Sweep contamination and report how the review queue changes.</p>
 <p>Preserve raw scores so policy thresholds can change without refitting. Never describe the detector&#x27;s <code>-1</code> output as a confirmed incident.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></div>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Anomaly validation without labels — deliver an evaluation table naming synthetic anomaly fixtures, domain-review sample/precision-at-k, review capacity, contamination sweep, stability metric, owner, and a stop threshold for each check.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -666,7 +969,7 @@ lof_rate = (pred_lof == -1).mean()
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -768,7 +1071,51 @@ lof_rate = (pred_lof == -1).mean()
 <p>Preserve raw scores so policy thresholds can change without refitting. Never describe the detector&#x27;s <code>-1</code> output as a confirmed incident.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-42` — Day 42 — K-Means and Anomaly Detection.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize unsupervised geometry, cluster stability, and anomaly ranking. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day42_unsupervised_kmeans_anomaly.md`
+- learner artifact: `python/ds-60day/notebooks/day42_unsupervised_kmeans_anomaly.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-41`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-41.html"><small>Previous lesson</small><strong>python-41</strong><span>Imbalance Handling</span></a>
@@ -860,6 +1207,23 @@ lof_rate = (pred_lof == -1).mean()
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

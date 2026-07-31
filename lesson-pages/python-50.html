@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-50-time-series-modeling-and-forecast-evaluation">Day 50 — Time-Series Modeling and Forecast Evaluation<a class="heading-anchor" href="#guide--day-50-time-series-modeling-and-forecast-evaluation" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-50</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>ml</code> · <strong>Network:</strong> offline</p>
 <p>Forecasting differs from ordinary random-split prediction because the future must never influence the past. This lesson compares a small <code>pmdarima</code> model against simple time-safe baselines on deterministic synthetic data.</p>
@@ -360,12 +399,110 @@ seasonal_naive = train.iloc[-30:].to_numpy()
 print(&quot;last:&quot;, mean_absolute_error(test, last_value))
 print(&quot;seasonal:&quot;, mean_absolute_error(test, seasonal_naive))</code></pre>
 <p>Every candidate must use this same 30-day horizon and metric. A more complex model earns its cost only if it improves the relevant evidence reliably.</p>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Open the Day 50 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
+<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
+<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
+<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
+</ol>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyter lab</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
+<h4 id="guide--concept-deep-dive-forecast-horizons-temporal-backtesting-naive-baselines-and-leakage-safe-lags">Concept deep dive — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags<a class="heading-anchor" href="#guide--concept-deep-dive-forecast-horizons-temporal-backtesting-naive-baselines-and-leakage-safe-lags" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
+<p>Time-series prediction preserves order. A forecast made at an <strong>origin</strong> may use only information available by that origin and predicts a stated horizon. Random train/test splitting leaks future patterns and produces an evaluation that no real forecast can reproduce.</p>
+<p>Last-value and seasonal-naive forecasts are strong required baselines. Lag and rolling features must be shifted so the row at time <code>t</code> never sees the value it is trying to predict. Rolling-origin evaluation repeats realistic forecast origins and reports performance across time regimes.</p>
+<h5 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>series.shift(lag)</code>:</strong> aligns a past value as a current-row feature; positive lags must precede any rolling summary.</li>
+<li><strong><code>train.iloc[:-horizon]</code> / <code>test.iloc[-horizon:]</code>:</strong> creates a simple chronological boundary with a declared horizon.</li>
+<li><strong>rolling-origin loop:</strong> repeats fit/predict at increasing origins while keeping every target strictly in the future.</li>
+</ul>
+<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
+<h5 id="guide--focused-example-a-construct-a-seasonal-naive-forecast-on-matching-timestamps">Focused example A — construct a seasonal-naive forecast on matching timestamps<a class="heading-anchor" href="#guide--focused-example-a-construct-a-seasonal-naive-forecast-on-matching-timestamps" aria-label="Link to this section">#</a></h5>
+<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
+<pre><code class="language-python">import numpy as np
+import pandas as pd
+from sklearn.metrics import mean_absolute_error
+
+index = pd.date_range(&quot;2026-01-01&quot;, periods=28, freq=&quot;D&quot;)
+values = pd.Series(np.tile([10, 12, 11, 14, 15, 13, 9], 4), index=index)
+horizon, season = 7, 7
+train, test = values.iloc[:-horizon], values.iloc[-horizon:]
+forecast = pd.Series(train.iloc[-season:].to_numpy(), index=test.index)
+print({&quot;mae&quot;: mean_absolute_error(test, forecast),
+       &quot;forecast_index_matches&quot;: forecast.index.equals(test.index)})
+assert mean_absolute_error(test, forecast) == 0.0</code></pre>
+<p><strong>Expected observation:</strong> The exact weekly pattern gives zero error and the forecast is explicitly aligned to test timestamps.</p>
+<p><strong>Assumption to name:</strong> A seven-day season was available and stable; real data rarely repeat perfectly.</p>
+<h5 id="guide--focused-example-b-build-a-trailing-feature-that-excludes-the-current-target">Focused example B — build a trailing feature that excludes the current target<a class="heading-anchor" href="#guide--focused-example-b-build-a-trailing-feature-that-excludes-the-current-target" aria-label="Link to this section">#</a></h5>
+<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
+<pre><code class="language-python">import pandas as pd
+
+series = pd.Series([10.0, 20.0, 30.0, 40.0, 50.0], name=&quot;value&quot;)
+features = pd.DataFrame({
+    &quot;target&quot;: series,
+    &quot;lag_1&quot;: series.shift(1),
+    &quot;trailing_mean_2&quot;: series.shift(1).rolling(2).mean(),
+})
+print(features)
+assert features.loc[3, &quot;trailing_mean_2&quot;] == 25.0</code></pre>
+<p><strong>Expected observation:</strong> At row 3, the trailing mean uses rows 1 and 2 (20 and 30), never the current target 40.</p>
+<p><strong>Assumption to name:</strong> Rows are sorted, timestamps are unique, frequency/gaps are understood, and past targets are available at prediction time.</p>
+<h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>What to do</th>
+<th>Evidence to keep</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<h5 id="guide--common-mistake-and-debugging-path">Common mistake and debugging path<a class="heading-anchor" href="#guide--common-mistake-and-debugging-path" aria-label="Link to this section">#</a></h5>
+<p><strong>Mistake:</strong> Computing rolling features before shifting or tuning seasonal order against the final horizon.</p>
+<p><strong>Debug it deliberately:</strong> For one prediction timestamp, list the maximum source timestamp for every feature and assert it is no later than the forecast origin.</p>
+<p><strong>Stop condition:</strong> Do not report a forecast metric without horizon, origins, timestamp alignment, baseline, missing-period policy, and leakage audit.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Fit <code>auto_arima</code> with <code>m=7</code> and <code>m=30</code>; compare mean absolute error on the same test window.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — fit m=7 and m=30 using training observations only, forecast the identical timestamped test window, and print MAE plus errors by horizon for both; report convergence/skip status and selected seasonal period.</p>
+<ol>
 <li>Create last-value and 30-day seasonal-naive forecasts and compare them with ARIMA.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — on the same forecast origins, print MAE for last-value, 30-day seasonal-naive, and ARIMA; assert each forecast at time t uses only observations before t and include a metric table keyed by model.</p>
+<ol>
 <li>Difference the training series and inspect autocorrelation without using test-period observations.</li>
 </ol>
+<p><strong>Verify:</strong> Practice 3 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — difference only the training series, print its length/NaN handling and selected autocorrelations with confidence bounds, and assert no test-period timestamp entered the transform or lag calculation.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Change only the seasonal period. Keep the split, horizon, and MAE calculation fixed, and bound the search if runtime is high.</li>
@@ -378,9 +515,16 @@ print(&quot;seasonal:&quot;, mean_absolute_error(test, seasonal_naive))</code></
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Rolling-origin evaluation:</strong> Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE. <strong>Progressive hint:</strong> At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.</li>
+</ol>
+<p><strong>Verify:</strong> Rolling-origin evaluation — print at least four forecast origins with train-end, horizon timestamps, seasonal-naive MAE, candidate MAE, and aggregate weighted MAE; assert every prediction uses data strictly before its origin.</p>
+<ol>
 <li><strong>Prediction intervals:</strong> Produce forecast intervals and evaluate empirical coverage and width across rolling origins. Explain why a narrow interval is not useful when it misses too often. <strong>Progressive hint:</strong> For a nominal 90% interval, count actuals between lower and upper bounds and report support plus average width by horizon.</li>
+</ol>
+<p><strong>Verify:</strong> Prediction intervals — print interval level, per-origin coverage indicator, aggregate empirical coverage, and mean width; compare at least two interval widths/levels and flag severe undercoverage.</p>
+<ol>
 <li><strong>Timestamp/data-quality debugging:</strong> Validate a series containing duplicate timestamps, missing periods, an irregular interval, and a timezone transition before modeling. <strong>Progressive hint:</strong> Sort, assert monotonic unique timestamps, infer/declare frequency, and decide aggregation or imputation from domain meaning.</li>
 </ol>
+<p><strong>Verify:</strong> Timestamp/data-quality debugging — produce a validation report listing duplicate timestamps, exact missing periods, irregular gaps, timezone/ambiguous transitions, frequency, and chosen repair; assert the cleaned index is unique, ordered, and regular before modeling.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -433,17 +577,46 @@ print(&quot;seasonal:&quot;, mean_absolute_error(test, seasonal_naive))</code></
 <li>Work in the <a href="python-50.html#learner">Day 50 learner notebook</a>.</li>
 <li>Then review the <a href="python-50.html#solution-1">Day 50 solution</a>.</li>
 <li>Continue to <a href="python-51.html#guide">Day 51 — Target Encoding</a>.</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<pre><code class="language-text">Tutor me through `python-50` — Day 50 — Time-Series Modeling and Forecast Evaluation.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day50_time_series_modeling.md`
+- learner artifact: `python/ds-60day/notebooks/day50_time_series_modeling.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-49`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -460,12 +633,12 @@ print(&quot;seasonal:&quot;, mean_absolute_error(test, seasonal_naive))</code></
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-50-time-series-modeling-and-forecast-evaluation">Day 50 — Time-series modeling and forecast evaluation<a class="heading-anchor" href="#learner--cell-1--day-50-time-series-modeling-and-forecast-evaluation" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -502,31 +675,127 @@ print(&quot;seasonal:&quot;, mean_absolute_error(test, seasonal_naive))</code></
 <span>mean_absolute_error(test.values, pred)</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-4--model-choice-and-baselines">Model choice and baselines<a class="heading-anchor" href="#learner--cell-4--model-choice-and-baselines" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-4--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-4--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
+<h4 id="learner--cell-4--concept-lab-forecast-horizons-temporal-backtesting-naive-baselines-and-leakage-safe-lags">Concept lab — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags<a class="heading-anchor" href="#learner--cell-4--concept-lab-forecast-horizons-temporal-backtesting-naive-baselines-and-leakage-safe-lags" aria-label="Link to this section">#</a></h4>
+<h5 id="learner--cell-4--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-4--mental-model" aria-label="Link to this section">#</a></h5>
+<p>Time-series prediction preserves order. A forecast made at an <strong>origin</strong> may use only information available by that origin and predicts a stated horizon. Random train/test splitting leaks future patterns and produces an evaluation that no real forecast can reproduce.</p>
+<p>Last-value and seasonal-naive forecasts are strong required baselines. Lag and rolling features must be shifted so the row at time <code>t</code> never sees the value it is trying to predict. Rolling-origin evaluation repeats realistic forecast origins and reports performance across time regimes.</p>
+<h5 id="learner--cell-4--read-the-api-before-running-it">Read the API before running it<a class="heading-anchor" href="#learner--cell-4--read-the-api-before-running-it" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>series.shift(lag)</code>:</strong> aligns a past value as a current-row feature; positive lags must precede any rolling summary.</li>
+<li><strong><code>train.iloc[:-horizon]</code> / <code>test.iloc[-horizon:]</code>:</strong> creates a simple chronological boundary with a declared horizon.</li>
+<li><strong>rolling-origin loop:</strong> repeats fit/predict at increasing origins while keeping every target strictly in the future.</li>
+</ul>
+<p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-5--focused-example-a-construct-a-seasonal-naive-forecast-on-matching-timestamps">Focused example A — construct a seasonal-naive forecast on matching timestamps<a class="heading-anchor" href="#learner--cell-5--focused-example-a-construct-a-seasonal-naive-forecast-on-matching-timestamps" aria-label="Link to this section">#</a></h5>
+<p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
+<p><strong>Assumption:</strong> A seven-day season was available and stable; real data rarely repeat perfectly.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import numpy as np</span>
+<span>import pandas as pd</span>
+<span>from sklearn.metrics import mean_absolute_error</span>
+<span> </span>
+<span>index = pd.date_range(&quot;2026-01-01&quot;, periods=28, freq=&quot;D&quot;)</span>
+<span>values = pd.Series(np.tile([10, 12, 11, 14, 15, 13, 9], 4), index=index)</span>
+<span>horizon, season = 7, 7</span>
+<span>train, test = values.iloc[:-horizon], values.iloc[-horizon:]</span>
+<span>forecast = pd.Series(train.iloc[-season:].to_numpy(), index=test.index)</span>
+<span>print({&quot;mae&quot;: mean_absolute_error(test, forecast),</span>
+<span>       &quot;forecast_index_matches&quot;: forecast.index.equals(test.index)})</span>
+<span>assert mean_absolute_error(test, forecast) == 0.0</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> The exact weekly pattern gives zero error and the forecast is explicitly aligned to test timestamps.</p>
+<p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-8--focused-example-b-build-a-trailing-feature-that-excludes-the-current-target">Focused example B — build a trailing feature that excludes the current target<a class="heading-anchor" href="#learner--cell-8--focused-example-b-build-a-trailing-feature-that-excludes-the-current-target" aria-label="Link to this section">#</a></h5>
+<p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
+<p><strong>Assumption:</strong> Rows are sorted, timestamps are unique, frequency/gaps are understood, and past targets are available at prediction time.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>import pandas as pd</span>
+<span> </span>
+<span>series = pd.Series([10.0, 20.0, 30.0, 40.0, 50.0], name=&quot;value&quot;)</span>
+<span>features = pd.DataFrame({</span>
+<span>    &quot;target&quot;: series,</span>
+<span>    &quot;lag_1&quot;: series.shift(1),</span>
+<span>    &quot;trailing_mean_2&quot;: series.shift(1).rolling(2).mean(),</span>
+<span>})</span>
+<span>print(features)</span>
+<span>assert features.loc[3, &quot;trailing_mean_2&quot;] == 25.0</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> At row 3, the trailing mean uses rows 1 and 2 (20 and 30), never the current target 40.</p>
+<h5 id="learner--cell-10--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-10--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Computing rolling features before shifting or tuning seasonal order against the final horizon.</p>
+<p><strong>Diagnostic:</strong> For one prediction timestamp, list the maximum source timestamp for every feature and assert it is no later than the forecast origin.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>Action</th>
+<th>Evidence</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<p><strong>Stop condition:</strong> Do not report a forecast metric without horizon, origins, timestamp alignment, baseline, missing-period policy, and leakage audit.</p>
+<p>Continue to the numbered practice only after you can explain both examples without rereading their code.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-11--model-choice-and-baselines">Model choice and baselines<a class="heading-anchor" href="#learner--cell-11--model-choice-and-baselines" aria-label="Link to this section">#</a></h4>
 <p>Seasonal additive models, tree models with lag features, and neural sequence models can all be useful in the right setting. They also add assumptions and operational cost. Compare every candidate against a simple last-value or seasonal-naive forecast on a forward time split.</p>
-<h4 id="learner--cell-4--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-4--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<h4 id="learner--cell-11--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-11--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Fit <code>auto_arima</code> with <code>m=7</code> and <code>m=30</code>; compare mean absolute error on the same test window.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — fit m=7 and m=30 using training observations only, forecast the identical timestamped test window, and print MAE plus errors by horizon for both; report convergence/skip status and selected seasonal period.</p>
+<ol>
 <li>Create last-value and 30-day seasonal-naive forecasts and compare them with ARIMA.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — on the same forecast origins, print MAE for last-value, 30-day seasonal-naive, and ARIMA; assert each forecast at time t uses only observations before t and include a metric table keyed by model.</p>
+<ol>
 <li>Difference the training series and inspect autocorrelation without using test-period observations.</li>
 </ol>
-<h5 id="learner--cell-4--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-4--progressive-hints" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — difference only the training series, print its length/NaN handling and selected autocorrelations with confidence bounds, and assert no test-period timestamp entered the transform or lag calculation.</p>
+<h5 id="learner--cell-11--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-11--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Change only the seasonal period. Keep the split, horizon, and MAE calculation fixed, and bound the search if runtime is high.</li>
 <li>Build each baseline solely from <code>train</code>; verify predictions have the same index/length as <code>test</code>.</li>
 <li>Call <code>train.diff().dropna()</code> before plotting autocorrelation. The test values should not appear anywhere in transformation fitting.</li>
 </ol>
 <p>The reference solution extends the lesson with <code>TimeSeriesSplit</code>, shifted rolling features, and a seasonal-naive evaluation. It uses a different synthetic weekly series to reinforce the method rather than mirror the notebook.</p>
-<h5 id="learner--cell-4--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-4--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="learner--cell-11--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-11--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Evaluate forecasts with forward-only information, multiple origins, meaningful baselines, and timestamp/data-quality checks before adding model complexity.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Rolling-origin evaluation:</strong> Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE. <strong>Progressive hint:</strong> At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.</li>
+</ol>
+<p><strong>Verify:</strong> Rolling-origin evaluation — print at least four forecast origins with train-end, horizon timestamps, seasonal-naive MAE, candidate MAE, and aggregate weighted MAE; assert every prediction uses data strictly before its origin.</p>
+<ol>
 <li><strong>Prediction intervals:</strong> Produce forecast intervals and evaluate empirical coverage and width across rolling origins. Explain why a narrow interval is not useful when it misses too often. <strong>Progressive hint:</strong> For a nominal 90% interval, count actuals between lower and upper bounds and report support plus average width by horizon.</li>
+</ol>
+<p><strong>Verify:</strong> Prediction intervals — print interval level, per-origin coverage indicator, aggregate empirical coverage, and mean width; compare at least two interval widths/levels and flag severe undercoverage.</p>
+<ol>
 <li><strong>Timestamp/data-quality debugging:</strong> Validate a series containing duplicate timestamps, missing periods, an irregular interval, and a timezone transition before modeling. <strong>Progressive hint:</strong> Sort, assert monotonic unique timestamps, infer/declare frequency, and decide aggregation or imputation from domain meaning.</li>
 </ol>
+<p><strong>Verify:</strong> Timestamp/data-quality debugging — produce a validation report listing duplicate timestamps, exact missing periods, irregular gaps, timezone/ambiguous transitions, frequency, and chosen repair; assert the cleaned index is unique, ordered, and regular before modeling.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
 <span>#</span>
 <span># Keep the official solution closed until you have attempted each task.</span>
 <span># Add small assertions, shape checks, or metric comparisons as evidence.</span>
@@ -541,15 +810,15 @@ print(&quot;seasonal:&quot;, mean_absolute_error(test, seasonal_naive))</code></
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -592,7 +861,7 @@ rng = pd.date_range(&#x27;2020-01-01&#x27;, periods=400, freq=&#x27;D&#x27;)
 np.random.seed(0)
 y = 10 + 2*np.sin(2*np.pi*rng.dayofyear/7) + np.random.normal(0,0.8,len(rng))
 df = pd.DataFrame({&#x27;ds&#x27;: rng, &#x27;y&#x27;: y}).set_index(&#x27;ds&#x27;)</code></pre>
-<p>Exercise 1 — Seasonal naive baseline</p>
+<p>Worked reference for Exercise 1 — Seasonal naive baseline</p>
 <pre><code class="language-python"># 7-day seasonal naive: forecast y_t = y_{t-7}
 H = 14  # horizon
 df[&#x27;y_lag7&#x27;] = df[&#x27;y&#x27;].shift(7)
@@ -607,7 +876,7 @@ print({&#x27;baseline_MAPE&#x27;: float(base_mape)})</code></pre>
 <li>Always align lags to avoid peeking into the future</li>
 </ul>
 <hr>
-<p>Exercise 2 — TimeSeriesSplit and models</p>
+<p>Worked reference for Exercise 2 — TimeSeriesSplit and models</p>
 <pre><code class="language-python">from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 
@@ -644,7 +913,7 @@ print(cv.describe().loc[[&#x27;mean&#x27;,&#x27;std&#x27;]])</code></pre>
 <li>Compare models with average MAPE over folds</li>
 </ul>
 <hr>
-<p>Exercise 3 — Final fit and error visualization</p>
+<p>Worked reference for Exercise 3 — Final fit and error visualization</p>
 <pre><code class="language-python"># Fit best model on full train and forecast last H steps using a walk‑forward loop
 H = 14
 train = df.iloc[:-H].copy(); test = df.iloc[-H:].copy()
@@ -667,40 +936,62 @@ err.plot(title=&#x27;Forecast error&#x27;); plt.axhline(0,color=&#x27;k&#x27;,lw
 <li>For multi-step forecasting, compare direct and recursive strategies with validated ARIMA or lag-feature baselines before adding a heavier model</li>
 </ul>
 <hr>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong><code>series.shift(lag)</code>:</strong> aligns a past value as a current-row feature; positive lags must precede any rolling summary.</li>
+<li><strong><code>train.iloc[:-horizon]</code> / <code>test.iloc[-horizon:]</code>:</strong> creates a simple chronological boundary with a declared horizon.</li>
+<li><strong>rolling-origin loop:</strong> repeats fit/predict at increasing origins while keeping every target strictly in the future.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> Chronological baselines establish the task, while shifted features and rolling origins reproduce what information was available.</p>
+<p><strong>Useful alternative:</strong> Exponential smoothing, regression with lags, or domain-specific state-space models may be preferable to automated ARIMA search.</p>
+<p><strong>Trade-off:</strong> Longer training windows provide more data but may include stale regimes; shorter windows adapt faster with higher variance.</p>
+<p><strong>Edge case to test:</strong> Duplicate/missing timestamps, time zones, daylight-saving changes, insufficient seasonal history, and exogenous data publication delays need policies.</p>
+<p><strong>Evidence of correctness:</strong> Assert timestamp ordering/alignment and feature-source cutoffs, beat last/seasonal naive on identical origins, and report errors by origin plus uncertainty.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Fit <code>auto_arima</code> with <code>m=7</code> and <code>m=30</code>; compare mean absolute error on the same test window.</p>
 <p><strong>How to reason about it:</strong> Compare seasonal periods on the identical training window and forecast horizon. Bound auto-ARIMA search, report runtime, and remember that the best period may change across forecast origins.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — fit m=7 and m=30 using training observations only, forecast the identical timestamped test window, and print MAE plus errors by horizon for both; report convergence/skip status and selected seasonal period.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create last-value and 30-day seasonal-naive forecasts and compare them with ARIMA.</p>
 <p><strong>How to reason about it:</strong> Last-value and seasonal-naive forecasts are required baselines. Build them only from information available at each origin and align prediction indices exactly with the test targets.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — on the same forecast origins, print MAE for last-value, 30-day seasonal-naive, and ARIMA; assert each forecast at time t uses only observations before t and include a metric table keyed by model.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Difference the training series and inspect autocorrelation without using test-period observations.</p>
 <p><strong>How to reason about it:</strong> Differencing and autocorrelation diagnostics use training data only. Inspect stationarity assumptions and avoid differencing mechanically without understanding what must be inverted for forecasts.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 3 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — difference only the training series, print its length/NaN handling and selected autocorrelations with confidence bounds, and assert no test-period timestamp entered the transform or lag calculation.</p>
 <h5 id="solution-1--exercise-4-rolling-origin-evaluation">Exercise 4 — Rolling-origin evaluation<a class="heading-anchor" href="#solution-1--exercise-4-rolling-origin-evaluation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE.</p>
 <p><strong>Reasoning before implementation:</strong> At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.</p>
 <p>One holdout period can favor a model by chance or season. A tidy result table should contain model, origin, horizon step, actual, prediction, and absolute error. Aggregate by model and also inspect variation across origins.</p>
 <p>Never fit one candidate on the full series and slice its in-sample predictions for earlier origins. That uses future observations and invalidates the backtest.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Rolling-origin evaluation — print at least four forecast origins with train-end, horizon timestamps, seasonal-naive MAE, candidate MAE, and aggregate weighted MAE; assert every prediction uses data strictly before its origin.</p>
 <h5 id="solution-1--exercise-5-prediction-intervals">Exercise 5 — Prediction intervals<a class="heading-anchor" href="#solution-1--exercise-5-prediction-intervals" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Produce forecast intervals and evaluate empirical coverage and width across rolling origins. Explain why a narrow interval is not useful when it misses too often.</p>
 <p><strong>Reasoning before implementation:</strong> For a nominal 90% interval, count actuals between lower and upper bounds and report support plus average width by horizon.</p>
 <p>Coverage and sharpness must be read together. A trivially wide interval can cover nearly everything, while an overconfident narrow interval misses often. Report coverage by horizon because uncertainty usually grows farther ahead.</p>
 <p>Model-based intervals rely on residual/distribution assumptions. Residual bootstrap or conformal methods offer alternatives, but still require forward-only calibration data and exchangeability assumptions.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Prediction intervals — print interval level, per-origin coverage indicator, aggregate empirical coverage, and mean width; compare at least two interval widths/levels and flag severe undercoverage.</p>
 <h5 id="solution-1--exercise-6-timestamp-data-quality-debugging">Exercise 6 — Timestamp/data-quality debugging<a class="heading-anchor" href="#solution-1--exercise-6-timestamp-data-quality-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Validate a series containing duplicate timestamps, missing periods, an irregular interval, and a timezone transition before modeling.</p>
 <p><strong>Reasoning before implementation:</strong> Sort, assert monotonic unique timestamps, infer/declare frequency, and decide aggregation or imputation from domain meaning.</p>
 <p>Do not let a library silently reinterpret irregular observations as regular. Create an expected date range, compare it with observed timestamps, and report duplicates/missing periods. Aggregate duplicates only with a documented rule.</p>
 <p>Timezone-aware series should be normalized deliberately, often to UTC for storage while retaining local-calendar features separately. Imputation is a fitted or policy step and must not read future values in a forecasting evaluation.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></div>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Timestamp/data-quality debugging — produce a validation report listing duplicate timestamps, exact missing periods, irregular gaps, timezone/ambiguous transitions, frequency, and chosen repair; assert the cleaned index is unique, ordered, and regular before modeling.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -708,7 +999,7 @@ err.plot(title=&#x27;Forecast error&#x27;); plt.axhline(0,color=&#x27;k&#x27;,lw
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -755,7 +1046,7 @@ err.plot(title=&#x27;Forecast error&#x27;); plt.axhline(0,color=&#x27;k&#x27;,lw
 <span>df = pd.DataFrame({&#x27;ds&#x27;: rng, &#x27;y&#x27;: y}).set_index(&#x27;ds&#x27;)</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Exercise 1 — Seasonal naive baseline</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Worked reference for Exercise 1 — Seasonal naive baseline</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># 7-day seasonal naive: forecast y_t = y_{t-7}</span>
 <span>H = 14  # horizon</span>
 <span>df[&#x27;y_lag7&#x27;] = df[&#x27;y&#x27;].shift(7)</span>
@@ -772,7 +1063,7 @@ err.plot(title=&#x27;Forecast error&#x27;); plt.axhline(0,color=&#x27;k&#x27;,lw
 <li>Always align lags to avoid peeking into the future</li>
 </ul>
 <hr>
-<p>Exercise 2 — TimeSeriesSplit and models</p></article>
+<p>Worked reference for Exercise 2 — TimeSeriesSplit and models</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from sklearn.linear_model import LinearRegression</span>
 <span>from sklearn.ensemble import RandomForestRegressor</span>
 <span> </span>
@@ -811,7 +1102,7 @@ err.plot(title=&#x27;Forecast error&#x27;); plt.axhline(0,color=&#x27;k&#x27;,lw
 <li>Compare models with average MAPE over folds</li>
 </ul>
 <hr>
-<p>Exercise 3 — Final fit and error visualization</p></article>
+<p>Worked reference for Exercise 3 — Final fit and error visualization</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Fit best model on full train and forecast last H steps using a walk‑forward loop</span>
 <span>H = 14</span>
 <span>train = df.iloc[:-H].copy(); test = df.iloc[-H:].copy()</span>
@@ -836,40 +1127,106 @@ err.plot(title=&#x27;Forecast error&#x27;); plt.axhline(0,color=&#x27;k&#x27;,lw
 <li>For multi-step forecasting, compare direct and recursive strategies with validated ARIMA or lag-feature baselines before adding a heavier model</li>
 </ul>
 <hr>
+<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-2--cell-9--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-9--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong><code>series.shift(lag)</code>:</strong> aligns a past value as a current-row feature; positive lags must precede any rolling summary.</li>
+<li><strong><code>train.iloc[:-horizon]</code> / <code>test.iloc[-horizon:]</code>:</strong> creates a simple chronological boundary with a declared horizon.</li>
+<li><strong>rolling-origin loop:</strong> repeats fit/predict at increasing origins while keeping every target strictly in the future.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> Chronological baselines establish the task, while shifted features and rolling origins reproduce what information was available.</p>
+<p><strong>Useful alternative:</strong> Exponential smoothing, regression with lags, or domain-specific state-space models may be preferable to automated ARIMA search.</p>
+<p><strong>Trade-off:</strong> Longer training windows provide more data but may include stale regimes; shorter windows adapt faster with higher variance.</p>
+<p><strong>Edge case to test:</strong> Duplicate/missing timestamps, time zones, daylight-saving changes, insufficient seasonal history, and exogenous data publication delays need policies.</p>
+<p><strong>Evidence of correctness:</strong> Assert timestamp ordering/alignment and feature-source cutoffs, beat last/seasonal naive on identical origins, and report errors by origin plus uncertainty.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-9--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-9--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-9--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Fit <code>auto_arima</code> with <code>m=7</code> and <code>m=30</code>; compare mean absolute error on the same test window.</p>
 <p><strong>How to reason about it:</strong> Compare seasonal periods on the identical training window and forecast horizon. Bound auto-ARIMA search, report runtime, and remember that the best period may change across forecast origins.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — fit m=7 and m=30 using training observations only, forecast the identical timestamped test window, and print MAE plus errors by horizon for both; report convergence/skip status and selected seasonal period.</p>
 <h5 id="solution-2--cell-9--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create last-value and 30-day seasonal-naive forecasts and compare them with ARIMA.</p>
 <p><strong>How to reason about it:</strong> Last-value and seasonal-naive forecasts are required baselines. Build them only from information available at each origin and align prediction indices exactly with the test targets.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — on the same forecast origins, print MAE for last-value, 30-day seasonal-naive, and ARIMA; assert each forecast at time t uses only observations before t and include a metric table keyed by model.</p>
 <h5 id="solution-2--cell-9--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Difference the training series and inspect autocorrelation without using test-period observations.</p>
 <p><strong>How to reason about it:</strong> Differencing and autocorrelation diagnostics use training data only. Inspect stationarity assumptions and avoid differencing mechanically without understanding what must be inverted for forecasts.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 3 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — difference only the training series, print its length/NaN handling and selected autocorrelations with confidence bounds, and assert no test-period timestamp entered the transform or lag calculation.</p>
 <h5 id="solution-2--cell-9--exercise-4-rolling-origin-evaluation">Exercise 4 — Rolling-origin evaluation<a class="heading-anchor" href="#solution-2--cell-9--exercise-4-rolling-origin-evaluation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE.</p>
 <p><strong>Reasoning before implementation:</strong> At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.</p>
 <p>One holdout period can favor a model by chance or season. A tidy result table should contain model, origin, horizon step, actual, prediction, and absolute error. Aggregate by model and also inspect variation across origins.</p>
 <p>Never fit one candidate on the full series and slice its in-sample predictions for earlier origins. That uses future observations and invalidates the backtest.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Rolling-origin evaluation — print at least four forecast origins with train-end, horizon timestamps, seasonal-naive MAE, candidate MAE, and aggregate weighted MAE; assert every prediction uses data strictly before its origin.</p>
 <h5 id="solution-2--cell-9--exercise-5-prediction-intervals">Exercise 5 — Prediction intervals<a class="heading-anchor" href="#solution-2--cell-9--exercise-5-prediction-intervals" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Produce forecast intervals and evaluate empirical coverage and width across rolling origins. Explain why a narrow interval is not useful when it misses too often.</p>
 <p><strong>Reasoning before implementation:</strong> For a nominal 90% interval, count actuals between lower and upper bounds and report support plus average width by horizon.</p>
 <p>Coverage and sharpness must be read together. A trivially wide interval can cover nearly everything, while an overconfident narrow interval misses often. Report coverage by horizon because uncertainty usually grows farther ahead.</p>
 <p>Model-based intervals rely on residual/distribution assumptions. Residual bootstrap or conformal methods offer alternatives, but still require forward-only calibration data and exchangeability assumptions.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Prediction intervals — print interval level, per-origin coverage indicator, aggregate empirical coverage, and mean width; compare at least two interval widths/levels and flag severe undercoverage.</p>
 <h5 id="solution-2--cell-9--exercise-6-timestamp-data-quality-debugging">Exercise 6 — Timestamp/data-quality debugging<a class="heading-anchor" href="#solution-2--cell-9--exercise-6-timestamp-data-quality-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Validate a series containing duplicate timestamps, missing periods, an irregular interval, and a timezone transition before modeling.</p>
 <p><strong>Reasoning before implementation:</strong> Sort, assert monotonic unique timestamps, infer/declare frequency, and decide aggregation or imputation from domain meaning.</p>
 <p>Do not let a library silently reinterpret irregular observations as regular. Create an expected date range, compare it with observed timestamps, and report duplicates/missing periods. Aggregate duplicates only with a documented rule.</p>
 <p>Timezone-aware series should be normalized deliberately, often to UTC for storage while retaining local-calendar features separately. Imputation is a fitted or policy step and must not read future values in a forecasting evaluation.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></article></div>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Timestamp/data-quality debugging — produce a validation report listing duplicate timestamps, exact missing periods, irregular gaps, timezone/ambiguous transitions, frequency, and chosen repair; assert the cleaned index is unique, ordered, and regular before modeling.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-50` — Day 50 — Time-Series Modeling and Forecast Evaluation.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day50_time_series_modeling.md`
+- learner artifact: `python/ds-60day/notebooks/day50_time_series_modeling.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-49`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-49.html"><small>Previous lesson</small><strong>python-49</strong><span>NLP Basics Hugging Face Spacy</span></a>
@@ -961,6 +1318,23 @@ err.plot(title=&#x27;Forecast error&#x27;); plt.axhline(0,color=&#x27;k&#x27;,lw
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

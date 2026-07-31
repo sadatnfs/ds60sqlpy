@@ -118,7 +118,14 @@
     <article class="document"><h2 id="troubleshooting">Troubleshooting<a class="heading-anchor" href="#troubleshooting" aria-label="Link to this section">#</a></h2>
 <p>Start from the repository root and run:</p>
 <pre><code class="language-text">python scripts/course.py doctor</code></pre>
-<p>On Windows, use <code>.\.venv\Scripts\python.exe</code>; on macOS/Linux, use <code>.venv/bin/python</code> if <code>python</code> points elsewhere.</p>
+<p>If <code>python</code> points elsewhere, use the repository interpreter directly. On Windows PowerShell, resolve the standard-<code>venv</code> or conda-prefix layout once per window:</p>
+<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython scripts\course.py doctor</code></pre>
+<p>On macOS/Linux, run <code>.venv/bin/python scripts/course.py doctor</code>.</p>
 <p>For the difference between <code>.venv</code>, disposable caches, offline model data, learner progress, and Docker state, see <a href="local-files-and-caches.md.html">Local environments and caches</a>.</p>
 <h3 id="file-not-found-for-requirements-scripts-notebooks-or-sql">“File not found” for requirements, scripts, notebooks, or SQL<a class="heading-anchor" href="#file-not-found-for-requirements-scripts-notebooks-or-sql" aria-label="Link to this section">#</a></h3>
 <p>You are probably in the wrong directory.</p>
@@ -131,23 +138,35 @@ pwd</code></pre>
 <p>Change to the directory containing the root README and retry.</p>
 <h3 id="python-or-py-is-not-found"><code>python</code> or <code>py</code> is not found<a class="heading-anchor" href="#python-or-py-is-not-found" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>Windows: reinstall Python 3.12 with the Python launcher, then open a new terminal and run <code>py -3.12 --version</code>.</li>
+<li>Windows: do not reinstall merely because an existing Python or Anaconda installation is missing from <code>PATH</code>. From the repository root, run the read-only discovery preview first:</li>
+</ul>
+<pre><code class="language-powershell">  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+  &amp; .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -WhatIf</code></pre>
+<p>If it finds a supported Python, Anaconda, or Miniconda installation, rerun without <code>-WhatIf</code> to prepare the repository environment. Only if discovery reports that no supported interpreter exists should you install Python 3.12 manually or explicitly preview the optional winget path with <code>&amp; .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -InstallMissingWithWinget -WhatIf</code>.</p>
+<ul>
 <li>macOS/Linux: run <code>python3.12 --version</code>; do not replace the operating system’s Python.</li>
 <li>In VS Code: select the repository <code>.venv</code> from <strong>Python: Select Interpreter</strong>.</li>
 </ul>
 <h3 id="virtual-environment-creation-fails">Virtual environment creation fails<a class="heading-anchor" href="#virtual-environment-creation-fails" aria-label="Link to this section">#</a></h3>
 <p>Windows:</p>
-<pre><code class="language-powershell">py -3.12 -m venv .venv</code></pre>
+<pre><code class="language-powershell">&amp; .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -WhatIf
+&amp; .\scripts\bootstrap_windows.ps1 -SkipPostgreSql</code></pre>
+<p>The preview discovers Python.org and Anaconda/Miniconda installations before the real run chooses either the standard <code>venv</code> layout or the conda-prefix fallback. It does not delete a partial environment.</p>
 <p>Linux may need the venv package:</p>
 <pre><code class="language-bash">sudo apt-get install python3.12-venv</code></pre>
 <p>Remove a partially created <code>.venv</code> only after confirming it is the repository environment and contains no work you need.</p>
 <h3 id="powershell-refuses-to-activate-the-environment">PowerShell refuses to activate the environment<a class="heading-anchor" href="#powershell-refuses-to-activate-the-environment" aria-label="Link to this section">#</a></h3>
 <p>Activation is not required:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe scripts\course.py doctor</code></pre>
+<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython scripts\course.py doctor</code></pre>
 <p>For a temporary activated session:</p>
 <pre><code class="language-powershell">Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\.venv\Scripts\Activate.ps1</code></pre>
-<p>Do not change machine-wide execution policy for this course.</p>
+<p>The activation script exists only in the standard <code>venv</code> layout. The conda-prefix fallback continues to use <code>&amp; $CoursePython ...</code>. Do not change machine-wide execution policy for this course.</p>
 <h3 id="a-package-installs-but-the-notebook-cannot-import-it">A package installs but the notebook cannot import it<a class="heading-anchor" href="#a-package-installs-but-the-notebook-cannot-import-it" aria-label="Link to this section">#</a></h3>
 <p>The terminal interpreter and notebook kernel differ.</p>
 <ol>
@@ -165,7 +184,12 @@ pwd</code></pre>
 <h3 id="jupyter-is-not-found"><code>jupyter</code> is not found<a class="heading-anchor" href="#jupyter-is-not-found" aria-label="Link to this section">#</a></h3>
 <p>Use the environment’s Python:</p>
 <p>Windows:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe -m jupyterlab</code></pre>
+<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython -m jupyterlab</code></pre>
 <p>macOS/Linux:</p>
 <pre><code class="language-bash">.venv/bin/python -m jupyterlab</code></pre>
 <p>If the module is missing, rerun the setup script and doctor.</p>
@@ -196,7 +220,7 @@ pwd</code></pre>
 </ul>
 <h3 id="psql-is-not-found"><code>psql</code> is not found<a class="heading-anchor" href="#psql-is-not-found" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>Windows: add the PostgreSQL <code>bin</code> directory to <code>PATH</code>, or use SQL Shell.</li>
+<li>Windows: first run <code>&amp; .\scripts\bootstrap_windows.ps1 -WhatIf</code>; it searches <code>PATH</code>, the registry, and versioned PostgreSQL installation directories before any install advice. Use the discovered executable in the current session, or rerun with <code>-PersistUserPath</code> only if you want the narrowly scoped user <code>PATH</code> change.</li>
 <li>macOS Homebrew: add <code>$(brew --prefix postgresql@17)/bin</code> to <code>PATH</code>.</li>
 <li>Linux: install the PostgreSQL client package.</li>
 </ul>
@@ -263,7 +287,8 @@ createdb advanced_sql_training</code></pre>
 <li>Check whether the lesson needs Psycopg:</li>
 </ol>
 <p>Windows PowerShell:</p>
-<pre><code class="language-powershell">   powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced</code></pre>
+<pre><code class="language-powershell">   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+   &amp; .\scripts\bootstrap_windows.ps1 -Profile Advanced</code></pre>
 <p>macOS/Linux:</p>
 <pre><code class="language-bash">   bash scripts/setup.sh --advanced</code></pre>
 <ol>

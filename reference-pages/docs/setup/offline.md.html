@@ -154,7 +154,7 @@
 <tr>
 <td>JupySQL, pandas, SQLAlchemy, and Psycopg wheels</td>
 <td>PostgreSQL notebook bridge</td>
-<td>Installed by advanced setup; queries stay local afterward</td>
+<td>Installed by Windows <code>Core</code> bootstrap or macOS/Linux advanced setup; queries stay local afterward</td>
 </tr>
 <tr>
 <td>torchvision pretrained weights</td>
@@ -182,10 +182,18 @@
 <li>Run repository validation.</li>
 </ol>
 <p>Windows:</p>
-<pre><code class="language-powershell">powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1
-.\.venv\Scripts\python.exe scripts\course.py doctor
-.\.venv\Scripts\python.exe scripts\course.py catalog
-.\.venv\Scripts\python.exe scripts\course.py validate</code></pre>
+<pre><code class="language-powershell"># Recommended: double-click START_DS60.cmd and approve the connected setup.
+# Manual equivalent:
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+&amp; .\scripts\bootstrap_windows.ps1
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython scripts\course.py doctor
+&amp; $CoursePython scripts\course.py catalog
+&amp; $CoursePython scripts\course.py validate</code></pre>
 <p>macOS/Linux:</p>
 <pre><code class="language-bash">bash scripts/setup.sh
 .venv/bin/python scripts/course.py doctor
@@ -195,8 +203,13 @@
 <h3 id="confirm-offline-readiness">Confirm offline readiness<a class="heading-anchor" href="#confirm-offline-readiness" aria-label="Link to this section">#</a></h3>
 <p>Disconnect from the network or disable Wi-Fi and start a fresh terminal.</p>
 <p>Windows:</p>
-<pre><code class="language-powershell">.\.venv\Scripts\python.exe scripts\course.py doctor
-.\.venv\Scripts\python.exe scripts\course.py validate</code></pre>
+<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython scripts\course.py doctor
+&amp; $CoursePython scripts\course.py validate</code></pre>
 <p>macOS/Linux:</p>
 <pre><code class="language-bash">.venv/bin/python scripts/course.py doctor
 .venv/bin/python scripts/course.py validate</code></pre>

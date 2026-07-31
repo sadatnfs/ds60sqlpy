@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-23-streaming-data-pipelines-and-generators">Day 23 — Streaming Data Pipelines and Generators<a class="heading-anchor" href="#guide--day-23-streaming-data-pipelines-and-generators" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
 <p>A streaming pipeline bounds memory by processing records incrementally. It also requires explicit ownership of files, errors, and partial output.</p>
@@ -292,6 +331,99 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 22 (<code>python-22</code>), generators from Day 4 (<code>python-04</code>), and file I/O from Day 8 (<code>python-08</code>).</p>
+<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<ol>
+<li>Confirm the course environment before changing it:</li>
+</ol>
+<pre><code class="language-powershell">   # Windows PowerShell
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   &amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash">   # macOS/Linux
+   .venv/bin/python scripts/course.py doctor</code></pre>
+<ol>
+<li>Read <code>python/ds-60day/companion-guides/day23_data_pipelines_generators.md</code>, then open <code>python/ds-60day/notebooks/day23_data_pipelines_generators.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
+<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
+<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
+<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+</ol>
+<p><strong>Lesson outcome:</strong> use day 23 — streaming data pipelines and generators to practice lazy, composable data-pipeline stages with explicit resource and error policy and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
+<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
+<p>A pipeline is a sequence of stages that turn input into output. Give each stage one responsibility—read, parse, validate, normalize, filter, batch, or write—and define the shape it accepts and yields. Small stages are easier to test and recombine than one function mixing files, rules, logging, and output.</p>
+<p>Generator stages keep memory bounded by yielding one item at a time. Calling a generator function does not run its body; iteration starts work and advances state. The stage that opens a resource should own its <code>with</code> block for the entire iteration. Decide whether malformed records stop the stream, are skipped with evidence, or go to quarantine.</p>
+<h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>pipeline:</strong> an ordered composition of input/output stages.</li>
+<li><strong>stage:</strong> one transformation with a stated input and output contract.</li>
+<li><strong>streaming:</strong> processing incrementally rather than loading everything.</li>
+<li><strong>backpressure:</strong> a consumer limiting how quickly upstream work advances.</li>
+<li><strong>batch:</strong> a bounded group processed or written together.</li>
+<li><strong>quarantine:</strong> separate retention of invalid records and failure reasons.</li>
+</ul>
+<h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<p><code>yield normalized</code> pauses a generator stage after producing one record. <code>yield from iterable</code> delegates successive values to another iterable. A consumer such as <code>for batch in batches(rows, 100):</code> drives the whole upstream chain; without consumption, no generator body or file read occurs.</p>
+<h5 id="guide--worked-example-1-compose-lazy-normalization-and-filtering">Worked example 1 — Compose lazy normalization and filtering<a class="heading-anchor" href="#guide--worked-example-1-compose-lazy-normalization-and-filtering" aria-label="Link to this section">#</a></h5>
+<p>Each stage consumes and yields one record at a time. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">from collections.abc import Iterable, Iterator
+
+def normalize(rows: Iterable[dict[str, str]]) -&gt; Iterator[dict[str, str]]:
+    for row in rows:
+        yield {&quot;name&quot;: row[&quot;name&quot;].strip(), &quot;status&quot;: row[&quot;status&quot;].lower()}
+
+def active_only(rows: Iterable[dict[str, str]]) -&gt; Iterator[dict[str, str]]:
+    for row in rows:
+        if row[&quot;status&quot;] == &quot;active&quot;:
+            yield row
+
+source = [{&quot;name&quot;: &quot; Ada &quot;, &quot;status&quot;: &quot;ACTIVE&quot;}, {&quot;name&quot;: &quot;Lin&quot;, &quot;status&quot;: &quot;inactive&quot;}]
+list(active_only(normalize(source)))</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`[{&#x27;name&#x27;: &#x27;Ada&#x27;, &#x27;status&#x27;: &#x27;active&#x27;}]`. No stage needed all records at once.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--worked-example-2-preserve-a-final-partial-batch">Worked example 2 — Preserve a final partial batch<a class="heading-anchor" href="#guide--worked-example-2-preserve-a-final-partial-batch" aria-label="Link to this section">#</a></h5>
+<p>Batch boundaries are part of the contract. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">def batches(items: Iterable[int], size: int) -&gt; Iterator[tuple[int, ...]]:
+    if size &lt;= 0:
+        raise ValueError(&quot;size must be positive&quot;)
+    batch = []
+    for item in items:
+        batch.append(item)
+        if len(batch) == size:
+            yield tuple(batch)
+            batch = []
+    if batch:
+        yield tuple(batch)
+
+list(batches(range(5), 2))</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`[(0, 1), (2, 3), (4,)]`. The last partial batch is not silently lost.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
+<p>When the output differs from your prediction, use this order:</p>
+<ol>
+<li>Test each stage with a tiny list before composing the pipeline.</li>
+<li>If no work occurs, confirm that a consumer actually iterates the generator.</li>
+<li>Keep a file&#x27;s <code>with</code> block inside the generator that performs iteration.</li>
+<li>Count input, accepted, quarantined, and output records to reconcile every path.</li>
+</ol>
+<h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
+<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
+<ol>
+<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
+<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
+<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
+<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
+<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
+</ol>
+<p><strong>Useful alternative:</strong> Use eager lists for small data and simple debugging; use lazy stages when memory, streaming, or early stopping matters.</p>
+<p><strong>Boundary to remember:</strong> Partial consumption, consumer failure, invalid batch size, final partial batch, malformed first/last rows, and cleanup on exceptions need tests. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Streaming:</strong> process a bounded portion while the rest remains unread.</li>
@@ -304,7 +436,6 @@
 <h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-python">from collections.abc import Iterable, Iterator
 
-
 def parsed_integers(lines: Iterable[str]) -&gt; Iterator[int]:
     for line_number, raw in enumerate(lines, start=1):
         text = raw.strip()
@@ -315,23 +446,25 @@ def parsed_integers(lines: Iterable[str]) -&gt; Iterator[int]:
         except ValueError as exc:
             raise ValueError(f&quot;line {line_number}: expected integer&quot;) from exc
 
-
 result = list(parsed_integers([&quot;10\n&quot;, &quot;\n&quot;, &quot;20\n&quot;]))</code></pre>
 <p>The generator is deterministic and does not require a file. Including the line number turns a malformed record into actionable evidence.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Build a CSV streaming cleaner that yields normalized row dictionaries. <strong>Hint:</strong> let the generator open the file inside its own <code>with</code> block and use <code>csv.DictReader</code>; state whether malformed rows stop or are quarantined.</li>
-<li>Compose generators to filter, map, and batch rows. <strong>Hint:</strong> give every stage one responsibility, preserve laziness, and make the final partial batch part of the contract.</li>
+<li>Build <code>stream_clean_csv(path)</code> that opens a UTF-8 CSV inside the generator, yields one normalized row dictionary at a time, and follows a written malformed-row policy. <strong>Constraints:</strong> use <code>csv.DictReader</code>, keep the file open during iteration, and do not return a list. <strong>Verify:</strong> partially consume two rows, consume the rest, test an empty file, and confirm the handle closes after completion/failure.</li>
+</ol>
+<ol>
+<li>Compose separate generator stages to filter, map, and batch clean rows. <strong>Contract:</strong> every stage documents input/output shape; batch size must be positive; the final partial batch is yielded. <strong>Verify:</strong> on a five-row fixture with size two, assert exact batches, source order, and input = accepted + quarantined + deliberately filtered counts.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Build one-responsibility lazy stages with explicit resource ownership, error policy, and final-partial-batch behavior.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization. <strong>Progressive hint:</strong> Calling a generator function creates an iterator; its body starts on iteration.</li>
-<li><strong>Tracing:</strong> Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. <strong>Progressive hint:</strong> Consumption is stateful and does not rewind automatically.</li>
-<li><strong>Implementation:</strong> Implement <code>batch_rows(rows, size)</code> yielding tuples and preserving the final partial batch. <strong>Progressive hint:</strong> Validate positive size and reset the accumulator after each yield.</li>
-<li><strong>Debugging:</strong> Repair a function that returns a generator expression over a file after the surrounding <code>with</code> block has already closed the file. <strong>Progressive hint:</strong> Own the <code>with</code> block inside the generator that performs iteration.</li>
-<li><strong>Edge case and explanation:</strong> Add a quarantine side channel for malformed rows without making the clean stream eagerly load the entire file. <strong>Progressive hint:</strong> Pass a callback/list for bounded error records or yield tagged results.</li>
+<li><strong>Prediction:</strong> Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization. <strong>Progressive hint:</strong> Calling a generator function creates an iterator; its body starts on iteration. <strong>Verify:</strong> Append an event inside the generator body and assert no event at construction, one at first <code>next</code>, and all remaining events only after full consumption.</li>
+<li><strong>Tracing:</strong> Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. <strong>Progressive hint:</strong> Consumption is stateful and does not rewind automatically. <strong>Verify:</strong> Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4—never a restarted sequence.</li>
+<li><strong>Implementation:</strong> Implement <code>batch_rows(rows, size)</code> yielding tuples and preserving the final partial batch. <strong>Progressive hint:</strong> Validate positive size and reset the accumulator after each yield. <strong>Verify:</strong> Assert five rows at size two produce <code>[(0, 1), (2, 3), (4,)]</code>, empty input produces none, and nonpositive size raises.</li>
+<li><strong>Debugging:</strong> Repair a function that returns a generator expression over a file after the surrounding <code>with</code> block has already closed the file. <strong>Progressive hint:</strong> Own the <code>with</code> block inside the generator that performs iteration. <strong>Verify:</strong> Partially consume the repaired file generator and then finish it; assert rows remain readable until exhaustion and the handle closes afterward.</li>
+<li><strong>Edge case and explanation:</strong> Add a quarantine side channel for malformed rows without making the clean stream eagerly load the entire file. <strong>Progressive hint:</strong> Pass a callback/list for bounded error records or yield tagged results. <strong>Verify:</strong> Feed valid/invalid/valid rows and assert the clean stream remains lazy, output order is preserved, and accepted plus quarantined counts equal input.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -355,17 +488,33 @@ result = list(parsed_integers([&quot;10\n&quot;, &quot;\n&quot;, &quot;20\n&quot
 <li><a href="python-23.html#learner">Open the learner notebook</a></li>
 <li><a href="python-23.html#solution-1">Check the separate solution</a></li>
 <li><a href="python-24.html#guide">Next: Day 24 — Exploratory data analysis</a></li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-23`
+(Day 23 — Streaming Data Pipelines and Generators). Direct catalog prerequisites: `python-22`.
+I have completed the direct prerequisites: `python-22`. Emphasize lazy, composable data-pipeline stages with explicit resource and error policy.
+Read `python/ds-60day/companion-guides/day23_data_pipelines_generators.md` and use the learner notebook
+`python/ds-60day/notebooks/day23_data_pipelines_generators.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -382,12 +531,12 @@ result = list(parsed_integers([&quot;10\n&quot;, &quot;\n&quot;, &quot;20\n&quot
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-23-data-pipelines-functions-generators-memory-efficient-processing">Day 23 — Data pipelines: functions, generators, memory-efficient processing<a class="heading-anchor" href="#learner--cell-1--day-23-data-pipelines-functions-generators-memory-efficient-processing" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -396,7 +545,72 @@ result = list(parsed_integers([&quot;10\n&quot;, &quot;\n&quot;, &quot;20\n&quot
 <li>Chunk large files.</li>
 <li>Compose transforms with .pipe.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from pathlib import Path</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
+<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>This is the editable learner artifact for <code>python-23</code>. Read <code>python/ds-60day/companion-guides/day23_data_pipelines_generators.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
+<p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
+<p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--core-mental-model">Core mental model<a class="heading-anchor" href="#learner--cell-3--core-mental-model" aria-label="Link to this section">#</a></h4>
+<p>A pipeline is a sequence of stages that turn input into output. Give each stage one responsibility—read, parse, validate, normalize, filter, batch, or write—and define the shape it accepts and yields. Small stages are easier to test and recombine than one function mixing files, rules, logging, and output.</p>
+<p>Generator stages keep memory bounded by yielding one item at a time. Calling a generator function does not run its body; iteration starts work and advances state. The stage that opens a resource should own its <code>with</code> block for the entire iteration. Decide whether malformed records stop the stream, are skipped with evidence, or go to quarantine.</p>
+<h5 id="learner--cell-3--vocabulary">Vocabulary<a class="heading-anchor" href="#learner--cell-3--vocabulary" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>pipeline:</strong> an ordered composition of input/output stages.</li>
+<li><strong>stage:</strong> one transformation with a stated input and output contract.</li>
+<li><strong>streaming:</strong> processing incrementally rather than loading everything.</li>
+<li><strong>backpressure:</strong> a consumer limiting how quickly upstream work advances.</li>
+<li><strong>batch:</strong> a bounded group processed or written together.</li>
+<li><strong>quarantine:</strong> separate retention of invalid records and failure reasons.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<p><code>yield normalized</code> pauses a generator stage after producing one record. <code>yield from iterable</code> delegates successive values to another iterable. A consumer such as <code>for batch in batches(rows, 100):</code> drives the whole upstream chain; without consumption, no generator body or file read occurs.</p>
+<h5 id="learner--cell-4--worked-example-1-compose-lazy-normalization-and-filtering">Worked example 1 — Compose lazy normalization and filtering<a class="heading-anchor" href="#learner--cell-4--worked-example-1-compose-lazy-normalization-and-filtering" aria-label="Link to this section">#</a></h5>
+<p>Each stage consumes and yields one record at a time. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from collections.abc import Iterable, Iterator</span>
+<span> </span>
+<span>def normalize(rows: Iterable[dict[str, str]]) -&gt; Iterator[dict[str, str]]:</span>
+<span>    for row in rows:</span>
+<span>        yield {&quot;name&quot;: row[&quot;name&quot;].strip(), &quot;status&quot;: row[&quot;status&quot;].lower()}</span>
+<span> </span>
+<span>def active_only(rows: Iterable[dict[str, str]]) -&gt; Iterator[dict[str, str]]:</span>
+<span>    for row in rows:</span>
+<span>        if row[&quot;status&quot;] == &quot;active&quot;:</span>
+<span>            yield row</span>
+<span> </span>
+<span>source = [{&quot;name&quot;: &quot; Ada &quot;, &quot;status&quot;: &quot;ACTIVE&quot;}, {&quot;name&quot;: &quot;Lin&quot;, &quot;status&quot;: &quot;inactive&quot;}]</span>
+<span>list(active_only(normalize(source)))</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> <code>[{&#x27;name&#x27;: &#x27;Ada&#x27;, &#x27;status&#x27;: &#x27;active&#x27;}]</code>. No stage needed all records at once.</p>
+<p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
+<h5 id="learner--cell-6--worked-example-2-preserve-a-final-partial-batch">Worked example 2 — Preserve a final partial batch<a class="heading-anchor" href="#learner--cell-6--worked-example-2-preserve-a-final-partial-batch" aria-label="Link to this section">#</a></h5>
+<p>Batch boundaries are part of the contract. Predict first; then run the next cell.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>def batches(items: Iterable[int], size: int) -&gt; Iterator[tuple[int, ...]]:</span>
+<span>    if size &lt;= 0:</span>
+<span>        raise ValueError(&quot;size must be positive&quot;)</span>
+<span>    batch = []</span>
+<span>    for item in items:</span>
+<span>        batch.append(item)</span>
+<span>        if len(batch) == size:</span>
+<span>            yield tuple(batch)</span>
+<span>            batch = []</span>
+<span>    if batch:</span>
+<span>        yield tuple(batch)</span>
+<span> </span>
+<span>list(batches(range(5), 2))</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>[(0, 1), (2, 3), (4,)]</code>. The last partial batch is not silently lost.</p>
+<h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
+<p>When evidence differs from your prediction, use this order:</p>
+<ol>
+<li>Test each stage with a tiny list before composing the pipeline.</li>
+<li>If no work occurs, confirm that a consumer actually iterates the generator.</li>
+<li>Keep a file&#x27;s <code>with</code> block inside the generator that performs iteration.</li>
+<li>Count input, accepted, quarantined, and output records to reconcile every path.</li>
+</ol>
+<p><strong>Alternative to compare:</strong> Use eager lists for small data and simple debugging; use lazy stages when memory, streaming, or early stopping matters.</p>
+<p><strong>Boundary to test:</strong> Partial consumption, consumer failure, invalid batch size, final partial batch, malformed first/last rows, and cleanup on exceptions need tests.</p>
+<p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from pathlib import Path</span>
 <span>def read_lines(path, chunk=1024):</span>
 <span>    with open(path, &#x27;r&#x27;, encoding=&#x27;utf-8&#x27;) as f:</span>
 <span>        while True:</span>
@@ -412,52 +626,119 @@ result = list(parsed_integers([&quot;10\n&quot;, &quot;\n&quot;, &quot;20\n&quot
 <span># list(only_numbers(read_lines(&#x27;data.txt&#x27;)))</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Build a CSV streaming cleaner that yields normalized row dictionaries. <strong>Hint:</strong> let the generator open the file inside its own <code>with</code> block and use <code>csv.DictReader</code>; state whether malformed rows stop or are quarantined.</li>
-<li>Compose generators to filter, map, and batch rows. <strong>Hint:</strong> give every stage one responsibility, preserve laziness, and make the final partial batch part of the contract.</li>
+<li>Build <code>stream_clean_csv(path)</code> that opens a UTF-8 CSV inside the generator, yields one normalized row dictionary at a time, and follows a written malformed-row policy. <strong>Constraints:</strong> use <code>csv.DictReader</code>, keep the file open during iteration, and do not return a list. <strong>Verify:</strong> partially consume two rows, consume the rest, test an empty file, and confirm the handle closes after completion/failure.</li>
 </ol>
-<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Compose separate generator stages to filter, map, and batch clean rows. <strong>Contract:</strong> every stage documents input/output shape; batch size must be positive; the final partial batch is yielded. <strong>Verify:</strong> on a five-row fixture with size two, assert exact batches, source order, and input = accepted + quarantined + deliberately filtered counts.</li>
+</ol>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Build one-responsibility lazy stages with explicit resource ownership, error policy, and final-partial-batch behavior.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization. <strong>Progressive hint:</strong> Calling a generator function creates an iterator; its body starts on iteration.</li>
-<li><strong>Tracing:</strong> Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. <strong>Progressive hint:</strong> Consumption is stateful and does not rewind automatically.</li>
-<li><strong>Implementation:</strong> Implement <code>batch_rows(rows, size)</code> yielding tuples and preserving the final partial batch. <strong>Progressive hint:</strong> Validate positive size and reset the accumulator after each yield.</li>
-<li><strong>Debugging:</strong> Repair a function that returns a generator expression over a file after the surrounding <code>with</code> block has already closed the file. <strong>Progressive hint:</strong> Own the <code>with</code> block inside the generator that performs iteration.</li>
-<li><strong>Edge case and explanation:</strong> Add a quarantine side channel for malformed rows without making the clean stream eagerly load the entire file. <strong>Progressive hint:</strong> Pass a callback/list for bounded error records or yield tagged results.</li>
+<li><strong>Prediction:</strong> Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization. <strong>Progressive hint:</strong> Calling a generator function creates an iterator; its body starts on iteration. <strong>Verify:</strong> Append an event inside the generator body and assert no event at construction, one at first <code>next</code>, and all remaining events only after full consumption.</li>
+<li><strong>Tracing:</strong> Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. <strong>Progressive hint:</strong> Consumption is stateful and does not rewind automatically. <strong>Verify:</strong> Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4—never a restarted sequence.</li>
+<li><strong>Implementation:</strong> Implement <code>batch_rows(rows, size)</code> yielding tuples and preserving the final partial batch. <strong>Progressive hint:</strong> Validate positive size and reset the accumulator after each yield. <strong>Verify:</strong> Assert five rows at size two produce <code>[(0, 1), (2, 3), (4,)]</code>, empty input produces none, and nonpositive size raises.</li>
+<li><strong>Debugging:</strong> Repair a function that returns a generator expression over a file after the surrounding <code>with</code> block has already closed the file. <strong>Progressive hint:</strong> Own the <code>with</code> block inside the generator that performs iteration. <strong>Verify:</strong> Partially consume the repaired file generator and then finish it; assert rows remain readable until exhaustion and the handle closes afterward.</li>
+<li><strong>Edge case and explanation:</strong> Add a quarantine side channel for malformed rows without making the clean stream eagerly load the entire file. <strong>Progressive hint:</strong> Pass a callback/list for bounded error records or yield tagged results. <strong>Verify:</strong> Feed valid/invalid/valid rows and assert the clean stream remains lazy, output order is preserved, and accepted plus quarantined counts equal input.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Predict first. Then write small code and assertions below each label.</span>
-<span># Keep the official solution closed until you have tested an honest attempt.</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Build <code>stream_clean_csv(path)</code> that opens a UTF-8 CSV inside the generator, yields one normalized row dictionary at a time, and follows a written malformed-row policy. <strong>Constraints:</strong> use <code>csv.DictReader</code>, keep the file open during iteration, and do not return a list. <strong>Verify:</strong> partially consume two rows, consume the rest, test an empty file, and confirm the handle closes after completion/failure.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
+<span># Short contract: Build `stream_clean_csv(path)` that opens a UTF-8 CSV inside the generator, yields one normalized row dictionary at a time, and follows a written malformed-row policy. use `csv....</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 3 — Prediction</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Compose separate generator stages to filter, map, and batch clean rows. <strong>Contract:</strong> every stage documents input/output shape; batch size must be positive; the final partial batch is yielded. <strong>Verify:</strong> on a five-row fixture with size two, assert exact batches, source order, and input = accepted + quarantined + deliberately filtered counts.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
+<span># Short contract: Compose separate generator stages to filter, map, and batch clean rows. every stage documents input/output shape; batch size must be positive; the final partial batch is yielded...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 4 — Tracing</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization. <strong>Progressive hint:</strong> Calling a generator function creates an iterator; its body starts on iteration. <strong>Verify:</strong> Append an event inside the generator body and assert no event at construction, one at first <code>next</code>, and all remaining events only after full consumption.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
+<span># Short contract: Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization. Calling a generator function creates an iterator; its body s...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 5 — Implementation</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. <strong>Progressive hint:</strong> Consumption is stateful and does not rewind automatically. <strong>Verify:</strong> Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4—never a restarted sequence.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
+<span># Short contract: Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. Consumption is stateful and does not rewind automatically. As...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 6 — Debugging</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement <code>batch_rows(rows, size)</code> yielding tuples and preserving the final partial batch. <strong>Progressive hint:</strong> Validate positive size and reset the accumulator after each yield. <strong>Verify:</strong> Assert five rows at size two produce <code>[(0, 1), (2, 3), (4,)]</code>, empty input produces none, and nonpositive size raises.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
+<span># Short contract: Implement `batch_rows(rows, size)` yielding tuples and preserving the final partial batch. Validate positive size and reset the accumulator after each yield. Assert five rows at...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 7 — Edge case and explanation</span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair a function that returns a generator expression over a file after the surrounding <code>with</code> block has already closed the file. <strong>Progressive hint:</strong> Own the <code>with</code> block inside the generator that performs iteration. <strong>Verify:</strong> Partially consume the repaired file generator and then finish it; assert rows remain readable until exhaustion and the handle closes afterward.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
+<span># Short contract: Repair a function that returns a generator expression over a file after the surrounding `with` block has already closed the file. Own the `with` block inside the generator that...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Add a quarantine side channel for malformed rows without making the clean stream eagerly load the entire file. <strong>Progressive hint:</strong> Pass a callback/list for bounded error records or yield tagged results. <strong>Verify:</strong> Feed valid/invalid/valid rows and assert the clean stream remains lazy, output order is preserved, and accepted plus quarantined counts equal input.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
+<span># Short contract: Add a quarantine side channel for malformed rows without making the clean stream eagerly load the entire file. Pass a callback/list for bounded error records or yield tagged res...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -481,115 +762,172 @@ result = list(parsed_integers([&quot;10\n&quot;, &quot;\n&quot;, &quot;20\n&quot
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-23-solutions-data-pipelines-and-generators">Day 23 — Solutions: Data Pipelines and Generators<a class="heading-anchor" href="#solution-1--day-23-solutions-data-pipelines-and-generators" aria-label="Link to this section">#</a></h3>
-<p>We build a streaming CSV cleaner and compose generators to filter/map/batch rows.</p>
-<p>Contents</p>
+<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
+<p>These worked answers demonstrate <strong>lazy, composable data-pipeline stages with explicit resource and error policy</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
+<p>A pipeline is a sequence of stages that turn input into output. Give each stage one responsibility—read, parse, validate, normalize, filter, batch, or write—and define the shape it accepts and yields. Small stages are easier to test and recombine than one function mixing files, rules, logging, and output.</p>
+<p>Generator stages keep memory bounded by yielding one item at a time. Calling a generator function does not run its body; iteration starts work and advances state. The stage that opens a resource should own its <code>with</code> block for the entire iteration. Decide whether malformed records stop the stream, are skipped with evidence, or go to quarantine.</p>
+<h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
-<li>Exercise 1: CSV streaming cleaner (yield rows)</li>
-<li>Exercise 2: Compose generators to filter, map, and batch</li>
+<li><strong>pipeline:</strong> an ordered composition of input/output stages.</li>
+<li><strong>stage:</strong> one transformation with a stated input and output contract.</li>
+<li><strong>streaming:</strong> processing incrementally rather than loading everything.</li>
+<li><strong>backpressure:</strong> a consumer limiting how quickly upstream work advances.</li>
+<li><strong>batch:</strong> a bounded group processed or written together.</li>
+<li><strong>quarantine:</strong> separate retention of invalid records and failure reasons.</li>
 </ul>
-<hr>
-<p>Exercise 1 — CSV streaming cleaner</p>
-<pre><code class="language-python">from __future__ import annotations
-from typing import Iterable, Iterator
-import csv
+<h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
+<p>For this lesson&#x27;s <strong>lazy, composable data-pipeline stages with explicit resource and error policy</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Build <code>stream_clean_csv(path)</code> that opens a UTF-8 CSV inside the generator, yields one normalized row dictionary at a time, and follows a written malformed-row policy. <strong>Constraints:</strong> use <code>csv.DictReader</code>, keep the file open during iteration, and do not return a list. <strong>Verify:</strong> partially consume two rows, consume the rest, test an empty file, and confirm the handle closes after completion/failure.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Build <code>stream_clean_csv(path)</code> that opens a UTF-8 CSV inside the generator, yields one normalized row dictionary at a time, and follows a written malformed-row policy. Constraints: use <code>csv.DictReader</code>, keep the file open during iteration, and do not return a list. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: partially consume two rows, consume the rest, test an empty file, and confirm the handle closes after completion/failure. That connects the answer to lazy, composable data-pipeline stages with explicit resource and error policy.</p>
+<pre><code class="language-python">import csv
+from collections.abc import Iterator
 from pathlib import Path
+import tempfile
 
 
-def stream_csv(path: Path) -&gt; Iterator[dict[str, str]]:
-    with path.open(encoding=&#x27;utf-8&#x27;, newline=&#x27;&#x27;) as f:
-        reader = csv.DictReader(f)
-        for row in reader:
+def stream_clean_csv(path: Path) -&gt; Iterator[dict[str, str]]:
+    &#x27;&#x27;&#x27;Yield normalized valid rows; skip rows missing name or status.&#x27;&#x27;&#x27;
+
+    with path.open(encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as handle:
+        for row in csv.DictReader(handle):
+            if not row.get(&quot;name&quot;) or not row.get(&quot;status&quot;):
+                continue
+            yield {
+                &quot;name&quot;: row[&quot;name&quot;].strip(),
+                &quot;status&quot;: row[&quot;status&quot;].strip().lower(),
+            }
+
+
+with tempfile.TemporaryDirectory() as temporary:
+    folder = Path(temporary)
+    source = folder / &quot;rows.csv&quot;
+    source.write_text(
+        &quot;name,status\n&quot;
+        &quot;Ada,ACTIVE\n&quot;
+        &quot;Lin,inactive\n&quot;
+        &quot;Grace,active\n&quot;,
+        encoding=&quot;utf-8&quot;,
+    )
+    stream = stream_clean_csv(source)
+    first = next(stream)
+    second = next(stream)
+    rest = list(stream)
+    assert first == {&quot;name&quot;: &quot;Ada&quot;, &quot;status&quot;: &quot;active&quot;}
+    assert second == {&quot;name&quot;: &quot;Lin&quot;, &quot;status&quot;: &quot;inactive&quot;}
+    assert rest == [{&quot;name&quot;: &quot;Grace&quot;, &quot;status&quot;: &quot;active&quot;}]
+    assert stream.gi_frame is None
+
+    partial = stream_clean_csv(source)
+    assert next(partial)[&quot;name&quot;] == &quot;Ada&quot;
+    partial.close()
+    assert partial.gi_frame is None
+
+    empty = folder / &quot;empty.csv&quot;
+    empty.write_text(&quot;name,status\n&quot;, encoding=&quot;utf-8&quot;)
+    assert list(stream_clean_csv(empty)) == []</code></pre>
+<p>Because the <code>with</code> block surrounds <code>yield</code>, the file remains open while iteration is active and closes on exhaustion or generator close.</p>
+<p><strong>Verification evidence:</strong> partially consume two rows, consume the rest, test an empty file, and confirm the handle closes after completion/failure.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Compose separate generator stages to filter, map, and batch clean rows. <strong>Contract:</strong> every stage documents input/output shape; batch size must be positive; the final partial batch is yielded. <strong>Verify:</strong> on a five-row fixture with size two, assert exact batches, source order, and input = accepted + quarantined + deliberately filtered counts.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Compose separate generator stages to filter, map, and batch clean rows. Contract: every stage documents input/output shape; batch size must be positive; the final partial batch is yielded. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: on a five-row fixture with size two, assert exact batches, source order, and input = accepted + quarantined + deliberately filtered counts. That connects the answer to lazy, composable data-pipeline stages with explicit resource and error policy.</p>
+<pre><code class="language-python">from collections.abc import Iterable, Iterator
+
+
+def active(
+    rows: Iterable[dict[str, str]],
+    audit: dict[str, int],
+) -&gt; Iterator[dict[str, str]]:
+    &#x27;&#x27;&#x27;Map row dictionaries to accepted rows; audit other outcomes.&#x27;&#x27;&#x27;
+
+    for row in rows:
+        if not row.get(&quot;name&quot;) or not row.get(&quot;status&quot;):
+            audit[&quot;quarantined&quot;] += 1
+        elif row[&quot;status&quot;] != &quot;active&quot;:
+            audit[&quot;filtered&quot;] += 1
+        else:
+            audit[&quot;accepted&quot;] += 1
             yield row
 
 
-def clean_rows(rows: Iterable[dict[str, str]]) -&gt; Iterator[dict[str, str]]:
-    for r in rows:
-        # Example cleanup: trim spaces and uppercase a code field
-        r = {k: (v.strip() if isinstance(v, str) else v) for k, v in r.items()}
-        if &#x27;code&#x27; in r and isinstance(r[&#x27;code&#x27;], str):
-            r[&#x27;code&#x27;] = r[&#x27;code&#x27;].upper()
-        yield r
+def add_label(rows: Iterable[dict[str, str]]) -&gt; Iterator[dict[str, str]]:
+    &#x27;&#x27;&#x27;Map one accepted row to one copied row with a display label.&#x27;&#x27;&#x27;
 
-# Usage:
-# for row in clean_rows(stream_csv(Path(&#x27;data.csv&#x27;))):
-#     process(row)</code></pre>
-<p>Line-by-line</p>
-<ul>
-<li>stream_csv yields one row at a time; no large list in memory</li>
-<li>clean_rows transforms without side effects outside the generator</li>
-</ul>
-<hr>
-<p>Exercise 2 — Compose filter/map/batch</p>
-<pre><code class="language-python">from itertools import islice
-from typing import Iterable, Iterator, Callable, TypeVar
-
-T = TypeVar(&#x27;T&#x27;)
+    for row in rows:
+        yield {**row, &quot;label&quot;: row[&quot;name&quot;].title()}
 
 
-def only_if(rows: Iterable[T], pred: Callable[[T], bool]) -&gt; Iterator[T]:
-    for r in rows:
-        if pred(r):
-            yield r
+def batch(
+    rows: Iterable[dict[str, str]], size: int
+) -&gt; Iterator[tuple[dict[str, str], ...]]:
+    &#x27;&#x27;&#x27;Map a row stream to ordered tuples of at most ``size`` rows.&#x27;&#x27;&#x27;
+
+    if size &lt;= 0:
+        raise ValueError(&quot;size must be positive&quot;)
+    current = []
+    for row in rows:
+        current.append(row)
+        if len(current) == size:
+            yield tuple(current)
+            current = []
+    if current:
+        yield tuple(current)
 
 
-def mapper(rows: Iterable[T], fn: Callable[[T], T]) -&gt; Iterator[T]:
-    for r in rows:
-        yield fn(r)
+fixture = [
+    {&quot;name&quot;: &quot;ada&quot;, &quot;status&quot;: &quot;active&quot;},
+    {&quot;name&quot;: &quot;lin&quot;, &quot;status&quot;: &quot;inactive&quot;},
+    {&quot;name&quot;: &quot;grace&quot;, &quot;status&quot;: &quot;active&quot;},
+    {&quot;name&quot;: &quot;&quot;, &quot;status&quot;: &quot;active&quot;},
+    {&quot;name&quot;: &quot;guido&quot;, &quot;status&quot;: &quot;active&quot;},
+]
+audit = {&quot;accepted&quot;: 0, &quot;filtered&quot;: 0, &quot;quarantined&quot;: 0}
+result = list(batch(add_label(active(fixture, audit)), 2))
+assert [[row[&quot;label&quot;] for row in rows] for rows in result] == [
+    [&quot;Ada&quot;, &quot;Grace&quot;],
+    [&quot;Guido&quot;],
+]
+assert audit == {&quot;accepted&quot;: 3, &quot;filtered&quot;: 1, &quot;quarantined&quot;: 1}
+assert len(fixture) == sum(audit.values())
+assert [row[&quot;name&quot;] for rows in result for row in rows] == [
+    &quot;ada&quot;, &quot;grace&quot;, &quot;guido&quot;
+]
 
-
-def batched(rows: Iterable[T], size: int) -&gt; Iterator[list[T]]:
-    it = iter(rows)
-    while True:
-        chunk = list(islice(it, size))
-        if not chunk:
-            return
-        yield chunk
-
-# Example: filter rows by predicate, map to typed dict, then batch
-# pipeline = batched(
-#     mapper(
-#         only_if(clean_rows(stream_csv(Path(&#x27;data.csv&#x27;))), lambda r: r.get(&#x27;qty&#x27;,&#x27;0&#x27;).isdigit()),
-#         lambda r: {**r, &#x27;qty&#x27;: int(r[&#x27;qty&#x27;])}
-#     ),
-#     size=500
-#)
-# for chunk in pipeline:
-#     bulk_insert(chunk)</code></pre>
-<p>Notes</p>
-<ul>
-<li>Keep transforms pure; side effects (DB writes) occur at pipeline edges</li>
-<li>Use itertools and generator composition to stay memory-efficient</li>
-</ul>
-<hr>
-<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
-<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Build a CSV streaming cleaner that yields normalized row dictionaries. <strong>Hint:</strong> let the generator open the file inside its own <code>with</code> block and use <code>csv.DictReader</code>; state whether malformed rows stop or are quarantined.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Compose generators to filter, map, and batch rows. <strong>Hint:</strong> give every stage one responsibility, preserve laziness, and make the final partial batch part of the contract.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-3-prediction">Exercise 3 — Prediction<a class="heading-anchor" href="#solution-1--exercise-3-prediction" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization.</p>
-<p><strong>Reasoning checkpoint:</strong> Calling a generator function creates an iterator; its body starts on iteration. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-4-tracing">Exercise 4 — Tracing<a class="heading-anchor" href="#solution-1--exercise-4-tracing" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see.</p>
-<p><strong>Reasoning checkpoint:</strong> Consumption is stateful and does not rewind automatically. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-5-implementation">Exercise 5 — Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Implement <code>batch_rows(rows, size)</code> yielding tuples and preserving the final partial batch.</p>
-<p><strong>Reasoning checkpoint:</strong> Validate positive size and reset the accumulator after each yield. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-6-debugging">Exercise 6 — Debugging<a class="heading-anchor" href="#solution-1--exercise-6-debugging" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Repair a function that returns a generator expression over a file after the surrounding <code>with</code> block has already closed the file.</p>
-<p><strong>Reasoning checkpoint:</strong> Own the <code>with</code> block inside the generator that performs iteration. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-7-edge-case-and-explanation">Exercise 7 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-7-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Add a quarantine side channel for malformed rows without making the clean stream eagerly load the entire file.</p>
-<p><strong>Reasoning checkpoint:</strong> Pass a callback/list for bounded error records or yield tagged results. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+try:
+    list(batch([], 0))
+except ValueError:
+    pass
+else:
+    raise AssertionError(&quot;non-positive batch size should fail&quot;)</code></pre>
+<p><strong>Verification evidence:</strong> on a five-row fixture with size two, assert exact batches, source order, and input = accepted + quarantined + deliberately filtered counts.</p>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization. <strong>Progressive hint:</strong> Calling a generator function creates an iterator; its body starts on iteration. <strong>Verify:</strong> Append an event inside the generator body and assert no event at construction, one at first <code>next</code>, and all remaining events only after full consumption.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization. Progressive hint: Calling a generator function creates an iterator; its body starts on iteration. Then compare the prediction with this proof target: Append an event inside the generator body and assert no event at construction, one at first <code>next</code>, and all remaining events only after full consumption. This makes lazy, composable data-pipeline stages with explicit resource and error policy observable instead of relying on intuition.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Append an event inside the generator body and assert no event at construction, one at first <code>next</code>, and all remaining events only after full consumption.</p>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. <strong>Progressive hint:</strong> Consumption is stateful and does not rewind automatically. <strong>Verify:</strong> Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4—never a restarted sequence.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. Progressive hint: Consumption is stateful and does not rewind automatically. Record the named value, shape, label, or iterator position needed to establish: Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4—never a restarted sequence. The trace exposes lazy, composable data-pipeline stages with explicit resource and error policy directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4—never a restarted sequence.</p>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement <code>batch_rows(rows, size)</code> yielding tuples and preserving the final partial batch. <strong>Progressive hint:</strong> Validate positive size and reset the accumulator after each yield. <strong>Verify:</strong> Assert five rows at size two produce <code>[(0, 1), (2, 3), (4,)]</code>, empty input produces none, and nonpositive size raises.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement <code>batch_rows(rows, size)</code> yielding tuples and preserving the final partial batch. Progressive hint: Validate positive size and reset the accumulator after each yield. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert five rows at size two produce <code>[(0, 1), (2, 3), (4,)]</code>, empty input produces none, and nonpositive size raises. That connects the answer to lazy, composable data-pipeline stages with explicit resource and error policy.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert five rows at size two produce <code>[(0, 1), (2, 3), (4,)]</code>, empty input produces none, and nonpositive size raises.</p>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a function that returns a generator expression over a file after the surrounding <code>with</code> block has already closed the file. <strong>Progressive hint:</strong> Own the <code>with</code> block inside the generator that performs iteration. <strong>Verify:</strong> Partially consume the repaired file generator and then finish it; assert rows remain readable until exhaustion and the handle closes afterward.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a function that returns a generator expression over a file after the surrounding <code>with</code> block has already closed the file. Progressive hint: Own the <code>with</code> block inside the generator that performs iteration. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Partially consume the repaired file generator and then finish it; assert rows remain readable until exhaustion and the handle closes afterward. The diagnosis depends on lazy, composable data-pipeline stages with explicit resource and error policy.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Partially consume the repaired file generator and then finish it; assert rows remain readable until exhaustion and the handle closes afterward.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Add a quarantine side channel for malformed rows without making the clean stream eagerly load the entire file. <strong>Progressive hint:</strong> Pass a callback/list for bounded error records or yield tagged results. <strong>Verify:</strong> Feed valid/invalid/valid rows and assert the clean stream remains lazy, output order is preserved, and accepted plus quarantined counts equal input.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Add a quarantine side channel for malformed rows without making the clean stream eagerly load the entire file. Progressive hint: Pass a callback/list for bounded error records or yield tagged results. Values below, at, and above the named boundary must produce the evidence Feed valid/invalid/valid rows and assert the clean stream remains lazy, output order is preserved, and accepted plus quarantined counts equal input. Those cases show how lazy, composable data-pipeline stages with explicit resource and error policy behaves at its edge.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Feed valid/invalid/valid rows and assert the clean stream remains lazy, output order is preserved, and accepted plus quarantined counts equal input.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Build one-responsibility lazy stages with explicit resource ownership, error policy, and final-partial-batch behavior.</p>
-<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
-<h5 id="solution-1--practices-1-2-laziness-is-stateful">Practices 1–2 — Laziness is stateful<a class="heading-anchor" href="#solution-1--practices-1-2-laziness-is-stateful" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-laziness-is-stateful">Shared implementation for Exercises 3–4 — Laziness is stateful<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-laziness-is-stateful" aria-label="Link to this section">#</a></h5>
 <p>A generator body starts on the first <code>next</code>, not at function call. After two items are consumed, downstream stages can see only the remaining three unless a fresh iterator is constructed.</p>
-<h5 id="solution-1--practices-3-5-batching-and-correct-resource-lifetime">Practices 3–5 — Batching and correct resource lifetime<a class="heading-anchor" href="#solution-1--practices-3-5-batching-and-correct-resource-lifetime" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-batching-and-correct-resource-lifetime">Shared implementation for Exercises 5–7 — Batching and correct resource lifetime<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-batching-and-correct-resource-lifetime" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
@@ -631,7 +969,7 @@ def nonblank_lines(path: Path, rejected: list[tuple[int, str]]) -&gt; Iterator[s
 assert list(batch_rows(range(5), 2)) == [(0, 1), (2, 3), (4,)]</code></pre>
 <p>The bounded quarantine prevents unbounded memory growth while leaving the successful stream lazy. A production pipeline might yield a tagged result object to route successes and errors to separate sinks.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -639,7 +977,7 @@ assert list(batch_rows(range(5), 2)) == [(0, 1), (2, 3), (4,)]</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -787,7 +1125,38 @@ assert list(batch_rows(range(5), 2)) == [(0, 1), (2, 3), (4,)]</code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>The bounded quarantine prevents unbounded memory growth while leaving the successful stream lazy. A production pipeline might yield a tagged result object to route successes and errors to separate sinks.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-23`
+(Day 23 — Streaming Data Pipelines and Generators). Direct catalog prerequisites: `python-22`.
+I have completed the direct prerequisites: `python-22`. Emphasize lazy, composable data-pipeline stages with explicit resource and error policy.
+Read `python/ds-60day/companion-guides/day23_data_pipelines_generators.md` and use the learner notebook
+`python/ds-60day/notebooks/day23_data_pipelines_generators.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-22.html"><small>Previous lesson</small><strong>python-22</strong><span>Advanced pandas Apply Query Eval</span></a>
@@ -879,6 +1248,23 @@ assert list(batch_rows(range(5), 2)) == [(0, 1), (2, 3), (4,)]</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

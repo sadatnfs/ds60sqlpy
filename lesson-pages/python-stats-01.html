@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this Python file from the repository environment</h2>
           <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_stats_01_resampling_experiments.py</code>.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,12 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
-          
+
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--resampling-experiments-and-causal-boundaries">Resampling, experiments, and causal boundaries<a class="heading-anchor" href="#guide--resampling-experiments-and-causal-boundaries" aria-label="Link to this section">#</a></h3>
 <p><strong>Stable ID:</strong> <code>python-stats-01</code></p>
 <p><strong>Level:</strong> advanced</p>
@@ -327,6 +366,58 @@
 <pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_stats_01_resampling_experiments.py</code></pre>
 <p>The fixture has eight completed units per arm, identical baseline score distributions, and treatment outcomes shifted upward by two. It is deliberately small enough for all <code>C(16, 8) = 12,870</code> assignments to be enumerated.</p>
 <p>The solution reports the estimate, standardized effect, bootstrap interval, exact permutation p-value, approximate sample plan, and adjusted p-values. None alone establishes that a real-world causal design was implemented.</p>
+<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe python\professional\lessons\py_stats_01_resampling_experiments.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_stats_01_resampling_experiments.py</code></pre>
+<p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
+<h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
+<p>Resampling approximates repeated sampling under an explicit scheme. A bootstrap samples observational units with replacement to estimate an estimator&#x27;s sampling variability. A permutation test shuffles labels under an exchangeability/null assumption to build a reference distribution. Clustered or temporal data needs cluster/block schemes.</p>
+<p>In an experiment, the estimand states the effect being targeted, such as difference in means under assigned treatment. Random assignment supports causal interpretation when assignment, interference, attrition, compliance, and measurement assumptions are credible. Observational adjustment does not recreate randomization automatically.</p>
+<ul>
+<li><strong>resampling unit:</strong> matches the independent assignment/observation grain rather than blindly sampling rows.</li>
+<li><strong>seeded bootstrap/permutation loop:</strong> produces a reproducible distribution of a declared statistic with Monte Carlo error.</li>
+<li><strong>estimand + assignment mechanism:</strong> defines which causal contrast is identified and which assumptions support it.</li>
+</ul>
+<h5 id="guide--micro-example-a-bootstrap-a-mean-difference-with-a-seeded-generator">Micro-example A — bootstrap a mean difference with a seeded generator<a class="heading-anchor" href="#guide--micro-example-a-bootstrap-a-mean-difference-with-a-seeded-generator" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">import numpy as np
+
+control = np.array([2.0, 2.5, 3.0, 3.5, 4.0])
+treatment = np.array([3.0, 3.5, 4.0, 4.5, 5.0])
+rng = np.random.default_rng(6101)
+draws = np.empty(5_000)
+for index in range(draws.size):
+    c = rng.choice(control, size=control.size, replace=True)
+    t = rng.choice(treatment, size=treatment.size, replace=True)
+    draws[index] = t.mean() - c.mean()
+interval = np.quantile(draws, [0.025, 0.975])
+print({&quot;estimate&quot;: treatment.mean() - control.mean(), &quot;interval&quot;: interval})</code></pre>
+<p><strong>Expected observation:</strong> The resampled interval describes uncertainty under independent within-group resampling; the small sample makes it wide/discrete.</p>
+<p><strong>Why it matters:</strong> Rows are independent units and each group&#x27;s empirical distribution is a useful population proxy.</p>
+<h5 id="guide--micro-example-b-build-a-randomization-style-null-distribution">Micro-example B — build a randomization-style null distribution<a class="heading-anchor" href="#guide--micro-example-b-build-a-randomization-style-null-distribution" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">import numpy as np
+
+outcomes = np.array([1, 2, 3, 4, 7, 8, 9, 10], dtype=float)
+assigned = np.array([0, 0, 0, 0, 1, 1, 1, 1], dtype=int)
+observed = outcomes[assigned == 1].mean() - outcomes[assigned == 0].mean()
+rng = np.random.default_rng(6102)
+null = []
+for _ in range(5_000):
+    shuffled = rng.permutation(assigned)
+    null.append(outcomes[shuffled == 1].mean() - outcomes[shuffled == 0].mean())
+p_value = np.mean(np.abs(null) &gt;= abs(observed))
+print({&quot;observed&quot;: observed, &quot;two_sided_p&quot;: p_value})</code></pre>
+<p><strong>Expected observation:</strong> The null distribution comes from assignments consistent with the shuffle rule, not from a parametric t formula.</p>
+<p><strong>Why it matters:</strong> Treatment labels are exchangeable under the sharp null and the design had no cluster/strata restrictions.</p>
+<h5 id="guide--debugging-and-transfer">Debugging and transfer<a class="heading-anchor" href="#guide--debugging-and-transfer" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Resampling rows independently when treatment or outcomes are clustered, repeated, or time-dependent.</p>
+<p><strong>Diagnostic:</strong> Write the estimand, unit, assignment/sampling mechanism, statistic, resampling rule, seed/runs, interval/test convention, and assumption violations.</p>
+<p><strong>Transfer question:</strong> How would both examples change if four observations came from two households rather than eight independent people?</p>
+<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--1-define-the-experiment-before-analysis">1. Define the experiment before analysis<a class="heading-anchor" href="#guide--1-define-the-experiment-before-analysis" aria-label="Link to this section">#</a></h5>
 <p>Write an <code>ExperimentPlan</code> containing:</p>
@@ -340,52 +431,70 @@
 <li>missing-outcome handling.</li>
 </ul>
 <p>Do this before computing outcomes.</p>
+<p><strong>Verify:</strong> Define the experiment before analysis — write an ExperimentPlan containing: - assignment unit, - one primary metric and window, - minimum sample per arm, - alpha, - intended analysis, - planned stopping/looks, and - missing-outcome handling; do this before computing outcomes.</p>
 <h5 id="guide--2-complete-standardized-effect">2. Complete standardized effect<a class="heading-anchor" href="#guide--2-complete-standardized-effect" aria-label="Link to this section">#</a></h5>
 <p>Use the pooled sample standard deviation. Reject groups smaller than two and zero pooled variance. Explain raw units and standardized units side by side.</p>
+<p><strong>Verify:</strong> Complete standardized effect — assert the standardized-effect fixture equals the hand-computed pooled-SD value within 1e-12; groups of size &lt;2 and zero pooled variance raise named errors, and the report includes raw-unit and standardized effects.</p>
 <h5 id="guide--3-bootstrap-the-difference">3. Bootstrap the difference<a class="heading-anchor" href="#guide--3-bootstrap-the-difference" aria-label="Link to this section">#</a></h5>
 <p>Resample each arm independently with replacement, compute 2,000 differences, sort them, and select percentile endpoints. Repeat with the same seed and verify equality. Change the seed and expect small endpoint variation, not a different conclusion guaranteed by design.</p>
+<p><strong>Verify:</strong> Bootstrap the difference — resample each arm independently with replacement, compute 2,000 differences, sort them, and select percentile endpoints; repeat with the same seed and verify equality; change the seed and expect small endpoint variation, not a different conclusion guaranteed by design.</p>
 <h5 id="guide--4-permute-assignments">4. Permute assignments<a class="heading-anchor" href="#guide--4-permute-assignments" aria-label="Link to this section">#</a></h5>
 <p>Pool outcomes and enumerate treatment-index combinations when feasible. Use a two-sided comparison to the observed absolute difference. For large data, use seeded Monte Carlo assignments and the plus-one p-value correction.</p>
 <p>State why permuting individual rows is invalid if assignment occurred by account or site.</p>
+<p><strong>Verify:</strong> Permute assignments — pool outcomes and enumerate treatment-index combinations when feasible; use a two-sided comparison to the observed absolute difference; state why permuting individual rows is invalid if assignment occurred by account or site.</p>
 <h5 id="guide--5-plan-sample-size">5. Plan sample size<a class="heading-anchor" href="#guide--5-plan-sample-size" aria-label="Link to this section">#</a></h5>
 <p>Use the Normal approximation for standardized effects 0.2, 0.5, and 0.8. Explain why variance uncertainty, clustering, attrition, noncompliance, and a binary metric require a more specific planner.</p>
+<p><strong>Verify:</strong> Plan sample size — use the Normal approximation for standardized effects 0.2, 0.5, and 0.8; explain why variance uncertainty, clustering, attrition, noncompliance, and a binary metric require a more specific planner.</p>
 <h5 id="guide--6-control-a-comparison-family">6. Control a comparison family<a class="heading-anchor" href="#guide--6-control-a-comparison-family" aria-label="Link to this section">#</a></h5>
 <p>Complete <code>holm_adjust</code> for three p-values. Preserve original order and enforce monotonic adjusted values after sorting. Identify the family before viewing results; splitting an inconvenient family after analysis defeats control.</p>
+<p><strong>Verify:</strong> Control a comparison family — for the three fixture p-values, print sorted raw thresholds and adjusted values, restore original order, assert adjusted values are monotone in sorted order and within [0,1], and name the predeclared comparison family.</p>
 <h5 id="guide--7-check-assignment-and-attrition">7. Check assignment and attrition<a class="heading-anchor" href="#guide--7-check-assignment-and-attrition" aria-label="Link to this section">#</a></h5>
 <p>Compute baseline standardized difference by arm. Then remove outcomes selectively from one arm and explain how that affects causal credibility even if the remaining p-value is small.</p>
+<p><strong>Verify:</strong> Check assignment and attrition — compute baseline standardized difference by arm; then remove outcomes selectively from one arm and explain how that affects causal credibility even if the remaining p-value is small.</p>
 <h5 id="guide--8-simulate-peeking-policy">8. Simulate peeking policy<a class="heading-anchor" href="#guide--8-simulate-peeking-policy" aria-label="Link to this section">#</a></h5>
 <p>Five ordinary looks each at alpha 0.05 are not one 0.05 decision. The lesson&#x27;s simple Bonferroni per-look split illustrates the budget. Compare it with a single final look and research group-sequential designs before production use.</p>
+<p><strong>Verify:</strong> Simulate peeking policy — with seed and run count declared, estimate the false-positive rate for five alpha=.05 looks, compare with one final look and the .01 Bonferroni-per-look rule, and report Monte Carlo standard errors.</p>
 <h5 id="guide--9-bound-the-claim">9. Bound the claim<a class="heading-anchor" href="#guide--9-bound-the-claim" aria-label="Link to this section">#</a></h5>
 <p>Complete <code>claim_scope</code>. Randomization, intact allocation, and no severe attrition permit a causal interpretation under additional assumptions. Observational grouping, compromised randomization, or severe differential attrition returns an associational scope.</p>
+<p><strong>Verify:</strong> Bound the claim — complete claim scope; randomization, intact allocation, and no severe attrition permit a causal interpretation under additional assumptions; observational grouping, compromised randomization, or severe differential attrition returns an associational scope.</p>
 <h5 id="guide--extended-professional-practice">Extended professional practice<a class="heading-anchor" href="#guide--extended-professional-practice" aria-label="Link to this section">#</a></h5>
 <p>These exercises move from prediction and implementation through debugging, operational trade-offs, and review. Keep the default path deterministic and offline; optional connected behavior must remain explicit.</p>
 <h5 id="guide--exercise-10-bootstrap-clustered-assignments">Exercise 10 — bootstrap clustered assignments<a class="heading-anchor" href="#guide--exercise-10-bootstrap-clustered-assignments" aria-label="Link to this section">#</a></h5>
 <p>Extend the experiment fixture with multiple rows per account. Bootstrap accounts—not rows—within each arm and compare interval width with the incorrect row bootstrap.</p>
 <p><strong>Progressive hint:</strong> Sample independent assignment units with replacement and carry all of each selected account&#x27;s observations into the resample.</p>
+<p><strong>Verify:</strong> bootstrap clustered assignments — extend the experiment fixture with multiple rows per account; bootstrap accounts—not rows—within each arm and compare interval width with the incorrect row bootstrap.</p>
 <h5 id="guide--exercise-11-bootstrap-a-ratio-metric">Exercise 11 — bootstrap a ratio metric<a class="heading-anchor" href="#guide--exercise-11-bootstrap-a-ratio-metric" aria-label="Link to this section">#</a></h5>
 <p>Estimate treatment lift for revenue per active user, preserving each user&#x27;s numerator and denominator. Handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.</p>
 <p><strong>Progressive hint:</strong> Define the estimand first; the two ratio formulas answer different questions. Resample complete user records.</p>
+<p><strong>Verify:</strong> bootstrap a ratio metric — estimate treatment lift for revenue per active user, preserving each user&#x27;s numerator and denominator; handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.</p>
 <h5 id="guide--exercise-12-apply-covariate-adjustment-without-leakage">Exercise 12 — apply covariate adjustment without leakage<a class="heading-anchor" href="#guide--exercise-12-apply-covariate-adjustment-without-leakage" aria-label="Link to this section">#</a></h5>
 <p>Use a pre-experiment outcome as a CUPED-style covariate. Estimate its adjustment coefficient without post-treatment information and compare unadjusted/adjusted variance and mean effect.</p>
 <p><strong>Progressive hint:</strong> The covariate must be measured before assignment and not affected by treatment. Center it with a documented analysis-sample mean.</p>
+<p><strong>Verify:</strong> apply covariate adjustment without leakage — use a pre-experiment outcome as a CUPED-style covariate; estimate its adjustment coefficient without post-treatment information and compare unadjusted/adjusted variance and mean effect.</p>
 <h5 id="guide--exercise-13-separate-intention-to-treat-from-treatment-on-treated">Exercise 13 — separate intention-to-treat from treatment-on-treated<a class="heading-anchor" href="#guide--exercise-13-separate-intention-to-treat-from-treatment-on-treated" aria-label="Link to this section">#</a></h5>
 <p>Simulate assigned treatment with imperfect compliance. Compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.</p>
 <p><strong>Progressive hint:</strong> Random assignment protects the assignment groups, not the self-selected compliance groups.</p>
+<p><strong>Verify:</strong> separate intention-to-treat from treatment-on-treated — simulate assigned treatment with imperfect compliance; compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.</p>
 <h5 id="guide--exercise-14-perform-missing-outcome-sensitivity">Exercise 14 — perform missing-outcome sensitivity<a class="heading-anchor" href="#guide--exercise-14-perform-missing-outcome-sensitivity" aria-label="Link to this section">#</a></h5>
 <p>Create differential attrition by arm. Report complete-case results and bounded best/worst-case outcomes under a declared feasible outcome range.</p>
 <p><strong>Progressive hint:</strong> Missing outcomes are not automatically zero or missing completely at random. Show how strong an assumption is needed to reverse the conclusion.</p>
+<p><strong>Verify:</strong> perform missing-outcome sensitivity — create differential attrition by arm; report complete-case results and bounded best/worst-case outcomes under a declared feasible outcome range.</p>
 <h5 id="guide--exercise-15-simulate-sequential-false-positives">Exercise 15 — simulate sequential false positives<a class="heading-anchor" href="#guide--exercise-15-simulate-sequential-false-positives" aria-label="Link to this section">#</a></h5>
 <p>Under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability. Compare one final look, the lesson&#x27;s simple alpha split, and a clearly labeled exploratory monitor.</p>
 <p><strong>Progressive hint:</strong> Use a seeded outer simulation and record the first crossing. The simple split illustrates budgeting; it is not an optimized group-sequential design.</p>
+<p><strong>Verify:</strong> simulate sequential false positives — under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability; compare one final look, the lesson&#x27;s simple alpha split, and a clearly labeled exploratory monitor.</p>
 <h5 id="guide--exercise-16-pre-specify-heterogeneous-effects">Exercise 16 — pre-specify heterogeneous effects<a class="heading-anchor" href="#guide--exercise-16-pre-specify-heterogeneous-effects" aria-label="Link to this section">#</a></h5>
 <p>Choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family. Contrast this with mining many cuts for the largest lift.</p>
 <p><strong>Progressive hint:</strong> An interaction test addresses whether effects differ; significance in one subgroup and not another is not itself evidence of difference.</p>
+<p><strong>Verify:</strong> pre-specify heterogeneous effects — choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family; contrast this with mining many cuts for the largest lift.</p>
 <h5 id="guide--exercise-17-run-clustered-randomization-inference">Exercise 17 — run clustered randomization inference<a class="heading-anchor" href="#guide--exercise-17-run-clustered-randomization-inference" aria-label="Link to this section">#</a></h5>
 <p>For a site-randomized experiment, permute site assignments while keeping all rows within a site together. Compare with invalid row-level permutation and state the sharp-null interpretation.</p>
 <p><strong>Progressive hint:</strong> Enumerate or sample assignments consistent with the original design, including treated-site count and any stratification.</p>
+<p><strong>Verify:</strong> run clustered randomization inference — for a site-randomized experiment, permute site assignments while keeping all rows within a site together; compare with invalid row-level permutation and state the sharp-null interpretation.</p>
 <h5 id="guide--exercise-18-produce-an-auditable-analysis-packet">Exercise 18 — produce an auditable analysis packet<a class="heading-anchor" href="#guide--exercise-18-produce-an-auditable-analysis-packet" aria-label="Link to this section">#</a></h5>
 <p>Write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.</p>
 <p><strong>Progressive hint:</strong> Generate machine-readable values and prose from one result object. Keep random seeds and units visible; exclude raw sensitive rows.</p>
+<p><strong>Verify:</strong> produce an auditable analysis packet — write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Fixture mean difference equals 2.</li>
@@ -414,17 +523,46 @@
 <li><strong>A narrow observational interval is called causal:</strong> precision does not identify an intervention effect.</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Carry the experiment plan into Python Days 35 and 45. Use <code>python-ml-01</code> to bind the resulting data snapshot, feature schema, evaluation evidence, and promoted artifact into a reproducible delivery record.</p></div>
+<p>Carry the experiment plan into Python Days 35 and 45. Use <code>python-ml-01</code> to bind the resulting data snapshot, feature schema, evaluation evidence, and promoted artifact into a reproducible delivery record.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<pre><code class="language-text">Tutor me through `python-stats-01` — Resampling, experiments, and causal boundaries.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize bootstrap and permutation resampling, experimental estimands, and causal boundaries. Use exactly these maintained learner materials:
+- guide: `python/professional/companion-guides/py_stats_01_resampling_experiments.md`
+- learner artifact: `python/professional/lessons/py_stats_01_resampling_experiments.py`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-32`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -441,13 +579,80 @@
               type="button"
               data-launch-artifact="Python source file"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
-        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-stats-01 learner lab: resampling and experiment decisions.&quot;&quot;&quot;</span>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-stats-01 learner lab: resampling and experiment decisions.</span>
+<span> </span>
+<span>Professional learner deep dive (python-stats-01)</span>
+<span>------------------------------------------------</span>
+<span> </span>
+<span>Mental model:</span>
+<span>Resampling approximates repeated sampling under an explicit scheme. A bootstrap samples</span>
+<span>observational units with replacement to estimate an estimator&#x27;s sampling variability. A</span>
+<span>permutation test shuffles labels under an exchangeability/null assumption to build a reference</span>
+<span>distribution. Clustered or temporal data needs cluster/block schemes.  In an experiment, the</span>
+<span>estimand states the effect being targeted, such as difference in means under assigned treatment.</span>
+<span>Random assignment supports causal interpretation when assignment, interference, attrition,</span>
+<span>compliance, and measurement assumptions are credible. Observational adjustment does not recreate</span>
+<span>randomization automatically.</span>
+<span> </span>
+<span>API/boundary anatomy:</span>
+<span>* resampling unit: matches the independent assignment/observation grain rather than blindly</span>
+<span>  sampling rows.</span>
+<span>* seeded bootstrap/permutation loop: produces a reproducible distribution of a declared</span>
+<span>  statistic with Monte Carlo error.</span>
+<span>* estimand + assignment mechanism: defines which causal contrast is identified and which</span>
+<span>  assumptions support it.</span>
+<span> </span>
+<span>Micro-example A — bootstrap a mean difference with a seeded generator::</span>
+<span> </span>
+<span>    import numpy as np</span>
+<span> </span>
+<span>    control = np.array([2.0, 2.5, 3.0, 3.5, 4.0])</span>
+<span>    treatment = np.array([3.0, 3.5, 4.0, 4.5, 5.0])</span>
+<span>    rng = np.random.default_rng(6101)</span>
+<span>    draws = np.empty(5_000)</span>
+<span>    for index in range(draws.size):</span>
+<span>        c = rng.choice(control, size=control.size, replace=True)</span>
+<span>        t = rng.choice(treatment, size=treatment.size, replace=True)</span>
+<span>        draws[index] = t.mean() - c.mean()</span>
+<span>    interval = np.quantile(draws, [0.025, 0.975])</span>
+<span>    print({&quot;estimate&quot;: treatment.mean() - control.mean(), &quot;interval&quot;: interval})</span>
+<span> </span>
+<span>Expected: The resampled interval describes uncertainty under independent within-group</span>
+<span>          resampling; the small sample makes it wide/discrete.</span>
+<span> </span>
+<span>Micro-example B — build a randomization-style null distribution::</span>
+<span> </span>
+<span>    import numpy as np</span>
+<span> </span>
+<span>    outcomes = np.array([1, 2, 3, 4, 7, 8, 9, 10], dtype=float)</span>
+<span>    assigned = np.array([0, 0, 0, 0, 1, 1, 1, 1], dtype=int)</span>
+<span>    observed = outcomes[assigned == 1].mean() - outcomes[assigned == 0].mean()</span>
+<span>    rng = np.random.default_rng(6102)</span>
+<span>    null = []</span>
+<span>    for _ in range(5_000):</span>
+<span>        shuffled = rng.permutation(assigned)</span>
+<span>        null.append(</span>
+<span>            outcomes[shuffled == 1].mean() - outcomes[shuffled == 0].mean()</span>
+<span>        )</span>
+<span>    p_value = np.mean(np.abs(null) &gt;= abs(observed))</span>
+<span>    print({&quot;observed&quot;: observed, &quot;two_sided_p&quot;: p_value})</span>
+<span> </span>
+<span>Expected: The null distribution comes from assignments consistent with the shuffle rule, not</span>
+<span>          from a parametric t formula.</span>
+<span> </span>
+<span>Debugging rule: Write the estimand, unit, assignment/sampling mechanism, statistic, resampling</span>
+<span>                rule, seed/runs, interval/test convention, and assumption violations.</span>
+<span> </span>
+<span>The snippets demonstrate mechanics only. They do not complete the</span>
+<span>numbered TODOs below; implement those from their stated contracts and</span>
+<span>prove normal, boundary, and failure behavior.</span>
+<span>&quot;&quot;&quot;</span>
 <span> </span>
 <span>from __future__ import annotations</span>
 <span> </span>
@@ -524,110 +729,110 @@
 <span># Prompt: Write an `ExperimentPlan` containing: - assignment unit, - one primary metric</span>
 <span># and window, - minimum sample per arm, - alpha, - intended analysis, - planned</span>
 <span># stopping/looks, and - missing-outcome handling. Do this before computing outcomes.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 2 — Complete standardized effect</span>
 <span># Prompt: Use the pooled sample standard deviation. Reject groups smaller than two and</span>
 <span># zero pooled variance. Explain raw units and standardized units side by side.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 3 — Bootstrap the difference</span>
 <span># Prompt: Resample each arm independently with replacement, compute 2,000 differences,</span>
 <span># sort them, and select percentile endpoints. Repeat with the same seed and verify</span>
 <span># equality. Change the seed and expect small endpoint variation, not a different</span>
 <span># conclusion guaranteed by design.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 4 — Permute assignments</span>
 <span># Prompt: Pool outcomes and enumerate treatment-index combinations when feasible. Use a</span>
 <span># two-sided comparison to the observed absolute difference. For large data, use seeded</span>
 <span># Monte Carlo assignments and the plus-one p-value correction. State why permuting</span>
 <span># individual rows is invalid if assignment occurred by account or site.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 5 — Plan sample size</span>
 <span># Prompt: Use the Normal approximation for standardized effects 0.2, 0.5, and 0.8. Explain</span>
 <span># why variance uncertainty, clustering, attrition, noncompliance, and a binary metric</span>
 <span># require a more specific planner.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 6 — Control a comparison family</span>
 <span># Prompt: Complete `holm_adjust` for three p-values. Preserve original order and enforce</span>
 <span># monotonic adjusted values after sorting. Identify the family before viewing results;</span>
 <span># splitting an inconvenient family after analysis defeats control.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 7 — Check assignment and attrition</span>
 <span># Prompt: Compute baseline standardized difference by arm. Then remove outcomes</span>
 <span># selectively from one arm and explain how that affects causal credibility even if the</span>
 <span># remaining p-value is small.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 8 — Simulate peeking policy</span>
 <span># Prompt: Five ordinary looks each at alpha 0.05 are not one 0.05 decision. The lesson&#x27;s</span>
 <span># simple Bonferroni per-look split illustrates the budget. Compare it with a single final</span>
 <span># look and research group-sequential designs before production use.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 9 — Bound the claim</span>
 <span># Prompt: Complete `claim_scope`. Randomization, intact allocation, and no severe</span>
 <span># attrition permit a causal interpretation under additional assumptions. Observational</span>
 <span># grouping, compromised randomization, or severe differential attrition returns an</span>
 <span># associational scope.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 10 — bootstrap clustered assignments</span>
 <span># Prompt: Extend the experiment fixture with multiple rows per account. Bootstrap</span>
 <span># accounts—not rows—within each arm and compare interval width with the incorrect row</span>
 <span># bootstrap.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 11 — bootstrap a ratio metric</span>
 <span># Prompt: Estimate treatment lift for revenue per active user, preserving each user&#x27;s</span>
 <span># numerator and denominator. Handle a resample with zero denominator and compare ratio-of-</span>
 <span># sums with mean-of-user-ratios.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 12 — apply covariate adjustment without leakage</span>
 <span># Prompt: Use a pre-experiment outcome as a CUPED-style covariate. Estimate its adjustment</span>
 <span># coefficient without post-treatment information and compare unadjusted/adjusted variance</span>
 <span># and mean effect.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 13 — separate intention-to-treat from treatment-on-treated</span>
 <span># Prompt: Simulate assigned treatment with imperfect compliance. Compute the intention-to-</span>
 <span># treat effect by assignment and explain why comparing actual takers with non-takers is</span>
 <span># generally confounded.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 14 — perform missing-outcome sensitivity</span>
 <span># Prompt: Create differential attrition by arm. Report complete-case results and bounded</span>
 <span># best/worst-case outcomes under a declared feasible outcome range.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 15 — simulate sequential false positives</span>
 <span># Prompt: Under a true null, simulate repeated ordinary alpha=0.05 looks and estimate</span>
 <span># ever-reject probability. Compare one final look, the lesson&#x27;s simple alpha split, and a</span>
 <span># clearly labeled exploratory monitor.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 16 — pre-specify heterogeneous effects</span>
 <span># Prompt: Choose two domain-motivated subgroups before analysis, estimate effects with</span>
 <span># uncertainty and support, and adjust the planned comparison family. Contrast this with</span>
 <span># mining many cuts for the largest lift.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 17 — run clustered randomization inference</span>
 <span># Prompt: For a site-randomized experiment, permute site assignments while keeping all</span>
 <span># rows within a site together. Compare with invalid row-level permutation and state the</span>
 <span># sharp-null interpretation.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># Exercise 18 — produce an auditable analysis packet</span>
 <span># Prompt: Write a deterministic JSON/Markdown packet containing plan hash, data</span>
 <span># fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval,</span>
 <span># adjusted p-values, claim scope, code version, and limitations.</span>
-<span># Evidence: add a boundary check and explain the failure policy.</span>
+<span># Verify: add a boundary check and explain the failure policy.</span>
 <span>#</span>
 <span># === End numbered professional practice ===</span>
 <span> </span>
@@ -635,15 +840,15 @@
 <span>    self_check()</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -674,6 +879,36 @@
 <p>Randomization supports causal claims only when assignment was implemented, units did not interfere, outcome handling remained credible, and attrition did not destroy comparability. Observational differences remain associational even when bootstrap intervals are narrow.</p>
 <p>Edge cases include zero variance, tiny groups, a metric chosen after seeing results, assignment and analysis units that differ, cluster correlation, noncompliance, missing outcomes, many secondary metrics, and stopping early because an ordinary p-value crossed 0.05.</p>
 <hr>
+<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
+<h4 id="solution-1--reasoning-before-implementation">Reasoning before implementation<a class="heading-anchor" href="#solution-1--reasoning-before-implementation" aria-label="Link to this section">#</a></h4>
+<p>The reference makes the resampling unit and null/estimand explicit, then separates statistical uncertainty from causal identification.</p>
+<ol>
+<li><strong>resampling unit:</strong> matches the independent assignment/observation grain rather than blindly sampling rows.</li>
+<li><strong>seeded bootstrap/permutation loop:</strong> produces a reproducible distribution of a declared statistic with Monte Carlo error.</li>
+<li><strong>estimand + assignment mechanism:</strong> defines which causal contrast is identified and which assumptions support it.</li>
+<li><strong>Prove the failure boundary:</strong> Exercise one normal case, one boundary case, and one injected failure without relying on hidden state.</li>
+</ol>
+<p><strong>Alternative:</strong> Analytic standard errors can be faster and clearer when assumptions hold; Bayesian models express other uncertainty questions.</p>
+<p><strong>Trade-off:</strong> More resamples reduce Monte Carlo noise but do not add participants or repair exchangeability, interference, attrition, or selection.</p>
+<p><strong>Failure boundary:</strong> Tiny samples, repeated units, unequal assignment, missing outcomes, multiple looks, noncompliance, and spillovers need design-specific methods.</p>
+<p><strong>Verification:</strong> Compare seeded resampling with a hand/analytic check, report Monte Carlo error and units, reproduce assignment constraints, and state which causal claims remain unsupported.</p>
+<h5 id="solution-1--verification-micro-example">Verification micro-example<a class="heading-anchor" href="#solution-1--verification-micro-example" aria-label="Link to this section">#</a></h5>
+<p>Run this small, deterministic case before adapting the reference to a larger system. It gives the reasoning above an executable anchor:</p>
+<pre><code class="language-python">import numpy as np
+
+control = np.array([2.0, 2.5, 3.0, 3.5, 4.0])
+treatment = np.array([3.0, 3.5, 4.0, 4.5, 5.0])
+rng = np.random.default_rng(6101)
+draws = np.empty(5_000)
+for index in range(draws.size):
+    c = rng.choice(control, size=control.size, replace=True)
+    t = rng.choice(treatment, size=treatment.size, replace=True)
+    draws[index] = t.mean() - c.mean()
+interval = np.quantile(draws, [0.025, 0.975])
+print({&quot;estimate&quot;: treatment.mean() - control.mean(), &quot;interval&quot;: interval})</code></pre>
+<p><strong>Expected observation:</strong> The resampled interval describes uncertainty under independent within-group resampling; the small sample makes it wide/discrete.</p>
+<p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
+<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-stats-01.html#solution-2"><code>py_stats_01_resampling_experiments_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
 <h5 id="solution-1--exercise-1-define-the-experiment-before-analysis">Exercise 1 — Define the experiment before analysis<a class="heading-anchor" href="#solution-1--exercise-1-define-the-experiment-before-analysis" aria-label="Link to this section">#</a></h5>
@@ -681,46 +916,55 @@
 <p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Define the experiment before analysis — write an ExperimentPlan containing: - assignment unit, - one primary metric and window, - minimum sample per arm, - alpha, - intended analysis, - planned stopping/looks, and - missing-outcome handling; do this before computing outcomes.</p>
 <h5 id="solution-1--exercise-2-complete-standardized-effect">Exercise 2 — Complete standardized effect<a class="heading-anchor" href="#solution-1--exercise-2-complete-standardized-effect" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Use the pooled sample standard deviation. Reject groups smaller than two and zero pooled variance. Explain raw units and standardized units side by side.</p>
 <p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Complete standardized effect — assert the standardized-effect fixture equals the hand-computed pooled-SD value within 1e-12; groups of size &lt;2 and zero pooled variance raise named errors, and the report includes raw-unit and standardized effects.</p>
 <h5 id="solution-1--exercise-3-bootstrap-the-difference">Exercise 3 — Bootstrap the difference<a class="heading-anchor" href="#solution-1--exercise-3-bootstrap-the-difference" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Resample each arm independently with replacement, compute 2,000 differences, sort them, and select percentile endpoints. Repeat with the same seed and verify equality. Change the seed and expect small endpoint variation, not a different conclusion guaranteed by design.</p>
 <p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Bootstrap the difference — resample each arm independently with replacement, compute 2,000 differences, sort them, and select percentile endpoints; repeat with the same seed and verify equality; change the seed and expect small endpoint variation, not a different conclusion guaranteed by design.</p>
 <h5 id="solution-1--exercise-4-permute-assignments">Exercise 4 — Permute assignments<a class="heading-anchor" href="#solution-1--exercise-4-permute-assignments" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Pool outcomes and enumerate treatment-index combinations when feasible. Use a two-sided comparison to the observed absolute difference. For large data, use seeded Monte Carlo assignments and the plus-one p-value correction. State why permuting individual rows is invalid if assignment occurred by account or site.</p>
 <p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Permute assignments — pool outcomes and enumerate treatment-index combinations when feasible; use a two-sided comparison to the observed absolute difference; state why permuting individual rows is invalid if assignment occurred by account or site.</p>
 <h5 id="solution-1--exercise-5-plan-sample-size">Exercise 5 — Plan sample size<a class="heading-anchor" href="#solution-1--exercise-5-plan-sample-size" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Use the Normal approximation for standardized effects 0.2, 0.5, and 0.8. Explain why variance uncertainty, clustering, attrition, noncompliance, and a binary metric require a more specific planner.</p>
 <p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Plan sample size — use the Normal approximation for standardized effects 0.2, 0.5, and 0.8; explain why variance uncertainty, clustering, attrition, noncompliance, and a binary metric require a more specific planner.</p>
 <h5 id="solution-1--exercise-6-control-a-comparison-family">Exercise 6 — Control a comparison family<a class="heading-anchor" href="#solution-1--exercise-6-control-a-comparison-family" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Complete <code>holm_adjust</code> for three p-values. Preserve original order and enforce monotonic adjusted values after sorting. Identify the family before viewing results; splitting an inconvenient family after analysis defeats control.</p>
 <p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Control a comparison family — for the three fixture p-values, print sorted raw thresholds and adjusted values, restore original order, assert adjusted values are monotone in sorted order and within [0,1], and name the predeclared comparison family.</p>
 <h5 id="solution-1--exercise-7-check-assignment-and-attrition">Exercise 7 — Check assignment and attrition<a class="heading-anchor" href="#solution-1--exercise-7-check-assignment-and-attrition" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Compute baseline standardized difference by arm. Then remove outcomes selectively from one arm and explain how that affects causal credibility even if the remaining p-value is small.</p>
 <p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Check assignment and attrition — compute baseline standardized difference by arm; then remove outcomes selectively from one arm and explain how that affects causal credibility even if the remaining p-value is small.</p>
 <h5 id="solution-1--exercise-8-simulate-peeking-policy">Exercise 8 — Simulate peeking policy<a class="heading-anchor" href="#solution-1--exercise-8-simulate-peeking-policy" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Five ordinary looks each at alpha 0.05 are not one 0.05 decision. The lesson&#x27;s simple Bonferroni per-look split illustrates the budget. Compare it with a single final look and research group-sequential designs before production use.</p>
 <p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Simulate peeking policy — with seed and run count declared, estimate the false-positive rate for five alpha=.05 looks, compare with one final look and the .01 Bonferroni-per-look rule, and report Monte Carlo standard errors.</p>
 <h5 id="solution-1--exercise-9-bound-the-claim">Exercise 9 — Bound the claim<a class="heading-anchor" href="#solution-1--exercise-9-bound-the-claim" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Complete <code>claim_scope</code>. Randomization, intact allocation, and no severe attrition permit a causal interpretation under additional assumptions. Observational grouping, compromised randomization, or severe differential attrition returns an associational scope.</p>
 <p><strong>Reference reasoning:</strong> Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> Bound the claim — complete claim scope; randomization, intact allocation, and no severe attrition permit a causal interpretation under additional assumptions; observational grouping, compromised randomization, or severe differential attrition returns an associational scope.</p>
 <h5 id="solution-1--exercise-10-bootstrap-clustered-assignments">Exercise 10 — bootstrap clustered assignments<a class="heading-anchor" href="#solution-1--exercise-10-bootstrap-clustered-assignments" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Extend the experiment fixture with multiple rows per account. Bootstrap accounts—not rows—within each arm and compare interval width with the incorrect row bootstrap.</p>
 <p><strong>Reasoning path:</strong> Sample independent assignment units with replacement and carry all of each selected account&#x27;s observations into the resample.</p>
@@ -728,6 +972,7 @@
 <p>If assignment was by site, site is the resampling unit. A small number of clusters needs specialized methods and candid limitations.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> bootstrap clustered assignments — extend the experiment fixture with multiple rows per account; bootstrap accounts—not rows—within each arm and compare interval width with the incorrect row bootstrap.</p>
 <h5 id="solution-1--exercise-11-bootstrap-a-ratio-metric">Exercise 11 — bootstrap a ratio metric<a class="heading-anchor" href="#solution-1--exercise-11-bootstrap-a-ratio-metric" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Estimate treatment lift for revenue per active user, preserving each user&#x27;s numerator and denominator. Handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.</p>
 <p><strong>Reasoning path:</strong> Define the estimand first; the two ratio formulas answer different questions. Resample complete user records.</p>
@@ -735,6 +980,7 @@
 <p>Mean of individual ratios weights users equally and can be undefined or answer a different question. Report the exact formula and support with the interval.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> bootstrap a ratio metric — estimate treatment lift for revenue per active user, preserving each user&#x27;s numerator and denominator; handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.</p>
 <h5 id="solution-1--exercise-12-apply-covariate-adjustment-without-leakage">Exercise 12 — apply covariate adjustment without leakage<a class="heading-anchor" href="#solution-1--exercise-12-apply-covariate-adjustment-without-leakage" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Use a pre-experiment outcome as a CUPED-style covariate. Estimate its adjustment coefficient without post-treatment information and compare unadjusted/adjusted variance and mean effect.</p>
 <p><strong>Reasoning path:</strong> The covariate must be measured before assignment and not affected by treatment. Center it with a documented analysis-sample mean.</p>
@@ -742,6 +988,7 @@
 <p>Check balance/missingness and report both estimates. Selecting the covariate or formula after seeing favorable effects creates another analysis degree of freedom.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> apply covariate adjustment without leakage — use a pre-experiment outcome as a CUPED-style covariate; estimate its adjustment coefficient without post-treatment information and compare unadjusted/adjusted variance and mean effect.</p>
 <h5 id="solution-1--exercise-13-separate-intention-to-treat-from-treatment-on-treated">Exercise 13 — separate intention-to-treat from treatment-on-treated<a class="heading-anchor" href="#solution-1--exercise-13-separate-intention-to-treat-from-treatment-on-treated" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Simulate assigned treatment with imperfect compliance. Compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.</p>
 <p><strong>Reasoning path:</strong> Random assignment protects the assignment groups, not the self-selected compliance groups.</p>
@@ -749,6 +996,7 @@
 <p>Instrumental-variable/complier effects require additional exclusion, monotonicity, and relevance assumptions; state them before making that extension.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> separate intention-to-treat from treatment-on-treated — simulate assigned treatment with imperfect compliance; compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.</p>
 <h5 id="solution-1--exercise-14-perform-missing-outcome-sensitivity">Exercise 14 — perform missing-outcome sensitivity<a class="heading-anchor" href="#solution-1--exercise-14-perform-missing-outcome-sensitivity" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Create differential attrition by arm. Report complete-case results and bounded best/worst-case outcomes under a declared feasible outcome range.</p>
 <p><strong>Reasoning path:</strong> Missing outcomes are not automatically zero or missing completely at random. Show how strong an assumption is needed to reverse the conclusion.</p>
@@ -756,6 +1004,7 @@
 <p>The resulting range is a sensitivity analysis, not a recovered truth. Severe differential attrition downgrades causal credibility even when observed p-values remain small.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> perform missing-outcome sensitivity — create differential attrition by arm; report complete-case results and bounded best/worst-case outcomes under a declared feasible outcome range.</p>
 <h5 id="solution-1--exercise-15-simulate-sequential-false-positives">Exercise 15 — simulate sequential false positives<a class="heading-anchor" href="#solution-1--exercise-15-simulate-sequential-false-positives" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability. Compare one final look, the lesson&#x27;s simple alpha split, and a clearly labeled exploratory monitor.</p>
 <p><strong>Reasoning path:</strong> Use a seeded outer simulation and record the first crossing. The simple split illustrates budgeting; it is not an optimized group-sequential design.</p>
@@ -763,6 +1012,7 @@
 <p>Do not tune the simulation until a preferred policy wins. Production use requires a reviewed sequential design and operational stopping rules.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> simulate sequential false positives — under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability; compare one final look, the lesson&#x27;s simple alpha split, and a clearly labeled exploratory monitor.</p>
 <h5 id="solution-1--exercise-16-pre-specify-heterogeneous-effects">Exercise 16 — pre-specify heterogeneous effects<a class="heading-anchor" href="#solution-1--exercise-16-pre-specify-heterogeneous-effects" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family. Contrast this with mining many cuts for the largest lift.</p>
 <p><strong>Reasoning path:</strong> An interaction test addresses whether effects differ; significance in one subgroup and not another is not itself evidence of difference.</p>
@@ -770,6 +1020,7 @@
 <p>Data-mined segments are hypothesis generation and need independent confirmation. Avoid causal stories for a subgroup selected because its observed lift was largest.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> pre-specify heterogeneous effects — choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family; contrast this with mining many cuts for the largest lift.</p>
 <h5 id="solution-1--exercise-17-run-clustered-randomization-inference">Exercise 17 — run clustered randomization inference<a class="heading-anchor" href="#solution-1--exercise-17-run-clustered-randomization-inference" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> For a site-randomized experiment, permute site assignments while keeping all rows within a site together. Compare with invalid row-level permutation and state the sharp-null interpretation.</p>
 <p><strong>Reasoning path:</strong> Enumerate or sample assignments consistent with the original design, including treated-site count and any stratification.</p>
@@ -777,15 +1028,17 @@
 <p>Row permutation fabricates assignments that could never occur and overstates independent information. Few sites limit resolution and power.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> run clustered randomization inference — for a site-randomized experiment, permute site assignments while keeping all rows within a site together; compare with invalid row-level permutation and state the sharp-null interpretation.</p>
 <h5 id="solution-1--exercise-18-produce-an-auditable-analysis-packet">Exercise 18 — produce an auditable analysis packet<a class="heading-anchor" href="#solution-1--exercise-18-produce-an-auditable-analysis-packet" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.</p>
 <p><strong>Reasoning path:</strong> Generate machine-readable values and prose from one result object. Keep random seeds and units visible; exclude raw sensitive rows.</p>
 <p>Canonicalize the plan and dataset identity before analysis, then serialize finite numeric results with explicit metric units and denominators. The report links every claim to its design/evidence and labels exploratory analyses. Rerunning with identical inputs and seed should reproduce the packet.</p>
 <p>Hashes identify bytes but do not prove legal use or study quality. Preserve review ownership and any deviations from the pre-analysis plan.</p>
 <p><strong>Common trap:</strong> Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.</p>
-<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p></div>
+<p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
+<p><strong>Verify:</strong> produce an auditable analysis packet — write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -793,7 +1046,7 @@
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -1088,7 +1341,51 @@
 <span>    raise SystemExit(main())</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-stats-01` — Resampling, experiments, and causal boundaries.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize bootstrap and permutation resampling, experimental estimands, and causal boundaries. Use exactly these maintained learner materials:
+- guide: `python/professional/companion-guides/py_stats_01_resampling_experiments.md`
+- learner artifact: `python/professional/lessons/py_stats_01_resampling_experiments.py`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-32`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-lang-01.html"><small>Previous lesson</small><strong>python-lang-01</strong><span>Advanced Typing and the Python Data Model</span></a>
@@ -1180,6 +1477,23 @@
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

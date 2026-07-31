@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this Python file from the repository environment</h2>
           <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>bridge/professional/lessons/bridge_ops_01_migration_observability.py</code>.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,12 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
-          
+
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--bridge-ops-01-migration-delivery-and-application-observability">BRIDGE-OPS-01 — Migration delivery and application observability<a class="heading-anchor" href="#guide--bridge-ops-01-migration-delivery-and-application-observability" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <p><strong>Level:</strong> Advanced <strong>Stable lesson ID:</strong> <code>bridge-ops-01</code> <strong>Catalog prerequisites:</strong> <code>sql-found-02</code> and <code>bridge-08</code> <strong>Prerequisites:</strong> SQL-FOUND-02, <a href="bridge-04.html#guide">Bridge Day 4</a>, <a href="bridge-05.html#guide">Bridge Day 5</a>, and <a href="bridge-08.html#guide">Bridge Day 8</a>. Days 4 and 5 are earlier steps within the sequential bridge path.</p>
@@ -293,6 +332,16 @@
 .\.venv\Scripts\python.exe bridge\professional\lessons\bridge_ops_01_migration_observability.py</code></pre>
 <pre><code class="language-bash"># macOS/Linux
 .venv/bin/python bridge/professional/lessons/bridge_ops_01_migration_observability.py</code></pre>
+<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Start at the repository root. The answer-free starter is deliberately safe to run: it prints orientation text and does not call unfinished functions or contact PostgreSQL.</p>
+<pre><code class="language-powershell"># Windows PowerShell
+.\.venv\Scripts\python.exe bridge\professional\lessons\bridge_ops_01_migration_observability.py
+.\.venv\Scripts\python.exe -m pytest bridge\professional\tests -q</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python bridge/professional/lessons/bridge_ops_01_migration_observability.py
+.venv/bin/python -m pytest bridge/professional/tests -q</code></pre>
+<p>Read this guide first, implement one boundary at a time in <code>bridge/professional/lessons/bridge_ops_01_migration_observability.py</code>, and use small fakes or recording doubles for the default evidence path. Any PostgreSQL step is optional, explicitly gated, and restricted to <code>DS60_DATABASE_URL</code> plus the disposable <code>advanced_sql_training</code> database. Never place a credential in source, notebook output, test fixtures, or logs. &lt;!-- END BRIDGE ENRICHMENT: HOW TO RUN --&gt;</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end, you can:</p>
 <ul>
@@ -461,120 +510,140 @@ printf &#x27;\n&#x27;
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Canonical serialization must distinguish structure and parameter types without depending on object repr.</li>
+<li><strong>Verify:</strong> Construct valid and invalid migrations; assert blank/bad IDs, blank description, empty commands, and missing verification fail, while two equal migrations have equal checksums and any identity/text/parameter change changes the hash.</li>
 </ul>
 <ol>
 <li><strong>Redaction:</strong> Implement <code>redact_fields()</code> for sensitive key names, URL-shaped values, non-serializable objects, and ordinary scalars.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Use key classification and safe type conversion; never echo rejected values.</li>
+<li><strong>Verify:</strong> Pass ordinary scalars, password/token keys, credential URLs, and an exception object; assert safe scalars survive, sensitive values become fixed markers, output is JSON-serializable, and no sentinel secret appears in <code>repr</code> or JSON.</li>
 </ul>
 <ol>
 <li><strong>Planning:</strong> Implement <code>plan_pending()</code> with duplicate/order validation, unknown applied-version rejection, and checksum-drift detection.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Applied history is immutable and must be a prefix of known ordered migrations.</li>
+<li><strong>Verify:</strong> Assert ordered known history returns only the pending suffix; duplicate/reordered source, database-only IDs, non-prefix history, and a changed stored checksum each raise before delivery.</li>
 </ul>
 <ol>
 <li><strong>Test double:</strong> Build a recording session fake that stores SQL separately from parameter tuples and never parses PostgreSQL through SQLite.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Model transactional state and prepared query results explicitly.</li>
+<li><strong>Verify:</strong> Use a session fake that records <code>(sql, params)</code> separately and queues results; assert it never parses SQL or imports SQLite and exposes commit/rollback/close event order.</li>
 </ul>
 <ol>
 <li><strong>Delivery:</strong> Implement the documented nine-step delivery order and prove rollback/close happen before injected retry delay.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> One attempt must acquire, lock, re-check, apply, verify, record, commit, close, then report.</li>
+<li><strong>Verify:</strong> Record the nine delivery stages—open, bootstrap/lock, re-check, commands, verify, metadata, commit, close, report—and in failure assert rollback and close occur before the sleeper.</li>
 </ul>
 <ol>
 <li><strong>Commit uncertainty:</strong> Simulate an uncertain commit whose retry sees a matching metadata row and prove commands are not applied twice.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Re-check immutable metadata under lock before every attempt.</li>
+<li><strong>Verify:</strong> Make fake commit persist metadata then raise; on retry, assert matching metadata is read under the lock, migration commands are not called twice, and result reports the version skipped/applied once.</li>
 </ul>
 <ol>
 <li><strong>Observability:</strong> Add event and metric fakes; require request/migration IDs in logs, exclude request IDs from metric tags, and prove secrets are absent.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Logs support correlation; metrics require bounded dimensions.</li>
+<li><strong>Verify:</strong> Inspect events for request and migration IDs and metrics for bounded migration/outcome tags; assert request ID is absent from metric tags and URL/password/parameters/exception message are absent everywhere.</li>
 </ul>
 <ol>
 <li><strong>Readiness:</strong> Implement read-only readiness for current, pending, drifted, and unreachable states while keeping liveness database-independent.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Readiness describes safe traffic acceptance, not process existence.</li>
+<li><strong>Verify:</strong> Assert liveness succeeds without a session; readiness is true for matching current history and false with explicit reasons for pending, checksum drift, unknown history, or unreachable database.</li>
 </ul>
 <ol>
 <li><strong>Recovery:</strong> Build a scenario table for recovery decisions, including incomplete evidence that must pause.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Destructive or forward actions require rehearsed, compatible evidence.</li>
+<li><strong>Verify:</strong> Create scenario rows for unconfirmed diagnosis, committed writes, compatibility, and rehearsed paths; assert incomplete evidence returns <code>PAUSE_AND_GATHER_EVIDENCE</code> and only supported rows choose forward/rollback.</li>
 </ul>
 <ol>
 <li><strong>Optional integration:</strong> After fake tests, run the disposable live lab twice and inspect migration metadata with a read-only query.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> The second run demonstrates idempotency; cleanup evidence is part of completion.</li>
+<li><strong>Verify:</strong> With explicit live opt-in, run the disposable migration set twice; assert the second applies nothing, metadata IDs/checksums match source, and the read-only inspection targets only course objects.</li>
 </ul>
 <ol>
 <li><strong>Immutability:</strong> Change only SQL whitespace after a migration is applied and decide whether checksum drift should be accepted.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> A stored checksum is an immutable history contract, not a semantic SQL parser.</li>
+<li><strong>Verify:</strong> Change only whitespace in applied SQL; assert checksum mismatch is detected and delivery stops rather than accepting edited immutable history.</li>
 </ul>
 <ol>
 <li><strong>Concurrency:</strong> Model two deployers contending for the same advisory lock and specify timeout/ownership behavior.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Only one delivery transaction may make planning decisions at a time.</li>
+<li><strong>Verify:</strong> Simulate two sessions on the same advisory lock; assert only the lock holder plans/applies at a time, the waiter obeys the declared timeout, and both close their own sessions.</li>
 </ul>
 <ol>
 <li><strong>PostgreSQL semantics:</strong> Identify which DDL is transactional in PostgreSQL and how non-transactional commands alter the migration policy.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Do not assume every administrative statement can share ordinary transaction rollback.</li>
+<li><strong>Verify:</strong> Produce a reviewed list separating transaction-safe DDL from commands requiring special handling; any non-transactional command must use a separate migration policy and recovery proof.</li>
 </ul>
 <ol>
 <li><strong>Timeouts:</strong> Set statement and lock timeouts per attempt without leaking settings to later pooled work.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Transaction-local settings should expire with commit/rollback.</li>
+<li><strong>Verify:</strong> Record transaction-local statement and lock timeout commands before migration SQL; assert they end with commit/rollback and are absent when a later pooled session begins.</li>
 </ul>
 <ol>
 <li><strong>Telemetry design:</strong> Define a bounded migration metric schema and a redaction test for exception objects and URL-like fields.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Migration IDs may still become unbounded over years; choose dimensions deliberately.</li>
+<li><strong>Verify:</strong> Define metric names/tags with a bounded outcome/error class and migration family/version policy; feed URL-like fields and exceptions through redaction and assert no secret/message becomes a label.</li>
 </ul>
 <ol>
 <li><strong>Probe semantics:</strong> Distinguish current-but-stale application readiness from database reachability and migration currency.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Each probe should answer one operational question.</li>
+<li><strong>Verify:</strong> Return separate probe fields for database reachability, schema currency, application staleness, and process liveness; assert changing one condition changes only its corresponding reason.</li>
 </ul>
 <ol>
 <li><strong>Decision analysis:</strong> Compare forward fix and release rollback when the new schema has already received writes.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Data written under the new contract can make old code incompatible even if DDL reversal is possible.</li>
+<li><strong>Verify:</strong> For schema that has received incompatible new writes, assert release rollback is rejected unless compatibility and reversal are rehearsed; choose a rehearsed forward fix or pause.</li>
 </ul>
 <ol>
 <li><strong>Expand-contract:</strong> Design a three-release expand/migrate/contract sequence for renaming a populated column.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Maintain compatibility while old and new application versions overlap.</li>
+<li><strong>Verify:</strong> Document release A adding nullable new column, release B dual-writing/backfilling/reading both, and release C enforcing new contract/removing old only after compatibility evidence.</li>
 </ul>
 <ol>
 <li><strong>Cleanup:</strong> Prove the optional live lab leaves no table, metadata row, lock, connection, or credential-bearing output behind.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> A passing mutation test is incomplete without postconditions.</li>
+<li><strong>Verify:</strong> After the optional lab, query for course tables/metadata, inspect connection close calls, and scan captured output; assert no lab object, held lock/session, or credential sentinel remains.</li>
 </ul>
 <ol>
 <li><strong>Failure simulation:</strong> Inject a network-like error immediately after fake commit and require the retry to gather evidence rather than blindly replay.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Client exceptions after commit do not prove server rollback.</li>
+<li><strong>Verify:</strong> Raise immediately after fake commit; assert the next attempt reads lock-protected metadata/checksum before any command replay and pauses on conflicting or missing evidence.</li>
 </ul>
 <h5 id="guide--before-opening-the-solution">Before opening the solution<a class="heading-anchor" href="#guide--before-opening-the-solution" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -609,18 +678,49 @@ printf &#x27;\n&#x27;
 <li><strong>Assuming rollback is safer:</strong> reverse DDL or a previous application can be destructive after new-shape writes.</li>
 <li><strong>Testing with SQLite:</strong> it does not reproduce PostgreSQL DDL transactions, SQLSTATEs, locks, or Psycopg binding.</li>
 </ul>
+<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: ASK CODEX --&gt;</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Use the checked-in <code>guide-ds60sqlpy-learning</code> skill as a tutor, not as an answer generator. The direct catalog prerequisites are <code>bridge-08</code>, <code>sql-found-02</code>. The prompt below deliberately names exact paths so a new Codex task can orient itself without guessing.</p>
+<pre><code class="language-text">Tutor me through stable lesson ID bridge-ops-01: Migration Delivery and Application Observability.
+Direct catalog prerequisites: bridge-08, sql-found-02. Assume I completed exactly those
+prerequisites, then begin with one short Retrieval question that connects each
+prerequisite to this lesson.
+
+Use repository skill guide-ds60sqlpy-learning.
+Companion guide: bridge/professional/companion-guides/bridge_ops_01_migration_observability.md
+Learner artifact: bridge/professional/lessons/bridge_ops_01_migration_observability.py
+
+Do not open, quote, summarize, or copy anything under solutions/ until I
+explicitly say I have finished my attempt and ask to compare.
+
+Use these coaching phases in order:
+1. Predict — ask what I expect before I run or change code.
+2. Attempt — let me implement or explain one numbered exercise at a time.
+3. Hint — give the smallest useful conceptual hint, never a finished answer.
+4. Evidence — ask for the exact return value, exception type, recorded calls,
+   query plus bound parameters, or written decision required by that exercise.
+5. Retrieval — close with two no-notes questions and one transfer problem.
+
+Keep the default path offline and fake-first. If the lesson has an optional
+PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the
+disposable advanced_sql_training database; never ask me to paste the URL.
+
+Done when every numbered exercise has its own evidence, normal/edge/failure
+behavior is explained in my words, the relevant offline tests pass, and I can
+solve the final transfer problem without opening solutions/.</code></pre>
+<p>&lt;!-- END BRIDGE ENRICHMENT: ASK CODEX --&gt;</p>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Complete the <a href="bridge-ops-01.html#learner">learner file</a> and fake-backed tests before reviewing the <a href="bridge-ops-01.html#solution-2">reference implementation</a> and <a href="bridge-ops-01.html#solution-1">solution reasoning</a>. Then pair this delivery lab with the PostgreSQL migration foundation and a small application compatibility test.</p></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -637,12 +737,12 @@ printf &#x27;\n&#x27;
               type="button"
               data-launch-artifact="Python source file"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;BRIDGE-OPS-01: migration delivery and application observability.</span>
 <span> </span>
 <span>Prerequisites: SQL-FOUND-02, Bridge Day 4, Bridge Day 5, and Bridge Day 8.</span>
@@ -836,65 +936,121 @@ printf &#x27;\n&#x27;
 <span>#    description, command text/parameters, and verification.</span>
 <span>#    Hint: Canonical serialization must distinguish structure and parameter types without</span>
 <span>#    depending on object repr.</span>
+<span>#    Verify: Construct valid and invalid migrations; assert blank/bad IDs, blank description,</span>
+<span>#    empty commands, and missing verification fail, while two equal migrations have equal</span>
+<span>#    checksums and any identity/text/parameter change changes the hash.</span>
 <span># 2. [Redaction] Implement `redact_fields()` for sensitive key names, URL-shaped values,</span>
 <span>#    non-serializable objects, and ordinary scalars.</span>
 <span>#    Hint: Use key classification and safe type conversion; never echo rejected values.</span>
+<span>#    Verify: Pass ordinary scalars, password/token keys, credential URLs, and an exception</span>
+<span>#    object; assert safe scalars survive, sensitive values become fixed markers, output is</span>
+<span>#    JSON-serializable, and no sentinel secret appears in `repr` or JSON.</span>
 <span># 3. [Planning] Implement `plan_pending()` with duplicate/order validation, unknown</span>
 <span>#    applied-version rejection, and checksum-drift detection.</span>
 <span>#    Hint: Applied history is immutable and must be a prefix of known ordered migrations.</span>
+<span>#    Verify: Assert ordered known history returns only the pending suffix; duplicate/reordered</span>
+<span>#    source, database-only IDs, non-prefix history, and a changed stored checksum each raise</span>
+<span>#    before delivery.</span>
 <span># 4. [Test double] Build a recording session fake that stores SQL separately from parameter</span>
 <span>#    tuples and never parses PostgreSQL through SQLite.</span>
 <span>#    Hint: Model transactional state and prepared query results explicitly.</span>
+<span>#    Verify: Use a session fake that records `(sql, params)` separately and queues results;</span>
+<span>#    assert it never parses SQL or imports SQLite and exposes commit/rollback/close event order.</span>
 <span># 5. [Delivery] Implement the documented nine-step delivery order and prove rollback/close</span>
 <span>#    happen before injected retry delay.</span>
 <span>#    Hint: One attempt must acquire, lock, re-check, apply, verify, record, commit, close, then</span>
 <span>#    report.</span>
+<span>#    Verify: Record the nine delivery stages—open, bootstrap/lock, re-check, commands, verify,</span>
+<span>#    metadata, commit, close, report—and in failure assert rollback and close occur before the</span>
+<span>#    sleeper.</span>
 <span># 6. [Commit uncertainty] Simulate an uncertain commit whose retry sees a matching metadata row</span>
 <span>#    and prove commands are not applied twice.</span>
 <span>#    Hint: Re-check immutable metadata under lock before every attempt.</span>
+<span>#    Verify: Make fake commit persist metadata then raise; on retry, assert matching metadata is</span>
+<span>#    read under the lock, migration commands are not called twice, and result reports the</span>
+<span>#    version skipped/applied once.</span>
 <span># 7. [Observability] Add event and metric fakes; require request/migration IDs in logs, exclude</span>
 <span>#    request IDs from metric tags, and prove secrets are absent.</span>
 <span>#    Hint: Logs support correlation; metrics require bounded dimensions.</span>
+<span>#    Verify: Inspect events for request and migration IDs and metrics for bounded</span>
+<span>#    migration/outcome tags; assert request ID is absent from metric tags and</span>
+<span>#    URL/password/parameters/exception message are absent everywhere.</span>
 <span># 8. [Readiness] Implement read-only readiness for current, pending, drifted, and unreachable</span>
 <span>#    states while keeping liveness database-independent.</span>
 <span>#    Hint: Readiness describes safe traffic acceptance, not process existence.</span>
+<span>#    Verify: Assert liveness succeeds without a session; readiness is true for matching current</span>
+<span>#    history and false with explicit reasons for pending, checksum drift, unknown history, or</span>
+<span>#    unreachable database.</span>
 <span># 9. [Recovery] Build a scenario table for recovery decisions, including incomplete evidence</span>
 <span>#    that must pause.</span>
 <span>#    Hint: Destructive or forward actions require rehearsed, compatible evidence.</span>
+<span>#    Verify: Create scenario rows for unconfirmed diagnosis, committed writes, compatibility,</span>
+<span>#    and rehearsed paths; assert incomplete evidence returns `PAUSE_AND_GATHER_EVIDENCE` and</span>
+<span>#    only supported rows choose forward/rollback.</span>
 <span># 10. [Optional integration] After fake tests, run the disposable live lab twice and inspect</span>
 <span>#    migration metadata with a read-only query.</span>
 <span>#    Hint: The second run demonstrates idempotency; cleanup evidence is part of completion.</span>
+<span>#    Verify: With explicit live opt-in, run the disposable migration set twice; assert the</span>
+<span>#    second applies nothing, metadata IDs/checksums match source, and the read-only inspection</span>
+<span>#    targets only course objects.</span>
 <span># 11. [Immutability] Change only SQL whitespace after a migration is applied and decide whether</span>
 <span>#    checksum drift should be accepted.</span>
 <span>#    Hint: A stored checksum is an immutable history contract, not a semantic SQL parser.</span>
+<span>#    Verify: Change only whitespace in applied SQL; assert checksum mismatch is detected and</span>
+<span>#    delivery stops rather than accepting edited immutable history.</span>
 <span># 12. [Concurrency] Model two deployers contending for the same advisory lock and specify</span>
 <span>#    timeout/ownership behavior.</span>
 <span>#    Hint: Only one delivery transaction may make planning decisions at a time.</span>
+<span>#    Verify: Simulate two sessions on the same advisory lock; assert only the lock holder</span>
+<span>#    plans/applies at a time, the waiter obeys the declared timeout, and both close their own</span>
+<span>#    sessions.</span>
 <span># 13. [PostgreSQL semantics] Identify which DDL is transactional in PostgreSQL and how</span>
 <span>#    non-transactional commands alter the migration policy.</span>
 <span>#    Hint: Do not assume every administrative statement can share ordinary transaction rollback.</span>
+<span>#    Verify: Produce a reviewed list separating transaction-safe DDL from commands requiring</span>
+<span>#    special handling; any non-transactional command must use a separate migration policy and</span>
+<span>#    recovery proof.</span>
 <span># 14. [Timeouts] Set statement and lock timeouts per attempt without leaking settings to later</span>
 <span>#    pooled work.</span>
 <span>#    Hint: Transaction-local settings should expire with commit/rollback.</span>
+<span>#    Verify: Record transaction-local statement and lock timeout commands before migration SQL;</span>
+<span>#    assert they end with commit/rollback and are absent when a later pooled session begins.</span>
 <span># 15. [Telemetry design] Define a bounded migration metric schema and a redaction test for</span>
 <span>#    exception objects and URL-like fields.</span>
 <span>#    Hint: Migration IDs may still become unbounded over years; choose dimensions deliberately.</span>
+<span>#    Verify: Define metric names/tags with a bounded outcome/error class and migration</span>
+<span>#    family/version policy; feed URL-like fields and exceptions through redaction and assert no</span>
+<span>#    secret/message becomes a label.</span>
 <span># 16. [Probe semantics] Distinguish current-but-stale application readiness from database</span>
 <span>#    reachability and migration currency.</span>
 <span>#    Hint: Each probe should answer one operational question.</span>
+<span>#    Verify: Return separate probe fields for database reachability, schema currency,</span>
+<span>#    application staleness, and process liveness; assert changing one condition changes only its</span>
+<span>#    corresponding reason.</span>
 <span># 17. [Decision analysis] Compare forward fix and release rollback when the new schema has</span>
 <span>#    already received writes.</span>
 <span>#    Hint: Data written under the new contract can make old code incompatible even if DDL</span>
 <span>#    reversal is possible.</span>
+<span>#    Verify: For schema that has received incompatible new writes, assert release rollback is</span>
+<span>#    rejected unless compatibility and reversal are rehearsed; choose a rehearsed forward fix or</span>
+<span>#    pause.</span>
 <span># 18. [Expand-contract] Design a three-release expand/migrate/contract sequence for renaming a</span>
 <span>#    populated column.</span>
 <span>#    Hint: Maintain compatibility while old and new application versions overlap.</span>
+<span>#    Verify: Document release A adding nullable new column, release B</span>
+<span>#    dual-writing/backfilling/reading both, and release C enforcing new contract/removing old</span>
+<span>#    only after compatibility evidence.</span>
 <span># 19. [Cleanup] Prove the optional live lab leaves no table, metadata row, lock, connection, or</span>
 <span>#    credential-bearing output behind.</span>
 <span>#    Hint: A passing mutation test is incomplete without postconditions.</span>
+<span>#    Verify: After the optional lab, query for course tables/metadata, inspect connection close</span>
+<span>#    calls, and scan captured output; assert no lab object, held lock/session, or credential</span>
+<span>#    sentinel remains.</span>
 <span># 20. [Failure simulation] Inject a network-like error immediately after fake commit and require</span>
 <span>#    the retry to gather evidence rather than blindly replay.</span>
 <span>#    Hint: Client exceptions after commit do not prove server rollback.</span>
+<span>#    Verify: Raise immediately after fake commit; assert the next attempt reads lock-protected</span>
+<span>#    metadata/checksum before any command replay and pauses on conflicting or missing evidence.</span>
 <span> </span>
 <span> </span>
 <span>def main() -&gt; int:</span>
@@ -908,15 +1064,15 @@ printf &#x27;\n&#x27;
 <span>    raise SystemExit(main())</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -972,6 +1128,23 @@ printf &#x27;\n&#x27;
 <li>The recovery decision model is intentionally conservative. It cannot replace tested backups, change review, ownership, or incident command.</li>
 </ul>
 <p>Add tests for checksum drift, concurrent re-check behavior, final-attempt failure, commit uncertainty, rollback/close failures, sensitive telemetry, readiness drift, and every recovery branch before adapting this pattern.</p>
+<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE --&gt;</p>
+<h4 id="solution-1--small-executable-check">Small executable check<a class="heading-anchor" href="#solution-1--small-executable-check" aria-label="Link to this section">#</a></h4>
+<p>Redaction is testable without a database session:</p>
+<pre><code class="language-python">from bridge.professional.solutions.bridge_ops_01_migration_observability_solution import (
+    redact_fields,
+)
+
+safe = redact_fields(
+    {
+        &quot;request_id&quot;: &quot;run-7&quot;,
+        &quot;password&quot;: &quot;secret&quot;,
+        &quot;database_url&quot;: &quot;postgresql://learner:&quot; + &quot;secret&quot; + &quot;@localhost/course&quot;,
+    }
+)
+assert safe[&quot;request_id&quot;] == &quot;run-7&quot;
+assert &quot;secret&quot; not in repr(safe)</code></pre>
+<p>&lt;!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE --&gt;</p>
 <h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
 <p>These walkthroughs map one-for-one to the answer-free learner artifact and companion guide. The executable reference is <code>bridge/professional/solutions/bridge_ops_01_migration_observability_solution.py</code>.</p>
 <p><strong>Shared failure rule:</strong> Mutable history, retry after uncertain commit without re-checking metadata, or recovery without complete evidence can corrupt schema state.</p>
@@ -979,104 +1152,104 @@ printf &#x27;\n&#x27;
 <p><strong>Prompt:</strong> Implement <code>Migration</code> validation and a stable checksum over identity, description, command text/parameters, and verification.</p>
 <p><strong>Approach:</strong> Validate non-blank ordered ID, description, at least one command, and verification; serialize fields into a deterministic JSON-compatible form and hash with SHA-256.</p>
 <p><strong>Why:</strong> Canonical serialization must distinguish structure and parameter types without depending on object repr.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Construct valid and invalid migrations; assert blank/bad IDs, blank description, empty commands, and missing verification fail, while two equal migrations have equal checksums and any identity/text/parameter change changes the hash.</p>
 <h5 id="solution-1--exercise-2-redaction">Exercise 2 — Redaction<a class="heading-anchor" href="#solution-1--exercise-2-redaction" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement <code>redact_fields()</code> for sensitive key names, URL-shaped values, non-serializable objects, and ordinary scalars.</p>
 <p><strong>Approach:</strong> Replace credential-bearing keys/URL values with a marker, retain bounded JSON scalars, convert unsupported objects to safe type labels, and recursively avoid payload dumps.</p>
 <p><strong>Why:</strong> Use key classification and safe type conversion; never echo rejected values.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Pass ordinary scalars, password/token keys, credential URLs, and an exception object; assert safe scalars survive, sensitive values become fixed markers, output is JSON-serializable, and no sentinel secret appears in <code>repr</code> or JSON.</p>
 <h5 id="solution-1--exercise-3-planning">Exercise 3 — Planning<a class="heading-anchor" href="#solution-1--exercise-3-planning" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement <code>plan_pending()</code> with duplicate/order validation, unknown applied-version rejection, and checksum-drift detection.</p>
 <p><strong>Approach:</strong> Validate unique increasing IDs, ensure every applied ID exists and matches checksum, reject gaps/unknown versions, then return unapplied migrations in canonical order.</p>
 <p><strong>Why:</strong> Applied history is immutable and must be a prefix of known ordered migrations.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Assert ordered known history returns only the pending suffix; duplicate/reordered source, database-only IDs, non-prefix history, and a changed stored checksum each raise before delivery.</p>
 <h5 id="solution-1--exercise-4-test-double">Exercise 4 — Test double<a class="heading-anchor" href="#solution-1--exercise-4-test-double" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a recording session fake that stores SQL separately from parameter tuples and never parses PostgreSQL through SQLite.</p>
 <p><strong>Approach:</strong> Record execute calls, queue deterministic result objects, and track commit/rollback/close events. Test SQL dialect behavior only in optional PostgreSQL integration.</p>
 <p><strong>Why:</strong> Model transactional state and prepared query results explicitly.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Use a session fake that records <code>(sql, params)</code> separately and queues results; assert it never parses SQL or imports SQLite and exposes commit/rollback/close event order.</p>
 <h5 id="solution-1--exercise-5-delivery">Exercise 5 — Delivery<a class="heading-anchor" href="#solution-1--exercise-5-delivery" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement the documented nine-step delivery order and prove rollback/close happen before injected retry delay.</p>
 <p><strong>Approach:</strong> Encode the order directly, classify only retryable failures, roll back and close in the attempt&#x27;s exception path, and let the outer retry call its fake sleeper afterward.</p>
 <p><strong>Why:</strong> One attempt must acquire, lock, re-check, apply, verify, record, commit, close, then report.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Record the nine delivery stages—open, bootstrap/lock, re-check, commands, verify, metadata, commit, close, report—and in failure assert rollback and close occur before the sleeper.</p>
 <h5 id="solution-1--exercise-6-commit-uncertainty">Exercise 6 — Commit uncertainty<a class="heading-anchor" href="#solution-1--exercise-6-commit-uncertainty" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Simulate an uncertain commit whose retry sees a matching metadata row and prove commands are not applied twice.</p>
 <p><strong>Approach:</strong> On retry, read the recorded checksum; a match means the first attempt committed, so mark it skipped/applied evidence without re-running commands. Drift must fail closed.</p>
 <p><strong>Why:</strong> Re-check immutable metadata under lock before every attempt.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Make fake commit persist metadata then raise; on retry, assert matching metadata is read under the lock, migration commands are not called twice, and result reports the version skipped/applied once.</p>
 <h5 id="solution-1--exercise-7-observability">Exercise 7 — Observability<a class="heading-anchor" href="#solution-1--exercise-7-observability" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add event and metric fakes; require request/migration IDs in logs, exclude request IDs from metric tags, and prove secrets are absent.</p>
 <p><strong>Approach:</strong> Emit redacted structured events with correlation IDs, count/observe with fixed tags such as outcome/migration class, and test sentinel secrets across every field/message.</p>
 <p><strong>Why:</strong> Logs support correlation; metrics require bounded dimensions.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Inspect events for request and migration IDs and metrics for bounded migration/outcome tags; assert request ID is absent from metric tags and URL/password/parameters/exception message are absent everywhere.</p>
 <h5 id="solution-1--exercise-8-readiness">Exercise 8 — Readiness<a class="heading-anchor" href="#solution-1--exercise-8-readiness" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement read-only readiness for current, pending, drifted, and unreachable states while keeping liveness database-independent.</p>
 <p><strong>Approach:</strong> Probe metadata without writes, compare current/target/checksums, return bounded reasons, and map connection failure to not-ready. Liveness remains a local process response.</p>
 <p><strong>Why:</strong> Readiness describes safe traffic acceptance, not process existence.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Assert liveness succeeds without a session; readiness is true for matching current history and false with explicit reasons for pending, checksum drift, unknown history, or unreachable database.</p>
 <h5 id="solution-1--exercise-9-recovery">Exercise 9 — Recovery<a class="heading-anchor" href="#solution-1--exercise-9-recovery" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a scenario table for recovery decisions, including incomplete evidence that must pause.</p>
 <p><strong>Approach:</strong> Return pause when diagnosis/state is incomplete; choose forward fix only with confirmed/rehearsed safe progress; choose rollback release only when prior compatibility and rollback evidence are established.</p>
 <p><strong>Why:</strong> Destructive or forward actions require rehearsed, compatible evidence.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Create scenario rows for unconfirmed diagnosis, committed writes, compatibility, and rehearsed paths; assert incomplete evidence returns <code>PAUSE_AND_GATHER_EVIDENCE</code> and only supported rows choose forward/rollback.</p>
 <h5 id="solution-1--exercise-10-optional-integration">Exercise 10 — Optional integration<a class="heading-anchor" href="#solution-1--exercise-10-optional-integration" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> After fake tests, run the disposable live lab twice and inspect migration metadata with a read-only query.</p>
 <p><strong>Approach:</strong> Gate on environment/opt-in, parameterize values, run against the course schema, assert first applied/second skipped plus matching checksum, then remove lab objects through the documented rollback-safe cleanup.</p>
 <p><strong>Why:</strong> The second run demonstrates idempotency; cleanup evidence is part of completion.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> With explicit live opt-in, run the disposable migration set twice; assert the second applies nothing, metadata IDs/checksums match source, and the read-only inspection targets only course objects.</p>
 <h5 id="solution-1--exercise-11-immutability">Exercise 11 — Immutability<a class="heading-anchor" href="#solution-1--exercise-11-immutability" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Change only SQL whitespace after a migration is applied and decide whether checksum drift should be accepted.</p>
 <p><strong>Approach:</strong> The reference treats any serialized content change as drift. Create a new migration for intentional changes; do not normalize arbitrary SQL in a way that can hide meaningful edits.</p>
 <p><strong>Why:</strong> A stored checksum is an immutable history contract, not a semantic SQL parser.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Change only whitespace in applied SQL; assert checksum mismatch is detected and delivery stops rather than accepting edited immutable history.</p>
 <h5 id="solution-1--exercise-12-concurrency">Exercise 12 — Concurrency<a class="heading-anchor" href="#solution-1--exercise-12-concurrency" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Model two deployers contending for the same advisory lock and specify timeout/ownership behavior.</p>
 <p><strong>Approach:</strong> Acquire a stable namespaced advisory transaction lock, let the second wait or fail under a configured lock timeout, and re-plan after acquisition rather than using stale pre-lock state.</p>
 <p><strong>Why:</strong> Only one delivery transaction may make planning decisions at a time.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Simulate two sessions on the same advisory lock; assert only the lock holder plans/applies at a time, the waiter obeys the declared timeout, and both close their own sessions.</p>
 <h5 id="solution-1--exercise-13-postgresql-semantics">Exercise 13 — PostgreSQL semantics<a class="heading-anchor" href="#solution-1--exercise-13-postgresql-semantics" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Identify which DDL is transactional in PostgreSQL and how non-transactional commands alter the migration policy.</p>
 <p><strong>Approach:</strong> Most PostgreSQL DDL is transactional, but commands such as <code>CREATE INDEX CONCURRENTLY</code> have restrictions. Classify or forbid such commands in the standard runner and use a separately designed/rehearsed workflow.</p>
 <p><strong>Why:</strong> Do not assume every administrative statement can share ordinary transaction rollback.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Produce a reviewed list separating transaction-safe DDL from commands requiring special handling; any non-transactional command must use a separate migration policy and recovery proof.</p>
 <h5 id="solution-1--exercise-14-timeouts">Exercise 14 — Timeouts<a class="heading-anchor" href="#solution-1--exercise-14-timeouts" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Set statement and lock timeouts per attempt without leaking settings to later pooled work.</p>
 <p><strong>Approach:</strong> Issue parameter-safe <code>SET LOCAL</code> or trusted constant settings after beginning the transaction, test their order before commands, and rely on transaction end to restore defaults.</p>
 <p><strong>Why:</strong> Transaction-local settings should expire with commit/rollback.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Record transaction-local statement and lock timeout commands before migration SQL; assert they end with commit/rollback and are absent when a later pooled session begins.</p>
 <h5 id="solution-1--exercise-15-telemetry-design">Exercise 15 — Telemetry design<a class="heading-anchor" href="#solution-1--exercise-15-telemetry-design" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Define a bounded migration metric schema and a redaction test for exception objects and URL-like fields.</p>
 <p><strong>Approach:</strong> Prefer outcome/stage/error-class tags and numeric duration/attempts; keep request/migration IDs in logs unless the migration set is explicitly bounded; sanitize exception details before emission.</p>
 <p><strong>Why:</strong> Migration IDs may still become unbounded over years; choose dimensions deliberately.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Define metric names/tags with a bounded outcome/error class and migration family/version policy; feed URL-like fields and exceptions through redaction and assert no secret/message becomes a label.</p>
 <h5 id="solution-1--exercise-16-probe-semantics">Exercise 16 — Probe semantics<a class="heading-anchor" href="#solution-1--exercise-16-probe-semantics" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Distinguish current-but-stale application readiness from database reachability and migration currency.</p>
 <p><strong>Approach:</strong> Reachability proves a read connection; schema readiness proves expected migration/checksum state; application freshness/version compatibility is separate evidence. Report reasons independently.</p>
 <p><strong>Why:</strong> Each probe should answer one operational question.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Return separate probe fields for database reachability, schema currency, application staleness, and process liveness; assert changing one condition changes only its corresponding reason.</p>
 <h5 id="solution-1--exercise-17-decision-analysis">Exercise 17 — Decision analysis<a class="heading-anchor" href="#solution-1--exercise-17-decision-analysis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare forward fix and release rollback when the new schema has already received writes.</p>
 <p><strong>Approach:</strong> Default to pause unless compatibility and data transformation evidence exists. Forward fix is often safer after new writes; rollback release requires proof the old app can read/write the evolved data.</p>
 <p><strong>Why:</strong> Data written under the new contract can make old code incompatible even if DDL reversal is possible.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> For schema that has received incompatible new writes, assert release rollback is rejected unless compatibility and reversal are rehearsed; choose a rehearsed forward fix or pause.</p>
 <h5 id="solution-1--exercise-18-expand-contract">Exercise 18 — Expand-contract<a class="heading-anchor" href="#solution-1--exercise-18-expand-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design a three-release expand/migrate/contract sequence for renaming a populated column.</p>
 <p><strong>Approach:</strong> Add the new nullable column, dual-write/backfill/verify, switch readers and enforce constraints, then remove the old column only after compatibility and rollback windows close.</p>
 <p><strong>Why:</strong> Maintain compatibility while old and new application versions overlap.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Document release A adding nullable new column, release B dual-writing/backfilling/reading both, and release C enforcing new contract/removing old only after compatibility evidence.</p>
 <h5 id="solution-1--exercise-19-cleanup">Exercise 19 — Cleanup<a class="heading-anchor" href="#solution-1--exercise-19-cleanup" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Prove the optional live lab leaves no table, metadata row, lock, connection, or credential-bearing output behind.</p>
 <p><strong>Approach:</strong> Run read-only catalog checks after cleanup, close every session, verify lock absence, clear captured output, and scan logs/notebook/test artifacts for URL or secret sentinels.</p>
 <p><strong>Why:</strong> A passing mutation test is incomplete without postconditions.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> After the optional lab, query for course tables/metadata, inspect connection close calls, and scan captured output; assert no lab object, held lock/session, or credential sentinel remains.</p>
 <h5 id="solution-1--exercise-20-failure-simulation">Exercise 20 — Failure simulation<a class="heading-anchor" href="#solution-1--exercise-20-failure-simulation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Inject a network-like error immediately after fake commit and require the retry to gather evidence rather than blindly replay.</p>
 <p><strong>Approach:</strong> Mark the fake metadata committed, raise to the client, then on retry re-lock/re-read and accept only the matching checksum. A missing or mismatched row must not be guessed into success.</p>
 <p><strong>Why:</strong> Client exceptions after commit do not prove server rollback.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p></div>
+<p><strong>Verification evidence:</strong> Raise immediately after fake commit; assert the next attempt reads lock-protected metadata/checksum before any command replay and pauses on conflicting or missing evidence.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -1084,7 +1257,7 @@ printf &#x27;\n&#x27;
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -1772,7 +1945,51 @@ printf &#x27;\n&#x27;
 <span>    raise SystemExit(main())</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through stable lesson ID bridge-ops-01: Migration Delivery and Application Observability.
+Direct catalog prerequisites: bridge-08, sql-found-02. Assume I completed exactly those
+prerequisites, then begin with one short Retrieval question that connects each
+prerequisite to this lesson.
+
+Use repository skill guide-ds60sqlpy-learning.
+Companion guide: bridge/professional/companion-guides/bridge_ops_01_migration_observability.md
+Learner artifact: bridge/professional/lessons/bridge_ops_01_migration_observability.py
+
+Do not open, quote, summarize, or copy anything under solutions/ until I
+explicitly say I have finished my attempt and ask to compare.
+
+Use these coaching phases in order:
+1. Predict — ask what I expect before I run or change code.
+2. Attempt — let me implement or explain one numbered exercise at a time.
+3. Hint — give the smallest useful conceptual hint, never a finished answer.
+4. Evidence — ask for the exact return value, exception type, recorded calls,
+   query plus bound parameters, or written decision required by that exercise.
+5. Retrieval — close with two no-notes questions and one transfer problem.
+
+Keep the default path offline and fake-first. If the lesson has an optional
+PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the
+disposable advanced_sql_training database; never ask me to paste the URL.
+
+Done when every numbered exercise has its own evidence, normal/edge/failure
+behavior is explained in my words, the relevant offline tests pass, and I can
+solve the final transfer problem without opening solutions/.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="bridge-jupyter-01.html"><small>Previous lesson</small><strong>bridge-jupyter-01</strong><span>PostgreSQL in Jupyter with SQL Magics</span></a>
@@ -1864,6 +2081,23 @@ printf &#x27;\n&#x27;
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

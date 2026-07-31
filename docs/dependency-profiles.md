@@ -31,7 +31,14 @@ The setup scripts are the simplest route:
 
 ```powershell
 # Windows PowerShell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+& .\scripts\bootstrap_windows.ps1 -Profile Advanced
+
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
 ```
 
 ```bash
@@ -45,7 +52,7 @@ baseline:
 
 ```powershell
 # Example on Windows
-.\.venv\Scripts\python.exe -m pip install -e ".[bridge]"
+& $CoursePython -m pip install -e ".[bridge]"
 ```
 
 ```bash

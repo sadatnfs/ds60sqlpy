@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-54/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-54-data-warehouse-project-part-3-aggregates">Day 54 — Data Warehouse Project, Part 3: Aggregates<a class="heading-anchor" href="#guide--day-54-data-warehouse-project-part-3-aggregates" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -285,6 +384,54 @@
 <li><strong>Prerequisites:</strong> Review <a href="sql-53.html#guide">Day 53 — slowly changing dimensions</a> and retain the committed Day 52 warehouse in the same database. Day 54 does not depend on Day 53&#x27;s rolled-back changes.</li>
 <li><strong>Artifacts:</strong> <a href="sql-54.html#learner">learner SQL</a> · <a href="sql-54.html#solution-1">solution reasoning</a> · <a href="sql-54.html#solution-2">executable solution</a></li>
 </ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-54 — Project3 DWH Part3 Aggregations</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-54/lesson/workspace/sql/postgres-60day/day54_project3_dwh_part3_aggregations.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>This lesson requires the committed Day 52 warehouse. The guided preparation cell resolves that cataloged predecessor. For a direct terminal run, execute Day 52 successfully first; do not assume a rolled-back Day 53 exercise persists into Day 54.</p>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day54_project3_dwh_part3_aggregations.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/day54_project3_dwh_part3_aggregations.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Aggregate table, Idempotent refresh, Late-arriving fact. Its worked SQL reads or creates <code>agg_sales_category_month</code>, <code>agg_sales_customer_month</code>, <code>fact_sales</code>, <code>dim_date</code>, <code>dim_product</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: For one target year/month, delete category, customer, and product aggregate rows, rebuild each independently from facts, and commit or roll back the whole unit together. Reconcile each table&#x27;s period revenue with a fact-only control before considering the refresh successful. The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for <code>agg_sales_category_month</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final <code>SELECT</code>. Verify the command tag in <code>pg_catalog</code>/<code>information_schema</code>, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit <code>NULL</code>, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day54_project3_dwh_part3_aggregations.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">CREATE TABLE agg_sales_category_month (
+  year    INT NOT NULL,
+  month   INT NOT NULL,
+  category TEXT NOT NULL,
+  revenue NUMERIC(14,2) NOT NULL,
+  PRIMARY KEY (year, month, category)
+);</code></pre>
+<p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
+<p><strong>Expected result/shape:</strong> Example 1 must print the expected DDL command tag for <code>agg_sales_category_month</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">CREATE TABLE agg_sales_customer_month (
+  year     INT NOT NULL,
+  month    INT NOT NULL,
+  customer_sk INT NOT NULL,
+  revenue  NUMERIC(14,2) NOT NULL,
+  PRIMARY KEY (year, month, customer_sk)
+);</code></pre>
+<p><strong>How to read it:</strong> Example 2 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
+<p><strong>Expected result/shape:</strong> Example 2 must print the expected DDL command tag for <code>agg_sales_customer_month</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Build aggregate tables with an enforced monthly grain.</li>
@@ -301,14 +448,22 @@
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <p>Complete these in the <a href="sql-54.html#learner">learner SQL</a>:</p>
 <ol>
-<li>Add and validate <code>agg_sales_product_month</code>.</li>
-<li>Refresh all aggregates for a supplied year/month.</li>
-<li>Explain late-fact effects on closed months.</li>
-<li>Implement transactional delete/insert for one month.</li>
-<li>Make missing-side reconciliation NULL-safe.</li>
-<li>Prove the refresh is idempotent.</li>
+<li>Add and validate <code>agg_sales_product_month</code>. <strong>Inputs/evidence:</strong> For sql-54 Exercise 1, read from <code>dim_product</code>, <code>agg_sales_product_month</code>, <code>fact_sales</code>, and <code>dim_date</code>. Build the answer toward <code>year</code>, <code>month</code>, and <code>product_sk</code>; keep <code>year</code>, <code>month</code>, and <code>product_sk</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-54 Exercise 1, expected output: one row per <code>year</code>, <code>month</code>, and <code>product_sk</code>. The final columns are <code>year</code>, <code>month</code>, and <code>product_sk</code>. The final order is <code>a.year, a.month</code>. <strong>Verify:</strong> For sql-54 Exercise 1, independently aggregate <code>dim_product</code>, <code>agg_sales_product_month</code>, <code>fact_sales</code>, and <code>dim_date</code> by <code>year</code>, <code>month</code>, and <code>product_sk</code>; require one output row for every distinct <code>year</code>, <code>month</code>, and <code>product_sk</code> tuple and compare <code>product_sk</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>row_count</code> for the existing <code>year</code>, and <code>month</code> tuple and verify the new tuple appears exactly once.</li>
+<li>Refresh all aggregates for a supplied year/month. <strong>Inputs/evidence:</strong> For sql-54 Exercise 2, read from <code>agg_sales_category_month</code>, <code>agg_sales_customer_month</code>, <code>agg_sales_product_month</code>, <code>fact_sales</code>, and <code>dim_date</code>. Build the answer toward <code>year</code>, <code>month</code>, and <code>category</code>; keep <code>year</code>, <code>month</code>, and <code>product_sk</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-54 Exercise 2, expected output: one row per <code>year</code>, <code>month</code>, and <code>product_sk</code>. The final columns are <code>year</code>, <code>month</code>, and <code>category</code>. The final order is <code>dd.year DESC, dd.month DESC</code>. <strong>Verify:</strong> For sql-54 Exercise 2, assert no more than 1 rows, no duplicate <code>year</code>, <code>month</code>, and <code>product_sk</code>, and no adjacent pair that violates <code>dd.year DESC, dd.month DESC</code>. Rejoin the returned keys to <code>agg_sales_category_month</code>, <code>agg_sales_customer_month</code>, <code>agg_sales_product_month</code>, <code>fact_sales</code>, and <code>dim_date</code> to confirm <code>year</code>, <code>month</code>, and <code>category</code> came from the same source rows. Run with 1 minus one and 1 plus one eligible rows; require the output cap of 1 while retaining <code>dd.year DESC, dd.month DESC</code>.</li>
+<li>Explain late-fact effects on closed months. <strong>Inputs/evidence:</strong> For sql-54 Exercise 3, read from <code>fact_sales</code>, and <code>dim_date</code>. Build the answer toward <code>year</code>, <code>month</code>, <code>fact_rows</code>, and <code>latest_fact_date</code>; keep <code>year</code>, and <code>month</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-54 Exercise 3, expected output: one row per <code>year</code>, and <code>month</code>. The final columns are <code>year</code>, <code>month</code>, <code>fact_rows</code>, and <code>latest_fact_date</code>. The final order is <code>dd.year DESC, dd.month DESC</code>. <strong>Verify:</strong> For sql-54 Exercise 3, independently aggregate <code>fact_sales</code>, and <code>dim_date</code> by <code>year</code>, and <code>month</code>; require one output row for every distinct <code>year</code>, and <code>month</code> tuple and compare <code>fact_rows</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>fact_rows</code> for the existing <code>year</code>, and <code>month</code> tuple and verify the new tuple appears exactly once.</li>
+<li>Implement transactional delete/insert for one month. <strong>Inputs/evidence:</strong> For sql-54 Exercise 4, read the target keys from <code>agg_sales_category_month</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values. <strong>Expected result/shape:</strong> For sql-54 Exercise 4, expected output: the command tag and an independently counted set of affected <code>year</code>, and <code>month</code> values. The final columns are <code>year</code>, <code>month</code>, <code>category_rows</code>, and <code>revenue</code>. The final order is <code>year DESC, month DESC</code>. <strong>Verify:</strong> For sql-54 Exercise 4, materialize the intended <code>year</code>, and <code>month</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>agg_sales_category_month</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>year</code>, and <code>month</code> values in both cases.</li>
+<li>Make missing-side reconciliation NULL-safe. <strong>Inputs/evidence:</strong> For sql-54 Exercise 5, read from <code>agg_sales_category_month</code>, <code>fact_sales</code>, <code>dim_date</code>, and <code>f.revenue</code>. Build the answer toward <code>year</code>, <code>month</code>, <code>aggregate_revenue</code>, <code>fact_revenue</code>, and <code>difference</code>; keep <code>year</code>, and <code>month</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-54 Exercise 5, expected output: one row per <code>year</code>, and <code>month</code>. The final columns are <code>year</code>, <code>month</code>, <code>aggregate_revenue</code>, <code>fact_revenue</code>, and <code>difference</code>. The final order is <code>year, month</code>. <strong>Verify:</strong> For sql-54 Exercise 5, project <code>year</code>, and <code>month</code> plus the raw source columns from <code>agg_sales_category_month</code>, <code>fact_sales</code>, <code>dim_date</code>, and <code>f.revenue</code> at each join stage; record row count and distinct <code>year</code>, and <code>month</code>, then assert the final <code>year</code>, <code>month</code>, <code>aggregate_revenue</code>, <code>fact_revenue</code>, and <code>difference</code> values match those staged rows without unintended fanout or loss. Repeat with <code>NULL</code> in <code>year</code>, and <code>month</code> and state whether the row is kept, rejected, or classified.</li>
+<li>Prove the refresh is idempotent. <strong>Inputs/evidence:</strong> For sql-54 Exercise 6, read from <code>agg_sales_category_month</code>, <code>fact_sales</code>, <code>dim_date</code>, and <code>aggregate_snapshot_before</code>. Build the answer toward <code>except</code>; keep <code>except</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-54 Exercise 6, expected output: at most one row keyed by <code>except</code>. The final columns are <code>except</code>. The final order is <code>dd.year DESC, dd.month DESC</code>. <strong>Verify:</strong> For sql-54 Exercise 6, assert no more than 1 rows, no duplicate <code>except</code>, and no adjacent pair that violates <code>dd.year DESC, dd.month DESC</code>. Rejoin the returned keys to <code>agg_sales_category_month</code>, <code>fact_sales</code>, <code>dim_date</code>, and <code>aggregate_snapshot_before</code> to confirm <code>except</code> came from the same source rows. Add duplicate source candidates for <code>except</code>; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</li>
 </ol>
 <p>Refresh twice and compare row counts and totals.</p>
+<h4 id="guide--common-mistakes-and-how-to-recover">Common mistakes and how to recover<a class="heading-anchor" href="#guide--common-mistakes-and-how-to-recover" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Lesson-specific semantic mistake:</strong> Every refreshed month&#x27;s aggregate revenue must equal fact revenue.</li>
+<li><strong>Unexpected row count:</strong> display keys before aggregates, count rows after each join/filter stage, and find the first stage whose grain differs from the contract. Do not hide fanout with <code>DISTINCT</code>.</li>
+<li><strong>Unexpected <code>NULL</code> or missing row:</strong> decide whether the fact is unknown, inapplicable, zero, or absent before using <code>COALESCE</code>; inspect outer-join predicate placement and empty-input aggregate behavior.</li>
+<li><strong>Unstable top/first/last output:</strong> add <code>ORDER BY</code> with a unique final tie-breaker before <code>LIMIT</code> or order-sensitive windows/aggregates.</li>
+<li><strong><code>psql</code> stops on an error:</strong> fix the first error shown by <code>ON_ERROR_STOP</code>, restore the declared transaction/setup state, and rerun the complete file. A later successful statement does not validate a partial run.</li>
+</ul>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Does each primary key exactly match the documented aggregate grain?</li>
@@ -326,11 +481,8 @@
 <h4 id="guide--preconditions-and-state">Preconditions and state<a class="heading-anchor" href="#guide--preconditions-and-state" aria-label="Link to this section">#</a></h4>
 <p>Run Day 52 first in the same database. The learner creates its aggregate tables, loads them, performs data-quality checks, and rolls the entire Day 54 transaction back.</p>
 <p>The starter grains are <code>(year, month, category)</code> and <code>(year, month, customer_sk)</code>. Revenue is summed from <code>fact_sales.amount</code>; date attributes come from <code>dim_date</code>.</p>
-<h4 id="guide--practice-match-the-learner-prompts-exactly">Practice — match the learner prompts exactly<a class="heading-anchor" href="#guide--practice-match-the-learner-prompts-exactly" aria-label="Link to this section">#</a></h4>
-<ol>
-<li>Create <code>agg_sales_product_month</code> at <code>(year, month, product_sk)</code> grain with revenue, units, and distinct orders, then validate it against <code>fact_sales</code>.</li>
-<li>Create a stored procedure accepting year and month that deletes and rebuilds category, customer, and product aggregates for that target period.</li>
-</ol>
+<h4 id="guide--practice-map">Practice map<a class="heading-anchor" href="#guide--practice-map" aria-label="Link to this section">#</a></h4>
+<p>Use the numbered <strong>Exercises</strong> section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.</p>
 <h4 id="guide--refresh-design">Refresh design<a class="heading-anchor" href="#guide--refresh-design" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Delete and insert all related aggregates in one transaction.</li>
@@ -345,17 +497,45 @@
 <li>Late facts require rerunning affected periods or a deliberate backfill window.</li>
 <li>The compact seed does not need aggregates for speed; this is a warehouse serving-pattern exercise.</li>
 <li>Day 54 does not require rolled-back Day 53 audit/SCD changes.</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-54 — Project3 DWH Part3 Aggregations.
+
+I have completed the direct catalog prerequisite: `sql-53`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day54_project3_dwh_part3_aggregations.md
+- Answer-free learner SQL: sql/postgres-60day/day54_project3_dwh_part3_aggregations.sql
+
+Key terms to teach in context: Aggregate table, Idempotent refresh, Late-arriving fact. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: For one target year/month, delete category, customer, and product aggregate rows, rebuild each independently from facts, and commit or roll back the whole unit together. Reconcile each table&#x27;s period revenue with a fact-only control before considering the refresh successful.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-54/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -372,13 +552,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 54: Project 3 - Data Warehouse Design (Part 3)</span>
+<span>-- BEGINNER WORKFLOW — sql-54: Project3 DWH Part3 Aggregations</span>
+<span>-- Guide: sql/postgres-60day/companion-guides/day54_project3_dwh_part3_aggregations.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-54/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: agg_sales_category_month, agg_sales_customer_month, fact_sales, dim_date, dim_product.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>-- Topics: Aggregation tables and DQ checks in DWH</span>
 <span>BEGIN;</span>
 <span>SET search_path TO dwh, training, public;</span>
@@ -463,28 +660,52 @@
 <span> </span>
 <span>-- Exercises</span>
 <span>-- 1. Add an agg table agg_sales_product_month and validate it.</span>
+<span>--    Inputs: For sql-54 Exercise 1, read from `dim_product`, `agg_sales_product_month`, `fact_sales`, and `dim_date`. Build the answer toward `year`, `month`, and `product_sk`; keep `year`, `month`, and `product_sk` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-54 Exercise 1, expected output: one row per `year`, `month`, and `product_sk`. The final columns are `year`, `month`, and `product_sk`. The final order is `a.year, a.month`.</span>
+<span>--    Verify: For sql-54 Exercise 1, independently aggregate `dim_product`, `agg_sales_product_month`, `fact_sales`, and `dim_date` by `year`, `month`, and `product_sk`; require one output row for every distinct `year`, `month`, and `product_sk` tuple and compare `product_sk` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `row_count` for the existing `year`, and `month` tuple and verify the new tuple appears exactly once.</span>
+<span>--    Hint ladder, rung 1: For sql-54 Exercise 1, run `aggregate_total`, and `fact_total` one at a time. Record each CTE&#x27;s row count and `year`, `month`, and `product_sk` uniqueness before the next stage uses it.</span>
 <span>-- 2. Create a stored procedure to refresh a given y, m across all aggs.</span>
+<span>--    Inputs: For sql-54 Exercise 2, read from `agg_sales_category_month`, `agg_sales_customer_month`, `agg_sales_product_month`, `fact_sales`, and `dim_date`. Build the answer toward `year`, `month`, and `category`; keep `year`, `month`, and `product_sk` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-54 Exercise 2, expected output: one row per `year`, `month`, and `product_sk`. The final columns are `year`, `month`, and `category`. The final order is `dd.year DESC, dd.month DESC`.</span>
+<span>--    Verify: For sql-54 Exercise 2, assert no more than 1 rows, no duplicate `year`, `month`, and `product_sk`, and no adjacent pair that violates `dd.year DESC, dd.month DESC`. Rejoin the returned keys to `agg_sales_category_month`, `agg_sales_customer_month`, `agg_sales_product_month`, `fact_sales`, and `dim_date` to confirm `year`, `month`, and `category` came from the same source rows. Run with 1 minus one and 1 plus one eligible rows; require the output cap of 1 while retaining `dd.year DESC, dd.month DESC`.</span>
+<span>--    Hint ladder, rung 1: For sql-54 Exercise 2, run `aggregate_total`, and `fact_total` one at a time. Record each CTE&#x27;s row count and `year`, `month`, and `product_sk` uniqueness before the next stage uses it.</span>
 <span>-- 3. Prediction: explain why refreshing only the current month misses a</span>
 <span>--    late-arriving fact for a previous month.</span>
+<span>--    Inputs: For sql-54 Exercise 3, read from `fact_sales`, and `dim_date`. Build the answer toward `year`, `month`, `fact_rows`, and `latest_fact_date`; keep `year`, and `month` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-54 Exercise 3, expected output: one row per `year`, and `month`. The final columns are `year`, `month`, `fact_rows`, and `latest_fact_date`. The final order is `dd.year DESC, dd.month DESC`.</span>
+<span>--    Verify: For sql-54 Exercise 3, independently aggregate `fact_sales`, and `dim_date` by `year`, and `month`; require one output row for every distinct `year`, and `month` tuple and compare `fact_rows` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `fact_rows` for the existing `year`, and `month` tuple and verify the new tuple appears exactly once.</span>
+<span>--    Hint ladder, rung 1: For sql-54 Exercise 3, start with the first relation in `fact_sales`, and `dim_date`; after each join, record total rows and distinct `year`, and `month` so the exact fanout or loss is visible.</span>
 <span>-- 4. Construction: implement delete-and-insert refresh for one closed month in</span>
 <span>--    a transaction and return inserted row counts.</span>
+<span>--    Inputs: For sql-54 Exercise 4, read the target keys from `agg_sales_category_month` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
+<span>--    Expected result/shape: For sql-54 Exercise 4, expected output: the command tag and an independently counted set of affected `year`, and `month` values. The final columns are `year`, `month`, `category_rows`, and `revenue`. The final order is `year DESC, month DESC`.</span>
+<span>--    Verify: For sql-54 Exercise 4, materialize the intended `year`, and `month` target set first; require the command tag/`RETURNING` set to match it, then query `agg_sales_category_month` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `year`, and `month` values in both cases.</span>
+<span>--    Hint ladder, rung 1: For sql-54 Exercise 4, materialize the intended `year`, and `month` target set first; require the command tag/`RETURNING` set to match it, then query `agg_sales_category_month` again and prove rollback or idempotent retry.</span>
 <span>-- 5. Debugging: repair the FULL JOIN reconciliation so a row missing from either</span>
 <span>--    the fact aggregate or stored aggregate is reported, not hidden by NULL math.</span>
+<span>--    Inputs: For sql-54 Exercise 5, read from `agg_sales_category_month`, `fact_sales`, `dim_date`, and `f.revenue`. Build the answer toward `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference`; keep `year`, and `month` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-54 Exercise 5, expected output: one row per `year`, and `month`. The final columns are `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference`. The final order is `year, month`.</span>
+<span>--    Verify: For sql-54 Exercise 5, project `year`, and `month` plus the raw source columns from `agg_sales_category_month`, `fact_sales`, `dim_date`, and `f.revenue` at each join stage; record row count and distinct `year`, and `month`, then assert the final `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference` values match those staged rows without unintended fanout or loss. Repeat with `NULL` in `year`, and `month` and state whether the row is kept, rejected, or classified.</span>
+<span>--    Hint ladder, rung 1: For sql-54 Exercise 5, run `aggregate_total`, and `fact_total` one at a time. Record each CTE&#x27;s row count and `year`, and `month` uniqueness before the next stage uses it.</span>
 <span>-- 6. Edge case: rerun the same month refresh twice and prove both row count and</span>
 <span>--    revenue are identical (idempotency).</span>
+<span>--    Inputs: For sql-54 Exercise 6, read from `agg_sales_category_month`, `fact_sales`, `dim_date`, and `aggregate_snapshot_before`. Build the answer toward `except`; keep `except` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-54 Exercise 6, expected output: at most one row keyed by `except`. The final columns are `except`. The final order is `dd.year DESC, dd.month DESC`.</span>
+<span>--    Verify: For sql-54 Exercise 6, assert no more than 1 rows, no duplicate `except`, and no adjacent pair that violates `dd.year DESC, dd.month DESC`. Rejoin the returned keys to `agg_sales_category_month`, `fact_sales`, `dim_date`, and `aggregate_snapshot_before` to confirm `except` came from the same source rows. Add duplicate source candidates for `except`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</span>
+<span>--    Hint ladder, rung 1: For sql-54 Exercise 6, start with the first relation in `agg_sales_category_month`, `fact_sales`, `dim_date`, and `aggregate_snapshot_before`; after each join, record total rows and distinct `except` so the exact fanout or loss is visible.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -508,6 +729,26 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-54-solutions-warehouse-aggregates-and-refresh-procedure">Day 54 Solutions — Warehouse Aggregates and Refresh Procedure<a class="heading-anchor" href="#solution-1--day-54-solutions-warehouse-aggregates-and-refresh-procedure" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day54_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day54_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are Aggregate table, Idempotent refresh, Late-arriving fact. Its worked-model focus is: For one target year/month, delete category, customer, and product aggregate rows, rebuild each independently from facts, and commit or roll back the whole unit together. Reconcile each table&#x27;s period revenue with a fact-only control before considering the refresh successful.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>Run <a href="sql-52.html#solution-2"><code>day52_solutions.sql</code></a> first in the same database. Day 54 creates and tests aggregate objects inside a transaction, then rolls everything back. The complete runnable answer is <a href="sql-54.html#solution-2"><code>day54_solutions.sql</code></a>.</p>
 <h4 id="solution-1--exercise-1-aggsalesproductmonth">Exercise 1 — <code>agg_sales_product_month</code><a class="heading-anchor" href="#solution-1--exercise-1-aggsalesproductmonth" aria-label="Link to this section">#</a></h4>
 <p>The answer uses this grain and schema:</p>
@@ -558,6 +799,16 @@ ORDER BY a.year, a.month;
 
 ROLLBACK;</code></pre>
 <p>The two sides are aggregated independently before joining, preventing join fanout. Expected <code>difference</code> is zero for every built month.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-54 Exercise 1, read from <code>dim_product</code>, <code>agg_sales_product_month</code>, <code>fact_sales</code>, and <code>dim_date</code>. Build the answer toward <code>year</code>, <code>month</code>, and <code>product_sk</code>; keep <code>year</code>, <code>month</code>, and <code>product_sk</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-54 Exercise 1, expected output: one row per <code>year</code>, <code>month</code>, and <code>product_sk</code>. The final columns are <code>year</code>, <code>month</code>, and <code>product_sk</code>. The final order is <code>a.year, a.month</code>.</li>
+<li><strong>Independent verification:</strong> For sql-54 Exercise 1, independently aggregate <code>dim_product</code>, <code>agg_sales_product_month</code>, <code>fact_sales</code>, and <code>dim_date</code> by <code>year</code>, <code>month</code>, and <code>product_sk</code>; require one output row for every distinct <code>year</code>, <code>month</code>, and <code>product_sk</code> tuple and compare <code>product_sk</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>row_count</code> for the existing <code>year</code>, and <code>month</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Intermediate relation check:</strong> For sql-54 Exercise 1, run <code>aggregate_total</code>, and <code>fact_total</code> one at a time. Record each CTE&#x27;s row count and <code>year</code>, <code>month</code>, and <code>product_sk</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-54 Exercise 1, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>dim_product</code>, <code>agg_sales_product_month</code>, <code>fact_sales</code>, and <code>dim_date</code>, preserve one row per <code>year</code>, <code>month</code>, and <code>product_sk</code>, and finish with <code>year</code>, <code>month</code>, and <code>product_sk</code> ordered by <code>a.year, a.month</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-54 Exercise 1, the chosen form is justified by this lesson-specific rationale: The answer uses this grain and schema: The two sides are aggregated independently before joining, preventing join fanout. Evaluate another form against the concrete expected result (one row per <code>year</code>, <code>month</code>, and <code>product_sk</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>row_count</code> for the existing <code>year</code>, and <code>month</code> tuple and verify the new tuple appears exactly once.</li>
+</ul>
 <h4 id="solution-1--exercise-2-refresh-all-aggregates-for-year-month">Exercise 2 — Refresh all aggregates for <code>(year, month)</code><a class="heading-anchor" href="#solution-1--exercise-2-refresh-all-aggregates-for-year-month" aria-label="Link to this section">#</a></h4>
 <p>The executable solution creates:</p>
 <pre><code class="language-text">dwh.refresh_sales_aggregates_solution(p_year int, p_month int)</code></pre>
@@ -570,6 +821,16 @@ ROLLBACK;</code></pre>
 </ol>
 <p>The delete-then-insert design is idempotent for a target period. The answer discovers the latest fact month and calls the procedure for that month, then reconciles product aggregate revenue with <code>fact_sales</code>.</p>
 <p>To inspect the result after running the canonical file, remember that it ends with <code>ROLLBACK</code>; the aggregate objects intentionally will not persist.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-54 Exercise 2, read from <code>agg_sales_category_month</code>, <code>agg_sales_customer_month</code>, <code>agg_sales_product_month</code>, <code>fact_sales</code>, and <code>dim_date</code>. Build the answer toward <code>year</code>, <code>month</code>, and <code>category</code>; keep <code>year</code>, <code>month</code>, and <code>product_sk</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-54 Exercise 2, expected output: one row per <code>year</code>, <code>month</code>, and <code>product_sk</code>. The final columns are <code>year</code>, <code>month</code>, and <code>category</code>. The final order is <code>dd.year DESC, dd.month DESC</code>.</li>
+<li><strong>Independent verification:</strong> For sql-54 Exercise 2, assert no more than 1 rows, no duplicate <code>year</code>, <code>month</code>, and <code>product_sk</code>, and no adjacent pair that violates <code>dd.year DESC, dd.month DESC</code>. Rejoin the returned keys to <code>agg_sales_category_month</code>, <code>agg_sales_customer_month</code>, <code>agg_sales_product_month</code>, <code>fact_sales</code>, and <code>dim_date</code> to confirm <code>year</code>, <code>month</code>, and <code>category</code> came from the same source rows. Run with 1 minus one and 1 plus one eligible rows; require the output cap of 1 while retaining <code>dd.year DESC, dd.month DESC</code>.</li>
+<li><strong>Intermediate relation check:</strong> For sql-54 Exercise 2, run <code>aggregate_total</code>, and <code>fact_total</code> one at a time. Record each CTE&#x27;s row count and <code>year</code>, <code>month</code>, and <code>product_sk</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-54 Exercise 2, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>WHERE</code>, <code>GROUP BY</code>, <code>SELECT</code>, <code>ORDER BY</code>, and <code>LIMIT</code>. Read only those operations: begin at <code>agg_sales_category_month</code>, <code>agg_sales_customer_month</code>, <code>agg_sales_product_month</code>, <code>fact_sales</code>, and <code>dim_date</code>, preserve one row per <code>year</code>, <code>month</code>, and <code>product_sk</code>, and finish with <code>year</code>, <code>month</code>, and <code>category</code> ordered by <code>dd.year DESC, dd.month DESC</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-54 Exercise 2, the chosen form is justified by this lesson-specific rationale: The executable solution creates: Within one procedure call it: 1. Evaluate another form against the concrete expected result (one row per <code>year</code>, <code>month</code>, and <code>product_sk</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Run with 1 minus one and 1 plus one eligible rows; require the output cap of 1 while retaining <code>dd.year DESC, dd.month DESC</code>.</li>
+</ul>
 <h4 id="solution-1--required-days-52-54-sequence">Required Days 52–54 sequence<a class="heading-anchor" href="#solution-1--required-days-52-54-sequence" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d course -f day52_solutions.sql
 psql -X -v ON_ERROR_STOP=1 -d course -f day53_solutions.sql
@@ -585,14 +846,54 @@ psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
 </ul>
 <h4 id="solution-1--exercise-3-account-for-late-facts">Exercise 3 — Account for late facts<a class="heading-anchor" href="#solution-1--exercise-3-account-for-late-facts" aria-label="Link to this section">#</a></h4>
 <p>The period inventory identifies every loaded month. A late fact requires refreshing its own affected period, not merely the newest month.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-54 Exercise 3, read from <code>fact_sales</code>, and <code>dim_date</code>. Build the answer toward <code>year</code>, <code>month</code>, <code>fact_rows</code>, and <code>latest_fact_date</code>; keep <code>year</code>, and <code>month</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-54 Exercise 3, expected output: one row per <code>year</code>, and <code>month</code>. The final columns are <code>year</code>, <code>month</code>, <code>fact_rows</code>, and <code>latest_fact_date</code>. The final order is <code>dd.year DESC, dd.month DESC</code>.</li>
+<li><strong>Independent verification:</strong> For sql-54 Exercise 3, independently aggregate <code>fact_sales</code>, and <code>dim_date</code> by <code>year</code>, and <code>month</code>; require one output row for every distinct <code>year</code>, and <code>month</code> tuple and compare <code>fact_rows</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>fact_rows</code> for the existing <code>year</code>, and <code>month</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Intermediate relation check:</strong> For sql-54 Exercise 3, start with the first relation in <code>fact_sales</code>, and <code>dim_date</code>; after each join, record total rows and distinct <code>year</code>, and <code>month</code> so the exact fanout or loss is visible.</li>
+<li><strong>Clause check:</strong> For sql-54 Exercise 3, the solution actually uses <code>FROM</code>, <code>JOIN ... ON</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>fact_sales</code>, and <code>dim_date</code>, preserve one row per <code>year</code>, and <code>month</code>, and finish with <code>year</code>, <code>month</code>, <code>fact_rows</code>, and <code>latest_fact_date</code> ordered by <code>dd.year DESC, dd.month DESC</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-54 Exercise 3, the chosen form is justified by this lesson-specific rationale: The period inventory identifies every loaded month. Evaluate another form against the concrete expected result (one row per <code>year</code>, and <code>month</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>fact_rows</code> for the existing <code>year</code>, and <code>month</code> tuple and verify the new tuple appears exactly once.</li>
+</ul>
 <h4 id="solution-1--exercise-4-refresh-atomically">Exercise 4 — Refresh atomically<a class="heading-anchor" href="#solution-1--exercise-4-refresh-atomically" aria-label="Link to this section">#</a></h4>
 <p>Delete and all aggregate inserts run in one transaction through the procedure. Failure rolls back the whole period instead of leaving partial tables.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-54 Exercise 4, read the target keys from <code>agg_sales_category_month</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values.</li>
+<li><strong>Expected result/shape:</strong> For sql-54 Exercise 4, expected output: the command tag and an independently counted set of affected <code>year</code>, and <code>month</code> values. The final columns are <code>year</code>, <code>month</code>, <code>category_rows</code>, and <code>revenue</code>. The final order is <code>year DESC, month DESC</code>.</li>
+<li><strong>Independent verification:</strong> For sql-54 Exercise 4, materialize the intended <code>year</code>, and <code>month</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>agg_sales_category_month</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>year</code>, and <code>month</code> values in both cases.</li>
+<li><strong>Intermediate relation check:</strong> For sql-54 Exercise 4, materialize the intended <code>year</code>, and <code>month</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>agg_sales_category_month</code> again and prove rollback or idempotent retry.</li>
+<li><strong>Clause check:</strong> For sql-54 Exercise 4, the solution actually uses <code>FROM</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>agg_sales_category_month</code>, preserve one row per <code>year</code>, and <code>month</code>, and finish with <code>year</code>, <code>month</code>, <code>category_rows</code>, and <code>revenue</code> ordered by <code>year DESC, month DESC</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-54 Exercise 4, the chosen form is justified by this lesson-specific rationale: Delete and all aggregate inserts run in one transaction through the procedure. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected <code>year</code>, and <code>month</code> values) and the verification above.</li>
+<li><strong>Edge case:</strong> Use an empty target set and a multi-row target set; reconcile the affected <code>year</code>, and <code>month</code> values in both cases.</li>
+</ul>
 <h4 id="solution-1--exercise-5-make-reconciliation-null-safe">Exercise 5 — Make reconciliation NULL-safe<a class="heading-anchor" href="#solution-1--exercise-5-make-reconciliation-null-safe" aria-label="Link to this section">#</a></h4>
 <p>FULL JOIN preserves a period missing on either side, and coalesced arithmetic turns that absence into a visible nonzero difference.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-54 Exercise 5, read from <code>agg_sales_category_month</code>, <code>fact_sales</code>, <code>dim_date</code>, and <code>f.revenue</code>. Build the answer toward <code>year</code>, <code>month</code>, <code>aggregate_revenue</code>, <code>fact_revenue</code>, and <code>difference</code>; keep <code>year</code>, and <code>month</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-54 Exercise 5, expected output: one row per <code>year</code>, and <code>month</code>. The final columns are <code>year</code>, <code>month</code>, <code>aggregate_revenue</code>, <code>fact_revenue</code>, and <code>difference</code>. The final order is <code>year, month</code>.</li>
+<li><strong>Independent verification:</strong> For sql-54 Exercise 5, project <code>year</code>, and <code>month</code> plus the raw source columns from <code>agg_sales_category_month</code>, <code>fact_sales</code>, <code>dim_date</code>, and <code>f.revenue</code> at each join stage; record row count and distinct <code>year</code>, and <code>month</code>, then assert the final <code>year</code>, <code>month</code>, <code>aggregate_revenue</code>, <code>fact_revenue</code>, and <code>difference</code> values match those staged rows without unintended fanout or loss. Repeat with <code>NULL</code> in <code>year</code>, and <code>month</code> and state whether the row is kept, rejected, or classified.</li>
+<li><strong>Intermediate relation check:</strong> For sql-54 Exercise 5, run <code>aggregate_total</code>, and <code>fact_total</code> one at a time. Record each CTE&#x27;s row count and <code>year</code>, and <code>month</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-54 Exercise 5, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>WHERE</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>agg_sales_category_month</code>, <code>fact_sales</code>, <code>dim_date</code>, and <code>f.revenue</code>, preserve one row per <code>year</code>, and <code>month</code>, and finish with <code>year</code>, <code>month</code>, <code>aggregate_revenue</code>, <code>fact_revenue</code>, and <code>difference</code> ordered by <code>year, month</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-54 Exercise 5, the chosen form is justified by this lesson-specific rationale: FULL JOIN preserves a period missing on either side, and coalesced arithmetic turns that absence into a visible nonzero difference. Evaluate another form against the concrete expected result (one row per <code>year</code>, and <code>month</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Repeat with <code>NULL</code> in <code>year</code>, and <code>month</code> and state whether the row is kept, rejected, or classified.</li>
+</ul>
 <h4 id="solution-1--exercise-6-prove-idempotency">Exercise 6 — Prove idempotency<a class="heading-anchor" href="#solution-1--exercise-6-prove-idempotency" aria-label="Link to this section">#</a></h4>
-<p>The answer snapshots category aggregates, reruns the same latest period, and uses two-way <code>EXCEPT</code>. Both difference sets must be empty.</p></div>
+<p>The answer snapshots category aggregates, reruns the same latest period, and uses two-way <code>EXCEPT</code>. Both difference sets must be empty.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-54 Exercise 6, read from <code>agg_sales_category_month</code>, <code>fact_sales</code>, <code>dim_date</code>, and <code>aggregate_snapshot_before</code>. Build the answer toward <code>except</code>; keep <code>except</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-54 Exercise 6, expected output: at most one row keyed by <code>except</code>. The final columns are <code>except</code>. The final order is <code>dd.year DESC, dd.month DESC</code>.</li>
+<li><strong>Independent verification:</strong> For sql-54 Exercise 6, assert no more than 1 rows, no duplicate <code>except</code>, and no adjacent pair that violates <code>dd.year DESC, dd.month DESC</code>. Rejoin the returned keys to <code>agg_sales_category_month</code>, <code>fact_sales</code>, <code>dim_date</code>, and <code>aggregate_snapshot_before</code> to confirm <code>except</code> came from the same source rows. Add duplicate source candidates for <code>except</code>; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</li>
+<li><strong>Intermediate relation check:</strong> For sql-54 Exercise 6, start with the first relation in <code>agg_sales_category_month</code>, <code>fact_sales</code>, <code>dim_date</code>, and <code>aggregate_snapshot_before</code>; after each join, record total rows and distinct <code>except</code> so the exact fanout or loss is visible.</li>
+<li><strong>Clause check:</strong> For sql-54 Exercise 6, the solution actually uses <code>FROM</code>, <code>JOIN ... ON</code>, <code>SELECT</code>, <code>ORDER BY</code>, and <code>LIMIT</code>. Read only those operations: begin at <code>agg_sales_category_month</code>, <code>fact_sales</code>, <code>dim_date</code>, and <code>aggregate_snapshot_before</code>, preserve one row per <code>except</code>, and finish with <code>except</code> ordered by <code>dd.year DESC, dd.month DESC</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-54 Exercise 6, the chosen form is justified by this lesson-specific rationale: The answer snapshots category aggregates, reruns the same latest period, and uses two-way <code>EXCEPT</code>. Evaluate another form against the concrete expected result (at most one row keyed by <code>except</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Add duplicate source candidates for <code>except</code>; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.</li>
+</ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -600,7 +901,7 @@ psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -624,6 +925,19 @@ psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 54 solutions: aggregate tables and refresh procedure</span>
+<span>-- SOLUTION READING MAP — sql-54: Project3 DWH Part3 Aggregations</span>
+<span>-- Explanation: sql/postgres-60day/solutions/day54_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day54_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>BEGIN;</span>
 <span>SET search_path TO dwh, training, public;</span>
 <span> </span>
@@ -823,7 +1137,50 @@ psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-54 — Project3 DWH Part3 Aggregations.
+
+I have completed the direct catalog prerequisite: `sql-53`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day54_project3_dwh_part3_aggregations.md
+- Answer-free learner SQL: sql/postgres-60day/day54_project3_dwh_part3_aggregations.sql
+
+Key terms to teach in context: Aggregate table, Idempotent refresh, Late-arriving fact. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: For one target year/month, delete category, customer, and product aggregate rows, rebuild each independently from facts, and commit or roll back the whole unit together. Reconcile each table&#x27;s period revenue with a fact-only control before considering the refresh successful.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-54/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-53.html"><small>Previous lesson</small><strong>sql-53</strong><span>Project3 DWH Part2 SCD</span></a>
@@ -915,6 +1272,23 @@ psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

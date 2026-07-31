@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-15/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-15-phase-1-project-multi-dimensional-revenue-report-companion-guide">Day 15 — Phase 1 Project: Multi-Dimensional Revenue Report (Companion Guide)<a class="heading-anchor" href="#guide--day-15-phase-1-project-multi-dimensional-revenue-report-companion-guide" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -285,6 +384,87 @@
 <li><strong>Prerequisites:</strong> <a href="sql-14.html#guide">Day 14 — numeric types and casting</a> and the complete Day 01–14 foundation sequence</li>
 <li><strong>Artifacts:</strong> <a href="sql-15.html#learner">learner SQL</a> · <a href="sql-15.html#solution-1">solution reasoning</a> · <a href="sql-15.html#solution-2">executable solution</a></li>
 </ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-15 — Phase1 Project</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-15/lesson/workspace/sql/postgres-60day/day15_phase1_project.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day15_phase1_project.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/day15_phase1_project.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Metric contract, Dimensional report, Control total. Its worked SQL reads or creates <code>orders</code>, <code>order_items</code>, <code>customers</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: Build one stable orderlines relation first, with one row per intended line or order and a single net-revenue formula. Reconcile its total, then add dimension joins one at a time and compare the total after each join. Only after totals remain stable should you add grouping sets and display labels. The expected contract is that One row per customer. Predict keys, row count, <code>NULL</code> behavior, and ordering before running. Afterwards, compare keys/counts/totals with an independent control. A blank string, SQL <code>NULL</code>, numeric zero, and a missing row are different facts; use <code>COALESCE</code> only after choosing which meaning the business question requires.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day15_phase1_project.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">WITH line AS (
+  SELECT o.customer_id,
+         date_trunc(&#x27;month&#x27;, o.order_date AT TIME ZONE &#x27;UTC&#x27;)::date
+           AS month_utc,
+         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
+  FROM orders o
+  JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY o.customer_id,
+           date_trunc(&#x27;month&#x27;, o.order_date AT TIME ZONE &#x27;UTC&#x27;)::date
+),
+segment AS (
+  SELECT c.customer_id, COALESCE(c.segment,&#x27;standard&#x27;) AS segment, c.country
+  FROM customers c
+)
+SELECT s.segment, s.country, l.month_utc,
+       ROUND(SUM(l.revenue),2) AS revenue,
+       COUNT(DISTINCT l.customer_id) AS actives,
+       ROUND(SUM(l.revenue)/NULLIF(COUNT(DISTINCT l.customer_id),0),2) AS rev_per_active
+FROM line l
+JOIN segment s ON s.customer_id = l.customer_id
+GROUP BY s.segment, s.country, l.month_utc
+ORDER BY l.month_utc DESC, revenue DESC, s.segment, s.country
+LIMIT 200;</code></pre>
+<p><strong>How to read it:</strong> Example 1: Start with <code>orders</code>, <code>order_items</code>, and <code>customers</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>segment</code>, <code>country</code>, <code>month_utc</code>, <code>revenue</code>, <code>actives</code>, and <code>rev_per_active</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 200</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>segment</code>, and <code>country</code>, capped at 200 rows with columns <code>segment</code>, <code>country</code>, <code>month_utc</code>, <code>revenue</code>, <code>actives</code>, and <code>rev_per_active</code> from <code>orders</code>, <code>order_items</code>, and <code>customers</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">-- The same topic query shown as a plan instead of business rows.
+EXPLAIN (COSTS OFF)
+WITH line AS (
+  SELECT o.customer_id,
+         date_trunc(&#x27;month&#x27;, o.order_date AT TIME ZONE &#x27;UTC&#x27;)::date
+           AS month_utc,
+         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
+  FROM orders o
+  JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY o.customer_id,
+           date_trunc(&#x27;month&#x27;, o.order_date AT TIME ZONE &#x27;UTC&#x27;)::date
+),
+segment AS (
+  SELECT c.customer_id, COALESCE(c.segment,&#x27;standard&#x27;) AS segment, c.country
+  FROM customers c
+)
+SELECT s.segment, s.country, l.month_utc,
+       ROUND(SUM(l.revenue),2) AS revenue,
+       COUNT(DISTINCT l.customer_id) AS actives,
+       ROUND(SUM(l.revenue)/NULLIF(COUNT(DISTINCT l.customer_id),0),2) AS rev_per_active
+FROM line l
+JOIN segment s ON s.customer_id = l.customer_id
+GROUP BY s.segment, s.country, l.month_utc
+ORDER BY l.month_utc DESC, revenue DESC, s.segment, s.country
+LIMIT 200;</code></pre>
+<p><strong>How to read it:</strong> Example 2 is executed by <code>psql</code> as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.</p>
+<p><strong>Expected result/shape:</strong> Example 2 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its <code>segment</code>, and <code>country</code> key set and row count over <code>orders</code>, <code>order_items</code>, and <code>customers</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Design a multi-dimensional revenue report from a written metric contract.</li>
@@ -309,13 +489,21 @@
 <p>Deliver a reconciled Phase 1 report that combines filtering, joins, aggregation, text/time handling, and exact money semantics.</p>
 <p>Attempt each prompt in a scratch SQL file before opening the solution. For every result, write its row grain and expected shape first.</p>
 <ol>
-<li><strong>Query writing:</strong> Create a customer performance table with order count, stored revenue, and latest order date, retaining customers with no orders. <strong>Progressive hint:</strong> Left join from customers and aggregate at customer grain. <strong>Expected shape:</strong> One row per customer.</li>
-<li><strong>Query writing:</strong> Create a product profitability table from net order-line revenue and catalog cost. <strong>Progressive hint:</strong> Calculate line revenue and line cost at item grain, then aggregate to product. <strong>Expected shape:</strong> One row per sold product.</li>
-<li><strong>Query writing:</strong> Build a UTC monthly order-status report with counts and stored revenue. <strong>Progressive hint:</strong> Derive one reporting month and group by month/status. <strong>Expected shape:</strong> One row per observed month and status.</li>
-<li><strong>Debugging:</strong> Reconcile stored order total, computed line total, and paid total without multiplying details. <strong>Progressive hint:</strong> Aggregate items and payments independently to order grain before joining. <strong>Expected shape:</strong> One row per order with differences.</li>
-<li><strong>Prediction:</strong> Compare monthly budgets with actual expenses and preserve missing sides. <strong>Progressive hint:</strong> Aggregate both sources to category/month grain, then full join and keep NULL distinct from a real zero. <strong>Expected shape:</strong> One row per category/month in either source.</li>
-<li><strong>Extension:</strong> Produce one executive summary row with population, activity, stored revenue, computed revenue, and payments. <strong>Progressive hint:</strong> Compute independent one-row aggregates, then cross join them to avoid detail multiplication. <strong>Expected shape:</strong> Exactly one summary row.</li>
+<li><strong>Query writing:</strong> Create a customer performance table with order count, stored revenue, and latest order date, retaining customers with no orders. <strong>Progressive hint:</strong> Left join from customers and aggregate at customer grain. <strong>Inputs/evidence:</strong> For sql-15 Exercise 1, read from <code>customers</code>, and <code>orders</code>. Build the answer toward <code>customer_id</code>, <code>full_name</code>, <code>country</code>, <code>order_count</code>, <code>stored_revenue</code>, and <code>latest_order_date</code>; keep <code>customer_id</code>, <code>full_name</code>, and <code>country</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-15 Exercise 1, expected output: One row per customer. The final columns are <code>customer_id</code>, <code>full_name</code>, <code>country</code>, <code>order_count</code>, <code>stored_revenue</code>, and <code>latest_order_date</code>. The final order is <code>stored_revenue DESC, c.customer_id</code>. <strong>Verify:</strong> For sql-15 Exercise 1, independently aggregate <code>customers</code>, and <code>orders</code> by <code>customer_id</code>, <code>full_name</code>, and <code>country</code>; require one output row for every distinct <code>customer_id</code>, <code>full_name</code>, and <code>country</code> tuple and compare <code>order_count</code>, <code>stored_revenue</code>, and <code>latest_order_date</code> tuple by tuple. Use one key absent from <code>orders</code>; then tie two candidates on <code>stored_revenue DESC</code> and verify <code>c.customer_id</code> selects the same row on every run.</li>
+<li><strong>Query writing:</strong> Create a product profitability table from net order-line revenue and catalog cost. <strong>Progressive hint:</strong> Calculate line revenue and line cost at item grain, then aggregate to product. <strong>Inputs/evidence:</strong> For sql-15 Exercise 2, read from <code>products</code>, and <code>order_items</code>. Build the answer toward <code>product_id</code>, <code>name</code>, <code>category</code>, <code>units_sold</code>, <code>net_revenue</code>, <code>catalog_cost</code>, and <code>gross_profit</code>; keep <code>product_id</code>, <code>name</code>, and <code>category</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-15 Exercise 2, expected output: One row per sold product. The final columns are <code>product_id</code>, <code>name</code>, <code>category</code>, <code>units_sold</code>, <code>net_revenue</code>, <code>catalog_cost</code>, and <code>gross_profit</code>. The final order is <code>gross_profit DESC, p.product_id</code>. <strong>Verify:</strong> For sql-15 Exercise 2, independently aggregate <code>products</code>, and <code>order_items</code> by <code>product_id</code>, <code>name</code>, and <code>category</code>; require one output row for every distinct <code>product_id</code>, <code>name</code>, and <code>category</code> tuple and compare <code>units_sold</code>, and <code>net_revenue</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>units_sold</code>, and <code>net_revenue</code> for the existing <code>product_id</code>, and <code>name</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Query writing:</strong> Build a UTC monthly order-status report with counts and stored revenue. <strong>Progressive hint:</strong> Derive one reporting month and group by month/status. <strong>Inputs/evidence:</strong> For sql-15 Exercise 3, read from <code>orders</code>. Build the answer toward <code>utc_month</code>, <code>status</code>, <code>order_count</code>, and <code>stored_revenue</code>; keep <code>status</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-15 Exercise 3, expected output: One row per observed month and status. The final columns are <code>utc_month</code>, <code>status</code>, <code>order_count</code>, and <code>stored_revenue</code>. The final order is <code>utc_month, o.status</code>. <strong>Verify:</strong> For sql-15 Exercise 3, independently aggregate <code>orders</code> by <code>status</code>; require one output row for every distinct <code>status</code> tuple and compare <code>order_count</code>, and <code>stored_revenue</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>order_count</code>, and <code>stored_revenue</code> for the existing <code>status</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Debugging:</strong> Reconcile stored order total, computed line total, and paid total without multiplying details. <strong>Progressive hint:</strong> Aggregate items and payments independently to order grain before joining. <strong>Inputs/evidence:</strong> For sql-15 Exercise 4, read from <code>order_items</code>, <code>payments</code>, and <code>orders</code>. Build the answer toward <code>order_id</code>, <code>stored_total</code>, <code>line_total</code>, <code>paid_total</code>, <code>stored_minus_lines</code>, and <code>unpaid_balance</code>; keep <code>order_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-15 Exercise 4, expected output: One row per order with differences. The final columns are <code>order_id</code>, <code>stored_total</code>, <code>line_total</code>, <code>paid_total</code>, <code>stored_minus_lines</code>, and <code>unpaid_balance</code>. The final order is <code>ABS(o.total_amount - lt.line_total) DESC, o.order_id</code>. <strong>Verify:</strong> For sql-15 Exercise 4, project <code>order_id</code> plus the raw source columns from <code>order_items</code>, <code>payments</code>, and <code>orders</code> at each join stage; record row count and distinct <code>order_id</code>, then assert the final <code>order_id</code>, <code>stored_total</code>, <code>line_total</code>, <code>paid_total</code>, <code>stored_minus_lines</code>, and <code>unpaid_balance</code> values match those staged rows without unintended fanout or loss. Add one source row with a new <code>order_id</code>; verify the result gains exactly one row carrying that <code>order_id</code> value.</li>
+<li><strong>Prediction:</strong> Compare monthly budgets with actual expenses and preserve missing sides. <strong>Progressive hint:</strong> Aggregate both sources to category/month grain, then full join and keep NULL distinct from a real zero. <strong>Inputs/evidence:</strong> For sql-15 Exercise 5, read from <code>expenses</code>, and <code>budgets</code>. Build the answer toward <code>category</code>, <code>period</code>, <code>budget_amount</code>, <code>actual_amount</code>, and <code>variance</code>; keep <code>category</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-15 Exercise 5, expected output: One row per category/month in either source. The final columns are <code>category</code>, <code>period</code>, <code>budget_amount</code>, <code>actual_amount</code>, and <code>variance</code>. The final order is <code>period, category</code>. <strong>Verify:</strong> For sql-15 Exercise 5, project <code>category</code> plus the raw source columns from <code>expenses</code>, and <code>budgets</code> at each join stage; record row count and distinct <code>category</code>, then assert the final <code>category</code>, <code>period</code>, <code>budget_amount</code>, <code>actual_amount</code>, and <code>variance</code> values match those staged rows without unintended fanout or loss. Add one source row with a new <code>category</code>; verify the result gains exactly one row carrying that <code>category</code> value.</li>
+<li><strong>Extension:</strong> Produce one executive summary row with population, activity, stored revenue, computed revenue, and payments. <strong>Progressive hint:</strong> Compute independent one-row aggregates, then cross join them to avoid detail multiplication. <strong>Inputs/evidence:</strong> For sql-15 Exercise 6, read from <code>customers</code>, <code>orders</code>, <code>order_items</code>, and <code>payments</code>. Build the answer toward <code>customers</code>, <code>orders</code>, <code>stored_revenue</code>, <code>computed_revenue</code>, and <code>payments</code>; keep <code>customer_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-15 Exercise 6, expected output: Exactly one summary row. The final columns are <code>customers</code>, <code>orders</code>, <code>stored_revenue</code>, <code>computed_revenue</code>, and <code>payments</code>. <strong>Verify:</strong> For sql-15 Exercise 6, project <code>customer_id</code> plus the raw source columns from <code>customers</code>, <code>orders</code>, <code>order_items</code>, and <code>payments</code> at each join stage; record row count and distinct <code>customer_id</code>, then assert the final <code>customers</code>, <code>orders</code>, <code>stored_revenue</code>, <code>computed_revenue</code>, and <code>payments</code> values match those staged rows without unintended fanout or loss. Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
 </ol>
+<h4 id="guide--common-mistakes-and-how-to-recover">Common mistakes and how to recover<a class="heading-anchor" href="#guide--common-mistakes-and-how-to-recover" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Lesson-specific semantic mistake:</strong> Combining fact tables before fixing their grain multiplies measures; every project output must state its row grain and acceptance checks.</li>
+<li><strong>Unexpected row count:</strong> display keys before aggregates, count rows after each join/filter stage, and find the first stage whose grain differs from the contract. Do not hide fanout with <code>DISTINCT</code>.</li>
+<li><strong>Unexpected <code>NULL</code> or missing row:</strong> decide whether the fact is unknown, inapplicable, zero, or absent before using <code>COALESCE</code>; inspect outer-join predicate placement and empty-input aggregate behavior.</li>
+<li><strong>Unstable top/first/last output:</strong> add <code>ORDER BY</code> with a unique final tie-breaker before <code>LIMIT</code> or order-sensitive windows/aggregates.</li>
+<li><strong><code>psql</code> stops on an error:</strong> fix the first error shown by <code>ON_ERROR_STOP</code>, restore the declared transaction/setup state, and rerun the complete file. A later successful statement does not validate a partial run.</li>
+</ul>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Does the grand total equal the independent net-line-revenue control?</li>
@@ -350,17 +538,45 @@
 <p>Current practice map</p>
 <ul>
 <li>The authoritative six prompts above replace the older single deliverable. Complete all six outputs and document grain, missing-side behavior, UTC boundaries, money definitions, and reconciliation evidence.</li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-15 — Phase1 Project.
+
+I have completed the direct catalog prerequisite: `sql-14`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day15_phase1_project.md
+- Answer-free learner SQL: sql/postgres-60day/day15_phase1_project.sql
+
+Key terms to teach in context: Metric contract, Dimensional report, Control total. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Build one stable orderlines relation first, with one row per intended line or order and a single net-revenue formula. Reconcile its total, then add dimension joins one at a time and compare the total after each join. Only after totals remain stable should you add grouping sets and display labels.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-15/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -377,13 +593,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 15: Phase 1 Project - Complex Report</span>
+<span>-- BEGINNER WORKFLOW — sql-15: Phase1 Project</span>
+<span>-- Guide: sql/postgres-60day/companion-guides/day15_phase1_project.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-15/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: orders, order_items, customers.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
@@ -423,29 +656,53 @@
 <span>-- Keep answers in your own scratch file; this learner script remains answer-free.</span>
 <span>-- 1. [Query writing] Create a customer performance table with order count, stored revenue, and latest order date, retaining customers with no orders.</span>
 <span>--    Hint: Left join from customers and aggregate at customer grain.</span>
+<span>--    Inputs: For sql-15 Exercise 1, read from `customers`, and `orders`. Build the answer toward `customer_id`, `full_name`, `country`, `order_count`, `stored_revenue`, and `latest_order_date`; keep `customer_id`, `full_name`, and `country` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-15 Exercise 1, expected output: One row per customer. The final columns are `customer_id`, `full_name`, `country`, `order_count`, `stored_revenue`, and `latest_order_date`. The final order is `stored_revenue DESC, c.customer_id`.</span>
+<span>--    Verify: For sql-15 Exercise 1, independently aggregate `customers`, and `orders` by `customer_id`, `full_name`, and `country`; require one output row for every distinct `customer_id`, `full_name`, and `country` tuple and compare `order_count`, `stored_revenue`, and `latest_order_date` tuple by tuple. Use one key absent from `orders`; then tie two candidates on `stored_revenue DESC` and verify `c.customer_id` selects the same row on every run.</span>
+<span>--    Hint ladder, rung 1: For sql-15 Exercise 1, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id`, `full_name`, and `country` so the exact fanout or loss is visible.</span>
 <span>-- 2. [Query writing] Create a product profitability table from net order-line revenue and catalog cost.</span>
 <span>--    Hint: Calculate line revenue and line cost at item grain, then aggregate to product.</span>
+<span>--    Inputs: For sql-15 Exercise 2, read from `products`, and `order_items`. Build the answer toward `product_id`, `name`, `category`, `units_sold`, `net_revenue`, `catalog_cost`, and `gross_profit`; keep `product_id`, `name`, and `category` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-15 Exercise 2, expected output: One row per sold product. The final columns are `product_id`, `name`, `category`, `units_sold`, `net_revenue`, `catalog_cost`, and `gross_profit`. The final order is `gross_profit DESC, p.product_id`.</span>
+<span>--    Verify: For sql-15 Exercise 2, independently aggregate `products`, and `order_items` by `product_id`, `name`, and `category`; require one output row for every distinct `product_id`, `name`, and `category` tuple and compare `units_sold`, and `net_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `units_sold`, and `net_revenue` for the existing `product_id`, and `name` tuple and verify the new tuple appears exactly once.</span>
+<span>--    Hint ladder, rung 1: For sql-15 Exercise 2, start with the first relation in `products`, and `order_items`; after each join, record total rows and distinct `product_id`, `name`, and `category` so the exact fanout or loss is visible.</span>
 <span>-- 3. [Query writing] Build a UTC monthly order-status report with counts and stored revenue.</span>
 <span>--    Hint: Derive one reporting month and group by month/status.</span>
+<span>--    Inputs: For sql-15 Exercise 3, read from `orders`. Build the answer toward `utc_month`, `status`, `order_count`, and `stored_revenue`; keep `status` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-15 Exercise 3, expected output: One row per observed month and status. The final columns are `utc_month`, `status`, `order_count`, and `stored_revenue`. The final order is `utc_month, o.status`.</span>
+<span>--    Verify: For sql-15 Exercise 3, independently aggregate `orders` by `status`; require one output row for every distinct `status` tuple and compare `order_count`, and `stored_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count`, and `stored_revenue` for the existing `status` tuple and verify the new tuple appears exactly once.</span>
+<span>--    Hint ladder, rung 1: For sql-15 Exercise 3, confirm the groups are `status`; then check `utc_month, o.status` before applying the row cap.</span>
 <span>-- 4. [Debugging] Reconcile stored order total, computed line total, and paid total without multiplying details.</span>
 <span>--    Hint: Aggregate items and payments independently to order grain before joining.</span>
+<span>--    Inputs: For sql-15 Exercise 4, read from `order_items`, `payments`, and `orders`. Build the answer toward `order_id`, `stored_total`, `line_total`, `paid_total`, `stored_minus_lines`, and `unpaid_balance`; keep `order_id` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-15 Exercise 4, expected output: One row per order with differences. The final columns are `order_id`, `stored_total`, `line_total`, `paid_total`, `stored_minus_lines`, and `unpaid_balance`. The final order is `ABS(o.total_amount - lt.line_total) DESC, o.order_id`.</span>
+<span>--    Verify: For sql-15 Exercise 4, project `order_id` plus the raw source columns from `order_items`, `payments`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `stored_total`, `line_total`, `paid_total`, `stored_minus_lines`, and `unpaid_balance` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.</span>
+<span>--    Hint ladder, rung 1: For sql-15 Exercise 4, run `line_totals`, and `paid_totals` one at a time. Record each CTE&#x27;s row count and `order_id` uniqueness before the next stage uses it.</span>
 <span>-- 5. [Prediction] Compare monthly budgets with actual expenses and preserve missing sides.</span>
 <span>--    Hint: Aggregate both sources to category/month grain, then full join and keep NULL distinct from a real zero.</span>
+<span>--    Inputs: For sql-15 Exercise 5, read from `expenses`, and `budgets`. Build the answer toward `category`, `period`, `budget_amount`, `actual_amount`, and `variance`; keep `category` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-15 Exercise 5, expected output: One row per category/month in either source. The final columns are `category`, `period`, `budget_amount`, `actual_amount`, and `variance`. The final order is `period, category`.</span>
+<span>--    Verify: For sql-15 Exercise 5, project `category` plus the raw source columns from `expenses`, and `budgets` at each join stage; record row count and distinct `category`, then assert the final `category`, `period`, `budget_amount`, `actual_amount`, and `variance` values match those staged rows without unintended fanout or loss. Add one source row with a new `category`; verify the result gains exactly one row carrying that `category` value.</span>
+<span>--    Hint ladder, rung 1: For sql-15 Exercise 5, run `actual`, and `planned` one at a time. Record each CTE&#x27;s row count and `category` uniqueness before the next stage uses it.</span>
 <span>-- 6. [Extension] Produce one executive summary row with population, activity, stored revenue, computed revenue, and payments.</span>
 <span>--    Hint: Compute independent one-row aggregates, then cross join them to avoid detail multiplication.</span>
+<span>--    Inputs: For sql-15 Exercise 6, read from `customers`, `orders`, `order_items`, and `payments`. Build the answer toward `customers`, `orders`, `stored_revenue`, `computed_revenue`, and `payments`; keep `customer_id` visible whenever the result has row-level grain.</span>
+<span>--    Expected result/shape: For sql-15 Exercise 6, expected output: Exactly one summary row. The final columns are `customers`, `orders`, `stored_revenue`, `computed_revenue`, and `payments`.</span>
+<span>--    Verify: For sql-15 Exercise 6, project `customer_id` plus the raw source columns from `customers`, `orders`, `order_items`, and `payments` at each join stage; record row count and distinct `customer_id`, then assert the final `customers`, `orders`, `stored_revenue`, `computed_revenue`, and `payments` values match those staged rows without unintended fanout or loss. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.</span>
+<span>--    Hint ladder, rung 1: For sql-15 Exercise 6, run `customer_kpis`, `order_kpis`, `line_kpis`, and `payment_kpis` one at a time. Record each CTE&#x27;s row count and `customer_id` uniqueness before the next stage uses it.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -469,6 +726,26 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-15-solutions-phase-1-project-multi-dimensional-revenue-report">Day 15 solutions — Phase 1 Project: Multi-Dimensional Revenue Report<a class="heading-anchor" href="#solution-1--day-15-solutions-phase-1-project-multi-dimensional-revenue-report" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day15_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day15_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are Metric contract, Dimensional report, Control total. Its worked-model focus is: Build one stable orderlines relation first, with one row per intended line or order and a single net-revenue formula. Reconcile its total, then add dimension joins one at a time and compare the total after each join. Only after totals remain stable should you add grouping sets and display labels.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>These answers align one-for-one with <a href="sql-15.html#learner">day15_phase1_project.sql</a>. Run only against the disposable <code>advanced_sql_training</code> database. The executable companion wraps every answer in <code>BEGIN</code>/<code>ROLLBACK</code>. The snippets below assume the lesson&#x27;s <code>SET search_path TO training, public;</code> statement. Run the complete executable companion when you want a self-contained check.</p>
 <h4 id="solution-1--reading-contract">Reading contract<a class="heading-anchor" href="#solution-1--reading-contract" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -502,6 +779,16 @@ GROUP BY c.customer_id, c.full_name, c.country
 ORDER BY stored_revenue DESC, c.customer_id;</code></pre>
 <p><strong>Expected shape:</strong> One row per customer.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-15 Exercise 1, read from <code>customers</code>, and <code>orders</code>. Build the answer toward <code>customer_id</code>, <code>full_name</code>, <code>country</code>, <code>order_count</code>, <code>stored_revenue</code>, and <code>latest_order_date</code>; keep <code>customer_id</code>, <code>full_name</code>, and <code>country</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-15 Exercise 1, expected output: One row per customer. The final columns are <code>customer_id</code>, <code>full_name</code>, <code>country</code>, <code>order_count</code>, <code>stored_revenue</code>, and <code>latest_order_date</code>. The final order is <code>stored_revenue DESC, c.customer_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-15 Exercise 1, independently aggregate <code>customers</code>, and <code>orders</code> by <code>customer_id</code>, <code>full_name</code>, and <code>country</code>; require one output row for every distinct <code>customer_id</code>, <code>full_name</code>, and <code>country</code> tuple and compare <code>order_count</code>, <code>stored_revenue</code>, and <code>latest_order_date</code> tuple by tuple. Use one key absent from <code>orders</code>; then tie two candidates on <code>stored_revenue DESC</code> and verify <code>c.customer_id</code> selects the same row on every run.</li>
+<li><strong>Intermediate relation check:</strong> For sql-15 Exercise 1, start with the first relation in <code>customers</code>, and <code>orders</code>; after each join, record total rows and distinct <code>customer_id</code>, <code>full_name</code>, and <code>country</code> so the exact fanout or loss is visible.</li>
+<li><strong>Clause check:</strong> For sql-15 Exercise 1, the solution actually uses <code>FROM</code>, <code>JOIN ... ON</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>customers</code>, and <code>orders</code>, preserve one row per <code>customer_id</code>, <code>full_name</code>, and <code>country</code>, and finish with <code>customer_id</code>, <code>full_name</code>, <code>country</code>, <code>order_count</code>, <code>stored_revenue</code>, and <code>latest_order_date</code> ordered by <code>stored_revenue DESC, c.customer_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-15 Exercise 1, the chosen form is justified by this lesson-specific rationale: Left join from customers and aggregate at customer grain. Evaluate another form against the concrete expected result (One row per customer) and the verification above.</li>
+<li><strong>Edge case:</strong> Use one key absent from <code>orders</code>; then tie two candidates on <code>stored_revenue DESC</code> and verify <code>c.customer_id</code> selects the same row on every run.</li>
+</ul>
 <h4 id="solution-1--exercise-2-query-writing">Exercise 2 — Query writing<a class="heading-anchor" href="#solution-1--exercise-2-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Create a product profitability table from net order-line revenue and catalog cost.</p>
 <p><strong>Reasoning:</strong> Calculate line revenue and line cost at item grain, then aggregate to product.</p>
@@ -531,6 +818,16 @@ GROUP BY p.product_id, p.name, p.category
 ORDER BY gross_profit DESC, p.product_id;</code></pre>
 <p><strong>Expected shape:</strong> One row per sold product.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-15 Exercise 2, read from <code>products</code>, and <code>order_items</code>. Build the answer toward <code>product_id</code>, <code>name</code>, <code>category</code>, <code>units_sold</code>, <code>net_revenue</code>, <code>catalog_cost</code>, and <code>gross_profit</code>; keep <code>product_id</code>, <code>name</code>, and <code>category</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-15 Exercise 2, expected output: One row per sold product. The final columns are <code>product_id</code>, <code>name</code>, <code>category</code>, <code>units_sold</code>, <code>net_revenue</code>, <code>catalog_cost</code>, and <code>gross_profit</code>. The final order is <code>gross_profit DESC, p.product_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-15 Exercise 2, independently aggregate <code>products</code>, and <code>order_items</code> by <code>product_id</code>, <code>name</code>, and <code>category</code>; require one output row for every distinct <code>product_id</code>, <code>name</code>, and <code>category</code> tuple and compare <code>units_sold</code>, and <code>net_revenue</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>units_sold</code>, and <code>net_revenue</code> for the existing <code>product_id</code>, and <code>name</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Intermediate relation check:</strong> For sql-15 Exercise 2, start with the first relation in <code>products</code>, and <code>order_items</code>; after each join, record total rows and distinct <code>product_id</code>, <code>name</code>, and <code>category</code> so the exact fanout or loss is visible.</li>
+<li><strong>Clause check:</strong> For sql-15 Exercise 2, the solution actually uses <code>FROM</code>, <code>JOIN ... ON</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>products</code>, and <code>order_items</code>, preserve one row per <code>product_id</code>, <code>name</code>, and <code>category</code>, and finish with <code>product_id</code>, <code>name</code>, <code>category</code>, <code>units_sold</code>, <code>net_revenue</code>, <code>catalog_cost</code>, and <code>gross_profit</code> ordered by <code>gross_profit DESC, p.product_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-15 Exercise 2, the chosen form is justified by this lesson-specific rationale: Calculate line revenue and line cost at item grain, then aggregate to product. Evaluate another form against the concrete expected result (One row per sold product) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>units_sold</code>, and <code>net_revenue</code> for the existing <code>product_id</code>, and <code>name</code> tuple and verify the new tuple appears exactly once.</li>
+</ul>
 <h4 id="solution-1--exercise-3-query-writing">Exercise 3 — Query writing<a class="heading-anchor" href="#solution-1--exercise-3-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Build a UTC monthly order-status report with counts and stored revenue.</p>
 <p><strong>Reasoning:</strong> Derive one reporting month and group by month/status.</p>
@@ -551,6 +848,16 @@ GROUP BY date_trunc(&#x27;month&#x27;, o.order_date AT TIME ZONE &#x27;UTC&#x27;
 ORDER BY utc_month, o.status;</code></pre>
 <p><strong>Expected shape:</strong> One row per observed month and status.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-15 Exercise 3, read from <code>orders</code>. Build the answer toward <code>utc_month</code>, <code>status</code>, <code>order_count</code>, and <code>stored_revenue</code>; keep <code>status</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-15 Exercise 3, expected output: One row per observed month and status. The final columns are <code>utc_month</code>, <code>status</code>, <code>order_count</code>, and <code>stored_revenue</code>. The final order is <code>utc_month, o.status</code>.</li>
+<li><strong>Independent verification:</strong> For sql-15 Exercise 3, independently aggregate <code>orders</code> by <code>status</code>; require one output row for every distinct <code>status</code> tuple and compare <code>order_count</code>, and <code>stored_revenue</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>order_count</code>, and <code>stored_revenue</code> for the existing <code>status</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Intermediate relation check:</strong> For sql-15 Exercise 3, confirm the groups are <code>status</code>; then check <code>utc_month, o.status</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-15 Exercise 3, the solution actually uses <code>FROM</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>orders</code>, preserve one row per <code>status</code>, and finish with <code>utc_month</code>, <code>status</code>, <code>order_count</code>, and <code>stored_revenue</code> ordered by <code>utc_month, o.status</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-15 Exercise 3, the chosen form is justified by this lesson-specific rationale: Derive one reporting month and group by month/status. Evaluate another form against the concrete expected result (One row per observed month and status) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>order_count</code>, and <code>stored_revenue</code> for the existing <code>status</code> tuple and verify the new tuple appears exactly once.</li>
+</ul>
 <h4 id="solution-1--exercise-4-debugging">Exercise 4 — Debugging<a class="heading-anchor" href="#solution-1--exercise-4-debugging" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Reconcile stored order total, computed line total, and paid total without multiplying details.</p>
 <p><strong>Reasoning:</strong> Aggregate items and payments independently to order grain before joining.</p>
@@ -589,6 +896,16 @@ LEFT JOIN paid_totals AS pt
 ORDER BY ABS(o.total_amount - lt.line_total) DESC, o.order_id;</code></pre>
 <p><strong>Expected shape:</strong> One row per order with differences.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-15 Exercise 4, read from <code>order_items</code>, <code>payments</code>, and <code>orders</code>. Build the answer toward <code>order_id</code>, <code>stored_total</code>, <code>line_total</code>, <code>paid_total</code>, <code>stored_minus_lines</code>, and <code>unpaid_balance</code>; keep <code>order_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-15 Exercise 4, expected output: One row per order with differences. The final columns are <code>order_id</code>, <code>stored_total</code>, <code>line_total</code>, <code>paid_total</code>, <code>stored_minus_lines</code>, and <code>unpaid_balance</code>. The final order is <code>ABS(o.total_amount - lt.line_total) DESC, o.order_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-15 Exercise 4, project <code>order_id</code> plus the raw source columns from <code>order_items</code>, <code>payments</code>, and <code>orders</code> at each join stage; record row count and distinct <code>order_id</code>, then assert the final <code>order_id</code>, <code>stored_total</code>, <code>line_total</code>, <code>paid_total</code>, <code>stored_minus_lines</code>, and <code>unpaid_balance</code> values match those staged rows without unintended fanout or loss. Add one source row with a new <code>order_id</code>; verify the result gains exactly one row carrying that <code>order_id</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-15 Exercise 4, run <code>line_totals</code>, and <code>paid_totals</code> one at a time. Record each CTE&#x27;s row count and <code>order_id</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-15 Exercise 4, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>order_items</code>, <code>payments</code>, and <code>orders</code>, preserve one row per <code>order_id</code>, and finish with <code>order_id</code>, <code>stored_total</code>, <code>line_total</code>, <code>paid_total</code>, <code>stored_minus_lines</code>, and <code>unpaid_balance</code> ordered by <code>ABS(o.total_amount - lt.line_total) DESC, o.order_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-15 Exercise 4, the chosen form is justified by this lesson-specific rationale: Aggregate items and payments independently to order grain before joining. Evaluate another form against the concrete expected result (One row per order with differences) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>order_id</code>; verify the result gains exactly one row carrying that <code>order_id</code> value.</li>
+</ul>
 <h4 id="solution-1--exercise-5-prediction">Exercise 5 — Prediction<a class="heading-anchor" href="#solution-1--exercise-5-prediction" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Compare monthly budgets with actual expenses and preserve missing sides.</p>
 <p><strong>Reasoning:</strong> Aggregate both sources to category/month grain, then full join and keep NULL distinct from a real zero.</p>
@@ -628,6 +945,16 @@ FULL JOIN actual AS a
 ORDER BY period, category;</code></pre>
 <p><strong>Expected shape:</strong> One row per category/month in either source.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-15 Exercise 5, read from <code>expenses</code>, and <code>budgets</code>. Build the answer toward <code>category</code>, <code>period</code>, <code>budget_amount</code>, <code>actual_amount</code>, and <code>variance</code>; keep <code>category</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-15 Exercise 5, expected output: One row per category/month in either source. The final columns are <code>category</code>, <code>period</code>, <code>budget_amount</code>, <code>actual_amount</code>, and <code>variance</code>. The final order is <code>period, category</code>.</li>
+<li><strong>Independent verification:</strong> For sql-15 Exercise 5, project <code>category</code> plus the raw source columns from <code>expenses</code>, and <code>budgets</code> at each join stage; record row count and distinct <code>category</code>, then assert the final <code>category</code>, <code>period</code>, <code>budget_amount</code>, <code>actual_amount</code>, and <code>variance</code> values match those staged rows without unintended fanout or loss. Add one source row with a new <code>category</code>; verify the result gains exactly one row carrying that <code>category</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-15 Exercise 5, run <code>actual</code>, and <code>planned</code> one at a time. Record each CTE&#x27;s row count and <code>category</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-15 Exercise 5, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>expenses</code>, and <code>budgets</code>, preserve one row per <code>category</code>, and finish with <code>category</code>, <code>period</code>, <code>budget_amount</code>, <code>actual_amount</code>, and <code>variance</code> ordered by <code>period, category</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-15 Exercise 5, the chosen form is justified by this lesson-specific rationale: Aggregate both sources to category/month grain, then full join and keep NULL distinct from a real zero. Evaluate another form against the concrete expected result (One row per category/month in either source) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>category</code>; verify the result gains exactly one row carrying that <code>category</code> value.</li>
+</ul>
 <h4 id="solution-1--exercise-6-extension">Exercise 6 — Extension<a class="heading-anchor" href="#solution-1--exercise-6-extension" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Produce one executive summary row with population, activity, stored revenue, computed revenue, and payments.</p>
 <p><strong>Reasoning:</strong> Compute independent one-row aggregates, then cross join them to avoid detail multiplication.</p>
@@ -663,6 +990,16 @@ CROSS JOIN line_kpis AS l
 CROSS JOIN payment_kpis AS p;</code></pre>
 <p><strong>Expected shape:</strong> Exactly one summary row.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-15 Exercise 6, read from <code>customers</code>, <code>orders</code>, <code>order_items</code>, and <code>payments</code>. Build the answer toward <code>customers</code>, <code>orders</code>, <code>stored_revenue</code>, <code>computed_revenue</code>, and <code>payments</code>; keep <code>customer_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-15 Exercise 6, expected output: Exactly one summary row. The final columns are <code>customers</code>, <code>orders</code>, <code>stored_revenue</code>, <code>computed_revenue</code>, and <code>payments</code>.</li>
+<li><strong>Independent verification:</strong> For sql-15 Exercise 6, project <code>customer_id</code> plus the raw source columns from <code>customers</code>, <code>orders</code>, <code>order_items</code>, and <code>payments</code> at each join stage; record row count and distinct <code>customer_id</code>, then assert the final <code>customers</code>, <code>orders</code>, <code>stored_revenue</code>, <code>computed_revenue</code>, and <code>payments</code> values match those staged rows without unintended fanout or loss. Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-15 Exercise 6, run <code>customer_kpis</code>, <code>order_kpis</code>, <code>line_kpis</code>, and <code>payment_kpis</code> one at a time. Record each CTE&#x27;s row count and <code>customer_id</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-15 Exercise 6, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, and <code>SELECT</code>. Read only those operations: begin at <code>customers</code>, <code>orders</code>, <code>order_items</code>, and <code>payments</code>, preserve one row per <code>customer_id</code>, and finish with <code>customers</code>, <code>orders</code>, <code>stored_revenue</code>, <code>computed_revenue</code>, and <code>payments</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-15 Exercise 6, the chosen form is justified by this lesson-specific rationale: Compute independent one-row aggregates, then cross join them to avoid detail multiplication. Evaluate another form against the concrete expected result (Exactly one summary row) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
+</ul>
 <h4 id="solution-1--final-self-check">Final self-check<a class="heading-anchor" href="#solution-1--final-self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Can you explain the logical grain before and after every aggregation?</li>
@@ -672,7 +1009,7 @@ CROSS JOIN payment_kpis AS p;</code></pre>
 <li>Does the complete executable solution finish with <code>ROLLBACK</code>?</li>
 </ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -680,7 +1017,7 @@ CROSS JOIN payment_kpis AS p;</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -704,6 +1041,19 @@ CROSS JOIN payment_kpis AS p;</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 15 executable solutions</span>
+<span>-- SOLUTION READING MAP — sql-15: Phase1 Project</span>
+<span>-- Explanation: sql/postgres-60day/solutions/day15_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day15_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span>
 <span>-- ON_ERROR_STOP is supplied by the documented psql command.</span>
 <span> </span>
@@ -911,11 +1261,54 @@ CROSS JOIN payment_kpis AS p;</code></pre>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-15 — Phase1 Project.
+
+I have completed the direct catalog prerequisite: `sql-14`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day15_phase1_project.md
+- Answer-free learner SQL: sql/postgres-60day/day15_phase1_project.sql
+
+Key terms to teach in context: Metric contract, Dimensional report, Control total. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Build one stable orderlines relation first, with one row per intended line or order and a single net-revenue formula. Reconcile its total, then add dimension joins one at a time and compare the total after each join. Only after totals remain stable should you add grouping sets and display labels.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-15/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-14.html"><small>Previous lesson</small><strong>sql-14</strong><span>Numeric and Casting</span></a>
-        <a class="nav-card next" href="sql-16.html"><small>Next lesson</small><strong>sql-16</strong><span>Window Functions Fundamentals</span></a>
+        <a class="nav-card next" href="sql-found-01.html"><small>Next lesson</small><strong>sql-found-01</strong><span>Relational Design, DDL, and Integrity Constraints</span></a>
       </nav>
     </div>
   </main>
@@ -1003,6 +1396,23 @@ CROSS JOIN payment_kpis AS p;</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

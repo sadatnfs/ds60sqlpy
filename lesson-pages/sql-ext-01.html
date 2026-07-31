@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-ext-01/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--sql-ext-01-extensions-spatial-data-and-vectors">SQL-EXT-01 — Extensions, Spatial Data, and Vectors<a class="heading-anchor" href="#guide--sql-ext-01-extensions-spatial-data-and-vectors" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -289,6 +388,73 @@
 <p>Run the offline default:</p>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_ext_01_extensions_spatial_vector.sql</code></pre>
 <p>It reads extension catalogs, uses built-in fallbacks, and rolls back. It never executes <code>CREATE EXTENSION</code>, creates an FDW server/user mapping, or downloads an image.</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-EXT-01 — PostgreSQL Extensions, Spatial Data, and Vectors</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-ext-01/lesson/workspace/sql/professional/lessons/sql_ext_01_extensions_spatial_vector.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Some demonstrations require privileges or server features a normal course role may not have. Run the capability check first. The supported default path still teaches inspection and design without creating cluster-wide roles, extensions, or replication objects.</p>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\professional\lessons\sql_ext_01_extensions_spatial_vector.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/professional/lessons/sql_ext_01_extensions_spatial_vector.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Extension, Available/installed, Capability boundary, SRID, Geometry/geography, Embedding. Its worked SQL reads or creates <code>pg_catalog.pg_available_extensions</code>, <code>pro_extensions_lab.resources</code>, <code>pro_extensions_lab.remote_snapshot</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: pgavailableextensions answers whether the server installation exposes a control file and its default version. installedversion answers whether this database has created it. Neither proves the connected role may install/upgrade it, that replicas carry compatible binaries, or that an application was tested against that exact version. The first runnable example has a concrete contract: Example 1 returns one row per <code>name</code>, <code>default_version</code>, and <code>installed_version</code> with columns <code>name</code>, <code>purpose</code>, <code>default_version</code>, <code>installed_version</code>, <code>available_on_server</code>, and <code>installed_in_database</code> from <code>requested</code>, and <code>pg_catalog.pg_available_extensions</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>name</code>, <code>purpose</code>, <code>default_version</code>, <code>installed_version</code>, <code>available_on_server</code>, and <code>installed_in_database</code>. Reselect the returned key columns from <code>requested</code>, and <code>pg_catalog.pg_available_extensions</code>, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/professional/lessons/sql_ext_01_extensions_spatial_vector.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">WITH requested(name, purpose) AS (
+    VALUES
+        (&#x27;pg_trgm&#x27;::text, &#x27;trigram similarity and wildcard indexes&#x27;::text),
+        (&#x27;citext&#x27;, &#x27;case-insensitive text type&#x27;),
+        (&#x27;pgcrypto&#x27;, &#x27;cryptographic digest/encryption helpers&#x27;),
+        (&#x27;postgis&#x27;, &#x27;coordinate reference systems and spatial operations&#x27;),
+        (&#x27;vector&#x27;, &#x27;vector type and nearest-neighbour indexes&#x27;),
+        (&#x27;postgres_fdw&#x27;, &#x27;foreign PostgreSQL tables&#x27;)
+)
+SELECT
+    requested.name,
+    requested.purpose,
+    available.default_version,
+    available.installed_version,
+    available.name IS NOT NULL AS available_on_server,
+    available.installed_version IS NOT NULL AS installed_in_database
+FROM requested
+LEFT JOIN pg_catalog.pg_available_extensions AS available
+  ON available.name = requested.name
+ORDER BY requested.name;</code></pre>
+<p><strong>How to read it:</strong> Example 1: Start with <code>requested</code>, and <code>pg_catalog.pg_available_extensions</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>name</code>, <code>purpose</code>, <code>default_version</code>, <code>installed_version</code>, <code>available_on_server</code>, and <code>installed_in_database</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>name</code>, <code>default_version</code>, and <code>installed_version</code> with columns <code>name</code>, <code>purpose</code>, <code>default_version</code>, <code>installed_version</code>, <code>available_on_server</code>, and <code>installed_in_database</code> from <code>requested</code>, and <code>pg_catalog.pg_available_extensions</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">CREATE TABLE pro_extensions_lab.resources (
+    resource_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    display_name text NOT NULL CHECK (btrim(display_name) &lt;&gt; &#x27;&#x27;),
+    normalized_name text GENERATED ALWAYS AS (lower(display_name)) STORED,
+    summary text NOT NULL,
+    location point NOT NULL,
+    embedding double precision[] NOT NULL
+        CHECK (cardinality(embedding) = 3),
+    payload text NOT NULL,
+    payload_sha256 text GENERATED ALWAYS AS (
+        encode(sha256(payload::bytea), &#x27;hex&#x27;)
+    ) STORED
+);</code></pre>
+<p><strong>How to read it:</strong> Example 2 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
+<p><strong>Expected result/shape:</strong> Example 2 must print the expected DDL command tag for <code>pro_extensions_lab.resources</code>. Verify the object in <code>pg_catalog.pg_class</code>, <code>pg_catalog.pg_available_extensions</code>, and <code>pg_catalog.pg_extension</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Inspect extension capability/version boundaries and compare pg_trgm, citext, pgcrypto, PostGIS, pgvector, and postgres_fdw with bounded built-in fallbacks.</li>
@@ -334,20 +500,20 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <p>Complete all fourteen prompts. Begin with capability classification, case-folding boundary, spatial semantics, vector validation/index trade-offs, cryptographic purpose, FDW design, and search-operator comparison; then cover lifecycle, collation, operable spatial/vector/FDW designs, supply chain, and upgrade rehearsal. For each optional extension, record the built-in fallback, what it cannot do, and the cleanup/rollback plan.</p>
 <p>Do not install, update, or connect externally in these exercises; produce capability evidence and reviewed designs:</p>
 <ol>
-<li><strong>Capability matrix:</strong> distinguish unavailable, available, and installed versions without treating availability as permission.</li>
-<li><strong>Case folding:</strong> compare generated lowercase storage with <code>citext</code> across collation, operators, joins, and writers.</li>
-<li><strong>Spatial meaning:</strong> contrast abstract <code>point</code> distance with PostGIS geometry/geography, SRID, and earth units.</li>
-<li><strong>Vector safety:</strong> validate dimensions and compare exact scan with ANN accuracy and lifecycle costs.</li>
-<li><strong>Cryptographic purpose:</strong> separate digest, password hashing, encryption, signing, and external key management.</li>
-<li><strong>FDW boundary:</strong> design ownership, mapping, secret, contract, pushdown, consistency, failure, and snapshot behavior.</li>
-<li><strong>Search operators:</strong> map trigram, prefix, and full-text questions to exact operators and indexes.</li>
-<li><strong>Lifecycle inventory:</strong> record owner, versions, dependencies, trust, source, update path, approval, restore, and rollback.</li>
-<li><strong>Collation drift:</strong> detect provider/version changes and plan impact review, reindex, and validation.</li>
-<li><strong>PostGIS nearest:</strong> design SRID/units-safe prefilter plus exact distance and tie behavior.</li>
-<li><strong>pgvector choice:</strong> compare metric/operator, normalization, HNSW/IVFFlat, recall, filter, dimension, write, and exact fallback.</li>
-<li><strong>FDW operations:</strong> add credential rotation, connection/time limits, drift, failure visibility, and last-known-good behavior.</li>
-<li><strong>Supply chain:</strong> review provenance, native privilege, CVEs, builds, licensing, patch ownership, and removal.</li>
-<li><strong>Upgrade rehearsal:</strong> restore isolation, capture dependencies/plans, canary correctness/performance, compatibility, and rollback limits.</li>
+<li><strong>Capability matrix:</strong> distinguish unavailable, available, and installed versions without treating availability as permission. <strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 1, LEFT JOIN the requested extension-name fixture (citext, pg_trgm, pgcrypto, postgis, postgres_fdw, and vector) to <code>pg_available_extensions</code> and <code>pg_extension</code>. This is read-only discovery. <strong>Expected result/shape:</strong> For sql-ext-01 Exercise 1, One row per requested <code>extension_name</code>, with <code>extension_name</code>, <code>default_version</code>, <code>installed_version</code>, <code>installed_owner</code>, and <code>capability_state</code>, ordered by <code>extension_name</code>. State is <code>unavailable</code>, <code>available_not_installed</code>, or <code>installed</code>. <strong>Verify:</strong> For sql-ext-01 Exercise 1, Every requested name appears exactly once even when unavailable; compare installed versions directly with <code>pg_extension</code>. Record CREATE privilege/approval as unknown unless separately proven—availability does not grant permission. Hint ladder, rung 1: Start from the requested list and LEFT JOIN catalogs, otherwise unavailable names disappear.</li>
+<li><strong>Case folding:</strong> compare generated lowercase storage with <code>citext</code> across collation, operators, joins, and writers. <strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 2, Inspect generated column <code>pro_extensions_lab.items.normalized_name</code> and its unique-index catalog row; compare that narrow <code>lower(item_name)</code> rule with optional <code>citext</code>. <strong>Expected result/shape:</strong> For sql-ext-01 Exercise 2, A catalog evidence row names the generated expression and unique index definition. A behavior table has <code>case_id</code>, <code>candidate_name</code>, <code>normalized_name</code>, <code>expected_outcome</code>, and <code>observed_sqlstate</code> for a distinct insert and a case-fold collision. <strong>Verify:</strong> For sql-ext-01 Exercise 2, In a savepoint, <code>Charlie</code> succeeds and <code>alpha</code> conflicts with existing <code>Alpha</code> using SQLSTATE <code>23505</code>; rollback removes both attempts. Document Unicode/collation, operators/joins, and cross-writer limitations rather than claiming <code>lower()</code> is universally equivalent to <code>citext</code>. Hint ladder, rung 1: The generated column is a stored key; every lookup and join must use the same explicit normalization contract.</li>
+<li><strong>Spatial meaning:</strong> contrast abstract <code>point</code> distance with PostGIS geometry/geography, SRID, and earth units. <strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 3, Calculate <code>&lt;-&gt;</code> from each <code>pro_extensions_lab.items.location</code> to the built-in point <code>(1,1)</code>, and write a comparison matrix for built-in <code>point</code>, PostGIS <code>geometry</code>, and PostGIS <code>geography</code>. <strong>Expected result/shape:</strong> For sql-ext-01 Exercise 3, One row per <code>item_id</code>, with <code>item_id</code>, <code>item_name</code>, and <code>planar_distance</code>, ordered by <code>planar_distance, item_id</code>. The matrix names coordinate model, SRID support, distance units, index/operator, and appropriate use for each type. <strong>Verify:</strong> For sql-ext-01 Exercise 3, Distances may tie, so <code>item_id</code>—not distance—is the identity and final tie-break. Prove the built-in result is Cartesian grid distance and explicitly reject interpreting latitude/longitude degrees as meters. Hint ladder, rung 1: A numeric distance has no geographic meaning until the coordinate reference system and units are defined.</li>
+<li><strong>Vector safety:</strong> validate dimensions and compare exact scan with ANN accuracy and lifecycle costs. <strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 4, Strengthen <code>pro_extensions_lab.checked_l2(left,right)</code> to reject NULL arrays, zero dimensions, unequal dimensions, NULL elements, and non-finite elements before calculating exact L2 distance. <strong>Expected result/shape:</strong> For sql-ext-01 Exercise 4, One row per <code>item_id</code>, with <code>item_id</code>, <code>item_name</code>, and <code>vector_distance</code>, ordered by <code>vector_distance, item_id</code>. The supplied <code>[0,0,0]</code> to <code>[3,4,0]</code> control equals <code>5</code>. <strong>Verify:</strong> For sql-ext-01 Exercise 4, Named negative controls reject dimension mismatch, empty arrays, NULL elements, <code>Infinity</code>, and <code>NaN</code> with SQLSTATE <code>23514</code>; equal distance ties remain separate item IDs. Compare exact scan results with any approved ANN index before reporting recall, memory, build, or write cost. Hint ladder, rung 1: <code>sum()</code> silently ignores NULL inputs, so validation must happen before unnesting and aggregation.</li>
+<li><strong>Cryptographic purpose:</strong> separate digest, password hashing, encryption, signing, and external key management. <strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 5, Read <code>item_id</code>, <code>item_name</code>, and generated <code>payload_sha256</code> from <code>pro_extensions_lab.items</code>; separately classify SHA-256, optional <code>pgcrypto.digest</code>, <code>crypt</code>, PGP encryption, and external key management. <strong>Expected result/shape:</strong> For sql-ext-01 Exercise 5, One row per <code>item_id</code> with the three evidence columns, ordered by <code>item_id</code>. A purpose matrix names integrity digest, password hashing, encryption, key custody, and capability/fallback. <strong>Verify:</strong> For sql-ext-01 Exercise 5, Recompute SHA-256 from <code>payload</code> and compare all 64 hex characters; changing payload changes the digest. The matrix must explicitly forbid a fast unsalted digest for password storage and must not claim optional pgcrypto functions ran when unavailable. Hint ladder, rung 1: Hashing, password verification, encryption, and key management solve different threats.</li>
+<li><strong>FDW boundary:</strong> design ownership, mapping, secret, contract, pushdown, consistency, failure, and snapshot behavior. <strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 6, Use local <code>pro_extensions_lab.remote_snapshot</code>; no foreign server, user mapping, network connection, or credential is created. Choose the latest row per <code>source_key</code> by <code>fetched_at DESC, snapshot_id DESC</code>. <strong>Expected result/shape:</strong> For sql-ext-01 Exercise 6, One row per <code>source_key</code>, with <code>source_key</code>, <code>snapshot_id</code>, <code>fetched_at</code>, and <code>payload</code>, ordered by <code>source_key</code>. <strong>Verify:</strong> For sql-ext-01 Exercise 6, Add two same-time snapshots and prove greater <code>snapshot_id</code> wins. Separately review server ownership, secret location/rotation, imported columns, pushdown, transaction consistency, timeout, failure isolation, and snapshot fallback before any approved FDW deployment. Hint ladder, rung 1: Capability inventory and a local snapshot are safe evidence; neither proves a remote FDW connection is authorized or healthy.</li>
+<li><strong>Search operators:</strong> map trigram, prefix, and full-text questions to exact operators and indexes. <strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 7, Build a reviewed matrix for prefix <code>LIKE &#x27;term%&#x27;</code>, optional pg_trgm similarity/operators, and built-in full-text search. Name the query operator and matching index/operator class together. <strong>Expected result/shape:</strong> For sql-ext-01 Exercise 7, One row per <code>search_method</code>, with <code>search_method</code>, <code>query_operator</code>, <code>index_strategy</code>, <code>ranking_semantics</code>, <code>strength</code>, and <code>limitation</code>. <strong>Verify:</strong> For sql-ext-01 Exercise 7, Use one exact prefix, one misspelling, and one multi-token document to show the methods answer different questions. If <code>pg_trgm</code> is absent, record that capability as unavailable and run only built-in comparisons. Hint ladder, rung 1: An index helps only operators supported by its operator class; “fuzzy,” “prefix,” and “linguistic” are not synonyms.</li>
+<li><strong>Lifecycle inventory:</strong> record owner, versions, dependencies, trust, source, update path, approval, restore, and rollback. <strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 8, Extend Exercise 1&#x27;s read-only requested-extension inventory with available versions/trusted flag, installed schema/owner, dependencies, update path, publisher/package provenance, approval, backup/restore needs, rollback test, and named owner. <strong>Expected result/shape:</strong> For sql-ext-01 Exercise 8, One row per requested <code>extension_name</code>, with catalog facts kept separate from reviewed policy fields. No <code>CREATE EXTENSION</code>, <code>ALTER EXTENSION</code>, or <code>DROP EXTENSION</code> runs. <strong>Verify:</strong> For sql-ext-01 Exercise 8, Every installed extension has an exact version, owner, schema, dependency inventory, package source, upgrade and restore rehearsal, and rollback limit. Unavailable extensions remain visible with an explicit fallback instead of disappearing. Hint ladder, rung 1: Catalog state is observed evidence; approval, provenance, rollback, and operational ownership are separate decisions.</li>
+<li><strong>Collation drift:</strong> detect provider/version changes and plan impact review, reindex, and validation. <strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 9, Read <code>pg_collation</code> and compare non-NULL recorded <code>collversion</code> with <code>pg_collation_actual_version(oid)</code>. This query detects; it does not reindex or refresh metadata. <strong>Expected result/shape:</strong> For sql-ext-01 Exercise 9, One row per mismatched <code>(collation_schema, collation_name, encoding)</code>, with those identity fields, <code>collprovider</code>, <code>recorded_version</code>, and <code>actual_version</code>, ordered by all three identity fields. <strong>Verify:</strong> For sql-ext-01 Exercise 9, An empty result means no mismatch was detected, not that every dependent index was inspected. For each returned collation, inventory dependent indexes, rehearse <code>REINDEX</code>, validate ordering/uniqueness, and only then refresh version metadata under an approved runbook. Hint ladder, rung 1: <code>collname</code> alone is not globally unique; preserve its namespace and encoding.</li>
+<li><strong>PostGIS nearest:</strong> design SRID/units-safe prefilter plus exact distance and tie behavior. <strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 10, Write but do not execute a PostGIS query unless capability and approval are confirmed. Use <code>geography</code> with a declared SRID, a GiST indexable <code>ST_DWithin</code> radius prefilter, exact <code>ST_Distance</code>, and stable <code>resource_id</code> tie-break. <strong>Expected result/shape:</strong> For sql-ext-01 Exercise 10, A reviewed query contract names parameters, coordinate validation, meters as units, output grain/columns/order, antimeridian/pole cases, maximum radius, timeout, fallback, and owner. <strong>Verify:</strong> For sql-ext-01 Exercise 10, In an approved isolated PostGIS environment, compare the indexed query with a small exact control set, inspect <code>EXPLAIN (ANALYZE, BUFFERS)</code>, and test equal distances plus antimeridian/pole fixtures. Otherwise report <code>not executed: capability unavailable</code>. Hint ladder, rung 1: Prefilter for indexable radius, then calculate exact distance and order by distance plus stable identity.</li>
+<li><strong>pgvector choice:</strong> compare metric/operator, normalization, HNSW/IVFFlat, recall, filter, dimension, write, and exact fallback. <strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 11, Use validated arrays and <code>checked_l2</code> as the built-in exact fallback; separately define optional pgvector cosine, inner-product, and L2 semantics plus HNSW/IVFFlat evaluation. <strong>Expected result/shape:</strong> For sql-ext-01 Exercise 11, One row per <code>item_id</code>, with <code>item_id</code>, <code>item_name</code>, and <code>exact_l2</code>, ordered by <code>exact_l2, item_id</code>. <strong>Verify:</strong> For sql-ext-01 Exercise 11, Compare every ANN candidate set with this exact ordering and report recall at the chosen <code>k</code>, filtered recall, latency, build memory/time, update cost, and index size. State normalization assumptions and use <code>item_id</code> to keep equal distances deterministic. Hint ladder, rung 1: A fast plan is not sufficient; ANN adoption needs a correctness benchmark against the exact metric.</li>
+<li><strong>FDW operations:</strong> add credential rotation, connection/time limits, drift, failure visibility, and last-known-good behavior. <strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 12, Aggregate local <code>pro_extensions_lab.remote_snapshot</code> by <code>source_key</code>; accompany it with an FDW operations contract for secrets, connections, schema drift, timeouts, pushdown, partial failure, and fallback. <strong>Expected result/shape:</strong> For sql-ext-01 Exercise 12, One row per <code>source_key</code>, with <code>source_key</code>, <code>snapshot_watermark</code>, and <code>retained_versions</code>, ordered by <code>source_key</code>. <strong>Verify:</strong> For sql-ext-01 Exercise 12, Independently compare <code>max(fetched_at)</code> and counts per key; add a same-time version and confirm the latest-row query uses <code>snapshot_id</code> for its tie, while this aggregate correctly increments <code>retained_versions</code>. Simulate remote unavailability by using only the timestamped local fallback. Hint ladder, rung 1: A watermark says when the snapshot was fetched, not that the remote source is current or complete.</li>
+<li><strong>Supply chain:</strong> review provenance, native privilege, CVEs, builds, licensing, patch ownership, and removal. <strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 13, For one unavailable requested extension, assemble observed package availability plus reviewed source/build provenance, SBOM/native dependencies, CVEs, license, reproducibility, signer/hash, patch owner/SLA, restore compatibility, removal test, and approving authority. <strong>Expected result/shape:</strong> For sql-ext-01 Exercise 13, One row per <code>review_item</code>, with <code>review_item</code>, <code>observed_evidence</code>, <code>status</code>, <code>owner</code>, and <code>blocking_reason</code>. Unknown or missing evidence remains visible and blocks approval. <strong>Verify:</strong> For sql-ext-01 Exercise 13, The review output must remain <code>rejected</code>/<code>blocked</code> when the source signature/SBOM is removed or the removal rehearsal fails; a successful local compile is not sufficient and nothing is installed. Hint ladder, rung 1: Native extension code executes inside the database server process, so provenance and patch ownership are security controls.</li>
+<li><strong>Upgrade rehearsal:</strong> restore isolation, capture dependencies/plans, canary correctness/performance, compatibility, and rollback limits. <strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 14, Plan an extension upgrade only in a separately restored disposable database. Capture installed/target versions, package build, dependency graph, objects, query plans/results, backup compatibility, application canaries, elapsed/lock/WAL evidence, rollback limit, owner, and cleanup. <strong>Expected result/shape:</strong> For sql-ext-01 Exercise 14, One row per <code>phase_number</code>, with <code>phase_name</code>, <code>before_evidence</code>, <code>after_evidence</code>, <code>status</code>, <code>owner</code>, and <code>failure_response</code>; this transaction emits a plan and changes no extension. <strong>Verify:</strong> For sql-ext-01 Exercise 14, Every before/after correctness and performance check must pass within explicit tolerances. Inject a changed result or incompatible backup restore and prove approval remains blocked; record when downgrade is not a safe rollback and restore/forward-fix is required. Hint ladder, rung 1: Extension DDL success does not prove application semantics, plans, backup compatibility, or reversibility.</li>
 </ol>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -372,17 +538,45 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <li><code>DROP EXTENSION ... CASCADE</code> is destructive and is never a casual cleanup shortcut.</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-repl-01.html#guide">SQL-REPL-01 — replication, CDC, and high availability</a>. Carry extension binaries/versions, owners, grants, indexes, backup scope, replica compatibility, and disaster-recovery evidence into every adoption decision.</p></div>
+<p>Continue to <a href="sql-repl-01.html#guide">SQL-REPL-01 — replication, CDC, and high availability</a>. Carry extension binaries/versions, owners, grants, indexes, backup scope, replica compatibility, and disaster-recovery evidence into every adoption decision.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-ext-01 — PostgreSQL Extensions, Spatial Data, and Vectors.
+
+I have completed the direct catalog prerequisites: `sql-types-01`, `sql-ops-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/professional/companion-guides/sql_ext_01_extensions_spatial_vector.md
+- Answer-free learner SQL: sql/professional/lessons/sql_ext_01_extensions_spatial_vector.sql
+
+Key terms to teach in context: Extension, Available/installed, Capability boundary, SRID, Geometry/geography, Embedding. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: pgavailableextensions answers whether the server installation exposes a control file and its default version. installedversion answers whether this database has created it. Neither proves the connected role may install/upgrade it, that replicas carry compatible binaries, or that an application was tested against that exact version.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-ext-01/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -399,13 +593,30 @@ CREATE EXTENSION postgres_fdw;</code></pre>
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-EXT-01: Extensions, spatial data, and vectors</span>
+<span>-- BEGINNER WORKFLOW — sql-ext-01: PostgreSQL Extensions, Spatial Data, and Vectors</span>
+<span>-- Guide: sql/professional/companion-guides/sql_ext_01_extensions_spatial_vector.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-ext-01/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: pg_catalog.pg_available_extensions, pro_extensions_lab.resources, pro_extensions_lab.remote_snapshot.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>-- Target: PostgreSQL 16+</span>
 <span>-- This default path never executes CREATE EXTENSION.</span>
 <span> </span>
@@ -615,37 +826,76 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <span>-- 1. Classify each requested extension as unavailable, available-but-not-</span>
 <span>--    installed, or installed. Record exact versions; do not infer CREATE</span>
 <span>--    privilege from availability.</span>
+<span>--    Inputs: For sql-ext-01 Exercise 1, LEFT JOIN the requested extension-name fixture (citext, pg_trgm, pgcrypto, postgis, postgres_fdw, and vector) to `pg_available_extensions` and `pg_extension`. This is read-only discovery.</span>
+<span>--    Expected result/shape: For sql-ext-01 Exercise 1, One row per requested `extension_name`, with `extension_name`, `default_version`, `installed_version`, `installed_owner`, and `capability_state`, ordered by `extension_name`. State is `unavailable`, `available_not_installed`, or `installed`.</span>
+<span>--    Verify: For sql-ext-01 Exercise 1, Every requested name appears exactly once even when unavailable; compare installed versions directly with `pg_extension`. Record CREATE privilege/approval as unknown unless separately proven—availability does not grant permission. Hint ladder, rung 1: Start from the requested list and LEFT JOIN catalogs, otherwise unavailable names disappear.</span>
 <span>-- 2. Explain where generated lower(display_name) differs from citext, including</span>
 <span>--    Unicode/collation, operators, joins, and every writer&#x27;s contract.</span>
+<span>--    Inputs: For sql-ext-01 Exercise 2, Inspect generated column `pro_extensions_lab.items.normalized_name` and its unique-index catalog row; compare that narrow `lower(item_name)` rule with optional `citext`.</span>
+<span>--    Expected result/shape: For sql-ext-01 Exercise 2, A catalog evidence row names the generated expression and unique index definition. A behavior table has `case_id`, `candidate_name`, `normalized_name`, `expected_outcome`, and `observed_sqlstate` for a distinct insert and a case-fold collision.</span>
+<span>--    Verify: For sql-ext-01 Exercise 2, In a savepoint, `Charlie` succeeds and `alpha` conflicts with existing `Alpha` using SQLSTATE `23505`; rollback removes both attempts. Document Unicode/collation, operators/joins, and cross-writer limitations rather than claiming `lower()` is universally equivalent to `citext`. Hint ladder, rung 1: The generated column is a stored key; every lookup and join must use the same explicit normalization contract.</span>
 <span>-- 3. Compare built-in point distance with PostGIS geometry/geography and SRIDs.</span>
 <span>--    State why latitude/longitude must not be treated as an abstract point grid.</span>
+<span>--    Inputs: For sql-ext-01 Exercise 3, Calculate `&lt;-&gt;` from each `pro_extensions_lab.items.location` to the built-in point `(1,1)`, and write a comparison matrix for built-in `point`, PostGIS `geometry`, and PostGIS `geography`.</span>
+<span>--    Expected result/shape: For sql-ext-01 Exercise 3, One row per `item_id`, with `item_id`, `item_name`, and `planar_distance`, ordered by `planar_distance, item_id`. The matrix names coordinate model, SRID support, distance units, index/operator, and appropriate use for each type.</span>
+<span>--    Verify: For sql-ext-01 Exercise 3, Distances may tie, so `item_id`—not distance—is the identity and final tie-break. Prove the built-in result is Cartesian grid distance and explicitly reject interpreting latitude/longitude degrees as meters. Hint ladder, rung 1: A numeric distance has no geographic meaning until the coordinate reference system and units are defined.</span>
 <span>-- 4. Extend array_l2_distance with explicit dimension validation and compare an</span>
 <span>--    exact scan with pgvector HNSW/IVFFlat recall, build, memory, and write cost.</span>
+<span>--    Inputs: For sql-ext-01 Exercise 4, Strengthen `pro_extensions_lab.checked_l2(left,right)` to reject NULL arrays, zero dimensions, unequal dimensions, NULL elements, and non-finite elements before calculating exact L2 distance.</span>
+<span>--    Expected result/shape: For sql-ext-01 Exercise 4, One row per `item_id`, with `item_id`, `item_name`, and `vector_distance`, ordered by `vector_distance, item_id`. The supplied `[0,0,0]` to `[3,4,0]` control equals `5`.</span>
+<span>--    Verify: For sql-ext-01 Exercise 4, Named negative controls reject dimension mismatch, empty arrays, NULL elements, `Infinity`, and `NaN` with SQLSTATE `23514`; equal distance ties remain separate item IDs. Compare exact scan results with any approved ANN index before reporting recall, memory, build, or write cost. Hint ladder, rung 1: `sum()` silently ignores NULL inputs, so validation must happen before unnesting and aggregation.</span>
 <span>-- 5. Compare built-in SHA-256, pgcrypto digest/crypt/PGP functions, and external</span>
 <span>--    key management. Never use a fast digest alone for password storage.</span>
+<span>--    Inputs: For sql-ext-01 Exercise 5, Read `item_id`, `item_name`, and generated `payload_sha256` from `pro_extensions_lab.items`; separately classify SHA-256, optional `pgcrypto.digest`, `crypt`, PGP encryption, and external key management.</span>
+<span>--    Expected result/shape: For sql-ext-01 Exercise 5, One row per `item_id` with the three evidence columns, ordered by `item_id`. A purpose matrix names integrity digest, password hashing, encryption, key custody, and capability/fallback.</span>
+<span>--    Verify: For sql-ext-01 Exercise 5, Recompute SHA-256 from `payload` and compare all 64 hex characters; changing payload changes the digest. The matrix must explicitly forbid a fast unsalted digest for password storage and must not claim optional pgcrypto functions ran when unavailable. Hint ladder, rung 1: Hashing, password verification, encryption, and key management solve different threats.</span>
 <span>-- 6. Design an approved postgres_fdw boundary: server ownership, user mapping</span>
 <span>--    secrets, imported-column contract, pushdown, transaction consistency,</span>
 <span>--    failure isolation, and local snapshot fallback.</span>
+<span>--    Inputs: For sql-ext-01 Exercise 6, Use local `pro_extensions_lab.remote_snapshot`; no foreign server, user mapping, network connection, or credential is created. Choose the latest row per `source_key` by `fetched_at DESC, snapshot_id DESC`.</span>
+<span>--    Expected result/shape: For sql-ext-01 Exercise 6, One row per `source_key`, with `source_key`, `snapshot_id`, `fetched_at`, and `payload`, ordered by `source_key`.</span>
+<span>--    Verify: For sql-ext-01 Exercise 6, Add two same-time snapshots and prove greater `snapshot_id` wins. Separately review server ownership, secret location/rotation, imported columns, pushdown, transaction consistency, timeout, failure isolation, and snapshot fallback before any approved FDW deployment. Hint ladder, rung 1: Capability inventory and a local snapshot are safe evidence; neither proves a remote FDW connection is authorized or healthy.</span>
 <span>-- 7. Explain pg_trgm similarity versus prefix LIKE and full-text search. Name</span>
 <span>--    the exact operators an optional trigram index must serve.</span>
+<span>--    Inputs: For sql-ext-01 Exercise 7, Build a reviewed matrix for prefix `LIKE &#x27;term%&#x27;`, optional pg_trgm similarity/operators, and built-in full-text search. Name the query operator and matching index/operator class together.</span>
+<span>--    Expected result/shape: For sql-ext-01 Exercise 7, One row per `search_method`, with `search_method`, `query_operator`, `index_strategy`, `ranking_semantics`, `strength`, and `limitation`.</span>
+<span>--    Verify: For sql-ext-01 Exercise 7, Use one exact prefix, one misspelling, and one multi-token document to show the methods answer different questions. If `pg_trgm` is absent, record that capability as unavailable and run only built-in comparisons. Hint ladder, rung 1: An index helps only operators supported by its operator class; “fuzzy,” “prefix,” and “linguistic” are not synonyms.</span>
 <span>-- 8. Build an extension lifecycle inventory: owner, installed/default/available</span>
 <span>--    versions, dependencies, trusted flag, update path, publisher, approval,</span>
 <span>--    backup/restore needs, and rollback test. Do not upgrade anything here.</span>
+<span>--    Inputs: For sql-ext-01 Exercise 8, Extend Exercise 1&#x27;s read-only requested-extension inventory with available versions/trusted flag, installed schema/owner, dependencies, update path, publisher/package provenance, approval, backup/restore needs, rollback test, and named owner.</span>
+<span>--    Expected result/shape: For sql-ext-01 Exercise 8, One row per requested `extension_name`, with catalog facts kept separate from reviewed policy fields. No `CREATE EXTENSION`, `ALTER EXTENSION`, or `DROP EXTENSION` runs.</span>
+<span>--    Verify: For sql-ext-01 Exercise 8, Every installed extension has an exact version, owner, schema, dependency inventory, package source, upgrade and restore rehearsal, and rollback limit. Unavailable extensions remain visible with an explicit fallback instead of disappearing. Hint ladder, rung 1: Catalog state is observed evidence; approval, provenance, rollback, and operational ownership are separate decisions.</span>
 <span>-- 9. Detect collation provider/version drift and explain why affected indexes</span>
 <span>--    may require REINDEX after operating-system or ICU changes. Separate</span>
 <span>--    detection, impact analysis, remediation, and validation.</span>
+<span>--    Inputs: For sql-ext-01 Exercise 9, Read `pg_collation` and compare non-NULL recorded `collversion` with `pg_collation_actual_version(oid)`. This query detects; it does not reindex or refresh metadata.</span>
+<span>--    Expected result/shape: For sql-ext-01 Exercise 9, One row per mismatched `(collation_schema, collation_name, encoding)`, with those identity fields, `collprovider`, `recorded_version`, and `actual_version`, ordered by all three identity fields.</span>
+<span>--    Verify: For sql-ext-01 Exercise 9, An empty result means no mismatch was detected, not that every dependent index was inspected. For each returned collation, inventory dependent indexes, rehearse `REINDEX`, validate ordering/uniqueness, and only then refresh version metadata under an approved runbook. Hint ladder, rung 1: `collname` alone is not globally unique; preserve its namespace and encoding.</span>
 <span>-- 10. If PostGIS is approved elsewhere, design a nearest-resource query using</span>
 <span>--     geography and a GiST index. Address SRID, units, antimeridian/poles,</span>
 <span>--     ST_DWithin prefiltering, exact distance, and deterministic ties.</span>
+<span>--    Inputs: For sql-ext-01 Exercise 10, Write but do not execute a PostGIS query unless capability and approval are confirmed. Use `geography` with a declared SRID, a GiST indexable `ST_DWithin` radius prefilter, exact `ST_Distance`, and stable `resource_id` tie-break.</span>
+<span>--    Expected result/shape: For sql-ext-01 Exercise 10, A reviewed query contract names parameters, coordinate validation, meters as units, output grain/columns/order, antimeridian/pole cases, maximum radius, timeout, fallback, and owner.</span>
+<span>--    Verify: For sql-ext-01 Exercise 10, In an approved isolated PostGIS environment, compare the indexed query with a small exact control set, inspect `EXPLAIN (ANALYZE, BUFFERS)`, and test equal distances plus antimeridian/pole fixtures. Otherwise report `not executed: capability unavailable`. Hint ladder, rung 1: Prefilter for indexable radius, then calculate exact distance and order by distance plus stable identity.</span>
 <span>-- 11. If pgvector is approved elsewhere, compare cosine, inner-product, and L2</span>
 <span>--     operators plus HNSW and IVFFlat. State normalization, recall benchmark,</span>
 <span>--     build/update cost, filtering, dimension, and exact fallback requirements.</span>
+<span>--    Inputs: For sql-ext-01 Exercise 11, Use validated arrays and `checked_l2` as the built-in exact fallback; separately define optional pgvector cosine, inner-product, and L2 semantics plus HNSW/IVFFlat evaluation.</span>
+<span>--    Expected result/shape: For sql-ext-01 Exercise 11, One row per `item_id`, with `item_id`, `item_name`, and `exact_l2`, ordered by `exact_l2, item_id`.</span>
+<span>--    Verify: For sql-ext-01 Exercise 11, Compare every ANN candidate set with this exact ordering and report recall at the chosen `k`, filtered recall, latency, build memory/time, update cost, and index size. State normalization assumptions and use `item_id` to keep equal distances deterministic. Hint ladder, rung 1: A fast plan is not sufficient; ANN adoption needs a correctness benchmark against the exact metric.</span>
 <span>-- 12. Extend the FDW design for credential rotation, connection limits, remote</span>
 <span>--     schema drift, timeouts, pushdown inspection, partial failure, observability,</span>
 <span>--     and a last-known-good snapshot. Never put credentials in learner SQL.</span>
+<span>--    Inputs: For sql-ext-01 Exercise 12, Aggregate local `pro_extensions_lab.remote_snapshot` by `source_key`; accompany it with an FDW operations contract for secrets, connections, schema drift, timeouts, pushdown, partial failure, and fallback.</span>
+<span>--    Expected result/shape: For sql-ext-01 Exercise 12, One row per `source_key`, with `source_key`, `snapshot_watermark`, and `retained_versions`, ordered by `source_key`.</span>
+<span>--    Verify: For sql-ext-01 Exercise 12, Independently compare `max(fetched_at)` and counts per key; add a same-time version and confirm the latest-row query uses `snapshot_id` for its tie, while this aggregate correctly increments `retained_versions`. Simulate remote unavailability by using only the timestamped local fallback. Hint ladder, rung 1: A watermark says when the snapshot was fetched, not that the remote source is current or complete.</span>
 <span>-- 13. Write a supply-chain review for an extension unavailable from the trusted</span>
 <span>--     package source. Cover source/build provenance, native-code privilege,</span>
 <span>--     CVEs, reproducibility, licensing, patch ownership, and removal testing.</span>
+<span>--    Inputs: For sql-ext-01 Exercise 13, For one unavailable requested extension, assemble observed package availability plus reviewed source/build provenance, SBOM/native dependencies, CVEs, license, reproducibility, signer/hash, patch owner/SLA, restore compatibility, removal test, and approving authority.</span>
+<span>--    Expected result/shape: For sql-ext-01 Exercise 13, One row per `review_item`, with `review_item`, `observed_evidence`, `status`, `owner`, and `blocking_reason`. Unknown or missing evidence remains visible and blocks approval.</span>
+<span>--    Verify: For sql-ext-01 Exercise 13, The review output must remain `rejected`/`blocked` when the source signature/SBOM is removed or the removal rehearsal fails; a successful local compile is not sufficient and nothing is installed. Hint ladder, rung 1: Native extension code executes inside the database server process, so provenance and patch ownership are security controls.</span>
 <span>-- 14. Plan an extension upgrade rehearsal in a restored disposable database.</span>
 <span>--     Capture dependencies and plans before/after, application canaries,</span>
 <span>--     performance/correctness checks, backup compatibility, and rollback limits.</span>
@@ -663,20 +913,23 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <span>    END IF;</span>
 <span>END</span>
 <span>$self_check$;</span>
+<span>--    Inputs: For sql-ext-01 Exercise 14, Plan an extension upgrade only in a separately restored disposable database. Capture installed/target versions, package build, dependency graph, objects, query plans/results, backup compatibility, application canaries, elapsed/lock/WAL evidence, rollback limit, owner, and cleanup.</span>
+<span>--    Expected result/shape: For sql-ext-01 Exercise 14, One row per `phase_number`, with `phase_name`, `before_evidence`, `after_evidence`, `status`, `owner`, and `failure_response`; this transaction emits a plan and changes no extension.</span>
+<span>--    Verify: For sql-ext-01 Exercise 14, Every before/after correctness and performance check must pass within explicit tolerances. Inject a changed result or incompatible backup restore and prove approval remains blocked; record when downgrade is not a safe rollback and restore/forward-fix is required. Hint ladder, rung 1: Extension DDL success does not prove application semantics, plans, backup compatibility, or reversibility.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span>\echo &#x27;SQL-EXT-01 complete: no extension was created and schema was rolled back&#x27;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -700,44 +953,148 @@ CREATE EXTENSION postgres_fdw;</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--sql-ext-01-solutions-extensions-spatial-and-vector-boundaries">SQL-EXT-01 Solutions — Extensions, Spatial, and Vector Boundaries<a class="heading-anchor" href="#solution-1--sql-ext-01-solutions-extensions-spatial-and-vector-boundaries" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\professional\solutions\sql_ext_01_extensions_spatial_vector_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/professional/solutions/sql_ext_01_extensions_spatial_vector_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are Extension, Available/installed, Capability boundary, SRID, Geometry/geography, Embedding. Its worked-model focus is: pgavailableextensions answers whether the server installation exposes a control file and its default version. installedversion answers whether this database has created it. Neither proves the connected role may install/upgrade it, that replicas carry compatible binaries, or that an application was tested against that exact version.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>Run:</p>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_ext_01_extensions_spatial_vector_solutions.sql</code></pre>
 <p>The solution uses only built-ins and rolls back.</p>
 <h4 id="solution-1--exercise-1-capability-matrix">Exercise 1 — Capability matrix<a class="heading-anchor" href="#solution-1--exercise-1-capability-matrix" aria-label="Link to this section">#</a></h4>
 <p>Join a requested-extension list to <code>pg_available_extensions</code>. A missing row is unavailable; a row with NULL <code>installed_version</code> is available but not installed; a non-NULL installed version exists in this database. Also capture every available version, PostgreSQL/image version, control-file trust, CREATE privilege, owner, replica compatibility, and supported upgrade path.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 1, LEFT JOIN the requested extension-name fixture (citext, pg_trgm, pgcrypto, postgis, postgres_fdw, and vector) to <code>pg_available_extensions</code> and <code>pg_extension</code>. This is read-only discovery.</li>
+<li><strong>Expected result/shape:</strong> For sql-ext-01 Exercise 1, One row per requested <code>extension_name</code>, with <code>extension_name</code>, <code>default_version</code>, <code>installed_version</code>, <code>installed_owner</code>, and <code>capability_state</code>, ordered by <code>extension_name</code>. State is <code>unavailable</code>, <code>available_not_installed</code>, or <code>installed</code>.</li>
+<li><strong>Independent verification:</strong> For sql-ext-01 Exercise 1, Every requested name appears exactly once even when unavailable; compare installed versions directly with <code>pg_extension</code>. Record CREATE privilege/approval as unknown unless separately proven—availability does not grant permission. Hint ladder, rung 1: Start from the requested list and LEFT JOIN catalogs, otherwise unavailable names disappear.</li>
+</ul>
 <h4 id="solution-1--exercise-2-case-insensitive-identity">Exercise 2 — Case-insensitive identity<a class="heading-anchor" href="#solution-1--exercise-2-case-insensitive-identity" aria-label="Link to this section">#</a></h4>
 <p>A generated lower-case key centralizes one invariant and supports a unique index. It differs from citext across operators, implicit casts, joins, collations, Unicode case folding, and schema type contracts. Choose a documented normalization/collation and test real-language edge cases rather than assuming lowercase equals identity.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 2, Inspect generated column <code>pro_extensions_lab.items.normalized_name</code> and its unique-index catalog row; compare that narrow <code>lower(item_name)</code> rule with optional <code>citext</code>.</li>
+<li><strong>Expected result/shape:</strong> For sql-ext-01 Exercise 2, A catalog evidence row names the generated expression and unique index definition. A behavior table has <code>case_id</code>, <code>candidate_name</code>, <code>normalized_name</code>, <code>expected_outcome</code>, and <code>observed_sqlstate</code> for a distinct insert and a case-fold collision.</li>
+<li><strong>Independent verification:</strong> For sql-ext-01 Exercise 2, In a savepoint, <code>Charlie</code> succeeds and <code>alpha</code> conflicts with existing <code>Alpha</code> using SQLSTATE <code>23505</code>; rollback removes both attempts. Document Unicode/collation, operators/joins, and cross-writer limitations rather than claiming <code>lower()</code> is universally equivalent to <code>citext</code>. Hint ladder, rung 1: The generated column is a stored key; every lookup and join must use the same explicit normalization contract.</li>
+</ul>
 <h4 id="solution-1--exercise-3-spatial-semantics">Exercise 3 — Spatial semantics<a class="heading-anchor" href="#solution-1--exercise-3-spatial-semantics" aria-label="Link to this section">#</a></h4>
 <p>Built-in <code>point &lt;-&gt; point</code> returns planar units on an abstract coordinate grid. PostGIS geometry adds SRID-aware planar operations and transformations; geography models Earth distance. Longitude/latitude degrees are not meters and cross dateline/poles; select SRID/type before distance/index design.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 3, Calculate <code>&lt;-&gt;</code> from each <code>pro_extensions_lab.items.location</code> to the built-in point <code>(1,1)</code>, and write a comparison matrix for built-in <code>point</code>, PostGIS <code>geometry</code>, and PostGIS <code>geography</code>.</li>
+<li><strong>Expected result/shape:</strong> For sql-ext-01 Exercise 3, One row per <code>item_id</code>, with <code>item_id</code>, <code>item_name</code>, and <code>planar_distance</code>, ordered by <code>planar_distance, item_id</code>. The matrix names coordinate model, SRID support, distance units, index/operator, and appropriate use for each type.</li>
+<li><strong>Independent verification:</strong> For sql-ext-01 Exercise 3, Distances may tie, so <code>item_id</code>—not distance—is the identity and final tie-break. Prove the built-in result is Cartesian grid distance and explicitly reject interpreting latitude/longitude degrees as meters. Hint ladder, rung 1: A numeric distance has no geographic meaning until the coordinate reference system and units are defined.</li>
+</ul>
 <h4 id="solution-1--exercise-4-vectors">Exercise 4 — Vectors<a class="heading-anchor" href="#solution-1--exercise-4-vectors" aria-label="Link to this section">#</a></h4>
 <p><code>checked_l2</code> rejects unequal dimensions and computes exact L2 by matching array ordinality. This is adequate only for tiny fixtures. pgvector adds typed dimensions/operators and exact/approximate indexes. HNSW and IVFFlat differ in build time, memory, training/list/probe/search parameters, update behavior, and recall. Evaluate against labeled queries and pin embedding model/version.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 4, Strengthen <code>pro_extensions_lab.checked_l2(left,right)</code> to reject NULL arrays, zero dimensions, unequal dimensions, NULL elements, and non-finite elements before calculating exact L2 distance.</li>
+<li><strong>Expected result/shape:</strong> For sql-ext-01 Exercise 4, One row per <code>item_id</code>, with <code>item_id</code>, <code>item_name</code>, and <code>vector_distance</code>, ordered by <code>vector_distance, item_id</code>. The supplied <code>[0,0,0]</code> to <code>[3,4,0]</code> control equals <code>5</code>.</li>
+<li><strong>Independent verification:</strong> For sql-ext-01 Exercise 4, Named negative controls reject dimension mismatch, empty arrays, NULL elements, <code>Infinity</code>, and <code>NaN</code> with SQLSTATE <code>23514</code>; equal distance ties remain separate item IDs. Compare exact scan results with any approved ANN index before reporting recall, memory, build, or write cost. Hint ladder, rung 1: <code>sum()</code> silently ignores NULL inputs, so validation must happen before unnesting and aggregation.</li>
+</ul>
 <h4 id="solution-1--exercise-5-cryptography">Exercise 5 — Cryptography<a class="heading-anchor" href="#solution-1--exercise-5-cryptography" aria-label="Link to this section">#</a></h4>
 <p>Built-in SHA-256 is a deterministic integrity checksum. pgcrypto adds digest, password <code>crypt</code>, random bytes, and PGP-style encryption, but database-side key exposure and threat model matter. Passwords need a deliberately slow password KDF; encryption keys should usually be managed outside the protected data and remain recoverable under strict access.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 5, Read <code>item_id</code>, <code>item_name</code>, and generated <code>payload_sha256</code> from <code>pro_extensions_lab.items</code>; separately classify SHA-256, optional <code>pgcrypto.digest</code>, <code>crypt</code>, PGP encryption, and external key management.</li>
+<li><strong>Expected result/shape:</strong> For sql-ext-01 Exercise 5, One row per <code>item_id</code> with the three evidence columns, ordered by <code>item_id</code>. A purpose matrix names integrity digest, password hashing, encryption, key custody, and capability/fallback.</li>
+<li><strong>Independent verification:</strong> For sql-ext-01 Exercise 5, Recompute SHA-256 from <code>payload</code> and compare all 64 hex characters; changing payload changes the digest. The matrix must explicitly forbid a fast unsalted digest for password storage and must not claim optional pgcrypto functions ran when unavailable. Hint ladder, rung 1: Hashing, password verification, encryption, and key management solve different threats.</li>
+</ul>
 <h4 id="solution-1--exercise-6-fdw-boundary">Exercise 6 — FDW boundary<a class="heading-anchor" href="#solution-1--exercise-6-fdw-boundary" aria-label="Link to this section">#</a></h4>
 <p>Own foreign servers/mappings separately, keep credentials out of DDL/Git, import only reviewed columns, test pushdown with EXPLAIN, bound timeouts/concurrency, define transaction consistency, and materialize a local timestamped snapshot when remote failure/freshness trade-offs permit. Reconcile source keys and record extraction watermark.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 6, Use local <code>pro_extensions_lab.remote_snapshot</code>; no foreign server, user mapping, network connection, or credential is created. Choose the latest row per <code>source_key</code> by <code>fetched_at DESC, snapshot_id DESC</code>.</li>
+<li><strong>Expected result/shape:</strong> For sql-ext-01 Exercise 6, One row per <code>source_key</code>, with <code>source_key</code>, <code>snapshot_id</code>, <code>fetched_at</code>, and <code>payload</code>, ordered by <code>source_key</code>.</li>
+<li><strong>Independent verification:</strong> For sql-ext-01 Exercise 6, Add two same-time snapshots and prove greater <code>snapshot_id</code> wins. Separately review server ownership, secret location/rotation, imported columns, pushdown, transaction consistency, timeout, failure isolation, and snapshot fallback before any approved FDW deployment. Hint ladder, rung 1: Capability inventory and a local snapshot are safe evidence; neither proves a remote FDW connection is authorized or healthy.</li>
+</ul>
 <h4 id="solution-1--exercise-7-search">Exercise 7 — Search<a class="heading-anchor" href="#solution-1--exercise-7-search" aria-label="Link to this section">#</a></h4>
 <p>Prefix <code>LIKE &#x27;post%&#x27;</code> can use a compatible pattern index; full-text search uses lexemes/language; pg_trgm supports similarity and many wildcard patterns through its <code>%</code>, distance, LIKE/ILIKE operator support. Pick the operator first, then the matching GIN/GiST trigram operator class and measured threshold.</p>
+<h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 7, Build a reviewed matrix for prefix <code>LIKE &#x27;term%&#x27;</code>, optional pg_trgm similarity/operators, and built-in full-text search. Name the query operator and matching index/operator class together.</li>
+<li><strong>Expected result/shape:</strong> For sql-ext-01 Exercise 7, One row per <code>search_method</code>, with <code>search_method</code>, <code>query_operator</code>, <code>index_strategy</code>, <code>ranking_semantics</code>, <code>strength</code>, and <code>limitation</code>.</li>
+<li><strong>Independent verification:</strong> For sql-ext-01 Exercise 7, Use one exact prefix, one misspelling, and one multi-token document to show the methods answer different questions. If <code>pg_trgm</code> is absent, record that capability as unavailable and run only built-in comparisons. Hint ladder, rung 1: An index helps only operators supported by its operator class; “fuzzy,” “prefix,” and “linguistic” are not synonyms.</li>
+</ul>
 <h4 id="solution-1--exercise-8-extension-lifecycle-inventory">Exercise 8 — Extension lifecycle inventory<a class="heading-anchor" href="#solution-1--exercise-8-extension-lifecycle-inventory" aria-label="Link to this section">#</a></h4>
 <p>Join <code>pg_extension</code> to available versions and dependency catalogs; add owner, installed/default/available version, update paths, trust, package/image source, supported platforms, backup behavior, replica compatibility, approver, patch owner, and tested removal/rollback.</p>
 <p>An extension is executable code and schema objects, not a feature flag. Binary availability on every restore/replica node matters. The executable answer only inventories capabilities and never changes them.</p>
+<h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 8, Extend Exercise 1&#x27;s read-only requested-extension inventory with available versions/trusted flag, installed schema/owner, dependencies, update path, publisher/package provenance, approval, backup/restore needs, rollback test, and named owner.</li>
+<li><strong>Expected result/shape:</strong> For sql-ext-01 Exercise 8, One row per requested <code>extension_name</code>, with catalog facts kept separate from reviewed policy fields. No <code>CREATE EXTENSION</code>, <code>ALTER EXTENSION</code>, or <code>DROP EXTENSION</code> runs.</li>
+<li><strong>Independent verification:</strong> For sql-ext-01 Exercise 8, Every installed extension has an exact version, owner, schema, dependency inventory, package source, upgrade and restore rehearsal, and rollback limit. Unavailable extensions remain visible with an explicit fallback instead of disappearing. Hint ladder, rung 1: Catalog state is observed evidence; approval, provenance, rollback, and operational ownership are separate decisions.</li>
+</ul>
 <h4 id="solution-1--exercise-9-collation-version-drift">Exercise 9 — Collation version drift<a class="heading-anchor" href="#solution-1--exercise-9-collation-version-drift" aria-label="Link to this section">#</a></h4>
 <p>Compare recorded provider versions with current actual versions. A mismatch means sort keys may have changed after libc/ICU updates; it does not identify every affected index automatically.</p>
 <p>Inventory indexes, constraints, partitions, and materialized results using that collation; plan controlled REINDEX/refresh, conflict handling, capacity/locks, and post-checks. Refresh version metadata only after remediation is validated.</p>
+<h5 id="solution-1--reasoning-and-verification-9">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-9" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 9, Read <code>pg_collation</code> and compare non-NULL recorded <code>collversion</code> with <code>pg_collation_actual_version(oid)</code>. This query detects; it does not reindex or refresh metadata.</li>
+<li><strong>Expected result/shape:</strong> For sql-ext-01 Exercise 9, One row per mismatched <code>(collation_schema, collation_name, encoding)</code>, with those identity fields, <code>collprovider</code>, <code>recorded_version</code>, and <code>actual_version</code>, ordered by all three identity fields.</li>
+<li><strong>Independent verification:</strong> For sql-ext-01 Exercise 9, An empty result means no mismatch was detected, not that every dependent index was inspected. For each returned collation, inventory dependent indexes, rehearse <code>REINDEX</code>, validate ordering/uniqueness, and only then refresh version metadata under an approved runbook. Hint ladder, rung 1: <code>collname</code> alone is not globally unique; preserve its namespace and encoding.</li>
+</ul>
 <h4 id="solution-1--exercise-10-postgis-nearest-resource-design">Exercise 10 — PostGIS nearest-resource design<a class="heading-anchor" href="#solution-1--exercise-10-postgis-nearest-resource-design" aria-label="Link to this section">#</a></h4>
 <p>Use geography point SRID 4326 (or a reviewed transformed geometry). Apply <code>ST_DWithin</code> in meters so GiST can prefilter, then order candidates by exact <code>ST_Distance</code> and a stable resource ID.</p>
 <p>Validate coordinate order/range, SRID, units, empty geometry, poles, antimeridian, and spheroid accuracy. This is design-only unless PostGIS is already approved in an isolated environment.</p>
+<h5 id="solution-1--reasoning-and-verification-10">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-10" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 10, Write but do not execute a PostGIS query unless capability and approval are confirmed. Use <code>geography</code> with a declared SRID, a GiST indexable <code>ST_DWithin</code> radius prefilter, exact <code>ST_Distance</code>, and stable <code>resource_id</code> tie-break.</li>
+<li><strong>Expected result/shape:</strong> For sql-ext-01 Exercise 10, A reviewed query contract names parameters, coordinate validation, meters as units, output grain/columns/order, antimeridian/pole cases, maximum radius, timeout, fallback, and owner.</li>
+<li><strong>Independent verification:</strong> For sql-ext-01 Exercise 10, In an approved isolated PostGIS environment, compare the indexed query with a small exact control set, inspect <code>EXPLAIN (ANALYZE, BUFFERS)</code>, and test equal distances plus antimeridian/pole fixtures. Otherwise report <code>not executed: capability unavailable</code>. Hint ladder, rung 1: Prefilter for indexable radius, then calculate exact distance and order by distance plus stable identity.</li>
+</ul>
 <h4 id="solution-1--exercise-11-pgvector-metric-and-ann-evidence">Exercise 11 — pgvector metric and ANN evidence<a class="heading-anchor" href="#solution-1--exercise-11-pgvector-metric-and-ann-evidence" aria-label="Link to this section">#</a></h4>
 <p>Choose L2, negative inner product, or cosine from the embedding model contract. Normalize when required and enforce comparable model/version/dimension.</p>
 <p>Measure exact top-k ground truth against HNSW/IVFFlat recall with real filters, concurrency, mutations, build time, memory, disk, and latency. Tune search parameters and retain an exact fallback; index use is not relevance evidence.</p>
+<h5 id="solution-1--reasoning-and-verification-11">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-11" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 11, Use validated arrays and <code>checked_l2</code> as the built-in exact fallback; separately define optional pgvector cosine, inner-product, and L2 semantics plus HNSW/IVFFlat evaluation.</li>
+<li><strong>Expected result/shape:</strong> For sql-ext-01 Exercise 11, One row per <code>item_id</code>, with <code>item_id</code>, <code>item_name</code>, and <code>exact_l2</code>, ordered by <code>exact_l2, item_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-ext-01 Exercise 11, Compare every ANN candidate set with this exact ordering and report recall at the chosen <code>k</code>, filtered recall, latency, build memory/time, update cost, and index size. State normalization assumptions and use <code>item_id</code> to keep equal distances deterministic. Hint ladder, rung 1: A fast plan is not sufficient; ANN adoption needs a correctness benchmark against the exact metric.</li>
+</ul>
 <h4 id="solution-1--exercise-12-operable-fdw-boundary">Exercise 12 — Operable FDW boundary<a class="heading-anchor" href="#solution-1--exercise-12-operable-fdw-boundary" aria-label="Link to this section">#</a></h4>
 <p>Use external secret storage and a narrow mapping owner with rotation rehearsal; bound connections/timeouts and remote resources. Validate imported schema, inspect pushdown, and monitor latency, rows, errors, and freshness.</p>
 <p>Define transaction and retry semantics. Maintain a timestamped reconciled last-known-good snapshot when stale local data is safer than live dependency failure. Never commit credentials in SQL.</p>
+<h5 id="solution-1--reasoning-and-verification-12">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-12" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 12, Aggregate local <code>pro_extensions_lab.remote_snapshot</code> by <code>source_key</code>; accompany it with an FDW operations contract for secrets, connections, schema drift, timeouts, pushdown, partial failure, and fallback.</li>
+<li><strong>Expected result/shape:</strong> For sql-ext-01 Exercise 12, One row per <code>source_key</code>, with <code>source_key</code>, <code>snapshot_watermark</code>, and <code>retained_versions</code>, ordered by <code>source_key</code>.</li>
+<li><strong>Independent verification:</strong> For sql-ext-01 Exercise 12, Independently compare <code>max(fetched_at)</code> and counts per key; add a same-time version and confirm the latest-row query uses <code>snapshot_id</code> for its tie, while this aggregate correctly increments <code>retained_versions</code>. Simulate remote unavailability by using only the timestamped local fallback. Hint ladder, rung 1: A watermark says when the snapshot was fetched, not that the remote source is current or complete.</li>
+</ul>
 <h4 id="solution-1--exercise-13-extension-supply-chain-review">Exercise 13 — Extension supply-chain review<a class="heading-anchor" href="#solution-1--exercise-13-extension-supply-chain-review" aria-label="Link to this section">#</a></h4>
 <p>Require approved publisher/source, pinned checksums, reproducible or trusted packages, dependency/SBOM and CVE/license review, native-code privilege analysis, platform support, patch owner/SLA, backup/restore, and removal rehearsal.</p>
 <p>Compiling successfully is not approval. Native code runs inside the database process; prefer a maintained external service or built-in fallback when lifecycle ownership is absent.</p>
+<h5 id="solution-1--reasoning-and-verification-13">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-13" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 13, For one unavailable requested extension, assemble observed package availability plus reviewed source/build provenance, SBOM/native dependencies, CVEs, license, reproducibility, signer/hash, patch owner/SLA, restore compatibility, removal test, and approving authority.</li>
+<li><strong>Expected result/shape:</strong> For sql-ext-01 Exercise 13, One row per <code>review_item</code>, with <code>review_item</code>, <code>observed_evidence</code>, <code>status</code>, <code>owner</code>, and <code>blocking_reason</code>. Unknown or missing evidence remains visible and blocks approval.</li>
+<li><strong>Independent verification:</strong> For sql-ext-01 Exercise 13, The review output must remain <code>rejected</code>/<code>blocked</code> when the source signature/SBOM is removed or the removal rehearsal fails; a successful local compile is not sufficient and nothing is installed. Hint ladder, rung 1: Native extension code executes inside the database server process, so provenance and patch ownership are security controls.</li>
+</ul>
 <h4 id="solution-1--exercise-14-upgrade-rehearsal">Exercise 14 — Upgrade rehearsal<a class="heading-anchor" href="#solution-1--exercise-14-upgrade-rehearsal" aria-label="Link to this section">#</a></h4>
 <p>Restore a representative disposable database with old binaries, inventory dependent objects/functions/plans and data checks, then follow a supported update path. Run catalog, correctness, application, and performance canaries.</p>
 <p>Confirm dump/restore and replica compatibility. Many upgrades are not reversibly transactional, so rollback may require traffic fencing and restore rather than an attempted downgrade.</p>
+<h5 id="solution-1--reasoning-and-verification-14">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-14" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-ext-01 Exercise 14, Plan an extension upgrade only in a separately restored disposable database. Capture installed/target versions, package build, dependency graph, objects, query plans/results, backup compatibility, application canaries, elapsed/lock/WAL evidence, rollback limit, owner, and cleanup.</li>
+<li><strong>Expected result/shape:</strong> For sql-ext-01 Exercise 14, One row per <code>phase_number</code>, with <code>phase_name</code>, <code>before_evidence</code>, <code>after_evidence</code>, <code>status</code>, <code>owner</code>, and <code>failure_response</code>; this transaction emits a plan and changes no extension.</li>
+<li><strong>Independent verification:</strong> For sql-ext-01 Exercise 14, Every before/after correctness and performance check must pass within explicit tolerances. Inject a changed result or incompatible backup restore and prove approval remains blocked; record when downgrade is not a safe rollback and restore/forward-fix is required. Hint ladder, rung 1: Extension DDL success does not prove application semantics, plans, backup compatibility, or reversibility.</li>
+</ul>
 <h4 id="solution-1--edge-cases">Edge cases<a class="heading-anchor" href="#solution-1--edge-cases" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Pre-existing extensions are legitimate environment state; the solution inspects and never drops them.</li>
@@ -746,7 +1103,7 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <li>Embedding backfills need dual-version compatibility like schema migrations.</li>
 </ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -754,7 +1111,7 @@ CREATE EXTENSION postgres_fdw;</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -778,6 +1135,19 @@ CREATE EXTENSION postgres_fdw;</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-EXT-01 executable solutions: built-ins only, no CREATE EXTENSION.</span>
+<span>-- SOLUTION READING MAP — sql-ext-01: PostgreSQL Extensions, Spatial Data, and Vectors</span>
+<span>-- Explanation: sql/professional/solutions/sql_ext_01_extensions_spatial_vector_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_ext_01_extensions_spatial_vector_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>\set ON_ERROR_STOP on</span>
 <span>BEGIN;</span>
 <span>SET LOCAL search_path TO pg_catalog, public;</span>
@@ -790,7 +1160,13 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <span>    item_name text NOT NULL,</span>
 <span>    normalized_name text GENERATED ALWAYS AS (lower(item_name)) STORED,</span>
 <span>    location point NOT NULL,</span>
-<span>    embedding double precision[] NOT NULL CHECK (cardinality(embedding) = 3),</span>
+<span>    embedding double precision[] NOT NULL CHECK (</span>
+<span>        cardinality(embedding) = 3</span>
+<span>        AND array_position(embedding, NULL) IS NULL</span>
+<span>        AND array_position(embedding, &#x27;NaN&#x27;::double precision) IS NULL</span>
+<span>        AND array_position(embedding, &#x27;Infinity&#x27;::double precision) IS NULL</span>
+<span>        AND array_position(embedding, &#x27;-Infinity&#x27;::double precision) IS NULL</span>
+<span>    ),</span>
 <span>    payload text NOT NULL,</span>
 <span>    payload_sha256 text GENERATED ALWAYS AS (</span>
 <span>        encode(sha256(payload::bytea), &#x27;hex&#x27;)</span>
@@ -807,6 +1183,70 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <span>    (&#x27;Alpha&#x27;, point(0, 0), ARRAY[0, 0, 0]::double precision[], &#x27;alpha-v1&#x27;),</span>
 <span>    (&#x27;Bravo&#x27;, point(3, 4), ARRAY[3, 4, 0]::double precision[], &#x27;bravo-v1&#x27;);</span>
 <span> </span>
+<span>SELECT</span>
+<span>    c.column_name,</span>
+<span>    c.is_generated,</span>
+<span>    c.generation_expression,</span>
+<span>    i.indexdef</span>
+<span>FROM information_schema.columns AS c</span>
+<span>JOIN pg_catalog.pg_indexes AS i</span>
+<span>  ON i.schemaname = c.table_schema</span>
+<span> AND i.tablename = c.table_name</span>
+<span> AND i.indexname = &#x27;items_normalized_name_uk&#x27;</span>
+<span>WHERE c.table_schema = &#x27;pro_extensions_lab&#x27;</span>
+<span>  AND c.table_name = &#x27;items&#x27;</span>
+<span>  AND c.column_name = &#x27;normalized_name&#x27;;</span>
+<span> </span>
+<span>CREATE TABLE pro_extensions_lab.normalization_checks (</span>
+<span>    case_id text PRIMARY KEY,</span>
+<span>    candidate_name text NOT NULL,</span>
+<span>    normalized_name text NOT NULL,</span>
+<span>    expected_outcome text NOT NULL,</span>
+<span>    observed_sqlstate text</span>
+<span>);</span>
+<span> </span>
+<span>DO $solution$</span>
+<span>DECLARE</span>
+<span>    actual_sqlstate text;</span>
+<span>BEGIN</span>
+<span>    INSERT INTO pro_extensions_lab.items (</span>
+<span>        item_name, location, embedding, payload</span>
+<span>    )</span>
+<span>    VALUES (</span>
+<span>        &#x27;Charlie&#x27;,</span>
+<span>        point(1, 1),</span>
+<span>        ARRAY[1, 1, 1]::double precision[],</span>
+<span>        &#x27;charlie-v1&#x27;</span>
+<span>    );</span>
+<span> </span>
+<span>    INSERT INTO pro_extensions_lab.normalization_checks</span>
+<span>    VALUES (&#x27;distinct&#x27;, &#x27;Charlie&#x27;, lower(&#x27;Charlie&#x27;), &#x27;accepted&#x27;, NULL);</span>
+<span> </span>
+<span>    BEGIN</span>
+<span>        INSERT INTO pro_extensions_lab.items (</span>
+<span>            item_name, location, embedding, payload</span>
+<span>        )</span>
+<span>        VALUES (</span>
+<span>            &#x27;alpha&#x27;,</span>
+<span>            point(2, 2),</span>
+<span>            ARRAY[2, 2, 2]::double precision[],</span>
+<span>            &#x27;alpha-v2&#x27;</span>
+<span>        );</span>
+<span>        RAISE EXCEPTION &#x27;case-fold collision unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN unique_violation THEN</span>
+<span>            GET STACKED DIAGNOSTICS actual_sqlstate = RETURNED_SQLSTATE;</span>
+<span>    END;</span>
+<span> </span>
+<span>    INSERT INTO pro_extensions_lab.normalization_checks</span>
+<span>    VALUES (&#x27;case-fold-collision&#x27;, &#x27;alpha&#x27;, lower(&#x27;alpha&#x27;), &#x27;rejected&#x27;, actual_sqlstate);</span>
+<span>END</span>
+<span>$solution$;</span>
+<span> </span>
+<span>SELECT *</span>
+<span>FROM pro_extensions_lab.normalization_checks</span>
+<span>ORDER BY case_id;</span>
+<span> </span>
 <span>CREATE FUNCTION pro_extensions_lab.checked_l2(</span>
 <span>    p_left double precision[],</span>
 <span>    p_right double precision[]</span>
@@ -814,16 +1254,33 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <span>RETURNS double precision</span>
 <span>LANGUAGE plpgsql</span>
 <span>IMMUTABLE</span>
-<span>STRICT</span>
 <span>PARALLEL SAFE</span>
 <span>SET search_path = pg_catalog</span>
 <span>AS $function$</span>
 <span>DECLARE</span>
 <span>    result double precision;</span>
 <span>BEGIN</span>
-<span>    IF cardinality(p_left) &lt;&gt; cardinality(p_right) THEN</span>
-<span>        RAISE EXCEPTION &#x27;vector dimensions differ: % versus %&#x27;,</span>
+<span>    IF p_left IS NULL OR p_right IS NULL THEN</span>
+<span>        RAISE EXCEPTION &#x27;vectors must be non-NULL&#x27;</span>
+<span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    IF cardinality(p_left) = 0</span>
+<span>       OR cardinality(p_left) &lt;&gt; cardinality(p_right) THEN</span>
+<span>        RAISE EXCEPTION &#x27;vector dimensions must be equal and positive: % versus %&#x27;,</span>
 <span>            cardinality(p_left), cardinality(p_right)</span>
+<span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
+<span>    END IF;</span>
+<span> </span>
+<span>    IF EXISTS (</span>
+<span>        SELECT 1</span>
+<span>        FROM unnest(p_left || p_right) AS element(value)</span>
+<span>        WHERE element.value IS NULL</span>
+<span>           OR element.value = &#x27;NaN&#x27;::double precision</span>
+<span>           OR element.value = &#x27;Infinity&#x27;::double precision</span>
+<span>           OR element.value = &#x27;-Infinity&#x27;::double precision</span>
+<span>    ) THEN</span>
+<span>        RAISE EXCEPTION &#x27;vector elements must be finite and non-NULL&#x27;</span>
 <span>            USING ERRCODE = &#x27;check_violation&#x27;;</span>
 <span>    END IF;</span>
 <span> </span>
@@ -839,6 +1296,7 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <span>-- Exercise 3: point distance is planar grid distance, not geodesy.</span>
 <span>-- Exercise 4: checked_l2 validates dimensions and performs an exact tiny scan.</span>
 <span>SELECT</span>
+<span>    i.item_id,</span>
 <span>    i.item_name,</span>
 <span>    i.location &lt;-&gt; point(1, 1) AS planar_distance,</span>
 <span>    pro_extensions_lab.checked_l2(</span>
@@ -851,6 +1309,25 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <span> </span>
 <span>-- Exercise 5: payload_sha256 is an integrity digest, not encryption or a</span>
 <span>-- password-storage construction.</span>
+<span>SELECT</span>
+<span>    i.item_id,</span>
+<span>    i.item_name,</span>
+<span>    i.payload_sha256</span>
+<span>FROM pro_extensions_lab.items AS i</span>
+<span>ORDER BY i.item_id;</span>
+<span> </span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (&#x27;SHA-256 / digest&#x27;::text, &#x27;integrity fingerprint&#x27;, &#x27;not encryption and not password storage&#x27;),</span>
+<span>        (&#x27;crypt with adaptive password hash&#x27;, &#x27;password verification&#x27;, &#x27;requires approved pgcrypto capability and work factor&#x27;),</span>
+<span>        (&#x27;PGP encryption&#x27;, &#x27;protect database-held ciphertext&#x27;, &#x27;key custody and threat model remain external decisions&#x27;),</span>
+<span>        (&#x27;external KMS/envelope encryption&#x27;, &#x27;separate key custody and rotation&#x27;, &#x27;application/service integration required&#x27;)</span>
+<span>) AS crypto_purposes(mechanism, appropriate_purpose, important_limit)</span>
+<span>ORDER BY mechanism;</span>
+<span> </span>
+<span>-- Exercise 4 negative controls: every invalid shape/value must fail before</span>
+<span>-- aggregation can silently ignore it or return NULL.</span>
 <span>DO $solution$</span>
 <span>BEGIN</span>
 <span>    BEGIN</span>
@@ -862,6 +1339,50 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <span>    EXCEPTION</span>
 <span>        WHEN check_violation THEN</span>
 <span>            RAISE NOTICE &#x27;Expected vector-dimension rejection: %&#x27;, SQLERRM;</span>
+<span>    END;</span>
+<span> </span>
+<span>    BEGIN</span>
+<span>        PERFORM pro_extensions_lab.checked_l2(</span>
+<span>            ARRAY[]::double precision[],</span>
+<span>            ARRAY[]::double precision[]</span>
+<span>        );</span>
+<span>        RAISE EXCEPTION &#x27;empty vectors unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected empty-vector rejection: %&#x27;, SQLERRM;</span>
+<span>    END;</span>
+<span> </span>
+<span>    BEGIN</span>
+<span>        PERFORM pro_extensions_lab.checked_l2(</span>
+<span>            ARRAY[1, NULL, 3]::double precision[],</span>
+<span>            ARRAY[1, 2, 3]::double precision[]</span>
+<span>        );</span>
+<span>        RAISE EXCEPTION &#x27;NULL vector element unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected NULL-element rejection: %&#x27;, SQLERRM;</span>
+<span>    END;</span>
+<span> </span>
+<span>    BEGIN</span>
+<span>        PERFORM pro_extensions_lab.checked_l2(</span>
+<span>            ARRAY[1, &#x27;Infinity&#x27;::double precision, 3],</span>
+<span>            ARRAY[1, 2, 3]::double precision[]</span>
+<span>        );</span>
+<span>        RAISE EXCEPTION &#x27;infinite vector element unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected infinite-element rejection: %&#x27;, SQLERRM;</span>
+<span>    END;</span>
+<span> </span>
+<span>    BEGIN</span>
+<span>        PERFORM pro_extensions_lab.checked_l2(</span>
+<span>            ARRAY[1, &#x27;NaN&#x27;::double precision, 3],</span>
+<span>            ARRAY[1, 2, 3]::double precision[]</span>
+<span>        );</span>
+<span>        RAISE EXCEPTION &#x27;NaN vector element unexpectedly succeeded&#x27;;</span>
+<span>    EXCEPTION</span>
+<span>        WHEN check_violation THEN</span>
+<span>            RAISE NOTICE &#x27;Expected NaN-element rejection: %&#x27;, SQLERRM;</span>
 <span>    END;</span>
 <span>END</span>
 <span>$solution$;</span>
@@ -884,6 +1405,7 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <span> </span>
 <span>SELECT DISTINCT ON (rs.source_key)</span>
 <span>    rs.source_key,</span>
+<span>    rs.snapshot_id,</span>
 <span>    rs.fetched_at,</span>
 <span>    rs.payload</span>
 <span>FROM pro_extensions_lab.remote_snapshot AS rs</span>
@@ -908,6 +1430,20 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <span> </span>
 <span>-- Exercise 7: trigram, prefix, and full-text search differ by operator and</span>
 <span>-- operator class. No optional search extension is enabled by this solution.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (&#x27;prefix LIKE&#x27;::text, &#x27;column LIKE &#x27;&#x27;term%&#x27;&#x27;&#x27;::text, &#x27;B-tree pattern operator class when collation/operator support it&#x27;::text, &#x27;ordered prefix&#x27;, &#x27;does not correct misspellings&#x27;),</span>
+<span>        (&#x27;trigram similarity&#x27;, &#x27;%, similarity(), word_similarity()&#x27;, &#x27;GIN/GiST gin_trgm_ops or gist_trgm_ops&#x27;, &#x27;fuzzy character overlap&#x27;, &#x27;optional pg_trgm; threshold changes semantics&#x27;),</span>
+<span>        (&#x27;full-text search&#x27;, &#x27;@@ over tsvector/tsquery&#x27;, &#x27;GIN/GiST text-search operator class&#x27;, &#x27;token/lexeme linguistic match&#x27;, &#x27;not arbitrary substring similarity&#x27;)</span>
+<span>) AS search_contract(</span>
+<span>    search_method,</span>
+<span>    query_operator,</span>
+<span>    index_strategy,</span>
+<span>    ranking_semantics,</span>
+<span>    limitation</span>
+<span>)</span>
+<span>ORDER BY search_method;</span>
 <span> </span>
 <span>-- Exercise 1 and Exercise 8: inventory requested extension capability/lifecycle</span>
 <span>-- state without CREATE/ALTER/DROP.</span>
@@ -924,7 +1460,12 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <span>    r.extension_name,</span>
 <span>    a.default_version,</span>
 <span>    a.installed_version,</span>
-<span>    pg_catalog.pg_get_userbyid(e.extowner) AS installed_owner</span>
+<span>    pg_catalog.pg_get_userbyid(e.extowner) AS installed_owner,</span>
+<span>    CASE</span>
+<span>        WHEN a.name IS NULL THEN &#x27;unavailable&#x27;</span>
+<span>        WHEN e.oid IS NULL THEN &#x27;available_not_installed&#x27;</span>
+<span>        ELSE &#x27;installed&#x27;</span>
+<span>    END AS capability_state</span>
 <span>FROM requested AS r</span>
 <span>LEFT JOIN pg_catalog.pg_available_extensions AS a</span>
 <span>  ON a.name = r.extension_name</span>
@@ -932,22 +1473,80 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <span>  ON e.extname = r.extension_name</span>
 <span>ORDER BY r.extension_name;</span>
 <span> </span>
+<span>-- Exercise 8 adds lifecycle facts without changing extension state.</span>
+<span>WITH requested(extension_name) AS (</span>
+<span>    VALUES</span>
+<span>        (&#x27;citext&#x27;::name),</span>
+<span>        (&#x27;pg_trgm&#x27;::name),</span>
+<span>        (&#x27;pgcrypto&#x27;::name),</span>
+<span>        (&#x27;postgis&#x27;::name),</span>
+<span>        (&#x27;postgres_fdw&#x27;::name),</span>
+<span>        (&#x27;vector&#x27;::name)</span>
+<span>),</span>
+<span>available_versions AS (</span>
+<span>    SELECT</span>
+<span>        v.name,</span>
+<span>        array_agg(v.version ORDER BY v.version) AS available_versions,</span>
+<span>        bool_or(v.trusted) AS any_trusted_version,</span>
+<span>        array_agg(DISTINCT dependency ORDER BY dependency)</span>
+<span>            FILTER (WHERE dependency IS NOT NULL) AS declared_dependencies</span>
+<span>    FROM pg_catalog.pg_available_extension_versions AS v</span>
+<span>    LEFT JOIN LATERAL unnest(v.requires) AS dependency</span>
+<span>      ON true</span>
+<span>    GROUP BY v.name</span>
+<span>)</span>
+<span>SELECT</span>
+<span>    r.extension_name,</span>
+<span>    a.default_version,</span>
+<span>    a.installed_version,</span>
+<span>    ns.nspname AS installed_schema,</span>
+<span>    pg_catalog.pg_get_userbyid(e.extowner) AS installed_owner,</span>
+<span>    versions.available_versions,</span>
+<span>    versions.any_trusted_version,</span>
+<span>    versions.declared_dependencies</span>
+<span>FROM requested AS r</span>
+<span>LEFT JOIN pg_catalog.pg_available_extensions AS a</span>
+<span>  ON a.name = r.extension_name</span>
+<span>LEFT JOIN pg_catalog.pg_extension AS e</span>
+<span>  ON e.extname = r.extension_name</span>
+<span>LEFT JOIN pg_catalog.pg_namespace AS ns</span>
+<span>  ON ns.oid = e.extnamespace</span>
+<span>LEFT JOIN available_versions AS versions</span>
+<span>  ON versions.name = r.extension_name</span>
+<span>ORDER BY r.extension_name;</span>
+<span> </span>
 <span>-- Exercise 9: mismatch detection comes before impact analysis/reindex. Metadata</span>
 <span>-- must be refreshed only after affected objects have been remediated.</span>
 <span>SELECT</span>
-<span>    c.collname,</span>
+<span>    n.nspname AS collation_schema,</span>
+<span>    c.collname AS collation_name,</span>
+<span>    c.collencoding AS encoding,</span>
 <span>    c.collprovider,</span>
 <span>    c.collversion AS recorded_version,</span>
 <span>    pg_catalog.pg_collation_actual_version(c.oid) AS actual_version</span>
 <span>FROM pg_catalog.pg_collation AS c</span>
+<span>JOIN pg_catalog.pg_namespace AS n</span>
+<span>  ON n.oid = c.collnamespace</span>
 <span>WHERE c.collversion IS NOT NULL</span>
 <span>  AND c.collversion IS DISTINCT FROM</span>
 <span>      pg_catalog.pg_collation_actual_version(c.oid)</span>
-<span>ORDER BY c.collname;</span>
+<span>ORDER BY collation_schema, collation_name, encoding;</span>
 <span> </span>
 <span>-- Exercise 10: approved PostGIS uses ST_DWithin for indexed radius prefiltering,</span>
 <span>-- then exact ST_Distance and a stable ID. SRID, units, coordinate validation,</span>
 <span>-- antimeridian, and poles are part of the query contract.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (1, &#x27;capability&#x27;, &#x27;PostGIS installed version and approval are recorded&#x27;),</span>
+<span>        (2, &#x27;inputs&#x27;, &#x27;validated longitude/latitude converted to geography SRID 4326&#x27;),</span>
+<span>        (3, &#x27;prefilter&#x27;, &#x27;ST_DWithin(resource_geography, query_geography, radius_meters)&#x27;),</span>
+<span>        (4, &#x27;distance&#x27;, &#x27;ST_Distance returns meters for geography&#x27;),</span>
+<span>        (5, &#x27;order&#x27;, &#x27;distance_meters, resource_id gives deterministic ties&#x27;),</span>
+<span>        (6, &#x27;edge cases&#x27;, &#x27;antimeridian, poles, equal distance, invalid coordinates&#x27;),</span>
+<span>        (7, &#x27;evidence&#x27;, &#x27;exact control result plus EXPLAIN (ANALYZE, BUFFERS)&#x27;)</span>
+<span>) AS postgis_review(check_number, check_name, required_evidence)</span>
+<span>ORDER BY check_number;</span>
 <span> </span>
 <span>-- Exercise 11: compare exact metric results before evaluating ANN recall. This</span>
 <span>-- built-in fallback remains exact and validates vector dimensions.</span>
@@ -975,15 +1574,80 @@ CREATE EXTENSION postgres_fdw;</code></pre>
 <span>-- Exercise 13: unavailable package review must cover provenance, native-code</span>
 <span>-- authority, dependencies/SBOM, CVEs, licensing, reproducible build, patch</span>
 <span>-- owner/SLA, restore, and removal. Successful compilation is not approval.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (1, &#x27;source and release provenance&#x27;, &#x27;blocked until signed source/release hash is verified&#x27;),</span>
+<span>        (2, &#x27;native dependency SBOM and CVEs&#x27;, &#x27;blocked until scanned and risk-owned&#x27;),</span>
+<span>        (3, &#x27;license&#x27;, &#x27;blocked until distribution/use is approved&#x27;),</span>
+<span>        (4, &#x27;reproducible build&#x27;, &#x27;blocked until build inputs and output hash are recorded&#x27;),</span>
+<span>        (5, &#x27;patch ownership and SLA&#x27;, &#x27;blocked until an accountable maintainer exists&#x27;),</span>
+<span>        (6, &#x27;restore/removal rehearsal&#x27;, &#x27;blocked until backup restore and clean removal pass&#x27;)</span>
+<span>) AS supply_chain_review(review_number, review_item, blocking_rule)</span>
+<span>ORDER BY review_number;</span>
 <span> </span>
 <span>-- Exercise 14: an upgrade rehearsal restores a disposable database, captures</span>
 <span>-- dependencies/plans/results before and after, runs application/performance</span>
 <span>-- canaries, and records backup compatibility plus nonreversible rollback limits.</span>
+<span>SELECT *</span>
+<span>FROM (</span>
+<span>    VALUES</span>
+<span>        (1, &#x27;restore baseline&#x27;, &#x27;version, package, dependency and backup evidence&#x27;),</span>
+<span>        (2, &#x27;capture before&#x27;, &#x27;objects, plans, results, timings and application canaries&#x27;),</span>
+<span>        (3, &#x27;upgrade&#x27;, &#x27;exact reviewed command, locks, WAL, elapsed time and logs&#x27;),</span>
+<span>        (4, &#x27;capture after&#x27;, &#x27;same correctness/performance evidence and tolerances&#x27;),</span>
+<span>        (5, &#x27;rollback decision&#x27;, &#x27;downgrade support or restore/forward-fix limit&#x27;),</span>
+<span>        (6, &#x27;cleanup&#x27;, &#x27;disposable target disposition and follow-up owners&#x27;)</span>
+<span>) AS upgrade_rehearsal(phase_number, phase_name, required_evidence)</span>
+<span>ORDER BY phase_number;</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-ext-01 — PostgreSQL Extensions, Spatial Data, and Vectors.
+
+I have completed the direct catalog prerequisites: `sql-types-01`, `sql-ops-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/professional/companion-guides/sql_ext_01_extensions_spatial_vector.md
+- Answer-free learner SQL: sql/professional/lessons/sql_ext_01_extensions_spatial_vector.sql
+
+Key terms to teach in context: Extension, Available/installed, Capability boundary, SRID, Geometry/geography, Embedding. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: pgavailableextensions answers whether the server installation exposes a control file and its default version. installedversion answers whether this database has created it. Neither proves the connected role may install/upgrade it, that replicas carry compatible binaries, or that an application was tested against that exact version.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-ext-01/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-ops-02.html"><small>Previous lesson</small><strong>sql-ops-02</strong><span>Backup, Restore, and Recovery Rehearsals</span></a>
@@ -1075,6 +1739,23 @@ CREATE EXTENSION postgres_fdw;</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

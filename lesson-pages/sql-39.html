@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -216,11 +253,11 @@
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this SQL against only the disposable course database</h2>
-          <p>Open the script in VS Code, predict each result, then run it with <code>psql -X -v ON_ERROR_STOP=1</code>. The course SQL scripts set their own transaction boundary; never point reset or lesson commands at a shared or valuable database.</p>
-          <p class="static-help">
-            <strong>Windows:</strong> double-click <code>START_DS60.cmd</code> in the repository folder, let it finish its readiness checks, then reopen this lesson and choose <strong>Create/open guided SQL notebook</strong>. <strong>macOS/Linux:</strong> start the private portal with the repository interpreter first. You can also open the real <code>.sql</code> file in VS Code and run it with the documented <code>psql</code> command.
-          </p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database—never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,72 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
+
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
         </div>
       </section>
+
+
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-39/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +347,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +371,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-39-locks-blocking-and-deadlocks">Day 39 — Locks, Blocking, and Deadlocks<a class="heading-anchor" href="#guide--day-39-locks-blocking-and-deadlocks" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -285,6 +384,50 @@
 <li><strong>Prerequisites:</strong> <a href="sql-38.html#guide">Day 38 — transactions and isolation</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-39.html#learner">learner SQL</a> · <a href="sql-39.html#solution-1">solution reasoning</a> · <a href="sql-39.html#solution-2">executable solution</a></li>
 </ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre><code class="language-powershell">   .\START_DS60.cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-39 — Locks Deadlocks</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-39/lesson/workspace/sql/postgres-60day/day39_locks_deadlocks.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>The full learner file demonstrates the safe single-session part. For the manual concurrency prompts, open <strong>two separate</strong> <code>psql</code> terminals connected to <code>advanced_sql_training</code>, label them Session A and Session B, and follow the statement schedule exactly. Temporary tables are session-local, so use only the regular disposable table named by the exercise and clean it up when both sessions finish.</p>
+<p>Manual <code>psql</code> fallback:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\day39_locks_deadlocks.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/day39_locks_deadlocks.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Blocking, Deadlock, Advisory lock. Its worked SQL reads or creates <code>orders</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: In two disposable sessions, lock test rows 1 and 2 in opposite orders and inspect the wait before PostgreSQL aborts one participant with 40P01. Roll back, then repeat with both sessions ordering keys ascending to show the cycle cannot form. The first runnable example has a concrete contract: Example 1 returns one row per <code>pid</code> with columns <code>pid</code>, <code>locktype</code>, <code>regclass</code>, <code>mode</code>, and <code>granted</code> from <code>pg_locks</code>, and <code>pg_class</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>pid</code>, <code>locktype</code>, <code>regclass</code>, <code>mode</code>, and <code>granted</code>. Reselect the returned key columns from <code>pg_locks</code>, and <code>pg_class</code>, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day39_locks_deadlocks.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">SELECT pid, locktype, relation::regclass, mode, granted
+FROM pg_locks
+LEFT JOIN pg_class ON pg_locks.relation = pg_class.oid
+ORDER BY granted DESC, relation;</code></pre>
+<p><strong>How to read it:</strong> Example 1: Start with <code>pg_locks</code>, and <code>pg_class</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>pid</code>, <code>locktype</code>, <code>regclass</code>, <code>mode</code>, and <code>granted</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>pid</code> with columns <code>pid</code>, <code>locktype</code>, <code>regclass</code>, <code>mode</code>, and <code>granted</code> from <code>pg_locks</code>, and <code>pg_class</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">WITH to_lock AS (
+  SELECT order_id FROM orders WHERE total_amount &gt; 900 ORDER BY order_id LIMIT 5
+)
+SELECT * FROM orders o
+JOIN to_lock t ON t.order_id = o.order_id
+FOR UPDATE;</code></pre>
+<p><strong>How to read it:</strong> Example 2 is a data-changing CTE chain, not a displayed query result. The CTEs <code>to_lock</code> determine the affected rows before the final write to the columns written in the final <code>SELECT</code>. Read the command tag for the affected-row count, then use a separate <code>SELECT</code> to prove the lesson invariant; a successful command tag alone does not prove historical correctness.</p>
+<p><strong>Expected result/shape:</strong> Example 2 prints a DML command tag for <code>orders</code>. Capture the target key set at <code>order_id</code> grain before the write, compare it with affected/returned keys, and use a follow-up <code>SELECT</code> to prove the before/after invariant and transaction cleanup.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Observe blocking and deadlock state without intervening blindly.</li>
@@ -301,15 +444,23 @@
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <p>Complete these in the <a href="sql-39.html#learner">learner SQL</a>:</p>
 <ol>
-<li>Reproduce a deadlock and inspect it with <code>pg_locks</code>.</li>
-<li>Prevent it with consistent key ordering.</li>
-<li>Demonstrate a <code>SKIP LOCKED</code> worker.</li>
-<li>Predict <code>NOWAIT</code> behavior when another session owns the lock.</li>
-<li>Atomically claim/update at most five queue rows.</li>
-<li>Preserve deterministic key ordering through the locking SELECT.</li>
-<li>Test a transaction-level advisory lock.</li>
+<li>Reproduce a deadlock and inspect it with <code>pg_locks</code>. <strong>Inputs/evidence:</strong> For sql-39 Exercise 1, read the target keys from <code>orders</code>, and <code>pg_locks</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values. <strong>Expected result/shape:</strong> For sql-39 Exercise 1, expected output: the command tag and an independently counted set of affected <code>order_id</code> values. The final columns are <code>order_id</code>. <strong>Verify:</strong> For sql-39 Exercise 1, materialize the intended <code>order_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>orders</code>, and <code>pg_locks</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>order_id</code> values in both cases.</li>
+<li>Prevent it with consistent key ordering. <strong>Inputs/evidence:</strong> For sql-39 Exercise 2, read the target keys from <code>orders</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values. <strong>Expected result/shape:</strong> For sql-39 Exercise 2, expected output: the command tag and an independently counted set of affected <code>order_id</code> values. The final columns are <code>order_id</code>, and <code>total_amount</code>. The final order is <code>order_id FOR UPDATE</code>. <strong>Verify:</strong> For sql-39 Exercise 2, materialize the intended <code>order_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>orders</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>order_id</code> values in both cases.</li>
+<li>Demonstrate a <code>SKIP LOCKED</code> worker. <strong>Inputs/evidence:</strong> For sql-39 Exercise 3, read the target keys from <code>orders</code>, and <code>SKIP</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values. <strong>Expected result/shape:</strong> For sql-39 Exercise 3, expected output: the command tag and an independently counted set of affected <code>order_id</code> values. The final columns are <code>order_id</code>, <code>order_date</code>, and <code>status</code>. The final order is <code>order_id</code>. <strong>Verify:</strong> For sql-39 Exercise 3, materialize the intended <code>order_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>orders</code>, and <code>SKIP</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>order_id</code> values in both cases.</li>
+<li>Predict <code>NOWAIT</code> behavior when another session owns the lock. <strong>Inputs/evidence:</strong> For sql-39 Exercise 4, run the underlying read-only query over <code>orders</code>, and <code>NOWAIT</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison. <strong>Expected result/shape:</strong> For sql-39 Exercise 4, expected output: one row per <code>order_id</code>. The final columns are <code>order_id</code>. <strong>Verify:</strong> For sql-39 Exercise 4, run the underlying query without <code>EXPLAIN</code> and preserve its <code>order_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li>Atomically claim/update at most five queue rows. <strong>Inputs/evidence:</strong> For sql-39 Exercise 5, read the target keys from <code>solution_jobs</code>, and <code>SKIP</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values. <strong>Expected result/shape:</strong> For sql-39 Exercise 5, expected output: up to five unprocessed jobs with <code>SKIP LOCKED</code>; the UPDATE joins only those keys and <code>RETURNING</code> proves exactly what this worker claimed. The final columns are <code>returning</code>. <strong>Verify:</strong> For sql-39 Exercise 5, materialize the intended <code>returning</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>solution_jobs</code>, and <code>SKIP</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>returning</code> values in both cases.</li>
+<li>Preserve deterministic key ordering through the locking SELECT. <strong>Inputs/evidence:</strong> For sql-39 Exercise 6, read the target keys from <code>orders</code>, <code>ordered_keys</code>, and <code>OF</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values. <strong>Expected result/shape:</strong> For sql-39 Exercise 6, expected output: the command tag and an independently counted set of affected <code>order_id</code> values. The final columns are <code>order_id</code>. The final order is <code>o.order_id FOR UPDATE OF o</code>. <strong>Verify:</strong> For sql-39 Exercise 6, materialize the intended <code>order_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>orders</code>, <code>ordered_keys</code>, and <code>OF</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>order_id</code> values in both cases.</li>
+<li>Test a transaction-level advisory lock. <strong>Inputs/evidence:</strong> For sql-39 Exercise 7, read from <code>pg_try_advisory_xact_lock</code>. Compute <code>ROLLBACK</code> with no outer <code>GROUP BY</code>; return exactly one aggregate row and label every expression. <strong>Expected result/shape:</strong> For sql-39 Exercise 7, expected output: exactly one aggregate summary row. The final columns are <code>ROLLBACK</code>. <strong>Verify:</strong> For sql-39 Exercise 7, evaluate each of <code>row_count</code> in a separate control <code>SELECT</code> over <code>pg_try_advisory_xact_lock</code>; require one final row and compare every value. Add one source row with a new <code>ROLLBACK</code>; verify the result gains exactly one row carrying that <code>ROLLBACK</code> value.</li>
 </ol>
 <p>Use a disposable queue and prove two workers claim different rows.</p>
+<h4 id="guide--common-mistakes-and-how-to-recover">Common mistakes and how to recover<a class="heading-anchor" href="#guide--common-mistakes-and-how-to-recover" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Lesson-specific semantic mistake:</strong> Do not skip this worked-model requirement: In two disposable sessions, lock test rows 1 and 2 in opposite orders and inspect the wait before PostgreSQL aborts one participant with 40P01. Roll back, then repeat with both sessions ordering keys ascending to show the cycle cannot form.</li>
+<li><strong>Unexpected row count:</strong> display keys before aggregates, count rows after each join/filter stage, and find the first stage whose grain differs from the contract. Do not hide fanout with <code>DISTINCT</code>.</li>
+<li><strong>Unexpected <code>NULL</code> or missing row:</strong> decide whether the fact is unknown, inapplicable, zero, or absent before using <code>COALESCE</code>; inspect outer-join predicate placement and empty-input aggregate behavior.</li>
+<li><strong>Unstable top/first/last output:</strong> add <code>ORDER BY</code> with a unique final tie-breaker before <code>LIMIT</code> or order-sensitive windows/aggregates.</li>
+<li><strong><code>psql</code> stops on an error:</strong> fix the first error shown by <code>ON_ERROR_STOP</code>, restore the declared transaction/setup state, and rerun the complete file. A later successful statement does not validate a partial run.</li>
+</ul>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Can you identify blocker, waiter, resource, and statement from evidence?</li>
@@ -327,12 +478,8 @@
 <h4 id="guide--how-the-learner-script-uses-the-current-schema">How the learner script uses the current schema<a class="heading-anchor" href="#guide--how-the-learner-script-uses-the-current-schema" aria-label="Link to this section">#</a></h4>
 <p>The script lists current locks, selects five high-value <code>orders</code> in ascending <code>order_id</code>, and locks those same rows in a consistent order. It also introduces transaction- and session-level advisory locks as application coordination tools.</p>
 <p>A deadlock is a cycle: session A waits for B while B waits for A. PostgreSQL detects the cycle and aborts one transaction with SQLSTATE <code>40P01</code>. Consistent key order, small transactions, and avoiding user pauses inside transactions reduce risk.</p>
-<h4 id="guide--practice-match-the-learner-prompts-exactly">Practice — match the learner prompts exactly<a class="heading-anchor" href="#guide--practice-match-the-learner-prompts-exactly" aria-label="Link to this section">#</a></h4>
-<ol>
-<li>In two disposable sessions, lock two test rows in opposite order, capture the waits in <code>pg_locks</code>, then let PostgreSQL detect the deadlock.</li>
-<li>Repeat with both sessions acquiring rows in ascending key order.</li>
-<li>Use a disposable job table and <code>SELECT ... FOR UPDATE SKIP LOCKED</code> so two workers claim different unprocessed rows.</li>
-</ol>
+<h4 id="guide--practice-map">Practice map<a class="heading-anchor" href="#guide--practice-map" aria-label="Link to this section">#</a></h4>
+<p>Use the numbered <strong>Exercises</strong> section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.</p>
 <h4 id="guide--operational-safety">Operational safety<a class="heading-anchor" href="#guide--operational-safety" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Do not run the deliberate deadlock against production or important shared orders.</li>
@@ -344,17 +491,45 @@
 <p>Record the two-session statement sequence, the blocked/aborted session, SQLSTATE, and proof that the consistent-order version completes. Roll back or drop all disposable queue/deadlock objects.</p>
 <h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
 <p>Prompts 4–7 compare waiting, immediate failure, cooperative queues, and advisory coordination. <code>NOWAIT</code> raises an error instead of waiting; <code>SKIP LOCKED</code> omits currently claimed rows, which is useful for workers but wrong for complete reporting.</p>
-<p>Claim and update queue rows in one transaction, with a deterministic key order. Use <code>pg_try_advisory_xact_lock</code> for a non-blocking application lock that releases automatically at transaction end. Advisory locks work only when every actor follows the same key convention.</p></div>
+<p>Claim and update queue rows in one transaction, with a deterministic key order. Use <code>pg_try_advisory_xact_lock</code> for a non-blocking application lock that releases automatically at transaction end. Advisory locks work only when every actor follows the same key convention.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<pre><code class="language-text">Tutor me through sql-39 — Locks Deadlocks.
+
+I have completed the direct catalog prerequisite: `sql-38`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day39_locks_deadlocks.md
+- Answer-free learner SQL: sql/postgres-60day/day39_locks_deadlocks.sql
+
+Key terms to teach in context: Blocking, Deadlock, Advisory lock. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: In two disposable sessions, lock test rows 1 and 2 in opposite orders and inspect the wait before PostgreSQL aborts one participant with 40P01. Roll back, then repeat with both sessions ordering keys ascending to show the cycle cannot form.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-39/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -371,13 +546,30 @@
               type="button"
               data-launch-artifact="PostgreSQL script"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 39: Locks &amp; Deadlock Prevention</span>
+<span>-- BEGINNER WORKFLOW — sql-39: Locks Deadlocks</span>
+<span>-- Guide: sql/postgres-60day/companion-guides/day39_locks_deadlocks.md</span>
+<span>-- Recommended runner: open the private lesson reader and choose</span>
+<span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
+<span>-- creates an ignored .learning/sql/sql-39/ copy, and prints the full</span>
+<span>-- psql transcript below the run cell. Edit that private copy, not this official</span>
+<span>-- source, while studying.</span>
+<span>-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span>
+<span>-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span>
+<span>-- declare what one input row and one output row represent. A displayed result</span>
+<span>-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span>
+<span>-- Primary objects in the worked examples: orders.</span>
+<span>-- Success means the first error never appears, psql exits 0, result keys and</span>
+<span>-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span>
+<span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
+<span>-- only in your ignored working copy.</span>
+<span>--</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
@@ -409,29 +601,57 @@
 <span> </span>
 <span>-- Exercises</span>
 <span>-- 1. Simulate a deadlock in two sessions and capture with pg_locks.</span>
+<span>--    Inputs: For sql-39 Exercise 1, read the target keys from `orders`, and `pg_locks` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
+<span>--    Expected result/shape: For sql-39 Exercise 1, expected output: the command tag and an independently counted set of affected `order_id` values. The final columns are `order_id`.</span>
+<span>--    Verify: For sql-39 Exercise 1, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, and `pg_locks` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.</span>
+<span>--    Hint ladder, rung 1: For sql-39 Exercise 1, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, and `pg_locks` again and prove rollback or idempotent retry.</span>
 <span>-- 2. Implement consistent lock ordering to avoid the deadlock.</span>
+<span>--    Inputs: For sql-39 Exercise 2, read the target keys from `orders` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
+<span>--    Expected result/shape: For sql-39 Exercise 2, expected output: the command tag and an independently counted set of affected `order_id` values. The final columns are `order_id`, and `total_amount`. The final order is `order_id FOR UPDATE`.</span>
+<span>--    Verify: For sql-39 Exercise 2, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.</span>
+<span>--    Hint ladder, rung 1: For sql-39 Exercise 2, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders` again and prove rollback or idempotent retry.</span>
 <span>-- 3. Use SELECT FOR UPDATE SKIP LOCKED for job-queue style processing.</span>
+<span>--    Inputs: For sql-39 Exercise 3, read the target keys from `orders`, and `SKIP` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
+<span>--    Expected result/shape: For sql-39 Exercise 3, expected output: the command tag and an independently counted set of affected `order_id` values. The final columns are `order_id`, `order_date`, and `status`. The final order is `order_id`.</span>
+<span>--    Verify: For sql-39 Exercise 3, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, and `SKIP` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.</span>
+<span>--    Hint ladder, rung 1: For sql-39 Exercise 3, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, and `SKIP` again and prove rollback or idempotent retry.</span>
 <span>-- 4. Prediction: compare FOR UPDATE NOWAIT with ordinary FOR UPDATE when</span>
 <span>--    another session already owns the row lock.</span>
+<span>--    Inputs: For sql-39 Exercise 4, run the underlying read-only query over `orders`, and `NOWAIT` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span>
+<span>--    Expected result/shape: For sql-39 Exercise 4, expected output: one row per `order_id`. The final columns are `order_id`.</span>
+<span>--    Verify: For sql-39 Exercise 4, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span>
+<span>--    Hint ladder, rung 1: For sql-39 Exercise 4, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.</span>
 <span>-- 5. Construction: claim at most five queued rows with FOR UPDATE SKIP LOCKED,</span>
 <span>--    update them, and return exactly the rows claimed.</span>
+<span>--    Inputs: For sql-39 Exercise 5, read the target keys from `solution_jobs`, and `SKIP` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
+<span>--    Expected result/shape: For sql-39 Exercise 5, expected output: up to five unprocessed jobs with `SKIP LOCKED`; the UPDATE joins only those keys and `RETURNING` proves exactly what this worker claimed. The final columns are `returning`.</span>
+<span>--    Verify: For sql-39 Exercise 5, materialize the intended `returning` target set first; require the command tag/`RETURNING` set to match it, then query `solution_jobs`, and `SKIP` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `returning` values in both cases.</span>
+<span>--    Hint ladder, rung 1: For sql-39 Exercise 5, run `claimed` one at a time. Record each CTE&#x27;s row count and `returning` uniqueness before the next stage uses it.</span>
 <span>-- 6. Debugging: identify why ordering inside a CTE is not enough unless the</span>
 <span>--    locking SELECT preserves that same deterministic key order.</span>
+<span>--    Inputs: For sql-39 Exercise 6, read the target keys from `orders`, `ordered_keys`, and `OF` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span>
+<span>--    Expected result/shape: For sql-39 Exercise 6, expected output: the command tag and an independently counted set of affected `order_id` values. The final columns are `order_id`. The final order is `o.order_id FOR UPDATE OF o`.</span>
+<span>--    Verify: For sql-39 Exercise 6, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, `ordered_keys`, and `OF` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.</span>
+<span>--    Hint ladder, rung 1: For sql-39 Exercise 6, start with the first relation in `orders`, `ordered_keys`, and `OF`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.</span>
 <span>-- 7. Edge case: use pg_try_advisory_xact_lock and explain why transaction-level</span>
 <span>--    advisory locks avoid a forgotten manual unlock.</span>
+<span>--    Inputs: For sql-39 Exercise 7, read from `pg_try_advisory_xact_lock`. Compute `ROLLBACK` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.</span>
+<span>--    Expected result/shape: For sql-39 Exercise 7, expected output: exactly one aggregate summary row. The final columns are `ROLLBACK`.</span>
+<span>--    Verify: For sql-39 Exercise 7, evaluate each of `row_count` in a separate control `SELECT` over `pg_try_advisory_xact_lock`; require one final row and compare every value. Add one source row with a new `ROLLBACK`; verify the result gains exactly one row carrying that `ROLLBACK` value.</span>
+<span>--    Hint ladder, rung 1: For sql-39 Exercise 7, select `ROLLBACK` from `pg_try_advisory_xact_lock` before adding derived columns.</span>
 <span> </span>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -455,6 +675,26 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-39-solutions-locks-and-deadlocks">Day 39 — Solutions: Locks and Deadlocks<a class="heading-anchor" href="#solution-1--day-39-solutions-locks-and-deadlocks" aria-label="Link to this section">#</a></h3>
+<p>&lt;!-- beginner-solution-enrichment --&gt;</p>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre><code class="language-powershell"># Windows PowerShell, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\solutions\day39_solutions.sql&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux, from the repository root
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
+  -f sql/postgres-60day/solutions/day39_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are Blocking, Deadlock, Advisory lock. Its worked-model focus is: In two disposable sessions, lock test rows 1 and 2 in opposite orders and inspect the wait before PostgreSQL aborts one participant with 40P01. Roll back, then repeat with both sessions ordering keys ascending to show the cycle cannot form.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>Deadlocks and lock waits require concurrent sessions. A single sequential solution file cannot fully execute these labs. Use two terminals for the staged commands and a third terminal when observing a wait.</p>
 <h4 id="solution-1--exercise-1-reproduce-and-observe-a-deadlock">Exercise 1 — Reproduce and observe a deadlock<a class="heading-anchor" href="#solution-1--exercise-1-reproduce-and-observe-a-deadlock" aria-label="Link to this section">#</a></h4>
 <p>Session A locks order 1:</p>
@@ -487,6 +727,16 @@ ORDER BY a.pid, l.granted, l.locktype;</code></pre>
 SET total_amount = total_amount
 WHERE order_id = 1;</code></pre>
 <p>PostgreSQL detects the cycle and aborts one transaction with <code>deadlock detected</code>; roll back both sessions afterward. The detector normally resolves the deadlock quickly, so the diagnostic captures the lock wait before the final cycle edge rather than promising to freeze a deadlock.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-39 Exercise 1, read the target keys from <code>orders</code>, and <code>pg_locks</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values.</li>
+<li><strong>Expected result/shape:</strong> For sql-39 Exercise 1, expected output: the command tag and an independently counted set of affected <code>order_id</code> values. The final columns are <code>order_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-39 Exercise 1, materialize the intended <code>order_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>orders</code>, and <code>pg_locks</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>order_id</code> values in both cases.</li>
+<li><strong>Intermediate relation check:</strong> For sql-39 Exercise 1, materialize the intended <code>order_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>orders</code>, and <code>pg_locks</code> again and prove rollback or idempotent retry.</li>
+<li><strong>Clause check:</strong> For sql-39 Exercise 1, the solution actually uses <code>FROM</code>, <code>WHERE</code>, and <code>SELECT</code>. Read only those operations: begin at <code>orders</code>, and <code>pg_locks</code>, preserve one row per <code>order_id</code>, and finish with <code>order_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-39 Exercise 1, the chosen form is justified by this lesson-specific rationale: Session A locks order 1: Session B locks order 2: Session A now waits for B: Before completing the cycle, run this safe diagnostic in a third session: Then Session B completes the cycle: PostgreSQL detects the. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected <code>order_id</code> values) and the verification above.</li>
+<li><strong>Edge case:</strong> Use an empty target set and a multi-row target set; reconcile the affected <code>order_id</code> values in both cases.</li>
+</ul>
 <h4 id="solution-1--exercise-2-prevent-the-deadlock-with-consistent-ordering">Exercise 2 — Prevent the deadlock with consistent ordering<a class="heading-anchor" href="#solution-1--exercise-2-prevent-the-deadlock-with-consistent-ordering" aria-label="Link to this section">#</a></h4>
 <p>Every worker must acquire the same set of row locks in the same order:</p>
 <pre><code class="language-sql">BEGIN;
@@ -502,6 +752,16 @@ FOR UPDATE;
 
 ROLLBACK;</code></pre>
 <p>Run the same transaction in both sessions. One may wait, but neither can hold order 2 while requesting order 1, so this pair does not form a cycle.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-39 Exercise 2, read the target keys from <code>orders</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values.</li>
+<li><strong>Expected result/shape:</strong> For sql-39 Exercise 2, expected output: the command tag and an independently counted set of affected <code>order_id</code> values. The final columns are <code>order_id</code>, and <code>total_amount</code>. The final order is <code>order_id FOR UPDATE</code>.</li>
+<li><strong>Independent verification:</strong> For sql-39 Exercise 2, materialize the intended <code>order_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>orders</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>order_id</code> values in both cases.</li>
+<li><strong>Intermediate relation check:</strong> For sql-39 Exercise 2, materialize the intended <code>order_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>orders</code> again and prove rollback or idempotent retry.</li>
+<li><strong>Clause check:</strong> For sql-39 Exercise 2, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>orders</code>, preserve one row per <code>order_id</code>, and finish with <code>order_id</code>, and <code>total_amount</code> ordered by <code>order_id FOR UPDATE</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-39 Exercise 2, the chosen form is justified by this lesson-specific rationale: Every worker must acquire the same set of row locks in the same order: Run the same transaction in both sessions. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected <code>order_id</code> values) and the verification above.</li>
+<li><strong>Edge case:</strong> Use an empty target set and a multi-row target set; reconcile the affected <code>order_id</code> values in both cases.</li>
+</ul>
 <h4 id="solution-1--exercise-3-job-queue-claiming-with-skip-locked">Exercise 3 — Job-queue claiming with <code>SKIP LOCKED</code><a class="heading-anchor" href="#solution-1--exercise-3-job-queue-claiming-with-skip-locked" aria-label="Link to this section">#</a></h4>
 <pre><code class="language-sql">BEGIN;
 SET LOCAL search_path TO training, public;
@@ -517,6 +777,16 @@ FOR UPDATE SKIP LOCKED;
 
 ROLLBACK;</code></pre>
 <p>To see queue behavior, keep the first session open before <code>ROLLBACK</code> and run the same <code>SELECT</code> in Session B. B skips A&#x27;s locked rows and can claim a different batch.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-39 Exercise 3, read the target keys from <code>orders</code>, and <code>SKIP</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values.</li>
+<li><strong>Expected result/shape:</strong> For sql-39 Exercise 3, expected output: the command tag and an independently counted set of affected <code>order_id</code> values. The final columns are <code>order_id</code>, <code>order_date</code>, and <code>status</code>. The final order is <code>order_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-39 Exercise 3, materialize the intended <code>order_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>orders</code>, and <code>SKIP</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>order_id</code> values in both cases.</li>
+<li><strong>Intermediate relation check:</strong> For sql-39 Exercise 3, materialize the intended <code>order_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>orders</code>, and <code>SKIP</code> again and prove rollback or idempotent retry.</li>
+<li><strong>Clause check:</strong> For sql-39 Exercise 3, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, <code>ORDER BY</code>, and <code>LIMIT</code>. Read only those operations: begin at <code>orders</code>, and <code>SKIP</code>, preserve one row per <code>order_id</code>, and finish with <code>order_id</code>, <code>order_date</code>, and <code>status</code> ordered by <code>order_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-39 Exercise 3, the chosen form is justified by this lesson-specific rationale: To see queue behavior, keep the first session open before <code>ROLLBACK</code> and run the same <code>SELECT</code> in Session B. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected <code>order_id</code> values) and the verification above.</li>
+<li><strong>Edge case:</strong> Use an empty target set and a multi-row target set; reconcile the affected <code>order_id</code> values in both cases.</li>
+</ul>
 <h4 id="solution-1--pitfalls">Pitfalls<a class="heading-anchor" href="#solution-1--pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><code>SKIP LOCKED</code> intentionally returns an inconsistent view and is appropriate for queues, not ordinary reports.</li>
@@ -526,14 +796,54 @@ ROLLBACK;</code></pre>
 </ul>
 <h4 id="solution-1--exercise-4-predict-nowait">Exercise 4 — Predict NOWAIT<a class="heading-anchor" href="#solution-1--exercise-4-predict-nowait" aria-label="Link to this section">#</a></h4>
 <p><code>FOR UPDATE NOWAIT</code> raises SQLSTATE <code>55P03</code> immediately when a conflicting lock already exists. The executable solution explains the two-session check without blocking automated validation.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-39 Exercise 4, run the underlying read-only query over <code>orders</code>, and <code>NOWAIT</code> before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</li>
+<li><strong>Expected result/shape:</strong> For sql-39 Exercise 4, expected output: one row per <code>order_id</code>. The final columns are <code>order_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-39 Exercise 4, run the underlying query without <code>EXPLAIN</code> and preserve its <code>order_id</code> rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+<li><strong>Intermediate relation check:</strong> For sql-39 Exercise 4, run the underlying query without <code>EXPLAIN</code> and preserve its <code>order_id</code> rows.</li>
+<li><strong>Clause check:</strong> For sql-39 Exercise 4, the solution actually uses <code>FROM</code>, <code>WHERE</code>, and <code>SELECT</code>. Read only those operations: begin at <code>orders</code>, and <code>NOWAIT</code>, preserve one row per <code>order_id</code>, and finish with <code>order_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-39 Exercise 4, the chosen form is justified by this lesson-specific rationale: <code>FOR UPDATE NOWAIT</code> raises SQLSTATE <code>55P03</code> immediately when a conflicting lock already exists. Evaluate another form against the concrete expected result (one row per <code>order_id</code>) and the verification above.</li>
+<li><strong>Edge case:</strong> Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
+</ul>
 <h4 id="solution-1--exercise-5-claim-and-update-queue-rows">Exercise 5 — Claim and update queue rows<a class="heading-anchor" href="#solution-1--exercise-5-claim-and-update-queue-rows" aria-label="Link to this section">#</a></h4>
 <p>The locking CTE selects up to five unprocessed jobs with <code>SKIP LOCKED</code>; the UPDATE joins only those keys and <code>RETURNING</code> proves exactly what this worker claimed.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-39 Exercise 5, read the target keys from <code>solution_jobs</code>, and <code>SKIP</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values.</li>
+<li><strong>Expected result/shape:</strong> For sql-39 Exercise 5, expected output: up to five unprocessed jobs with <code>SKIP LOCKED</code>; the UPDATE joins only those keys and <code>RETURNING</code> proves exactly what this worker claimed. The final columns are <code>returning</code>.</li>
+<li><strong>Independent verification:</strong> For sql-39 Exercise 5, materialize the intended <code>returning</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>solution_jobs</code>, and <code>SKIP</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>returning</code> values in both cases.</li>
+<li><strong>Intermediate relation check:</strong> For sql-39 Exercise 5, run <code>claimed</code> one at a time. Record each CTE&#x27;s row count and <code>returning</code> uniqueness before the next stage uses it.</li>
+<li><strong>Clause check:</strong> For sql-39 Exercise 5, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, <code>ORDER BY</code>, <code>LIMIT</code>, and <code>RETURNING</code>. Read only those operations: begin at <code>solution_jobs</code>, and <code>SKIP</code>, preserve one row per <code>returning</code>, and finish with <code>returning</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-39 Exercise 5, the chosen form is justified by this lesson-specific rationale: The locking CTE selects up to five unprocessed jobs with <code>SKIP LOCKED</code>; the UPDATE joins only those keys and <code>RETURNING</code> proves exactly what this worker claimed. Evaluate another form against the concrete expected result (up to five unprocessed jobs with <code>SKIP LOCKED</code>; the UPDATE joins only those keys and <code>RETURNING</code> proves exactly what this worker claimed) and the verification above.</li>
+<li><strong>Edge case:</strong> Use an empty target set and a multi-row target set; reconcile the affected <code>returning</code> values in both cases.</li>
+</ul>
 <h4 id="solution-1--exercise-6-preserve-lock-order">Exercise 6 — Preserve lock order<a class="heading-anchor" href="#solution-1--exercise-6-preserve-lock-order" aria-label="Link to this section">#</a></h4>
 <p>Keys and the final locking SELECT both order by the unique <code>order_id</code>. Every writer must share that order for the pattern to prevent cycles.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-39 Exercise 6, read the target keys from <code>orders</code>, <code>ordered_keys</code>, and <code>OF</code> before writing. Keep the change inside the lesson transaction and capture the command tag or <code>RETURNING</code> values.</li>
+<li><strong>Expected result/shape:</strong> For sql-39 Exercise 6, expected output: the command tag and an independently counted set of affected <code>order_id</code> values. The final columns are <code>order_id</code>. The final order is <code>o.order_id FOR UPDATE OF o</code>.</li>
+<li><strong>Independent verification:</strong> For sql-39 Exercise 6, materialize the intended <code>order_id</code> target set first; require the command tag/<code>RETURNING</code> set to match it, then query <code>orders</code>, <code>ordered_keys</code>, and <code>OF</code> again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected <code>order_id</code> values in both cases.</li>
+<li><strong>Intermediate relation check:</strong> For sql-39 Exercise 6, start with the first relation in <code>orders</code>, <code>ordered_keys</code>, and <code>OF</code>; after each join, record total rows and distinct <code>order_id</code> so the exact fanout or loss is visible.</li>
+<li><strong>Clause check:</strong> For sql-39 Exercise 6, the solution actually uses <code>WITH</code>, <code>FROM</code>, <code>JOIN ... ON</code>, <code>WHERE</code>, <code>SELECT</code>, <code>ORDER BY</code>, and <code>LIMIT</code>. Read only those operations: begin at <code>orders</code>, <code>ordered_keys</code>, and <code>OF</code>, preserve one row per <code>order_id</code>, and finish with <code>order_id</code> ordered by <code>o.order_id FOR UPDATE OF o</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-39 Exercise 6, the chosen form is justified by this lesson-specific rationale: Keys and the final locking SELECT both order by the unique <code>order_id</code>. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected <code>order_id</code> values) and the verification above.</li>
+<li><strong>Edge case:</strong> Use an empty target set and a multi-row target set; reconcile the affected <code>order_id</code> values in both cases.</li>
+</ul>
 <h4 id="solution-1--exercise-7-prefer-transaction-advisory-locks">Exercise 7 — Prefer transaction advisory locks<a class="heading-anchor" href="#solution-1--exercise-7-prefer-transaction-advisory-locks" aria-label="Link to this section">#</a></h4>
-<p><code>pg_try_advisory_xact_lock</code> is non-blocking and releases automatically when the transaction ends. It works only if all cooperating applications derive the same lock key.</p></div>
+<p><code>pg_try_advisory_xact_lock</code> is non-blocking and releases automatically when the transaction ends. It works only if all cooperating applications derive the same lock key.</p>
+<h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-39 Exercise 7, read from <code>pg_try_advisory_xact_lock</code>. Compute <code>ROLLBACK</code> with no outer <code>GROUP BY</code>; return exactly one aggregate row and label every expression.</li>
+<li><strong>Expected result/shape:</strong> For sql-39 Exercise 7, expected output: exactly one aggregate summary row. The final columns are <code>ROLLBACK</code>.</li>
+<li><strong>Independent verification:</strong> For sql-39 Exercise 7, evaluate each of <code>row_count</code> in a separate control <code>SELECT</code> over <code>pg_try_advisory_xact_lock</code>; require one final row and compare every value. Add one source row with a new <code>ROLLBACK</code>; verify the result gains exactly one row carrying that <code>ROLLBACK</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-39 Exercise 7, select <code>ROLLBACK</code> from <code>pg_try_advisory_xact_lock</code> before adding derived columns.</li>
+<li><strong>Clause check:</strong> For sql-39 Exercise 7, the solution actually uses <code>SELECT</code>. Read only those operations: begin at <code>pg_try_advisory_xact_lock</code>, preserve exactly one summary row, and finish with <code>ROLLBACK</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-39 Exercise 7, the chosen form is justified by this lesson-specific rationale: <code>pg_try_advisory_xact_lock</code> is non-blocking and releases automatically when the transaction ends. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>ROLLBACK</code>; verify the result gains exactly one row carrying that <code>ROLLBACK</code> value.</li>
+</ul></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -541,7 +851,7 @@ ROLLBACK;</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -565,6 +875,19 @@ ROLLBACK;</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 39 solutions: locks and deadlocks</span>
+<span>-- SOLUTION READING MAP — sql-39: Locks Deadlocks</span>
+<span>-- Explanation: sql/postgres-60day/solutions/day39_solutions.md</span>
+<span>-- Run from the repository root only against advanced_sql_training:</span>
+<span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day39_solutions.sql</span>
+<span>-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span>
+<span>-- row filters; group/aggregate; filter groups; compute windows; project named</span>
+<span>-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span>
+<span>-- as an intermediate relation whose keys, row count, and totals can be checked.</span>
+<span>-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span>
+<span>-- rows, test a boundary case, and reconcile with an independent control.</span>
+<span>-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span>
+<span>-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span>
+<span>--</span>
 <span>BEGIN;</span>
 <span>SET search_path TO training, public;</span>
 <span> </span>
@@ -654,11 +977,54 @@ ROLLBACK;</code></pre>
 <span>ROLLBACK;</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-39 — Locks Deadlocks.
+
+I have completed the direct catalog prerequisite: `sql-38`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day39_locks_deadlocks.md
+- Answer-free learner SQL: sql/postgres-60day/day39_locks_deadlocks.sql
+
+Key terms to teach in context: Blocking, Deadlock, Advisory lock. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: In two disposable sessions, lock test rows 1 and 2 in opposite orders and inspect the wait before PostgreSQL aborts one participant with 40P01. Roll back, then repeat with both sessions ordering keys ascending to show the cycle cannot form.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-39/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="sql-38.html"><small>Previous lesson</small><strong>sql-38</strong><span>Transactions Isolation</span></a>
-        <a class="nav-card next" href="sql-40.html"><small>Next lesson</small><strong>sql-40</strong><span>Analytic Functions Advanced</span></a>
+        <a class="nav-card next" href="sql-found-02.html"><small>Next lesson</small><strong>sql-found-02</strong><span>Versioned Schema Migrations and Safe Evolution</span></a>
       </nav>
     </div>
   </main>
@@ -746,6 +1112,23 @@ ROLLBACK;</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

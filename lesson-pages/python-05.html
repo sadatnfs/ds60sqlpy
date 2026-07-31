@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-5-functions-docstrings-and-type-hints">Day 5 — Functions, Docstrings, and Type Hints<a class="heading-anchor" href="#guide--day-5-functions-docstrings-and-type-hints" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>A function is a named contract: given valid inputs, it returns a documented result or raises a documented exception.</p>
@@ -292,6 +331,86 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 4 (<code>python-04</code>): collections, iteration, and generators.</p>
+<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<ol>
+<li>Confirm the course environment before changing it:</li>
+</ol>
+<pre><code class="language-powershell">   # Windows PowerShell
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   &amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash">   # macOS/Linux
+   .venv/bin/python scripts/course.py doctor</code></pre>
+<ol>
+<li>Read <code>python/ds-60day/companion-guides/day05_functions_type_hints.md</code>, then open <code>python/ds-60day/notebooks/day05_functions_type_hints.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
+<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
+<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
+<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+</ol>
+<p><strong>Lesson outcome:</strong> use day 5 — functions, docstrings, and type hints to practice function contracts, parameters, return values, scope, and type hints and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
+<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
+<p>A function gives a name to a reusable behavior. Its contract says which inputs are accepted, what it returns, which failures it raises, and whether it changes anything outside itself. Parameters are names in the definition; arguments are actual values supplied by a caller.</p>
+<p>A call creates a local scope. Names assigned there normally disappear when the call returns. A <code>return</code> sends one value to the caller and stops that call. Type hints document intended types and support static tools, but Python does not enforce them automatically at runtime. Defaults are evaluated once when <code>def</code> runs, so mutable defaults should normally be replaced by <code>None</code> plus a fresh object inside the function.</p>
+<h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>function:</strong> a named reusable block that can accept inputs and return a value.</li>
+<li><strong>parameter:</strong> a name declared in a function signature.</li>
+<li><strong>argument:</strong> a value supplied for a parameter during a call.</li>
+<li><strong>return value:</strong> the object sent back to the caller.</li>
+<li><strong>scope:</strong> the region in which a name can be resolved.</li>
+<li><strong>type hint:</strong> machine-readable documentation of an intended type.</li>
+</ul>
+<h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<p><code>def clamp(value: float, *, low: float, high: float) -&gt; float:</code> begins with <code>def</code>, gives the function a name, annotates three parameters, uses <code>*</code> to make <code>low</code> and <code>high</code> keyword-only, and annotates the return. The colon starts the indented body. A docstring is the first string in that body and should state behavior that the signature cannot fully express, especially errors and edge cases.</p>
+<h5 id="guide--worked-example-1-make-validation-part-of-the-contract">Worked example 1 — Make validation part of the contract<a class="heading-anchor" href="#guide--worked-example-1-make-validation-part-of-the-contract" aria-label="Link to this section">#</a></h5>
+<p>Reject an invalid domain before doing the calculation. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">def mean(values: list[float]) -&gt; float:
+    &quot;&quot;&quot;Return the arithmetic mean of a non-empty list.&quot;&quot;&quot;
+    if not values:
+        raise ValueError(&quot;values must not be empty&quot;)
+    return sum(values) / len(values)
+
+mean([2.0, 4.0, 9.0])</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`5.0`. Empty input follows a deliberate exception path instead of dividing by zero accidentally.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--worked-example-2-use-keyword-only-parameters-to-make-calls-readable">Worked example 2 — Use keyword-only parameters to make calls readable<a class="heading-anchor" href="#guide--worked-example-2-use-keyword-only-parameters-to-make-calls-readable" aria-label="Link to this section">#</a></h5>
+<p>A signature can prevent ambiguous positional calls. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">def discounted(price: float, *, rate: float = 0.0) -&gt; float:
+    if not 0 &lt;= rate &lt;= 1:
+        raise ValueError(&quot;rate must be between 0 and 1&quot;)
+    return price * (1 - rate)
+
+discounted(80.0, rate=0.25)</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`60.0`. The call labels `rate`, making `0.25` hard to confuse with another quantity.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
+<p>When the output differs from your prediction, use this order:</p>
+<ol>
+<li>Read the signature and call side by side when arguments bind unexpectedly.</li>
+<li>Check whether every path reaches an explicit <code>return</code>; falling off the end returns <code>None</code>.</li>
+<li>Replace a mutable default such as <code>items=[]</code> with <code>items: list[...] | None = None</code>.</li>
+<li>Use a type checker for hints, but still validate external runtime data at the boundary.</li>
+</ol>
+<h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
+<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
+<ol>
+<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
+<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
+<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
+<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
+<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
+</ol>
+<p><strong>Useful alternative:</strong> A tuple can return several related values; a dataclass becomes clearer when those values need durable names and behavior.</p>
+<p><strong>Boundary to remember:</strong> Empty input, mismatched lengths, zero total weight, invalid numeric ranges, and Unicode/whitespace normalization need written policy. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Parameter:</strong> the name in a function definition; <strong>argument:</strong> a value passed at a call site.</li>
@@ -313,20 +432,25 @@
     return min(max(value, low), high)</code></pre>
 <p>The annotation describes intended types; the branch enforces a relationship between values that a basic type checker cannot express.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Write an annotated function that computes the mean and population standard deviation of a list of numbers. <strong>Hint:</strong> calculate the mean once, then use each value&#x27;s squared distance from that mean.</li>
-<li>Add a docstring that states the return shape and empty-input behavior. <strong>Hint:</strong> decide on the contract before coding: return a sentinel or raise a specific exception.</li>
-<li>Reject invalid inputs with <code>ValueError</code>. <strong>Hint:</strong> validate the collection and its values near the function boundary; do not catch errors the function cannot repair.</li>
+<li>Implement <code>describe(values: list[float]) -&gt; tuple[float, float]</code> returning the arithmetic mean and <strong>population</strong> standard deviation. <strong>Input:</strong> <code>[2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]</code>. <strong>Expected result:</strong> <code>(5.0, 2.0)</code>. <strong>Constraints:</strong> compute the mean once, use squared distances, and do not import a statistics helper that performs the whole task. <strong>Verify:</strong> Use <code>math.isclose</code> to confirm mean <code>5.0</code> and population standard deviation <code>2.0</code>, then show empty input follows the documented failure path.</li>
+</ol>
+<ol>
+<li>Add a docstring to <code>describe</code> that states accepted input, the two tuple fields in order, and the empty-input policy. <strong>Constraint:</strong> choose and document one explicit behavior—this lesson&#x27;s reference raises <code>ValueError</code>. <strong>Verify:</strong> capture <code>help(describe)</code> output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input <code>ValueError</code> without reading the body.</li>
+</ol>
+<ol>
+<li>Validate <code>describe</code> near its boundary: reject an empty list and any non-finite value such as <code>float(&#x27;nan&#x27;)</code> with a useful <code>ValueError</code>. <strong>Verify:</strong> show the normal result and use two separate <code>try</code>/<code>except ValueError</code> checks for the invalid cases; do not catch errors inside the function that it cannot repair.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Design functions from their contracts: accepted inputs, return value, failure behavior, side effects, and boundary cases.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict the result of calling a function with <code>items=[]</code> as a default three times when it appends on each call. Explain shared defaults. <strong>Progressive hint:</strong> Default objects are created once when <code>def</code> executes.</li>
-<li><strong>Tracing:</strong> Trace a local variable that shadows a global of the same name. Which binding changes, and when would <code>global</code> be required? <strong>Progressive hint:</strong> Assignment makes a name local unless explicitly declared otherwise.</li>
-<li><strong>Implementation:</strong> Implement typed <code>weighted_mean(values, weights)</code> with length, empty, and zero-total-weight validation. <strong>Progressive hint:</strong> State every invalid condition before calculating.</li>
-<li><strong>Debugging:</strong> Repair a function whose <code>*items</code> argument is accidentally passed as one list instead of unpacked individual items. <strong>Progressive hint:</strong> Compare <code>f(values)</code> with <code>f(*values)</code>.</li>
-<li><strong>Edge case and explanation:</strong> Write a docstring for a name-normalization function and test empty, whitespace-only, and Unicode input. <strong>Progressive hint:</strong> Document whether empty normalized output is valid or an error.</li>
+<li><strong>Prediction:</strong> Predict the result of calling a function with <code>items=[]</code> as a default three times when it appends on each call. Explain shared defaults. <strong>Progressive hint:</strong> Default objects are created once when <code>def</code> executes. <strong>Verify:</strong> Call the faulty function three times and record cumulative state, then assert the <code>None</code>-sentinel repair returns independent one-item lists on every call.</li>
+<li><strong>Tracing:</strong> Trace a local variable that shadows a global of the same name. Which binding changes, and when would <code>global</code> be required? <strong>Progressive hint:</strong> Assignment makes a name local unless explicitly declared otherwise. <strong>Verify:</strong> Record local/global values before, during, and after the call; confirm ordinary local assignment leaves the global unchanged.</li>
+<li><strong>Implementation:</strong> Implement typed <code>weighted_mean(values, weights)</code> with length, empty, and zero-total-weight validation. <strong>Progressive hint:</strong> State every invalid condition before calculating. <strong>Verify:</strong> Assert a known weighted mean and separately assert empty, length-mismatch, and zero-total-weight inputs raise the documented errors.</li>
+<li><strong>Debugging:</strong> Repair a function whose <code>*items</code> argument is accidentally passed as one list instead of unpacked individual items. <strong>Progressive hint:</strong> Compare <code>f(values)</code> with <code>f(*values)</code>. <strong>Verify:</strong> Capture arguments received by <code>f(values)</code> and <code>f(*values)</code>; assert the repaired call presents individual items rather than one nested list.</li>
+<li><strong>Edge case and explanation:</strong> Write a docstring for a name-normalization function and test empty, whitespace-only, and Unicode input. <strong>Progressive hint:</strong> Document whether empty normalized output is valid or an error. <strong>Verify:</strong> Test ordinary, empty, whitespace-only, and Unicode names against the docstring&#x27;s stated contract; every behavior must match the documentation.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -350,17 +474,33 @@
 <li><a href="python-05.html#learner">Open the learner notebook</a></li>
 <li><a href="python-05.html#solution-1">Check the separate solution</a></li>
 <li><a href="python-06.html#guide">Next: Day 6 — Core data structures</a></li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-05`
+(Day 5 — Functions, Docstrings, and Type Hints). Direct catalog prerequisites: `python-04`.
+I have completed the direct prerequisites: `python-04`. Emphasize function contracts, parameters, return values, scope, and type hints.
+Read `python/ds-60day/companion-guides/day05_functions_type_hints.md` and use the learner notebook
+`python/ds-60day/notebooks/day05_functions_type_hints.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -377,12 +517,12 @@
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-5-functions-args-kwargs-scope-docstrings-type-hints">Day 5 — Functions, args/kwargs, scope, docstrings, type hints<a class="heading-anchor" href="#learner--cell-1--day-5-functions-args-kwargs-scope-docstrings-type-hints" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -391,7 +531,59 @@
 <li>Document with docstrings.</li>
 <li>Add typing for clarity and tooling support.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>from typing import List, Dict, Any</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
+<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>This is the editable learner artifact for <code>python-05</code>. Read <code>python/ds-60day/companion-guides/day05_functions_type_hints.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
+<p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
+<p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--core-mental-model">Core mental model<a class="heading-anchor" href="#learner--cell-3--core-mental-model" aria-label="Link to this section">#</a></h4>
+<p>A function gives a name to a reusable behavior. Its contract says which inputs are accepted, what it returns, which failures it raises, and whether it changes anything outside itself. Parameters are names in the definition; arguments are actual values supplied by a caller.</p>
+<p>A call creates a local scope. Names assigned there normally disappear when the call returns. A <code>return</code> sends one value to the caller and stops that call. Type hints document intended types and support static tools, but Python does not enforce them automatically at runtime. Defaults are evaluated once when <code>def</code> runs, so mutable defaults should normally be replaced by <code>None</code> plus a fresh object inside the function.</p>
+<h5 id="learner--cell-3--vocabulary">Vocabulary<a class="heading-anchor" href="#learner--cell-3--vocabulary" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>function:</strong> a named reusable block that can accept inputs and return a value.</li>
+<li><strong>parameter:</strong> a name declared in a function signature.</li>
+<li><strong>argument:</strong> a value supplied for a parameter during a call.</li>
+<li><strong>return value:</strong> the object sent back to the caller.</li>
+<li><strong>scope:</strong> the region in which a name can be resolved.</li>
+<li><strong>type hint:</strong> machine-readable documentation of an intended type.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<p><code>def clamp(value: float, *, low: float, high: float) -&gt; float:</code> begins with <code>def</code>, gives the function a name, annotates three parameters, uses <code>*</code> to make <code>low</code> and <code>high</code> keyword-only, and annotates the return. The colon starts the indented body. A docstring is the first string in that body and should state behavior that the signature cannot fully express, especially errors and edge cases.</p>
+<h5 id="learner--cell-4--worked-example-1-make-validation-part-of-the-contract">Worked example 1 — Make validation part of the contract<a class="heading-anchor" href="#learner--cell-4--worked-example-1-make-validation-part-of-the-contract" aria-label="Link to this section">#</a></h5>
+<p>Reject an invalid domain before doing the calculation. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>def mean(values: list[float]) -&gt; float:</span>
+<span>    &quot;&quot;&quot;Return the arithmetic mean of a non-empty list.&quot;&quot;&quot;</span>
+<span>    if not values:</span>
+<span>        raise ValueError(&quot;values must not be empty&quot;)</span>
+<span>    return sum(values) / len(values)</span>
+<span> </span>
+<span>mean([2.0, 4.0, 9.0])</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> <code>5.0</code>. Empty input follows a deliberate exception path instead of dividing by zero accidentally.</p>
+<p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
+<h5 id="learner--cell-6--worked-example-2-use-keyword-only-parameters-to-make-calls-readable">Worked example 2 — Use keyword-only parameters to make calls readable<a class="heading-anchor" href="#learner--cell-6--worked-example-2-use-keyword-only-parameters-to-make-calls-readable" aria-label="Link to this section">#</a></h5>
+<p>A signature can prevent ambiguous positional calls. Predict first; then run the next cell.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>def discounted(price: float, *, rate: float = 0.0) -&gt; float:</span>
+<span>    if not 0 &lt;= rate &lt;= 1:</span>
+<span>        raise ValueError(&quot;rate must be between 0 and 1&quot;)</span>
+<span>    return price * (1 - rate)</span>
+<span> </span>
+<span>discounted(80.0, rate=0.25)</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>60.0</code>. The call labels <code>rate</code>, making <code>0.25</code> hard to confuse with another quantity.</p>
+<h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
+<p>When evidence differs from your prediction, use this order:</p>
+<ol>
+<li>Read the signature and call side by side when arguments bind unexpectedly.</li>
+<li>Check whether every path reaches an explicit <code>return</code>; falling off the end returns <code>None</code>.</li>
+<li>Replace a mutable default such as <code>items=[]</code> with <code>items: list[...] | None = None</code>.</li>
+<li>Use a type checker for hints, but still validate external runtime data at the boundary.</li>
+</ol>
+<p><strong>Alternative to compare:</strong> A tuple can return several related values; a dataclass becomes clearer when those values need durable names and behavior.</p>
+<p><strong>Boundary to test:</strong> Empty input, mismatched lengths, zero total weight, invalid numeric ranges, and Unicode/whitespace normalization need written policy.</p>
+<p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>from typing import List, Dict, Any</span>
 <span> </span>
 <span>def summarize(title: str, *items: str, uppercase: bool = False, **meta: Any) -&gt; Dict[str, Any]:</span>
 <span>    &quot;&quot;&quot;Summarize a list of items.</span>
@@ -408,53 +600,134 @@
 <span>summarize(&#x27;Todo&#x27;, &#x27;clean&#x27;, &#x27;analyze&#x27;, uppercase=True, owner=&#x27;you&#x27;)</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Write an annotated function that computes the mean and population standard deviation of a list of numbers. <strong>Hint:</strong> calculate the mean once, then use each value&#x27;s squared distance from that mean.</li>
-<li>Add a docstring that states the return shape and empty-input behavior. <strong>Hint:</strong> decide on the contract before coding: return a sentinel or raise a specific exception.</li>
-<li>Reject invalid inputs with <code>ValueError</code>. <strong>Hint:</strong> validate the collection and its values near the function boundary; do not catch errors the function cannot repair.</li>
+<li>Implement <code>describe(values: list[float]) -&gt; tuple[float, float]</code> returning the arithmetic mean and <strong>population</strong> standard deviation. <strong>Input:</strong> <code>[2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]</code>. <strong>Expected result:</strong> <code>(5.0, 2.0)</code>. <strong>Constraints:</strong> compute the mean once, use squared distances, and do not import a statistics helper that performs the whole task. <strong>Verify:</strong> Use <code>math.isclose</code> to confirm mean <code>5.0</code> and population standard deviation <code>2.0</code>, then show empty input follows the documented failure path.</li>
 </ol>
-<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Add a docstring to <code>describe</code> that states accepted input, the two tuple fields in order, and the empty-input policy. <strong>Constraint:</strong> choose and document one explicit behavior—this lesson&#x27;s reference raises <code>ValueError</code>. <strong>Verify:</strong> capture <code>help(describe)</code> output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input <code>ValueError</code> without reading the body.</li>
+</ol>
+<ol>
+<li>Validate <code>describe</code> near its boundary: reject an empty list and any non-finite value such as <code>float(&#x27;nan&#x27;)</code> with a useful <code>ValueError</code>. <strong>Verify:</strong> show the normal result and use two separate <code>try</code>/<code>except ValueError</code> checks for the invalid cases; do not catch errors inside the function that it cannot repair.</li>
+</ol>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Design functions from their contracts: accepted inputs, return value, failure behavior, side effects, and boundary cases.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict the result of calling a function with <code>items=[]</code> as a default three times when it appends on each call. Explain shared defaults. <strong>Progressive hint:</strong> Default objects are created once when <code>def</code> executes.</li>
-<li><strong>Tracing:</strong> Trace a local variable that shadows a global of the same name. Which binding changes, and when would <code>global</code> be required? <strong>Progressive hint:</strong> Assignment makes a name local unless explicitly declared otherwise.</li>
-<li><strong>Implementation:</strong> Implement typed <code>weighted_mean(values, weights)</code> with length, empty, and zero-total-weight validation. <strong>Progressive hint:</strong> State every invalid condition before calculating.</li>
-<li><strong>Debugging:</strong> Repair a function whose <code>*items</code> argument is accidentally passed as one list instead of unpacked individual items. <strong>Progressive hint:</strong> Compare <code>f(values)</code> with <code>f(*values)</code>.</li>
-<li><strong>Edge case and explanation:</strong> Write a docstring for a name-normalization function and test empty, whitespace-only, and Unicode input. <strong>Progressive hint:</strong> Document whether empty normalized output is valid or an error.</li>
+<li><strong>Prediction:</strong> Predict the result of calling a function with <code>items=[]</code> as a default three times when it appends on each call. Explain shared defaults. <strong>Progressive hint:</strong> Default objects are created once when <code>def</code> executes. <strong>Verify:</strong> Call the faulty function three times and record cumulative state, then assert the <code>None</code>-sentinel repair returns independent one-item lists on every call.</li>
+<li><strong>Tracing:</strong> Trace a local variable that shadows a global of the same name. Which binding changes, and when would <code>global</code> be required? <strong>Progressive hint:</strong> Assignment makes a name local unless explicitly declared otherwise. <strong>Verify:</strong> Record local/global values before, during, and after the call; confirm ordinary local assignment leaves the global unchanged.</li>
+<li><strong>Implementation:</strong> Implement typed <code>weighted_mean(values, weights)</code> with length, empty, and zero-total-weight validation. <strong>Progressive hint:</strong> State every invalid condition before calculating. <strong>Verify:</strong> Assert a known weighted mean and separately assert empty, length-mismatch, and zero-total-weight inputs raise the documented errors.</li>
+<li><strong>Debugging:</strong> Repair a function whose <code>*items</code> argument is accidentally passed as one list instead of unpacked individual items. <strong>Progressive hint:</strong> Compare <code>f(values)</code> with <code>f(*values)</code>. <strong>Verify:</strong> Capture arguments received by <code>f(values)</code> and <code>f(*values)</code>; assert the repaired call presents individual items rather than one nested list.</li>
+<li><strong>Edge case and explanation:</strong> Write a docstring for a name-normalization function and test empty, whitespace-only, and Unicode input. <strong>Progressive hint:</strong> Document whether empty normalized output is valid or an error. <strong>Verify:</strong> Test ordinary, empty, whitespace-only, and Unicode names against the docstring&#x27;s stated contract; every behavior must match the documentation.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Predict first. Then write small code and assertions below each label.</span>
-<span># Keep the official solution closed until you have tested an honest attempt.</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Implement <code>describe(values: list[float]) -&gt; tuple[float, float]</code> returning the arithmetic mean and <strong>population</strong> standard deviation. <strong>Input:</strong> <code>[2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]</code>. <strong>Expected result:</strong> <code>(5.0, 2.0)</code>. <strong>Constraints:</strong> compute the mean once, use squared distances, and do not import a statistics helper that performs the whole task. <strong>Verify:</strong> Use <code>math.isclose</code> to confirm mean <code>5.0</code> and population standard deviation <code>2.0</code>, then show empty input follows the documented failure path.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
+<span># Short contract: Implement `describe(values: list[float]) -&gt; tuple[float, float]` returning the arithmetic mean and **population** standard deviation. `[2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]`....</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 4 — Prediction</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Add a docstring to <code>describe</code> that states accepted input, the two tuple fields in order, and the empty-input policy. <strong>Constraint:</strong> choose and document one explicit behavior—this lesson&#x27;s reference raises <code>ValueError</code>. <strong>Verify:</strong> capture <code>help(describe)</code> output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input <code>ValueError</code> without reading the body.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
+<span># Short contract: Add a docstring to `describe` that states accepted input, the two tuple fields in order, and the empty-input policy. choose and document one explicit behavior—this lesson&#x27;s refe...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 5 — Tracing</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Validate <code>describe</code> near its boundary: reject an empty list and any non-finite value such as <code>float(&#x27;nan&#x27;)</code> with a useful <code>ValueError</code>. <strong>Verify:</strong> show the normal result and use two separate <code>try</code>/<code>except ValueError</code> checks for the invalid cases; do not catch errors inside the function that it cannot repair.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
+<span># Short contract: Validate `describe` near its boundary: reject an empty list and any non-finite value such as `float(&#x27;nan&#x27;)` with a useful `ValueError`. show the normal result and use two separa...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 6 — Implementation</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict the result of calling a function with <code>items=[]</code> as a default three times when it appends on each call. Explain shared defaults. <strong>Progressive hint:</strong> Default objects are created once when <code>def</code> executes. <strong>Verify:</strong> Call the faulty function three times and record cumulative state, then assert the <code>None</code>-sentinel repair returns independent one-item lists on every call.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
+<span># Short contract: Predict the result of calling a function with `items=[]` as a default three times when it appends on each call. Explain shared defaults. Default objects are created once when `d...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 7 — Debugging</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace a local variable that shadows a global of the same name. Which binding changes, and when would <code>global</code> be required? <strong>Progressive hint:</strong> Assignment makes a name local unless explicitly declared otherwise. <strong>Verify:</strong> Record local/global values before, during, and after the call; confirm ordinary local assignment leaves the global unchanged.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
+<span># Short contract: Trace a local variable that shadows a global of the same name. Which binding changes, and when would `global` be required? Assignment makes a name local unless explicitly declar...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 8 — Edge case and explanation</span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement typed <code>weighted_mean(values, weights)</code> with length, empty, and zero-total-weight validation. <strong>Progressive hint:</strong> State every invalid condition before calculating. <strong>Verify:</strong> Assert a known weighted mean and separately assert empty, length-mismatch, and zero-total-weight inputs raise the documented errors.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
+<span># Short contract: Implement typed `weighted_mean(values, weights)` with length, empty, and zero-total-weight validation. State every invalid condition before calculating. Assert a known weighted...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair a function whose <code>*items</code> argument is accidentally passed as one list instead of unpacked individual items. <strong>Progressive hint:</strong> Compare <code>f(values)</code> with <code>f(*values)</code>. <strong>Verify:</strong> Capture arguments received by <code>f(values)</code> and <code>f(*values)</code>; assert the repaired call presents individual items rather than one nested list.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
+<span># Short contract: Repair a function whose `*items` argument is accidentally passed as one list instead of unpacked individual items. Compare `f(values)` with `f(*values)`. Capture arguments recei...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 15</div><h5 id="learner--cell-25--practice-8-prediction-attempt-and-evidence">Practice 8 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-25--practice-8-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Write a docstring for a name-normalization function and test empty, whitespace-only, and Unicode input. <strong>Progressive hint:</strong> Document whether empty normalized output is valid or an error. <strong>Verify:</strong> Test ordinary, empty, whitespace-only, and Unicode names against the docstring&#x27;s stated contract; every behavior must match the documentation.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span># Practice 8 — your work</span>
+<span># Short contract: Write a docstring for a name-normalization function and test empty, whitespace-only, and Unicode input. Document whether empty normalized output is valid or an error. Test ordin...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -478,119 +751,94 @@
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-05-solutions-functions-docstrings-and-type-hints">Day 05 — Solutions: Functions, Docstrings, and Type Hints<a class="heading-anchor" href="#solution-1--day-05-solutions-functions-docstrings-and-type-hints" aria-label="Link to this section">#</a></h3>
-<p>We implement a robust function that computes mean and standard deviation with clear types, docstring, and validation.</p>
-<p>Contents</p>
+<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
+<p>These worked answers demonstrate <strong>function contracts, parameters, return values, scope, and type hints</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
+<p>A function gives a name to a reusable behavior. Its contract says which inputs are accepted, what it returns, which failures it raises, and whether it changes anything outside itself. Parameters are names in the definition; arguments are actual values supplied by a caller.</p>
+<p>A call creates a local scope. Names assigned there normally disappear when the call returns. A <code>return</code> sends one value to the caller and stops that call. Type hints document intended types and support static tools, but Python does not enforce them automatically at runtime. Defaults are evaluated once when <code>def</code> runs, so mutable defaults should normally be replaced by <code>None</code> plus a fresh object inside the function.</p>
+<h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
-<li>Exercise 1: mean/std with type hints</li>
-<li>Exercise 2: Add docstring and edge cases</li>
-<li>Exercise 3: Validate inputs and raise ValueError</li>
+<li><strong>function:</strong> a named reusable block that can accept inputs and return a value.</li>
+<li><strong>parameter:</strong> a name declared in a function signature.</li>
+<li><strong>argument:</strong> a value supplied for a parameter during a call.</li>
+<li><strong>return value:</strong> the object sent back to the caller.</li>
+<li><strong>scope:</strong> the region in which a name can be resolved.</li>
+<li><strong>type hint:</strong> machine-readable documentation of an intended type.</li>
 </ul>
-<hr>
-<p>Exercise 1+2 — mean and std with type hints and docstring</p>
-<pre><code class="language-python">from typing import Sequence, Tuple
-import math
+<h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
+<p>For this lesson&#x27;s <strong>function contracts, parameters, return values, scope, and type hints</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Implement <code>describe(values: list[float]) -&gt; tuple[float, float]</code> returning the arithmetic mean and <strong>population</strong> standard deviation. <strong>Input:</strong> <code>[2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]</code>. <strong>Expected result:</strong> <code>(5.0, 2.0)</code>. <strong>Constraints:</strong> compute the mean once, use squared distances, and do not import a statistics helper that performs the whole task. <strong>Verify:</strong> Use <code>math.isclose</code> to confirm mean <code>5.0</code> and population standard deviation <code>2.0</code>, then show empty input follows the documented failure path.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implement <code>describe(values: list[float]) -&gt; tuple[float, float]</code> returning the arithmetic mean and population standard deviation. Input: <code>[2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]</code>. Expected result: <code>(5.0, 2.0)</code>. Constraints: compute the mean once, use squared distances, and do not import a statistics helper that performs the whole task. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Use <code>math.isclose</code> to confirm mean <code>5.0</code> and population standard deviation <code>2.0</code>, then show empty input follows the documented failure path. That connects the answer to function contracts, parameters, return values, scope, and type hints.</p>
+<pre><code class="language-python">import math
 
-def mean_std(xs: Sequence[float], *, ddof: int = 0) -&gt; Tuple[float, float]:
-    &quot;&quot;&quot;
-    Compute the arithmetic mean and standard deviation of a sequence of numbers.
 
-    Args:
-        xs: sequence of numeric values (e.g., list[float]); may be any iterable that supports len() and indexing
-        ddof: delta degrees of freedom (0 for population std, 1 for sample std)
-
-    Returns:
-        (mean, std) as floats.
+def describe(values: list[float]) -&gt; tuple[float, float]:
+    &quot;&quot;&quot;Return mean and population standard deviation.
 
     Raises:
-        ValueError: if xs is empty, contains non-numbers, or ddof is invalid.
+        ValueError: If values is empty or contains a non-finite value.
     &quot;&quot;&quot;
-    # Validate ddof first
-    if ddof &lt; 0:
-        raise ValueError(f&quot;ddof must be &gt;= 0, got {ddof}&quot;)
 
-    n = len(xs)                         # may raise TypeError if xs has no length
-    if n == 0:
-        raise ValueError(&quot;xs must be non-empty&quot;)
-    if ddof &gt;= n:
-        raise ValueError(f&quot;ddof ({ddof}) must be &lt; len(xs) ({n})&quot;)
+    if not values:
+        raise ValueError(&quot;values must not be empty&quot;)
+    if not all(math.isfinite(value) for value in values):
+        raise ValueError(&quot;values must be finite&quot;)
+    mean = sum(values) / len(values)
+    variance = sum((value - mean) ** 2 for value in values) / len(values)
+    return mean, math.sqrt(variance)
 
-    # Convert to floats and validate elements
-    vals: list[float] = []
-    for i, x in enumerate(xs):
-        try:
-            vals.append(float(x))       # coerce ints to float; reject non-numeric
-        except (TypeError, ValueError):
-            raise ValueError(f&quot;xs[{i}] is not a number: {x!r}&quot;) from None
 
-    mu = sum(vals) / n
-    var = sum((v - mu) ** 2 for v in vals) / (n - ddof)
-    sigma = math.sqrt(var)
-    return mu, sigma
-
-# Quick checks
-m, s = mean_std([1, 2, 3])
-assert round(m, 3) == 2.000 and round(s, 3) == round(math.sqrt(2/3), 3)
-assert mean_std([1, 2, 3], ddof=1)[0] == 2.0</code></pre>
-<p>Line-by-line highlights</p>
-<ul>
-<li>ddof lets you choose population (0) vs sample (1) std; we validate <code>ddof &lt; len(xs)</code>.</li>
-<li>We coerce items to float, catching non-numeric input early with helpful indices.</li>
-<li>Variance uses the standard formula; <code>math.sqrt</code> computes std.</li>
-</ul>
-<hr>
-<p>Exercise 3 — Input validation examples Bad inputs and expected errors:</p>
-<pre><code class="language-python">try:
-    mean_std([], ddof=0)
-except ValueError as e:
-    print(e)  # xs must be non-empty
-
-try:
-    mean_std([1, &#x27;x&#x27;, 3])
-except ValueError as e:
-    print(e)  # xs[1] is not a number: &#x27;x&#x27;
-
-try:
-    mean_std([1, 2], ddof=2)
-except ValueError as e:
-    print(e)  # ddof (2) must be &lt; len(xs) (2)</code></pre>
-<p>Notes</p>
-<ul>
-<li>Good error messages tell a user (or your future self) exactly what to fix.</li>
-<li>For large data, consider <code>statistics</code> module or NumPy for performance.</li>
-</ul>
-<hr>
-<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
-<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Write an annotated function that computes the mean and population standard deviation of a list of numbers. <strong>Hint:</strong> calculate the mean once, then use each value&#x27;s squared distance from that mean.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Add a docstring that states the return shape and empty-input behavior. <strong>Hint:</strong> decide on the contract before coding: return a sentinel or raise a specific exception.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Reject invalid inputs with <code>ValueError</code>. <strong>Hint:</strong> validate the collection and its values near the function boundary; do not catch errors the function cannot repair.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-4-prediction">Exercise 4 — Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Predict the result of calling a function with <code>items=[]</code> as a default three times when it appends on each call. Explain shared defaults.</p>
-<p><strong>Reasoning checkpoint:</strong> Default objects are created once when <code>def</code> executes. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-5-tracing">Exercise 5 — Tracing<a class="heading-anchor" href="#solution-1--exercise-5-tracing" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Trace a local variable that shadows a global of the same name. Which binding changes, and when would <code>global</code> be required?</p>
-<p><strong>Reasoning checkpoint:</strong> Assignment makes a name local unless explicitly declared otherwise. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-6-implementation">Exercise 6 — Implementation<a class="heading-anchor" href="#solution-1--exercise-6-implementation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Implement typed <code>weighted_mean(values, weights)</code> with length, empty, and zero-total-weight validation.</p>
-<p><strong>Reasoning checkpoint:</strong> State every invalid condition before calculating. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-7-debugging">Exercise 7 — Debugging<a class="heading-anchor" href="#solution-1--exercise-7-debugging" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Repair a function whose <code>*items</code> argument is accidentally passed as one list instead of unpacked individual items.</p>
-<p><strong>Reasoning checkpoint:</strong> Compare <code>f(values)</code> with <code>f(*values)</code>. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-8-edge-case-and-explanation">Exercise 8 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-8-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Write a docstring for a name-normalization function and test empty, whitespace-only, and Unicode input.</p>
-<p><strong>Reasoning checkpoint:</strong> Document whether empty normalized output is valid or an error. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+result = describe([2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0])
+assert result == (5.0, 2.0)</code></pre>
+<p><strong>Verification evidence:</strong> Use <code>math.isclose</code> to confirm mean <code>5.0</code> and population standard deviation <code>2.0</code>, then show empty input follows the documented failure path.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Add a docstring to <code>describe</code> that states accepted input, the two tuple fields in order, and the empty-input policy. <strong>Constraint:</strong> choose and document one explicit behavior—this lesson&#x27;s reference raises <code>ValueError</code>. <strong>Verify:</strong> capture <code>help(describe)</code> output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input <code>ValueError</code> without reading the body.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Add a docstring to <code>describe</code> that states accepted input, the two tuple fields in order, and the empty-input policy. Constraint: choose and document one explicit behavior—this lesson&#x27;s reference raises <code>ValueError</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: capture <code>help(describe)</code> output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input <code>ValueError</code> without reading the body. That connects the answer to function contracts, parameters, return values, scope, and type hints.</p>
+<p>The docstring belongs directly below the signature and names tuple order plus failure behavior. The Exercise 1 implementation already includes the complete docstring.</p>
+<pre><code class="language-python">assert describe.__doc__ is not None
+assert &quot;population standard deviation&quot; in describe.__doc__
+assert &quot;ValueError&quot; in describe.__doc__</code></pre>
+<p><strong>Verification evidence:</strong> capture <code>help(describe)</code> output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input <code>ValueError</code> without reading the body.</p>
+<h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Validate <code>describe</code> near its boundary: reject an empty list and any non-finite value such as <code>float(&#x27;nan&#x27;)</code> with a useful <code>ValueError</code>. <strong>Verify:</strong> show the normal result and use two separate <code>try</code>/<code>except ValueError</code> checks for the invalid cases; do not catch errors inside the function that it cannot repair.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Validate <code>describe</code> near its boundary: reject an empty list and any non-finite value such as <code>float(&#x27;nan&#x27;)</code> with a useful <code>ValueError</code>. Preserve that failing case, repair the violated rule, and rerun the evidence named here: show the normal result and use two separate <code>try</code>/<code>except ValueError</code> checks for the invalid cases; do not catch errors inside the function that it cannot repair. The diagnosis depends on function contracts, parameters, return values, scope, and type hints.</p>
+<pre><code class="language-python">for invalid in ([], [1.0, float(&quot;nan&quot;)]):
+    try:
+        describe(invalid)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f&quot;expected ValueError for {invalid!r}&quot;)</code></pre>
+<p>Validation occurs before arithmetic so the error states the real contract instead of surfacing a later divide-by-zero or NaN.</p>
+<p><strong>Verification evidence:</strong> show the normal result and use two separate <code>try</code>/<code>except ValueError</code> checks for the invalid cases; do not catch errors inside the function that it cannot repair.</p>
+<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict the result of calling a function with <code>items=[]</code> as a default three times when it appends on each call. Explain shared defaults. <strong>Progressive hint:</strong> Default objects are created once when <code>def</code> executes. <strong>Verify:</strong> Call the faulty function three times and record cumulative state, then assert the <code>None</code>-sentinel repair returns independent one-item lists on every call.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict the result of calling a function with <code>items=[]</code> as a default three times when it appends on each call. Explain shared defaults. Progressive hint: Default objects are created once when <code>def</code> executes. Then compare the prediction with this proof target: Call the faulty function three times and record cumulative state, then assert the <code>None</code>-sentinel repair returns independent one-item lists on every call. This makes function contracts, parameters, return values, scope, and type hints observable instead of relying on intuition.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Call the faulty function three times and record cumulative state, then assert the <code>None</code>-sentinel repair returns independent one-item lists on every call.</p>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace a local variable that shadows a global of the same name. Which binding changes, and when would <code>global</code> be required? <strong>Progressive hint:</strong> Assignment makes a name local unless explicitly declared otherwise. <strong>Verify:</strong> Record local/global values before, during, and after the call; confirm ordinary local assignment leaves the global unchanged.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace a local variable that shadows a global of the same name. Which binding changes, and when would <code>global</code> be required? Progressive hint: Assignment makes a name local unless explicitly declared otherwise. Record the named value, shape, label, or iterator position needed to establish: Record local/global values before, during, and after the call; confirm ordinary local assignment leaves the global unchanged. The trace exposes function contracts, parameters, return values, scope, and type hints directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Record local/global values before, during, and after the call; confirm ordinary local assignment leaves the global unchanged.</p>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement typed <code>weighted_mean(values, weights)</code> with length, empty, and zero-total-weight validation. <strong>Progressive hint:</strong> State every invalid condition before calculating. <strong>Verify:</strong> Assert a known weighted mean and separately assert empty, length-mismatch, and zero-total-weight inputs raise the documented errors.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement typed <code>weighted_mean(values, weights)</code> with length, empty, and zero-total-weight validation. Progressive hint: State every invalid condition before calculating. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert a known weighted mean and separately assert empty, length-mismatch, and zero-total-weight inputs raise the documented errors. That connects the answer to function contracts, parameters, return values, scope, and type hints.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert a known weighted mean and separately assert empty, length-mismatch, and zero-total-weight inputs raise the documented errors.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a function whose <code>*items</code> argument is accidentally passed as one list instead of unpacked individual items. <strong>Progressive hint:</strong> Compare <code>f(values)</code> with <code>f(*values)</code>. <strong>Verify:</strong> Capture arguments received by <code>f(values)</code> and <code>f(*values)</code>; assert the repaired call presents individual items rather than one nested list.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a function whose <code>*items</code> argument is accidentally passed as one list instead of unpacked individual items. Progressive hint: Compare <code>f(values)</code> with <code>f(*values)</code>. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Capture arguments received by <code>f(values)</code> and <code>f(*values)</code>; assert the repaired call presents individual items rather than one nested list. The diagnosis depends on function contracts, parameters, return values, scope, and type hints.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Capture arguments received by <code>f(values)</code> and <code>f(*values)</code>; assert the repaired call presents individual items rather than one nested list.</p>
+<h5 id="solution-1--exercise-8-answer-contract">Exercise 8 — answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Write a docstring for a name-normalization function and test empty, whitespace-only, and Unicode input. <strong>Progressive hint:</strong> Document whether empty normalized output is valid or an error. <strong>Verify:</strong> Test ordinary, empty, whitespace-only, and Unicode names against the docstring&#x27;s stated contract; every behavior must match the documentation.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Write a docstring for a name-normalization function and test empty, whitespace-only, and Unicode input. Progressive hint: Document whether empty normalized output is valid or an error. Values below, at, and above the named boundary must produce the evidence Test ordinary, empty, whitespace-only, and Unicode names against the docstring&#x27;s stated contract; every behavior must match the documentation. Those cases show how function contracts, parameters, return values, scope, and type hints behaves at its edge.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Test ordinary, empty, whitespace-only, and Unicode names against the docstring&#x27;s stated contract; every behavior must match the documentation.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Design functions from their contracts: accepted inputs, return value, failure behavior, side effects, and boundary cases.</p>
-<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
-<h5 id="solution-1--practice-1-mutable-defaults">Practice 1 — Mutable defaults<a class="heading-anchor" href="#solution-1--practice-1-mutable-defaults" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercise-4-mutable-defaults">Shared implementation for Exercise 4 — Mutable defaults<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercise-4-mutable-defaults" aria-label="Link to this section">#</a></h5>
 <p>A list default is shared across calls. Use <code>None</code> as a sentinel and create a new list inside the function when the caller supplied no collection.</p>
-<h5 id="solution-1--practices-2-5-contracts-make-functions-predictable">Practices 2–5 — Contracts make functions predictable<a class="heading-anchor" href="#solution-1--practices-2-5-contracts-make-functions-predictable" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-8-contracts-make-functions-predictable">Shared implementation for Exercises 5–8 — Contracts make functions predictable<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-8-contracts-make-functions-predictable" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">from collections.abc import Sequence
 
 
@@ -645,7 +893,7 @@ assert join_words(*words) == &quot;clear contract&quot;
 assert normalize_name(&quot;  Ada   Lovelace &quot;) == &quot;Ada Lovelace&quot;
 assert normalize_name(&quot;  Zoë  &quot;) == &quot;Zoë&quot;</code></pre></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -653,7 +901,7 @@ assert normalize_name(&quot;  Zoë  &quot;) == &quot;Zoë&quot;</code></pre></di
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -808,7 +1056,38 @@ assert normalize_name(&quot;  Zoë  &quot;) == &quot;Zoë&quot;</code></pre></di
 <span> </span></code></pre>
 </article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-05`
+(Day 5 — Functions, Docstrings, and Type Hints). Direct catalog prerequisites: `python-04`.
+I have completed the direct prerequisites: `python-04`. Emphasize function contracts, parameters, return values, scope, and type hints.
+Read `python/ds-60day/companion-guides/day05_functions_type_hints.md` and use the learner notebook
+`python/ds-60day/notebooks/day05_functions_type_hints.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-04.html"><small>Previous lesson</small><strong>python-04</strong><span>Loops Comprehensions Generators</span></a>
@@ -900,6 +1179,23 @@ assert normalize_name(&quot;  Zoë  &quot;) == &quot;Zoë&quot;</code></pre></di
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

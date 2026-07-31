@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this Python file from the repository environment</h2>
           <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>bridge/professional/lessons/bridge_analytics_01_local_project.py</code>.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -230,10 +267,12 @@
           <button class="button launcher-only" type="button" id="launch-learner" hidden>
             Open with guided launcher
           </button>
-          
-          
+
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--bridge-analytics-01-local-analytics-engineering-project">BRIDGE-ANALYTICS-01 — Local analytics engineering project<a class="heading-anchor" href="#guide--bridge-analytics-01-local-analytics-engineering-project" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <p><strong>Level:</strong> Advanced <strong>Stable lesson ID:</strong> <code>bridge-analytics-01</code> <strong>Catalog prerequisites:</strong> <code>python-data-01</code>, <code>sql-analytics-01</code>, and <code>bridge-05</code> <strong>Prerequisites:</strong> the <a href="python-data-01.html#guide">professional columnar-data module</a>, <a href="sql-analytics-01.html#guide">advanced analytical SQL lab</a>, and <a href="bridge-05.html#guide">Bridge Day 5</a>. Those paths include the Python Day 23 and SQL Day 30 foundations.</p>
@@ -298,6 +337,16 @@
 <pre><code class="language-bash"># macOS/Linux
 .venv/bin/python bridge/professional/solutions/bridge_analytics_01_local_project_solution.py</code></pre>
 <p>The solution builds twice in the same in-memory connection and asserts that the ordered snapshot is identical. Closing the process removes all tables.</p>
+<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Start at the repository root. The answer-free starter is deliberately safe to run: it prints orientation text and does not call unfinished functions or contact PostgreSQL.</p>
+<pre><code class="language-powershell"># Windows PowerShell
+.\.venv\Scripts\python.exe bridge\professional\lessons\bridge_analytics_01_local_project.py
+.\.venv\Scripts\python.exe -m pytest bridge\professional\tests -q</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python bridge/professional/lessons/bridge_analytics_01_local_project.py
+.venv/bin/python -m pytest bridge/professional/tests -q</code></pre>
+<p>Read this guide first, implement one boundary at a time in <code>bridge/professional/lessons/bridge_analytics_01_local_project.py</code>, and use small fakes or recording doubles for the default evidence path. This lesson uses only an in-memory DuckDB database created by the process. Closing the process removes it; do not create or commit a local database file. &lt;!-- END BRIDGE ENRICHMENT: HOW TO RUN --&gt;</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end, you can:</p>
 <ul>
@@ -502,144 +551,168 @@ unit: currency units</code></pre>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Validate the complete key tuple and report only safe row position/key metadata.</li>
+<li><strong>Verify:</strong> For each producer contract, load one unique fixture successfully, duplicate its primary-key tuple, and assert validation fails with the source/grain named before DuckDB insertion.</li>
 </ul>
 <ol>
 <li><strong>DAG:</strong> Draw dependencies and implement deterministic topological order with missing-dependency and cycle detection.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Break ties by stable model name so valid independent branches are reproducible.</li>
+<li><strong>Verify:</strong> Assert raw sources precede dependent staging/intermediate/mart models with stable name ordering; an unknown dependency and a two-model cycle each raise <code>ValueError</code> listing unresolved names.</li>
 </ul>
 <ol>
 <li><strong>Staging:</strong> Implement the three staging models without aggregation or <code>DISTINCT</code> and state each row grain.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Staging should rename/cast, not hide duplicate producer rows.</li>
+<li><strong>Verify:</strong> Compare staging row counts with their raw sources, assert no <code>DISTINCT</code>/aggregation, and record grains <code>customer_id</code>, <code>order_id</code>, and <code>(order_id, line_number)</code> with typed/normalized columns.</li>
 </ul>
 <ol>
 <li><strong>Intermediate model:</strong> Declare <code>int_order_revenue</code> grain, predict row count, then implement its join and aggregate.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Aggregate line items to one row per order before joining other facts.</li>
+<li><strong>Verify:</strong> Predict and assert one row per order in <code>int_order_revenue</code>, with exact summed item revenue and retained customer/status/date fields; row count equals raw orders, including orders without matching items per policy.</li>
 </ul>
 <ol>
 <li><strong>Mart:</strong> Build <code>mart_daily_revenue</code> and document exact status exclusions and UTC/date semantics.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Every selected non-aggregate must belong to the daily grain.</li>
+<li><strong>Verify:</strong> Assert one row per UTC order date, only the documented completed/paid statuses contribute, revenue/order/customer measures match fixtures, and output is ordered by date.</li>
 </ul>
 <ol>
 <li><strong>Identifier safety:</strong> Validate trusted model names before using them in generated DDL.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Parameters cannot bind identifiers; constrain structure with a strict grammar/allowlist.</li>
+<li><strong>Verify:</strong> Pass every checked-in model name and injection-shaped/uppercase/punctuated names; assert only names matching the trusted identifier policy reach generated DDL.</li>
 </ul>
 <ol>
 <li><strong>Schema contract:</strong> Compare <code>DESCRIBE</code> output with <code>MART_CONTRACT</code>; make separate name and type drift fixtures.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Check position, normalized type prefix, and nullability according to declared policy.</li>
+<li><strong>Verify:</strong> Compare exact <code>DESCRIBE</code> column order/type compatibility with <code>MART_CONTRACT</code>; separate fixtures must report name drift and type drift distinctly before publication.</li>
 </ul>
 <ol>
 <li><strong>Data tests:</strong> Write zero-row violation queries for uniqueness, not-null, accepted status, relationships, and positive money/quantity rules.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> A test query returns violating rows; passing means count zero.</li>
+<li><strong>Verify:</strong> Execute each violation query against valid fixtures and assert zero rows; inject one uniqueness, null, status, relationship, money, and quantity violation and assert its named test returns evidence rows.</li>
 </ul>
 <ol>
 <li><strong>Reconciliation:</strong> Write an independent reconciliation for mart revenue, orders, and customers by day.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Do not reuse the mart&#x27;s exact transformation path for its check.</li>
+<li><strong>Verify:</strong> Independently recompute daily revenue/order/customer measures from order grain and full-outer compare; assert zero mismatches, then perturb each mart measure and observe a dated mismatch row.</li>
 </ul>
 <ol>
 <li><strong>Semantic metric:</strong> Define one extra metric with aggregation, grain, time dimension, unit, exclusions, and denominator.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> A metric definition is a contract, not merely a SQL expression.</li>
+<li><strong>Verify:</strong> Define an additional metric with model, expression, aggregation, grain, time dimension, unit, exclusions, and denominator; calculate one fixture date and compare the exact value.</li>
 </ul>
 <ol>
 <li><strong>Idempotency:</strong> Run the project twice in one connection and prove identical ordered snapshots.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Rebuild semantics should replace trusted models rather than append.</li>
+<li><strong>Verify:</strong> Run the project twice in one connection; assert identical ordered snapshots, row counts, test results, and reconciliation, with no duplicate append state.</li>
 </ul>
 <ol>
 <li><strong>Impact analysis:</strong> Add one deterministic source row, predict every downstream change, then update tests without weakening contracts.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Write expected deltas before executing the rebuild.</li>
+<li><strong>Verify:</strong> Add one source row and write predicted staging/intermediate/mart row and measure deltas first; assert the actual snapshot matches every predicted change and existing contracts remain unchanged.</li>
 </ul>
 <ol>
 <li><strong>Freshness:</strong> Add a producer freshness contract with an injected as-of time and distinguish stale from missing data.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Time-based tests must not call the wall clock directly.</li>
+<li><strong>Verify:</strong> With an injected as-of instant, assert a present old source is reported stale, an absent source missing, and a recent source current using the declared threshold.</li>
 </ul>
 <ol>
 <li><strong>Build strategy:</strong> Compare full rebuild and incremental processing for this local project and state what evidence is missing for incrementality.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Idempotent full rebuild is the reference correctness baseline.</li>
+<li><strong>Verify:</strong> Provide a comparison of full rebuild versus incremental state, keys, late updates, delete handling, and atomic publication; mark incrementality unproved until change-capture and replay tests exist.</li>
 </ul>
 <ol>
 <li><strong>Money correctness:</strong> Trace exact revenue from producer Decimal through DuckDB type, aggregation, Python snapshot, and reconciliation.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Reject silent float conversion and premature rounding.</li>
+<li><strong>Verify:</strong> Trace one exact Decimal from source tuple through DuckDB <code>DECIMAL</code>, order aggregation, mart aggregation, Python snapshot, and reconciliation; assert equality at every boundary without float conversion.</li>
 </ul>
 <ol>
 <li><strong>NULL semantics:</strong> Choose behavior for missing dimension labels and prove it does not change fact row count or measure totals.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> An <code>unknown</code> label is a business rule; a filtering join is a data-loss bug unless declared.</li>
+<li><strong>Verify:</strong> Inject a missing dimension label; assert the declared replacement/NULL policy, unchanged fact row count, and unchanged revenue/order totals.</li>
 </ul>
 <ol>
 <li><strong>Time semantics:</strong> Define daily boundaries for timezone-aware source instants and test an order around midnight.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Convert the instant to the reporting zone before deriving its date.</li>
+<li><strong>Verify:</strong> Place timezone-aware orders immediately before and after the declared UTC midnight; assert they land on the two expected dates and no local-machine timezone changes the snapshot.</li>
 </ul>
 <ol>
 <li><strong>Late data:</strong> Model a late-arriving order for a previously built day and compare full rebuild with an incremental repair.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Watermarks based only on event time can miss late records.</li>
+<li><strong>Verify:</strong> Add a late order to an already-built date; assert full rebuild corrects that date and the proposed incremental repair reprocesses the same affected partition to an identical result.</li>
 </ul>
 <ol>
 <li><strong>Snapshot determinism:</strong> Require explicit ordering and stable serialization for mart snapshots across platforms.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Database row order is undefined without final <code>ORDER BY</code>.</li>
+<li><strong>Verify:</strong> Assert mart queries include a complete unique order, serialize dates/Decimals with the documented stable format, and produce byte-identical snapshots across repeated runs.</li>
 </ul>
 <ol>
 <li><strong>Performance:</strong> Inspect a bounded <code>EXPLAIN</code> for the intermediate/mart build and identify one optimization that preserves grain.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Optimize after contracts and reconciliation pass.</li>
+<li><strong>Verify:</strong> Capture bounded <code>EXPLAIN</code> output for intermediate and mart builds, identify scan/join/aggregate operators, and propose one optimization whose post-change grain, counts, and reconciliation remain identical.</li>
 </ul>
 <ol>
 <li><strong>Lineage:</strong> Produce a compact source-to-metric lineage table from <code>depends_on</code> and metric definitions.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Lineage should be derivable from checked-in contracts rather than hand-maintained prose alone.</li>
+<li><strong>Verify:</strong> Generate lineage rows from every raw source through models to each metric; assert all declared dependencies appear, no orphan/cycle exists, and <code>gross_revenue</code> terminates at <code>mart_daily_revenue</code>.</li>
 </ul>
 <ol>
 <li><strong>Transaction:</strong> Design build publication so readers do not observe half-rebuilt models after a failure.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Check DuckDB transaction/DDL semantics rather than assuming atomicity.</li>
+<li><strong>Verify:</strong> Inject failure before publication and assert readers retain the prior complete mart; the design must stage or transact replacement so no partial model set becomes visible.</li>
 </ul>
 <ol>
 <li><strong>Failure policy:</strong> Make any contract, data-test, or reconciliation failure stop publication while retaining inspectable results.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Do not continue to a green artifact after a red quality gate.</li>
+<li><strong>Verify:</strong> Force producer-contract, table-contract, data-test, and reconciliation failures separately; assert each blocks publication while retaining the named failing query/result for diagnosis.</li>
 </ul>
 <ol>
 <li><strong>Portable artifact:</strong> Export a deterministic local result with manifest, metric definitions, test evidence, and cleanup instructions.</li>
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> Separate generated artifacts from source and never include local paths or credentials.</li>
+<li><strong>Verify:</strong> Export an ordered result plus manifest containing lesson/version, schema/grain, metric definitions, source fixture hashes, test/reconciliation results, creation command, and cleanup; repeat and compare deterministically.</li>
 </ul>
 <h5 id="guide--before-opening-the-solution">Before opening the solution<a class="heading-anchor" href="#guide--before-opening-the-solution" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -679,18 +752,49 @@ unit: currency units</code></pre>
 <li><strong>Claiming incremental idempotency from a full rebuild:</strong> stateful incremental behavior needs its own fixtures and watermarks.</li>
 <li><strong>Writing a local <code>.duckdb</code> file by default:</strong> in-memory execution keeps tests isolated and USB-safe.</li>
 </ul>
+<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: ASK CODEX --&gt;</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Use the checked-in <code>guide-ds60sqlpy-learning</code> skill as a tutor, not as an answer generator. The direct catalog prerequisites are <code>bridge-05</code>, <code>python-data-01</code>, <code>sql-analytics-01</code>. The prompt below deliberately names exact paths so a new Codex task can orient itself without guessing.</p>
+<pre><code class="language-text">Tutor me through stable lesson ID bridge-analytics-01: Analytics Engineering, Lineage, and Data Contracts.
+Direct catalog prerequisites: bridge-05, python-data-01, sql-analytics-01. Assume I completed exactly those
+prerequisites, then begin with one short Retrieval question that connects each
+prerequisite to this lesson.
+
+Use repository skill guide-ds60sqlpy-learning.
+Companion guide: bridge/professional/companion-guides/bridge_analytics_01_local_project.md
+Learner artifact: bridge/professional/lessons/bridge_analytics_01_local_project.py
+
+Do not open, quote, summarize, or copy anything under solutions/ until I
+explicitly say I have finished my attempt and ask to compare.
+
+Use these coaching phases in order:
+1. Predict — ask what I expect before I run or change code.
+2. Attempt — let me implement or explain one numbered exercise at a time.
+3. Hint — give the smallest useful conceptual hint, never a finished answer.
+4. Evidence — ask for the exact return value, exception type, recorded calls,
+   query plus bound parameters, or written decision required by that exercise.
+5. Retrieval — close with two no-notes questions and one transfer problem.
+
+Keep the default path offline and fake-first. If the lesson has an optional
+PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the
+disposable advanced_sql_training database; never ask me to paste the URL.
+
+Done when every numbered exercise has its own evidence, normal/edge/failure
+behavior is explained in my words, the relevant offline tests pass, and I can
+solve the final transfer problem without opening solutions/.</code></pre>
+<p>&lt;!-- END BRIDGE ENRICHMENT: ASK CODEX --&gt;</p>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Complete the <a href="bridge-analytics-01.html#learner">learner file</a> and add a deliberately failing contract case before reviewing the <a href="bridge-analytics-01.html#solution-2">reference implementation</a> and <a href="bridge-analytics-01.html#solution-1">solution reasoning</a>. Then adapt the same source → staging → intermediate → mart pattern to a small local dataset whose grain and ownership you can state precisely.</p></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -707,12 +811,12 @@ unit: currency units</code></pre>
               type="button"
               data-launch-artifact="Python source file"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;BRIDGE-ANALYTICS-01: a local dbt-style analytics project.</span>
 <span> </span>
 <span>Prerequisites: Python Day 23, SQL Day 30, and Bridge Day 5.</span>
@@ -884,78 +988,143 @@ unit: currency units</code></pre>
 <span># 1. [Producer contract] Add primary-key validation and a duplicate fixture failure for every</span>
 <span>#    producer contract.</span>
 <span>#    Hint: Validate the complete key tuple and report only safe row position/key metadata.</span>
+<span>#    Verify: For each producer contract, load one unique fixture successfully, duplicate its</span>
+<span>#    primary-key tuple, and assert validation fails with the source/grain named before DuckDB</span>
+<span>#    insertion.</span>
 <span># 2. [DAG] Draw dependencies and implement deterministic topological order with</span>
 <span>#    missing-dependency and cycle detection.</span>
 <span>#    Hint: Break ties by stable model name so valid independent branches are reproducible.</span>
+<span>#    Verify: Assert raw sources precede dependent staging/intermediate/mart models with stable</span>
+<span>#    name ordering; an unknown dependency and a two-model cycle each raise `ValueError` listing</span>
+<span>#    unresolved names.</span>
 <span># 3. [Staging] Implement the three staging models without aggregation or `DISTINCT` and state</span>
 <span>#    each row grain.</span>
 <span>#    Hint: Staging should rename/cast, not hide duplicate producer rows.</span>
+<span>#    Verify: Compare staging row counts with their raw sources, assert no</span>
+<span>#    `DISTINCT`/aggregation, and record grains `customer_id`, `order_id`, and `(order_id,</span>
+<span>#    line_number)` with typed/normalized columns.</span>
 <span># 4. [Intermediate model] Declare `int_order_revenue` grain, predict row count, then implement</span>
 <span>#    its join and aggregate.</span>
 <span>#    Hint: Aggregate line items to one row per order before joining other facts.</span>
+<span>#    Verify: Predict and assert one row per order in `int_order_revenue`, with exact summed item</span>
+<span>#    revenue and retained customer/status/date fields; row count equals raw orders, including</span>
+<span>#    orders without matching items per policy.</span>
 <span># 5. [Mart] Build `mart_daily_revenue` and document exact status exclusions and UTC/date</span>
 <span>#    semantics.</span>
 <span>#    Hint: Every selected non-aggregate must belong to the daily grain.</span>
+<span>#    Verify: Assert one row per UTC order date, only the documented completed/paid statuses</span>
+<span>#    contribute, revenue/order/customer measures match fixtures, and output is ordered by date.</span>
 <span># 6. [Identifier safety] Validate trusted model names before using them in generated DDL.</span>
 <span>#    Hint: Parameters cannot bind identifiers; constrain structure with a strict</span>
 <span>#    grammar/allowlist.</span>
+<span>#    Verify: Pass every checked-in model name and injection-shaped/uppercase/punctuated names;</span>
+<span>#    assert only names matching the trusted identifier policy reach generated DDL.</span>
 <span># 7. [Schema contract] Compare `DESCRIBE` output with `MART_CONTRACT`; make separate name and</span>
 <span>#    type drift fixtures.</span>
 <span>#    Hint: Check position, normalized type prefix, and nullability according to declared policy.</span>
+<span>#    Verify: Compare exact `DESCRIBE` column order/type compatibility with `MART_CONTRACT`;</span>
+<span>#    separate fixtures must report name drift and type drift distinctly before publication.</span>
 <span># 8. [Data tests] Write zero-row violation queries for uniqueness, not-null, accepted status,</span>
 <span>#    relationships, and positive money/quantity rules.</span>
 <span>#    Hint: A test query returns violating rows; passing means count zero.</span>
+<span>#    Verify: Execute each violation query against valid fixtures and assert zero rows; inject</span>
+<span>#    one uniqueness, null, status, relationship, money, and quantity violation and assert its</span>
+<span>#    named test returns evidence rows.</span>
 <span># 9. [Reconciliation] Write an independent reconciliation for mart revenue, orders, and</span>
 <span>#    customers by day.</span>
 <span>#    Hint: Do not reuse the mart&#x27;s exact transformation path for its check.</span>
+<span>#    Verify: Independently recompute daily revenue/order/customer measures from order grain and</span>
+<span>#    full-outer compare; assert zero mismatches, then perturb each mart measure and observe a</span>
+<span>#    dated mismatch row.</span>
 <span># 10. [Semantic metric] Define one extra metric with aggregation, grain, time dimension, unit,</span>
 <span>#    exclusions, and denominator.</span>
 <span>#    Hint: A metric definition is a contract, not merely a SQL expression.</span>
+<span>#    Verify: Define an additional metric with model, expression, aggregation, grain, time</span>
+<span>#    dimension, unit, exclusions, and denominator; calculate one fixture date and compare the</span>
+<span>#    exact value.</span>
 <span># 11. [Idempotency] Run the project twice in one connection and prove identical ordered</span>
 <span>#    snapshots.</span>
 <span>#    Hint: Rebuild semantics should replace trusted models rather than append.</span>
+<span>#    Verify: Run the project twice in one connection; assert identical ordered snapshots, row</span>
+<span>#    counts, test results, and reconciliation, with no duplicate append state.</span>
 <span># 12. [Impact analysis] Add one deterministic source row, predict every downstream change, then</span>
 <span>#    update tests without weakening contracts.</span>
 <span>#    Hint: Write expected deltas before executing the rebuild.</span>
+<span>#    Verify: Add one source row and write predicted staging/intermediate/mart row and measure</span>
+<span>#    deltas first; assert the actual snapshot matches every predicted change and existing</span>
+<span>#    contracts remain unchanged.</span>
 <span># 13. [Freshness] Add a producer freshness contract with an injected as-of time and distinguish</span>
 <span>#    stale from missing data.</span>
 <span>#    Hint: Time-based tests must not call the wall clock directly.</span>
+<span>#    Verify: With an injected as-of instant, assert a present old source is reported stale, an</span>
+<span>#    absent source missing, and a recent source current using the declared threshold.</span>
 <span># 14. [Build strategy] Compare full rebuild and incremental processing for this local project</span>
 <span>#    and state what evidence is missing for incrementality.</span>
 <span>#    Hint: Idempotent full rebuild is the reference correctness baseline.</span>
+<span>#    Verify: Provide a comparison of full rebuild versus incremental state, keys, late updates,</span>
+<span>#    delete handling, and atomic publication; mark incrementality unproved until change-capture</span>
+<span>#    and replay tests exist.</span>
 <span># 15. [Money correctness] Trace exact revenue from producer Decimal through DuckDB type,</span>
 <span>#    aggregation, Python snapshot, and reconciliation.</span>
 <span>#    Hint: Reject silent float conversion and premature rounding.</span>
+<span>#    Verify: Trace one exact Decimal from source tuple through DuckDB `DECIMAL`, order</span>
+<span>#    aggregation, mart aggregation, Python snapshot, and reconciliation; assert equality at</span>
+<span>#    every boundary without float conversion.</span>
 <span># 16. [NULL semantics] Choose behavior for missing dimension labels and prove it does not change</span>
 <span>#    fact row count or measure totals.</span>
 <span>#    Hint: An `unknown` label is a business rule; a filtering join is a data-loss bug unless</span>
 <span>#    declared.</span>
+<span>#    Verify: Inject a missing dimension label; assert the declared replacement/NULL policy,</span>
+<span>#    unchanged fact row count, and unchanged revenue/order totals.</span>
 <span># 17. [Time semantics] Define daily boundaries for timezone-aware source instants and test an</span>
 <span>#    order around midnight.</span>
 <span>#    Hint: Convert the instant to the reporting zone before deriving its date.</span>
+<span>#    Verify: Place timezone-aware orders immediately before and after the declared UTC midnight;</span>
+<span>#    assert they land on the two expected dates and no local-machine timezone changes the</span>
+<span>#    snapshot.</span>
 <span># 18. [Late data] Model a late-arriving order for a previously built day and compare full</span>
 <span>#    rebuild with an incremental repair.</span>
 <span>#    Hint: Watermarks based only on event time can miss late records.</span>
+<span>#    Verify: Add a late order to an already-built date; assert full rebuild corrects that date</span>
+<span>#    and the proposed incremental repair reprocesses the same affected partition to an identical</span>
+<span>#    result.</span>
 <span># 19. [Snapshot determinism] Require explicit ordering and stable serialization for mart</span>
 <span>#    snapshots across platforms.</span>
 <span>#    Hint: Database row order is undefined without final `ORDER BY`.</span>
+<span>#    Verify: Assert mart queries include a complete unique order, serialize dates/Decimals with</span>
+<span>#    the documented stable format, and produce byte-identical snapshots across repeated runs.</span>
 <span># 20. [Performance] Inspect a bounded `EXPLAIN` for the intermediate/mart build and identify one</span>
 <span>#    optimization that preserves grain.</span>
 <span>#    Hint: Optimize after contracts and reconciliation pass.</span>
+<span>#    Verify: Capture bounded `EXPLAIN` output for intermediate and mart builds, identify</span>
+<span>#    scan/join/aggregate operators, and propose one optimization whose post-change grain,</span>
+<span>#    counts, and reconciliation remain identical.</span>
 <span># 21. [Lineage] Produce a compact source-to-metric lineage table from `depends_on` and metric</span>
 <span>#    definitions.</span>
 <span>#    Hint: Lineage should be derivable from checked-in contracts rather than hand-maintained</span>
 <span>#    prose alone.</span>
+<span>#    Verify: Generate lineage rows from every raw source through models to each metric; assert</span>
+<span>#    all declared dependencies appear, no orphan/cycle exists, and `gross_revenue` terminates at</span>
+<span>#    `mart_daily_revenue`.</span>
 <span># 22. [Transaction] Design build publication so readers do not observe half-rebuilt models after</span>
 <span>#    a failure.</span>
 <span>#    Hint: Check DuckDB transaction/DDL semantics rather than assuming atomicity.</span>
+<span>#    Verify: Inject failure before publication and assert readers retain the prior complete</span>
+<span>#    mart; the design must stage or transact replacement so no partial model set becomes</span>
+<span>#    visible.</span>
 <span># 23. [Failure policy] Make any contract, data-test, or reconciliation failure stop publication</span>
 <span>#    while retaining inspectable results.</span>
 <span>#    Hint: Do not continue to a green artifact after a red quality gate.</span>
+<span>#    Verify: Force producer-contract, table-contract, data-test, and reconciliation failures</span>
+<span>#    separately; assert each blocks publication while retaining the named failing query/result</span>
+<span>#    for diagnosis.</span>
 <span># 24. [Portable artifact] Export a deterministic local result with manifest, metric definitions,</span>
 <span>#    test evidence, and cleanup instructions.</span>
 <span>#    Hint: Separate generated artifacts from source and never include local paths or</span>
 <span>#    credentials.</span>
+<span>#    Verify: Export an ordered result plus manifest containing lesson/version, schema/grain,</span>
+<span>#    metric definitions, source fixture hashes, test/reconciliation results, creation command,</span>
+<span>#    and cleanup; repeat and compare deterministically.</span>
 <span> </span>
 <span> </span>
 <span>def main() -&gt; int:</span>
@@ -968,15 +1137,15 @@ unit: currency units</code></pre>
 <span>    raise SystemExit(main())</span>
 <span> </span></code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -1028,6 +1197,19 @@ unit: currency units</code></pre>
 <li>In-memory DuckDB is portable and fast but does not prove PostgreSQL or cloud warehouse behavior.</li>
 </ul>
 <p>Extend this project only when a new model has a declared grain, dependencies, contract, violation queries, independent reconciliation where applicable, and a deterministic expected change to the final snapshot.</p>
+<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE --&gt;</p>
+<h4 id="solution-1--small-executable-check">Small executable check<a class="heading-anchor" href="#solution-1--small-executable-check" aria-label="Link to this section">#</a></h4>
+<p>The checked-in model graph has a deterministic dependency order:</p>
+<pre><code class="language-python">from bridge.professional.solutions.bridge_analytics_01_local_project_solution import (
+    MODELS,
+    SOURCE_NAMES,
+    topological_order,
+)
+
+ordered_names = tuple(model.name for model in topological_order(MODELS, source_names=SOURCE_NAMES))
+assert ordered_names[-1] == &quot;mart_daily_revenue&quot;
+assert ordered_names.index(&quot;int_order_revenue&quot;) &lt; ordered_names.index(&quot;mart_daily_revenue&quot;)</code></pre>
+<p>&lt;!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE --&gt;</p>
 <h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
 <p>These walkthroughs map one-for-one to the answer-free learner artifact and companion guide. The executable reference is <code>bridge/professional/solutions/bridge_analytics_01_local_project_solution.py</code>.</p>
 <p><strong>Shared failure rule:</strong> A model can execute successfully while still duplicating grain, drifting schema, misdefining a metric, or failing reconciliation.</p>
@@ -1035,124 +1217,124 @@ unit: currency units</code></pre>
 <p><strong>Prompt:</strong> Add primary-key validation and a duplicate fixture failure for every producer contract.</p>
 <p><strong>Approach:</strong> Track seen key tuples after shape/type/null checks, reject null or repeated keys, and add deterministic fixtures that differ only by the duplicate row.</p>
 <p><strong>Why:</strong> Validate the complete key tuple and report only safe row position/key metadata.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> For each producer contract, load one unique fixture successfully, duplicate its primary-key tuple, and assert validation fails with the source/grain named before DuckDB insertion.</p>
 <h5 id="solution-1--exercise-2-dag">Exercise 2 — DAG<a class="heading-anchor" href="#solution-1--exercise-2-dag" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Draw dependencies and implement deterministic topological order with missing-dependency and cycle detection.</p>
 <p><strong>Approach:</strong> Validate unique names/dependencies, use Kahn&#x27;s algorithm or DFS with explicit states, choose lexicographic ready nodes, and raise with the bounded cycle/missing names.</p>
 <p><strong>Why:</strong> Break ties by stable model name so valid independent branches are reproducible.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Assert raw sources precede dependent staging/intermediate/mart models with stable name ordering; an unknown dependency and a two-model cycle each raise <code>ValueError</code> listing unresolved names.</p>
 <h5 id="solution-1--exercise-3-staging">Exercise 3 — Staging<a class="heading-anchor" href="#solution-1--exercise-3-staging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement the three staging models without aggregation or <code>DISTINCT</code> and state each row grain.</p>
 <p><strong>Approach:</strong> Select source columns explicitly with trusted casts/aliases and one output row per source row. Let producer tests expose duplicates rather than masking them.</p>
 <p><strong>Why:</strong> Staging should rename/cast, not hide duplicate producer rows.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Compare staging row counts with their raw sources, assert no <code>DISTINCT</code>/aggregation, and record grains <code>customer_id</code>, <code>order_id</code>, and <code>(order_id, line_number)</code> with typed/normalized columns.</p>
 <h5 id="solution-1--exercise-4-intermediate-model">Exercise 4 — Intermediate model<a class="heading-anchor" href="#solution-1--exercise-4-intermediate-model" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Declare <code>int_order_revenue</code> grain, predict row count, then implement its join and aggregate.</p>
 <p><strong>Approach:</strong> Use order ID as primary grain, sum exact net line amounts from item rows, join only dimensions/many-to-one sources, and reconcile predicted order count with source orders.</p>
 <p><strong>Why:</strong> Aggregate line items to one row per order before joining other facts.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Predict and assert one row per order in <code>int_order_revenue</code>, with exact summed item revenue and retained customer/status/date fields; row count equals raw orders, including orders without matching items per policy.</p>
 <h5 id="solution-1--exercise-5-mart">Exercise 5 — Mart<a class="heading-anchor" href="#solution-1--exercise-5-mart" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build <code>mart_daily_revenue</code> and document exact status exclusions and UTC/date semantics.</p>
 <p><strong>Approach:</strong> Group eligible order-grain rows by declared day, compute exact revenue/order/customer measures, and encode excluded statuses in both SQL and metric documentation.</p>
 <p><strong>Why:</strong> Every selected non-aggregate must belong to the daily grain.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Assert one row per UTC order date, only the documented completed/paid statuses contribute, revenue/order/customer measures match fixtures, and output is ordered by date.</p>
 <h5 id="solution-1--exercise-6-identifier-safety">Exercise 6 — Identifier safety<a class="heading-anchor" href="#solution-1--exercise-6-identifier-safety" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Validate trusted model names before using them in generated DDL.</p>
 <p><strong>Approach:</strong> Require known <code>ModelSpec</code> names matching a conservative identifier regex, reject schema separators/quotes, and generate DDL only from validated internal specs.</p>
 <p><strong>Why:</strong> Parameters cannot bind identifiers; constrain structure with a strict grammar/allowlist.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Pass every checked-in model name and injection-shaped/uppercase/punctuated names; assert only names matching the trusted identifier policy reach generated DDL.</p>
 <h5 id="solution-1--exercise-7-schema-contract">Exercise 7 — Schema contract<a class="heading-anchor" href="#solution-1--exercise-7-schema-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare <code>DESCRIBE</code> output with <code>MART_CONTRACT</code>; make separate name and type drift fixtures.</p>
 <p><strong>Approach:</strong> Build an actual-column map/order, compare exact names and accepted type prefixes, and raise targeted errors for missing/extra/type/nullability drift.</p>
 <p><strong>Why:</strong> Check position, normalized type prefix, and nullability according to declared policy.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Compare exact <code>DESCRIBE</code> column order/type compatibility with <code>MART_CONTRACT</code>; separate fixtures must report name drift and type drift distinctly before publication.</p>
 <h5 id="solution-1--exercise-8-data-tests">Exercise 8 — Data tests<a class="heading-anchor" href="#solution-1--exercise-8-data-tests" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write zero-row violation queries for uniqueness, not-null, accepted status, relationships, and positive money/quantity rules.</p>
 <p><strong>Approach:</strong> Keep each invariant in a named query, count its rows through <code>run_data_tests</code>, and preserve individual results rather than one combined opaque flag.</p>
 <p><strong>Why:</strong> A test query returns violating rows; passing means count zero.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Execute each violation query against valid fixtures and assert zero rows; inject one uniqueness, null, status, relationship, money, and quantity violation and assert its named test returns evidence rows.</p>
 <h5 id="solution-1--exercise-9-reconciliation">Exercise 9 — Reconciliation<a class="heading-anchor" href="#solution-1--exercise-9-reconciliation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write an independent reconciliation for mart revenue, orders, and customers by day.</p>
 <p><strong>Approach:</strong> Aggregate from the trusted intermediate/source path independently, full-join by day, and fail on missing sides or exact measure differences.</p>
 <p><strong>Why:</strong> Do not reuse the mart&#x27;s exact transformation path for its check.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Independently recompute daily revenue/order/customer measures from order grain and full-outer compare; assert zero mismatches, then perturb each mart measure and observe a dated mismatch row.</p>
 <h5 id="solution-1--exercise-10-semantic-metric">Exercise 10 — Semantic metric<a class="heading-anchor" href="#solution-1--exercise-10-semantic-metric" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Define one extra metric with aggregation, grain, time dimension, unit, exclusions, and denominator.</p>
 <p><strong>Approach:</strong> Create a <code>MetricDefinition</code> such as revenue per purchasing customer with explicit numerator/denominator, daily grain, currency unit, eligible statuses, and zero-denominator behavior.</p>
 <p><strong>Why:</strong> A metric definition is a contract, not merely a SQL expression.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Define an additional metric with model, expression, aggregation, grain, time dimension, unit, exclusions, and denominator; calculate one fixture date and compare the exact value.</p>
 <h5 id="solution-1--exercise-11-idempotency">Exercise 11 — Idempotency<a class="heading-anchor" href="#solution-1--exercise-11-idempotency" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Run the project twice in one connection and prove identical ordered snapshots.</p>
 <p><strong>Approach:</strong> Use create-or-replace in topological order, run contracts/tests/reconciliation both times, and compare deterministic <code>ORDER BY</code> snapshots plus unchanged row counts/sums.</p>
 <p><strong>Why:</strong> Rebuild semantics should replace trusted models rather than append.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Run the project twice in one connection; assert identical ordered snapshots, row counts, test results, and reconciliation, with no duplicate append state.</p>
 <h5 id="solution-1--exercise-12-impact-analysis">Exercise 12 — Impact analysis<a class="heading-anchor" href="#solution-1--exercise-12-impact-analysis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add one deterministic source row, predict every downstream change, then update tests without weakening contracts.</p>
 <p><strong>Approach:</strong> Choose a valid linked row, calculate affected staging/intermediate/day measures, rebuild, and assert only those rows/measures change while all contracts remain identical.</p>
 <p><strong>Why:</strong> Write expected deltas before executing the rebuild.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Add one source row and write predicted staging/intermediate/mart row and measure deltas first; assert the actual snapshot matches every predicted change and existing contracts remain unchanged.</p>
 <h5 id="solution-1--exercise-13-freshness">Exercise 13 — Freshness<a class="heading-anchor" href="#solution-1--exercise-13-freshness" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add a producer freshness contract with an injected as-of time and distinguish stale from missing data.</p>
 <p><strong>Approach:</strong> Declare source timestamp, maximum age, and timezone; compare maximum observed timestamp with injected UTC as-of; report empty and stale sources as separate failures.</p>
 <p><strong>Why:</strong> Time-based tests must not call the wall clock directly.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> With an injected as-of instant, assert a present old source is reported stale, an absent source missing, and a recent source current using the declared threshold.</p>
 <h5 id="solution-1--exercise-14-build-strategy">Exercise 14 — Build strategy<a class="heading-anchor" href="#solution-1--exercise-14-build-strategy" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare full rebuild and incremental processing for this local project and state what evidence is missing for incrementality.</p>
 <p><strong>Approach:</strong> Keep full create-or-replace for bounded fixtures; an incremental design needs stable unique keys, watermark/late-data policy, merge semantics, and reconciliation against periodic full rebuilds.</p>
 <p><strong>Why:</strong> Idempotent full rebuild is the reference correctness baseline.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Provide a comparison of full rebuild versus incremental state, keys, late updates, delete handling, and atomic publication; mark incrementality unproved until change-capture and replay tests exist.</p>
 <h5 id="solution-1--exercise-15-money-correctness">Exercise 15 — Money correctness<a class="heading-anchor" href="#solution-1--exercise-15-money-correctness" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Trace exact revenue from producer Decimal through DuckDB type, aggregation, Python snapshot, and reconciliation.</p>
 <p><strong>Approach:</strong> Declare DECIMAL types/scales, keep exact arithmetic through models/tests, convert to Decimal at the boundary, and round only labeled presentation values.</p>
 <p><strong>Why:</strong> Reject silent float conversion and premature rounding.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Trace one exact Decimal from source tuple through DuckDB <code>DECIMAL</code>, order aggregation, mart aggregation, Python snapshot, and reconciliation; assert equality at every boundary without float conversion.</p>
 <h5 id="solution-1--exercise-16-null-semantics">Exercise 16 — NULL semantics<a class="heading-anchor" href="#solution-1--exercise-16-null-semantics" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Choose behavior for missing dimension labels and prove it does not change fact row count or measure totals.</p>
 <p><strong>Approach:</strong> Use a left join and explicit <code>COALESCE</code> to a documented unknown member, then reconcile fact counts/revenue before and after enrichment.</p>
 <p><strong>Why:</strong> An <code>unknown</code> label is a business rule; a filtering join is a data-loss bug unless declared.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Inject a missing dimension label; assert the declared replacement/NULL policy, unchanged fact row count, and unchanged revenue/order totals.</p>
 <h5 id="solution-1--exercise-17-time-semantics">Exercise 17 — Time semantics<a class="heading-anchor" href="#solution-1--exercise-17-time-semantics" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Define daily boundaries for timezone-aware source instants and test an order around midnight.</p>
 <p><strong>Approach:</strong> Declare UTC or a named reporting zone, apply conversion once in staging/intermediate logic, and fixture instants on both sides of midnight to verify bucket assignment.</p>
 <p><strong>Why:</strong> Convert the instant to the reporting zone before deriving its date.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Place timezone-aware orders immediately before and after the declared UTC midnight; assert they land on the two expected dates and no local-machine timezone changes the snapshot.</p>
 <h5 id="solution-1--exercise-18-late-data">Exercise 18 — Late data<a class="heading-anchor" href="#solution-1--exercise-18-late-data" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Model a late-arriving order for a previously built day and compare full rebuild with an incremental repair.</p>
 <p><strong>Approach:</strong> The full rebuild updates the old day automatically; incrementality needs ingestion-time lookback or affected-partition reprocessing plus reconciliation.</p>
 <p><strong>Why:</strong> Watermarks based only on event time can miss late records.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Add a late order to an already-built date; assert full rebuild corrects that date and the proposed incremental repair reprocesses the same affected partition to an identical result.</p>
 <h5 id="solution-1--exercise-19-snapshot-determinism">Exercise 19 — Snapshot determinism<a class="heading-anchor" href="#solution-1--exercise-19-snapshot-determinism" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Require explicit ordering and stable serialization for mart snapshots across platforms.</p>
 <p><strong>Approach:</strong> Select declared columns in contract order, order by the primary/time key, normalize exact scalar serialization, and compare tuples rather than display-formatted text.</p>
 <p><strong>Why:</strong> Database row order is undefined without final <code>ORDER BY</code>.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Assert mart queries include a complete unique order, serialize dates/Decimals with the documented stable format, and produce byte-identical snapshots across repeated runs.</p>
 <h5 id="solution-1--exercise-20-performance">Exercise 20 — Performance<a class="heading-anchor" href="#solution-1--exercise-20-performance" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Inspect a bounded <code>EXPLAIN</code> for the intermediate/mart build and identify one optimization that preserves grain.</p>
 <p><strong>Approach:</strong> Look for repeated scans, large joins, and unnecessary sorts; reduce projected columns or pre-aggregate at declared grain, then re-run all tests/reconciliation.</p>
 <p><strong>Why:</strong> Optimize after contracts and reconciliation pass.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Capture bounded <code>EXPLAIN</code> output for intermediate and mart builds, identify scan/join/aggregate operators, and propose one optimization whose post-change grain, counts, and reconciliation remain identical.</p>
 <h5 id="solution-1--exercise-21-lineage">Exercise 21 — Lineage<a class="heading-anchor" href="#solution-1--exercise-21-lineage" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Produce a compact source-to-metric lineage table from <code>depends_on</code> and metric definitions.</p>
 <p><strong>Approach:</strong> Traverse the DAG from metric model to producers, emit ordered model/layer/grain edges and metric exclusions, and test the expected path.</p>
 <p><strong>Why:</strong> Lineage should be derivable from checked-in contracts rather than hand-maintained prose alone.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Generate lineage rows from every raw source through models to each metric; assert all declared dependencies appear, no orphan/cycle exists, and <code>gross_revenue</code> terminates at <code>mart_daily_revenue</code>.</p>
 <h5 id="solution-1--exercise-22-transaction">Exercise 22 — Transaction<a class="heading-anchor" href="#solution-1--exercise-22-transaction" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design build publication so readers do not observe half-rebuilt models after a failure.</p>
 <p><strong>Approach:</strong> Run the model sequence in an explicit transaction when supported, validate contracts/tests before commit, roll back on failure, or build versioned temporary models then swap after validation.</p>
 <p><strong>Why:</strong> Check DuckDB transaction/DDL semantics rather than assuming atomicity.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Inject failure before publication and assert readers retain the prior complete mart; the design must stage or transact replacement so no partial model set becomes visible.</p>
 <h5 id="solution-1--exercise-23-failure-policy">Exercise 23 — Failure policy<a class="heading-anchor" href="#solution-1--exercise-23-failure-policy" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Make any contract, data-test, or reconciliation failure stop publication while retaining inspectable results.</p>
 <p><strong>Approach:</strong> Collect named results, raise before commit/export when one fails, and return bounded failure evidence without mutating the last known-good artifact.</p>
 <p><strong>Why:</strong> Do not continue to a green artifact after a red quality gate.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p>
+<p><strong>Verification evidence:</strong> Force producer-contract, table-contract, data-test, and reconciliation failures separately; assert each blocks publication while retaining the named failing query/result for diagnosis.</p>
 <h5 id="solution-1--exercise-24-portable-artifact">Exercise 24 — Portable artifact<a class="heading-anchor" href="#solution-1--exercise-24-portable-artifact" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Export a deterministic local result with manifest, metric definitions, test evidence, and cleanup instructions.</p>
 <p><strong>Approach:</strong> Write under ignored <code>artifacts/</code>, include build timestamp from an injected clock, source fixture/version, ordered schema/data, quality results and definitions, then document safe regeneration/removal.</p>
 <p><strong>Why:</strong> Separate generated artifacts from source and never include local paths or credentials.</p>
-<p><strong>Evidence:</strong> Assert deterministic outputs plus the exact calls that did and did not cross the boundary. Keep live/network evidence opt-in, credential-free, bounded, and separately labeled.</p></div>
+<p><strong>Verification evidence:</strong> Export an ordered result plus manifest containing lesson/version, schema/grain, metric definitions, source fixture hashes, test/reconciliation results, creation command, and cleanup; repeat and compare deterministically.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -1160,7 +1342,7 @@ unit: currency units</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -1840,7 +2022,51 @@ unit: currency units</code></pre>
 <span>    raise SystemExit(main())</span>
 <span> </span></code></pre></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through stable lesson ID bridge-analytics-01: Analytics Engineering, Lineage, and Data Contracts.
+Direct catalog prerequisites: bridge-05, python-data-01, sql-analytics-01. Assume I completed exactly those
+prerequisites, then begin with one short Retrieval question that connects each
+prerequisite to this lesson.
+
+Use repository skill guide-ds60sqlpy-learning.
+Companion guide: bridge/professional/companion-guides/bridge_analytics_01_local_project.md
+Learner artifact: bridge/professional/lessons/bridge_analytics_01_local_project.py
+
+Do not open, quote, summarize, or copy anything under solutions/ until I
+explicitly say I have finished my attempt and ask to compare.
+
+Use these coaching phases in order:
+1. Predict — ask what I expect before I run or change code.
+2. Attempt — let me implement or explain one numbered exercise at a time.
+3. Hint — give the smallest useful conceptual hint, never a finished answer.
+4. Evidence — ask for the exact return value, exception type, recorded calls,
+   query plus bound parameters, or written decision required by that exercise.
+5. Retrieval — close with two no-notes questions and one transfer problem.
+
+Keep the default path offline and fake-first. If the lesson has an optional
+PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the
+disposable advanced_sql_training database; never ask me to paste the URL.
+
+Done when every numbered exercise has its own evidence, normal/edge/failure
+behavior is explained in my words, the relevant offline tests pass, and I can
+solve the final transfer problem without opening solutions/.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="bridge-ai-01.html"><small>Previous lesson</small><strong>bridge-ai-01</strong><span>AI Application Engineering with Deterministic Test Doubles</span></a>
@@ -1932,6 +2158,23 @@ unit: currency units</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

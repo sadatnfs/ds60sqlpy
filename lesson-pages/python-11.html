@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-11-debugging-logging-and-profiling">Day 11 — Debugging, Logging, and Profiling<a class="heading-anchor" href="#guide--day-11-debugging-logging-and-profiling" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>Debugging explains incorrect behavior; logging records useful runtime events; profiling locates where time is actually spent. Measure before optimizing.</p>
@@ -292,6 +331,92 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 10 (<code>python-10</code>): tests, exceptions, importable utilities.</p>
+<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<ol>
+<li>Confirm the course environment before changing it:</li>
+</ol>
+<pre><code class="language-powershell">   # Windows PowerShell
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   &amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash">   # macOS/Linux
+   .venv/bin/python scripts/course.py doctor</code></pre>
+<ol>
+<li>Read <code>python/ds-60day/companion-guides/day11_debug_logging_profiling.md</code>, then open <code>python/ds-60day/notebooks/day11_debug_logging_profiling.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
+<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
+<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
+<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+</ol>
+<p><strong>Lesson outcome:</strong> use day 11 — debugging, logging, and profiling to practice evidence-driven debugging, useful logs, and measurement before optimization and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
+<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
+<p>Debugging is the process of reducing uncertainty. Start from an observable symptom, make the smallest reproducible case, form one hypothesis, and collect evidence that could disprove it. Reading the traceback from the final exception line upward usually identifies the failure type before the stack frames identify how execution arrived there.</p>
+<p>Logging records meaningful runtime events for later inspection; debugging explores a live failure; profiling measures where time or memory is actually spent. A log entry should add context without exposing credentials or personal data. Optimization begins after a representative measurement, not after guessing which line “looks slow.”</p>
+<h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>symptom:</strong> the observable incorrect output, failure, or slowdown.</li>
+<li><strong>traceback:</strong> the exception report showing failure type and active call stack.</li>
+<li><strong>hypothesis:</strong> a testable explanation for the observed symptom.</li>
+<li><strong>log level:</strong> severity such as DEBUG, INFO, WARNING, or ERROR.</li>
+<li><strong>profiler:</strong> a tool that measures resource use by code location.</li>
+<li><strong>benchmark:</strong> a repeatable timing or resource comparison under stated conditions.</li>
+</ul>
+<h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<p><code>logger.info(&quot;loaded rows=%d&quot;, row_count)</code> separates a stable message template from its value; logging formats it only when the level is enabled. In a traceback, the last line names the exception, while the preceding frames show calls from outermost to innermost. With <code>timeit</code>, setup and repeated statement execution are deliberately separated.</p>
+<h5 id="guide--worked-example-1-add-context-at-the-boundary">Worked example 1 — Add context at the boundary<a class="heading-anchor" href="#guide--worked-example-1-add-context-at-the-boundary" aria-label="Link to this section">#</a></h5>
+<p>A small function logs an outcome without dumping the input records. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">import logging
+
+logger = logging.getLogger(&quot;day11&quot;)
+logger.setLevel(logging.INFO)
+
+def accepted_count(values: list[int]) -&gt; int:
+    count = sum(value &gt;= 0 for value in values)
+    logger.info(&quot;accepted=%d total=%d&quot;, count, len(values))
+    return count
+
+accepted_count([4, -1, 0])</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">The function returns `2`; when the notebook has a visible logging handler, one INFO event reports counts rather than raw sensitive values.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--worked-example-2-measure-two-equivalent-membership-strategies">Worked example 2 — Measure two equivalent membership strategies<a class="heading-anchor" href="#guide--worked-example-2-measure-two-equivalent-membership-strategies" aria-label="Link to this section">#</a></h5>
+<p>Use repeated representative work instead of one noisy timestamp. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">from timeit import timeit
+
+values = list(range(1_000))
+value_set = set(values)
+list_seconds = timeit(&quot;999 in values&quot;, number=5_000, globals=globals())
+set_seconds = timeit(&quot;999 in value_set&quot;, number=5_000, globals=globals())
+{&quot;same_answer&quot;: (999 in values) == (999 in value_set),
+ &quot;set_faster_here&quot;: set_seconds &lt; list_seconds}</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">Both lookups agree and the set is normally faster in this repeated lookup scenario. Exact durations vary by computer and are not asserted.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
+<p>When the output differs from your prediction, use this order:</p>
+<ol>
+<li>Write the exact expected and actual behavior before changing code.</li>
+<li>Reduce the input until the failure still reproduces, then inspect the final traceback line.</li>
+<li>Add structured context such as IDs or counts, never passwords or entire private records.</li>
+<li>Benchmark the original and candidate with the same setup and verify they return equivalent results.</li>
+</ol>
+<h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
+<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
+<ol>
+<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
+<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
+<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
+<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
+<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
+</ol>
+<p><strong>Useful alternative:</strong> A debugger is best for stepping through changing state; temporary prints can help a tiny example; logging is better for repeatable or production execution.</p>
+<p><strong>Boundary to remember:</strong> Nondeterminism, first-run cache warm-up, logging duplicate handlers, swallowed exceptions, and unrepresentative benchmark data can mislead diagnosis. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Traceback:</strong> stack of calls leading to an uncaught exception; read the final exception first, then move upward into your code.</li>
@@ -308,10 +433,8 @@ import timeit
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format=&quot;%(levelname)s %(message)s&quot;)
 
-
 def unique_count(values: list[int]) -&gt; int:
     return len(set(values))
-
 
 values = list(range(1_000))
 logger.info(&quot;benchmarking unique_count count=%d&quot;, len(values))
@@ -319,19 +442,25 @@ elapsed = timeit.timeit(lambda: unique_count(values), number=10)
 print(f&quot;{elapsed=:.6f}s&quot;)</code></pre>
 <p>Configure logging once at an application entry point. Library code should emit records through its module logger, not repeatedly call <code>basicConfig</code>.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Add useful logging to the CSV/JSON utilities from Day 8. <strong>Hint:</strong> log path, operation, row count, and expected failures; never log secrets or entire sensitive records.</li>
-<li>Profile a deliberately slow function, identify its hot spot, then improve it. <strong>Hint:</strong> first improve the algorithm or data structure. If the work is numeric array processing, compare the measured loop with NumPy vectorization from the course&#x27;s installed data dependencies.</li>
+<li>Start from a supplied failing function and use <code>breakpoint()</code> or the VS Code debugger to pause immediately before the wrong value is produced. <strong>Evidence:</strong> record the call arguments, two relevant local variables, and the branch taken. <strong>Constraint:</strong> do not change logic until you can state one falsifiable hypothesis. <strong>Verify:</strong> record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix.</li>
+</ol>
+<ol>
+<li>Add module-level logging with <code>logging.getLogger(<strong>name</strong>)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. <strong>Constraints:</strong> use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. <strong>Verify:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</li>
+</ol>
+<ol>
+<li>Profile a deliberately slow membership or aggregation function with <code>cProfile</code> or <code>timeit</code>, implement one behavior-preserving improvement, and compare under identical inputs. <strong>Expected behavior:</strong> outputs match exactly and the measurement identifies where time changed. <strong>Constraint:</strong> report repeated timings rather than claiming from a single run. <strong>Verify:</strong> Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Observe before optimizing: reproduce a defect, add bounded context, profile representative work, and change the measured bottleneck.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> With a logger set to <code>WARNING</code>, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted. <strong>Progressive hint:</strong> The threshold keeps records at that level or more severe.</li>
-<li><strong>Tracing:</strong> Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption. <strong>Progressive hint:</strong> Read a traceback from the final exception upward through your code.</li>
-<li><strong>Implementation:</strong> Implement a reusable <code>timed(label)</code> context manager using <code>time.perf_counter</code> and logging. <strong>Progressive hint:</strong> Put elapsed-time logging in <code>finally</code> so failures are still timed.</li>
-<li><strong>Debugging:</strong> Explain why repeated <code>logging.basicConfig(...)</code> calls in notebooks may appear ineffective and configure a named logger without duplicate handlers. <strong>Progressive hint:</strong> Configuration is process state; inspect handlers before adding one.</li>
-<li><strong>Edge case and explanation:</strong> Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification. <strong>Progressive hint:</strong> A faster wrong answer is not an optimization.</li>
+<li><strong>Prediction:</strong> With a logger set to <code>WARNING</code>, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted. <strong>Progressive hint:</strong> The threshold keeps records at that level or more severe. <strong>Verify:</strong> Capture emitted records and assert WARNING and ERROR appear while DEBUG and INFO do not at a WARNING threshold.</li>
+<li><strong>Tracing:</strong> Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption. <strong>Progressive hint:</strong> Read a traceback from the final exception upward through your code. <strong>Verify:</strong> Annotate the traceback with failure type, first owned frame, input, and violated assumption; rerun the minimal fixture to reproduce it exactly.</li>
+<li><strong>Implementation:</strong> Implement a reusable <code>timed(label)</code> context manager using <code>time.perf_counter</code> and logging. <strong>Progressive hint:</strong> Put elapsed-time logging in <code>finally</code> so failures are still timed. <strong>Verify:</strong> Capture one success and one raised block; assert both log a non-negative elapsed duration and the original exception is not swallowed.</li>
+<li><strong>Debugging:</strong> Explain why repeated <code>logging.basicConfig(...)</code> calls in notebooks may appear ineffective and configure a named logger without duplicate handlers. <strong>Progressive hint:</strong> Configuration is process state; inspect handlers before adding one. <strong>Verify:</strong> Run configuration twice and assert the named logger has exactly one intended handler and emits one copy of each message.</li>
+<li><strong>Edge case and explanation:</strong> Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification. <strong>Progressive hint:</strong> A faster wrong answer is not an optimization. <strong>Verify:</strong> Assert both implementations return identical values across all benchmark inputs, then report warm-up and multiple comparable trial distributions.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -355,17 +484,33 @@ print(f&quot;{elapsed=:.6f}s&quot;)</code></pre>
 <li><a href="python-11.html#learner">Open the learner notebook</a></li>
 <li><a href="python-11.html#solution-1">Check the separate solution</a></li>
 <li><a href="python-12.html#guide">Next: Day 12 — OOP and dataclasses</a></li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-11`
+(Day 11 — Debugging, Logging, and Profiling). Direct catalog prerequisites: `python-10`.
+I have completed the direct prerequisites: `python-10`. Emphasize evidence-driven debugging, useful logs, and measurement before optimization.
+Read `python/ds-60day/companion-guides/day11_debug_logging_profiling.md` and use the learner notebook
+`python/ds-60day/notebooks/day11_debug_logging_profiling.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -382,12 +527,12 @@ print(f&quot;{elapsed=:.6f}s&quot;)</code></pre>
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-11-debugging-logging-profiling">Day 11 — Debugging, logging, profiling<a class="heading-anchor" href="#learner--cell-1--day-11-debugging-logging-profiling" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -396,7 +541,65 @@ print(f&quot;{elapsed=:.6f}s&quot;)</code></pre>
 <li>Basic profiling with timeit/cProfile.</li>
 <li>Identify hot spots and optimize.</li>
 </ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import logging, timeit</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
+<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>This is the editable learner artifact for <code>python-11</code>. Read <code>python/ds-60day/companion-guides/day11_debug_logging_profiling.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
+<p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
+<p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--core-mental-model">Core mental model<a class="heading-anchor" href="#learner--cell-3--core-mental-model" aria-label="Link to this section">#</a></h4>
+<p>Debugging is the process of reducing uncertainty. Start from an observable symptom, make the smallest reproducible case, form one hypothesis, and collect evidence that could disprove it. Reading the traceback from the final exception line upward usually identifies the failure type before the stack frames identify how execution arrived there.</p>
+<p>Logging records meaningful runtime events for later inspection; debugging explores a live failure; profiling measures where time or memory is actually spent. A log entry should add context without exposing credentials or personal data. Optimization begins after a representative measurement, not after guessing which line “looks slow.”</p>
+<h5 id="learner--cell-3--vocabulary">Vocabulary<a class="heading-anchor" href="#learner--cell-3--vocabulary" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>symptom:</strong> the observable incorrect output, failure, or slowdown.</li>
+<li><strong>traceback:</strong> the exception report showing failure type and active call stack.</li>
+<li><strong>hypothesis:</strong> a testable explanation for the observed symptom.</li>
+<li><strong>log level:</strong> severity such as DEBUG, INFO, WARNING, or ERROR.</li>
+<li><strong>profiler:</strong> a tool that measures resource use by code location.</li>
+<li><strong>benchmark:</strong> a repeatable timing or resource comparison under stated conditions.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<p><code>logger.info(&quot;loaded rows=%d&quot;, row_count)</code> separates a stable message template from its value; logging formats it only when the level is enabled. In a traceback, the last line names the exception, while the preceding frames show calls from outermost to innermost. With <code>timeit</code>, setup and repeated statement execution are deliberately separated.</p>
+<h5 id="learner--cell-4--worked-example-1-add-context-at-the-boundary">Worked example 1 — Add context at the boundary<a class="heading-anchor" href="#learner--cell-4--worked-example-1-add-context-at-the-boundary" aria-label="Link to this section">#</a></h5>
+<p>A small function logs an outcome without dumping the input records. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import logging</span>
+<span> </span>
+<span>logger = logging.getLogger(&quot;day11&quot;)</span>
+<span>logger.setLevel(logging.INFO)</span>
+<span> </span>
+<span>def accepted_count(values: list[int]) -&gt; int:</span>
+<span>    count = sum(value &gt;= 0 for value in values)</span>
+<span>    logger.info(&quot;accepted=%d total=%d&quot;, count, len(values))</span>
+<span>    return count</span>
+<span> </span>
+<span>accepted_count([4, -1, 0])</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> The function returns <code>2</code>; when the notebook has a visible logging handler, one INFO event reports counts rather than raw sensitive values.</p>
+<p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
+<h5 id="learner--cell-6--worked-example-2-measure-two-equivalent-membership-strategies">Worked example 2 — Measure two equivalent membership strategies<a class="heading-anchor" href="#learner--cell-6--worked-example-2-measure-two-equivalent-membership-strategies" aria-label="Link to this section">#</a></h5>
+<p>Use repeated representative work instead of one noisy timestamp. Predict first; then run the next cell.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>from timeit import timeit</span>
+<span> </span>
+<span>values = list(range(1_000))</span>
+<span>value_set = set(values)</span>
+<span>list_seconds = timeit(&quot;999 in values&quot;, number=5_000, globals=globals())</span>
+<span>set_seconds = timeit(&quot;999 in value_set&quot;, number=5_000, globals=globals())</span>
+<span>{&quot;same_answer&quot;: (999 in values) == (999 in value_set),</span>
+<span> &quot;set_faster_here&quot;: set_seconds &lt; list_seconds}</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> Both lookups agree and the set is normally faster in this repeated lookup scenario. Exact durations vary by computer and are not asserted.</p>
+<h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
+<p>When evidence differs from your prediction, use this order:</p>
+<ol>
+<li>Write the exact expected and actual behavior before changing code.</li>
+<li>Reduce the input until the failure still reproduces, then inspect the final traceback line.</li>
+<li>Add structured context such as IDs or counts, never passwords or entire private records.</li>
+<li>Benchmark the original and candidate with the same setup and verify they return equivalent results.</li>
+</ol>
+<p><strong>Alternative to compare:</strong> A debugger is best for stepping through changing state; temporary prints can help a tiny example; logging is better for repeatable or production execution.</p>
+<p><strong>Boundary to test:</strong> Nondeterminism, first-run cache warm-up, logging duplicate handlers, swallowed exceptions, and unrepresentative benchmark data can mislead diagnosis.</p>
+<p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import logging, timeit</span>
 <span>logging.basicConfig(level=logging.INFO)</span>
 <span> </span>
 <span>def slow_sum(n: int) -&gt; int:</span>
@@ -409,52 +612,134 @@ print(f&quot;{elapsed=:.6f}s&quot;)</code></pre>
 <span>timeit.timeit(lambda: slow_sum(10_000), number=10)</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-3--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Add useful logging to the CSV/JSON utilities from Day 8. <strong>Hint:</strong> log path, operation, row count, and expected failures; never log secrets or entire sensitive records.</li>
-<li>Profile a deliberately slow function, identify its hot spot, then improve it. <strong>Hint:</strong> first improve the algorithm or data structure. If the work is numeric array processing, compare the measured loop with NumPy vectorization from the course&#x27;s installed data dependencies.</li>
+<li>Start from a supplied failing function and use <code>breakpoint()</code> or the VS Code debugger to pause immediately before the wrong value is produced. <strong>Evidence:</strong> record the call arguments, two relevant local variables, and the branch taken. <strong>Constraint:</strong> do not change logic until you can state one falsifiable hypothesis. <strong>Verify:</strong> record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix.</li>
 </ol>
-<h5 id="learner--cell-3--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-3--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Add module-level logging with <code>logging.getLogger(<strong>name</strong>)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. <strong>Constraints:</strong> use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. <strong>Verify:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</li>
+</ol>
+<ol>
+<li>Profile a deliberately slow membership or aggregation function with <code>cProfile</code> or <code>timeit</code>, implement one behavior-preserving improvement, and compare under identical inputs. <strong>Expected behavior:</strong> outputs match exactly and the measurement identifies where time changed. <strong>Constraint:</strong> report repeated timings rather than claiming from a single run. <strong>Verify:</strong> Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.</li>
+</ol>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Observe before optimizing: reproduce a defect, add bounded context, profile representative work, and change the measured bottleneck.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> With a logger set to <code>WARNING</code>, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted. <strong>Progressive hint:</strong> The threshold keeps records at that level or more severe.</li>
-<li><strong>Tracing:</strong> Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption. <strong>Progressive hint:</strong> Read a traceback from the final exception upward through your code.</li>
-<li><strong>Implementation:</strong> Implement a reusable <code>timed(label)</code> context manager using <code>time.perf_counter</code> and logging. <strong>Progressive hint:</strong> Put elapsed-time logging in <code>finally</code> so failures are still timed.</li>
-<li><strong>Debugging:</strong> Explain why repeated <code>logging.basicConfig(...)</code> calls in notebooks may appear ineffective and configure a named logger without duplicate handlers. <strong>Progressive hint:</strong> Configuration is process state; inspect handlers before adding one.</li>
-<li><strong>Edge case and explanation:</strong> Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification. <strong>Progressive hint:</strong> A faster wrong answer is not an optimization.</li>
+<li><strong>Prediction:</strong> With a logger set to <code>WARNING</code>, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted. <strong>Progressive hint:</strong> The threshold keeps records at that level or more severe. <strong>Verify:</strong> Capture emitted records and assert WARNING and ERROR appear while DEBUG and INFO do not at a WARNING threshold.</li>
+<li><strong>Tracing:</strong> Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption. <strong>Progressive hint:</strong> Read a traceback from the final exception upward through your code. <strong>Verify:</strong> Annotate the traceback with failure type, first owned frame, input, and violated assumption; rerun the minimal fixture to reproduce it exactly.</li>
+<li><strong>Implementation:</strong> Implement a reusable <code>timed(label)</code> context manager using <code>time.perf_counter</code> and logging. <strong>Progressive hint:</strong> Put elapsed-time logging in <code>finally</code> so failures are still timed. <strong>Verify:</strong> Capture one success and one raised block; assert both log a non-negative elapsed duration and the original exception is not swallowed.</li>
+<li><strong>Debugging:</strong> Explain why repeated <code>logging.basicConfig(...)</code> calls in notebooks may appear ineffective and configure a named logger without duplicate handlers. <strong>Progressive hint:</strong> Configuration is process state; inspect handlers before adding one. <strong>Verify:</strong> Run configuration twice and assert the named logger has exactly one intended handler and emits one copy of each message.</li>
+<li><strong>Edge case and explanation:</strong> Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification. <strong>Progressive hint:</strong> A faster wrong answer is not an optimization. <strong>Verify:</strong> Assert both implementations return identical values across all benchmark inputs, then report warm-up and multiple comparable trial distributions.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Predict first. Then write small code and assertions below each label.</span>
-<span># Keep the official solution closed until you have tested an honest attempt.</span>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h5 id="learner--cell-11--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-11--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Start from a supplied failing function and use <code>breakpoint()</code> or the VS Code debugger to pause immediately before the wrong value is produced. <strong>Evidence:</strong> record the call arguments, two relevant local variables, and the branch taken. <strong>Constraint:</strong> do not change logic until you can state one falsifiable hypothesis. <strong>Verify:</strong> record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
+<span># Short contract: Start from a supplied failing function and use `breakpoint()` or the VS Code debugger to pause immediately before the wrong value is produced. record the call arguments, two rel...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 3 — Prediction</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Add module-level logging with <code>logging.getLogger(<strong>name</strong>)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. <strong>Constraints:</strong> use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. <strong>Verify:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
+<span># Short contract: Add module-level logging with `logging.getLogger(__name__)` and emit useful DEBUG/INFO/WARNING events for a small processing function. use lazy `%s`/`%d` formatting, do not call...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 4 — Tracing</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Profile a deliberately slow membership or aggregation function with <code>cProfile</code> or <code>timeit</code>, implement one behavior-preserving improvement, and compare under identical inputs. <strong>Expected behavior:</strong> outputs match exactly and the measurement identifies where time changed. <strong>Constraint:</strong> report repeated timings rather than claiming from a single run. <strong>Verify:</strong> Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
+<span># Short contract: Profile a deliberately slow membership or aggregation function with `cProfile` or `timeit`, implement one behavior-preserving improvement, and compare under identical inputs. ou...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 5 — Implementation</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Prediction:</strong> With a logger set to <code>WARNING</code>, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted. <strong>Progressive hint:</strong> The threshold keeps records at that level or more severe. <strong>Verify:</strong> Capture emitted records and assert WARNING and ERROR appear while DEBUG and INFO do not at a WARNING threshold.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
+<span># Short contract: With a logger set to `WARNING`, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted. The threshold keeps records at that level or more severe. Capture emitted rec...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 6 — Debugging</span>
+<span># Implementation:</span>
 <span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption. <strong>Progressive hint:</strong> Read a traceback from the final exception upward through your code. <strong>Verify:</strong> Annotate the traceback with failure type, first owned frame, input, and violated assumption; rerun the minimal fixture to reproduce it exactly.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
+<span># Short contract: Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption. Read a traceback from the final exception upward through your cod...</span>
+<span># Prediction:</span>
 <span> </span>
-<span># Practice 7 — Edge case and explanation</span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement a reusable <code>timed(label)</code> context manager using <code>time.perf_counter</code> and logging. <strong>Progressive hint:</strong> Put elapsed-time logging in <code>finally</code> so failures are still timed. <strong>Verify:</strong> Capture one success and one raised block; assert both log a non-negative elapsed duration and the original exception is not swallowed.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
+<span># Short contract: Implement a reusable `timed(label)` context manager using `time.perf_counter` and logging. Put elapsed-time logging in `finally` so failures are still timed. Capture one success...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Explain why repeated <code>logging.basicConfig(...)</code> calls in notebooks may appear ineffective and configure a named logger without duplicate handlers. <strong>Progressive hint:</strong> Configuration is process state; inspect handlers before adding one. <strong>Verify:</strong> Run configuration twice and assert the named logger has exactly one intended handler and emits one copy of each message.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
+<span># Short contract: Explain why repeated `logging.basicConfig(...)` calls in notebooks may appear ineffective and configure a named logger without duplicate handlers. Configuration is process state...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 15</div><h5 id="learner--cell-25--practice-8-prediction-attempt-and-evidence">Practice 8 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-25--practice-8-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification. <strong>Progressive hint:</strong> A faster wrong answer is not an optimization. <strong>Verify:</strong> Assert both implementations return identical values across all benchmark inputs, then report warm-up and multiple comparable trial distributions.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span># Practice 8 — your work</span>
+<span># Short contract: Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification. A faster wrong answer is not an optimization...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -478,140 +763,121 @@ print(f&quot;{elapsed=:.6f}s&quot;)</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-11-solutions-debugging-logging-and-profiling">Day 11 — Solutions: Debugging, Logging, and Profiling<a class="heading-anchor" href="#solution-1--day-11-solutions-debugging-logging-and-profiling" aria-label="Link to this section">#</a></h3>
-<p>Line-by-line solutions that add logging to utilities and profile a slow function.</p>
-<p>Contents</p>
+<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
+<p>These worked answers demonstrate <strong>evidence-driven debugging, useful logs, and measurement before optimization</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
+<p>Debugging is the process of reducing uncertainty. Start from an observable symptom, make the smallest reproducible case, form one hypothesis, and collect evidence that could disprove it. Reading the traceback from the final exception line upward usually identifies the failure type before the stack frames identify how execution arrived there.</p>
+<p>Logging records meaningful runtime events for later inspection; debugging explores a live failure; profiling measures where time or memory is actually spent. A log entry should add context without exposing credentials or personal data. Optimization begins after a representative measurement, not after guessing which line “looks slow.”</p>
+<h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
-<li>Exercise 1: Add logging to CSV/JSON utilities</li>
-<li>Exercise 2: Profile and optimize a slow function</li>
+<li><strong>symptom:</strong> the observable incorrect output, failure, or slowdown.</li>
+<li><strong>traceback:</strong> the exception report showing failure type and active call stack.</li>
+<li><strong>hypothesis:</strong> a testable explanation for the observed symptom.</li>
+<li><strong>log level:</strong> severity such as DEBUG, INFO, WARNING, or ERROR.</li>
+<li><strong>profiler:</strong> a tool that measures resource use by code location.</li>
+<li><strong>benchmark:</strong> a repeatable timing or resource comparison under stated conditions.</li>
 </ul>
-<hr>
-<p>Exercise 1 — Add logging to utilities We’ll instrument <code>safe_load_json</code> and the CSV/JSON converters (from Day 08) with the standard library <code>logging</code>.</p>
+<h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
+<p>For this lesson&#x27;s <strong>evidence-driven debugging, useful logs, and measurement before optimization</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Start from a supplied failing function and use <code>breakpoint()</code> or the VS Code debugger to pause immediately before the wrong value is produced. <strong>Evidence:</strong> record the call arguments, two relevant local variables, and the branch taken. <strong>Constraint:</strong> do not change logic until you can state one falsifiable hypothesis. <strong>Verify:</strong> record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Start from a supplied failing function and use <code>breakpoint()</code> or the VS Code debugger to pause immediately before the wrong value is produced. Evidence: record the call arguments, two relevant local variables, and the branch taken. Constraint: do not change logic until you can state one falsifiable hypothesis. Preserve that failing case, repair the violated rule, and rerun the evidence named here: record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix. The diagnosis depends on evidence-driven debugging, useful logs, and measurement before optimization.</p>
+<pre><code class="language-python">def average_positive(values: list[float]) -&gt; float:
+    positives = [value for value in values if value &gt; 0]
+    if not positives:
+        raise ValueError(&quot;at least one positive value is required&quot;)
+
+    # In VS Code, set a breakpoint on the return line. At the pause,
+    # inspect values, positives, sum(positives), and len(positives).
+    # Temporarily writing `breakpoint()` here gives the same view in a
+    # terminal; remove it after the diagnosis.
+    return sum(positives) / len(positives)
+
+
+failing_input = [-100.0, 10.0, 20.0]
+result = average_positive(failing_input)
+assert result == 15.0</code></pre>
+<p>The original bug divided by <code>len(values)</code> and returned <code>10.0</code>. Pausing immediately before that division reveals <code>sum(positives) == 30</code> but a denominator of <code>3</code>; the violated contract says only positive values belong to both numerator and denominator. After the one-line repair, rerun the original case and the no-positive boundary.</p>
+<p><strong>Verification evidence:</strong> record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Add module-level logging with <code>logging.getLogger(<strong>name</strong>)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. <strong>Constraints:</strong> use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. <strong>Verify:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Add module-level logging with <code>logging.getLogger(<strong>name</strong>)</code> and emit useful DEBUG/INFO/WARNING events for a small processing function. Constraints: use lazy <code>%s</code>/<code>%d</code> formatting, do not call <code>basicConfig</code> inside reusable library logic, and log counts/identifiers rather than sensitive record contents. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: demonstrate that changing the configured level changes visibility without changing the returned value. That connects the answer to evidence-driven debugging, useful logs, and measurement before optimization.</p>
 <pre><code class="language-python">import logging
 from pathlib import Path
-import json, csv
-from typing import Any
 
-log = logging.getLogger(__name__)                  # 1) get a module-level logger
+logger = logging.getLogger(__name__)
 
 
-def safe_load_json(path: str | Path) -&gt; Any | None:
-    p = Path(path)
-    log.info(&quot;loading JSON: %s&quot;, p)               # 2) info-level start message
+def report_file(path: Path) -&gt; int:
+    logger.debug(&quot;reading file=%s&quot;, path.name)
     try:
-        with p.open(encoding=&quot;utf-8&quot;) as f:
-            data = json.load(f)
-            log.debug(&quot;loaded keys: %s&quot;, list(data)[:5])
-            return data
+        text = path.read_text(encoding=&quot;utf-8&quot;)
     except FileNotFoundError:
-        log.error(&quot;not found: %s&quot;, p)
-    except PermissionError:
-        log.error(&quot;permission denied: %s&quot;, p)
-    except json.JSONDecodeError as e:
-        log.error(&quot;invalid JSON %s (line %d col %d): %s&quot;, p, e.lineno, e.colno, e.msg)
-    return None
+        logger.warning(&quot;missing file=%s&quot;, path.name)
+        return 0
+    line_count = len(text.splitlines())
+    logger.info(&quot;read lines=%d file=%s&quot;, line_count, path.name)
+    return line_count</code></pre>
+<p>Library code emits contextual records but leaves handler/level configuration to the application. It logs a basename and counts, not file contents or credentials.</p>
+<p><strong>Verification evidence:</strong> demonstrate that changing the configured level changes visibility without changing the returned value.</p>
+<h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Profile a deliberately slow membership or aggregation function with <code>cProfile</code> or <code>timeit</code>, implement one behavior-preserving improvement, and compare under identical inputs. <strong>Expected behavior:</strong> outputs match exactly and the measurement identifies where time changed. <strong>Constraint:</strong> report repeated timings rather than claiming from a single run. <strong>Verify:</strong> Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Profile a deliberately slow membership or aggregation function with <code>cProfile</code> or <code>timeit</code>, implement one behavior-preserving improvement, and compare under identical inputs. Expected behavior: outputs match exactly and the measurement identifies where time changed. Constraint: report repeated timings rather than claiming from a single run. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change. That connects the answer to evidence-driven debugging, useful logs, and measurement before optimization.</p>
+<pre><code class="language-python">from timeit import repeat
 
 
-def csv_to_json(csv_path: Path, json_path: Path) -&gt; None:
-    log.info(&quot;csv→json: %s → %s&quot;, csv_path, json_path)
-    with csv_path.open(encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as f:
-        rows = list(csv.DictReader(f))
-        log.info(&quot;rows read: %d&quot;, len(rows))
-    with json_path.open(&quot;w&quot;, encoding=&quot;utf-8&quot;) as out:
-        json.dump(rows, out, indent=2)
-        log.info(&quot;wrote json: %s&quot;, json_path)
+def contains_with_list(values: list[int], queries: list[int]) -&gt; list[bool]:
+    return [query in values for query in queries]
 
 
-def json_to_csv(json_path: Path, csv_path: Path) -&gt; None:
-    log.info(&quot;json→csv: %s → %s&quot;, json_path, csv_path)
-    data = safe_load_json(json_path)
-    if not data:
-        log.warning(&quot;no data; writing empty CSV: %s&quot;, csv_path)
-        csv_path.write_text(&quot;&quot;, encoding=&quot;utf-8&quot;)
-        return
-    fieldnames = sorted({k for rec in data for k in rec})
-    with csv_path.open(&quot;w&quot;, encoding=&quot;utf-8&quot;, newline=&quot;&quot;) as f:
-        w = csv.DictWriter(f, fieldnames=fieldnames)
-        w.writeheader()
-        for rec in data:
-            w.writerow({k: rec.get(k, &quot;&quot;) for k in fieldnames})
-    log.info(&quot;wrote csv: %s (cols=%d)&quot;, csv_path, len(fieldnames))
+def contains_with_set(values: list[int], queries: list[int]) -&gt; list[bool]:
+    lookup = set(values)
+    return [query in lookup for query in queries]
 
-# Configure logging in your app entry point (once):
-# logging.basicConfig(level=logging.INFO, format=&#x27;%(levelname)s %(message)s&#x27;)</code></pre>
-<p>Line-by-line highlights</p>
-<ul>
-<li>Use a module-level logger (getLogger(<strong>name</strong>)) so libraries can be configured by applications.</li>
-<li>INFO for high-level progress; DEBUG for noisy details; ERROR for failures.</li>
-<li>Prefer structured messages (<code>&quot;%s&quot;</code> placeholders) over f-strings in logging for lazy formatting.</li>
-</ul>
-<hr>
-<p>Exercise 2 — Profile and optimize Start with a slow Python loop and compare with NumPy vectorization.</p>
-<pre><code class="language-python">import timeit, numpy as np
 
-# Baseline: Python loop (intentionally slow)
-def scale_loop(xs: list[float], k: float) -&gt; list[float]:
-    out = []                               # 1) new list to hold results
-    for x in xs:                           # 2) Python-level loop
-        out.append(x * k)                  # 3) multiply and append
-    return out
+values = list(range(1_000))
+queries = list(range(900, 1_100))
+expected = contains_with_list(values, queries)
+assert contains_with_set(values, queries) == expected
 
-# Vectorized: ndarray operations
-
-def scale_vec(xs: np.ndarray, k: float) -&gt; np.ndarray:
-    return xs * k                          # elementwise multiply in C
-
-# Timing
-arr = np.arange(1_000_00, dtype=float)     # 100k elements
-lst = arr.tolist()
-
-loop_t = timeit.timeit(lambda: scale_loop(lst, 2.0), number=10)
-vec_t  = timeit.timeit(lambda: scale_vec(arr, 2.0), number=10)
-print({&quot;loop_sec&quot;: loop_t, &quot;vec_sec&quot;: vec_t})</code></pre>
-<p>Explanation</p>
-<ul>
-<li>timeit runs the callable multiple times; compare totals.</li>
-<li>Expect significant speedup from vectorization due to C-level loops and contiguous memory.</li>
-</ul>
-<p>Extra: Using <code>cProfile</code></p>
-<pre><code class="language-python">import cProfile, pstats
-
-with cProfile.Profile() as pr:
-    _ = scale_loop(lst, 2.0)
-
-pstats.Stats(pr).strip_dirs().sort_stats(&quot;cumtime&quot;).print_stats(10)</code></pre>
-<ul>
-<li>cumtime shows where total time is spent; optimize those hot paths first.</li>
-</ul>
-<hr>
-<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
-<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Add useful logging to the CSV/JSON utilities from Day 8. <strong>Hint:</strong> log path, operation, row count, and expected failures; never log secrets or entire sensitive records.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Profile a deliberately slow function, identify its hot spot, then improve it. <strong>Hint:</strong> first improve the algorithm or data structure. If the work is numeric array processing, compare the measured loop with NumPy vectorization from the course&#x27;s installed data dependencies.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-3-prediction">Exercise 3 — Prediction<a class="heading-anchor" href="#solution-1--exercise-3-prediction" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> With a logger set to <code>WARNING</code>, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted.</p>
-<p><strong>Reasoning checkpoint:</strong> The threshold keeps records at that level or more severe. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-4-tracing">Exercise 4 — Tracing<a class="heading-anchor" href="#solution-1--exercise-4-tracing" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption.</p>
-<p><strong>Reasoning checkpoint:</strong> Read a traceback from the final exception upward through your code. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-5-implementation">Exercise 5 — Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Implement a reusable <code>timed(label)</code> context manager using <code>time.perf_counter</code> and logging.</p>
-<p><strong>Reasoning checkpoint:</strong> Put elapsed-time logging in <code>finally</code> so failures are still timed. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-6-debugging">Exercise 6 — Debugging<a class="heading-anchor" href="#solution-1--exercise-6-debugging" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Explain why repeated <code>logging.basicConfig(...)</code> calls in notebooks may appear ineffective and configure a named logger without duplicate handlers.</p>
-<p><strong>Reasoning checkpoint:</strong> Configuration is process state; inspect handlers before adding one. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-7-edge-case-and-explanation">Exercise 7 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-7-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification.</p>
-<p><strong>Reasoning checkpoint:</strong> A faster wrong answer is not an optimization. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+list_trials = repeat(
+    lambda: contains_with_list(values, queries), repeat=5, number=100
+)
+set_trials = repeat(
+    lambda: contains_with_set(values, queries), repeat=5, number=100
+)
+assert len(list_trials) == len(set_trials) == 5</code></pre>
+<p>Compare distributions rather than asserting a duration that will be brittle across computers. The equality assertion proves behavior before timing; the five samples expose run-to-run variation. Save the fixture and use cProfile when call-level evidence is needed:</p>
+<pre><code class="language-text">python -m cProfile -s cumulative your_profile_fixture.py</code></pre>
+<p>The list version repeatedly scans up to 1,000 values for every query. The set version pays one construction cost and then uses expected constant-time membership checks.</p>
+<p><strong>Verification evidence:</strong> Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.</p>
+<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Prediction:</strong> With a logger set to <code>WARNING</code>, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted. <strong>Progressive hint:</strong> The threshold keeps records at that level or more severe. <strong>Verify:</strong> Capture emitted records and assert WARNING and ERROR appear while DEBUG and INFO do not at a WARNING threshold.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: With a logger set to <code>WARNING</code>, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted. Progressive hint: The threshold keeps records at that level or more severe. Then compare the prediction with this proof target: Capture emitted records and assert WARNING and ERROR appear while DEBUG and INFO do not at a WARNING threshold. This makes evidence-driven debugging, useful logs, and measurement before optimization observable instead of relying on intuition.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Capture emitted records and assert WARNING and ERROR appear while DEBUG and INFO do not at a WARNING threshold.</p>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption. <strong>Progressive hint:</strong> Read a traceback from the final exception upward through your code. <strong>Verify:</strong> Annotate the traceback with failure type, first owned frame, input, and violated assumption; rerun the minimal fixture to reproduce it exactly.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption. Progressive hint: Read a traceback from the final exception upward through your code. Record the named value, shape, label, or iterator position needed to establish: Annotate the traceback with failure type, first owned frame, input, and violated assumption; rerun the minimal fixture to reproduce it exactly. The trace exposes evidence-driven debugging, useful logs, and measurement before optimization directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Annotate the traceback with failure type, first owned frame, input, and violated assumption; rerun the minimal fixture to reproduce it exactly.</p>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement a reusable <code>timed(label)</code> context manager using <code>time.perf_counter</code> and logging. <strong>Progressive hint:</strong> Put elapsed-time logging in <code>finally</code> so failures are still timed. <strong>Verify:</strong> Capture one success and one raised block; assert both log a non-negative elapsed duration and the original exception is not swallowed.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement a reusable <code>timed(label)</code> context manager using <code>time.perf_counter</code> and logging. Progressive hint: Put elapsed-time logging in <code>finally</code> so failures are still timed. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Capture one success and one raised block; assert both log a non-negative elapsed duration and the original exception is not swallowed. That connects the answer to evidence-driven debugging, useful logs, and measurement before optimization.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Capture one success and one raised block; assert both log a non-negative elapsed duration and the original exception is not swallowed.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Explain why repeated <code>logging.basicConfig(...)</code> calls in notebooks may appear ineffective and configure a named logger without duplicate handlers. <strong>Progressive hint:</strong> Configuration is process state; inspect handlers before adding one. <strong>Verify:</strong> Run configuration twice and assert the named logger has exactly one intended handler and emits one copy of each message.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Explain why repeated <code>logging.basicConfig(...)</code> calls in notebooks may appear ineffective and configure a named logger without duplicate handlers. Progressive hint: Configuration is process state; inspect handlers before adding one. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Run configuration twice and assert the named logger has exactly one intended handler and emits one copy of each message. The diagnosis depends on evidence-driven debugging, useful logs, and measurement before optimization.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Run configuration twice and assert the named logger has exactly one intended handler and emits one copy of each message.</p>
+<h5 id="solution-1--exercise-8-answer-contract">Exercise 8 — answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification. <strong>Progressive hint:</strong> A faster wrong answer is not an optimization. <strong>Verify:</strong> Assert both implementations return identical values across all benchmark inputs, then report warm-up and multiple comparable trial distributions.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification. Progressive hint: A faster wrong answer is not an optimization. Values below, at, and above the named boundary must produce the evidence Assert both implementations return identical values across all benchmark inputs, then report warm-up and multiple comparable trial distributions. Those cases show how evidence-driven debugging, useful logs, and measurement before optimization behaves at its edge.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert both implementations return identical values across all benchmark inputs, then report warm-up and multiple comparable trial distributions.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Observe before optimizing: reproduce a defect, add bounded context, profile representative work, and change the measured bottleneck.</p>
-<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
-<h5 id="solution-1--practices-1-2-logging-and-traceback-reading">Practices 1–2 — Logging and traceback reading<a class="heading-anchor" href="#solution-1--practices-1-2-logging-and-traceback-reading" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-4-5-logging-and-traceback-reading">Shared implementation for Exercises 4–5 — Logging and traceback reading<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-4-5-logging-and-traceback-reading" aria-label="Link to this section">#</a></h5>
 <p>At <code>WARNING</code>, warning and error records are emitted. Start traceback diagnosis at the deepest frame in code you control, then inspect the input and assumption there before editing callers.</p>
-<h5 id="solution-1--practices-3-5-a-timing-tool-and-a-fair-benchmark">Practices 3–5 — A timing tool and a fair benchmark<a class="heading-anchor" href="#solution-1--practices-3-5-a-timing-tool-and-a-fair-benchmark" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-6-8-a-timing-tool-and-a-fair-benchmark">Shared implementation for Exercises 6–8 — A timing tool and a fair benchmark<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-8-a-timing-tool-and-a-fair-benchmark" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">from __future__ import annotations
 
 import logging
@@ -655,7 +921,7 @@ with timed(&quot;built_in_sum&quot;):
 assert loop_result == built_in_result</code></pre>
 <p>For a real benchmark, reuse equivalent input, warm both paths, run multiple trials, report a distribution, and keep logging/I/O outside the timed region.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -663,7 +929,7 @@ assert loop_result == built_in_result</code></pre>
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -804,7 +1070,38 @@ assert loop_result == built_in_result</code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>For a real benchmark, reuse equivalent input, warm both paths, run multiple trials, report a distribution, and keep logging/I/O outside the timed region.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-11`
+(Day 11 — Debugging, Logging, and Profiling). Direct catalog prerequisites: `python-10`.
+I have completed the direct prerequisites: `python-10`. Emphasize evidence-driven debugging, useful logs, and measurement before optimization.
+Read `python/ds-60day/companion-guides/day11_debug_logging_profiling.md` and use the learner notebook
+`python/ds-60day/notebooks/day11_debug_logging_profiling.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-10.html"><small>Previous lesson</small><strong>python-10</strong><span>Testing Pytest</span></a>
@@ -896,6 +1193,23 @@ assert loop_result == built_in_result</code></pre>
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 

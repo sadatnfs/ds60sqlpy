@@ -44,14 +44,20 @@ Add `--all` to print passing details as well as failures, warnings, and summarie
 On Windows, use:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\course.py doctor
-.\.venv\Scripts\python.exe scripts\course.py catalog
-.\.venv\Scripts\python.exe scripts\course.py validate
-.\.venv\Scripts\python.exe scripts\scan_secrets.py --history
-.\.venv\Scripts\python.exe scripts\audit_practice.py
-.\.venv\Scripts\python.exe scripts\audit_lesson_depth.py
-.\.venv\Scripts\python.exe scripts\build_course_guide.py --check
-.\.venv\Scripts\python.exe scripts\build_lesson_readers.py --check
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+
+& $CoursePython scripts\course.py doctor
+& $CoursePython scripts\course.py catalog
+& $CoursePython scripts\course.py validate
+& $CoursePython scripts\scan_secrets.py --history
+& $CoursePython scripts\audit_practice.py
+& $CoursePython scripts\audit_lesson_depth.py
+& $CoursePython scripts\build_course_guide.py --check
+& $CoursePython scripts\build_lesson_readers.py --check
 ```
 
 On macOS/Linux, use:
@@ -110,8 +116,8 @@ sync, so the learner-default `.python-version` cannot silently collapse the
 matrix onto Python 3.12. The Windows core runner also registers
 `Python (ds60sqlpy)` and runs
 `start_ds60.ps1 -DiagnosticsOnly -NonInteractive -SkipPostgreSql`, exercising
-the native PowerShell startup and both-environment-layout readiness path
-without opening a browser.
+the native startup under Windows PowerShell 5.1 and the
+both-environment-layout readiness path without opening a browser.
 
 The focused learner-entry tests cover different boundaries:
 
@@ -154,8 +160,9 @@ Every push and pull request also runs the actual learner `setup.ps1` or
 doctor through the generated `.venv`, and checks that setup produced no
 trackable files. The Windows runner first executes
 `bootstrap_windows.ps1 -SkipPostgreSql -WhatIf`, which exercises native
-PowerShell parsing and discovery without changing PATH, installing packages,
-registering a kernel, or requiring a database server on the CI image.
+Windows PowerShell 5.1 parsing and discovery without changing PATH, installing
+packages, registering a kernel, or requiring a database server on the CI
+image.
 
 The weekly and manually dispatched heavy job validates the lock, installs every
 extra, then exercises the maintained advanced import manifest for the `bridge`,
@@ -207,20 +214,34 @@ gh workflow run ci.yml --ref <branch-name>
 
 The comprehensive local run recorded this evidence:
 
-- Locked Python 3.11 suite: **167 passed, 2 expected skips**.
-- Locked Python 3.12 suite: **167 passed, 2 expected skips**.
+- Locked Python 3.12 suite: **440 passed, 3 expected skips**, plus **10
+  unittest subtests**. Two skips require native PowerShell and one requires a
+  process-pool semaphore unavailable in the local sandbox.
+- Ruff lint/format passed, and mypy checked **89 source files** without an
+  error.
+- `uv.lock` resolved **376 packages**; frozen all-extras dry runs succeeded for
+  Windows x86-64, Linux x86-64, Intel macOS, and Apple Silicon.
 - PostgreSQL 16.14: **72/72 learner scripts** and **72/72 executable
-  solutions** passed.
+  solutions** passed; focused SQL runner/contract/semantic tests passed
+  **153/153**.
 - The JupySQL solution notebook executed **18/18 code cells**, including
-  **9/9 live SQL cells**.
-- Notebook smoke checks passed **13/13**.
-- Practice coverage passed **154/154 lessons**.
+  **9/9 live SQL cells**, against only the local disposable course database.
+- Notebook structure/syntax checks passed **122/122**, and offline smoke checks
+  passed **13/13**.
+- Practice coverage and lesson-depth audits each passed **154/154 lessons**.
+- Generated-reader checks passed for `START_HERE.html`, **154 lesson pages**,
+  and **39 recursively linked reference pages**.
+- Interactive private-portal browser QA passed at desktop and narrow
+  breakpoints with no horizontal page overflow, raw source links, or console
+  warnings. The sandboxed test browser blocks `file://` navigation, so static
+  USB mode is covered here by deterministic DOM/link tests and isolated
+  generation rather than a live `file://` session.
 - The current-tree and reachable-Git-history sensitive-content scan passed.
 
-Native Windows execution was not verified locally and remains CI-only for this
-snapshot. These results describe this checkout and environment on the stated
-date; they are evidence, not a promise that later revisions or other machines
-will produce the same results.
+Native Windows PowerShell 5.1 execution and the Linux Python 3.11 matrix remain
+CI-only boundaries for this snapshot. These results describe this checkout and
+environment on the stated date; they are evidence, not a promise that later
+revisions or other machines will produce the same results.
 
 ## Validation layers
 
@@ -283,7 +304,13 @@ clean kernel:
 
 ```powershell
 # Windows PowerShell
-.\.venv\Scripts\python.exe -m nbconvert --execute --to notebook `
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+
+& $CoursePython -m nbconvert --execute --to notebook `
     --output-dir .\artifacts\notebook-validation `
     .\bridge\professional\solutions\bridge_jupyter_01_postgresql_magics_solution.ipynb
 ```

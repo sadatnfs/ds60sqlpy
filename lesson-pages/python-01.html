@@ -97,12 +97,48 @@
     .button.secondary:hover { color: #fff; background: var(--navy); }
     .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
     .sequence {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
     }
     .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
     .sequence strong { display: block; margin-bottom: .25rem; }
     .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
     .tabs {
       position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
       border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
@@ -165,14 +201,15 @@
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
       .top-actions .completion { display: none; }
-      .run-card, .sequence, .lesson-nav { grid-template-columns: 1fr; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
       .artifact-head { display: block; }
       .artifact-actions { margin-top: 1rem; }
       .nav-card.next { text-align: left; }
     }
     @media print {
-      .topbar, .run-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
       body { background: #fff; }
       .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
       .solution-notice { break-after: avoid; }
@@ -218,9 +255,9 @@
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
           <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
-          <p class="static-help">
+          <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
-          </p>
+          </div>
           <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
@@ -231,9 +268,11 @@
             Open with guided launcher
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-          
+
         </div>
       </section>
+
+
 
       <div class="sequence" aria-label="Recommended learning sequence">
         <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
@@ -248,7 +287,7 @@
 <a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
       </nav>
 
-      
+
       <section
         class="artifact-panel"
         id="guide"
@@ -272,12 +311,12 @@
               type="button"
               data-launch-artifact="Companion guide"
               data-artifact-kind="guide"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><h3 id="guide--day-1-setup-repl-virtual-environments-and-packages">Day 1 — Setup, REPL, Virtual Environments, and Packages<a class="heading-anchor" href="#guide--day-1-setup-repl-virtual-environments-and-packages" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>Day 1 builds the environment used by every later lesson. Run commands from the repository root in VS Code&#x27;s integrated terminal.</p>
@@ -292,6 +331,88 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>None. Start with the operating-system setup in <a href="../reference-pages/docs/setup/windows.md.html"><code>docs/setup/windows.md</code></a> or the corresponding macOS/Linux guide. Python 3.12 is the canonical version; 3.11 is also supported.</p>
+<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<ol>
+<li>Confirm the course environment before changing it:</li>
+</ol>
+<pre><code class="language-powershell">   # Windows PowerShell
+   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+       (Resolve-Path .\.venv\Scripts\python.exe).Path
+   } else {
+       (Resolve-Path .\.venv\python.exe).Path
+   }
+   &amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash">   # macOS/Linux
+   .venv/bin/python scripts/course.py doctor</code></pre>
+<ol>
+<li>Read <code>python/ds-60day/companion-guides/day01_setup_and_repl.md</code>, then open <code>python/ds-60day/notebooks/day01_setup_and_repl.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
+<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
+<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
+<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+</ol>
+<p><strong>Lesson outcome:</strong> use day 1 — setup, repl, virtual environments, and packages to practice execution contexts and a trustworthy course environment and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
+<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
+<p>Python code always runs inside a particular <strong>interpreter process</strong>. That process has a version, a filesystem location, an installed package set, and a current working directory. A terminal REPL, a script, and a notebook may look like three different tools, but each eventually asks an interpreter to execute Python.</p>
+<p>A virtual environment gives this repository its own interpreter and package directory. A Jupyter kernel is the notebook&#x27;s connection to an interpreter. If the terminal and notebook point at different interpreters, a package can import in one place and fail in the other. Diagnose identity first; reinstalling packages blindly often makes the mismatch harder to see.</p>
+<h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>interpreter:</strong> the program that reads Python code and executes it.</li>
+<li><strong>REPL:</strong> Read-Evaluate-Print Loop, an interactive prompt for small experiments.</li>
+<li><strong>script:</strong> a saved <code>.py</code> file executed from top to bottom.</li>
+<li><strong>virtual environment:</strong> an isolated interpreter/package location owned by one project.</li>
+<li><strong>kernel:</strong> the long-running interpreter process connected to a notebook.</li>
+<li><strong>working directory:</strong> the base directory used to resolve relative paths.</li>
+</ul>
+<h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<p><code>python -m module</code> has three parts: <code>python</code> chooses the interpreter, <code>-m</code> asks that interpreter to locate an importable module, and <code>module</code> names what to run. Therefore <code>python -m pip</code> installs into the same interpreter selected by <code>python</code>. In a notebook, <code>sys.executable</code> reveals the kernel&#x27;s interpreter and <code>Path.cwd()</code> reveals its working directory.</p>
+<h5 id="guide--worked-example-1-ask-the-running-interpreter-to-identify-itself">Worked example 1 — Ask the running interpreter to identify itself<a class="heading-anchor" href="#guide--worked-example-1-ask-the-running-interpreter-to-identify-itself" aria-label="Link to this section">#</a></h5>
+<p>Inspect evidence rather than guessing which Python is active. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">import platform
+import sys
+from pathlib import Path
+
+identity = {
+    &quot;python&quot;: platform.python_version(),
+    &quot;executable_name&quot;: Path(sys.executable).name,
+    &quot;working_folder&quot;: Path.cwd().name,
+}
+identity</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">A dictionary is displayed. The exact paths vary by computer; the course kernel should report Python 3.11 or 3.12 and an executable inside this repository&#x27;s `.venv`.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--worked-example-2-separate-a-calculation-from-presentation">Worked example 2 — Separate a calculation from presentation<a class="heading-anchor" href="#guide--worked-example-2-separate-a-calculation-from-presentation" aria-label="Link to this section">#</a></h5>
+<p>The same Python expressions work in the REPL, a script, and a notebook. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre><code class="language-python">subtotal = 12.50 + 7.25
+tax_rate = 0.08
+total = subtotal * (1 + tax_rate)
+message = f&quot;Total: ${total:.2f}&quot;
+message</code></pre>
+<p><strong>Expected observation</strong></p>
+<pre><code class="language-text">`&#x27;Total: $21.33&#x27;`. Names keep intermediate facts visible, and the f-string controls only presentation.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
+<p>When the output differs from your prediction, use this order:</p>
+<ol>
+<li>Print <code>sys.executable</code> in both places when an import works in a terminal but not a notebook.</li>
+<li>Run <code>python -m pip --version</code> and confirm its path belongs to the intended <code>.venv</code>.</li>
+<li>Check <code>Path.cwd()</code> before blaming a missing relative file.</li>
+<li>Restart the kernel after changing installed packages so the long-running process sees the new environment.</li>
+</ol>
+<h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
+<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
+<ol>
+<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
+<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
+<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
+<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
+<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
+</ol>
+<p><strong>Useful alternative:</strong> A one-line REPL experiment is fast; a saved script is reproducible; a notebook is best when prose, code, and observations belong together.</p>
+<p><strong>Boundary to remember:</strong> Paths differ across Windows, macOS, and Linux, so verify meaningful path components instead of hard-coding an entire developer-specific path. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Interpreter:</strong> the program that executes Python code.</li>
@@ -318,27 +439,34 @@ bash scripts/setup.sh
 <pre><code class="language-python">def greet(name: str) -&gt; str:
     return f&quot;Hello, {name}!&quot;
 
-
 print(greet(&quot;learner&quot;))</code></pre>
 <p>The REPL gives fast feedback. The file records exactly what should run again.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Run the setup and confirm that <code>course.py doctor</code> reports Python 3.11 or 3.12. <strong>Hint:</strong> read the interpreter path in the report; it should contain <code>.venv</code>.</li>
-<li>Start the REPL and evaluate arithmetic, a string method, and <code>type(...)</code>. <strong>Hint:</strong> exit with <code>exit()</code>.</li>
-<li>In JupyterLab, select <code>Python (ds60sqlpy)</code> and print the interpreter path. <strong>Hint:</strong> the <code>sys</code> module can describe the running interpreter.</li>
-<li>Create <code>calc.py</code> so two numeric command-line arguments produce their sum. <strong>Hint:</strong> command-line values in <code>sys.argv</code> are strings, so convert them deliberately. Day 15 replaces this bounded approach with <code>argparse</code>.</li>
-<li>As deeper environment practice, create two temporary environments and install NumPy in only one. <strong>Hint:</strong> always use <code>python -m pip</code> from the interpreter you intend to modify.</li>
+<li>Run the repository setup, then run <code>scripts/course.py doctor</code> with the repository interpreter. <strong>Required evidence:</strong> copy the Python version and interpreter path from the report. <strong>Success:</strong> the version is 3.11 or 3.12, the path belongs to this repository&#x27;s <code>.venv</code>, and the doctor does not report a blocking core failure. <strong>Constraint:</strong> do not install or delete anything while diagnosing. <strong>Verify:</strong> Save the doctor output showing Python 3.11/3.12 and an interpreter path inside this repository&#x27;s <code>.venv</code>; record that no blocking core check failed.</li>
 </ol>
-<p>The separate solution notes use the two-environment and REPL exercises to test the same setup skills without simply copying the notebook cells.</p>
+<ol>
+<li>Open the course Python REPL and evaluate <code>7 * 6</code>, <code>&#x27; Python &#x27;.strip().lower()</code>, and <code>type(3.5)</code>. <strong>Before running:</strong> predict each value and type. <strong>Success:</strong> record the three results and exit cleanly with <code>exit()</code>; explain why the string method does not modify the original literal. <strong>Verify:</strong> Record <code>42</code>, <code>&#x27;python&#x27;</code>, and <code>&lt;class &#x27;float&#x27;&gt;</code> beside your predictions, then confirm the REPL exits without terminating the terminal.</li>
+</ol>
+<ol>
+<li>Open this notebook with the <code>Python (ds60sqlpy)</code> kernel. Run <code>import sys; print(sys.executable)</code> and compare it with the doctor report. <strong>Success:</strong> both point to the same <code>.venv</code> layout. <strong>If they differ:</strong> stop and diagnose the kernel rather than reinstalling packages. <strong>Verify:</strong> Resolve both paths and confirm the doctor interpreter and notebook <code>sys.executable</code> identify the same <code>.venv</code> environment.</li>
+</ol>
+<ol>
+<li>Create <code>calc.py</code> so <code>python calc.py 12.5 7.25</code> prints exactly <code>19.75</code>. <strong>Inputs:</strong> exactly two numeric command-line arguments. <strong>Constraints:</strong> convert the strings from <code>sys.argv</code>, print a friendly usage message for the wrong count, and keep the arithmetic in a small function. <strong>Verify:</strong> test integers, decimals, and one invalid numeric value. Day 15 later replaces this bounded interface with <code>argparse</code>.</li>
+</ol>
+<ol>
+<li>Create two temporary virtual environments outside the repository and install NumPy in only one. <strong>Evidence:</strong> use each environment&#x27;s <code>python -m pip show numpy</code> and interpreter path to prove isolation. <strong>Constraint:</strong> do not alter or delete the course <code>.venv</code>; remove only the two temporary environments you created after recording the result. <strong>Verify:</strong> Show NumPy succeeds under exactly one temporary interpreter and fails under the other, while the course interpreter/path remains unchanged.</li>
+</ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Treat the interpreter, package installer, and notebook kernel as one connected system. Record evidence before changing an environment.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict what <code>sys.executable</code> should contain when the correct course kernel is active, then verify it in both the REPL and this notebook. <strong>Progressive hint:</strong> The important fact is the interpreter path, not merely the word Python.</li>
-<li><strong>Tracing:</strong> Trace the difference between <code>python -m pip --version</code> and a bare <code>pip --version</code>: which interpreter owns each command? <strong>Progressive hint:</strong> Read the Python and site-packages paths printed by pip.</li>
-<li><strong>Implementation:</strong> Write <code>environment_report()</code> returning the Python version, executable, platform, and current working directory without shell commands. <strong>Progressive hint:</strong> Use <code>sys</code>, <code>platform</code>, and <code>pathlib.Path</code>.</li>
-<li><strong>Debugging:</strong> A package imports in PowerShell but is missing in Jupyter. Write a three-step diagnosis that proves whether their interpreters differ. <strong>Progressive hint:</strong> Compare executable paths before reinstalling anything.</li>
-<li><strong>Edge case and explanation:</strong> Explain how to recover when the <code>ds60sqlpy</code> kernel is absent even though <code>.venv</code> exists, and state what remains possible offline. <strong>Progressive hint:</strong> Kernel registration and package download are separate operations.</li>
+<li><strong>Prediction:</strong> Predict what <code>sys.executable</code> should contain when the correct course kernel is active, then verify it in both the REPL and this notebook. <strong>Progressive hint:</strong> The important fact is the interpreter path, not merely the word Python. <strong>Verify:</strong> Resolve the REPL and notebook <code>sys.executable</code> values and assert both identify the same course <code>.venv</code>; record the exact shared path component.</li>
+<li><strong>Tracing:</strong> Trace the difference between <code>python -m pip --version</code> and a bare <code>pip --version</code>: which interpreter owns each command? <strong>Progressive hint:</strong> Read the Python and site-packages paths printed by pip. <strong>Verify:</strong> Capture both pip-version outputs, underline the Python executable/site-packages owner in each, and assert whether the two paths identify the same environment; explain any mismatch.</li>
+<li><strong>Implementation:</strong> Write <code>environment_report()</code> returning the Python version, executable, platform, and current working directory without shell commands. <strong>Progressive hint:</strong> Use <code>sys</code>, <code>platform</code>, and <code>pathlib.Path</code>. <strong>Verify:</strong> Assert <code>environment_report()</code> has exactly the four required fields with string values and that its executable/cwd agree with direct <code>sys</code>/<code>Path</code> inspection.</li>
+<li><strong>Debugging:</strong> A package imports in PowerShell but is missing in Jupyter. Write a three-step diagnosis that proves whether their interpreters differ. <strong>Progressive hint:</strong> Compare executable paths before reinstalling anything. <strong>Verify:</strong> Record <code>sys.executable</code>, <code>python -m pip --version</code>, and the notebook kernel interpreter; identify the first evidence that differs before changing anything.</li>
+<li><strong>Edge case and explanation:</strong> Explain how to recover when the <code>ds60sqlpy</code> kernel is absent even though <code>.venv</code> exists, and state what remains possible offline. <strong>Progressive hint:</strong> Kernel registration and package download are separate operations. <strong>Verify:</strong> After local kernel registration, assert the <code>jupyter kernelspec list</code> output contains <code>ds60sqlpy</code>, then run one already-installed offline import and record its successful output without downloading a package.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -362,17 +490,33 @@ print(greet(&quot;learner&quot;))</code></pre>
 <li><a href="python-01.html#learner">Open the learner notebook</a></li>
 <li><a href="python-01.html#solution-1">Check the separate solution after attempting the work</a></li>
 <li><a href="python-02.html#guide">Next: Day 2 — Variables and core types</a></li>
-</ul></div>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-01`
+(Day 1 — Setup, REPL, Virtual Environments, and Packages). Direct catalog prerequisites: none.
+I am new to this course and have no prior course lesson prerequisites. Emphasize execution contexts and a trustworthy course environment.
+Read `python/ds-60day/companion-guides/day01_setup_and_repl.md` and use the learner notebook
+`python/ds-60day/notebooks/day01_setup_and_repl.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</code></pre></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="learner"
         role="tabpanel"
         aria-labelledby="tab-learner"
         data-panel="learner"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -389,12 +533,12 @@ print(greet(&quot;learner&quot;))</code></pre>
               type="button"
               data-launch-artifact="Jupyter notebook"
               data-artifact-kind="lesson"
-              
+
               hidden
             >Open with guided launcher</button>
           </div>
         </header>
-        
+
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-1-python-setup-repl-virtual-envs-package-management">Day 1 — Python setup, REPL, virtual envs, package management<a class="heading-anchor" href="#learner--cell-1--day-1-python-setup-repl-virtual-envs-package-management" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
@@ -407,7 +551,61 @@ print(greet(&quot;learner&quot;))</code></pre>
 <p>Prerequisites: None</p>
 <p>At the end of this notebook you will be able to create a clean environment, identify its interpreter, and run code in Jupyter.</p>
 <p>A brand-new machine needs a connection for tools and packages. The lesson itself runs offline after that documented bootstrap.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--1-create-the-course-environment-from-the-repository-root">1) Create the course environment from the repository root<a class="heading-anchor" href="#learner--cell-2--1-create-the-course-environment-from-the-repository-root" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
+<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>This is the editable learner artifact for <code>python-01</code>. Read <code>python/ds-60day/companion-guides/day01_setup_and_repl.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
+<p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
+<p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--core-mental-model">Core mental model<a class="heading-anchor" href="#learner--cell-3--core-mental-model" aria-label="Link to this section">#</a></h4>
+<p>Python code always runs inside a particular <strong>interpreter process</strong>. That process has a version, a filesystem location, an installed package set, and a current working directory. A terminal REPL, a script, and a notebook may look like three different tools, but each eventually asks an interpreter to execute Python.</p>
+<p>A virtual environment gives this repository its own interpreter and package directory. A Jupyter kernel is the notebook&#x27;s connection to an interpreter. If the terminal and notebook point at different interpreters, a package can import in one place and fail in the other. Diagnose identity first; reinstalling packages blindly often makes the mismatch harder to see.</p>
+<h5 id="learner--cell-3--vocabulary">Vocabulary<a class="heading-anchor" href="#learner--cell-3--vocabulary" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>interpreter:</strong> the program that reads Python code and executes it.</li>
+<li><strong>REPL:</strong> Read-Evaluate-Print Loop, an interactive prompt for small experiments.</li>
+<li><strong>script:</strong> a saved <code>.py</code> file executed from top to bottom.</li>
+<li><strong>virtual environment:</strong> an isolated interpreter/package location owned by one project.</li>
+<li><strong>kernel:</strong> the long-running interpreter process connected to a notebook.</li>
+<li><strong>working directory:</strong> the base directory used to resolve relative paths.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<p><code>python -m module</code> has three parts: <code>python</code> chooses the interpreter, <code>-m</code> asks that interpreter to locate an importable module, and <code>module</code> names what to run. Therefore <code>python -m pip</code> installs into the same interpreter selected by <code>python</code>. In a notebook, <code>sys.executable</code> reveals the kernel&#x27;s interpreter and <code>Path.cwd()</code> reveals its working directory.</p>
+<h5 id="learner--cell-4--worked-example-1-ask-the-running-interpreter-to-identify-itself">Worked example 1 — Ask the running interpreter to identify itself<a class="heading-anchor" href="#learner--cell-4--worked-example-1-ask-the-running-interpreter-to-identify-itself" aria-label="Link to this section">#</a></h5>
+<p>Inspect evidence rather than guessing which Python is active. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>import platform</span>
+<span>import sys</span>
+<span>from pathlib import Path</span>
+<span> </span>
+<span>identity = {</span>
+<span>    &quot;python&quot;: platform.python_version(),</span>
+<span>    &quot;executable_name&quot;: Path(sys.executable).name,</span>
+<span>    &quot;working_folder&quot;: Path.cwd().name,</span>
+<span>}</span>
+<span>identity</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> A dictionary is displayed. The exact paths vary by computer; the course kernel should report Python 3.11 or 3.12 and an executable inside this repository&#x27;s <code>.venv</code>.</p>
+<p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
+<h5 id="learner--cell-6--worked-example-2-separate-a-calculation-from-presentation">Worked example 2 — Separate a calculation from presentation<a class="heading-anchor" href="#learner--cell-6--worked-example-2-separate-a-calculation-from-presentation" aria-label="Link to this section">#</a></h5>
+<p>The same Python expressions work in the REPL, a script, and a notebook. Predict first; then run the next cell.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>subtotal = 12.50 + 7.25</span>
+<span>tax_rate = 0.08</span>
+<span>total = subtotal * (1 + tax_rate)</span>
+<span>message = f&quot;Total: ${total:.2f}&quot;</span>
+<span>message</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>&#x27;Total: $21.33&#x27;</code>. Names keep intermediate facts visible, and the f-string controls only presentation.</p>
+<h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
+<p>When evidence differs from your prediction, use this order:</p>
+<ol>
+<li>Print <code>sys.executable</code> in both places when an import works in a terminal but not a notebook.</li>
+<li>Run <code>python -m pip --version</code> and confirm its path belongs to the intended <code>.venv</code>.</li>
+<li>Check <code>Path.cwd()</code> before blaming a missing relative file.</li>
+<li>Restart the kernel after changing installed packages so the long-running process sees the new environment.</li>
+</ol>
+<p><strong>Alternative to compare:</strong> A one-line REPL experiment is fast; a saved script is reproducible; a notebook is best when prose, code, and observations belong together.</p>
+<p><strong>Boundary to test:</strong> Paths differ across Windows, macOS, and Linux, so verify meaningful path components instead of hard-coding an entire developer-specific path.</p>
+<p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-9--1-create-the-course-environment-from-the-repository-root">1) Create the course environment from the repository root<a class="heading-anchor" href="#learner--cell-9--1-create-the-course-environment-from-the-repository-root" aria-label="Link to this section">#</a></h4>
 <p>Windows PowerShell:</p>
 <pre><code class="language-powershell">powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1
 .\.venv\Scripts\python.exe scripts\course.py doctor</code></pre>
@@ -415,19 +613,19 @@ print(greet(&quot;learner&quot;))</code></pre>
 <pre><code class="language-bash">bash scripts/setup.sh
 .venv/bin/python scripts/course.py doctor</code></pre>
 <p>Activation is optional. In VS Code, select the interpreter inside <code>.venv</code> as both the Python interpreter and notebook kernel.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--2-python-repl-basics">2) Python REPL basics<a class="heading-anchor" href="#learner--cell-3--2-python-repl-basics" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h4 id="learner--cell-10--2-python-repl-basics">2) Python REPL basics<a class="heading-anchor" href="#learner--cell-10--2-python-repl-basics" aria-label="Link to this section">#</a></h4>
 <p>A REPL is an interactive Python prompt. Start the interpreter that belongs to this repository:</p>
 <p>Windows PowerShell:</p>
 <pre><code class="language-powershell">.\.venv\Scripts\python.exe</code></pre>
 <p>macOS/Linux:</p>
 <pre><code class="language-bash">.venv/bin/python</code></pre>
 <p>At the <code>&gt;&gt;&gt;</code> prompt, try the expressions below. Enter <code>exit()</code> when you are finished.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>1 + 1</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>1 + 1</span>
 <span>&#x27;Hello &#x27; + &#x27;world&#x27;</span>
 <span>len(&#x27;data science&#x27;)</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-5--3-your-first-script">3) Your first script<a class="heading-anchor" href="#learner--cell-5--3-your-first-script" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h4 id="learner--cell-12--3-your-first-script">3) Your first script<a class="heading-anchor" href="#learner--cell-12--3-your-first-script" aria-label="Link to this section">#</a></h4>
 <p>Create a file named <code>hello.py</code> with:</p>
 <pre><code class="language-python">def greet(name: str) -&gt; str:
     return f&#x27;Hello, {name}!&#x27;
@@ -440,7 +638,7 @@ if __name__ == &#x27;__main__&#x27;:
 <p>macOS/Linux:</p>
 <pre><code class="language-bash">.venv/bin/python hello.py</code></pre>
 <p>Below we reproduce similar logic in this notebook cell.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>def greet(name: str) -&gt; str:</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span>def greet(name: str) -&gt; str:</span>
 <span>    &quot;&quot;&quot;Return a friendly greeting for ``name``.&quot;&quot;&quot;</span>
 <span> </span>
 <span>    return f&quot;Hello, {name}!&quot;</span>
@@ -449,14 +647,14 @@ if __name__ == &#x27;__main__&#x27;:
 <span>greet(&quot;Data Scientist&quot;)</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h4 id="learner--cell-7--4-inspecting-packages-in-the-course-environment">4) Inspecting packages in the course environment<a class="heading-anchor" href="#learner--cell-7--4-inspecting-packages-in-the-course-environment" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h4 id="learner--cell-14--4-inspecting-packages-in-the-course-environment">4) Inspecting packages in the course environment<a class="heading-anchor" href="#learner--cell-14--4-inspecting-packages-in-the-course-environment" aria-label="Link to this section">#</a></h4>
 <p>The setup script already installed NumPy and pandas. Verify them through the same interpreter instead of using a bare <code>pip</code> command:</p>
 <p>Windows PowerShell:</p>
 <pre><code class="language-powershell">.\.venv\Scripts\python.exe -m pip show numpy pandas</code></pre>
 <p>macOS/Linux:</p>
 <pre><code class="language-bash">.venv/bin/python -m pip show numpy pandas</code></pre>
 <p>Maintainers add course dependencies to <code>pyproject.toml</code>; learners normally rerun the setup script rather than installing ad hoc packages.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span>import platform</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span>import platform</span>
 <span>import sys</span>
 <span> </span>
 <span>import numpy as np</span>
@@ -469,62 +667,170 @@ if __name__ == &#x27;__main__&#x27;:
 <span>np.array([1, 2, 3])</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><h4 id="learner--cell-9--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-9--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h4 id="learner--cell-16--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-16--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
-<li>Run the setup and confirm that <code>course.py doctor</code> reports Python 3.11 or 3.12. <strong>Hint:</strong> read the interpreter path in the report; it should contain <code>.venv</code>.</li>
-<li>Start the REPL and evaluate arithmetic, a string method, and <code>type(...)</code>. <strong>Hint:</strong> exit with <code>exit()</code>.</li>
-<li>In JupyterLab, select <code>Python (ds60sqlpy)</code> and print the interpreter path. <strong>Hint:</strong> the <code>sys</code> module can describe the running interpreter.</li>
-<li>Create <code>calc.py</code> so two numeric command-line arguments produce their sum. <strong>Hint:</strong> command-line values in <code>sys.argv</code> are strings, so convert them deliberately. Day 15 replaces this bounded approach with <code>argparse</code>.</li>
-<li>As deeper environment practice, create two temporary environments and install NumPy in only one. <strong>Hint:</strong> always use <code>python -m pip</code> from the interpreter you intend to modify.</li>
+<li>Run the repository setup, then run <code>scripts/course.py doctor</code> with the repository interpreter. <strong>Required evidence:</strong> copy the Python version and interpreter path from the report. <strong>Success:</strong> the version is 3.11 or 3.12, the path belongs to this repository&#x27;s <code>.venv</code>, and the doctor does not report a blocking core failure. <strong>Constraint:</strong> do not install or delete anything while diagnosing. <strong>Verify:</strong> Save the doctor output showing Python 3.11/3.12 and an interpreter path inside this repository&#x27;s <code>.venv</code>; record that no blocking core check failed.</li>
 </ol>
-<p>The separate solution notes use the two-environment and REPL exercises to test the same setup skills without simply copying the notebook cells.</p>
-<h5 id="learner--cell-9--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-9--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Open the course Python REPL and evaluate <code>7 * 6</code>, <code>&#x27; Python &#x27;.strip().lower()</code>, and <code>type(3.5)</code>. <strong>Before running:</strong> predict each value and type. <strong>Success:</strong> record the three results and exit cleanly with <code>exit()</code>; explain why the string method does not modify the original literal. <strong>Verify:</strong> Record <code>42</code>, <code>&#x27;python&#x27;</code>, and <code>&lt;class &#x27;float&#x27;&gt;</code> beside your predictions, then confirm the REPL exits without terminating the terminal.</li>
+</ol>
+<ol>
+<li>Open this notebook with the <code>Python (ds60sqlpy)</code> kernel. Run <code>import sys; print(sys.executable)</code> and compare it with the doctor report. <strong>Success:</strong> both point to the same <code>.venv</code> layout. <strong>If they differ:</strong> stop and diagnose the kernel rather than reinstalling packages. <strong>Verify:</strong> Resolve both paths and confirm the doctor interpreter and notebook <code>sys.executable</code> identify the same <code>.venv</code> environment.</li>
+</ol>
+<ol>
+<li>Create <code>calc.py</code> so <code>python calc.py 12.5 7.25</code> prints exactly <code>19.75</code>. <strong>Inputs:</strong> exactly two numeric command-line arguments. <strong>Constraints:</strong> convert the strings from <code>sys.argv</code>, print a friendly usage message for the wrong count, and keep the arithmetic in a small function. <strong>Verify:</strong> test integers, decimals, and one invalid numeric value. Day 15 later replaces this bounded interface with <code>argparse</code>.</li>
+</ol>
+<ol>
+<li>Create two temporary virtual environments outside the repository and install NumPy in only one. <strong>Evidence:</strong> use each environment&#x27;s <code>python -m pip show numpy</code> and interpreter path to prove isolation. <strong>Constraint:</strong> do not alter or delete the course <code>.venv</code>; remove only the two temporary environments you created after recording the result. <strong>Verify:</strong> Show NumPy succeeds under exactly one temporary interpreter and fails under the other, while the course interpreter/path remains unchanged.</li>
+</ol>
+<h5 id="learner--cell-16--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-16--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Treat the interpreter, package installer, and notebook kernel as one connected system. Record evidence before changing an environment.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
-<li><strong>Prediction:</strong> Predict what <code>sys.executable</code> should contain when the correct course kernel is active, then verify it in both the REPL and this notebook. <strong>Progressive hint:</strong> The important fact is the interpreter path, not merely the word Python.</li>
-<li><strong>Tracing:</strong> Trace the difference between <code>python -m pip --version</code> and a bare <code>pip --version</code>: which interpreter owns each command? <strong>Progressive hint:</strong> Read the Python and site-packages paths printed by pip.</li>
-<li><strong>Implementation:</strong> Write <code>environment_report()</code> returning the Python version, executable, platform, and current working directory without shell commands. <strong>Progressive hint:</strong> Use <code>sys</code>, <code>platform</code>, and <code>pathlib.Path</code>.</li>
-<li><strong>Debugging:</strong> A package imports in PowerShell but is missing in Jupyter. Write a three-step diagnosis that proves whether their interpreters differ. <strong>Progressive hint:</strong> Compare executable paths before reinstalling anything.</li>
-<li><strong>Edge case and explanation:</strong> Explain how to recover when the <code>ds60sqlpy</code> kernel is absent even though <code>.venv</code> exists, and state what remains possible offline. <strong>Progressive hint:</strong> Kernel registration and package download are separate operations.</li>
+<li><strong>Prediction:</strong> Predict what <code>sys.executable</code> should contain when the correct course kernel is active, then verify it in both the REPL and this notebook. <strong>Progressive hint:</strong> The important fact is the interpreter path, not merely the word Python. <strong>Verify:</strong> Resolve the REPL and notebook <code>sys.executable</code> values and assert both identify the same course <code>.venv</code>; record the exact shared path component.</li>
+<li><strong>Tracing:</strong> Trace the difference between <code>python -m pip --version</code> and a bare <code>pip --version</code>: which interpreter owns each command? <strong>Progressive hint:</strong> Read the Python and site-packages paths printed by pip. <strong>Verify:</strong> Capture both pip-version outputs, underline the Python executable/site-packages owner in each, and assert whether the two paths identify the same environment; explain any mismatch.</li>
+<li><strong>Implementation:</strong> Write <code>environment_report()</code> returning the Python version, executable, platform, and current working directory without shell commands. <strong>Progressive hint:</strong> Use <code>sys</code>, <code>platform</code>, and <code>pathlib.Path</code>. <strong>Verify:</strong> Assert <code>environment_report()</code> has exactly the four required fields with string values and that its executable/cwd agree with direct <code>sys</code>/<code>Path</code> inspection.</li>
+<li><strong>Debugging:</strong> A package imports in PowerShell but is missing in Jupyter. Write a three-step diagnosis that proves whether their interpreters differ. <strong>Progressive hint:</strong> Compare executable paths before reinstalling anything. <strong>Verify:</strong> Record <code>sys.executable</code>, <code>python -m pip --version</code>, and the notebook kernel interpreter; identify the first evidence that differs before changing anything.</li>
+<li><strong>Edge case and explanation:</strong> Explain how to recover when the <code>ds60sqlpy</code> kernel is absent even though <code>.venv</code> exists, and state what remains possible offline. <strong>Progressive hint:</strong> Kernel registration and package download are separate operations. <strong>Verify:</strong> After local kernel registration, assert the <code>jupyter kernelspec list</code> output contains <code>ds60sqlpy</code>, then run one already-installed offline import and record its successful output without downloading a package.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--further-reading">Further reading<a class="heading-anchor" href="#learner--cell-10--further-reading" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-17--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Run the repository setup, then run <code>scripts/course.py doctor</code> with the repository interpreter. <strong>Required evidence:</strong> copy the Python version and interpreter path from the report. <strong>Success:</strong> the version is 3.11 or 3.12, the path belongs to this repository&#x27;s <code>.venv</code>, and the doctor does not report a blocking core failure. <strong>Constraint:</strong> do not install or delete anything while diagnosing. <strong>Verify:</strong> Save the doctor output showing Python 3.11/3.12 and an interpreter path inside this repository&#x27;s <code>.venv</code>; record that no blocking core check failed.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
+<span># Short contract: Run the repository setup, then run `scripts/course.py doctor` with the repository interpreter. copy the Python version and interpreter path from the report. the version is 3.11...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-19--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Open the course Python REPL and evaluate <code>7 * 6</code>, <code>&#x27; Python &#x27;.strip().lower()</code>, and <code>type(3.5)</code>. <strong>Before running:</strong> predict each value and type. <strong>Success:</strong> record the three results and exit cleanly with <code>exit()</code>; explain why the string method does not modify the original literal. <strong>Verify:</strong> Record <code>42</code>, <code>&#x27;python&#x27;</code>, and <code>&lt;class &#x27;float&#x27;&gt;</code> beside your predictions, then confirm the REPL exits without terminating the terminal.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
+<span># Short contract: Open the course Python REPL and evaluate `7 * 6`, `&#x27; Python &#x27;.strip().lower()`, and `type(3.5)`. predict each value and type. record the three results and exit cleanly with `exi...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-21--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Open this notebook with the <code>Python (ds60sqlpy)</code> kernel. Run <code>import sys; print(sys.executable)</code> and compare it with the doctor report. <strong>Success:</strong> both point to the same <code>.venv</code> layout. <strong>If they differ:</strong> stop and diagnose the kernel rather than reinstalling packages. <strong>Verify:</strong> Resolve both paths and confirm the doctor interpreter and notebook <code>sys.executable</code> identify the same <code>.venv</code> environment.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
+<span># Short contract: Open this notebook with the `Python (ds60sqlpy)` kernel. Run `import sys; print(sys.executable)` and compare it with the doctor report. both point to the same `.venv` layout. st...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 15</div><h5 id="learner--cell-23--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Create <code>calc.py</code> so <code>python calc.py 12.5 7.25</code> prints exactly <code>19.75</code>. <strong>Inputs:</strong> exactly two numeric command-line arguments. <strong>Constraints:</strong> convert the strings from <code>sys.argv</code>, print a friendly usage message for the wrong count, and keep the arithmetic in a small function. <strong>Verify:</strong> test integers, decimals, and one invalid numeric value. Day 15 later replaces this bounded interface with <code>argparse</code>.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
+<span># Short contract: Create `calc.py` so `python calc.py 12.5 7.25` prints exactly `19.75`. exactly two numeric command-line arguments. convert the strings from `sys.argv`, print a friendly usage me...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 16</div><h5 id="learner--cell-25--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-25--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Create two temporary virtual environments outside the repository and install NumPy in only one. <strong>Evidence:</strong> use each environment&#x27;s <code>python -m pip show numpy</code> and interpreter path to prove isolation. <strong>Constraint:</strong> do not alter or delete the course <code>.venv</code>; remove only the two temporary environments you created after recording the result. <strong>Verify:</strong> Show NumPy succeeds under exactly one temporary interpreter and fails under the other, while the course interpreter/path remains unchanged.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
+<span># Short contract: Create two temporary virtual environments outside the repository and install NumPy in only one. use each environment&#x27;s `python -m pip show numpy` and interpreter path to prove i...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 17</div><h5 id="learner--cell-27--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-27--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict what <code>sys.executable</code> should contain when the correct course kernel is active, then verify it in both the REPL and this notebook. <strong>Progressive hint:</strong> The important fact is the interpreter path, not merely the word Python. <strong>Verify:</strong> Resolve the REPL and notebook <code>sys.executable</code> values and assert both identify the same course <code>.venv</code>; record the exact shared path component.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
+<span># Short contract: Predict what `sys.executable` should contain when the correct course kernel is active, then verify it in both the REPL and this notebook. The important fact is the interpreter p...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 18</div><h5 id="learner--cell-29--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-29--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace the difference between <code>python -m pip --version</code> and a bare <code>pip --version</code>: which interpreter owns each command? <strong>Progressive hint:</strong> Read the Python and site-packages paths printed by pip. <strong>Verify:</strong> Capture both pip-version outputs, underline the Python executable/site-packages owner in each, and assert whether the two paths identify the same environment; explain any mismatch.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 12</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
+<span># Short contract: Trace the difference between `python -m pip --version` and a bare `pip --version`: which interpreter owns each command? Read the Python and site-packages paths printed by pip. C...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 19</div><h5 id="learner--cell-31--practice-8-prediction-attempt-and-evidence">Practice 8 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-31--practice-8-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Write <code>environment_report()</code> returning the Python version, executable, platform, and current working directory without shell commands. <strong>Progressive hint:</strong> Use <code>sys</code>, <code>platform</code>, and <code>pathlib.Path</code>. <strong>Verify:</strong> Assert <code>environment_report()</code> has exactly the four required fields with string values and that its executable/cwd agree with direct <code>sys</code>/<code>Path</code> inspection.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 13</div><pre class="source-code language-python"><code><span># Practice 8 — your work</span>
+<span># Short contract: Write `environment_report()` returning the Python version, executable, platform, and current working directory without shell commands. Use `sys`, `platform`, and `pathlib.Path`....</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 20</div><h5 id="learner--cell-33--practice-9-prediction-attempt-and-evidence">Practice 9 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-33--practice-9-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> A package imports in PowerShell but is missing in Jupyter. Write a three-step diagnosis that proves whether their interpreters differ. <strong>Progressive hint:</strong> Compare executable paths before reinstalling anything. <strong>Verify:</strong> Record <code>sys.executable</code>, <code>python -m pip --version</code>, and the notebook kernel interpreter; identify the first evidence that differs before changing anything.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 14</div><pre class="source-code language-python"><code><span># Practice 9 — your work</span>
+<span># Short contract: A package imports in PowerShell but is missing in Jupyter. Write a three-step diagnosis that proves whether their interpreters differ. Compare executable paths before reinstalli...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 21</div><h5 id="learner--cell-35--practice-10-prediction-attempt-and-evidence">Practice 10 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-35--practice-10-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Explain how to recover when the <code>ds60sqlpy</code> kernel is absent even though <code>.venv</code> exists, and state what remains possible offline. <strong>Progressive hint:</strong> Kernel registration and package download are separate operations. <strong>Verify:</strong> After local kernel registration, assert the <code>jupyter kernelspec list</code> output contains <code>ds60sqlpy</code>, then run one already-installed offline import and record its successful output without downloading a package.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 15</div><pre class="source-code language-python"><code><span># Practice 10 — your work</span>
+<span># Short contract: Explain how to recover when the `ds60sqlpy` kernel is absent even though `.venv` exists, and state what remains possible offline. Kernel registration and package download are se...</span>
+<span># Prediction:</span>
+<span> </span>
+<span># Implementation:</span>
+<span> </span>
+<span># Verification (assert or inspect exactly what the prompt requires):</span>
+<span> </span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 22</div><h4 id="learner--cell-37--further-reading">Further reading<a class="heading-anchor" href="#learner--cell-37--further-reading" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Python official docs: https://docs.python.org/3/</li>
 <li>Virtual environments: https://docs.python.org/3/library/venv.html</li>
 <li>JupyterLab: https://jupyterlab.readthedocs.io/</li>
-</ul></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span># Expanded mastery lab scratch space</span>
-<span>#</span>
-<span># Predict first. Then write small code and assertions below each label.</span>
-<span># Keep the official solution closed until you have tested an honest attempt.</span>
-<span> </span>
-<span># Practice 6 — Prediction</span>
-<span> </span>
-<span> </span>
-<span># Practice 7 — Tracing</span>
-<span> </span>
-<span> </span>
-<span># Practice 8 — Implementation</span>
-<span> </span>
-<span> </span>
-<span># Practice 9 — Debugging</span>
-<span> </span>
-<span> </span>
-<span># Practice 10 — Edge case and explanation</span>
-<span> </span></code></pre>
-</article></div>
+</ul></article></div>
       </section>
-    
-      
+
+
       <section
         class="artifact-panel"
         id="solution-1"
         role="tabpanel"
         aria-labelledby="tab-solution-1"
         data-panel="solution-1"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -548,134 +854,132 @@ if __name__ == &#x27;__main__&#x27;:
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-01-solutions-setup-repl-virtual-envs-package-management">Day 01 — Solutions: Setup, REPL, Virtual Envs, Package Management<a class="heading-anchor" href="#solution-1--day-01-solutions-setup-repl-virtual-envs-package-management" aria-label="Link to this section">#</a></h3>
-<p>This solution expands each exercise with exact commands and the reasoning behind them.</p>
-<p>Exercise 1: Create two virtual environments under the ignored <code>artifacts/day01/</code> directory. Install <code>numpy</code> only in <code>ds-prod</code>. Verify import works only there.</p>
-<p>Why: Isolate dependencies to avoid conflicts across projects. Verifying imports ensures the correct environment is active.</p>
-<p>Commands (macOS/Linux)</p>
-<pre><code>python3 -m venv artifacts/day01/ds-play/.venv
-python3 -m venv artifacts/day01/ds-prod/.venv
-
-# Activate ds-play and verify numpy is not present
-source artifacts/day01/ds-play/.venv/bin/activate
-python -c &quot;import sys; print(sys.executable)&quot;  # sanity
-python -c &quot;import numpy&quot; || echo &quot;numpy not installed in ds-play (expected)&quot;
-deactivate
-
-# Activate ds-prod and install numpy
-source artifacts/day01/ds-prod/.venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install numpy
-python -c &quot;import numpy as np; print(np.__version__)&quot;  # should succeed</code></pre>
-<p>Windows (PowerShell)</p>
-<pre><code>py -3.12 -m venv artifacts\day01\ds-play\.venv
-if ($LASTEXITCODE -ne 0) { throw &quot;ds-play environment creation failed&quot; }
-py -3.12 -m venv artifacts\day01\ds-prod\.venv
-if ($LASTEXITCODE -ne 0) { throw &quot;ds-prod environment creation failed&quot; }
-
-# ds-play
-$playPython = &quot;.\artifacts\day01\ds-play\.venv\Scripts\python.exe&quot;
-&amp; $playPython -c &quot;import importlib.util; raise SystemExit(importlib.util.find_spec(&#x27;numpy&#x27;) is not None)&quot;
-if ($LASTEXITCODE -eq 0) {
-    Write-Host &quot;numpy is not installed in ds-play (expected)&quot;
-} else {
-    throw &quot;numpy unexpectedly exists in ds-play&quot;
-}
-
-# ds-prod
-$prodPython = &quot;.\artifacts\day01\ds-prod\.venv\Scripts\python.exe&quot;
-&amp; $prodPython -m pip install --upgrade pip
-if ($LASTEXITCODE -ne 0) { throw &quot;pip upgrade failed&quot; }
-&amp; $prodPython -m pip install numpy
-if ($LASTEXITCODE -ne 0) { throw &quot;numpy installation failed&quot; }
-&amp; $prodPython -c &quot;import numpy as np; print(np.__version__)&quot;
-if ($LASTEXITCODE -ne 0) { throw &quot;numpy import failed&quot; }</code></pre>
-<p>Exercise 2: From the REPL, define a function <code>gcd(a, b)</code> (Euclid’s algorithm) and test.</p>
-<p>Why: Practice using the REPL for quick feedback. Euclid’s algorithm is a classic example of simple, testable logic.</p>
-<p>Code</p>
-<pre><code class="language-python">def gcd(a: int, b: int) -&gt; int:
-    while b:
-        a, b = b, a % b
-    return a
-
-assert gcd(12, 18) == 6
-assert gcd(17, 13) == 1
-print(&quot;gcd tests passed&quot;)</code></pre>
-<p>Exercise 3: Add a kernel for each environment and practice switching in JupyterLab.</p>
-<p>Why: Notebooks execute in a kernel process; binding the correct env avoids import errors.</p>
-<p>macOS/Linux:</p>
-<pre><code class="language-bash"># In ds-play
-artifacts/day01/ds-play/.venv/bin/python -m pip install ipykernel
-artifacts/day01/ds-play/.venv/bin/python -m ipykernel install \
-  --user --name ds-play --display-name &quot;Python (ds-play)&quot;
-
-# In ds-prod
-artifacts/day01/ds-prod/.venv/bin/python -m pip install ipykernel
-artifacts/day01/ds-prod/.venv/bin/python -m ipykernel install \
-  --user --name ds-prod --display-name &quot;Python (ds-prod)&quot;
-
-# Launch JupyterLab and switch kernels from the Kernel menu
-.venv/bin/python -m jupyterlab</code></pre>
-<p>Windows PowerShell:</p>
-<pre><code class="language-powershell">$playPython = &quot;.\artifacts\day01\ds-play\.venv\Scripts\python.exe&quot;
-$prodPython = &quot;.\artifacts\day01\ds-prod\.venv\Scripts\python.exe&quot;
-
-&amp; $playPython -m pip install ipykernel
-if ($LASTEXITCODE -ne 0) { throw &quot;ds-play ipykernel installation failed&quot; }
-&amp; $playPython -m ipykernel install --user --name ds-play --display-name &quot;Python (ds-play)&quot;
-if ($LASTEXITCODE -ne 0) { throw &quot;ds-play kernel registration failed&quot; }
-
-&amp; $prodPython -m pip install ipykernel
-if ($LASTEXITCODE -ne 0) { throw &quot;ds-prod ipykernel installation failed&quot; }
-&amp; $prodPython -m ipykernel install --user --name ds-prod --display-name &quot;Python (ds-prod)&quot;
-if ($LASTEXITCODE -ne 0) { throw &quot;ds-prod kernel registration failed&quot; }
-
-.\.venv\Scripts\python.exe -m jupyterlab</code></pre>
-<p>Notes</p>
+<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
+<p>These worked answers demonstrate <strong>execution contexts and a trustworthy course environment</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
+<p>Python code always runs inside a particular <strong>interpreter process</strong>. That process has a version, a filesystem location, an installed package set, and a current working directory. A terminal REPL, a script, and a notebook may look like three different tools, but each eventually asks an interpreter to execute Python.</p>
+<p>A virtual environment gives this repository its own interpreter and package directory. A Jupyter kernel is the notebook&#x27;s connection to an interpreter. If the terminal and notebook point at different interpreters, a package can import in one place and fail in the other. Diagnose identity first; reinstalling packages blindly often makes the mismatch harder to see.</p>
+<h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
-<li>These commands avoid activation so it is always clear which interpreter runs.</li>
-<li>The course setup already installs JupyterLab in the repository <code>.venv</code>.</li>
+<li><strong>interpreter:</strong> the program that reads Python code and executes it.</li>
+<li><strong>REPL:</strong> Read-Evaluate-Print Loop, an interactive prompt for small experiments.</li>
+<li><strong>script:</strong> a saved <code>.py</code> file executed from top to bottom.</li>
+<li><strong>virtual environment:</strong> an isolated interpreter/package location owned by one project.</li>
+<li><strong>kernel:</strong> the long-running interpreter process connected to a notebook.</li>
+<li><strong>working directory:</strong> the base directory used to resolve relative paths.</li>
 </ul>
-<hr>
-<h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
-<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Run the setup and confirm that <code>course.py doctor</code> reports Python 3.11 or 3.12. <strong>Hint:</strong> read the interpreter path in the report; it should contain <code>.venv</code>.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Start the REPL and evaluate arithmetic, a string method, and <code>type(...)</code>. <strong>Hint:</strong> exit with <code>exit()</code>.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> In JupyterLab, select <code>Python (ds60sqlpy)</code> and print the interpreter path. <strong>Hint:</strong> the <code>sys</code> module can describe the running interpreter.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-4-original-lesson-practice">Exercise 4 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-4-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Create <code>calc.py</code> so two numeric command-line arguments produce their sum. <strong>Hint:</strong> command-line values in <code>sys.argv</code> are strings, so convert them deliberately. Day 15 replaces this bounded approach with <code>argparse</code>.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-5-original-lesson-practice">Exercise 5 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-5-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> As deeper environment practice, create two temporary environments and install NumPy in only one. <strong>Hint:</strong> always use <code>python -m pip</code> from the interpreter you intend to modify. The separate solution notes use the two-environment and REPL exercises to test the same setup skills without simply copying the notebook cells.</p>
-<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
-<h5 id="solution-1--exercise-6-prediction">Exercise 6 — Prediction<a class="heading-anchor" href="#solution-1--exercise-6-prediction" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Predict what <code>sys.executable</code> should contain when the correct course kernel is active, then verify it in both the REPL and this notebook.</p>
-<p><strong>Reasoning checkpoint:</strong> The important fact is the interpreter path, not merely the word Python. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-7-tracing">Exercise 7 — Tracing<a class="heading-anchor" href="#solution-1--exercise-7-tracing" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Trace the difference between <code>python -m pip --version</code> and a bare <code>pip --version</code>: which interpreter owns each command?</p>
-<p><strong>Reasoning checkpoint:</strong> Read the Python and site-packages paths printed by pip. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-8-implementation">Exercise 8 — Implementation<a class="heading-anchor" href="#solution-1--exercise-8-implementation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Write <code>environment_report()</code> returning the Python version, executable, platform, and current working directory without shell commands.</p>
-<p><strong>Reasoning checkpoint:</strong> Use <code>sys</code>, <code>platform</code>, and <code>pathlib.Path</code>. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-9-debugging">Exercise 9 — Debugging<a class="heading-anchor" href="#solution-1--exercise-9-debugging" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> A package imports in PowerShell but is missing in Jupyter. Write a three-step diagnosis that proves whether their interpreters differ.</p>
-<p><strong>Reasoning checkpoint:</strong> Compare executable paths before reinstalling anything. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
-<h5 id="solution-1--exercise-10-edge-case-and-explanation">Exercise 10 — Edge case and explanation<a class="heading-anchor" href="#solution-1--exercise-10-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Explain how to recover when the <code>ds60sqlpy</code> kernel is absent even though <code>.venv</code> exists, and state what remains possible offline.</p>
-<p><strong>Reasoning checkpoint:</strong> Kernel registration and package download are separate operations. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
+<p>For this lesson&#x27;s <strong>execution contexts and a trustworthy course environment</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<h4 id="solution-1--exercises-1-5-worked-answers">Exercises 1–5 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-5-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Run the repository setup, then run <code>scripts/course.py doctor</code> with the repository interpreter. <strong>Required evidence:</strong> copy the Python version and interpreter path from the report. <strong>Success:</strong> the version is 3.11 or 3.12, the path belongs to this repository&#x27;s <code>.venv</code>, and the doctor does not report a blocking core failure. <strong>Constraint:</strong> do not install or delete anything while diagnosing. <strong>Verify:</strong> Save the doctor output showing Python 3.11/3.12 and an interpreter path inside this repository&#x27;s <code>.venv</code>; record that no blocking core check failed.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Run the repository setup, then run <code>scripts/course.py doctor</code> with the repository interpreter. Required evidence: copy the Python version and interpreter path from the report. Success: the version is 3.11 or 3.12, the path belongs to this repository&#x27;s <code>.venv</code>, and the doctor does not report a blocking core failure. Constraint: do not install or delete anything while diagnosing. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Save the doctor output showing Python 3.11/3.12 and an interpreter path inside this repository&#x27;s <code>.venv</code>; record that no blocking core check failed. That connects the answer to execution contexts and a trustworthy course environment.</p>
+<p>Run the doctor with the repository interpreter and keep its output as evidence; no Python implementation is needed for this environment check.</p>
+<pre><code class="language-powershell"># Windows PowerShell, after resolving $CoursePython as shown in the guide
+&amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python scripts/course.py doctor</code></pre>
+<p>Read the reported executable path rather than accepting a successful command from an unrelated global Python.</p>
+<p><strong>Verification evidence:</strong> Save the doctor output showing Python 3.11/3.12 and an interpreter path inside this repository&#x27;s <code>.venv</code>; record that no blocking core check failed.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Open the course Python REPL and evaluate <code>7 * 6</code>, <code>&#x27; Python &#x27;.strip().lower()</code>, and <code>type(3.5)</code>. <strong>Before running:</strong> predict each value and type. <strong>Success:</strong> record the three results and exit cleanly with <code>exit()</code>; explain why the string method does not modify the original literal. <strong>Verify:</strong> Record <code>42</code>, <code>&#x27;python&#x27;</code>, and <code>&lt;class &#x27;float&#x27;&gt;</code> beside your predictions, then confirm the REPL exits without terminating the terminal.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Open the course Python REPL and evaluate <code>7 * 6</code>, <code>&#x27; Python &#x27;.strip().lower()</code>, and <code>type(3.5)</code>. Before running: predict each value and type. Success: record the three results and exit cleanly with <code>exit()</code>; explain why the string method does not modify the original literal. Then compare the prediction with this proof target: Record <code>42</code>, <code>&#x27;python&#x27;</code>, and <code>&lt;class &#x27;float&#x27;&gt;</code> beside your predictions, then confirm the REPL exits without terminating the terminal. This makes execution contexts and a trustworthy course environment observable instead of relying on intuition.</p>
+<p>A REPL transcript should look like this:</p>
+<pre><code class="language-pycon">&gt;&gt;&gt; 7 * 6
+42
+&gt;&gt;&gt; &quot;  Python &quot;.strip().lower()
+&#x27;python&#x27;
+&gt;&gt;&gt; type(3.5)
+&lt;class &#x27;float&#x27;&gt;
+&gt;&gt;&gt; exit()</code></pre>
+<p><code>strip()</code> and <code>lower()</code> each return a new string; the literal is not mutated.</p>
+<p><strong>Verification evidence:</strong> Record <code>42</code>, <code>&#x27;python&#x27;</code>, and <code>&lt;class &#x27;float&#x27;&gt;</code> beside your predictions, then confirm the REPL exits without terminating the terminal.</p>
+<h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Open this notebook with the <code>Python (ds60sqlpy)</code> kernel. Run <code>import sys; print(sys.executable)</code> and compare it with the doctor report. <strong>Success:</strong> both point to the same <code>.venv</code> layout. <strong>If they differ:</strong> stop and diagnose the kernel rather than reinstalling packages. <strong>Verify:</strong> Resolve both paths and confirm the doctor interpreter and notebook <code>sys.executable</code> identify the same <code>.venv</code> environment.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Open this notebook with the <code>Python (ds60sqlpy)</code> kernel. Run <code>import sys; print(sys.executable)</code> and compare it with the doctor report. Success: both point to the same <code>.venv</code> layout. If they differ: stop and diagnose the kernel rather than reinstalling packages. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Resolve both paths and confirm the doctor interpreter and notebook <code>sys.executable</code> identify the same <code>.venv</code> environment. That connects the answer to execution contexts and a trustworthy course environment.</p>
+<p>Run this in the selected notebook kernel and compare the resolved path with the doctor report:</p>
+<pre><code class="language-python">import sys
+from pathlib import Path
+
+notebook_python = Path(sys.executable).resolve()
+print(notebook_python)
+assert notebook_python.exists()</code></pre>
+<p>Compare the printed path to the doctor&#x27;s path character for character after resolving both. In the real course run they must name the same repository environment. This reusable snippet checks that the interpreter exists without hard-coding a Windows or POSIX layout.</p>
+<p><strong>Verification evidence:</strong> Resolve both paths and confirm the doctor interpreter and notebook <code>sys.executable</code> identify the same <code>.venv</code> environment.</p>
+<h5 id="solution-1--exercise-4-worked-answer">Exercise 4 — worked answer<a class="heading-anchor" href="#solution-1--exercise-4-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Create <code>calc.py</code> so <code>python calc.py 12.5 7.25</code> prints exactly <code>19.75</code>. <strong>Inputs:</strong> exactly two numeric command-line arguments. <strong>Constraints:</strong> convert the strings from <code>sys.argv</code>, print a friendly usage message for the wrong count, and keep the arithmetic in a small function. <strong>Verify:</strong> test integers, decimals, and one invalid numeric value. Day 15 later replaces this bounded interface with <code>argparse</code>.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Create <code>calc.py</code> so <code>python calc.py 12.5 7.25</code> prints exactly <code>19.75</code>. Inputs: exactly two numeric command-line arguments. Constraints: convert the strings from <code>sys.argv</code>, print a friendly usage message for the wrong count, and keep the arithmetic in a small function. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: test integers, decimals, and one invalid numeric value. Day 15 later replaces this bounded interface with <code>argparse</code>. That connects the answer to execution contexts and a trustworthy course environment.</p>
+<p>Save this as <code>calc.py</code>:</p>
+<pre><code class="language-python">from __future__ import annotations
+
+import sys
+
+
+def add(left: float, right: float) -&gt; float:
+    return left + right
+
+
+def main(arguments: list[str]) -&gt; int:
+    if len(arguments) != 2:
+        print(&quot;Usage: python calc.py NUMBER NUMBER&quot;)
+        return 2
+    try:
+        left, right = (float(value) for value in arguments)
+    except ValueError:
+        print(&quot;Both arguments must be numbers.&quot;)
+        return 2
+    print(add(left, right))
+    return 0
+
+
+if __name__ == &quot;__main__&quot;:
+    raise SystemExit(main(sys.argv[1:]))</code></pre>
+<p><code>python calc.py 12.5 7.25</code> prints <code>19.75</code>; bad count or bad numeric text returns status 2 without hiding unrelated programming errors.</p>
+<p><strong>Verification evidence:</strong> test integers, decimals, and one invalid numeric value. Day 15 later replaces this bounded interface with <code>argparse</code>.</p>
+<h5 id="solution-1--exercise-5-worked-answer">Exercise 5 — worked answer<a class="heading-anchor" href="#solution-1--exercise-5-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Create two temporary virtual environments outside the repository and install NumPy in only one. <strong>Evidence:</strong> use each environment&#x27;s <code>python -m pip show numpy</code> and interpreter path to prove isolation. <strong>Constraint:</strong> do not alter or delete the course <code>.venv</code>; remove only the two temporary environments you created after recording the result. <strong>Verify:</strong> Show NumPy succeeds under exactly one temporary interpreter and fails under the other, while the course interpreter/path remains unchanged.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Create two temporary virtual environments outside the repository and install NumPy in only one. Evidence: use each environment&#x27;s <code>python -m pip show numpy</code> and interpreter path to prove isolation. Constraint: do not alter or delete the course <code>.venv</code>; remove only the two temporary environments you created after recording the result. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Show NumPy succeeds under exactly one temporary interpreter and fails under the other, while the course interpreter/path remains unchanged. That connects the answer to execution contexts and a trustworthy course environment.</p>
+<p>Create temporary environments outside the repository, always invoking pip through the interpreter that owns the environment:</p>
+<pre><code class="language-powershell">py -3.12 -m venv $env:TEMP\ds60-env-a
+py -3.12 -m venv $env:TEMP\ds60-env-b
+&amp; $env:TEMP\ds60-env-a\Scripts\python.exe -m pip install numpy
+&amp; $env:TEMP\ds60-env-a\Scripts\python.exe -m pip show numpy
+&amp; $env:TEMP\ds60-env-b\Scripts\python.exe -m pip show numpy</code></pre>
+<pre><code class="language-bash">python3.12 -m venv /tmp/ds60-env-a
+python3.12 -m venv /tmp/ds60-env-b
+/tmp/ds60-env-a/bin/python -m pip install numpy
+/tmp/ds60-env-a/bin/python -m pip show numpy
+/tmp/ds60-env-b/bin/python -m pip show numpy</code></pre>
+<p>The final command should report NumPy absent; neither command targets the course <code>.venv</code>.</p>
+<p><strong>Verification evidence:</strong> Show NumPy succeeds under exactly one temporary interpreter and fails under the other, while the course interpreter/path remains unchanged.</p>
+<h4 id="solution-1--exercises-6-10-expanded-mastery-answers">Exercises 6–10 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-6-10-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict what <code>sys.executable</code> should contain when the correct course kernel is active, then verify it in both the REPL and this notebook. <strong>Progressive hint:</strong> The important fact is the interpreter path, not merely the word Python. <strong>Verify:</strong> Resolve the REPL and notebook <code>sys.executable</code> values and assert both identify the same course <code>.venv</code>; record the exact shared path component.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict what <code>sys.executable</code> should contain when the correct course kernel is active, then verify it in both the REPL and this notebook. Progressive hint: The important fact is the interpreter path, not merely the word Python. Then compare the prediction with this proof target: Resolve the REPL and notebook <code>sys.executable</code> values and assert both identify the same course <code>.venv</code>; record the exact shared path component. This makes execution contexts and a trustworthy course environment observable instead of relying on intuition.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Resolve the REPL and notebook <code>sys.executable</code> values and assert both identify the same course <code>.venv</code>; record the exact shared path component.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace the difference between <code>python -m pip --version</code> and a bare <code>pip --version</code>: which interpreter owns each command? <strong>Progressive hint:</strong> Read the Python and site-packages paths printed by pip. <strong>Verify:</strong> Capture both pip-version outputs, underline the Python executable/site-packages owner in each, and assert whether the two paths identify the same environment; explain any mismatch.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace the difference between <code>python -m pip --version</code> and a bare <code>pip --version</code>: which interpreter owns each command? Progressive hint: Read the Python and site-packages paths printed by pip. Record the named value, shape, label, or iterator position needed to establish: Capture both pip-version outputs, underline the Python executable/site-packages owner in each, and assert whether the two paths identify the same environment; explain any mismatch. The trace exposes execution contexts and a trustworthy course environment directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Capture both pip-version outputs, underline the Python executable/site-packages owner in each, and assert whether the two paths identify the same environment; explain any mismatch.</p>
+<h5 id="solution-1--exercise-8-answer-contract">Exercise 8 — answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Implementation:</strong> Write <code>environment_report()</code> returning the Python version, executable, platform, and current working directory without shell commands. <strong>Progressive hint:</strong> Use <code>sys</code>, <code>platform</code>, and <code>pathlib.Path</code>. <strong>Verify:</strong> Assert <code>environment_report()</code> has exactly the four required fields with string values and that its executable/cwd agree with direct <code>sys</code>/<code>Path</code> inspection.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Write <code>environment_report()</code> returning the Python version, executable, platform, and current working directory without shell commands. Progressive hint: Use <code>sys</code>, <code>platform</code>, and <code>pathlib.Path</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert <code>environment_report()</code> has exactly the four required fields with string values and that its executable/cwd agree with direct <code>sys</code>/<code>Path</code> inspection. That connects the answer to execution contexts and a trustworthy course environment.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert <code>environment_report()</code> has exactly the four required fields with string values and that its executable/cwd agree with direct <code>sys</code>/<code>Path</code> inspection.</p>
+<h5 id="solution-1--exercise-9-answer-contract">Exercise 9 — answer contract<a class="heading-anchor" href="#solution-1--exercise-9-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> A package imports in PowerShell but is missing in Jupyter. Write a three-step diagnosis that proves whether their interpreters differ. <strong>Progressive hint:</strong> Compare executable paths before reinstalling anything. <strong>Verify:</strong> Record <code>sys.executable</code>, <code>python -m pip --version</code>, and the notebook kernel interpreter; identify the first evidence that differs before changing anything.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: A package imports in PowerShell but is missing in Jupyter. Write a three-step diagnosis that proves whether their interpreters differ. Progressive hint: Compare executable paths before reinstalling anything. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Record <code>sys.executable</code>, <code>python -m pip --version</code>, and the notebook kernel interpreter; identify the first evidence that differs before changing anything. The diagnosis depends on execution contexts and a trustworthy course environment.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Record <code>sys.executable</code>, <code>python -m pip --version</code>, and the notebook kernel interpreter; identify the first evidence that differs before changing anything.</p>
+<h5 id="solution-1--exercise-10-answer-contract">Exercise 10 — answer contract<a class="heading-anchor" href="#solution-1--exercise-10-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Explain how to recover when the <code>ds60sqlpy</code> kernel is absent even though <code>.venv</code> exists, and state what remains possible offline. <strong>Progressive hint:</strong> Kernel registration and package download are separate operations. <strong>Verify:</strong> After local kernel registration, assert the <code>jupyter kernelspec list</code> output contains <code>ds60sqlpy</code>, then run one already-installed offline import and record its successful output without downloading a package.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Explain how to recover when the <code>ds60sqlpy</code> kernel is absent even though <code>.venv</code> exists, and state what remains possible offline. Progressive hint: Kernel registration and package download are separate operations. Values below, at, and above the named boundary must produce the evidence After local kernel registration, assert the <code>jupyter kernelspec list</code> output contains <code>ds60sqlpy</code>, then run one already-installed offline import and record its successful output without downloading a package. Those cases show how execution contexts and a trustworthy course environment behaves at its edge.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> After local kernel registration, assert the <code>jupyter kernelspec list</code> output contains <code>ds60sqlpy</code>, then run one already-installed offline import and record its successful output without downloading a package.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Treat the interpreter, package installer, and notebook kernel as one connected system. Record evidence before changing an environment.</p>
-<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
-<h5 id="solution-1--practice-1-prediction">Practice 1 — Prediction<a class="heading-anchor" href="#solution-1--practice-1-prediction" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercise-6-prediction">Shared implementation for Exercise 6 — Prediction<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercise-6-prediction" aria-label="Link to this section">#</a></h5>
 <p>The correct result is an executable inside this repository&#x27;s <code>.venv</code> (<code>.venv\Scripts\python.exe</code> on Windows or <code>.venv/bin/python</code> on POSIX). The exact prefix varies by clone location, so inspect the path rather than comparing it with a developer-specific absolute string.</p>
-<h5 id="solution-1--practice-2-trace">Practice 2 — Trace<a class="heading-anchor" href="#solution-1--practice-2-trace" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercise-7-trace">Shared implementation for Exercise 7 — Trace<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercise-7-trace" aria-label="Link to this section">#</a></h5>
 <p><code>python -m pip</code> asks a known interpreter to import its installed <code>pip</code> module. A bare <code>pip</code> is whichever executable the shell finds first on <code>PATH</code>; it can belong to Anaconda, the Windows launcher, or another environment.</p>
-<h5 id="solution-1--practices-3-5-evidence-first-environment-diagnosis">Practices 3–5 — Evidence-first environment diagnosis<a class="heading-anchor" href="#solution-1--practices-3-5-evidence-first-environment-diagnosis" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-8-10-evidence-first-environment-diagnosis">Shared implementation for Exercises 8–10 — Evidence-first environment diagnosis<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-8-10-evidence-first-environment-diagnosis" aria-label="Link to this section">#</a></h5>
 <pre><code class="language-python">from __future__ import annotations
 
 import platform
@@ -712,7 +1016,7 @@ assert Path(report[&quot;executable&quot;]).name.lower().startswith(&quot;python
 # Package installation still requires the downloaded wheel cache or a network.</code></pre>
 <p>The repair changes kernel metadata; it should not involve copying packages between interpreters or adding an arbitrary global directory to <code>PATH</code>.</p></div>
       </section>
-    
+
 
       <section
         class="artifact-panel"
@@ -720,7 +1024,7 @@ assert Path(report[&quot;executable&quot;]).name.lower().startswith(&quot;python
         role="tabpanel"
         aria-labelledby="tab-solution-2"
         data-panel="solution-2"
-        
+
       >
         <header class="artifact-head">
           <div>
@@ -835,7 +1139,38 @@ assert Path(report[&quot;executable&quot;]).name.lower().startswith(&quot;python
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>The repair changes kernel metadata; it should not involve copying packages between interpreters or adding an arbitrary global directory to <code>PATH</code>.</p></article></div>
       </section>
-    
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-01`
+(Day 1 — Setup, REPL, Virtual Environments, and Packages). Direct catalog prerequisites: none.
+I am new to this course and have no prior course lesson prerequisites. Emphasize execution contexts and a trustworthy course environment.
+Read `python/ds-60day/companion-guides/day01_setup_and_repl.md` and use the learner notebook
+`python/ds-60day/notebooks/day01_setup_and_repl.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <span class="nav-card disabled"><small>Previous lesson</small><strong>Course start</strong></span>
@@ -927,6 +1262,23 @@ assert Path(report[&quot;executable&quot;]).name.lower().startswith(&quot;python
       } catch {
         link.removeAttribute("href");
         link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }
     });
 
