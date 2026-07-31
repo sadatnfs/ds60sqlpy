@@ -84,7 +84,9 @@ GROUP BY country
 ORDER BY country;
 
 -- Exercise 3: explicit grouping sets omit country/category detail. CUBE emits
--- detail, each one-column subtotal, and the grand total.
+-- detail, each one-column subtotal, and the grand total. GROUPING packs the
+-- omitted dimensions into a right-to-left bit mask: category is bit 0 and
+-- country is bit 1.
 WITH lines AS (
   SELECT c.country, p.category,
          oi.quantity * oi.unit_price * (1 - oi.discount) AS revenue
@@ -92,11 +94,25 @@ WITH lines AS (
   JOIN customers c USING (customer_id)
   JOIN order_items oi USING (order_id)
   JOIN products p USING (product_id)
+), cube_rows AS (
+  SELECT country,
+         category,
+         SUM(revenue) AS revenue,
+         GROUPING(country, category) AS grouping_mask
+  FROM lines
+  GROUP BY CUBE (country, category)
 )
-SELECT country, category, SUM(revenue) AS revenue,
-       GROUPING(country, category) AS grouping_mask
-FROM lines
-GROUP BY CUBE (country, category)
+SELECT country,
+       category,
+       revenue,
+       grouping_mask,
+       CASE grouping_mask
+         WHEN 0 THEN 'detail'
+         WHEN 1 THEN 'country subtotal'
+         WHEN 2 THEN 'category subtotal'
+         WHEN 3 THEN 'grand total'
+       END AS grouping_level
+FROM cube_rows
 ORDER BY grouping_mask, country, category;
 
 -- Exercise 4: FILTER states each metric population next to its measure.
@@ -111,12 +127,20 @@ JOIN customers c USING (customer_id)
 GROUP BY c.country
 ORDER BY c.country;
 
--- Exercise 5: GROUPING distinguishes generated subtotal NULL from a stored NULL.
+-- Exercise 5: GROUPING distinguishes generated subtotal NULL from a stored
+-- NULL. The controlled NULL row makes both cases observable even though the
+-- course customers table normally requires a country.
+WITH country_input AS (
+  SELECT country
+  FROM customers
+  UNION ALL
+  SELECT NULL::text
+)
 SELECT CASE WHEN GROUPING(country) = 1 THEN 'ALL COUNTRIES'
             ELSE COALESCE(country, '(stored null)') END AS country_label,
        GROUPING(country) AS is_subtotal,
        COUNT(*) AS customers
-FROM customers
+FROM country_input
 GROUP BY GROUPING SETS ((country), ())
 ORDER BY is_subtotal, country_label;
 

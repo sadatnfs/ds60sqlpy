@@ -135,10 +135,10 @@ FROM diffs d;
 --    Hint ladder, rung 1: For sql-53 Exercise 4, start with the first relation in `dim_customer`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.
 -- 5. Debugging: make the SCD2 load idempotent so rerunning an unchanged source
 --    creates no new version.
---    Inputs: For sql-53 Exercise 5, read from `dim_customer`, `training.customers`, and `c.country`. Build the answer toward `unchanged_rows_that_would_version`; keep `customer_id` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-53 Exercise 5, expected output: one row per `customer_id`. The final columns are `unchanged_rows_that_would_version`.
---    Verify: For sql-53 Exercise 5, project `customer_id` plus the raw source columns from `dim_customer`, `training.customers`, and `c.country` at each join stage; record row count and distinct `customer_id`, then assert the final `unchanged_rows_that_would_version` values match those staged rows without unintended fanout or loss. Add duplicate source candidates for `customer_id`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
---    Hint ladder, rung 1: For sql-53 Exercise 5, start with the first relation in `dim_customer`, `training.customers`, and `c.country`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.
+--    Inputs: For sql-53 Exercise 5, compare the current `dim_customer` row to `desired_customer_state`, which is copied from the same `staged_customer_change` used by Exercise 2.
+--    Expected result/shape: For sql-53 Exercise 5, expected output: exactly one aggregate row, `unchanged_rows_that_would_version = 0`.
+--    Verify: For sql-53 Exercise 5, rerun the nullable-safe attribute comparison against `desired_customer_state`; the result must report zero differences. Then alter one staged attribute and require a result of exactly one difference before applying any close/insert statements.
+--    Hint ladder, rung 1: Prove both desired and current relations are unique on `customer_id`, then compare with `IS DISTINCT FROM`.
 -- 6. Edge case: define a same-day change policy using timestamptz boundaries or
 --    source sequence numbers, and explain the tradeoff.
 --    Inputs: For sql-53 Exercise 6, read from `training.customers`, `dim_customer`, and `changed_customers`. Compute `first_version`, and `ROLLBACK` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.

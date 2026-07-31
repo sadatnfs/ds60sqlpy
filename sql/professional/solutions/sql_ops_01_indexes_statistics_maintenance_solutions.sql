@@ -49,10 +49,41 @@ SELECT
     e.severity,
     e.message
 FROM pro_ops_lab.events AS e
-WHERE e.device_id = 'device-007'
+WHERE e.device_id = 'device-005'
   AND e.severity >= 4
 ORDER BY e.occurred_at DESC
 LIMIT 25;
+
+SELECT
+    e.occurred_at,
+    e.severity,
+    e.message
+FROM pro_ops_lab.events AS e
+WHERE e.device_id = 'device-005'
+  AND e.severity >= 4
+ORDER BY e.occurred_at DESC
+LIMIT 25;
+
+-- Exercise 2: access method, operator class, and query operator form one
+-- contract. An index family name alone is not a design.
+SELECT *
+FROM (
+    VALUES
+        ('GIN'::text, 'jsonb, arrays, tsvector'::text,
+         'containment/membership/full-text', 'fast reads; heavier writes; no natural ordering'),
+        ('GiST', 'ranges, geometry, nearest-neighbor types',
+         'overlap/containment/distance', 'lossy checks and workload-specific opclasses'),
+        ('SP-GiST', 'partitionable search spaces such as inet/text points',
+         'prefix/nearest search by opclass', 'excellent for matching distributions, not universal'),
+        ('BRIN', 'physically correlated large tables',
+         'range exclusion by block summaries', 'tiny and cheap, but returns lossy candidate blocks')
+) AS access_method(
+    method,
+    suitable_types,
+    target_operators,
+    tradeoff
+)
+ORDER BY method;
 
 -- Exercise 3: category and severity are correlated by fixture construction.
 CREATE STATISTICS events_category_severity_stats (dependencies, mcv)
@@ -76,7 +107,9 @@ SELECT
     COALESCE(si.idx_scan, 0) AS observed_scans,
     i.indisunique,
     i.indisprimary,
-    pg_catalog.pg_get_expr(i.indpred, i.indrelid) AS predicate
+    pg_catalog.pg_get_expr(i.indpred, i.indrelid) AS predicate,
+    clock_timestamp() AS observed_at,
+    d.stats_reset
 FROM pg_catalog.pg_index AS i
 JOIN pg_catalog.pg_class AS ci
   ON ci.oid = i.indexrelid
@@ -86,6 +119,8 @@ JOIN pg_catalog.pg_namespace AS n
   ON n.oid = ct.relnamespace
 LEFT JOIN pg_catalog.pg_stat_user_indexes AS si
   ON si.indexrelid = i.indexrelid
+LEFT JOIN pg_catalog.pg_stat_database AS d
+  ON d.datid = (SELECT oid FROM pg_catalog.pg_database WHERE datname = current_database())
 WHERE n.nspname = 'pro_ops_lab'
   AND ct.relname = 'events'
 ORDER BY ci.relname;
@@ -113,14 +148,116 @@ BEGIN
 END
 $solution$;
 
--- Exercise 2: access methods are meaningful only with type/operator class and
--- target operator. The Markdown solution maps GIN, GiST, SP-GiST, and BRIN.
+-- Exercise 5: this transaction does not run VACUUM. Return a maintenance
+-- decision matrix that separates reclaim/freeze/visibility from estimates.
+SELECT *
+FROM (
+    VALUES
+        ('VACUUM'::text, 'dead tuples, freeze age, visibility map'::text,
+         'reclaim reusable space and prevent transaction-ID wraparound'::text,
+         'does not usually shrink the relation file'),
+        ('ANALYZE', 'sampled value distribution and correlation',
+         'refresh planner estimates', 'does not reclaim dead tuples'),
+        ('VACUUM (ANALYZE)', 'both maintenance signals',
+         'perform both jobs when the operational budget permits',
+         'still requires lock/WAL/runtime monitoring'),
+        ('VACUUM FULL', 'exceptional file compaction evidence',
+         'rewrite and return file space to the OS',
+         'takes an ACCESS EXCLUSIVE lock; not routine maintenance')
+) AS maintenance(
+    command,
+    evidence_domain,
+    primary_effect,
+    important_limit
+)
+ORDER BY command;
 
--- Exercise 5: this transaction does not run VACUUM. VACUUM reclaims dead-tuple
--- space/freeze safety/visibility; ANALYZE samples values for estimates.
+-- Exercise 6: detect capability state without enabling an extension or
+-- exposing query text. Query-text access and retention require privacy review.
+CREATE TEMP TABLE ds60_pgss_probe (
+    capability_state text NOT NULL,
+    detail text NOT NULL
+) ON COMMIT DROP;
 
--- Exercise 6: this solution neither enables pg_stat_statements nor exposes
--- query text. Production access and retention require privacy review.
+DO $solution$
+DECLARE
+    installed boolean;
+    preloaded boolean;
+    view_name regclass;
+BEGIN
+    SELECT EXISTS (
+        SELECT 1
+        FROM pg_catalog.pg_extension
+        WHERE extname = 'pg_stat_statements'
+    ) INTO installed;
+
+    preloaded :=
+        'pg_stat_statements' = ANY (
+            pg_catalog.regexp_split_to_array(
+                COALESCE(
+                    pg_catalog.current_setting(
+                        'shared_preload_libraries',
+                        true
+                    ),
+                    ''
+                ),
+                '\s*,\s*'
+            )
+        );
+
+    SELECT to_regclass(
+        pg_catalog.quote_ident(n.nspname) || '.pg_stat_statements'
+    )
+    INTO view_name
+    FROM pg_catalog.pg_extension AS e
+    JOIN pg_catalog.pg_namespace AS n
+      ON n.oid = e.extnamespace
+    WHERE e.extname = 'pg_stat_statements';
+
+    IF NOT installed THEN
+        INSERT INTO ds60_pgss_probe
+        VALUES ('absent', 'extension is not installed; no change was attempted');
+    ELSIF NOT preloaded THEN
+        INSERT INTO ds60_pgss_probe
+        VALUES (
+            'installed_not_preloaded',
+            'catalog objects exist but collection may require server preload/restart'
+        );
+    ELSIF view_name IS NULL THEN
+        INSERT INTO ds60_pgss_probe
+        VALUES ('installed_missing_view', 'extension catalog and view disagree');
+    ELSE
+        BEGIN
+            EXECUTE pg_catalog.format('SELECT 1 FROM %s LIMIT 1', view_name);
+            INSERT INTO ds60_pgss_probe
+            VALUES (
+                'readable',
+                'view is readable; query text is intentionally not selected'
+            );
+        EXCEPTION
+            WHEN insufficient_privilege THEN
+                INSERT INTO ds60_pgss_probe
+                VALUES ('permission_denied', 'extension exists but caller cannot read it');
+            WHEN object_not_in_prerequisite_state THEN
+                INSERT INTO ds60_pgss_probe
+                VALUES ('not_collecting', 'extension exists but prerequisite state is absent');
+        END;
+    END IF;
+END
+$solution$;
+
+SELECT capability_state, detail
+FROM ds60_pgss_probe;
+
+SELECT *
+FROM (
+    VALUES
+        (1, 'restrict view access'::text, 'database operator'::text),
+        (2, 'normalize/redact literals and identifiers before export', 'privacy owner'),
+        (3, 'set bounded retention and deletion', 'data governance owner'),
+        (4, 'publish aggregate fingerprints/latency, not raw query text', 'observability owner')
+) AS pgss_privacy(step_number, control, owner)
+ORDER BY step_number;
 
 -- Exercise 7: show semantic index properties for human review. Similarity is a
 -- candidate signal, never an automatic DROP decision.
@@ -129,7 +266,11 @@ SELECT
     i.indisunique,
     i.indisprimary,
     pg_catalog.pg_get_indexdef(i.indexrelid) AS index_definition,
-    pg_catalog.pg_get_expr(i.indpred, i.indrelid) AS predicate
+    pg_catalog.pg_get_expr(i.indpred, i.indrelid) AS predicate,
+    keys.key_expressions,
+    keys.included_columns,
+    keys.operator_classes,
+    keys.collations
 FROM pg_catalog.pg_index AS i
 JOIN pg_catalog.pg_class AS ci
   ON ci.oid = i.indexrelid
@@ -137,6 +278,27 @@ JOIN pg_catalog.pg_class AS ct
   ON ct.oid = i.indrelid
 JOIN pg_catalog.pg_namespace AS n
   ON n.oid = ct.relnamespace
+LEFT JOIN LATERAL (
+    SELECT
+        array_agg(
+            pg_catalog.pg_get_indexdef(i.indexrelid, pos.n, false)
+            ORDER BY pos.n
+        ) FILTER (WHERE pos.n <= i.indnkeyatts) AS key_expressions,
+        array_agg(
+            pg_catalog.pg_get_indexdef(i.indexrelid, pos.n, false)
+            ORDER BY pos.n
+        ) FILTER (WHERE pos.n > i.indnkeyatts) AS included_columns,
+        array_agg(opc.opcname::text ORDER BY pos.n)
+            FILTER (WHERE pos.n <= i.indnkeyatts) AS operator_classes,
+        array_agg(coll.collname::text ORDER BY pos.n)
+            FILTER (WHERE pos.n <= i.indnkeyatts) AS collations
+    FROM generate_series(1, i.indnatts) AS pos(n)
+    LEFT JOIN pg_catalog.pg_opclass AS opc
+      ON opc.oid = i.indclass[pos.n - 1]
+    LEFT JOIN pg_catalog.pg_collation AS coll
+      ON coll.oid = i.indcollation[pos.n - 1]
+) AS keys
+  ON true
 WHERE n.nspname = 'pro_ops_lab'
   AND ct.relname = 'events'
 ORDER BY ci.relname;
@@ -150,7 +312,14 @@ EXPLAIN (COSTS OFF)
 SELECT e.event_id, e.device_id
 FROM pro_ops_lab.events AS e
 WHERE lower(e.device_id) = 'device-007'
-ORDER BY e.event_id;
+ORDER BY e.event_id
+LIMIT 10;
+
+SELECT e.event_id, e.device_id
+FROM pro_ops_lab.events AS e
+WHERE lower(e.device_id) = 'device-007'
+ORDER BY e.event_id
+LIMIT 10;
 
 -- Exercise 9: observe rather than assert a HOT rate; page space, indexed
 -- columns, vacuum horizons, and asynchronous statistics affect the result.
@@ -164,6 +333,17 @@ WHERE e.event_id <= 100;
 SELECT
     s.relname,
     s.n_tup_upd,
+    s.n_tup_hot_upd
+FROM pg_catalog.pg_stat_xact_user_tables AS s
+WHERE s.schemaname = 'pro_ops_lab'
+  AND s.relname = 'events';
+
+-- The cumulative view is historical and can lag the current transaction. It is
+-- displayed separately rather than used to assert the immediately preceding
+-- UPDATE.
+SELECT
+    s.relname,
+    s.n_tup_upd,
     s.n_tup_hot_upd,
     s.n_dead_tup,
     s.last_autovacuum,
@@ -172,28 +352,134 @@ FROM pg_catalog.pg_stat_user_tables AS s
 WHERE s.schemaname = 'pro_ops_lab'
   AND s.relname = 'events';
 
--- Exercise 10: partition pruning and indexes are validated per partition.
--- PostgreSQL has no general global index, so cross-partition uniqueness usually
--- includes the partition key or uses another ownership design.
+-- Exercise 10: disposable two-month fixture proves partition routing, pruning,
+-- and per-partition index realization.
+CREATE TABLE pro_ops_lab.partitioned_events (
+    event_id bigint NOT NULL,
+    occurred_on date NOT NULL,
+    device_id text NOT NULL,
+    PRIMARY KEY (occurred_on, event_id)
+) PARTITION BY RANGE (occurred_on);
+
+CREATE TABLE pro_ops_lab.partitioned_events_2026_01
+PARTITION OF pro_ops_lab.partitioned_events
+FOR VALUES FROM ('2026-01-01') TO ('2026-02-01');
+
+CREATE TABLE pro_ops_lab.partitioned_events_2026_02
+PARTITION OF pro_ops_lab.partitioned_events
+FOR VALUES FROM ('2026-02-01') TO ('2026-03-01');
+
+CREATE INDEX partitioned_events_device_idx
+ON pro_ops_lab.partitioned_events (device_id, occurred_on);
+
+INSERT INTO pro_ops_lab.partitioned_events
+VALUES
+    (1, DATE '2026-01-10', 'device-007'),
+    (2, DATE '2026-01-20', 'device-008'),
+    (3, DATE '2026-02-10', 'device-007'),
+    (4, DATE '2026-02-20', 'device-009');
+
+EXPLAIN (COSTS OFF)
+SELECT pe.event_id, pe.occurred_on, pe.device_id
+FROM pro_ops_lab.partitioned_events AS pe
+WHERE pe.occurred_on >= DATE '2026-02-01'
+  AND pe.occurred_on < DATE '2026-03-01'
+  AND pe.device_id = 'device-007'
+ORDER BY pe.event_id;
+
+SELECT pe.event_id, pe.occurred_on, pe.device_id
+FROM pro_ops_lab.partitioned_events AS pe
+WHERE pe.occurred_on >= DATE '2026-02-01'
+  AND pe.occurred_on < DATE '2026-03-01'
+  AND pe.device_id = 'device-007'
+ORDER BY pe.event_id;
+
+SELECT
+    pt.relid::regclass AS partition_relation,
+    pt.parentrelid::regclass AS parent_relation,
+    pt.isleaf,
+    pt.level,
+    pg_catalog.pg_get_expr(c.relpartbound, c.oid) AS partition_bound
+FROM pg_catalog.pg_partition_tree(
+    'pro_ops_lab.partitioned_events'::regclass
+) AS pt
+JOIN pg_catalog.pg_class AS c
+  ON c.oid = pt.relid
+ORDER BY pt.level, pt.relid::regclass::text;
+
+SELECT
+    parent_index.relname AS parent_index,
+    child_table.relname AS child_partition,
+    child_index.relname AS child_index,
+    pg_catalog.pg_get_indexdef(child_index.oid) AS child_index_definition
+FROM pg_catalog.pg_class AS parent_index
+JOIN pg_catalog.pg_namespace AS parent_ns
+  ON parent_ns.oid = parent_index.relnamespace
+JOIN pg_catalog.pg_inherits AS inh
+  ON inh.inhparent = parent_index.oid
+JOIN pg_catalog.pg_class AS child_index
+  ON child_index.oid = inh.inhrelid
+JOIN pg_catalog.pg_index AS child_index_meta
+  ON child_index_meta.indexrelid = child_index.oid
+JOIN pg_catalog.pg_class AS child_table
+  ON child_table.oid = child_index_meta.indrelid
+WHERE parent_ns.nspname = 'pro_ops_lab'
+  AND parent_index.relname = 'partitioned_events_device_idx'
+ORDER BY child_table.relname, child_index.relname;
 
 -- Exercise 11: ANALYZE executes this read. BUFFERS is cache/I/O evidence for
 -- this fixture, not a production benchmark.
 EXPLAIN (ANALYZE, BUFFERS, COSTS OFF, TIMING OFF)
 SELECT COUNT(*)
 FROM pro_ops_lab.events AS e
-WHERE e.device_id = 'device-007'
+WHERE e.device_id = 'device-005'
   AND e.severity >= 4;
+
+SELECT COUNT(*) AS matching_rows
+FROM pro_ops_lab.events AS e
+WHERE e.device_id = 'device-005'
+  AND e.severity >= 4;
+
+SELECT *
+FROM (
+    VALUES
+        ('SELECT'::text, 'EXPLAIN ANALYZE executes a read-only statement'::text),
+        ('UPDATE/DELETE/INSERT', 'EXPLAIN ANALYZE performs the write; use rollback-only fixtures'),
+        ('DDL/maintenance', 'test only in disposable targets with explicit lock and recovery plans')
+) AS explain_safety(statement_class, execution_warning)
+ORDER BY statement_class;
 
 -- Exercise 12: an owned scorecard attaches source, budget, cadence, and action
 -- instead of pretending one threshold fits every workload.
 SELECT *
 FROM (
     VALUES
-        ('dead tuples'::text, 'pg_stat_user_tables'::text, 'table owner'::text),
-        ('invalid indexes', 'pg_index.indisvalid', 'database operator'),
-        ('lock wait', 'pg_stat_activity/pg_locks', 'service owner'),
-        ('replication lag', 'replay LSN and user SLO', 'HA owner')
-) AS scorecard(signal, evidence_source, owner)
+        ('dead tuples'::text, 'pg_stat_user_tables'::text, 'table owner'::text,
+         'workload-specific dead-tuple/age budget'::text, 'daily and after bulk writes'::text,
+         'page on freeze risk or sustained SLO breach'::text,
+         'runbooks/vacuum.md'::text, 'tune autovacuum or schedule reviewed maintenance'::text),
+        ('invalid indexes', 'pg_index.indisvalid', 'database operator',
+         'zero unexplained invalid production indexes', 'after every index build and daily',
+         'page immediately when a build leaves an invalid artifact',
+         'runbooks/index-build.md', 'inspect identity/state before retry or reviewed drop'),
+        ('lock wait', 'pg_stat_activity/pg_locks', 'service owner',
+         'service latency and lock-wait SLO', 'continuous',
+         'page when blocker age or user impact exceeds budget',
+         'runbooks/lock-response.md', 'identify blocker; cancel/terminate only by runbook'),
+        ('replication lag', 'replay LSN and user SLO', 'HA owner',
+         'RPO/RTO-derived byte and time lag', 'continuous',
+         'page before recovery-point or read-staleness budget is breached',
+         'runbooks/replication-lag.md', 'throttle workload or follow HA incident plan')
+) AS scorecard(
+    signal,
+    evidence_source,
+    owner,
+    budget,
+    cadence,
+    escalation,
+    runbook,
+    action
+)
 ORDER BY signal;
 
 ROLLBACK;

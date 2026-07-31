@@ -90,7 +90,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 ```
 
 The discovery bootstrap leaves PATH process-local by default, installs
-IPython, JupyterLab, classic Notebook, ipykernel, and the course dependency
+IPython, JupyterLab, Jupyter Notebook, ipykernel, and the course dependency
 profile, registers `Python (ds60sqlpy)`, and verifies `psql` without connecting
 to a database. A standard `venv` puts Python under `.venv\Scripts`; the
 Anaconda fallback creates a conda prefix whose interpreter is
@@ -186,6 +186,14 @@ SQL:
    ```text
    psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
    ```
+
+   That command uses the current operating system's PostgreSQL role and
+   authentication defaults. A native Windows installation normally needs the
+   `-h localhost -U postgres` flags from the
+   [Windows setup guide](docs/setup/windows.md#option-a-native-postgresql).
+   Before opening a guided notebook against native Windows PostgreSQL, also
+   complete the guide's non-interactive local-authentication step; the notebook
+   will never stop in a hidden password prompt.
 
 5. Attempt the exercises before opening [the worked solution](sql/postgres-60day/solutions/day01_solutions.md).
 6. Follow the generated catalog order: complete

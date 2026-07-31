@@ -86,7 +86,7 @@ WHERE d.state = 'published'
   AND d.tags @> ARRAY['postgresql', 'operations']::text[]
 ORDER BY d.document_id;
 
--- Exercise 2. The first document is blacked out, so no row is expected.
+-- Exercise 2. Document 201 is excluded by its blackout; document 202 remains.
 SELECT
     d.document_id,
     d.title
@@ -95,11 +95,30 @@ WHERE d.availability @> DATE '2026-08-11'
   AND NOT (d.blackout_windows @> DATE '2026-08-11')
 ORDER BY d.document_id;
 
--- Exercise 3. Fixture ownership guarantees numeric JSON minutes.
+SELECT
+    probe.probe_name,
+    probe.probe_date,
+    d.availability @> probe.probe_date AS inside_availability,
+    d.blackout_windows @> probe.probe_date AS inside_blackout,
+    (d.availability @> probe.probe_date)
+        AND NOT (d.blackout_windows @> probe.probe_date) AS is_available
+FROM pro_types_lab.documents AS d
+CROSS JOIN (
+    VALUES
+        ('availability lower bound'::text, DATE '2026-01-01'),
+        ('blackout lower bound', DATE '2026-08-10'),
+        ('blackout upper bound', DATE '2026-08-12'),
+        ('availability upper bound', DATE '2027-01-01')
+) AS probe(probe_name, probe_date)
+WHERE d.document_id = '00000000-0000-0000-0000-000000000201'::uuid
+ORDER BY probe.probe_date;
+
+-- Exercise 3. JSONPath tests the JSON type and numeric threshold before a
+-- numeric cast. It does not promise that every JSON number fits an integer.
 SELECT
     d.document_id,
     d.title,
-    (d.metadata ->> 'minutes')::integer AS minutes
+    (d.metadata ->> 'minutes')::numeric AS minutes_numeric
 FROM pro_types_lab.documents AS d
 WHERE d.metadata @? '$.minutes ? (@.type() == "number" && @ > 30)'
 ORDER BY d.document_id;
@@ -143,12 +162,53 @@ BEGIN
 END
 $solution$;
 
--- Exercise 5: operator-first index notes are in the Markdown solution. This
--- executable fixture deliberately creates no optional extension or extra GIN.
+-- Exercise 5: choose an access method from the operators the workload really
+-- uses. `nonmatching_query` makes a common false assumption explicit.
+SELECT *
+FROM (
+    VALUES
+        ('tags contains all values'::text, 'tags @> ARRAY[...]'::text,
+         'GIN array_ops'::text, 'tags[1] = ...'::text,
+         'array element position is a different expression'),
+        ('JSON containment/path', 'metadata @> ... or metadata @? ...',
+         'GIN jsonb_ops or jsonb_path_ops',
+         'metadata ->> ''minutes'' > ...',
+         'extracted scalar comparison needs an expression/generated-column index'),
+        ('full-text match', 'search_vector @@ tsquery',
+         'GIN tsvector_ops', 'title ILIKE ''%term%''',
+         'substring similarity needs optional pg_trgm, not tsvector GIN'),
+        ('range overlap/containment', 'availability @> date',
+         'GiST range_ops', 'lower(availability) = date',
+         'a lower-bound expression is not a range-containment search')
+) AS index_choice(
+    workload,
+    matching_operator,
+    candidate_index,
+    nonmatching_query,
+    reason
+)
+ORDER BY workload;
 
--- Exercise 6: type selection is a domain decision; the following exercises
--- demonstrate multirange, network, domain, generated, search, and normalized
--- relation alternatives without claiming one universal choice.
+-- Exercise 6: type selection is a domain decision, not a fashion choice.
+SELECT *
+FROM (
+    VALUES
+        ('money with a reusable nonnegative rule'::text, 'domain over numeric'::text,
+         'fixed scale plus reusable validation; column still declares NOT NULL'::text),
+        ('small stable workflow vocabulary', 'CHECK or enum',
+         'CHECK is easier to evolve; enum is strongly typed but migration-heavy'),
+        ('operator-managed vocabulary', 'reference table',
+         'rows carry metadata, lifecycle, and foreign-key identity'),
+        ('small owned tag bag', 'array',
+         'containment is concise when order and duplicates are not business facts'),
+        ('time window', 'range or multirange',
+         'boundary and overlap operators encode interval semantics'),
+        ('sparse evolving payload', 'JSONB',
+         'flexible shape, but frequently queried properties need validation/index policy'),
+        ('many-to-many tags', 'normalized relation',
+         'foreign keys, canonical identity, and duplicate prevention')
+) AS type_decision(field_shape, candidate_type, decision_rule)
+ORDER BY field_shape;
 
 -- Exercise 7: discrete date multiranges canonicalize overlapping/adjacent
 -- members. Subtracting from the month produces the uncovered gaps.
@@ -176,26 +236,24 @@ WITH rules(rule_id, network) AS (
 clients(client_id, address) AS (
     VALUES
         ('client-a'::text, '10.20.1.5'::inet),
-        ('client-b'::text, '2001:db8::42'::inet)
-),
-ranked AS (
-    SELECT
-        c.client_id,
-        c.address,
-        r.rule_id,
-        r.network,
-        row_number() OVER (
-            PARTITION BY c.client_id
-            ORDER BY masklen(r.network) DESC, r.rule_id
-        ) AS match_rank
-    FROM clients AS c
-    JOIN rules AS r
-      ON r.network >>= c.address
+        ('client-b'::text, '2001:db8::42'::inet),
+        ('client-unmatched'::text, '192.0.2.10'::inet)
 )
-SELECT client_id, address, rule_id, network
-FROM ranked
-WHERE match_rank = 1
-ORDER BY client_id;
+SELECT
+    c.client_id,
+    c.address,
+    best.rule_id,
+    best.network
+FROM clients AS c
+LEFT JOIN LATERAL (
+    SELECT r.rule_id, r.network
+    FROM rules AS r
+    WHERE r.network >>= c.address
+    ORDER BY masklen(r.network) DESC, r.rule_id
+    LIMIT 1
+) AS best
+  ON true
+ORDER BY c.client_id;
 
 -- Exercise 9: exact decimal storage with an explicit nonnegative reusable rule.
 CREATE DOMAIN pro_types_lab.nonnegative_money AS numeric(12, 2)
@@ -204,15 +262,59 @@ CHECK (VALUE >= 0);
 SELECT
     10.10::pro_types_lab.nonnegative_money
     + 20.20::pro_types_lab.nonnegative_money AS exact_decimal_sum,
-    round(10.125::numeric, 2) AS declared_rounding_example;
+    round(10.125::numeric, 2) AS declared_rounding_example,
+    NULL::pro_types_lab.nonnegative_money AS domain_null_without_column_rule;
 
--- Exercise 10: promote a controlled, frequently queried JSON number. The CASE
--- prevents a non-number JSON value from reaching the cast.
+SELECT *
+FROM (
+    VALUES
+        ('numeric(12,2)'::text, 'exact decimal', 'declared half-away-from-zero example', 'common database money model'),
+        ('bigint minor units', 'exact integer', 'application supplies currency scale', 'fast and interoperable if scale/currency are explicit'),
+        ('double precision', 'binary approximation', 'not exact for decimal equality', 'scientific measurement, not contractual money')
+) AS money_choice(storage, equality_model, rounding_policy, suitable_use)
+ORDER BY storage;
+
+-- Exercise 10: add malformed-for-this-property-but-valid-JSON probes before
+-- defining the generated column. The CASE must classify all of them safely.
+INSERT INTO pro_types_lab.documents (
+    document_id,
+    state,
+    title,
+    body,
+    tags,
+    availability,
+    blackout_windows,
+    metadata
+)
+SELECT
+    probe.document_id,
+    'draft',
+    probe.title,
+    'Boundary fixture',
+    ARRAY['boundary'],
+    daterange(DATE '2026-01-01', DATE '2027-01-01', '[)'),
+    '{}'::datemultirange,
+    probe.metadata
+FROM (
+    VALUES
+        ('00000000-0000-0000-0000-000000000210'::uuid, 'String minutes'::text,
+         '{"minutes":"45"}'::jsonb),
+        ('00000000-0000-0000-0000-000000000211'::uuid, 'Missing minutes',
+         '{"audience":[]}'::jsonb),
+        ('00000000-0000-0000-0000-000000000212'::uuid, 'Fractional minutes',
+         '{"minutes":12.5}'::jsonb),
+        ('00000000-0000-0000-0000-000000000213'::uuid, 'Out-of-range minutes',
+         '{"minutes":999999999999}'::jsonb)
+) AS probe(document_id, title, metadata);
+
 ALTER TABLE pro_types_lab.documents
 ADD COLUMN estimated_minutes integer GENERATED ALWAYS AS (
     CASE
         WHEN jsonb_typeof(metadata -> 'minutes') = 'number'
-        THEN (metadata ->> 'minutes')::integer
+         AND (metadata ->> 'minutes')::numeric
+             = trunc((metadata ->> 'minutes')::numeric)
+         AND (metadata ->> 'minutes')::numeric BETWEEN 0 AND 2147483647
+        THEN ((metadata ->> 'minutes')::numeric)::integer
         ELSE NULL
     END
 ) STORED;
@@ -222,7 +324,7 @@ ON pro_types_lab.documents (estimated_minutes);
 
 SELECT d.document_id, d.estimated_minutes
 FROM pro_types_lab.documents AS d
-WHERE d.estimated_minutes > 30
+WHERE d.document_id >= '00000000-0000-0000-0000-000000000210'::uuid
 ORDER BY d.document_id;
 
 -- Exercise 11: inspect lexemes after the explicit English configuration.
@@ -249,18 +351,26 @@ CREATE TABLE pro_types_lab.document_tags (
     PRIMARY KEY (document_id, tag_id)
 );
 
+-- Deliberately inject duplicate/case/whitespace legacy spellings. The
+-- normalized bridge policy is lower(btrim(tag)); array order is discarded.
+UPDATE pro_types_lab.documents
+SET tags = ARRAY['python', ' Python ', 'python']
+WHERE document_id = '00000000-0000-0000-0000-000000000203'::uuid;
+
 INSERT INTO pro_types_lab.tags (tag_name)
-SELECT DISTINCT tag_name
+SELECT DISTINCT lower(btrim(tag_name))
 FROM pro_types_lab.documents AS d
 CROSS JOIN LATERAL unnest(d.tags) AS tag_name
-ORDER BY tag_name;
+WHERE btrim(tag_name) <> ''
+ORDER BY lower(btrim(tag_name));
 
 INSERT INTO pro_types_lab.document_tags (document_id, tag_id)
-SELECT d.document_id, t.tag_id
+SELECT DISTINCT d.document_id, t.tag_id
 FROM pro_types_lab.documents AS d
 CROSS JOIN LATERAL unnest(d.tags) AS item(tag_name)
 JOIN pro_types_lab.tags AS t
-  ON t.tag_name = item.tag_name;
+  ON t.tag_name = lower(btrim(item.tag_name))
+WHERE btrim(item.tag_name) <> '';
 
 SELECT
     d.document_id,

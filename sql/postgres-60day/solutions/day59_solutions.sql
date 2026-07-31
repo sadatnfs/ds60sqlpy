@@ -35,23 +35,60 @@ FROM customer_ltv
 GROUP BY cohort_month, segment
 ORDER BY cohort_month DESC, total_ltv DESC;
 
--- Conversion funnel with rates and a stable customer denominator.
-WITH activity AS (
+-- Ordered conversion funnel with rates and a stable customer denominator.
+-- A later action counts only after the same customer completed the prior one;
+-- independent reach counts are useful diagnostics, but are not conversions.
+WITH viewed_stage AS (
   SELECT c.customer_id,
-         BOOL_OR(e.event_type = 'page_view') AS viewed,
-         BOOL_OR(e.event_type = 'add_to_cart') AS added,
-         BOOL_OR(e.event_type = 'checkout') AS checked_out,
-         EXISTS (
-           SELECT 1
-           FROM orders o
-           WHERE o.customer_id = c.customer_id
-             AND o.order_date >= CURRENT_TIMESTAMP - interval '90 days'
-         ) AS bought
+         MIN(e.event_time) FILTER (
+           WHERE e.event_type = 'page_view'
+         ) AS viewed_at
   FROM customers c
   LEFT JOIN events e
     ON e.customer_id = c.customer_id
    AND e.event_time >= CURRENT_TIMESTAMP - interval '90 days'
   GROUP BY c.customer_id
+), added_stage AS (
+  SELECT viewed.customer_id,
+         viewed.viewed_at,
+         MIN(event.event_time) AS added_at
+  FROM viewed_stage viewed
+  LEFT JOIN events event
+    ON event.customer_id = viewed.customer_id
+   AND event.event_type = 'add_to_cart'
+   AND event.event_time >= viewed.viewed_at
+  GROUP BY viewed.customer_id, viewed.viewed_at
+), checkout_stage AS (
+  SELECT added.customer_id,
+         added.viewed_at,
+         added.added_at,
+         MIN(event.event_time) AS checkout_at
+  FROM added_stage added
+  LEFT JOIN events event
+    ON event.customer_id = added.customer_id
+   AND event.event_type = 'checkout'
+   AND event.event_time >= added.added_at
+  GROUP BY added.customer_id, added.viewed_at, added.added_at
+), purchase_stage AS (
+  SELECT checkout.customer_id,
+         checkout.viewed_at,
+         checkout.added_at,
+         checkout.checkout_at,
+         MIN(customer_order.order_date) AS purchased_at
+  FROM checkout_stage checkout
+  LEFT JOIN orders customer_order
+    ON customer_order.customer_id = checkout.customer_id
+   AND customer_order.order_date >= checkout.checkout_at
+   AND customer_order.order_date >= CURRENT_TIMESTAMP - interval '90 days'
+  GROUP BY checkout.customer_id, checkout.viewed_at,
+           checkout.added_at, checkout.checkout_at
+), activity AS (
+  SELECT customer_id,
+         viewed_at IS NOT NULL AS viewed,
+         added_at IS NOT NULL AND added_at >= viewed_at AS added,
+         checkout_at IS NOT NULL AND checkout_at >= added_at AS checked_out,
+         purchased_at IS NOT NULL AND purchased_at >= checkout_at AS bought
+  FROM purchase_stage
 )
 SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,
        COUNT(*) FILTER (WHERE added) AS adders,
@@ -108,29 +145,71 @@ FROM (
      'cohort_month + segment')
 ) AS grain_map(step_name, row_grain, key_columns);
 
--- Exercise 2: start with every customer so buyers without matching event
--- records remain visible. Each denominator is the preceding funnel population.
-WITH activity AS (
+-- Exercise 2: require each later stage to occur at or after the prior stage.
+-- Independent reach counts are not funnel conversions and can exceed 100%.
+WITH viewed_stage AS (
   SELECT c.customer_id,
-         BOOL_OR(e.event_type = 'page_view') AS viewed,
-         BOOL_OR(e.event_type = 'add_to_cart') AS added,
-         BOOL_OR(e.event_type = 'checkout') AS checked_out,
-         EXISTS (
-           SELECT 1 FROM orders o
-           WHERE o.customer_id = c.customer_id
-             AND o.order_date >= CURRENT_TIMESTAMP - interval '90 days'
-         ) AS bought
+         MIN(e.event_time) FILTER (
+           WHERE e.event_type = 'page_view'
+         ) AS viewed_at
   FROM customers c
   LEFT JOIN events e
     ON e.customer_id = c.customer_id
    AND e.event_time >= CURRENT_TIMESTAMP - interval '90 days'
   GROUP BY c.customer_id
+), added_stage AS (
+  SELECT viewed.customer_id,
+         viewed.viewed_at,
+         MIN(event.event_time) AS added_at
+  FROM viewed_stage viewed
+  LEFT JOIN events event
+    ON event.customer_id = viewed.customer_id
+   AND event.event_type = 'add_to_cart'
+   AND event.event_time >= viewed.viewed_at
+  GROUP BY viewed.customer_id, viewed.viewed_at
+), checkout_stage AS (
+  SELECT added.customer_id,
+         added.viewed_at,
+         added.added_at,
+         MIN(event.event_time) AS checkout_at
+  FROM added_stage added
+  LEFT JOIN events event
+    ON event.customer_id = added.customer_id
+   AND event.event_type = 'checkout'
+   AND event.event_time >= added.added_at
+  GROUP BY added.customer_id, added.viewed_at, added.added_at
+), purchase_stage AS (
+  SELECT checkout.customer_id,
+         checkout.viewed_at,
+         checkout.added_at,
+         checkout.checkout_at,
+         MIN(customer_order.order_date) AS purchased_at
+  FROM checkout_stage checkout
+  LEFT JOIN orders customer_order
+    ON customer_order.customer_id = checkout.customer_id
+   AND customer_order.order_date >= checkout.checkout_at
+   AND customer_order.order_date >= CURRENT_TIMESTAMP - interval '90 days'
+  GROUP BY checkout.customer_id, checkout.viewed_at,
+           checkout.added_at, checkout.checkout_at
+), activity AS (
+  SELECT customer_id,
+         viewed_at IS NOT NULL AS viewed,
+         added_at IS NOT NULL AND added_at >= viewed_at AS added,
+         checkout_at IS NOT NULL AND checkout_at >= added_at AS checked_out,
+         purchased_at IS NOT NULL AND purchased_at >= checkout_at AS bought,
+         EXISTS (
+           SELECT 1
+           FROM orders any_order
+           WHERE any_order.customer_id = purchase_stage.customer_id
+             AND any_order.order_date >= CURRENT_TIMESTAMP - interval '90 days'
+         ) AND viewed_at IS NULL AS buyer_without_view
+  FROM purchase_stage
 ), counts AS (
   SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,
          COUNT(*) FILTER (WHERE added) AS adders,
          COUNT(*) FILTER (WHERE checked_out) AS checkouts,
          COUNT(*) FILTER (WHERE bought) AS buyers,
-         COUNT(*) FILTER (WHERE bought AND NOT viewed) AS buyers_without_view
+         COUNT(*) FILTER (WHERE buyer_without_view) AS buyers_without_view
   FROM activity
 )
 SELECT *,
@@ -170,6 +249,7 @@ LEFT JOIN LATERAL (
   SELECT e.metadata->>'campaign' AS campaign
   FROM events e
   WHERE e.customer_id = o.customer_id
+    AND e.event_type IN ('page_view', 'add_to_cart', 'checkout')
     AND e.event_time >= o.order_date - interval '7 days'
     AND e.event_time < o.order_date
     AND e.metadata ? 'campaign'

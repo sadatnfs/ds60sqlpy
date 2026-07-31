@@ -36,11 +36,20 @@ VALUES
     ('A4', 1, 'purchase',    TIMESTAMPTZ '2026-01-01 09:30+00', TIMESTAMPTZ '2026-01-01 09:31+00'),
     ('A4', 1, 'purchase',    TIMESTAMPTZ '2026-01-01 09:30+00', TIMESTAMPTZ '2026-01-01 09:32+00'),
     ('A5', 1, 'view_item',   TIMESTAMPTZ '2026-01-01 10:30+00', TIMESTAMPTZ '2026-01-01 10:31+00'),
+    ('A6', 1, 'active',      TIMESTAMPTZ '2026-01-02 09:00+00', TIMESTAMPTZ '2026-01-02 09:01+00'),
+    ('A7', 1, 'active',      TIMESTAMPTZ '2026-02-01 09:00+00', TIMESTAMPTZ '2026-02-01 09:01+00'),
     ('B1', 2, 'signup',      TIMESTAMPTZ '2026-01-02 09:00+00', TIMESTAMPTZ '2026-01-02 09:01+00'),
-    ('B2', 2, 'view_item',   TIMESTAMPTZ '2026-01-02 09:10+00', TIMESTAMPTZ '2026-01-02 09:11+00');
+    ('B2', 2, 'view_item',   TIMESTAMPTZ '2026-01-02 09:10+00', TIMESTAMPTZ '2026-01-02 09:11+00'),
+    ('B3', 2, 'purchase',    TIMESTAMPTZ '2026-01-10 09:30+00', TIMESTAMPTZ '2026-01-10 09:31+00');
 
 CREATE VIEW pro_analytics_lab.deduplicated_events AS
-SELECT source_event_id, user_id, event_name, event_at, ingested_at
+SELECT
+    ingestion_id,
+    source_event_id,
+    user_id,
+    event_name,
+    event_at,
+    ingested_at
 FROM (
     SELECT
         e.*,
@@ -55,10 +64,23 @@ WHERE rn = 1;
 -- Exercise 1.
 SELECT
     de.source_event_id,
-    COUNT(*) AS canonical_rows
+    COUNT(*) AS canonical_rows,
+    max(de.ingested_at) AS winner_ingested_at,
+    max(de.ingestion_id) AS winner_ingestion_id
 FROM pro_analytics_lab.deduplicated_events AS de
 GROUP BY de.source_event_id
 ORDER BY de.source_event_id;
+
+-- Retried delivery is not automatically harmless. This diagnostic reveals one
+-- source ID carrying conflicting business fields; an empty result is expected
+-- for the reference fixture.
+SELECT
+    e.source_event_id,
+    COUNT(DISTINCT ROW(e.user_id, e.event_name, e.event_at)) AS payload_versions
+FROM pro_analytics_lab.events AS e
+GROUP BY e.source_event_id
+HAVING COUNT(DISTINCT ROW(e.user_id, e.event_name, e.event_at)) > 1
+ORDER BY e.source_event_id;
 
 -- Exercise 2: exactly 60 minutes remains in the same session because the rule
 -- starts a new session only when the gap is greater than 60 minutes.
@@ -145,8 +167,9 @@ SELECT
 FROM completed AS c
 ORDER BY c.user_id;
 
--- Exercise 4: derive islands only after reducing to one row per user/day. This
--- fixture has no multi-day island, so the deterministic result is empty.
+-- Exercise 4: derive islands only after reducing to one row per user/day. User
+-- 1 has a positive Jan 1-Jan 2 island; many Jan 1 events still count as one
+-- active day.
 WITH active_days AS (
     SELECT DISTINCT de.user_id, de.event_at::date AS activity_date
     FROM pro_analytics_lab.deduplicated_events AS de
@@ -174,6 +197,44 @@ ORDER BY n.user_id, island_start;
 -- Exercise 5: attribution needs separate touch/purchase fixture rows. The
 -- reference rule is LEFT LATERAL, ordered touched_at DESC, touch_id DESC, so
 -- purchases with no qualifying touch remain with NULL attribution.
+CREATE TABLE pro_analytics_lab.campaign_touches (
+    touch_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id bigint NOT NULL,
+    campaign text NOT NULL,
+    touched_at timestamptz NOT NULL
+);
+
+INSERT INTO pro_analytics_lab.campaign_touches (
+    user_id, campaign, touched_at
+)
+VALUES
+    (1, 'search', TIMESTAMPTZ '2026-01-01 08:00+00'),
+    (1, 'email-a', TIMESTAMPTZ '2026-01-01 09:15+00'),
+    (1, 'email-b', TIMESTAMPTZ '2026-01-01 09:15+00');
+
+SELECT
+    p.source_event_id,
+    p.user_id,
+    p.event_at AS purchased_at,
+    selected.touch_id,
+    selected.campaign,
+    selected.touched_at
+FROM pro_analytics_lab.deduplicated_events AS p
+LEFT JOIN LATERAL (
+    SELECT
+        t.touch_id,
+        t.campaign,
+        t.touched_at
+    FROM pro_analytics_lab.campaign_touches AS t
+    WHERE t.user_id = p.user_id
+      AND t.touched_at <= p.event_at
+      AND t.touched_at > p.event_at - INTERVAL '7 days'
+    ORDER BY t.touched_at DESC, t.touch_id DESC
+    LIMIT 1
+) AS selected
+  ON true
+WHERE p.event_name = 'purchase'
+ORDER BY p.source_event_id;
 
 -- Exercise 6: expose cohort denominator and retained numerator before division.
 WITH cohorts AS (
@@ -194,16 +255,119 @@ SELECT
     COUNT(DISTINCT c.user_id) AS cohort_users,
     COUNT(DISTINCT a.user_id) FILTER (
         WHERE a.activity_month = (c.cohort_month + INTERVAL '1 month')::date
-    ) AS month_1_users
+    ) AS month_1_users,
+    round(
+        COUNT(DISTINCT a.user_id) FILTER (
+            WHERE a.activity_month
+                  = (c.cohort_month + INTERVAL '1 month')::date
+        )::numeric
+        / NULLIF(COUNT(DISTINCT c.user_id), 0),
+        4
+    ) AS month_1_rate
 FROM cohorts AS c
 LEFT JOIN activity AS a
   ON a.user_id = c.user_id
 GROUP BY c.cohort_month
 ORDER BY c.cohort_month;
 
+DO $solution$
+DECLARE
+    january_cohort_users bigint;
+    january_month_1_users bigint;
+BEGIN
+    WITH cohorts AS (
+        SELECT
+            de.user_id,
+            date_trunc('month', min(de.event_at))::date AS cohort_month
+        FROM pro_analytics_lab.deduplicated_events AS de
+        GROUP BY de.user_id
+    ),
+    activity AS (
+        SELECT DISTINCT
+            de.user_id,
+            date_trunc('month', de.event_at)::date AS activity_month
+        FROM pro_analytics_lab.deduplicated_events AS de
+    )
+    SELECT
+        count(DISTINCT c.user_id),
+        count(DISTINCT a.user_id) FILTER (
+            WHERE a.activity_month = DATE '2026-02-01'
+        )
+    INTO january_cohort_users, january_month_1_users
+    FROM cohorts AS c
+    LEFT JOIN activity AS a
+      ON a.user_id = c.user_id
+    WHERE c.cohort_month = DATE '2026-01-01';
+
+    IF january_cohort_users <> 2 OR january_month_1_users <> 1 THEN
+        RAISE EXCEPTION
+            'month-1 retention fixture drifted: expected 1/2, got %/%',
+            january_month_1_users,
+            january_cohort_users;
+    END IF;
+END
+$solution$;
+
 -- Exercise 7: the as-of contract is valid_from <= event_at AND
 -- event_at < valid_to. It must assert at most one match, not hide overlap with
 -- ORDER BY/LIMIT 1.
+CREATE TABLE pro_analytics_lab.user_tiers (
+    user_id bigint NOT NULL,
+    tier_name text NOT NULL,
+    valid_from timestamptz NOT NULL,
+    valid_to timestamptz,
+    PRIMARY KEY (user_id, valid_from),
+    CHECK (valid_to IS NULL OR valid_to > valid_from)
+);
+
+CREATE TABLE pro_analytics_lab.event_probes (
+    probe_id text PRIMARY KEY,
+    user_id bigint NOT NULL,
+    event_at timestamptz NOT NULL
+);
+
+INSERT INTO pro_analytics_lab.user_tiers
+VALUES
+    (1, 'basic', TIMESTAMPTZ '2026-01-01 00:00+00', TIMESTAMPTZ '2026-01-10 00:00+00'),
+    (1, 'pro', TIMESTAMPTZ '2026-01-10 00:00+00', NULL);
+
+INSERT INTO pro_analytics_lab.event_probes
+VALUES
+    ('before', 1, TIMESTAMPTZ '2026-01-09 23:59:59+00'),
+    ('boundary', 1, TIMESTAMPTZ '2026-01-10 00:00:00+00'),
+    ('after', 1, TIMESTAMPTZ '2026-01-10 00:00:01+00');
+
+SELECT
+    p.probe_id,
+    p.event_at,
+    min(t.tier_name) AS tier_name,
+    min(t.valid_from) AS valid_from,
+    min(t.valid_to) AS valid_to,
+    COUNT(t.tier_name) AS matching_tiers
+FROM pro_analytics_lab.event_probes AS p
+LEFT JOIN pro_analytics_lab.user_tiers AS t
+  ON t.user_id = p.user_id
+ AND t.valid_from <= p.event_at
+ AND p.event_at < COALESCE(t.valid_to, 'infinity'::timestamptz)
+GROUP BY p.probe_id, p.event_at
+ORDER BY p.probe_id;
+
+DO $solution$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pro_analytics_lab.event_probes AS p
+        JOIN pro_analytics_lab.user_tiers AS t
+          ON t.user_id = p.user_id
+         AND t.valid_from <= p.event_at
+         AND p.event_at < COALESCE(t.valid_to, 'infinity'::timestamptz)
+        GROUP BY p.probe_id
+        HAVING COUNT(*) > 1
+    ) THEN
+        RAISE EXCEPTION 'an event probe matched overlapping tier rows';
+    END IF;
+END
+$solution$;
 
 -- Exercise 8: a dense spine preserves calendar meaning for the trailing window.
 WITH spine AS (
@@ -295,7 +459,9 @@ CREATE TABLE pro_analytics_lab.campaign_nodes (
 );
 
 INSERT INTO pro_analytics_lab.campaign_nodes
-VALUES (1, NULL), (2, 1), (3, 2), (4, 3);
+VALUES
+    (1, NULL), (2, 1), (3, 2), (4, 3),
+    (5, 6), (6, 5);
 
 WITH RECURSIVE tree AS (
     SELECT
@@ -321,6 +487,32 @@ WITH RECURSIVE tree AS (
 SELECT campaign_id, parent_campaign_id, depth, path
 FROM tree
 ORDER BY path;
+
+WITH RECURSIVE reachable AS (
+    SELECT
+        c.campaign_id,
+        ARRAY[c.campaign_id] AS path
+    FROM pro_analytics_lab.campaign_nodes AS c
+    WHERE c.parent_campaign_id IS NULL
+
+    UNION ALL
+
+    SELECT
+        child.campaign_id,
+        reachable.path || child.campaign_id
+    FROM reachable
+    JOIN pro_analytics_lab.campaign_nodes AS child
+      ON child.parent_campaign_id = reachable.campaign_id
+    WHERE NOT child.campaign_id = ANY (reachable.path)
+)
+SELECT c.campaign_id AS unreachable_campaign_id
+FROM pro_analytics_lab.campaign_nodes AS c
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM reachable AS r
+    WHERE r.campaign_id = c.campaign_id
+)
+ORDER BY c.campaign_id;
 
 -- Exercise 12: start from dates and keep event filters in the join/aggregate.
 WITH spine AS (
@@ -351,7 +543,38 @@ ORDER BY s.report_date;
 SELECT COUNT(DISTINCT de.user_id) AS exact_distinct_users
 FROM pro_analytics_lab.deduplicated_events AS de;
 
--- Exercise 14: validate parameters before applying the same half-open bound.
+SELECT *
+FROM (
+    VALUES
+        (1, 'implementation/version', 'name the approved sketch and serialized format'),
+        (2, 'error budget', 'measure relative error at expected cardinalities'),
+        (3, 'mergeability', 'prove period sketches combine without summing estimates'),
+        (4, 'fallback', 'use exact count when capability or accuracy is unavailable'),
+        (5, 'ownership', 'name monitoring, upgrade, privacy, and rebuild owners')
+) AS approximation_review(criterion_number, criterion, required_evidence)
+ORDER BY criterion_number;
+
+-- Exercise 14: reject invalid parameters before applying the half-open bound.
+CREATE FUNCTION pro_analytics_lab.valid_time_window(
+    p_starts_at timestamptz,
+    p_ends_at timestamptz
+)
+RETURNS boolean
+LANGUAGE plpgsql
+IMMUTABLE
+AS $function$
+BEGIN
+    IF p_starts_at IS NULL
+       OR p_ends_at IS NULL
+       OR p_ends_at <= p_starts_at THEN
+        RAISE EXCEPTION USING
+            ERRCODE = '22023',
+            MESSAGE = 'ends_at must be greater than starts_at';
+    END IF;
+    RETURN true;
+END
+$function$;
+
 WITH parameters AS (
     SELECT
         TIMESTAMPTZ '2026-01-01 00:00+00' AS starts_at,
@@ -360,10 +583,25 @@ WITH parameters AS (
 SELECT de.source_event_id, de.event_at
 FROM pro_analytics_lab.deduplicated_events AS de
 CROSS JOIN parameters AS p
-WHERE p.ends_at > p.starts_at
+WHERE pro_analytics_lab.valid_time_window(p.starts_at, p.ends_at)
   AND de.event_at >= p.starts_at
   AND de.event_at < p.ends_at
 ORDER BY de.event_at, de.source_event_id;
+
+DO $solution$
+BEGIN
+    BEGIN
+        PERFORM pro_analytics_lab.valid_time_window(
+            TIMESTAMPTZ '2026-01-02 00:00+00',
+            TIMESTAMPTZ '2026-01-01 00:00+00'
+        );
+        RAISE EXCEPTION 'reversed window unexpectedly passed';
+    EXCEPTION
+        WHEN invalid_parameter_value THEN
+            RAISE NOTICE 'Expected invalid time window was rejected';
+    END;
+END
+$solution$;
 
 DO $solution$
 BEGIN
@@ -376,7 +614,7 @@ BEGIN
         RAISE EXCEPTION 'deduplication grain failed';
     END IF;
 
-    IF (SELECT COUNT(*) FROM pro_analytics_lab.deduplicated_events) <> 7 THEN
+    IF (SELECT COUNT(*) FROM pro_analytics_lab.deduplicated_events) <> 10 THEN
         RAISE EXCEPTION 'unexpected canonical event count';
     END IF;
 END

@@ -88,7 +88,7 @@ Expected shape: one row per raw phone with normalized digits and a Boolean
 validation flag. This regex is a simplified North American course rule, not a
 global phone-number standard.
 
-## Exercise 3 — `INOUT` ingestion procedure
+## Capstone implementation — Exercise 3 ingestion procedure
 
 The procedure uses an `INOUT` pair because PostgreSQL procedures do not return a
 query result like table-returning functions. `CALL` returns the final parameter
@@ -99,6 +99,7 @@ BEGIN;
 SET search_path TO training, public;
 
 CREATE TEMP TABLE stg_customer_ingest_solution (
+  source_row_number bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   full_name text,
   email text,
   country text,
@@ -108,7 +109,9 @@ CREATE TEMP TABLE stg_customer_ingest_solution (
   attributes text
 );
 
-INSERT INTO stg_customer_ingest_solution
+INSERT INTO stg_customer_ingest_solution(
+  full_name, email, country, segment, created_at, phone, attributes
+)
 VALUES
   (' Customer 601 ', 'CUSTOMER601@EXAMPLE.COM ', 'USA', 'gold',
    '2026/01/03 10:00', '(415) 555-0101', '{"channel":"web"}'),
@@ -120,6 +123,7 @@ VALUES
    'not-a-date', '123', 'not-json');
 
 CREATE TEMP TABLE cleaned_customer_ingest_solution (
+  source_row_number bigint PRIMARY KEY,
   full_name text,
   email text,
   country text,
@@ -129,8 +133,15 @@ CREATE TEMP TABLE cleaned_customer_ingest_solution (
   phone_valid boolean,
   email_valid boolean,
   country_valid boolean,
-  attributes jsonb
+  raw_attributes text,
+  attributes jsonb,
+  json_valid boolean
 ) ON COMMIT DROP;
+
+-- The complete executable defines pg_temp.try_parse_customer_timestamp before
+-- the procedure. It uses exact-format guards, round-trip checks, exception
+-- handling, and STABLE volatility after SET LOCAL TIME ZONE 'UTC'. STABLE is
+-- required because parsing timestamptz can depend on session settings.
 
 CREATE OR REPLACE PROCEDURE ingest_customer_stage_solution(
   INOUT upserted_rows integer,
@@ -143,7 +154,8 @@ BEGIN
 
   INSERT INTO cleaned_customer_ingest_solution
   WITH normalized AS (
-    SELECT trim(full_name) AS full_name,
+    SELECT source_row_number,
+           trim(full_name) AS full_name,
            lower(trim(email)) AS email,
            CASE upper(trim(country))
              WHEN 'USA' THEN 'US'
@@ -151,46 +163,56 @@ BEGIN
              ELSE upper(trim(country))
            END AS country,
            lower(NULLIF(trim(segment), '')) AS segment,
-           CASE
-             WHEN created_at ~ '^[0-9]{4}/[0-9]{2}/[0-9]{2} '
-               THEN to_timestamp(created_at, 'YYYY/MM/DD HH24:MI')
-             WHEN created_at ~ '^[0-9]{2}/[0-9]{2}/[0-9]{4} '
-               THEN to_timestamp(created_at, 'MM/DD/YYYY HH24:MI')
-             WHEN created_at ~ '^[0-9]{2}-[A-Za-z]{3}-[0-9]{4} '
-               THEN to_timestamp(created_at, 'DD-Mon-YYYY HH24:MI')
-             WHEN created_at ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
-               THEN created_at::timestamptz
-             ELSE NULL
-           END AS parsed_created_at,
+           pg_temp.try_parse_customer_timestamp(created_at) AS parsed_created_at,
            regexp_replace(phone, '[^0-9]', '', 'g') AS phone_digits,
-           CASE
-             WHEN attributes IS JSON THEN attributes::jsonb
-             ELSE '{}'::jsonb
-           END AS attributes
+           attributes AS raw_attributes,
+           CASE WHEN attributes IS JSON THEN attributes::jsonb END AS attributes,
+           attributes IS JSON AS json_valid
     FROM stg_customer_ingest_solution
   )
-  SELECT full_name,
+  SELECT source_row_number,
+         full_name,
          email,
          country,
          segment,
          parsed_created_at,
          phone_digits,
-         phone_digits ~ '^(1)?[0-9]{10}$' AS phone_valid,
+         phone_digits ~ '^[0-9]{10,15}$' AS phone_valid,
          email ~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$' AS email_valid,
          country IN ('US','CA','GB','DE','FR','IN','AU','BR') AS country_valid,
-         attributes
+         raw_attributes,
+         attributes,
+         json_valid
   FROM normalized;
 
   SELECT COUNT(*)
   INTO invalid_rows
   FROM cleaned_customer_ingest_solution
-  WHERE NOT email_valid
-     OR NOT country_valid
-     OR NOT phone_valid
+  WHERE email_valid IS NOT TRUE
+     OR country_valid IS NOT TRUE
+     OR phone_valid IS NOT TRUE
+     OR json_valid IS NOT TRUE
      OR created_at IS NULL
      OR full_name IS NULL
      OR full_name = '';
 
+  WITH valid_rows AS (
+    SELECT *
+    FROM cleaned_customer_ingest_solution
+    WHERE email_valid IS TRUE
+      AND country_valid IS TRUE
+      AND phone_valid IS TRUE
+      AND json_valid IS TRUE
+      AND created_at IS NOT NULL
+      AND full_name <> ''
+  ), deduped AS (
+    SELECT valid_rows.*,
+           ROW_NUMBER() OVER (
+             PARTITION BY email
+             ORDER BY created_at DESC, source_row_number DESC
+           ) AS winner_rank
+    FROM valid_rows
+  )
   INSERT INTO customers(full_name, email, country, created_at, segment, attributes)
   SELECT full_name,
          email,
@@ -198,16 +220,13 @@ BEGIN
          created_at,
          segment,
          attributes
-  FROM cleaned_customer_ingest_solution
-  WHERE email_valid
-    AND country_valid
-    AND phone_valid
-    AND created_at IS NOT NULL
-    AND full_name <> ''
+  FROM deduped
+  WHERE winner_rank = 1
   ON CONFLICT (email) DO UPDATE
   SET full_name = EXCLUDED.full_name,
       country = EXCLUDED.country,
       segment = EXCLUDED.segment,
+      -- Preserve the existing created_at as the first-seen/signup timestamp.
       attributes = EXCLUDED.attributes;
 
   GET DIAGNOSTICS upserted_rows = ROW_COUNT;
@@ -223,15 +242,16 @@ ORDER BY email;
 ROLLBACK;
 ```
 
-Expected results: `CALL` returns `upserted_rows` and `invalid_rows`; the cleaned
-table provides row-level evidence behind those counts. The whole demo rolls
-back, including the procedure and customer changes.
+Expected seed results: `CALL` returns `upserted_rows = 3` and
+`invalid_rows = 1`; the cleaned table retains four source rows, including the
+raw malformed JSON. The accepted and rejected counts must sum to the staged
+count. The whole demo rolls back, including the procedure and customer changes.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-58 Exercise 3, read from `stg_customer_ingest_solution`, `cleaned_customer_ingest_solution`, `customers`, and `ingest_customer_stage_solution`. Build the answer toward `full_name`, `email`, `country`, `segment`, `parsed_created_at`, `phone_digits`, `phone_valid`, `email_valid`, `country_valid`, and `attributes`; keep `country`, and `segment` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-58 Exercise 3, expected output: one row per `country`, and `segment`. The final columns are `full_name`, `email`, `country`, `segment`, `parsed_created_at`, `phone_digits`, `phone_valid`, `email_valid`, `country_valid`, and `attributes`. The final order is `email`.
-- **Independent verification:** For sql-58 Exercise 3, run an anti-check that counts rows where NOT ((NOT email_valid OR NOT country_valid OR NOT phone_valid OR created_at IS NULL OR full_name IS NULL OR full_name = '') OR (email_valid AND country_valid AND phone_valid AND created_at IS NOT NULL AND full_name <> '' ON CONFLICT (email) DO UPDATE SET full_name = EXCLUDED.full_name, country = EXCLUDED.country, segment = EXCLUDED.segment, attributes = EXCLUDED.att)); require unique `country`, and `segment` where the expected grain is one row per key and confirm the projected `full_name`, `email`, `country`, `segment`, `parsed_created_at`, `phone_digits`, `phone_valid`, `email_valid`, `country_valid`, and `attributes` against `stg_customer_ingest_solution`, `cleaned_customer_ingest_solution`, `customers`, and `ingest_customer_stage_solution`. Add one row for which `(NOT email_valid OR NOT country_valid OR NOT phone_valid OR created_at IS NULL OR full_name IS NULL OR full_name = '') OR (email_valid AND country_valid AND phone_valid AND created_at IS NOT NULL AND full_name <> '' ON CONFLICT (email) DO UPDATE SET full_name = EXCLUDED.full_name, country = EXCLUDED.country, segment = EXCLUDED.segment, attributes = EXCLUDED.att)` is true and one for which it is false; verify only the matching `country`, and `segment` value is returned.
+- **Inputs/evidence:** For sql-58 Exercise 3, stage every source row with `source_row_number` and raw text/JSON evidence; derive normalized fields plus timestamp, phone, email, and country validity flags, then upsert exactly one validated winner per normalized email.
+- **Expected result/shape:** For sql-58 Exercise 3, expected output: the procedure CALL returns one row with `upserted_rows` and `invalid_rows` (3 and 1 for the seed), while the cleaned detail remains one row per staged source row with raw evidence, normalized fields, and all four validity decisions.
+- **Independent verification:** For sql-58 Exercise 3, require `staged_rows = accepted_rows + rejected_rows`, every accepted row has all validity flags true, every rejection preserves `source_row_number` and raw attributes, malformed JSON never aborts the batch, valid winners reconcile to customer upserts, and rerun reaches the same final state.
 - **Intermediate relation check:** For sql-58 Exercise 3, run `normalized` one at a time. Record each CTE's row count and `country`, and `segment` uniqueness before the next stage uses it.
 - **Clause check:** For sql-58 Exercise 3, the solution actually uses `WITH`, `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `stg_customer_ingest_solution`, `cleaned_customer_ingest_solution`, `customers`, and `ingest_customer_stage_solution`, preserve one row per `country`, and `segment`, and finish with `full_name`, `email`, `country`, `segment`, `parsed_created_at`, `phone_digits`, `phone_valid`, `email_valid`, `country_valid`, and `attributes` ordered by `email`.
 - **Alternative/trade-off:** For sql-58 Exercise 3, the chosen form is justified by this lesson-specific rationale: The procedure uses an `INOUT` pair because PostgreSQL procedures do not return a query result like table-returning functions. Evaluate another form against the concrete expected result (one row per `country`, and `segment`) and the verification above.
@@ -239,13 +259,22 @@ back, including the procedure and customer changes.
 
 ## Reasoning, safety, and limits
 
-- Regex guards prevent known malformed strings from reaching timestamp casts.
-  Add formats deliberately; ambiguous dates such as `03/04/2026` require an
-  explicit locale policy.
-- Invalid JSON becomes `{}` in this exercise. A production pipeline should also
-  retain the raw value and rejection reason.
+- Exact-format regex guards, round-trip formatting, and caught datetime
+  exceptions prevent malformed strings from aborting the batch. The parser is
+  `STABLE`, not `IMMUTABLE`, because `timestamptz` parsing is session-sensitive.
+  Ambiguous dates such as `03/04/2026` still require an explicit locale policy.
+- Invalid JSON remains visible in `raw_attributes`, produces
+  `json_valid = false`, and keeps parsed `attributes` as SQL `NULL`; it never
+  becomes an accepted unexplained empty object.
+- Validation uses `IS TRUE` and rejection uses `IS NOT TRUE`, so an unknown
+  Boolean cannot slip through either population.
+- Valid rows are ranked by normalized email before `ON CONFLICT`; this avoids
+  PostgreSQL trying to update the same target twice in one statement. The
+  stable `source_row_number` breaks equal-timestamp ties.
 - `ON CONFLICT (email)` makes repeat loads deterministic, but the procedure's
   `upserted_rows` counts rows affected, not inserts versus updates separately.
+- The update preserves the existing `customers.created_at` as the immutable
+  first-seen/signup timestamp; profile corrections update descriptive fields.
 - The canonical `training.customers` table has no phone column. The solution
   validates phone in staging but does not discard the schema boundary by
   inventing a destination. Persisting phone requires a reviewed migration.
@@ -283,6 +312,15 @@ column absent from `training.customers`.
 - **Alternative/trade-off:** For sql-58 Exercise 2, the chosen form is justified by this lesson-specific rationale: The answer removes non-digits, then applies a deliberately narrow length check. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
 - **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
+## Exercise 3 — Build the `INOUT` ingestion procedure
+
+The complete transaction-safe procedure, its `CALL`, row-level evidence, and
+reasoning appear in the
+[capstone implementation above](#capstone-implementation--exercise-3-ingestion-procedure).
+Use that runnable implementation to compare your attempt clause by clause,
+including its validation rules, deterministic upsert, returned counts, and
+rollback boundary.
+
 ## Exercise 4 — Choose duplicate winners deterministically
 
 Normalize email before partitioning. Newest parsed timestamp wins, followed by
@@ -290,9 +328,9 @@ stable name/email tie-breakers; source input order never decides.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-58 Exercise 4, read from `stg_customer_ingest_solution`. Build the answer toward `make_source_duplicate_winner_selection_determini`; keep `make_source_duplicate_winner_selection_determini` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-58 Exercise 4, expected output: one row per `make_source_duplicate_winner_selection_determini`. The final columns are `make_source_duplicate_winner_selection_determini`. The final order is `normalized_email`.
-- **Independent verification:** For sql-58 Exercise 4, run an anti-check that counts rows where NOT ((winner_rank = 1)); require unique `make_source_duplicate_winner_selection_determini` where the expected grain is one row per key and confirm the projected `make_source_duplicate_winner_selection_determini` against `stg_customer_ingest_solution`. Add duplicate source candidates for `make_source_duplicate_winner_selection_determini`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
+- **Inputs/evidence:** For sql-58 Exercise 4, rank only cleaned rows whose timestamp, phone, email, and country flags are all true; partition by normalized email and order by parsed creation time descending then `source_row_number` descending.
+- **Expected result/shape:** For sql-58 Exercise 4, expected output: exactly one valid winner per `normalized_email`, with the normalized email, source row identity, parsed timestamp, and `winner_rank = 1`, ordered by normalized email.
+- **Independent verification:** For sql-58 Exercise 4, assert every winner has all validity flags true, normalized emails are unique, an equal-timestamp duplicate chooses the higher `source_row_number`, an invalid newer duplicate never wins, and the winner set matches the rows used by the upsert.
 - **Intermediate relation check:** For sql-58 Exercise 4, run `candidates` one at a time. Record each CTE's row count and `make_source_duplicate_winner_selection_determini` uniqueness before the next stage uses it.
 - **Clause check:** For sql-58 Exercise 4, the solution actually uses `WITH`, `FROM`, `WHERE`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `stg_customer_ingest_solution`, preserve one row per `make_source_duplicate_winner_selection_determini`, and finish with `make_source_duplicate_winner_selection_determini` ordered by `normalized_email`.
 - **Alternative/trade-off:** For sql-58 Exercise 4, the chosen form is justified by this lesson-specific rationale: Normalize email before partitioning. Evaluate another form against the concrete expected result (one row per `make_source_duplicate_winner_selection_determini`) and the verification above.

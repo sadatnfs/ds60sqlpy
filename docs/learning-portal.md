@@ -59,6 +59,11 @@ same PowerShell window.
 
 The command chooses a free loopback port, prints the private URL, and opens the
 default browser. Keep that terminal open; press `Ctrl+C` to stop the server.
+Jupyter inherits `PATH` and `DS60_DATABASE_URL` from this terminal. Native
+Windows PostgreSQL users should complete the
+[password-file handoff](setup/windows.md#let-the-guided-notebook-authenticate-without-a-hidden-prompt)
+and start the portal from that configured PowerShell window; the portal never
+asks for or stores a database password.
 
 Useful options:
 

@@ -2,25 +2,101 @@
 \set ON_ERROR_STOP on
 BEGIN;
 
-CREATE SCHEMA IF NOT EXISTS pro_migration_lab;
-
-CREATE TABLE IF NOT EXISTS pro_migration_lab.schema_migrations (
-    migration_id integer PRIMARY KEY,
-    migration_name text NOT NULL UNIQUE,
-    content_tag text NOT NULL,
-    applied_at timestamptz NOT NULL DEFAULT clock_timestamp()
+SELECT pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended('ds60sqlpy:pro_migration_lab', 0)
 );
 
-SELECT EXISTS (
-    SELECT 1
-    FROM pro_migration_lab.schema_migrations AS sm
-    WHERE sm.migration_id = 1
-) AS migration_applied
+-- Fail closed before deciding an existing manifest row is safe to skip.
+-- content_tag is a reviewed immutable fixture identity, not a cryptographic
+-- file checksum; production runners should record a real content digest.
+DO $preflight$
+DECLARE
+    manifest_exists boolean :=
+        to_regclass('pro_migration_lab.schema_migrations') IS NOT NULL;
+    id_exists boolean := false;
+    identity_matches boolean := false;
+BEGIN
+    IF manifest_exists THEN
+        EXECUTE $sql$
+            SELECT
+                EXISTS (
+                    SELECT 1
+                    FROM pro_migration_lab.schema_migrations
+                    WHERE migration_id = 1
+                ),
+                EXISTS (
+                    SELECT 1
+                    FROM pro_migration_lab.schema_migrations
+                    WHERE migration_id = 1
+                      AND migration_name = 'create_service_requests'
+                      AND content_tag = 'course-fixture-001-v1'
+                )
+        $sql$
+        INTO id_exists, identity_matches;
+
+        IF id_exists AND NOT identity_matches THEN
+            RAISE EXCEPTION
+                'migration 001 identity mismatch; refusing to skip';
+        END IF;
+
+        IF identity_matches AND (
+            to_regclass('pro_migration_lab.service_requests') IS NULL
+            OR to_regclass('pro_migration_lab.service_requests_api') IS NULL
+            OR NOT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_schema = 'pro_migration_lab'
+                  AND table_name = 'schema_migrations'
+                  AND column_name = 'content_tag'
+                  AND data_type = 'text'
+                  AND is_nullable = 'NO'
+            )
+            OR NOT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_schema = 'pro_migration_lab'
+                  AND table_name = 'service_requests'
+                  AND column_name = 'request_key'
+                  AND data_type = 'text'
+                  AND is_nullable = 'NO'
+            )
+        ) THEN
+            RAISE EXCEPTION
+                'migration 001 manifest matches but schema contract drifted';
+        END IF;
+    ELSIF EXISTS (
+        SELECT 1
+        FROM pg_catalog.pg_namespace
+        WHERE nspname = 'pro_migration_lab'
+    ) THEN
+        RAISE EXCEPTION
+            'pro_migration_lab exists without the reviewed manifest table';
+    END IF;
+
+    PERFORM pg_catalog.set_config(
+        'ds60.migration_applied',
+        identity_matches::text,
+        true
+    );
+END
+$preflight$;
+
+SELECT pg_catalog.current_setting('ds60.migration_applied')::boolean
+    AS migration_applied
 \gset
 
 \if :migration_applied
-    \echo 'Migration 001 already applied; skipping immutable body'
+    \echo 'Migration 001 identity and schema contract verified; skipping body'
 \else
+    CREATE SCHEMA pro_migration_lab;
+
+    CREATE TABLE pro_migration_lab.schema_migrations (
+        migration_id integer PRIMARY KEY,
+        migration_name text NOT NULL UNIQUE,
+        content_tag text NOT NULL,
+        applied_at timestamptz NOT NULL DEFAULT clock_timestamp()
+    );
+
     CREATE TABLE pro_migration_lab.service_requests (
         request_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
         request_key text NOT NULL UNIQUE,
@@ -67,4 +143,3 @@ SELECT EXISTS (
 \endif
 
 COMMIT;
-

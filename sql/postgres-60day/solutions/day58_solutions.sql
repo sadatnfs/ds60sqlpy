@@ -16,6 +16,7 @@ BEGIN;
 SET search_path TO training, public;
 
 CREATE TEMP TABLE stg_customer_ingest_solution (
+  source_row_number bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   full_name text,
   email text,
   country text,
@@ -25,7 +26,9 @@ CREATE TEMP TABLE stg_customer_ingest_solution (
   attributes text
 );
 
-INSERT INTO stg_customer_ingest_solution
+INSERT INTO stg_customer_ingest_solution(
+  full_name, email, country, segment, created_at, phone, attributes
+)
 VALUES
   (' Customer 601 ', 'CUSTOMER601@EXAMPLE.COM ', 'USA', 'gold',
    '2026/01/03 10:00', '(415) 555-0101', '{"channel":"web"}'),
@@ -37,6 +40,7 @@ VALUES
    'not-a-date', '123', 'not-json');
 
 CREATE TEMP TABLE cleaned_customer_ingest_solution (
+  source_row_number bigint PRIMARY KEY,
   full_name text,
   email text,
   country text,
@@ -46,8 +50,52 @@ CREATE TEMP TABLE cleaned_customer_ingest_solution (
   phone_valid boolean,
   email_valid boolean,
   country_valid boolean,
-  attributes jsonb
+  raw_attributes text,
+  attributes jsonb,
+  json_valid boolean
 ) ON COMMIT DROP;
+
+-- Parse only the supported formats, in a declared source time zone, and turn
+-- malformed-but-regex-shaped input into NULL rather than aborting the batch.
+SET LOCAL TIME ZONE 'UTC';
+CREATE OR REPLACE FUNCTION pg_temp.try_parse_customer_timestamp(raw_value text)
+RETURNS timestamptz
+LANGUAGE plpgsql
+-- Parsing text as timestamptz depends on session time-zone/date settings even
+-- though this lesson pins UTC above. STABLE is the honest volatility promise;
+-- IMMUTABLE would let PostgreSQL cache a value across changed settings.
+STABLE
+AS $function$
+DECLARE
+  parsed_value timestamptz;
+BEGIN
+  IF raw_value ~ '^[0-9]{4}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}$' THEN
+    parsed_value := to_timestamp(raw_value, 'FXYYYY/MM/DD HH24:MI');
+    IF to_char(parsed_value AT TIME ZONE 'UTC', 'YYYY/MM/DD HH24:MI') <> raw_value THEN
+      RETURN NULL;
+    END IF;
+  ELSIF raw_value ~ '^[0-9]{2}/[0-9]{2}/[0-9]{4} [0-9]{2}:[0-9]{2}$' THEN
+    parsed_value := to_timestamp(raw_value, 'FXMM/DD/YYYY HH24:MI');
+    IF to_char(parsed_value AT TIME ZONE 'UTC', 'MM/DD/YYYY HH24:MI') <> raw_value THEN
+      RETURN NULL;
+    END IF;
+  ELSIF raw_value ~ '^[0-9]{2}-[A-Za-z]{3}-[0-9]{4} [0-9]{2}:[0-9]{2}$' THEN
+    parsed_value := to_timestamp(raw_value, 'FXDD-Mon-YYYY HH24:MI');
+    IF lower(to_char(parsed_value AT TIME ZONE 'UTC', 'DD-Mon-YYYY HH24:MI'))
+       <> lower(raw_value) THEN
+      RETURN NULL;
+    END IF;
+  ELSIF raw_value ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}[ T][0-9]{2}:[0-9]{2}' THEN
+    parsed_value := raw_value::timestamptz;
+  ELSE
+    RETURN NULL;
+  END IF;
+  RETURN parsed_value;
+EXCEPTION
+  WHEN datetime_field_overflow OR invalid_datetime_format THEN
+    RETURN NULL;
+END
+$function$;
 
 -- Exercise 1: guarded CASE branches parse each supported datetime format and
 -- leave unrecognized input NULL instead of raising.
@@ -65,7 +113,8 @@ BEGIN
 
   INSERT INTO cleaned_customer_ingest_solution
   WITH normalized AS (
-    SELECT trim(full_name) AS full_name,
+    SELECT source_row_number,
+           trim(full_name) AS full_name,
            lower(trim(email)) AS email,
            CASE upper(trim(country))
              WHEN 'USA' THEN 'US'
@@ -73,25 +122,15 @@ BEGIN
              ELSE upper(trim(country))
            END AS country,
            lower(NULLIF(trim(segment), '')) AS segment,
-           CASE
-             WHEN created_at ~ '^[0-9]{4}/[0-9]{2}/[0-9]{2} '
-               THEN to_timestamp(created_at, 'YYYY/MM/DD HH24:MI')
-             WHEN created_at ~ '^[0-9]{2}/[0-9]{2}/[0-9]{4} '
-               THEN to_timestamp(created_at, 'MM/DD/YYYY HH24:MI')
-             WHEN created_at ~ '^[0-9]{2}-[A-Za-z]{3}-[0-9]{4} '
-               THEN to_timestamp(created_at, 'DD-Mon-YYYY HH24:MI')
-             WHEN created_at ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
-               THEN created_at::timestamptz
-             ELSE NULL
-           END AS parsed_created_at,
+           pg_temp.try_parse_customer_timestamp(created_at) AS parsed_created_at,
            regexp_replace(phone, '[^0-9]', '', 'g') AS phone_digits,
-           CASE
-             WHEN attributes IS JSON THEN attributes::jsonb
-             ELSE '{}'::jsonb
-           END AS attributes
+           attributes AS raw_attributes,
+           CASE WHEN attributes IS JSON THEN attributes::jsonb END AS attributes,
+           attributes IS JSON AS json_valid
     FROM stg_customer_ingest_solution
   )
-  SELECT full_name,
+  SELECT source_row_number,
+         full_name,
          email,
          country,
          segment,
@@ -100,19 +139,42 @@ BEGIN
          phone_digits ~ '^[0-9]{10,15}$' AS phone_valid,
          email ~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$' AS email_valid,
          country IN ('US','CA','GB','DE','FR','IN','AU','BR') AS country_valid,
-         attributes
+         raw_attributes,
+         attributes,
+         json_valid
   FROM normalized;
 
   SELECT COUNT(*)
   INTO invalid_rows
   FROM cleaned_customer_ingest_solution
-  WHERE NOT email_valid
-     OR NOT country_valid
-     OR NOT phone_valid
+  WHERE email_valid IS NOT TRUE
+     OR country_valid IS NOT TRUE
+     OR phone_valid IS NOT TRUE
+     OR json_valid IS NOT TRUE
      OR created_at IS NULL
      OR full_name IS NULL
      OR full_name = '';
 
+  -- PostgreSQL cannot update the same conflict target twice in one
+  -- INSERT ... ON CONFLICT statement. Rank validated normalized rows first,
+  -- then send exactly one winner per email to the upsert.
+  WITH valid_rows AS (
+    SELECT *
+    FROM cleaned_customer_ingest_solution
+    WHERE email_valid IS TRUE
+      AND country_valid IS TRUE
+      AND phone_valid IS TRUE
+      AND json_valid IS TRUE
+      AND created_at IS NOT NULL
+      AND full_name <> ''
+  ), deduped AS (
+    SELECT valid_rows.*,
+           ROW_NUMBER() OVER (
+             PARTITION BY email
+             ORDER BY created_at DESC, source_row_number DESC
+           ) AS winner_rank
+    FROM valid_rows
+  )
   INSERT INTO customers(full_name, email, country, created_at, segment, attributes)
   SELECT full_name,
          email,
@@ -120,16 +182,14 @@ BEGIN
          created_at,
          segment,
          attributes
-  FROM cleaned_customer_ingest_solution
-  WHERE email_valid
-    AND country_valid
-    AND phone_valid
-    AND created_at IS NOT NULL
-    AND full_name <> ''
+  FROM deduped
+  WHERE winner_rank = 1
   ON CONFLICT (email) DO UPDATE
   SET full_name = EXCLUDED.full_name,
       country = EXCLUDED.country,
       segment = EXCLUDED.segment,
+      -- `created_at` is the immutable first-seen/signup timestamp; a replay or
+      -- profile correction must not rewrite it.
       attributes = EXCLUDED.attributes;
 
   GET DIAGNOSTICS upserted_rows = ROW_COUNT;
@@ -148,14 +208,22 @@ ORDER BY email;
 -- Exercise 4: deterministic winner selection happens after normalization and
 -- before upsert. Newest valid timestamp wins; email/full_name break any ties.
 WITH candidates AS (
-  SELECT lower(trim(email)) AS normalized_email,
+  SELECT email AS normalized_email,
          full_name,
          created_at,
+         source_row_number,
          ROW_NUMBER() OVER (
-           PARTITION BY lower(trim(email))
-           ORDER BY created_at DESC NULLS LAST, trim(full_name), email
+           PARTITION BY email
+           ORDER BY created_at DESC NULLS LAST, source_row_number DESC
          ) AS winner_rank
-  FROM stg_customer_ingest_solution
+  FROM cleaned_customer_ingest_solution
+  WHERE email_valid IS TRUE
+    AND country_valid IS TRUE
+    AND phone_valid IS TRUE
+    AND json_valid IS TRUE
+    AND created_at IS NOT NULL
+    AND full_name IS NOT NULL
+    AND full_name <> ''
 )
 SELECT * FROM candidates WHERE winner_rank = 1 ORDER BY normalized_email;
 
@@ -165,10 +233,11 @@ WITH classified AS (
   SELECT *,
          CASE
            WHEN full_name IS NULL OR full_name = '' THEN 'invalid_name'
-           WHEN NOT email_valid THEN 'invalid_email'
-           WHEN NOT country_valid THEN 'invalid_country'
+           WHEN email_valid IS NOT TRUE THEN 'invalid_email'
+           WHEN country_valid IS NOT TRUE THEN 'invalid_country'
            WHEN created_at IS NULL THEN 'invalid_datetime'
-           WHEN NOT phone_valid THEN 'invalid_phone'
+           WHEN phone_valid IS NOT TRUE THEN 'invalid_phone'
+           WHEN json_valid IS NOT TRUE THEN 'invalid_json'
            ELSE 'accepted'
          END AS outcome
   FROM cleaned_customer_ingest_solution
@@ -188,7 +257,11 @@ ORDER BY email;
 -- Exercise 7: missing and unknown are different quality states. Preserve the
 -- raw input beside its normalized candidate.
 SELECT country AS raw_country,
-       NULLIF(upper(trim(country)), '') AS normalized_candidate,
+       CASE upper(trim(country))
+         WHEN 'USA' THEN 'US'
+         WHEN 'U S' THEN 'US'
+         ELSE NULLIF(upper(trim(country)), '')
+       END AS normalized_candidate,
        CASE WHEN country IS NULL OR trim(country) = '' THEN 'missing'
             WHEN upper(trim(country)) IN ('US','USA','CA','GB','DE','FR','IN','AU','BR')
               THEN 'recognized'
@@ -204,11 +277,11 @@ CREATE TEMP TABLE staged_batch_identity (
   PRIMARY KEY (batch_id, source_row_number)
 );
 INSERT INTO staged_batch_identity
-SELECT 'day58-demo', row_number() OVER (ORDER BY email), email
+SELECT 'day58-demo', source_row_number, email
 FROM stg_customer_ingest_solution
 ON CONFLICT (batch_id, source_row_number) DO NOTHING;
 INSERT INTO staged_batch_identity
-SELECT 'day58-demo', row_number() OVER (ORDER BY email), email
+SELECT 'day58-demo', source_row_number, email
 FROM stg_customer_ingest_solution
 ON CONFLICT (batch_id, source_row_number) DO NOTHING;
 SELECT COUNT(*) AS replay_safe_rows FROM staged_batch_identity;
@@ -226,14 +299,18 @@ ORDER BY email;
 -- separately using an explicit merge/audit strategy.
 WITH classified AS (
   SELECT *,
-         email_valid AND country_valid AND phone_valid
+         email_valid IS TRUE
+           AND country_valid IS TRUE
+           AND phone_valid IS TRUE
+           AND json_valid IS TRUE
            AND created_at IS NOT NULL
-           AND full_name IS NOT NULL AND full_name <> '' AS accepted
+           AND full_name IS NOT NULL
+           AND full_name <> '' AS accepted
   FROM cleaned_customer_ingest_solution
 )
 SELECT (SELECT COUNT(*) FROM stg_customer_ingest_solution) AS staged_rows,
-       COUNT(*) FILTER (WHERE accepted) AS accepted_rows,
-       COUNT(*) FILTER (WHERE NOT accepted) AS rejected_rows,
+       COUNT(*) FILTER (WHERE accepted IS TRUE) AS accepted_rows,
+       COUNT(*) FILTER (WHERE accepted IS NOT TRUE) AS rejected_rows,
        COUNT(*) AS reconciled_rows
 FROM classified;
 

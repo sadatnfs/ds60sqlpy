@@ -236,6 +236,56 @@ psql -X -v ON_ERROR_STOP=1 -h localhost -U postgres -d advanced_sql_training -f 
 
 The setup file drops and recreates the disposable `training` schema. Do not point it at a database containing valuable data. The verification file raises an error if expected counts, coverage, chronology, totals, or foreign keys are wrong.
 
+#### Let the guided notebook authenticate without a hidden prompt
+
+The native Windows installer normally requires the `postgres` password.
+Terminal `psql` can ask for it visibly, but the guided notebook intentionally
+uses `--no-password` so a Jupyter cell can never hang at an invisible prompt.
+Configure libpq—PostgreSQL's client connection library—once, outside this
+repository:
+
+1. In PowerShell, create PostgreSQL's per-user configuration directory and
+   open its password file:
+
+   ```powershell
+   $PgConfig = Join-Path $env:APPDATA "postgresql"
+   New-Item -ItemType Directory -Force $PgConfig | Out-Null
+   notepad (Join-Path $PgConfig "pgpass.conf")
+   ```
+
+2. Add exactly one line for this local disposable database, replacing the
+   final placeholder with the password chosen during PostgreSQL installation:
+
+   ```text
+   localhost:5432:advanced_sql_training:postgres:YOUR_LOCAL_POSTGRES_PASSWORD
+   ```
+
+   Save and close Notepad. `pgpass.conf` lives under your Windows profile, not
+   in the Git repository. Never copy, commit, paste into Codex, or share it.
+   If the password contains `:` or `\`, prefix that character with `\` in this
+   file.
+
+3. In the PowerShell window that will start the portal, set a password-free
+   target. This tells the runner which local role and host should match the
+   password-file entry:
+
+   ```powershell
+   $env:DS60_DATABASE_URL = "postgresql://postgres@localhost:5432/advanced_sql_training"
+   & $CoursePython scripts\course.py doctor
+   ```
+
+   Doctor should report `Course database: advanced_sql_training is reachable`.
+   The setting lasts only for that PowerShell process. Start the portal from
+   this same window so Jupyter inherits it:
+
+   ```powershell
+   & $CoursePython scripts\learning_portal.py
+   ```
+
+For the repository's Docker Compose service, do not create this native
+password-file entry. Its disposable `ds60` connection is already the course
+runner's default.
+
 ### Option B: Canonical container environment
 
 Docker-based automation uses PostgreSQL 17 and gives every operating system the same database behavior. Docker Desktop requires virtualization support and a one-time image download.
@@ -268,6 +318,10 @@ Start the private course dashboard. It saves completion in ignored
 ```powershell
 & $CoursePython scripts\learning_portal.py
 ```
+
+If you chose native PostgreSQL, run this in the same PowerShell window where
+you set the password-free `DS60_DATABASE_URL` in section 5. If you chose
+Docker Compose, make sure the `postgres` service is running.
 
 Python:
 

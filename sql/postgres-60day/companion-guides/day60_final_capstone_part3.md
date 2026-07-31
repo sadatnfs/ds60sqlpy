@@ -218,7 +218,11 @@ performance evidence, and a written handoff.
 
 ## Deliverable 2 — Core business views
 
-- Customer LTV at one row per customer, retaining zero-order customers.
+- Customer LTV at one row per customer, retaining zero-order customers with a
+  `LEFT JOIN` from `customers` to `orders` and `COALESCE(..., 0)`.
+- Treat `orders.total_amount` as the authoritative revenue measure in this
+  capstone. Do not recompute LTV from `order_items`: a line-based total can omit
+  header-only orders or disagree with header-level adjustments.
 - Monthly order revenue with previous month and safely divided month-over-month
   growth.
 - Reconcile summed customer LTV to summed `orders.total_amount`; expected
@@ -227,8 +231,12 @@ performance evidence, and a written handoff.
 ## Deliverable 3 — Stakeholder outputs
 
 - Finance: current-year budget versus actual by month/category.
-- Marketing: active customers by signup cohort and lifecycle month 0–6. A true
-  retention rate also needs the cohort-size denominator from Day 47.
+- Marketing: active customers by signup cohort and lifecycle month 0–6. Select
+  the six latest *distinct* signup months before expanding the lifecycle grid.
+  Count every signup once in `cohort_size`, count a customer at most once per
+  activity month, and report
+  `active_customers / NULLIF(cohort_size, 0)` as `retention_rate`. Keeping the
+  numerator and denominator visible makes the percentage auditable.
 - Operations: an actual plan for recent units by product category.
 
 ## Deliverable 4 — Performance sign-off

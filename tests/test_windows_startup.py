@@ -15,6 +15,8 @@ CI_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "ci.yml"
 README = REPO_ROOT / "README.md"
 OFFLINE_GUIDE = REPO_ROOT / "docs" / "setup" / "offline.md"
 WINDOWS_GUIDE = REPO_ROOT / "docs" / "setup" / "windows.md"
+GUIDED_SQL_GUIDE = REPO_ROOT / "docs" / "guided-sql-notebooks.md"
+PORTAL_GUIDE = REPO_ROOT / "docs" / "learning-portal.md"
 MACOS_GUIDE = REPO_ROOT / "docs" / "setup" / "macos.md"
 LINUX_GUIDE = REPO_ROOT / "docs" / "setup" / "linux.md"
 
@@ -204,6 +206,35 @@ def test_setup_guides_have_a_copy_ready_clone_command() -> None:
         text = guide.read_text(encoding="utf-8")
         assert clone in text
         assert "git clone <repository-url>" not in text
+
+
+def test_native_windows_guided_sql_authentication_is_explicit_and_secret_free() -> None:
+    windows = WINDOWS_GUIDE.read_text(encoding="utf-8")
+    guided = GUIDED_SQL_GUIDE.read_text(encoding="utf-8")
+    portal = PORTAL_GUIDE.read_text(encoding="utf-8")
+
+    assert "Let the guided notebook authenticate without a hidden prompt" in windows
+    assert r'Join-Path $env:APPDATA "postgresql"' in windows
+    assert "pgpass.conf" in windows
+    assert (
+        '$env:DS60_DATABASE_URL = "postgresql://postgres@localhost:5432/advanced_sql_training"'
+    ) in windows
+    assert "YOUR_LOCAL_POSTGRES_PASSWORD" in windows
+    assert "Never copy, commit, paste into Codex, or share it." in windows
+    assert "same PowerShell window" in windows
+
+    assert "authenticate-without-a-hidden-prompt" in guided
+    assert "password-free local `DS60_DATABASE_URL`" in guided
+    posix_start = guided.split("## macOS and Linux path", maxsplit=1)[1].split(
+        "## Generate without the portal",
+        maxsplit=1,
+    )[0]
+    assert "bash scripts/setup.sh\n" in posix_start
+    assert "scripts/setup.sh --advanced" not in posix_start
+    assert "Use `--advanced` only for the separate JupySQL" in " ".join(posix_start.split())
+    assert "password-file handoff" in portal
+    assert "portal never" in portal
+    assert "asks for or stores a database password" in portal
 
 
 @pytest.mark.skipif(shutil.which("pwsh") is None, reason="PowerShell is not installed")

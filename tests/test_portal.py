@@ -116,6 +116,15 @@ def test_portal_rejects_cross_origin_and_hidden_files(tmp_path: Path) -> None:
             )
         assert cross_origin.value.code == 403
 
+        with pytest.raises(HTTPError) as missing_origin:
+            _request(
+                f"{server.url}api/progress",
+                token=server.token,
+                method="POST",
+                payload={"lesson_id": "python-01", "complete": True},
+            )
+        assert missing_origin.value.code == 403
+
         with pytest.raises(HTTPError) as hidden_file:
             _request(f"{server.url}.git/config")
         assert hidden_file.value.code == 404

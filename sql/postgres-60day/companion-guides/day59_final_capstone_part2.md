@@ -126,30 +126,77 @@ LIMIT 100;
 ### Example 2
 
 ```sql
-WITH ev AS (
-  SELECT e.customer_id,
-         MAX(CASE WHEN e.event_type='page_view'  THEN 1 ELSE 0 END) AS page_view,
-         MAX(CASE WHEN e.event_type='add_to_cart' THEN 1 ELSE 0 END) AS add_to_cart,
-         MAX(CASE WHEN e.event_type='checkout'   THEN 1 ELSE 0 END) AS checkout
-  FROM events e
-  WHERE e.event_time >= now() - interval '90 days'
-  GROUP BY e.customer_id
-), buyers AS (
-  SELECT DISTINCT o.customer_id
-  FROM orders o
-  WHERE o.order_date >= now() - interval '90 days'
+WITH viewed_stage AS (
+  SELECT c.customer_id,
+         MIN(e.event_time) FILTER (
+           WHERE e.event_type = 'page_view'
+         ) AS viewed_at
+  FROM customers c
+  LEFT JOIN events e
+    ON e.customer_id = c.customer_id
+   AND e.event_time >= CURRENT_TIMESTAMP - interval '90 days'
+  GROUP BY c.customer_id
+), added_stage AS (
+  SELECT viewed.customer_id,
+         viewed.viewed_at,
+         MIN(event.event_time) AS added_at
+  FROM viewed_stage viewed
+  LEFT JOIN events event
+    ON event.customer_id = viewed.customer_id
+   AND event.event_type = 'add_to_cart'
+   AND event.event_time >= viewed.viewed_at
+  GROUP BY viewed.customer_id, viewed.viewed_at
+), checkout_stage AS (
+  SELECT added.customer_id,
+         added.viewed_at,
+         added.added_at,
+         MIN(event.event_time) AS checkout_at
+  FROM added_stage added
+  LEFT JOIN events event
+    ON event.customer_id = added.customer_id
+   AND event.event_type = 'checkout'
+   AND event.event_time >= added.added_at
+  GROUP BY added.customer_id, added.viewed_at, added.added_at
+), purchase_stage AS (
+  SELECT checkout.customer_id,
+         checkout.viewed_at,
+         checkout.added_at,
+         checkout.checkout_at,
+         MIN(customer_order.order_date) AS purchased_at
+  FROM checkout_stage checkout
+  LEFT JOIN orders customer_order
+    ON customer_order.customer_id = checkout.customer_id
+   AND customer_order.order_date >= checkout.checkout_at
+   AND customer_order.order_date >= CURRENT_TIMESTAMP - interval '90 days'
+  GROUP BY checkout.customer_id, checkout.viewed_at,
+           checkout.added_at, checkout.checkout_at
+), activity AS (
+  SELECT customer_id,
+         viewed_at IS NOT NULL AS viewed,
+         added_at IS NOT NULL AND added_at >= viewed_at AS added,
+         checkout_at IS NOT NULL AND checkout_at >= added_at AS checked_out,
+         purchased_at IS NOT NULL AND purchased_at >= checkout_at AS bought
+  FROM purchase_stage
 )
-SELECT 
-  SUM(page_view)    AS viewers,
-  SUM(add_to_cart)  AS adders,
-  SUM(checkout)     AS checkouts,
-  (SELECT COUNT(*) FROM buyers) AS buyers
-FROM ev;
+SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,
+       COUNT(*) FILTER (WHERE added) AS adders,
+       COUNT(*) FILTER (WHERE checked_out) AS checkouts,
+       COUNT(*) FILTER (WHERE bought) AS buyers
+FROM activity;
 ```
 
-**How to read it:** Example 2: Start with `events`, and `orders` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays the columns written in the final `SELECT`. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `viewed_stage` retains one row per customer and records the
+earliest recent page view. Each later `LEFT JOIN` searches only at or after its
+prior timestamp. A customer who checks out before adding to cart therefore does
+not enter the ordered checkout population. `activity` turns the four timestamps
+into nested Boolean populations, and aggregate `FILTER` returns one summary row.
+This is different from independently asking whether each event happened at any
+time; independent reach can increase between stages and is not a funnel.
 
-**Expected result/shape:** Example 2 returns one grouped row per `customer_id` with columns `customer_id`, `page_view`, `add_to_cart`, `checkout`, `viewers`, and `adders` from `events`, and `orders`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
+**Expected result/shape:** Exactly one row with `viewers`, `adders`, `checkouts`,
+and `buyers`. The invariant is `buyers <= checkouts <= adders <= viewers`.
+Inspect one customer's four timestamps before trusting the aggregate, and add a
+counterexample whose checkout precedes add-to-cart; that checkout must not count.
 
 ## Learning objectives
 
@@ -182,17 +229,17 @@ Complete these in the [learner SQL](../day59_final_capstone_part2.sql):
    **Expected result/shape:** For sql-59 Exercise 1, expected output: one row per `step_name`. The final columns are `step_name`, `row_grain`, and `key_columns`.
    **Verify:** For sql-59 Exercise 1, reselect the returned keys directly from the source; require unique `step_name` where the expected grain is one row per key and confirm the projected `step_name`, `row_grain`, and `key_columns` against the inline `VALUES` fixture. Add one source row with a new `step_name`; verify the result gains exactly one row carrying that `step_name` value.
 2. Add funnel conversion rates and retain buyers without events.
-   **Inputs/evidence:** For sql-59 Exercise 2, read from `orders`, `customers`, and `events`. Build the answer toward `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-59 Exercise 2, expected output: one row per `order_id`. The final columns are `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`.
-   **Verify:** For sql-59 Exercise 2, project `order_id` plus the raw source columns from `orders`, `customers`, and `events` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `customer_id`, `order_date`, `status`, and `total_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Inputs/evidence:** For sql-59 Exercise 2, derive `viewed_at`, `added_at`, `checkout_at`, and `purchased_at` per customer over the same trailing-90-day window.
+   **Expected result/shape:** For sql-59 Exercise 2, expected output: exactly one summary row with ordered stage counts, `buyers_without_view`, and three conversion rates whose denominators are the preceding ordered populations.
+   **Verify:** For sql-59 Exercise 2, require `added_at >= viewed_at`, `checkout_at >= added_at`, and `purchased_at >= checkout_at`. Prove `buyers <= checkouts <= adders <= viewers`; every nonzero stage rate must be between zero and one.
 3. Reconcile order totals, line revenue, and payments before KPI selection.
    **Inputs/evidence:** For sql-59 Exercise 3, read from `order_items`, `payments`, and `orders`. Build the answer toward `order_id`, `stored_order_total`, `line_revenue`, `paid_amount`, `header_minus_lines`, and `paid_minus_header`; keep `order_id` visible whenever the result has row-level grain.
    **Expected result/shape:** For sql-59 Exercise 3, expected output: at most 50 rows keyed by `order_id`. The final columns are `order_id`, `stored_order_total`, `line_revenue`, `paid_amount`, `header_minus_lines`, and `paid_minus_header`. The final order is `o.order_id`.
    **Verify:** For sql-59 Exercise 3, assert no more than 50 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_id`. Rejoin the returned keys to `order_items`, `payments`, and `orders` to confirm `order_id`, `stored_order_total`, `line_revenue`, `paid_amount`, `header_minus_lines`, and `paid_minus_header` came from the same source rows. Run with 50 minus one and 50 plus one eligible rows; require the output cap of 50 while retaining `o.order_id`.
 4. Add direct attribution and reconcile purchases.
-   **Inputs/evidence:** For sql-59 Exercise 4, read from `orders`, and `events`. Build the answer toward `attribution_bucket`, and `purchases`; keep `attribution_bucket`, and `purchases` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-59 Exercise 4, expected output: one row per `attribution_bucket`, and `purchases`. The final columns are `attribution_bucket`, and `purchases`. The final order is `purchases DESC, attribution_bucket`.
-   **Verify:** For sql-59 Exercise 4, independently aggregate `orders`, and `events` by `attribution_bucket`, and `purchases`; require one output row for every distinct `attribution_bucket`, and `purchases` tuple and compare `row_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `row_count` for the existing `attribution_bucket`, and `purchases` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-59 Exercise 4, start from `orders` and choose at most one event whose `event_type` is in the declared marketing-touch whitelist (`page_view`, `add_to_cart`, `checkout`), whose campaign metadata is present, and whose timestamp is in the preceding seven-day half-open window.
+   **Expected result/shape:** For sql-59 Exercise 4, expected output: one row per `attribution_bucket`, with `purchases`; every order contributes to exactly one campaign bucket or `(direct)`. The final order is `purchases DESC, attribution_bucket`.
+   **Verify:** For sql-59 Exercise 4, assert that `SUM(purchases)` equals `COUNT(*)` from `orders`. Add a tagged non-touch event and prove the attribution result is unchanged; then add two qualifying touches for one order and prove the latest timestamp, with `event_id` as tie-breaker, wins exactly once.
 5. Compare customer/date and date/customer index orders.
    **Inputs/evidence:** For sql-59 Exercise 5, run the underlying read-only query over `orders`, and `idx_orders_date_customer_day59_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
    **Expected result/shape:** For sql-59 Exercise 5, expected output: one row per `customer_id`. The final columns are `customer_id`, and `revenue`.
@@ -262,7 +309,9 @@ seed may correctly use a sequential scan.
 
 - Finance: current-year budget, actual expense, and variance by category.
 - Marketing: campaign touches within seven days before each customer's first
-  order, counted as distinct assisted customers.
+  order, counted as distinct assisted customers. Only the declared touch types
+  (`page_view`, `add_to_cart`, and `checkout`) qualify; a campaign tag on an
+  unrelated event must not create marketing credit.
 
 The marketing definition differs from Day 48's all-purchase event attribution.
 Multiple campaigns can assist one customer, so campaign rows are not additive.

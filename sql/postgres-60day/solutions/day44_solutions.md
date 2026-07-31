@@ -55,7 +55,8 @@ correctness is established with evidence.
 
 The two deliverables inspect active work and, when available,
 `pg_stat_statements`. The solution remains runnable on a fresh PostgreSQL
-installation where that optional extension is absent. See
+installation where that optional extension is absent or installed without its
+shared-memory module being loaded at server startup. See
 [`day44_solutions.sql`](day44_solutions.sql).
 
 ## Exercise 1 — Longest-running active statements
@@ -113,44 +114,51 @@ CREATE TEMP TABLE top_statement_stats (
 DO $optional_pg_stat_statements$
 BEGIN
   IF to_regclass('public.pg_stat_statements') IS NOT NULL THEN
-    EXECUTE $by_total$
-      INSERT INTO top_statement_stats
-      SELECT 'total_exec_time',
-             row_number() OVER (
-               ORDER BY total_exec_time DESC,
-                        userid, dbid, toplevel, queryid
-             )::integer,
-             userid,
-             dbid,
-             toplevel,
-             queryid,
-             left(query, 200),
-             calls,
-             mean_exec_time,
-             total_exec_time
-      FROM public.pg_stat_statements
-      ORDER BY total_exec_time DESC, userid, dbid, toplevel, queryid
-      LIMIT 10
-    $by_total$;
-    EXECUTE $by_mean$
-      INSERT INTO top_statement_stats
-      SELECT 'mean_exec_time',
-             row_number() OVER (
-               ORDER BY mean_exec_time DESC,
-                        userid, dbid, toplevel, queryid
-             )::integer,
-             userid,
-             dbid,
-             toplevel,
-             queryid,
-             left(query, 200),
-             calls,
-             mean_exec_time,
-             total_exec_time
-      FROM public.pg_stat_statements
-      ORDER BY mean_exec_time DESC, userid, dbid, toplevel, queryid
-      LIMIT 10
-    $by_mean$;
+    BEGIN
+      EXECUTE $by_total$
+        INSERT INTO top_statement_stats
+        SELECT 'total_exec_time',
+               row_number() OVER (
+                 ORDER BY total_exec_time DESC,
+                          userid, dbid, toplevel, queryid
+               )::integer,
+               userid,
+               dbid,
+               toplevel,
+               queryid,
+               left(query, 200),
+               calls,
+               mean_exec_time,
+               total_exec_time
+        FROM public.pg_stat_statements
+        ORDER BY total_exec_time DESC, userid, dbid, toplevel, queryid
+        LIMIT 10
+      $by_total$;
+      EXECUTE $by_mean$
+        INSERT INTO top_statement_stats
+        SELECT 'mean_exec_time',
+               row_number() OVER (
+                 ORDER BY mean_exec_time DESC,
+                          userid, dbid, toplevel, queryid
+               )::integer,
+               userid,
+               dbid,
+               toplevel,
+               queryid,
+               left(query, 200),
+               calls,
+               mean_exec_time,
+               total_exec_time
+        FROM public.pg_stat_statements
+        ORDER BY mean_exec_time DESC, userid, dbid, toplevel, queryid
+        LIMIT 10
+      $by_mean$;
+    EXCEPTION
+      WHEN object_not_in_prerequisite_state THEN
+        TRUNCATE top_statement_stats;
+        RAISE NOTICE
+          'pg_stat_statements exists but is not loaded via shared_preload_libraries; optional result is empty';
+    END;
   ELSE
     RAISE NOTICE 'pg_stat_statements is not installed; optional result is empty';
   END IF;
@@ -168,15 +176,22 @@ Expected shape: up to twenty rows when `pg_stat_statements` is installed and
 loaded—at most ten for each ranking label. Otherwise the block emits an
 explanatory notice and the final query returns an empty result.
 
+An existence check is necessary but not sufficient. PostgreSQL can install the
+extension's view without loading its shared-memory module at server startup.
+The nested block catches only that documented
+`object_not_in_prerequisite_state` condition. PL/pgSQL rolls back either
+partial ranking inside the nested block, and `TRUNCATE` makes the empty-result
+contract explicit. Any unrelated error still propagates.
+
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-44 Exercise 2, inspect `to_regclass('public.pg_stat_statements')`, then read the optional `public.pg_stat_statements` view into the course-owned temporary `top_statement_stats` table. Build `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`; do not install the extension or reset shared statistics.
 - **Expected result/shape:** For sql-44 Exercise 2, expected output: up to 20 rows when `pg_stat_statements` is installed and loaded, with at most 10 rows per ranking label (`total_exec_time` and `mean_exec_time`); otherwise emit an explanatory notice and return an empty result. Each row is one statement within a ranking, identified by (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`). The final columns are `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`. The final order is `ranking, rank_position`.
-- **Independent verification:** For sql-44 Exercise 2, if the optional view is absent, require the notice and empty result. If it is present, require only the `total_exec_time` and `mean_exec_time` labels, at most 10 rows per label, unique (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`), consecutive `rank_position` values from 1 through N, nonincreasing `total_exec_time` order for its label, nonincreasing `mean_exec_time` order for its label, and values that match a fresh read of `public.pg_stat_statements`.
+- **Independent verification:** For sql-44 Exercise 2, if the optional view is absent or raises `object_not_in_prerequisite_state` because the module was not preloaded, require an explanatory notice and an empty result. If it is readable, require only the `total_exec_time` and `mean_exec_time` labels, at most 10 rows per label, unique (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`), consecutive `rank_position` values from 1 through N, nonincreasing `total_exec_time` order for its label, nonincreasing `mean_exec_time` order for its label, and values that match a fresh read of `public.pg_stat_statements`.
 - **Intermediate relation check:** For sql-44 Exercise 2, inspect the existence check first, then compare the by-total and by-mean selections separately before reading the combined temporary relation.
 - **Clause check:** For sql-44 Exercise 2, the solution uses dynamic `SELECT`, window `OVER`, `FROM`, `ORDER BY`, and `LIMIT` clauses. Each branch preserves one statement per (`userid`, `dbid`, `toplevel`, `queryid`) within its `ranking`, assigns `rank_position`, and limits that ranking to ten rows.
 - **Alternative/trade-off:** For sql-44 Exercise 2, the chosen form is justified by this lesson-specific rationale: Expected shape: up to ten rows when `pg_stat_statements` is installed and loaded; otherwise an explanatory notice and an empty result. Evaluate another form against the concrete expected result (up to ten rows when `pg_stat_statements` is installed and loaded; otherwise an explanatory notice and an empty result) and the verification above.
-- **Edge case:** The optional view can be absent or contain fewer than ten statements. Both states are valid and leave the monitored statistics unchanged.
+- **Edge case:** The optional view can be absent, installed but not preloaded, readable but empty, or contain fewer than ten statements. All are valid optional-source states and leave the monitored statistics unchanged.
 
 ## Reasoning, safety, and pitfalls
 

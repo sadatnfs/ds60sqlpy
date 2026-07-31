@@ -217,72 +217,72 @@ ORDER BY wi.item_id;
 -- 1. Write a STABLE SQL function status_change_count(item_id) that returns the
 --    number of audit rows for one item. Decide what NULL input should return.
 --
---    Inputs: For sql-prog-01 Exercise 1, read from `pro_routines_lab.work_item_audit`, `pro_routines_lab.work_items`, `OF`, `pro_routines_lab.status_change_count`, and `pro_routines_lab.reassign_open_items`. Build the answer toward `stable`; keep `stable` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-prog-01 Exercise 1, expected output: one row per `stable`. The final columns are `stable`. The final order is `wi.item_id`.
---    Verify: For sql-prog-01 Exercise 1, run an anti-check that counts rows where NOT ((a.item_id = p_item_id $function$) OR (wi.owner_name = p_from_owner AND wi.status <> 'closed') OR (wi.item_id = 1)); require unique `stable` where the expected grain is one row per key and confirm the projected `stable` against `pro_routines_lab.work_item_audit`, `pro_routines_lab.work_items`, `OF`, `pro_routines_lab.status_change_count`, and `pro_routines_lab.reassign_open_items`. Repeat with `NULL` in `stable` and state whether the row is kept, rejected, or classified.
+--    Inputs: For sql-prog-01 Exercise 1, create the STABLE SQL function `status_change_count(p_item_id bigint)` over `work_item_audit`, with the explicit policy that NULL or an unknown ID returns zero.
+--    Expected result/shape: For sql-prog-01 Exercise 1, expected output: one scalar count per invocation plus a four-row probe matrix demonstrating zero, one, multiple, and NULL-input cases; every count is a nonnegative bigint.
+--    Verify: For sql-prog-01 Exercise 1, compare each function result with an independent filtered `COUNT(*)`, assert item 1 has multiple audits, item 3 has one, an absent ID has zero, and NULL has zero because SQL equality matches no row.
 --    Hint ladder, rung 1: For sql-prog-01 Exercise 1, inspect the source keys that survive `WHERE`; then check `wi.item_id` before applying the row cap.
 -- 2. Write a procedure reassign_open_items(from_owner, to_owner) that changes
 --    only non-closed items and rejects a blank destination owner.
 --
---    Inputs: For sql-prog-01 Exercise 2, complete the reassignment procedure written analysis and support its claims with read-only evidence from `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Mark unverified assumptions explicitly.
---    Expected result/shape: For sql-prog-01 Exercise 2, expected output: a completed the reassignment procedure written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `update`.
---    Verify: For sql-prog-01 Exercise 2, check the reassignment procedure written analysis against `update`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Inputs: For sql-prog-01 Exercise 2, create and call `reassign_open_items(p_from_owner, p_to_owner)`, rejecting NULL/blank destinations before updating only source-owner rows whose status is not `closed`.
+--    Expected result/shape: For sql-prog-01 Exercise 2, expected output: a successful CALL that moves Morgan's eligible item to Taylor, while Morgan's closed item remains unchanged; a blank destination is caught as SQLSTATE class `check_violation`.
+--    Verify: For sql-prog-01 Exercise 2, snapshot eligible and closed source rows before CALL, reconcile the changed target set afterward, and prove the nested invalid CALL changes no owner values.
 --    Hint ladder, rung 1: For sql-prog-01 Exercise 2, check the reassignment procedure written analysis against `update`.
 -- 3. Add a BEFORE UPDATE trigger that rejects a direct closed -> open
 --    transition. Safely prove the rejection and explain when application code
 --    or a dedicated transition table would be clearer.
 --
---    Inputs: For sql-prog-01 Exercise 3, complete the transition guard written analysis and support its claims with read-only evidence from `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Mark unverified assumptions explicitly.
---    Expected result/shape: For sql-prog-01 Exercise 3, expected output: a completed the transition guard written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `check_violation`, and `if`.
---    Verify: For sql-prog-01 Exercise 3, check the transition guard written analysis against `check_violation`, and `if`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Inputs: For sql-prog-01 Exercise 3, use a BEFORE UPDATE row trigger to reject direct `closed` to `open` transitions and primary-key mutation, returning NEW for allowed updates.
+--    Expected result/shape: For sql-prog-01 Exercise 3, expected output: allowed transitions succeed, direct reopen and identity mutation each emit an expected rejection notice, and rejected rows retain their original values.
+--    Verify: For sql-prog-01 Exercise 3, attempt both an allowed `closed` to `in_progress` transition and a forbidden `closed` to `open` transition, record SQLSTATE `23514`, and reselect the row after each attempt.
 --    Hint ladder, rung 1: For sql-prog-01 Exercise 3, check the transition guard written analysis against `check_violation`, and `if`.
 -- 4. Compare the number of row-audit records with statement-audit records after
 --    a multirow update. State the grain of each audit table.
 --
---    Inputs: For sql-prog-01 Exercise 4, read from `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Build the answer toward `changed_rows`; keep `changed_rows` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-prog-01 Exercise 4, expected output: one row per `changed_rows`. The final columns are `changed_rows`.
---    Verify: For sql-prog-01 Exercise 4, reselect the returned keys directly from the source; require unique `changed_rows` where the expected grain is one row per key and confirm the projected `changed_rows` against `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Add one source row with a new `changed_rows`; verify the result gains exactly one row carrying that `changed_rows` value.
+--    Inputs: For sql-prog-01 Exercise 4, compare row-level status audits with the statement-level summary produced by one two-row status UPDATE.
+--    Expected result/shape: For sql-prog-01 Exercise 4, expected output: one reconciliation row with `row_audit_records = 2`, `statement_audit_records = 1`, and `statement_changed_status_rows = 2`.
+--    Verify: For sql-prog-01 Exercise 4, filter row audits to the two known item IDs and transition, identify the one matching statement summary, and explain that row-audit grain is one changed item while statement-audit grain is one UPDATE statement.
 --    Hint ladder, rung 1: For sql-prog-01 Exercise 4, select `changed_rows` from `pro_routines_lab.work_items`, `ON`, and `NEW.status` before adding derived columns.
 -- 5. Explain why a CHECK constraint, not a trigger, enforces the allowed status
 --    values. Explain why functions cannot COMMIT, and when a top-level procedure
 --    may control transactions.
 --
---    Inputs: For sql-prog-01 Exercise 5, complete the declarative boundary written analysis and support its claims with read-only evidence from `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Mark unverified assumptions explicitly.
---    Expected result/shape: For sql-prog-01 Exercise 5, expected output: a completed the declarative boundary written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `call`.
---    Verify: For sql-prog-01 Exercise 5, check the declarative boundary written analysis against `call`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+--    Inputs: For sql-prog-01 Exercise 5, return a rule-to-mechanism decision matrix covering a row-local CHECK, OLD/NEW trigger, query function, and multi-step procedure.
+--    Expected result/shape: For sql-prog-01 Exercise 5, expected output: four rows with `rule`, `mechanism`, and `reason`, ordered deterministically by rule.
+--    Verify: For sql-prog-01 Exercise 5, reject one disallowed status through the CHECK, prove the transition trigger sees OLD/NEW, and state that functions cannot transaction-control while a procedure may do so only at an allowed top-level CALL boundary.
 --    Hint ladder, rung 1: For sql-prog-01 Exercise 5, check the declarative boundary written analysis against `call`.
 -- 6. Classify the lesson routines as VOLATILE, STABLE, or IMMUTABLE and decide
 --    whether each can be PARALLEL SAFE. Explain why an incorrect promise can
 --    produce wrong plans or results even when a demo appears to work.
 --
---    Inputs: For sql-prog-01 Exercise 6, read from `pg_catalog.pg_proc`, and `pg_catalog.pg_namespace`. Build the answer toward `proname`, `volatility`, and `parallel_mode`; keep `proname` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-prog-01 Exercise 6, expected output: one row per `proname`. The final columns are `proname`, `volatility`, and `parallel_mode`. The final order is `p.proname`.
---    Verify: For sql-prog-01 Exercise 6, project `proname` plus the raw source columns from `pg_catalog.pg_proc`, and `pg_catalog.pg_namespace` at each join stage; record row count and distinct `proname`, then assert the final `proname`, `volatility`, and `parallel_mode` values match those staged rows without unintended fanout or loss. Add one row for which `(n.nspname = 'pro_routines_lab')` is true and one for which it is false; verify only the matching `proname` value is returned.
+--    Inputs: For sql-prog-01 Exercise 6, inspect `pg_proc`/`pg_namespace` for every lab function and procedure, including kind, name, identity arguments, volatility, parallel mode, security mode, and routine settings.
+--    Expected result/shape: For sql-prog-01 Exercise 6, expected output: one row per routine signature, ordered by routine name, with overloaded routines distinguishable through `identity_arguments`.
+--    Verify: For sql-prog-01 Exercise 6, compare catalog values with every `CREATE FUNCTION/PROCEDURE` declaration and explain that falsely promising STABLE/IMMUTABLE or PARALLEL SAFE can permit invalid planner assumptions and wrong results.
 --    Hint ladder, rung 1: For sql-prog-01 Exercise 6, start with the first relation in `pg_catalog.pg_proc`, and `pg_catalog.pg_namespace`; after each join, record total rows and distinct `proname` so the exact fanout or loss is visible.
 -- 7. Add an AFTER UPDATE statement trigger with transition tables that records
 --    one summary row per statement. Reconcile affected rows against the
 --    row-level audit and define behavior for an update that changes zero rows.
 --
---    Inputs: For sql-prog-01 Exercise 7, read the target keys from `pro_routines_lab.statement_status_summary`, `n.status`, `old_rows`, `new_rows`, and `ON` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
---    Expected result/shape: For sql-prog-01 Exercise 7, expected output: the command tag and an independently counted set of affected `integer` values. The final columns are `integer`. The final order is `s.summary_id`.
---    Verify: For sql-prog-01 Exercise 7, materialize the intended `integer` target set first; require the command tag/`RETURNING` set to match it, then query `pro_routines_lab.statement_status_summary`, `n.status`, `old_rows`, `new_rows`, and `ON` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `integer` values in both cases.
+--    Inputs: For sql-prog-01 Exercise 7, create an AFTER UPDATE statement trigger with OLD/NEW transition tables, joining on the enforced immutable `item_id`, then run a multirow title update and a truly zero-target `WHERE false` update.
+--    Expected result/shape: For sql-prog-01 Exercise 7, expected output: one summary row `(matched_rows=2, changed_status_rows=0)`, one `(0,0)` row for the empty target, and one `(2,2)` row for a two-item status change.
+--    Verify: For sql-prog-01 Exercise 7, assert exactly one summary per UPDATE statement, reconcile changed-status counts with row audits, prove the zero-target statement records `(0,0)`, and keep `item_id` immutable so transition-table pairing cannot undercount.
 --    Hint ladder, rung 1: For sql-prog-01 Exercise 7, start with the first relation in `pro_routines_lab.statement_status_summary`, `n.status`, `old_rows`, `new_rows`, and `ON`; after each join, record total rows and distinct `integer` so the exact fanout or loss is visible.
 -- 8. Use a nested PL/pgSQL block to catch one expected unique_violation, then
 --    prove only the inner subtransaction was rolled back. Re-raise every
 --    unexpected SQLSTATE instead of using WHEN OTHERS as silent control flow.
 --
---    Inputs: For sql-prog-01 Exercise 8, read the target keys from `pro_routines_lab.exception_probe` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
---    Expected result/shape: For sql-prog-01 Exercise 8, expected output: the command tag and an independently counted set of affected `unique_violation` values. The final columns are `unique_violation`.
---    Verify: For sql-prog-01 Exercise 8, materialize the intended `unique_violation` target set first; require the command tag/`RETURNING` set to match it, then query `pro_routines_lab.exception_probe` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `unique_violation` values in both cases.
+--    Inputs: For sql-prog-01 Exercise 8, insert an outer marker, provoke one duplicate key inside a nested PL/pgSQL exception block, and catch only `unique_violation`.
+--    Expected result/shape: For sql-prog-01 Exercise 8, expected output: one expected NOTICE; the outer marker remains, while both inner `duplicate` inserts are absent because the inner block rolled back.
+--    Verify: For sql-prog-01 Exercise 8, query `exception_probe` for both keys after the handler and fail unless outer count is one and duplicate count is zero; never use a silent `WHEN OTHERS` branch.
 --    Hint ladder, rung 1: For sql-prog-01 Exercise 8, materialize the intended `unique_violation` target set first; require the command tag/`RETURNING` set to match it, then query `pro_routines_lab.exception_probe` again and prove rollback or idempotent retry.
 -- 9. Harden a SECURITY DEFINER reporting function: fixed search_path,
 --    schema-qualified objects, validated parameters, revoked PUBLIC execution,
 --    narrow owner privileges, and explicit grants. State why ownership itself
 --    is part of the security boundary.
 --
---    Inputs: For sql-prog-01 Exercise 9, read from `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Build the answer toward `search_path`; keep `search_path` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-prog-01 Exercise 9, expected output: one row per `search_path`. The final columns are `search_path`.
---    Verify: For sql-prog-01 Exercise 9, reselect the returned keys directly from the source; require unique `search_path` where the expected grain is one row per key and confirm the projected `search_path` against `pro_routines_lab.work_items`, `ON`, and `NEW.status`. Add one source row with a new `search_path`; verify the result gains exactly one row carrying that `search_path` value.
+--    Inputs: For sql-prog-01 Exercise 9, inventory actual routine owner/security/path/ACL metadata, then return an explicitly design-only six-step SECURITY DEFINER hardening checklist; this lesson creates no definer routine.
+--    Expected result/shape: For sql-prog-01 Exercise 9, expected output: catalog rows proving every lab routine is security-invoker, followed by six ordered controls covering NOLOGIN ownership, fixed path, qualified objects, validation, PUBLIC revocation, narrow grant, and catalog verification.
+--    Verify: For sql-prog-01 Exercise 9, require `prosecdef = false` for the executable lab and treat the checklist as proposed policy; perform privileged role/grant validation only in SQL-SEC-01 rather than implying it happened here.
 --    Hint ladder, rung 1: For sql-prog-01 Exercise 9, select `search_path` from `pro_routines_lab.work_items`, `ON`, and `NEW.status` before adding derived columns.
 -- 10. Simulate two workers claiming open items. Design one solution using
 --     SELECT ... FOR UPDATE SKIP LOCKED, define deterministic batch order, and
@@ -304,9 +304,9 @@ BEGIN
     END IF;
 END
 $self_check$;
---    Inputs: For sql-prog-01 Exercise 10, read the target keys from `pro_routines_lab.claim_queue`, and `SKIP` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
---    Expected result/shape: For sql-prog-01 Exercise 10, expected output: one `RETURNING` row per affected `affected_row_count` plus the command tag, with pre-write and post-write values that reconcile. The final columns are `affected_row_count`, and `command_tag`.
---    Verify: For sql-prog-01 Exercise 10, materialize the intended `affected_row_count` target set first; require the command tag/`RETURNING` set to match it, then query `pro_routines_lab.claim_queue`, and `SKIP` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `command_tag` values in both cases.
+--    Inputs: For sql-prog-01 Exercise 10, select the first two unclaimed queue rows by `queue_id` under `FOR UPDATE SKIP LOCKED`, then update those exact rows with a worker and timestamp.
+--    Expected result/shape: For sql-prog-01 Exercise 10, expected output: two `RETURNING` rows with `queue_id`, `claimed_by`, and `claimed_at`, ordered by the deterministic claim selection.
+--    Verify: For sql-prog-01 Exercise 10, reconcile returned IDs with the preselected batch, simulate a second transaction seeing different unlocked rows, keep the lock transaction short, and define retry, stale-lease, and starvation monitoring policies.
 --    Hint ladder, rung 1: For sql-prog-01 Exercise 10, run `claimable` one at a time. Record each CTE's row count and `affected_row_count` uniqueness before the next stage uses it.
 
 ROLLBACK;

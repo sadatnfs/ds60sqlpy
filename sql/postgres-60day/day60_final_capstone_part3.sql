@@ -43,16 +43,36 @@ SELECT * FROM v_dq_customers;
 SELECT * FROM v_dq_orders;
 
 -- 2. Core Business Views ----------------------------------------------------
--- Lifetime value per customer
+-- Lifetime value per customer.
+--
+-- Grain: exactly one row per customer, including customers who have not placed
+-- an order. `orders.total_amount` is the authoritative revenue measure for this
+-- capstone. Re-summing order lines here could silently change the definition
+-- by excluding header-only orders or omitting adjustments stored on the header.
 CREATE OR REPLACE VIEW v_customer_ltv AS
-WITH line AS (
-  SELECT o.customer_id, SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_value
-  FROM orders o JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.customer_id, o.order_id
-)
-SELECT customer_id, ROUND(SUM(order_value),2) AS ltv
-FROM line
-GROUP BY customer_id;
+SELECT c.customer_id,
+       c.full_name,
+       c.country,
+       c.segment,
+       COUNT(o.order_id) AS order_count,
+       COALESCE(SUM(o.total_amount), 0)::numeric(14,2) AS ltv
+FROM customers c
+LEFT JOIN orders o USING (customer_id)
+GROUP BY c.customer_id, c.full_name, c.country, c.segment;
+
+-- Control 1: zero-order customers must still appear in the view.
+SELECT COUNT(*) AS customers_missing_from_ltv
+FROM customers c
+LEFT JOIN v_customer_ltv l USING (customer_id)
+WHERE l.customer_id IS NULL;
+
+-- Control 2: customer-level LTV must reconcile to the authoritative order
+-- header total. Expected `difference` is 0.00 on the course seed.
+SELECT ROUND(COALESCE(SUM(ltv), 0), 2) AS ltv_total,
+       (SELECT ROUND(COALESCE(SUM(total_amount), 0), 2) FROM orders) AS order_total,
+       ROUND(COALESCE(SUM(ltv), 0), 2)
+         - (SELECT ROUND(COALESCE(SUM(total_amount), 0), 2) FROM orders) AS difference
+FROM v_customer_ltv;
 
 -- Monthly revenue and MoM growth
 CREATE OR REPLACE VIEW v_monthly_revenue AS
@@ -86,22 +106,63 @@ FROM bud b FULL OUTER JOIN exp e ON e.month=b.month AND e.category=b.category
 ORDER BY month DESC, category
 LIMIT 120;
 
--- Marketing: Cohort retention for last 6 cohorts
+-- Marketing: Cohort retention for the latest 6 signup cohorts.
+--
+-- A cohort is the customer's signup month. An active customer has at least one
+-- order in the lifecycle month being measured. `cohort_size` includes every
+-- signup, including people who never order; dividing by only active customers
+-- would inflate the reported retention rate.
 WITH orders_m AS (
-  SELECT o.customer_id, date_trunc('month', o.order_date)::date AS order_month FROM orders o GROUP BY 1,2
+  SELECT DISTINCT
+         o.customer_id,
+         date_trunc('month', o.order_date)::date AS order_month
+  FROM orders o
 ), cohorts AS (
-  SELECT c.customer_id, date_trunc('month', c.created_at)::date AS cohort_month FROM customers c
+  SELECT c.customer_id,
+         date_trunc('month', c.created_at)::date AS cohort_month
+  FROM customers c
+), latest_six_cohorts AS (
+  SELECT cohort_month
+  FROM cohorts
+  GROUP BY cohort_month
+  ORDER BY cohort_month DESC
+  LIMIT 6
+), cohort_members AS (
+  SELECT c.customer_id, c.cohort_month
+  FROM cohorts c
+  JOIN latest_six_cohorts latest USING (cohort_month)
+), cohort_sizes AS (
+  SELECT cohort_month, COUNT(*)::numeric AS cohort_size
+  FROM cohort_members
+  GROUP BY cohort_month
+), month_offsets AS (
+  -- The seven requested lifecycle buckets are month 0 through month 6.
+  SELECT generate_series(0, 6)::int AS month_offset
 ), retention AS (
-  SELECT co.cohort_month, om.order_month,
-         (
-           EXTRACT(YEAR FROM age(om.order_month, co.cohort_month)) * 12
-           + EXTRACT(MONTH FROM age(om.order_month, co.cohort_month))
-         )::int AS month_offset,
+  SELECT cm.cohort_month,
+         offsets.month_offset,
+         sizes.cohort_size,
          COUNT(DISTINCT om.customer_id) AS active_customers
-  FROM orders_m om JOIN cohorts co ON co.customer_id = om.customer_id
-  GROUP BY co.cohort_month, om.order_month
+  FROM cohort_members cm
+  JOIN cohort_sizes sizes USING (cohort_month)
+  CROSS JOIN month_offsets offsets
+  LEFT JOIN orders_m om
+    ON om.customer_id = cm.customer_id
+   AND om.order_month = (
+         cm.cohort_month + make_interval(months => offsets.month_offset)
+       )::date
+  GROUP BY cm.cohort_month, offsets.month_offset, sizes.cohort_size
 )
-SELECT * FROM retention WHERE month_offset BETWEEN 0 AND 6 ORDER BY cohort_month DESC, month_offset;
+SELECT cohort_month,
+       month_offset,
+       cohort_size,
+       active_customers,
+       ROUND(
+         active_customers::numeric / NULLIF(cohort_size, 0),
+         4
+       ) AS retention_rate
+FROM retention
+ORDER BY cohort_month DESC, month_offset;
 
 -- Operations: Top slow queries to optimize (use EXPLAIN ANALYZE in-session)
 EXPLAIN

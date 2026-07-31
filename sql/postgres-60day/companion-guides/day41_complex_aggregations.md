@@ -128,12 +128,54 @@ ORDER BY net_revenue DESC;
 
 - Produce several conditional measures from one controlled fact grain.
 - Build deterministic ordered labels after ranking within a partition.
+- Generate detail rows, one-dimensional subtotals, and a grand total with
+  `CUBE`.
+- Use `GROUPING` to identify the grain of every subtotal row without confusing
+  a generated subtotal marker with a stored SQL `NULL`.
 
 ## Vocabulary and concepts
 
 - **FILTER clause:** a per-aggregate condition written after the aggregate.
 - **Conditional aggregate:** a measure calculated only for qualifying rows.
 - **Ordered aggregation:** concatenation or collection under a specified order.
+- **Grouping set:** one explicit list of columns that defines an aggregate
+  grain. `GROUPING SETS` asks PostgreSQL for several such grains in one query.
+- **CUBE:** shorthand for every grouping set that can be formed from the listed
+  dimensions. Two dimensions produce four levels.
+- **GROUPING:** a function evaluated on grouping expressions. It returns `1`
+  when an expression was omitted to create the current subtotal and `0` when
+  the expression participates in that row's grouping key.
+- **Grouping mask:** the integer returned by multi-argument `GROUPING`. Read its
+  bits from right to left in the same order as the arguments.
+
+## How to read a two-dimensional CUBE
+
+`CUBE(country, category)` is equivalent to:
+
+```sql
+GROUP BY GROUPING SETS (
+  (country, category), -- detail
+  (country),           -- one country across all categories
+  (category),          -- one category across all countries
+  ()                   -- grand total
+)
+```
+
+PostgreSQL encodes which expressions were omitted with
+`GROUPING(country, category)`. The rightmost argument, `category`, is the
+least-significant bit:
+
+| `grouping_mask` | Included grouping key | Meaning |
+|---:|---|---|
+| `0` | `country, category` | detail |
+| `1` | `country` | country subtotal |
+| `2` | `category` | category subtotal |
+| `3` | none | grand total |
+
+This mask is a grain label, not a data-cleaning test. A stored `NULL` country
+in a detail group still has a country grouping bit of `0`; a generated country
+subtotal marker has that bit set to `1`. Test `GROUPING(country)`, not
+`country IS NULL`, when you need to distinguish them.
 
 ## Worked example / walkthrough
 
@@ -151,25 +193,25 @@ Complete these in the [learner SQL](../day41_complex_aggregations.sql):
    **Expected result/shape:** For sql-41 Exercise 1, expected output: one row for each category in `training.products`, with six metric columns. The final columns are `category`, `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d`. The final order is `revenue_30d DESC NULLS LAST, category`.
    **Verify:** For sql-41 Exercise 1, independently aggregate `orders`, `order_items`, `products`, and `training.products` by `category`; require one output row for every distinct `category` tuple and compare `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue_30d`, `revenue_90d`, and `orders_30d` for the existing `category` tuple and verify the new tuple appears exactly once.
 2. List each country's top five products with `string_agg`.
-   **Inputs/evidence:** For sql-41 Exercise 2, read from `customers`, `orders`, `order_items`, and `products`. Build the answer toward `country`, and `top_five_products`; keep `country` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-41 Exercise 2, expected output: one row per represented country and one comma-separated label ordered from highest to lowest product revenue. The final columns are `country`, and `top_five_products`. The final order is `country`.
-   **Verify:** For sql-41 Exercise 2, independently aggregate `customers`, `orders`, `order_items`, and `products` by `country`; require one output row for every distinct `country` tuple satisfying `(product_rank <= 5)` and compare `top_five_products` tuple by tuple. Give two rows the same `country` value and different ``country`` values; verify `country` produces the intended rank and display order.
+   **Inputs/evidence:** For sql-41 Exercise 2, read from `customers`, `orders`, `order_items`, and `products`. First aggregate at (`country`, `product_id`, `name`) grain, then rank products within each country; build the answer toward `country` and `top_five_products`.
+   **Expected result/shape:** For sql-41 Exercise 2, expected output: one row per represented country. `top_five_products` contains at most five product names ordered by `revenue DESC, product_id`; `product_id` is the deterministic tie-breaker. The final columns are `country` and `top_five_products`. The final order is `country`.
+   **Verify:** For sql-41 Exercise 2, independently aggregate line revenue at (`country`, `product_id`, `name`) grain and rank with `ROW_NUMBER() OVER (PARTITION BY country ORDER BY revenue DESC, product_id)`. For every country, compare the ordered products used by `string_agg`, require no more than five ranked products, and confirm a country with fewer than five products is not padded.
 3. Predict explicit grouping sets versus a two-column `CUBE`.
-   **Inputs/evidence:** For sql-41 Exercise 3, read from `orders`, `customers`, `order_items`, and `products`. Build the answer toward `country`, `category`, `revenue`, and `grouping_mask`; keep `country`, and `category` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-41 Exercise 3, expected output: one row per `country`, and `category`. The final columns are `country`, `category`, `revenue`, and `grouping_mask`. The final order is `grouping_mask, country, category`.
-   **Verify:** For sql-41 Exercise 3, independently aggregate `orders`, `customers`, `order_items`, and `products` by `country`, and `category`; require one output row for every distinct `country`, and `category` tuple and compare `revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `country`, and `category` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-41 Exercise 3, calculate line revenue from `orders`, `customers`, `order_items`, and `products`, then aggregate with `CUBE(country, category)`. Build the answer toward `country`, `category`, `revenue`, `grouping_mask`, and `grouping_level`.
+   **Expected result/shape:** For sql-41 Exercise 3, expected output: every grouping level emitted by the two-dimensional cube. `grouping_mask` is `0` for detail, `1` for a country subtotal, `2` for a category subtotal, and `3` for the grand total. The final columns are `country`, `category`, `revenue`, `grouping_mask`, and `grouping_level`. The final order is `grouping_mask, country, category`.
+   **Verify:** For sql-41 Exercise 3, compare mask `0` with an independent (`country`, `category`) aggregate, mask `1` with a country aggregate, and mask `2` with a category aggregate; require exactly one mask `3` row. Within each mask, the sum of `revenue` must equal the independent all-lines revenue total.
 4. Build country status/revenue/customer metrics with `FILTER`.
    **Inputs/evidence:** For sql-41 Exercise 4, read from `orders`, and `customers`. Build the answer toward `country`, `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers`; keep `country` visible whenever the result has row-level grain.
    **Expected result/shape:** For sql-41 Exercise 4, expected output: one row per `country`. The final columns are `country`, `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers`. The final order is `c.country`.
    **Verify:** For sql-41 Exercise 4, independently aggregate `orders`, and `customers` by `country`; require one output row for every distinct `country` tuple and compare `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `orders`, `paid_orders`, and `paid_revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
 5. Distinguish stored NULLs from subtotal NULLs with `GROUPING`.
-   **Inputs/evidence:** For sql-41 Exercise 5, read from `customers`. Build the answer toward `country_label`, `is_subtotal`, and `customers`; keep `country_label`, and `is_subtotal` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-41 Exercise 5, expected output: one row per `country_label`, and `is_subtotal`. The final columns are `country_label`, `is_subtotal`, and `customers`. The final order is `is_subtotal, country_label`.
-   **Verify:** For sql-41 Exercise 5, independently aggregate `customers` by `country_label`, and `is_subtotal`; require one output row for every distinct `country_label`, and `is_subtotal` tuple and compare `customers` tuple by tuple. Repeat with `NULL` in `GROUPING` and state whether the row is kept, rejected, or classified.
+   **Inputs/evidence:** For sql-41 Exercise 5, read `customers.country` and append one controlled `NULL::text` input row in a `country_input` CTE. Apply `GROUPING(country)` to the grouped expression and build `country_label`, `is_subtotal`, and `customers`.
+   **Expected result/shape:** For sql-41 Exercise 5, expected output: one detail row per distinct input country with `is_subtotal = 0`, including a `(stored null)` row, plus exactly one `ALL COUNTRIES` row with `is_subtotal = 1`. The final columns are `country_label`, `is_subtotal`, and `customers`. The final order is `is_subtotal, country_label`.
+   **Verify:** For sql-41 Exercise 5, require exactly one row with `is_subtotal = 1`, require the `(stored null)` row to have `is_subtotal = 0`, and verify that detail-row `customers` sum to the grand-total `customers`. `GROUPING` receives the grouped `country` expression; do not try to call `GROUPING(NULL)`.
 6. Return a typed empty array for an empty aggregate input.
-   **Inputs/evidence:** For sql-41 Exercise 6, read from `customers`. Build the answer toward `empty_email_array`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-41 Exercise 6, expected output: one row per `customer_id`. The final columns are `empty_email_array`.
-   **Verify:** For sql-41 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `empty_email_array` against `customers`. Repeat with `NULL` in `empty_email_array` and state whether the row is kept, rejected, or classified.
+   **Inputs/evidence:** For sql-41 Exercise 6, read `customers.email` through `array_agg(email) FILTER (WHERE false)` and use a same-type `COALESCE` fallback. Build the answer toward `empty_email_array`.
+   **Expected result/shape:** For sql-41 Exercise 6, expected output: exactly one scalar row with one column, `empty_email_array`, whose value is the non-NULL empty `text[]` value `{}`. There is no customer-level key because the query has no `GROUP BY`.
+   **Verify:** For sql-41 Exercise 6, assert that the uncoalesced filtered `array_agg` result is `NULL`, while the final result satisfies `empty_email_array IS NOT NULL` and `cardinality(empty_email_array) = 0`.
 
 Decide explicitly when an absent measure should be `NULL` or zero.
 
@@ -177,6 +219,14 @@ Decide explicitly when an absent measure should be `NULL` or zero.
 
 - Are order and customer counts protected from line-level fanout?
 - Is the top-five label order stable under metric ties?
+- Can you expand `CUBE(country, category)` into its four explicit grouping
+  sets without looking?
+- Can you explain why masks `1` and `2` mean different subtotal grains even
+  though each prints one NULL dimension?
+- If `country` contains a stored NULL, can you prove why
+  `GROUPING(country) = 0` for that detail row?
+- Why does a scalar aggregate over no qualifying rows return one row, and why
+  must the empty-array fallback be typed as `text[]`?
 
 ## Next step
 

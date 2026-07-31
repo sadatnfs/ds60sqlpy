@@ -77,13 +77,9 @@ and `INSERT=false`.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-sec-01 Exercise 1, complete the two-layer reads written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
-- **Expected result/shape:** For sql-sec-01 Exercise 1, expected output: a completed the two-layer reads written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `usage`, `has_schema_privilege`, `has_table_privilege`, and `insert`.
-- **Independent verification:** For sql-sec-01 Exercise 1, check the two-layer reads written analysis against `usage`, `has_schema_privilege`, `has_table_privilege`, and `insert`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
-- **Intermediate relation check:** For sql-sec-01 Exercise 1, check the two-layer reads written analysis against `usage`, `has_schema_privilege`, `has_table_privilege`, and `insert`.
-- **Clause check:** For sql-sec-01 Exercise 1, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_catalog.pg_roles`, `PUBLIC`, and `TO` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-sec-01 Exercise 1, the chosen form is justified by this lesson-specific rationale: `has_schema_privilege(role, schema, 'USAGE')` and `has_table_privilege(role, table, 'SELECT')` answer different questions. Evaluate another form against the concrete expected result (a completed the two-layer reads written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
-- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Inputs/evidence:** For sql-sec-01 Exercise 1, test schema USAGE and table SELECT as separate privilege layers, first before schema grants and then after temporarily removing one table grant.
+- **Expected result/shape:** For sql-sec-01 Exercise 1, expected output: evidence for table SELECT without schema USAGE, schema USAGE without table SELECT, and a final three-role matrix with USAGE/SELECT true and INSERT false.
+- **Independent verification:** For sql-sec-01 Exercise 1, assert the two observed boolean rows equal `(USAGE=false, SELECT=true)` and `(USAGE=true, SELECT=false)`, attempt the corresponding qualified SELECTs, and restore only the intended least-privilege state before later exercises.
 
 ## Exercise 2 — Read-only auditor
 
@@ -108,13 +104,9 @@ this SQL lesson.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-sec-01 Exercise 2, change only `auditor_read`, `pro_security_lab.documents`, and `ds60_sec_auditor` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `pg_catalog.pg_roles`, `information_schema.role_table_grants`, `pg_catalog.pg_policies`, and `pg_catalog.pg_class` rows.
-- **Expected result/shape:** For sql-sec-01 Exercise 2, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `usage`.
-- **Independent verification:** For sql-sec-01 Exercise 2, inspect `pg_catalog.pg_roles`, `information_schema.role_table_grants`, `pg_catalog.pg_policies`, and `pg_catalog.pg_class` for `auditor_read`, `pro_security_lab.documents`, and `ds60_sec_auditor`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
-- **Intermediate relation check:** For sql-sec-01 Exercise 2, inspect `pg_catalog.pg_roles`, `information_schema.role_table_grants`, `pg_catalog.pg_policies`, and `pg_catalog.pg_class` for `auditor_read`, `pro_security_lab.documents`, and `ds60_sec_auditor`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object.
-- **Clause check:** For sql-sec-01 Exercise 2, the solution actually uses `SELECT`. Read only those operations: begin at `auditor_read`, `pro_security_lab.documents`, and `ds60_sec_auditor`, preserve exactly one summary row, and finish with `usage`.
-- **Alternative/trade-off:** For sql-sec-01 Exercise 2, the chosen form is justified by this lesson-specific rationale: The solution creates a NOLOGIN `ds60_sec_auditor`, grants schema `USAGE`, lets the owner's default privileges grant future table `SELECT`, and adds: The auditor sees both seeded rows because the policy delibera. Evaluate another form against the concrete expected result (the requested DDL command tag plus catalog rows and one accepted and one rejected behavior) and the verification above.
-- **Edge case:** Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
+- **Inputs/evidence:** For sql-sec-01 Exercise 2, grant the auditor table SELECT via owner defaults, schema USAGE explicitly, and an RLS SELECT policy with `USING (true)`; grant no table writes.
+- **Expected result/shape:** For sql-sec-01 Exercise 2, expected output: two tenant rows when SET ROLE auditor, correct north/south definer counts, and an expected insufficient-privilege notice for INSERT.
+- **Independent verification:** For sql-sec-01 Exercise 2, assert the auditor sees exactly both seeded IDs, has no INSERT/UPDATE/DELETE privilege, and cannot execute routines except those explicitly granted.
 
 ## Exercise 3 — Owner-specific default privileges
 
@@ -131,13 +123,9 @@ unchanged by `ALTER DEFAULT PRIVILEGES`; use an explicit `GRANT` for them.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-sec-01 Exercise 3, read from `ds60_sec_owner`. Compute `ds60_sec_auditor` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-- **Expected result/shape:** For sql-sec-01 Exercise 3, expected output: exactly one aggregate summary row. The final columns are `ds60_sec_auditor`.
-- **Independent verification:** For sql-sec-01 Exercise 3, evaluate each of `row_count` in a separate control `SELECT` over `ds60_sec_owner`; require one final row and compare every value. Run the same operation as one allowed identity and one denied identity; record both outcomes without granting new access.
-- **Intermediate relation check:** For sql-sec-01 Exercise 3, select `ds60_sec_auditor` from `ds60_sec_owner` before adding derived columns.
-- **Clause check:** For sql-sec-01 Exercise 3, the solution actually uses `SELECT`. Read only those operations: begin at `ds60_sec_owner`, preserve exactly one summary row, and finish with `ds60_sec_auditor`.
-- **Alternative/trade-off:** For sql-sec-01 Exercise 3, the chosen form is justified by this lesson-specific rationale: `audit_notes` is created by `ds60_sec_owner` after: The assertion confirms auditor `SELECT` arrived automatically. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
-- **Edge case:** Run the same operation as one allowed identity and one denied identity; record both outcomes without granting new access.
+- **Inputs/evidence:** For sql-sec-01 Exercise 3, create one future table as the role whose default privileges were configured and one as a different NOLOGIN owner with schema CREATE authority.
+- **Expected result/shape:** For sql-sec-01 Exercise 3, expected output: the auditor has SELECT on `audit_notes` created by `ds60_sec_owner` but not on `other_owner_notes` created by `ds60_sec_other_owner`.
+- **Independent verification:** For sql-sec-01 Exercise 3, compare `has_table_privilege` for both tables and state that ALTER DEFAULT PRIVILEGES uses only the current object's creating role—not inherited membership defaults.
 
 ## Exercise 4 — Review the definer boundary
 
@@ -162,13 +150,9 @@ status can see rows that the caller cannot.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-sec-01 Exercise 4, complete the definer boundary written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
-- **Expected result/shape:** For sql-sec-01 Exercise 4, expected output: a completed the definer boundary written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `document_count_for_tenant`, `search_path`, and `current_user`.
-- **Independent verification:** For sql-sec-01 Exercise 4, check the definer boundary written analysis against `document_count_for_tenant`, `search_path`, and `current_user`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
-- **Intermediate relation check:** For sql-sec-01 Exercise 4, check the definer boundary written analysis against `document_count_for_tenant`, `search_path`, and `current_user`.
-- **Clause check:** For sql-sec-01 Exercise 4, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_catalog.pg_roles`, `PUBLIC`, and `TO` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-sec-01 Exercise 4, the chosen form is justified by this lesson-specific rationale: The solution's `document_count_for_tenant(text)` demonstrates minimum controls: - a NOLOGIN owner with narrowly managed membership; - `SET search_path = pg_catalog`; - a fully qualified relation; - a bounded ag. Evaluate another form against the concrete expected result (a completed the definer boundary written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
-- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Inputs/evidence:** For sql-sec-01 Exercise 4, create a validated, fixed-search-path SECURITY DEFINER tenant-count function owned by the NOLOGIN owner, revoke PUBLIC, grant only the auditor, and inspect `pg_proc`.
+- **Expected result/shape:** For sql-sec-01 Exercise 4, expected output: valid north/south counts, an invalid-parameter rejection for unknown tenant, and catalog rows with owner, `prosecdef`, `proconfig`, and `proacl`.
+- **Independent verification:** For sql-sec-01 Exercise 4, test allowed and NULL/unknown inputs under SET ROLE auditor, assert PUBLIC lacks EXECUTE, confirm the owner cannot login, and trace every referenced object as schema-qualified.
 
 ## Exercise 5 — RLS bypass cases
 
@@ -185,13 +169,9 @@ tenant-policy test identity.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-sec-01 Exercise 5, complete the rls bypass written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
-- **Expected result/shape:** For sql-sec-01 Exercise 5, expected output: a completed the rls bypass written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `bypassrls`.
-- **Independent verification:** For sql-sec-01 Exercise 5, check the rls bypass written analysis against `bypassrls`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
-- **Intermediate relation check:** For sql-sec-01 Exercise 5, check the rls bypass written analysis against `bypassrls`.
-- **Clause check:** For sql-sec-01 Exercise 5, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_catalog.pg_roles`, `PUBLIC`, and `TO` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-sec-01 Exercise 5, the chosen form is justified by this lesson-specific rationale: - An ordinary table owner normally bypasses RLS. Evaluate another form against the concrete expected result (a completed the rls bypass written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
-- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Inputs/evidence:** For sql-sec-01 Exercise 5, SET LOCAL ROLE north and south separately, query the RLS table, then FORCE RLS and test the table owner; inventory superuser/BYPASSRLS separately.
+- **Expected result/shape:** For sql-sec-01 Exercise 5, expected output: north sees only north, south sees only south, the forced owner sees zero without a matching policy, and bypass-capable roles are clearly labeled unsuitable tenant-test identities.
+- **Independent verification:** For sql-sec-01 Exercise 5, assert one own-tenant row and zero cross-tenant rows for each low-privilege role, distinguish owner bypass before FORCE from forced-owner behavior, and never grant or rely on BYPASSRLS for tenants.
 
 ## Exercise 6 — Effective-access inventory
 
@@ -207,13 +187,9 @@ SUPERUSER or BYPASSRLS can dominate ordinary grants.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-sec-01 Exercise 6, complete the effective access written analysis and support its claims with read-only evidence from `pg_auth_members`. Mark unverified assumptions explicitly.
-- **Expected result/shape:** For sql-sec-01 Exercise 6, expected output: a completed the effective access written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `has__privilege`, `aclexplode`, `insert`, and `usage`.
-- **Independent verification:** For sql-sec-01 Exercise 6, check the effective access written analysis against `has__privilege`, `aclexplode`, `insert`, and `usage`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
-- **Intermediate relation check:** For sql-sec-01 Exercise 6, check the effective access written analysis against `has__privilege`, `aclexplode`, `insert`, and `usage`.
-- **Clause check:** For sql-sec-01 Exercise 6, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_auth_members` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-sec-01 Exercise 6, the chosen form is justified by this lesson-specific rationale: Use `has__privilege` functions for the final yes/no matrix because they account for ownership, membership inheritance, and PUBLIC grants. Evaluate another form against the concrete expected result (a completed the effective access written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
-- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Inputs/evidence:** For sql-sec-01 Exercise 6, use PostgreSQL `has_*_privilege` functions to report schema, table, column, sequence, and function access for north, south, and auditor roles.
+- **Expected result/shape:** For sql-sec-01 Exercise 6, expected output: one row per role with five distinct privilege booleans and an `effective_source` explanation distinguishing owner-default table grants from direct function grants.
+- **Independent verification:** For sql-sec-01 Exercise 6, compare every effective-access boolean row with object ACLs, role membership, ownership, and PUBLIC and record the matching source evidence; do not infer the grant source from a true boolean alone.
 
 ## Exercise 7 — Session and execution identity
 
@@ -229,13 +205,9 @@ action appear to come from its owner.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-sec-01 Exercise 7, complete the identity context written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
-- **Expected result/shape:** For sql-sec-01 Exercise 7, expected output: a completed the identity context written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `session_user`, and `current_user`.
-- **Independent verification:** For sql-sec-01 Exercise 7, check the identity context written analysis against `session_user`, and `current_user`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
-- **Intermediate relation check:** For sql-sec-01 Exercise 7, check the identity context written analysis against `session_user`, and `current_user`.
-- **Clause check:** For sql-sec-01 Exercise 7, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_catalog.pg_roles`, `PUBLIC`, and `TO` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-sec-01 Exercise 7, the chosen form is justified by this lesson-specific rationale: `SESSION_USER` is the authenticated session identity. Evaluate another form against the concrete expected result (a completed the identity context written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
-- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Inputs/evidence:** For sql-sec-01 Exercise 7, display SESSION_USER/CURRENT_USER before SET ROLE, after SET ROLE auditor, and from inside an auditor-invoked SECURITY DEFINER identity probe.
+- **Expected result/shape:** For sql-sec-01 Exercise 7, expected output: authenticated identity remains SESSION_USER; effective identity changes to auditor under SET ROLE and to the function owner inside SECURITY DEFINER.
+- **Independent verification:** For sql-sec-01 Exercise 7, compare all three evidence rows and design audit fields that preserve both identities plus the called routine and tenant context.
 
 ## Exercise 8 — Fail-closed tenant context
 
@@ -251,35 +223,29 @@ cross-tenant SELECT, INSERT, UPDATE, and DELETE.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-sec-01 Exercise 8, complete the fail-closed tenancy written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
-- **Expected result/shape:** For sql-sec-01 Exercise 8, expected output: a completed the fail-closed tenancy written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
-- **Independent verification:** For sql-sec-01 Exercise 8, check the fail-closed tenancy written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
-- **Intermediate relation check:** For sql-sec-01 Exercise 8, check the fail-closed tenancy written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
-- **Clause check:** For sql-sec-01 Exercise 8, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_catalog.pg_roles`, `PUBLIC`, and `TO` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-sec-01 Exercise 8, the chosen form is justified by this lesson-specific rationale: The safe policy maps only exact allowed identities/context values and returns NULL/false for everything else. Evaluate another form against the concrete expected result (a completed the fail-closed tenancy written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
-- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Inputs/evidence:** For sql-sec-01 Exercise 8, map exact role names to tenant keys with a fail-closed CASE; test lowercase valid roles, case mismatch, unknown, and NULL.
+- **Expected result/shape:** For sql-sec-01 Exercise 8, expected output: four rows with `candidate_role`, `derived_tenant`, and `accepted_identity`; only exact north/south role names are accepted.
+- **Independent verification:** For sql-sec-01 Exercise 8, assert unknown, case-changed, and NULL identities derive NULL and `accepted_identity = false`; if a pooled custom setting is adopted instead, validate and transaction-locally reset it.
 
 ## Exercise 9 — A narrow writer
 
-Grant schema `USAGE`, `INSERT` on only permitted columns, and sequence `USAGE`
-when an identity sequence requires it. Grant `SELECT` only on columns allowed in
-`RETURNING`; otherwise a write can succeed while the return expression is
-denied. Add an RLS `WITH CHECK` policy for the writer's tenant.
+Use one coherent API-only design: the writer receives schema `USAGE` and
+`EXECUTE` on a fixed-path SECURITY DEFINER insert function, but no table or
+identity-sequence grants. The function owner is NOLOGIN, its PUBLIC execution
+is revoked, its inputs are validated, and FORCE RLS plus owner-scoped policies
+limit it to north rows. `RETURNING` exposes only the inserted ID, tenant, and
+title.
 
-Prove the intended insert, then assert that forbidden columns, another tenant,
-UPDATE, DELETE, and broad RETURNING all fail. PostgreSQL may require column
-references used by policies or expressions to be readable through a carefully
-designed API; test the actual statement shape.
+Prove that API call, then attempt a direct cross-tenant INSERT, UPDATE, DELETE,
+and table SELECT under `SET ROLE ds60_sec_writer`; all must fail. Mixing direct
+table grants with this API would add an unused second write path and would no
+longer be the minimum model.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-sec-01 Exercise 9, complete the narrow writer written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
-- **Expected result/shape:** For sql-sec-01 Exercise 9, expected output: a completed the narrow writer written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `usage`, `insert`, and `returning`.
-- **Independent verification:** For sql-sec-01 Exercise 9, check the narrow writer written analysis against `usage`, `insert`, and `returning`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
-- **Intermediate relation check:** For sql-sec-01 Exercise 9, check the narrow writer written analysis against `usage`, `insert`, and `returning`.
-- **Clause check:** For sql-sec-01 Exercise 9, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_catalog.pg_roles`, `PUBLIC`, and `TO` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-sec-01 Exercise 9, the chosen form is justified by this lesson-specific rationale: Grant schema `USAGE`, `INSERT` on only permitted columns, and sequence `USAGE` when an identity sequence requires it. Evaluate another form against the concrete expected result (a completed the narrow writer written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
-- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Inputs/evidence:** For sql-sec-01 Exercise 9, create a NOLOGIN API-only writer with schema USAGE and one explicit function EXECUTE grant; give it no table or sequence privileges, while the hardened owner API enforces north-only INSERT/RETURNING under FORCE RLS.
+- **Expected result/shape:** For sql-sec-01 Exercise 9, expected output: one returned north document from the insert API; cross-tenant INSERT, direct UPDATE, DELETE, and table SELECT each produce an expected denial.
+- **Independent verification:** For sql-sec-01 Exercise 9, SET LOCAL ROLE writer for every probe, assert the API owner/path/ACL and owner-scoped RLS policies in catalogs, confirm no direct table or sequence privilege, and prove the failed operations leave no rows changed.
 
 ## Exercise 10 — Offboarding and emergency revocation
 
@@ -295,13 +261,9 @@ changes. Cluster-wide commands remain reviewed runbook steps, not lesson SQL.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-sec-01 Exercise 10, complete the revocation runbook written analysis and support its claims with read-only evidence from `pg_catalog.pg_roles`, `PUBLIC`, and `TO`. Mark unverified assumptions explicitly.
-- **Expected result/shape:** For sql-sec-01 Exercise 10, expected output: a completed the revocation runbook written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
-- **Independent verification:** For sql-sec-01 Exercise 10, check the revocation runbook written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
-- **Intermediate relation check:** For sql-sec-01 Exercise 10, check the revocation runbook written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
-- **Clause check:** For sql-sec-01 Exercise 10, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pg_catalog.pg_roles`, `PUBLIC`, and `TO` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-sec-01 Exercise 10, the chosen form is justified by this lesson-specific rationale: First disable login/rotate the external credential and terminate or drain approved sessions according to incident authority. Evaluate another form against the concrete expected result (a completed the revocation runbook written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
-- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Inputs/evidence:** For sql-sec-01 Exercise 10, return a non-destructive offboarding plan covering login/session fencing, ownership, memberships, current/default grants, dependent credentials, negative verification, and break-glass recovery.
+- **Expected result/shape:** For sql-sec-01 Exercise 10, expected output: seven rows ordered by `step_number` with `action` and `required_evidence`; no cluster-wide destructive command is executed.
+- **Independent verification:** For sql-sec-01 Exercise 10, rehearse the plan with an expendable role and record an evidence checklist: owned/dependent-object counts before revocation, denied-login/query results, application smoke-test result, and independently tested recovery administrator.
 
 ## Edge cases and alternatives
 

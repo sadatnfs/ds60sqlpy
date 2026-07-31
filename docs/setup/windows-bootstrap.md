@@ -70,7 +70,7 @@ packages, and registered Jupyter kernel remain available.
 
 The default `Core` profile installs:
 
-- Notebook tooling: IPython, JupyterLab, classic Notebook, ipykernel, and
+- Notebook tooling: IPython, JupyterLab, Jupyter Notebook, ipykernel, and
   notebook validators
 - Python data and quality dependencies
 - Bridge and professional-track dependencies

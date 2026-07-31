@@ -83,26 +83,27 @@ CREATE TABLE pro_relational_lab.maintenance_visits (
     cost numeric(10, 2) NOT NULL DEFAULT 0 CHECK (cost >= 0),
     external_reference text UNIQUE,
     service_days integer GENERATED ALWAYS AS
-        (COALESCE(completed_on, opened_on) - opened_on) STORED,
+        (
+            CASE
+                WHEN completed_on IS NULL THEN NULL
+                ELSE completed_on - opened_on
+            END
+        ) STORED,
     CONSTRAINT maintenance_completion_order_ck
         CHECK (completed_on IS NULL OR completed_on >= opened_on)
 );
 ```
 
-`service_days` is zero while a visit is open. Another valid design would leave
-it NULL until completion by using
-`completed_on - opened_on` without `COALESCE`. That is a product-semantic
-choice, not merely a syntax choice.
+`service_days` is NULL while a visit is open because no completed duration is
+known yet. Once `completed_on` exists, the stored expression reports the
+calendar-day difference. Returning zero for an open visit would falsely make
+“unfinished” indistinguishable from “completed the same day.”
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-found-01 Exercise 1, change only `pro_relational_lab.equipment_items`, and `pro_relational_lab.maintenance_visits` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `information_schema.columns` rows.
-- **Expected result/shape:** For sql-found-01 Exercise 1, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `external_reference`, `service_days`, `completed_on`, `opened_on`, and `coalesce`.
-- **Independent verification:** For sql-found-01 Exercise 1, inspect `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `information_schema.columns` for `pro_relational_lab.equipment_items`, and `pro_relational_lab.maintenance_visits`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
-- **Intermediate relation check:** For sql-found-01 Exercise 1, inspect `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `information_schema.columns` for `pro_relational_lab.equipment_items`, and `pro_relational_lab.maintenance_visits`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object.
-- **Clause check:** For sql-found-01 Exercise 1, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pro_relational_lab.equipment_items`, and `pro_relational_lab.maintenance_visits` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-found-01 Exercise 1, the chosen form is justified by this lesson-specific rationale: The grain is one maintenance visit for one physical equipment item. Evaluate another form against the concrete expected result (the requested DDL command tag plus catalog rows and one accepted and one rejected behavior) and the verification above.
-- **Edge case:** Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
+- **Inputs/evidence:** For sql-found-01 Exercise 1, create `pro_relational_lab.maintenance_visits` at one-row-per-visit grain inside the rollback-only lab, referencing `equipment_items`; inspect its columns, constraints, defaults, and generated expression through PostgreSQL catalogs.
+- **Expected result/shape:** For sql-found-01 Exercise 1, expected output: a successful `CREATE TABLE` command tag followed by catalog evidence for one identity primary key, one item foreign key, nonblank and nonnegative checks, completion-order logic, nullable uniqueness, the `opened_on` default, and stored `service_days` that remains NULL until completion.
+- **Independent verification:** For sql-found-01 Exercise 1, assert the catalog definitions rather than generated constraint names, execute one accepted visit and rejected cost/date/foreign-key cases with their SQLSTATE classes, and confirm the final rollback removes `pro_relational_lab`.
 
 ## Exercise 2 — Prove an invalid cost is rejected
 
@@ -118,13 +119,9 @@ only that application—must obey it.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-found-01 Exercise 2, read the target keys from `pro_relational_lab.maintenance_visits`, and `pro_relational_lab.equipment_items` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
-- **Expected result/shape:** For sql-found-01 Exercise 2, expected output: the command tag and an independently counted set of affected `item_id` values. The final columns are `item_id`.
-- **Independent verification:** For sql-found-01 Exercise 2, materialize the intended `item_id` target set first; require the command tag/`RETURNING` set to match it, then query `pro_relational_lab.maintenance_visits`, and `pro_relational_lab.equipment_items` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `item_id` values in both cases.
-- **Intermediate relation check:** For sql-found-01 Exercise 2, materialize the intended `item_id` target set first; require the command tag/`RETURNING` set to match it, then query `pro_relational_lab.maintenance_visits`, and `pro_relational_lab.equipment_items` again and prove rollback or idempotent retry.
-- **Clause check:** For sql-found-01 Exercise 2, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `pro_relational_lab.maintenance_visits`, and `pro_relational_lab.equipment_items`, preserve one row per `item_id`, and finish with `item_id`.
-- **Alternative/trade-off:** For sql-found-01 Exercise 2, the chosen form is justified by this lesson-specific rationale: The solution inserts one valid completed visit, then attempts a negative cost inside an exception-catching test block. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected `item_id` values) and the verification above.
-- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `item_id` values in both cases.
+- **Inputs/evidence:** For sql-found-01 Exercise 2, resolve the `AUD-001` item key, insert one valid maintenance visit with `RETURNING visit_id, item_id, cost`, and attempt one negative-cost insert inside a nested exception block.
+- **Expected result/shape:** For sql-found-01 Exercise 2, expected output: exactly one returned valid visit with `cost = 28.50`; the invalid attempt emits the expected check-violation notice and contributes no visit row.
+- **Independent verification:** For sql-found-01 Exercise 2, compare the returned `item_id` with the independently selected `AUD-001` key, count exactly one `VISIT-100` row, and prove the negative-cost target count remains zero after SQLSTATE `23514` is caught.
 
 ## Exercise 3 — NULL uniqueness
 
@@ -145,13 +142,9 @@ unique.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-found-01 Exercise 3, read the target keys from `pro_relational_lab.maintenance_visits`, and `pro_relational_lab.equipment_items` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
-- **Expected result/shape:** For sql-found-01 Exercise 3, expected output: at most one row may have no external reference,” PostgreSQL 15+ supports: That is uncommon for external identifiers. The final columns are `item_id`, `opened_on`, `service_note`, and `NULL`. The final order is `mv.visit_id`.
-- **Independent verification:** For sql-found-01 Exercise 3, materialize the intended `item_id` target set first; require the command tag/`RETURNING` set to match it, then query `pro_relational_lab.maintenance_visits`, and `pro_relational_lab.equipment_items` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `item_id` values in both cases.
-- **Intermediate relation check:** For sql-found-01 Exercise 3, count the input rows from `pro_relational_lab.maintenance_visits`, and `pro_relational_lab.equipment_items`, then run each aggregate `FILTER` predicate as its own count before combining the values into the one-row summary.
-- **Clause check:** For sql-found-01 Exercise 3, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, aggregate `FILTER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `pro_relational_lab.maintenance_visits`, and `pro_relational_lab.equipment_items`, preserve exactly one summary row, and finish with `item_id`, `opened_on`, `service_note`, and `NULL` ordered by `mv.visit_id`.
-- **Alternative/trade-off:** For sql-found-01 Exercise 3, the chosen form is justified by this lesson-specific rationale: Two rows with `external_reference IS NULL` succeed under an ordinary `UNIQUE` constraint. Evaluate another form against the concrete expected result (at most one row may have no external reference,” PostgreSQL 15+ supports: That is uncommon for external identifiers) and the verification above.
-- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `item_id` values in both cases.
+- **Inputs/evidence:** For sql-found-01 Exercise 3, insert two visits with `external_reference IS NULL`, then inspect all visit rows plus the unique index property that controls NULL comparison.
+- **Expected result/shape:** For sql-found-01 Exercise 3, expected output: exactly three visits in the supplied solution state, exactly two with NULL external references, and ordinary uniqueness with `indnullsnotdistinct = false`; PostgreSQL 15+ `UNIQUE NULLS NOT DISTINCT` is the stated alternative policy.
+- **Independent verification:** For sql-found-01 Exercise 3, assert the two NULL rows both survive, retry a duplicate non-NULL `VISIT-100` and record SQLSTATE `23505`, and explain that changing to `NULLS NOT DISTINCT` would permit at most one NULL.
 
 ## Exercise 4 — Deliberate denormalization
 
@@ -166,15 +159,16 @@ This snapshot answers historical billing questions reliably. Copying a
 category's display name into each equipment row would not provide that benefit
 and would create an update anomaly when the category is renamed.
 
+The executable answer proves the claim rather than merely classifying it: it
+creates `loans.daily_fee_at_checkout numeric(10,2)`, copies the current
+equipment fee at checkout, changes the current fee from 12.00 to 15.00, and
+reselects the loan to show that its quoted 12.00 remains unchanged.
+
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-found-01 Exercise 4, read from `pro_relational_lab.equipment_categories`, `CASCADE`, and `pro_relational_lab.equipment_items`. Build the answer toward `daily_fee_at_checkout`; keep `item_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-found-01 Exercise 4, expected output: one row per `item_id`. The final columns are `daily_fee_at_checkout`.
-- **Independent verification:** For sql-found-01 Exercise 4, reselect the returned keys directly from the source; require unique `item_id` where the expected grain is one row per key and confirm the projected `daily_fee_at_checkout` against `pro_relational_lab.equipment_categories`, `CASCADE`, and `pro_relational_lab.equipment_items`. Add one source row with a new `item_id`; verify the result gains exactly one row carrying that `item_id` value.
-- **Intermediate relation check:** For sql-found-01 Exercise 4, select `item_id` from `pro_relational_lab.equipment_categories`, `CASCADE`, and `pro_relational_lab.equipment_items` before adding derived columns.
-- **Clause check:** For sql-found-01 Exercise 4, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pro_relational_lab.equipment_categories`, `CASCADE`, and `pro_relational_lab.equipment_items` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-found-01 Exercise 4, the chosen form is justified by this lesson-specific rationale: `daily_fee_at_checkout` is deliberate denormalization. Evaluate another form against the concrete expected result (one row per `item_id`) and the verification above.
-- **Edge case:** Add one source row with a new `item_id`; verify the result gains exactly one row carrying that `item_id` value.
+- **Inputs/evidence:** For sql-found-01 Exercise 4, create a loan-level numeric `daily_fee_at_checkout`, copy the equipment item's current fee at checkout, change the current fee, and return both values plus a decision record.
+- **Expected result/shape:** For sql-found-01 Exercise 4, expected output: one loan row showing current fee 15.00 and preserved checkout fee 12.00, followed by one classification row with `attribute_name`, `classification`, `invariant`, and `historical_question`.
+- **Independent verification:** For sql-found-01 Exercise 4, change the equipment item's current fee and compare both values; assert the historical `daily_fee_at_checkout` remains unchanged while the catalog fee changes.
 
 ## Exercise 5 — Providers, technicians, and assignments
 
@@ -188,17 +182,16 @@ silently assigned twice.
 Delimited names fail because the database cannot enforce a technician foreign
 key, distinguish a comma inside a name, or update/query one participant without
 parsing text. The executable solution creates normalized tables and demonstrates
-the join at one row per visit/technician assignment.
+the join at one row per visit/technician assignment. It backfills a provider
+assignment for every existing visit and then drops the old mutable
+`maintenance_visits.provider_name`; keeping both writable representations
+would recreate the update anomaly normalization is meant to remove.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-found-01 Exercise 5, read from `pro_relational_lab.maintenance_visits`, `pro_relational_lab.technicians`, `pro_relational_lab.providers`, and `pro_relational_lab.visit_technicians`. Compute `visit_id`, and `technician_id` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-- **Expected result/shape:** For sql-found-01 Exercise 5, expected output: one row per provider, one row per technician, and one row per visit/technician assignment. The final columns are `visit_id`, and `technician_id`.
-- **Independent verification:** For sql-found-01 Exercise 5, evaluate each of `technician_id` in a separate control `SELECT` over `pro_relational_lab.maintenance_visits`, `pro_relational_lab.technicians`, `pro_relational_lab.providers`, and `pro_relational_lab.visit_technicians` using `(mv.external_reference = 'VISIT-100')`; require one final row and compare every value. Add one row for which `(mv.external_reference = 'VISIT-100')` is true and one for which it is false; verify only the matching `visit_id` value is returned.
-- **Intermediate relation check:** For sql-found-01 Exercise 5, start with the first relation in `pro_relational_lab.maintenance_visits`, `pro_relational_lab.technicians`, `pro_relational_lab.providers`, and `pro_relational_lab.visit_technicians`; after each join, record total rows and distinct `visit_id` so the exact fanout or loss is visible.
-- **Clause check:** For sql-found-01 Exercise 5, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, and `SELECT`. Read only those operations: begin at `pro_relational_lab.maintenance_visits`, `pro_relational_lab.technicians`, `pro_relational_lab.providers`, and `pro_relational_lab.visit_technicians`, preserve exactly one summary row, and finish with `visit_id`, and `technician_id`.
-- **Alternative/trade-off:** For sql-found-01 Exercise 5, the chosen form is justified by this lesson-specific rationale: Use one row per provider, one row per technician, and one row per visit/technician assignment. Evaluate another form against the concrete expected result (one row per provider, one row per technician, and one row per visit/technician assignment) and the verification above.
-- **Edge case:** Add one row for which `(mv.external_reference = 'VISIT-100')` is true and one for which it is false; verify only the matching `visit_id` value is returned.
+- **Inputs/evidence:** For sql-found-01 Exercise 5, model providers and technicians as keyed entities, one provider assignment per visit, and a many-to-many `visit_technicians` bridge; then join the normalized relationships for `VISIT-100`.
+- **Expected result/shape:** For sql-found-01 Exercise 5, expected output: a four-row grain map (`providers`, `technicians`, `visit_providers`, `visit_technicians`) followed by two assignment rows with `visit_id`, `provider_name`, `technician_id`, and `technician_name`.
+- **Independent verification:** For sql-found-01 Exercise 5, inspect primary and foreign keys, assert one provider assignment and two distinct technician assignments for `VISIT-100`, and prove a duplicate `(visit_id, technician_id)` is rejected.
 
 ## Exercise 6 — Preserve equipment with no loans
 
@@ -213,35 +206,29 @@ tie-break; a date alone does not impose a total order.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-found-01 Exercise 6, read from `pro_relational_lab.equipment_items`, and `pro_relational_lab.loans`. Build the answer toward `item_id`; keep `item_id`, and `asset_tag` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-found-01 Exercise 6, expected output: one row per `item_id`, and `asset_tag`. The final columns are `item_id`. The final order is `i.asset_tag`.
-- **Independent verification:** For sql-found-01 Exercise 6, independently aggregate `pro_relational_lab.equipment_items`, and `pro_relational_lab.loans` by `item_id`, and `asset_tag`; require one output row for every distinct `item_id`, and `asset_tag` tuple satisfying `(i.asset_tag = 'AUD-001')` and compare `row_count` tuple by tuple. Give two rows the same `i.asset_tag` value and different ``item_id`, and `asset_tag`` values; verify `i.asset_tag` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-found-01 Exercise 6, start with the first relation in `pro_relational_lab.equipment_items`, and `pro_relational_lab.loans`; after each join, record total rows and distinct `item_id`, and `asset_tag` so the exact fanout or loss is visible.
-- **Clause check:** For sql-found-01 Exercise 6, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `pro_relational_lab.equipment_items`, and `pro_relational_lab.loans`, preserve one row per `item_id`, and `asset_tag`, and finish with `item_id` ordered by `i.asset_tag`.
-- **Alternative/trade-off:** For sql-found-01 Exercise 6, the chosen form is justified by this lesson-specific rationale: Start from `equipment_items`, LEFT JOIN `loans`, and aggregate by item. Evaluate another form against the concrete expected result (one row per `item_id`, and `asset_tag`) and the verification above.
-- **Edge case:** Give two rows the same `i.asset_tag` value and different ``item_id`, and `asset_tag`` values; verify `i.asset_tag` produces the intended rank and display order.
+- **Inputs/evidence:** For sql-found-01 Exercise 6, start from `pro_relational_lab.equipment_items`, `LEFT JOIN` `loans`, count the nullable-side `loan_id`, and aggregate the latest `checked_out_on` at item grain.
+- **Expected result/shape:** For sql-found-01 Exercise 6, expected output: one row per equipment item with columns `item_id`, `asset_tag`, `loan_count`, and `latest_checkout`, ordered by `asset_tag, item_id`; never-loaned items show zero and NULL.
+- **Independent verification:** For sql-found-01 Exercise 6, assert output row count equals equipment-item count, `AUD-001` has one loan, and `TOL-001` has zero with NULL latest checkout; move a loan-side date predicate between `ON` and `WHERE` and record the preservation difference.
 
 ## Exercise 7 — Referential deletion policy
 
-`category -> equipment` and `equipment -> loans` should normally RESTRICT
-physical deletion because silently deleting assets or historical checkouts
-destroys facts. `equipment -> maintenance_visits` should also RESTRICT under the
-same audit requirement. Retire a category/item with status or effective dates.
+The executable answer inventories all eight implemented foreign keys. Links
+from categories to equipment, members/equipment to loans, equipment to
+maintenance, and provider/technician identities to assignments use `RESTRICT`,
+because deleting those parents would erase the meaning of historical facts.
+Links from a visit to its provider/technician assignment rows use `CASCADE`,
+because those bridges have no meaning without the visit.
 
-CASCADE is appropriate for components that have no meaning outside their
-parent, not merely because cleanup is easy. `SET NULL` is valid only when the
-child remains truthful without its parent and the column is deliberately
-nullable. Every choice is a domain rule and requires a deletion test.
+The expected matrix is joined to `pg_constraint`, translating `confdeltype`
+into a readable `actual_action`; every supplied row must report `matches`.
+`SET NULL` would be valid only if the child remained truthful without its
+parent and the column were deliberately nullable.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-found-01 Exercise 7, read from `pro_relational_lab.equipment_categories`, `CASCADE`, and `pro_relational_lab.equipment_items`. Build the answer toward `maintenance_visits`; keep `item_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-found-01 Exercise 7, expected output: one row per `item_id`. The final columns are `maintenance_visits`.
-- **Independent verification:** For sql-found-01 Exercise 7, reselect the returned keys directly from the source; require unique `item_id` where the expected grain is one row per key and confirm the projected `maintenance_visits` against `pro_relational_lab.equipment_categories`, `CASCADE`, and `pro_relational_lab.equipment_items`. Add one source row with a new `item_id`; verify the result gains exactly one row carrying that `item_id` value.
-- **Intermediate relation check:** For sql-found-01 Exercise 7, select `item_id` from `pro_relational_lab.equipment_categories`, `CASCADE`, and `pro_relational_lab.equipment_items` before adding derived columns.
-- **Clause check:** For sql-found-01 Exercise 7, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `pro_relational_lab.equipment_categories`, `CASCADE`, and `pro_relational_lab.equipment_items` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-found-01 Exercise 7, the chosen form is justified by this lesson-specific rationale: `category -> equipment` and `equipment -> loans` should normally RESTRICT physical deletion because silently deleting assets or historical checkouts destroys facts. Evaluate another form against the concrete expected result (one row per `item_id`) and the verification above.
-- **Edge case:** Add one source row with a new `item_id`; verify the result gains exactly one row carrying that `item_id` value.
+- **Inputs/evidence:** For sql-found-01 Exercise 7, join an expected deletion-policy manifest for all eight implemented foreign keys to `pg_constraint`, translating `confdeltype` into readable referential actions.
+- **Expected result/shape:** For sql-found-01 Exercise 7, expected output: eight rows with `relationship`, `expected_action`, `actual_action`, `drift_status`, and `rationale`; category, borrower, equipment, provider, and technician identities use `RESTRICT`, parentless visit-assignment bridges use `CASCADE`, and every row reports `matches`.
+- **Independent verification:** For sql-found-01 Exercise 7, require all eight expected relationships exactly once, compare actions with `pg_get_constraintdef`, attempt one protected parent deletion to observe a foreign-key violation, and verify deleting a disposable visit removes only its dependent assignment rows.
 
 ## Exercise 8 — Catalog-level contract
 
@@ -257,13 +244,9 @@ searching rendered text alone.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-found-01 Exercise 8, read from `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, `pg_catalog.pg_attribute`, and `pg_catalog.pg_attrdef`. Build the answer toward `contype`, and `constraint_definition`; keep `contype` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-found-01 Exercise 8, expected output: one row per `contype`. The final columns are `contype`, and `constraint_definition`. The final order is `a.attnum`.
-- **Independent verification:** For sql-found-01 Exercise 8, project `contype` plus the raw source columns from `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, `pg_catalog.pg_attribute`, and `pg_catalog.pg_attrdef` at each join stage; record row count and distinct `contype`, then assert the final `contype`, and `constraint_definition` values match those staged rows without unintended fanout or loss. Give two rows the same `a.attnum` value and different ``contype`` values; verify `a.attnum` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-found-01 Exercise 8, start with the first relation in `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, `pg_catalog.pg_attribute`, and `pg_catalog.pg_attrdef`; after each join, record total rows and distinct `contype` so the exact fanout or loss is visible.
-- **Clause check:** For sql-found-01 Exercise 8, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, `pg_catalog.pg_attribute`, and `pg_catalog.pg_attrdef`, preserve one row per `contype`, and finish with `contype`, and `constraint_definition` ordered by `a.attnum`.
-- **Alternative/trade-off:** For sql-found-01 Exercise 8, the chosen form is justified by this lesson-specific rationale: Join `pg_constraint`, `pg_class`, `pg_namespace`, and `pg_attribute`, and inspect constraint type plus `pg_get_constraintdef`. Evaluate another form against the concrete expected result (one row per `contype`) and the verification above.
-- **Edge case:** Give two rows the same `a.attnum` value and different ``contype`` values; verify `a.attnum` produces the intended rank and display order.
+- **Inputs/evidence:** For sql-found-01 Exercise 8, inspect `pg_constraint`, `pg_attribute`/`pg_attrdef`, and `pg_index` for `maintenance_visits` without depending on generated object names.
+- **Expected result/shape:** For sql-found-01 Exercise 8, expected output: separate deterministic result sets for named constraint identities/types/definitions ordered by `conname`, column/generated-expression metadata, and external-reference unique-index properties including `indnullsnotdistinct`.
+- **Independent verification:** For sql-found-01 Exercise 8, assert one primary key, one item foreign key, the declared CHECK and UNIQUE semantics, `service_days` as a stored generated column with the expected expression, and ordinary NULL-distinct uniqueness; order each result by its own displayed key.
 
 ## Edge cases and alternatives
 

@@ -94,6 +94,9 @@ VALUES
     (1, DATE '2026-01-03'),
     (1, DATE '2026-01-05'),
     (1, DATE '2026-01-06'),
+    -- User 1 returns in month 1; user 2 does not. That deliberate contrast
+    -- makes the January cohort's 1 / 2 = 0.5000 retention visible below.
+    (1, DATE '2026-02-01'),
     (2, DATE '2026-01-15'),
     (2, DATE '2026-01-16'),
     (2, DATE '2026-01-18'),
@@ -121,6 +124,7 @@ VALUES
 -- Canonicalize duplicate ingestion with an explicit winner rule.
 CREATE VIEW pro_analytics_lab.deduplicated_events AS
 SELECT
+    ranked.ingestion_id,
     ranked.source_event_id,
     ranked.user_id,
     ranked.event_name,
@@ -270,6 +274,7 @@ SELECT
     purchase.source_event_id AS purchase_event_id,
     purchase.user_id,
     purchase.event_at AS purchased_at,
+    touch.touch_id,
     touch.campaign,
     touch.touched_at
 FROM pro_analytics_lab.deduplicated_events AS purchase
@@ -294,20 +299,37 @@ SELECT
     de.source_event_id,
     de.user_id,
     de.event_at,
-    history.tier
+    history.tier,
+    history.valid_from,
+    history.valid_to,
+    count(history.tier) OVER (
+        PARTITION BY de.source_event_id
+    ) AS matching_tiers
 FROM pro_analytics_lab.deduplicated_events AS de
-LEFT JOIN LATERAL (
-    SELECT th.tier
-    FROM pro_analytics_lab.tier_history AS th
-    WHERE th.user_id = de.user_id
-      AND th.valid_from <= de.event_at
-      AND (th.valid_to IS NULL OR de.event_at < th.valid_to)
-    ORDER BY th.valid_from DESC
-    LIMIT 1
-) AS history
-  ON true
+LEFT JOIN pro_analytics_lab.tier_history AS history
+  ON history.user_id = de.user_id
+ AND history.valid_from <= de.event_at
+ AND (history.valid_to IS NULL OR de.event_at < history.valid_to)
 WHERE de.event_name = 'purchase'
 ORDER BY de.source_event_id;
+
+DO $as_of_invariant$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pro_analytics_lab.deduplicated_events AS de
+        JOIN pro_analytics_lab.tier_history AS history
+          ON history.user_id = de.user_id
+         AND history.valid_from <= de.event_at
+         AND (history.valid_to IS NULL OR de.event_at < history.valid_to)
+        WHERE de.event_name = 'purchase'
+        GROUP BY de.source_event_id
+        HAVING count(*) > 1
+    ) THEN
+        RAISE EXCEPTION 'a purchase matched overlapping tier-history rows';
+    END IF;
+END
+$as_of_invariant$;
 
 \echo 'Monthly cohort retention with explicit denominator'
 WITH cohorts AS (
@@ -354,91 +376,221 @@ FROM retention AS r
 JOIN sizes AS s USING (cohort_month)
 ORDER BY r.cohort_month, r.month_number;
 
+DO $retention_fixture_invariant$
+DECLARE
+    january_cohort_users bigint;
+    january_month_1_users bigint;
+BEGIN
+    SELECT
+        count(DISTINCT u.user_id),
+        count(DISTINCT da.user_id) FILTER (
+            WHERE da.activity_date >= DATE '2026-02-01'
+              AND da.activity_date < DATE '2026-03-01'
+        )
+    INTO january_cohort_users, january_month_1_users
+    FROM pro_analytics_lab.users AS u
+    LEFT JOIN pro_analytics_lab.daily_activity AS da
+      ON da.user_id = u.user_id
+    WHERE u.signup_at >= TIMESTAMPTZ '2026-01-01 00:00:00+00'
+      AND u.signup_at < TIMESTAMPTZ '2026-02-01 00:00:00+00';
+
+    IF january_cohort_users <> 2 OR january_month_1_users <> 1 THEN
+        RAISE EXCEPTION
+            'retention fixture drifted: expected January month-1 retention 1/2, got %/%',
+            january_month_1_users,
+            january_cohort_users;
+    END IF;
+END
+$retention_fixture_invariant$;
+
 -- Exercises:
 --
 -- 1. Prove the dedup view has one row per source_event_id and document why the
 --    latest ingested row wins.
---    Inputs: For sql-analytics-01 Exercise 1, complete the deduplication written analysis and support its claims with read-only evidence from `pro_analytics_lab.users`, `pro_analytics_lab.events`, and `pro_analytics_lab.daily_activity`. Mark unverified assumptions explicitly.
---    Expected result/shape: For sql-analytics-01 Exercise 1, expected output: a completed the deduplication written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `source_event_id`, `ingested_at`, and `ingestion_id`.
---    Verify: For sql-analytics-01 Exercise 1, check the deduplication written analysis against `source_event_id`, `ingested_at`, and `ingestion_id`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
---    Hint ladder, rung 1: For sql-analytics-01 Exercise 1, check the deduplication written analysis against `source_event_id`, `ingested_at`, and `ingestion_id`.
+--    Inputs: Compare `pro_analytics_lab.events` with
+--    `pro_analytics_lab.deduplicated_events`. The winner order is
+--    `ingested_at DESC, ingestion_id DESC` within each `source_event_id`.
+--    Expected result/shape: One row per `source_event_id`, with
+--    `source_event_id`, `canonical_rows`, `winner_ingested_at`, and
+--    `winner_ingestion_id`, ordered by `source_event_id`; every
+--    `canonical_rows` value is 1.
+--    Verify: Independently rank the raw rows and prove source `A4` keeps the
+--    later ingestion. Insert two copies with equal `ingested_at` and prove the
+--    greater `ingestion_id` wins; separately flag conflicting business payload
+--    for one source ID instead of silently calling it a harmless retry.
+--    Hint ladder, rung 1: Deduplicate delivery attempts before any downstream
+--    funnel, session, or retention aggregate.
 -- 2. Recalculate sessions with a 60-minute threshold and add duration. Decide
 --    whether an event exactly 60 minutes later starts a new session.
---    Inputs: For sql-analytics-01 Exercise 2, read from `pro_analytics_lab.deduplicated_events`. Build the answer toward `user_id`, `session_number`, `started_at`, `ended_at`, `duration`, and `events`; keep `user_id`, and `session_number` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-analytics-01 Exercise 2, expected output: one row per `user_id`, and `session_number`. The final columns are `user_id`, `session_number`, `started_at`, `ended_at`, `duration`, and `events`. The final order is `user_id, session_number`.
---    Verify: For sql-analytics-01 Exercise 2, independently aggregate `pro_analytics_lab.deduplicated_events` by `user_id`, and `session_number`; require one output row for every distinct `user_id`, and `session_number` tuple and compare `duration`, and `events` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `duration`, and `events` for the existing `user_id`, and `session_number` tuple and verify the new tuple appears exactly once.
---    Hint ladder, rung 1: For sql-analytics-01 Exercise 2, run `lagged`, and `numbered` one at a time. Record each CTE's row count and `user_id`, and `session_number` uniqueness before the next stage uses it.
+--    Inputs: Order canonical events by `event_at, source_event_id` per
+--    `user_id`; start a new session only when the prior gap is greater than
+--    `INTERVAL '60 minutes'`.
+--    Expected result/shape: One row per `(user_id, session_number)`, with
+--    `user_id`, `session_number`, `started_at`, `ended_at`, `duration`, and
+--    `events`, ordered by `user_id, session_number`.
+--    Verify: An event exactly 60 minutes later stays in the same session; a
+--    60-minute-and-one-second gap starts another. Session event counts must sum
+--    to the canonical event count, and a one-event session has zero duration.
+--    Hint ladder, rung 1: Compute `lag()`, then a 0/1 boundary flag, then its
+--    running sum; aggregate only after every event has a session number.
 -- 3. Return one row per user with every funnel timestamp, then test that each
 --    non-NULL step is no earlier than its predecessor.
---    Inputs: For sql-analytics-01 Exercise 3, read from `pro_analytics_lab.deduplicated_events`. Build the answer toward `user_id`, `signup_at`, `viewed_at`, `added_at`, and `purchased_at`; keep `user_id` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-analytics-01 Exercise 3, expected output: one row per `user_id`. The final columns are `user_id`, `signup_at`, `viewed_at`, `added_at`, and `purchased_at`. The final order is `c.user_id`.
---    Verify: For sql-analytics-01 Exercise 3, reselect the returned keys directly from the source; require unique `user_id` where the expected grain is one row per key and confirm the projected `user_id`, `signup_at`, `viewed_at`, `added_at`, and `purchased_at` against `pro_analytics_lab.deduplicated_events`. Add one source row with a new `user_id`; verify the result gains exactly one row carrying that `user_id` value.
---    Hint ladder, rung 1: For sql-analytics-01 Exercise 3, run `signup`, `funnel`, and `completed` one at a time. Record each CTE's row count and `user_id` uniqueness before the next stage uses it.
+--    Inputs: Anchor on each user's earliest canonical `signup`, then choose the
+--    first `view_item`, `add_to_cart`, and `purchase` at or after the preceding
+--    non-NULL step.
+--    Expected result/shape: One row per user who has a signup, with `user_id`,
+--    `signup_at`, `viewed_at`, `added_at`, and `purchased_at`, ordered by
+--    `user_id`. Missing predecessors leave later steps NULL.
+--    Verify: Require the non-NULL chain to be nondecreasing. A user with only a
+--    view does not appear; a user with signup but no later step appears once
+--    with NULL later timestamps.
+--    Hint ladder, rung 1: A pre-signup event cannot satisfy a later funnel
+--    step; each step is bounded by the timestamp chosen for its predecessor.
 -- 4. Return only islands lasting at least two active days.
---    Inputs: For sql-analytics-01 Exercise 4, read from `pro_analytics_lab.deduplicated_events`. Compute `user_id`, `island_start`, `island_end`, and `active_days` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
---    Expected result/shape: For sql-analytics-01 Exercise 4, expected output: one row per user-date. The final columns are `user_id`, `island_start`, `island_end`, and `active_days`. The final order is `n.user_id, island_start`.
---    Verify: For sql-analytics-01 Exercise 4, evaluate each of `island_start`, `island_end`, and `active_days` in a separate control `SELECT` over `pro_analytics_lab.deduplicated_events`; require one final row and compare every value. Add one row to an existing group and one row for a new group; recompute `island_start`, `island_end`, and `active_days` for the existing `user_id`, and `island_key` tuple and verify the new tuple appears exactly once.
---    Hint ladder, rung 1: For sql-analytics-01 Exercise 4, run `active_days`, and `numbered` one at a time. Record each CTE's row count and `user_id`, and `island_key` uniqueness before the next stage uses it.
+--    Inputs: Reduce canonical events to distinct `(user_id, activity_date)`
+--    rows, derive an island key from date minus row number, and group by
+--    `(user_id, island_key)`.
+--    Expected result/shape: One row per consecutive-day island lasting at
+--    least two days, with `user_id`, `island_start`, `island_end`, and
+--    `active_days`, ordered by `user_id, island_start`.
+--    Verify: Include a positive two-day island, a one-day island, a gap, and a
+--    duplicate event on one active date. Only the consecutive run survives;
+--    the duplicate does not inflate `active_days`.
+--    Hint ladder, rung 1: Collapse multiple events on one date before numbering
+--    dates and grouping islands.
 -- 5. Add an unattributed purchase and two touches at the same timestamp. Define
 --    and test the deterministic tie-break and NULL attribution behavior.
---    Inputs: For sql-analytics-01 Exercise 5, read from `pro_analytics_lab.users`, `pro_analytics_lab.events`, and `pro_analytics_lab.daily_activity`. Build the answer toward `touched_at`, and `touch_id`; keep `touch_id` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-analytics-01 Exercise 5, expected output: one row per `touch_id`. The final columns are `touched_at`, and `touch_id`.
---    Verify: For sql-analytics-01 Exercise 5, reselect the returned keys directly from the source; require unique `touch_id` where the expected grain is one row per key and confirm the projected `touched_at`, and `touch_id` against `pro_analytics_lab.users`, `pro_analytics_lab.events`, and `pro_analytics_lab.daily_activity`. Add two tied candidates and prove `touch_id` identifies both without accidental loss.
---    Hint ladder, rung 1: For sql-analytics-01 Exercise 5, select `touch_id` from `pro_analytics_lab.users`, `pro_analytics_lab.events`, and `pro_analytics_lab.daily_activity` before adding derived columns.
+--    Inputs: Use `pro_analytics_lab.campaign_touches` and purchase rows from
+--    `pro_analytics_lab.deduplicated_events`. For each purchase, choose at most
+--    one touch in the preceding seven days with a LEFT LATERAL join ordered by
+--    `touched_at DESC, touch_id DESC`.
+--    Expected result/shape: One row per purchase `source_event_id`, with
+--    `source_event_id`,
+--    `user_id`, `purchased_at`, `touch_id`, `campaign`, and `touched_at`,
+--    ordered by `source_event_id`. Unattributed purchases retain NULL touch fields;
+--    greater `touch_id` wins an equal-time tie.
+--    Verify: Output count equals purchase count and `source_event_id` is unique.
+--    Remove the ID tie-breaker in a disposable copy and explain why a chosen
+--    campaign is no longer deterministic.
+--    Hint ladder, rung 1: Put window predicates inside the lateral subquery and
+--    keep the outer join LEFT so unmatched purchases survive.
 -- 6. Add month 1 activity and verify numerator, cohort denominator, and rate
 --    independently before division.
---    Inputs: For sql-analytics-01 Exercise 6, read from `pro_analytics_lab.deduplicated_events`. Build the answer toward `cohort_month`, `cohort_users`, and `month_1_users`; keep `cohort_month` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-analytics-01 Exercise 6, expected output: one row per `cohort_month`. The final columns are `cohort_month`, `cohort_users`, and `month_1_users`. The final order is `c.cohort_month`.
---    Verify: For sql-analytics-01 Exercise 6, independently aggregate `pro_analytics_lab.deduplicated_events` by `cohort_month`; require one output row for every distinct `cohort_month` tuple and compare `cohort_users`, and `month_1_users` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `cohort_users`, and `month_1_users` for the existing `cohort_month` tuple and verify the new tuple appears exactly once.
---    Hint ladder, rung 1: For sql-analytics-01 Exercise 6, run `cohorts`, and `activity` one at a time. Record each CTE's row count and `cohort_month` uniqueness before the next stage uses it.
+--    Inputs: Define each user's cohort as the month of that user's earliest
+--    canonical event, then reduce activity to distinct user/month rows.
+--    Expected result/shape: One row per `cohort_month`, with `cohort_month`,
+--    `cohort_users`, `month_1_users`, and `month_1_rate`, ordered by
+--    `cohort_month`. The denominator includes users with no month-1 activity.
+--    Verify: Independently list cohort and month-1 members and compare both
+--    distinct counts. The fixture must include one retained and one nonretained
+--    cohort member; adding another nonretained member changes only the
+--    denominator and rate.
+--    Hint ladder, rung 1: Keep cohort membership separate from activity
+--    membership so the LEFT JOIN cannot shrink the denominator.
 -- 7. Add an event exactly at a tier valid_to boundary and prove it joins the
 --    successor [valid_from, valid_to) row, not both rows.
---    Inputs: For sql-analytics-01 Exercise 7, read from `pro_analytics_lab.users`, `pro_analytics_lab.events`, and `pro_analytics_lab.daily_activity`. Build the answer toward `valid_from`, `event_at`, and `valid_to`; keep `valid_from` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-analytics-01 Exercise 7, expected output: one row per `valid_from`. The final columns are `valid_from`, `event_at`, and `valid_to`.
---    Verify: For sql-analytics-01 Exercise 7, reselect the returned keys directly from the source; require unique `valid_from` where the expected grain is one row per key and confirm the projected `valid_from`, `event_at`, and `valid_to` against `pro_analytics_lab.users`, `pro_analytics_lab.events`, and `pro_analytics_lab.daily_activity`. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
---    Hint ladder, rung 1: For sql-analytics-01 Exercise 7, select `valid_from` from `pro_analytics_lab.users`, `pro_analytics_lab.events`, and `pro_analytics_lab.daily_activity` before adding derived columns.
+--    Inputs: Use adjacent half-open rows in
+--    `pro_analytics_lab.tier_history(user_id, tier, valid_from, valid_to)` and
+--    an inline `event_probes(probe_id, user_id, event_at)` CTE, including a
+--    probe exactly at the shared boundary.
+--    Expected result/shape: One row per `probe_id`, with `probe_id`, `event_at`,
+--    `tier_name`, `valid_from`, `valid_to`, and `matching_tiers`, ordered by
+--    `probe_id`. The boundary probe matches the successor exactly once.
+--    Verify: Use `valid_from <= event_at` and
+--    `event_at < COALESCE(valid_to, 'infinity')`, and assert no probe has more
+--    than one match. Add an overlap and prove that assertion fails rather than
+--    hiding the duplicate with `LIMIT 1`.
+--    Hint ladder, rung 1: At the upper boundary `< valid_to` excludes the old
+--    row while `valid_from <= event_at` includes the successor.
 -- 8. Compute a trailing seven-day active-user metric over a dense date spine.
 --    Compare ROWS and RANGE frames and prove missing calendar dates do not
 --    silently change the business window.
---    Inputs: For sql-analytics-01 Exercise 8, read from `pro_analytics_lab.deduplicated_events`. Compute `report_date`, and `trailing_7d_active_users` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
---    Expected result/shape: For sql-analytics-01 Exercise 8, expected output: one row per calendar date in the requested business zone and LEFT JOIN deduplicated activity by local date. The final columns are `report_date`, and `trailing_7d_active_users`. The final order is `s.report_date`.
---    Verify: For sql-analytics-01 Exercise 8, evaluate each of `report_date`, and `trailing_7d_active_users` in a separate control `SELECT` over `pro_analytics_lab.deduplicated_events`; require one final row and compare every value. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
---    Hint ladder, rung 1: For sql-analytics-01 Exercise 8, run `spine` one at a time. Record each CTE's row count and `report_date` uniqueness before the next stage uses it.
+--    Inputs: Generate the eight UTC business dates from 2026-01-01 through
+--    2026-01-08; for each date count distinct users in the inclusive
+--    seven-calendar-day window ending on that date.
+--    Expected result/shape: Exactly eight rows, one per `report_date`, with
+--    `report_date` and `trailing_7d_active_users`, ordered by `report_date`;
+--    dates with no activity remain.
+--    Verify: Independently list the distinct users for two dates using
+--    `[report_date - 6 days, report_date + 1 day)`. Add the same user on two
+--    days and prove the weekly unique count rises by at most one, unlike a sum
+--    of daily distinct counts.
+--    Hint ladder, rung 1: A dense spine preserves calendar days; keep user/date
+--    grain until the seven-day distinct set is formed.
 -- 9. Calculate median and 90th-percentile session duration with percentile_cont.
 --    State input/output grain, interpolation behavior, NULL handling, and why
 --    an average cannot answer the same distribution question.
---    Inputs: For sql-analytics-01 Exercise 9, use `pro_analytics_lab.deduplicated_events` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
---    Expected result/shape: For sql-analytics-01 Exercise 9, expected output: one row per session with duration. The final columns are `session_count`, and `median_and_p90`.
---    Verify: For sql-analytics-01 Exercise 9, restore into an isolated target and reconcile `pro_analytics_lab.deduplicated_events` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
---    Hint ladder, rung 1: For sql-analytics-01 Exercise 9, run `lagged`, `numbered`, and `sessions` one at a time. Record each CTE's row count and `artifact_name` and `restored_object` uniqueness before the next stage uses it.
+--    Inputs: Derive one row per `(user_id, session_number)` with the Exercise 2
+--    rule, then feed non-NULL `duration` values to ordered-set aggregates.
+--    Expected result/shape: Exactly one aggregate row with `session_count` and
+--    `median_and_p90`; the second column is a two-element interval array from
+--    `percentile_cont(ARRAY[0.5, 0.9])`.
+--    Verify: Materialize and sort session durations, confirm `session_count`,
+--    and compare `percentile_cont`, `percentile_disc`, and `avg` on a tiny
+--    skewed fixture. An empty input yields NULL percentiles, not zero duration.
+--    Hint ladder, rung 1: Percentiles consume session rows, not event rows;
+--    raw-event input overweights sessions containing more events.
 -- 10. Return the top two event types per user with row_number, rank, and
 --     dense_rank side by side. Define a deterministic tie policy and explain
 --     when each ranking function changes the number of returned rows.
---    Inputs: For sql-analytics-01 Exercise 10, read from `pro_analytics_lab.deduplicated_events`. Compute `user_id`, and `event_name` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
---    Expected result/shape: For sql-analytics-01 Exercise 10, expected output: one row per `(user_id,event_name)`, then calculate all three functions ordered by count descending. The final columns are `user_id`, and `event_name`. The final order is `c.user_id, row_number_position`.
---    Verify: For sql-analytics-01 Exercise 10, evaluate each of `event_name` in a separate control `SELECT` over `pro_analytics_lab.deduplicated_events`; require one final row and compare every value. Give two rows the same `c.user_id` value and different `row_number_position` values; verify `c.user_id, row_number_position` produces the intended rank and display order.
---    Hint ladder, rung 1: For sql-analytics-01 Exercise 10, run `counts` one at a time. Record each CTE's row count and `user_id` uniqueness before the next stage uses it.
+--    Inputs: Aggregate canonical events to one row per
+--    `(user_id, event_name)`, then calculate `row_number`, `rank`, and
+--    `dense_rank` within each user.
+--    Expected result/shape: One row per `(user_id, event_name)`, with
+--    `user_id`, `event_name`, `event_count`, `row_number_position`,
+--    `rank_position`, and `dense_rank_position`, ordered by
+--    `user_id, row_number_position`. Only `row_number` uses `event_name` as a
+--    tie-break; the other two preserve count ties.
+--    Verify: Create equal counts for two event names. `row_number <= 2`
+--    returns exactly two rows; tie-preserving rank filters may return more.
+--    State which meaning of “top two” the report adopts.
+--    Hint ladder, rung 1: Adding `event_name` inside `rank()` destroys the
+--    count tie whose behavior you are comparing.
 -- 11. Traverse a parent/child campaign hierarchy with a recursive CTE. Include
 --     depth, a path, and cycle detection; prove malformed cyclic input
 --     terminates rather than looping until a resource limit.
---    Inputs: For sql-analytics-01 Exercise 11, read from `pro_analytics_lab.campaign_nodes`, and `tree`. Compute `campaign_id`, `parent_campaign_id`, `depth`, and `path` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
---    Expected result/shape: For sql-analytics-01 Exercise 11, expected output: one row per node in a multi-parent graph. The final columns are `campaign_id`, `parent_campaign_id`, `depth`, and `path`. The final order is `path`.
---    Verify: For sql-analytics-01 Exercise 11, evaluate each of `parent_campaign_id`, `depth`, and `path` in a separate control `SELECT` over `pro_analytics_lab.campaign_nodes`, and `tree`; require one final row and compare every value. Add one source row with a new `campaign_id`; verify the result gains exactly one row carrying that `campaign_id` value.
---    Hint ladder, rung 1: For sql-analytics-01 Exercise 11, start with the first relation in `pro_analytics_lab.campaign_nodes`, and `tree`; after each join, record total rows and distinct `campaign_id` so the exact fanout or loss is visible.
+--    Inputs: Seed a recursive CTE from `pro_analytics_lab.campaign_nodes`
+--    rows whose `parent_campaign_id` is NULL. Carry `depth` and integer-array
+--    `path`, and refuse a child already in that path. Include a separate
+--    rootless two-node cycle in the fixture.
+--    Expected result/shape: The hierarchy result has one row per
+--    root-reachable node/path, with `campaign_id`, `parent_campaign_id`,
+--    `depth`, and `path`, ordered by `path`. A second diagnostic result lists
+--    unreachable `campaign_id` values, including the closed cycle.
+--    Verify: No returned path repeats an ID, recursion terminates, and reachable
+--    plus unreachable IDs equal all fixture IDs. Explain that a closed cycle in
+--    this single-parent model is rootless; the diagnostic exposes it.
+--    Hint ladder, rung 1: `tree` is the CTE being built, not a base relation;
+--    anchor and recursive branches must project the same columns and types.
 -- 12. Build a daily funnel report that retains zero-activity dates. Keep event
 --     filters in the appropriate JOIN condition, make each denominator
 --     explicit, and distinguish zero from missing data.
---    Inputs: For sql-analytics-01 Exercise 12, read from `pro_analytics_lab.deduplicated_events`. Build the answer toward `report_date`, `signups`, and `purchasers`; keep `report_date` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-analytics-01 Exercise 12, expected output: one row per `report_date`. The final columns are `report_date`, `signups`, and `purchasers`. The final order is `s.report_date`.
---    Verify: For sql-analytics-01 Exercise 12, independently aggregate `pro_analytics_lab.deduplicated_events` by `report_date`; require one output row for every distinct `report_date` tuple and compare `signups`, and `purchasers` tuple by tuple. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
---    Hint ladder, rung 1: For sql-analytics-01 Exercise 12, run `spine` one at a time. Record each CTE's row count and `report_date` uniqueness before the next stage uses it.
+--    Inputs: Start from the four-date spine 2026-01-01 through 2026-01-04 and
+--    LEFT JOIN canonical events with half-open UTC day bounds in `ON`.
+--    Expected result/shape: Exactly four rows, one per `report_date`, with
+--    `report_date`, `signups`, and `purchasers`, ordered by `report_date`.
+--    Zero-activity dates retain zero counts.
+--    Verify: Compare each day with a direct control query and prove the empty
+--    dates remain. Move an event predicate to `WHERE` in a disposable copy and
+--    observe the NULL-extended date rows disappear.
+--    Hint ladder, rung 1: `WHERE` runs after the LEFT JOIN and can reject rows
+--    the spine was supposed to preserve.
 -- 13. Compare an exact distinct-user count with a documented approximate
 --     strategy suitable for very large data. Define acceptable error, memory,
 --     mergeability, refresh, and verification requirements before choosing.
---    Inputs: For sql-analytics-01 Exercise 13, read the target keys from `pro_analytics_lab.deduplicated_events` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
---    Expected result/shape: For sql-analytics-01 Exercise 13, expected output: the command tag and an independently counted set of affected `exact_distinct_users` values. The final columns are `exact_distinct_users`.
---    Verify: For sql-analytics-01 Exercise 13, materialize the intended `exact_distinct_users` target set first; require the command tag/`RETURNING` set to match it, then query `pro_analytics_lab.deduplicated_events` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `exact_distinct_users` values in both cases.
---    Hint ladder, rung 1: For sql-analytics-01 Exercise 13, materialize the intended `exact_distinct_users` target set first; require the command tag/`RETURNING` set to match it, then query `pro_analytics_lab.deduplicated_events` again and prove rollback or idempotent retry.
+--    Inputs: Compute core PostgreSQL's exact
+--    `COUNT(DISTINCT user_id)` from `pro_analytics_lab.deduplicated_events`.
+--    Separately review an adoption matrix for an optional approximate sketch;
+--    do not pretend an unavailable extension executed.
+--    Expected result/shape: The query returns exactly one row with
+--    `exact_distinct_users`. The matrix has one row per criterion:
+--    implementation/version, error budget, cardinality, memory, serialization,
+--    mergeability, privacy, monitoring, fallback, and rebuild owner.
+--    Verify: Compare the exact scalar with `SELECT DISTINCT user_id`. On any
+--    approved sketch, sample against exact and record relative error; missing
+--    capability or excess error must select the exact fallback.
+--    Hint ladder, rung 1: Approximate distinct counting is a measured
+--    capability decision, not a write or command-tag exercise.
 -- 14. Turn one analysis into a reusable parameterized query. Validate time-zone,
 --     interval, and cohort inputs; preserve half-open bounds and deterministic
 --     order; add grain, duplicate, NULL, and boundary contract checks.
@@ -463,10 +615,18 @@ BEGIN
     END IF;
 END
 $self_check$;
---    Inputs: For sql-analytics-01 Exercise 14, read from `pro_analytics_lab.deduplicated_events`. Build the answer toward `source_event_id`, and `event_at`; keep `source_event_id` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-analytics-01 Exercise 14, expected output: one row per `source_event_id`. The final columns are `source_event_id`, and `event_at`. The final order is `de.event_at, de.source_event_id`.
---    Verify: For sql-analytics-01 Exercise 14, project `source_event_id` plus the raw source columns from `pro_analytics_lab.deduplicated_events` at each join stage; record row count and distinct `source_event_id`, then assert the final `source_event_id`, and `event_at` values match those staged rows without unintended fanout or loss. Repeat with `NULL` in `source_event_id`, and `event_at` and state whether the row is kept, rejected, or classified.
---    Hint ladder, rung 1: For sql-analytics-01 Exercise 14, run `parameters` one at a time. Record each CTE's row count and `source_event_id` uniqueness before the next stage uses it.
+--    Inputs: Accept typed `starts_at` and `ends_at` instants, reject NULL or
+--    `ends_at <= starts_at`, and filter canonical events with
+--    `starts_at <= event_at AND event_at < ends_at`.
+--    Expected result/shape: One row per canonical `source_event_id` inside the
+--    window, with `source_event_id` and `event_at`, ordered by
+--    `event_at, source_event_id`. A valid empty window returns zero rows; an
+--    invalid bound raises SQLSTATE `22023`.
+--    Verify: Test events exactly at both endpoints, equal/reversed/NULL bounds,
+--    duplicate raw deliveries, timestamp ties, an empty valid interval, and a
+--    window crossing a daylight-saving transition expressed as instants.
+--    Hint ladder, rung 1: Validate parameters before reading facts; converting
+--    instants to local labels is a separate presentation rule.
 
 ROLLBACK;
 \echo 'SQL-ANALYTICS-01 complete: pro_analytics_lab was rolled back'

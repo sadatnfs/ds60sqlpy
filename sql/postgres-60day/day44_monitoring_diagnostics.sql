@@ -26,8 +26,13 @@ WHERE state <> 'idle'
 ORDER BY running_for DESC
 LIMIT 20;
 
--- If pg_stat_statements is enabled (recommended), inspect top queries
--- Note: enabling requires CREATE EXTENSION pg_stat_statements; (may need superuser)
+-- pg_stat_statements has three relevant states:
+--   1. absent: its view does not exist;
+--   2. installed but unusable: the view exists, but the server was not started
+--      with pg_stat_statements in shared_preload_libraries;
+--   3. installed and loaded: the view is readable.
+-- Treat the first two as an explained empty optional result. Do not install the
+-- extension or change server startup settings from this monitoring lesson.
 -- SELECT queryid, calls, total_exec_time, mean_exec_time, rows, left(query, 120) AS q
 -- FROM pg_stat_statements
 -- ORDER BY total_exec_time DESC
@@ -52,7 +57,7 @@ ORDER BY qty DESC;
 -- 2. If pg_stat_statements is available, list top 10 queries by mean_exec_time and total time.
 --    Inputs: For sql-44 Exercise 2, inspect `to_regclass('public.pg_stat_statements')`, then read the optional `public.pg_stat_statements` view into the course-owned temporary `top_statement_stats` table. Build `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`; do not install the extension or reset shared statistics.
 --    Expected result/shape: For sql-44 Exercise 2, expected output: up to 20 rows when `pg_stat_statements` is installed and loaded, with at most 10 rows per ranking label (`total_exec_time` and `mean_exec_time`); otherwise emit an explanatory notice and return an empty result. Each row is one statement within a ranking, identified by (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`). The final columns are `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`. The final order is `ranking, rank_position`.
---    Verify: For sql-44 Exercise 2, if the optional view is absent, require the notice and empty result. If it is present, require only the `total_exec_time` and `mean_exec_time` labels, at most 10 rows per label, unique (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`), consecutive `rank_position` values from 1 through N, nonincreasing `total_exec_time` order for its label, nonincreasing `mean_exec_time` order for its label, and values that match a fresh read of `public.pg_stat_statements`.
+--    Verify: For sql-44 Exercise 2, if the optional view is absent or raises `object_not_in_prerequisite_state` because the module was not preloaded, require an explanatory notice and an empty result. If it is readable, require only the `total_exec_time` and `mean_exec_time` labels, at most 10 rows per label, unique (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`), consecutive `rank_position` values from 1 through N, nonincreasing `total_exec_time` order for its label, nonincreasing `mean_exec_time` order for its label, and values that match a fresh read of `public.pg_stat_statements`.
 --    Hint ladder, rung 1: For sql-44 Exercise 2, first prove whether the optional view exists. Then rank the same snapshot twice with deterministic tie-breakers and keep the monitored statistics unchanged.
 -- 3. Prediction: explain why query_start is not the same as transaction start,
 --    then display both ages for non-idle sessions.

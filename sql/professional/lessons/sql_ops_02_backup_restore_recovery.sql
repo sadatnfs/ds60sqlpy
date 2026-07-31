@@ -300,76 +300,167 @@ SELECT
 --
 -- 1. Add a schema fingerprint based on expected columns, types, nullability,
 --    constraints, and indexes. Explain why a data checksum alone is incomplete.
---    Inputs: For sql-ops-02 Exercise 1, read from `information_schema.columns`, `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace`. Compute `constraints` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
---    Expected result/shape: For sql-ops-02 Exercise 1, expected output: exactly one aggregate summary row. The final columns are `constraints`.
---    Verify: For sql-ops-02 Exercise 1, evaluate each of `row_count` in a separate control `SELECT` over `information_schema.columns`, `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace`; require one final row and compare every value. Add one source row with a new `constraints`; verify the result gains exactly one row carrying that `constraints` value.
---    Hint ladder, rung 1: For sql-ops-02 Exercise 1, run `columns`, and `constraints` one at a time. Record each CTE's row count and `constraints` uniqueness before the next stage uses it.
+--    Inputs: Canonicalize `pro_recovery_lab.restored_accounts` and
+--    `restored_entries` metadata from `information_schema.columns` and
+--    PostgreSQL catalogs. Include type/schema/domain, length or precision,
+--    nullability, default, identity/generated state, collation, constraints,
+--    and indexes; exclude OIDs and generated names.
+--    Expected result/shape: First return ordered canonical rows with columns
+--    `object_kind`, `relation_name`, `item_order`, `item_name`, and
+--    `semantic_definition`. Then return exactly one row with
+--    `restored_schema_fingerprint`.
+--    Verify: Compare canonical rows before hashes. Changing a default, dropping
+--    a constraint, or adding an index must change a visible semantic row and
+--    the fingerprint, while a volatile OID change must not.
+--    Hint ladder, rung 1: An opaque digest is useful only after its stable,
+--    diagnosable input rows are defined.
 -- 2. Inside a savepoint, corrupt one restored row and prove the checksum test
 --    fails; roll back to the savepoint and prove it passes again.
---    Inputs: For sql-ops-02 Exercise 2, read the target keys from `pro_recovery_lab.restored_records` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
---    Expected result/shape: For sql-ops-02 Exercise 2, expected output: the command tag and an independently counted set of affected `affected_row_count` values. The final columns are `affected_row_count`, and `command_tag`.
---    Verify: For sql-ops-02 Exercise 2, materialize the intended `affected_row_count` target set first; require the command tag/`RETURNING` set to match it, then query `pro_recovery_lab.restored_records` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `command_tag` values in both cases.
---    Hint ladder, rung 1: For sql-ops-02 Exercise 2, materialize the intended `affected_row_count` target set first; require the command tag/`RETURNING` set to match it, then query `pro_recovery_lab.restored_records` again and prove rollback or idempotent retry.
+--    Inputs: Record the source and restored account/entry checksums, create a
+--    savepoint, update one `pro_recovery_lab.restored_entries.amount`, compare
+--    again, roll back to the savepoint, and compare a third time.
+--    Expected result/shape: Three named observations: baseline checksums match;
+--    the corrupted restored checksum differs; after savepoint rollback the
+--    checksums match again. The intentional mismatch is reported and caught,
+--    not allowed to abort the remaining demonstration.
+--    Verify: Also compare row counts and a key-level detail query so a NULL or
+--    colliding digest cannot be the sole proof. Corrupt a second key and prove
+--    the detail query identifies exactly that key.
+--    Hint ladder, rung 1: A savepoint lets you prove the negative control and
+--    still restore the transaction to its known-good state.
 -- 3. Write RPO/RTO requirements for a new service, then choose logical dumps,
 --    physical base backup plus WAL, replication, or a combination. Separate
 --    availability from backup.
---    Inputs: For sql-ops-02 Exercise 3, use `pro_recovery_lab.recovery_plan` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
---    Expected result/shape: For sql-ops-02 Exercise 3, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `service_name`, `rpo`, `rto`, `backup_strategy`, and `availability_strategy`. The final order is `rp.service_name`.
---    Verify: For sql-ops-02 Exercise 3, restore into an isolated target and reconcile `pro_recovery_lab.recovery_plan` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
---    Hint ladder, rung 1: For sql-ops-02 Exercise 3, restore into an isolated target and reconcile `pro_recovery_lab.recovery_plan` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
+--    Inputs: Fill `pro_recovery_lab.recovery_plan` from explicit business RPO
+--    and RTO requirements. Choose backup and availability strategies
+--    separately and state each strategy's limit.
+--    Expected result/shape: One row per `service_name`, with `service_name`,
+--    `rpo`, `rto`, `backup_strategy`, and `availability_strategy`, ordered by
+--    `service_name`.
+--    Verify: For every row, map RPO to recoverable data age and RTO to the full
+--    restore-through-validation timeline. Remove replicas and prove a usable
+--    backup path remains; remove backups and explain why replicas alone cannot
+--    recover deleted/corrupted data.
+--    Hint ladder, rung 1: Availability reduces interruption; backup preserves
+--    a recoverable historical state. Neither substitutes automatically.
 -- 4. Draft and peer-review exact pg_dump/pg_restore commands for an isolated
 --    ds60_restore_rehearsal database. Verify rows, constraints, owners/grants,
 --    sequences, functions, extensions, and application queries before cleanup.
---    Inputs: For sql-ops-02 Exercise 4, use `ds60_restore_rehearsal` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
---    Expected result/shape: For sql-ops-02 Exercise 4, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `artifact_name`, `restored_object`, `row_count`, and `reconciliation_status`.
---    Verify: For sql-ops-02 Exercise 4, restore into an isolated target and reconcile `ds60_restore_rehearsal` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
---    Hint ladder, rung 1: For sql-ops-02 Exercise 4, restore into an isolated target and reconcile `ds60_restore_rehearsal` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
+--    Inputs: Draft literal `pg_dump`/`createdb`/`pg_restore` commands for a
+--    separately created disposable database named `ds60_restore_rehearsal`.
+--    Record artifact path/hash, tool/server versions, exact flags, start/end
+--    time, exit status, and cleanup command. Do not run external commands from
+--    this SQL transaction.
+--    Expected result/shape: One reviewed row per phase—dump, create isolated
+--    target, restore, catalogs, data, security, application smoke tests, and
+--    cleanup—with `phase_number`, `command_or_check`, `required_evidence`,
+--    `owner`, and `status`.
+--    Verify: Execute only after peer review; reconcile rows, constraints,
+--    owners/grants, identity/sequence state, functions, extensions, and critical
+--    queries. A missing artifact or failed check blocks completion and cutover.
+--    Hint ladder, rung 1: `ds60_restore_rehearsal` is a database target name,
+--    not a relation to select from.
 -- 5. Explain WAL archiving, base backups, timelines, recovery target time, and
 --    retention. State why archived WAL without a usable base backup is not PITR.
---    Inputs: For sql-ops-02 Exercise 5, use `pro_recovery_lab.source_accounts`, `pro_recovery_lab.source_entries`, and `pro_recovery_lab.backup_manifest` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
---    Expected result/shape: For sql-ops-02 Exercise 5, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `artifact_name`, `restored_object`, `row_count`, and `reconciliation_status`.
---    Verify: For sql-ops-02 Exercise 5, restore into an isolated target and reconcile `pro_recovery_lab.source_accounts`, `pro_recovery_lab.source_entries`, and `pro_recovery_lab.backup_manifest` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
---    Hint ladder, rung 1: For sql-ops-02 Exercise 5, restore into an isolated target and reconcile `pro_recovery_lab.source_accounts`, `pro_recovery_lab.source_entries`, and `pro_recovery_lab.backup_manifest` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
+--    Inputs: Build a PITR evidence chain that names one compatible base backup,
+--    every required WAL segment, timeline history, recovery target, retention
+--    horizon, restore configuration, and validation/cleanup owner.
+--    Expected result/shape: One row per chain component, with `component`,
+--    `artifact_identity`, `required_from`, `required_through`, `observed_status`,
+--    and `failure_response`. This lesson records a plan; it does not configure
+--    archiving or execute recovery.
+--    Verify: Remove one required WAL segment and separately remove the usable
+--    base backup; each negative control makes the target unrecoverable. Record
+--    the actual recovered timeline/time and application checks in an isolated
+--    rehearsal rather than accepting file presence alone.
+--    Hint ladder, rung 1: WAL replays changes after a compatible starting
+--    backup; an archive by itself is not a full database image.
 -- 6. Explain why “backup command exited zero” is not recovery evidence.
---    Inputs: For sql-ops-02 Exercise 6, complete the evidence written analysis and support its claims with read-only evidence from `pro_recovery_lab.source_accounts`, `pro_recovery_lab.source_entries`, and `pro_recovery_lab.backup_manifest`. Mark unverified assumptions explicitly.
---    Expected result/shape: For sql-ops-02 Exercise 6, expected output: a completed the evidence written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
---    Verify: For sql-ops-02 Exercise 6, check the evidence written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
---    Hint ladder, rung 1: For sql-ops-02 Exercise 6, check the evidence written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+--    Inputs: Classify evidence from the dump command, artifact manifest,
+--    isolated restore, catalog/data reconciliation, recovery-point proof, and
+--    application read/write smoke tests.
+--    Expected result/shape: One row per evidence layer, with `evidence_layer`,
+--    `what_it_proves`, `what_it_does_not_prove`, `failure_signal`, and `owner`.
+--    An exit-zero dump is only the first layer.
+--    Verify: Inject a syntactically valid but incomplete artifact or a restore
+--    that lacks one critical object. Command exit evidence may pass, while the
+--    later reconciliation must fail and prevent a “recoverable” decision.
+--    Hint ladder, rung 1: Evidence should advance from “bytes were written” to
+--    “a representative application can safely use the restored state.”
 -- 7. Design encryption and custody for dump files, base backups, WAL archives,
 --    manifests, and keys. Separate transport/storage encryption from database
 --    checksums; include rotation, least privilege, restore access, and deletion.
---    Inputs: For sql-ops-02 Exercise 7, read from `pro_recovery_lab.artifact_controls`. Build the answer toward `encryptioncustody_answer`; keep `encryptioncustody_answer` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-ops-02 Exercise 7, expected output: one row per `encryptioncustody_answer`. The final columns are `encryptioncustody_answer`. The final order is `artifact_kind`.
---    Verify: For sql-ops-02 Exercise 7, reselect the returned keys directly from the source; require unique `encryptioncustody_answer` where the expected grain is one row per key and confirm the projected `encryptioncustody_answer` against `pro_recovery_lab.artifact_controls`. Add one source row with a new `encryptioncustody_answer`; verify the result gains exactly one row carrying that `encryptioncustody_answer` value.
---    Hint ladder, rung 1: For sql-ops-02 Exercise 7, check `artifact_kind` before applying the row cap.
+--    Inputs: Complete `pro_recovery_lab.artifact_controls` for dump files, base
+--    backups, WAL archives, manifests, and keys. Keep artifact encryption,
+--    integrity/authenticity, key custody, and restore authorization separate.
+--    Expected result/shape: One row per `artifact_kind`, with `artifact_kind`,
+--    `encrypted`, `integrity_manifest`, `key_owner`, and `restore_role`, ordered
+--    by `artifact_kind`.
+--    Verify: Every artifact except the key record names encryption at rest and
+--    every restorable artifact has integrity evidence plus a distinct
+--    least-privileged restore role. Walk one key rotation and deletion event
+--    without making old retained backups permanently unrestorable.
+--    Hint ladder, rung 1: PostgreSQL page checksums detect some storage
+--    corruption; they do not encrypt a dump or prove artifact provenance.
 -- 8. Extend the restore checklist for sequences/identity state, large objects,
 --    owners, memberships, default privileges, security labels, extensions, and
 --    configuration outside the database. Classify what each backup format omits.
---    Inputs: For sql-ops-02 Exercise 8, read from the inline `VALUES` fixture. Build the answer toward `component`, and `expected_source`; keep `component` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-ops-02 Exercise 8, expected output: one row per `component`. The final columns are `component`, and `expected_source`. The final order is `component`.
---    Verify: For sql-ops-02 Exercise 8, reselect the returned keys directly from the source; require unique `component` where the expected grain is one row per key and confirm the projected `component`, and `expected_source` against the inline `VALUES` fixture. Add one source row with a new `component`; verify the result gains exactly one row carrying that `component` value.
---    Hint ladder, rung 1: For sql-ops-02 Exercise 8, check `component` before applying the row cap.
+--    Inputs: Classify each inline restore component—identity/sequence state,
+--    large objects, owners, memberships, default privileges, security labels,
+--    extensions, and external configuration—by its authoritative source.
+--    Expected result/shape: One row per `component`, with `component` and
+--    `expected_source`, ordered by `component`.
+--    Verify: For each chosen dump format, mark whether the component is inside
+--    the artifact, requires separate global/config capture, or must be rebuilt.
+--    A checklist is incomplete if any required component has no source and
+--    validation query.
+--    Hint ladder, rung 1: Database contents, cluster-global objects, and
+--    host/service configuration have different backup boundaries.
 -- 9. Plan a PostgreSQL major-version recovery rehearsal. Compare logical restore
 --    with pg_upgrade, extension compatibility, collation changes, ANALYZE,
 --    application-driver tests, rollback window, and cutover evidence.
---    Inputs: For sql-ops-02 Exercise 9, use `pg_catalog.pg_database`, and `pg_upgrade` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
---    Expected result/shape: For sql-ops-02 Exercise 9, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `server_version`, `server_version_num`, `datcollate`, and `datctype`.
---    Verify: For sql-ops-02 Exercise 9, restore into an isolated target and reconcile `pg_catalog.pg_database`, and `pg_upgrade` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
---    Hint ladder, rung 1: For sql-ops-02 Exercise 9, restore into an isolated target and reconcile `pg_catalog.pg_database`, and `pg_upgrade` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
+--    Inputs: Query the current database and server for `server_version`,
+--    `server_version_num`, `datcollate`, and `datctype`; separately draft the
+--    logical-restore versus `pg_upgrade` rehearsal decision.
+--    Expected result/shape: Exactly one local capability row with those four
+--    columns. The reviewed plan also records source/target versions, extension
+--    and collation compatibility, ANALYZE, driver/application tests, rollback
+--    window, cutover evidence, and cleanup.
+--    Verify: Capture the same capability row in the isolated target and compare
+--    it with the planned target. A missing extension version, collation drift,
+--    or failed application test blocks cutover even if `pg_upgrade --check` or
+--    restore exits zero.
+--    Hint ladder, rung 1: `pg_upgrade` is an external program, not a catalog
+--    relation in this query.
 -- 10. Design a selective table/schema restore without violating dependencies.
 --     Inventory foreign keys, types, functions, sequences, privileges, and
 --     downstream consumers; explain when full isolated restore is safer.
---    Inputs: For sql-ops-02 Exercise 10, use `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
---    Expected result/shape: For sql-ops-02 Exercise 10, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `contype`, and `dependency_contract`. The final order is `rel.relname, con.contype, dependency_contract`.
---    Verify: For sql-ops-02 Exercise 10, restore into an isolated target and reconcile `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
---    Hint ladder, rung 1: For sql-ops-02 Exercise 10, start with the first relation in `pg_catalog.pg_constraint`, `pg_catalog.pg_class`, and `pg_catalog.pg_namespace`; after each join, record total rows and distinct `contype` so the exact fanout or loss is visible.
+--    Inputs: Inspect `pg_constraint`, `pg_class`, and `pg_namespace` for
+--    relations in `pro_recovery_lab`, then extend the dependency inventory to
+--    types, functions, sequences, privileges, and downstream consumers.
+--    Expected result/shape: One row per `(relation_name, constraint_type,
+--    dependency_contract)`, with those three columns ordered by
+--    `relation_name, constraint_type, dependency_contract`.
+--    Verify: For every selected table, prove its referenced and referencing
+--    objects are either restored or deliberately remapped. Remove one required
+--    parent/table/type in an isolated target and prove validation stops; choose
+--    full isolated restore when the closure cannot be established safely.
+--    Hint ladder, rung 1: Constraint type alone is not an identity; retain the
+--    relation and rendered dependency definition.
 -- 11. Create a restore-capacity test: artifact size, transfer throughput, CPU,
 --     I/O, parallel jobs, WAL volume, index build, validation, and safety margin.
 --     Explain why a small-fixture linear extrapolation can miss bottlenecks.
---    Inputs: For sql-ops-02 Exercise 11, read from `pro_recovery_lab.capacity_budget`. Build the answer toward `capacity_answer`; keep `capacity_answer` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-ops-02 Exercise 11, expected output: one row per `capacity_answer`. The final columns are `capacity_answer`. The final order is `phase`.
---    Verify: For sql-ops-02 Exercise 11, reselect the returned keys directly from the source; require unique `capacity_answer` where the expected grain is one row per key and confirm the projected `capacity_answer` against `pro_recovery_lab.capacity_budget`. Add one source row with a new `capacity_answer`; verify the result gains exactly one row carrying that `capacity_answer` value.
---    Hint ladder, rung 1: For sql-ops-02 Exercise 11, check `phase` before applying the row cap.
+--    Inputs: Fill `pro_recovery_lab.capacity_budget` with measured restore
+--    phases, including artifact transfer, data load, index build, WAL catch-up,
+--    validation, and application readiness.
+--    Expected result/shape: One row per `phase`, with `phase`,
+--    `measured_seconds`, `peak_bytes`, and `evidence_note`, ordered by `phase`.
+--    Verify: Sum the measured critical path plus a named safety margin and
+--    compare it with RTO; separately record CPU, I/O, parallel jobs, transfer
+--    throughput, and free-space headroom. Repeat at a representative scale
+--    because small-fixture linear extrapolation is not sufficient evidence.
+--    Hint ladder, rung 1: RTO ends after validation and application readiness,
+--    not when the last table finishes loading.
 -- 12. Write a recovery-game-day record with incident commander, operators,
 --     observers, decision log, timestamps, injected failures, achieved RPO/RTO,
 --     unresolved gaps, cleanup, follow-up owners, and the next rehearsal date.
@@ -399,10 +490,18 @@ BEGIN
     END IF;
 END
 $self_check$;
---    Inputs: For sql-ops-02 Exercise 12, read from the inline `VALUES` fixture. Build the answer toward `role_name`, and `responsibility`; keep `role_name` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-ops-02 Exercise 12, expected output: one row per `role_name`. The final columns are `role_name`, and `responsibility`. The final order is `role_name`.
---    Verify: For sql-ops-02 Exercise 12, reselect the returned keys directly from the source; require unique `role_name` where the expected grain is one row per key and confirm the projected `role_name`, and `responsibility` against the inline `VALUES` fixture. Run the same operation as one allowed identity and one denied identity; record both outcomes without granting new access.
---    Hint ladder, rung 1: For sql-ops-02 Exercise 12, check `role_name` before applying the row cap.
+--    Inputs: Use the inline role fixture as the minimum authority map, then add
+--    named incident commander, operators, observers, and follow-up owners to a
+--    timestamped game-day record.
+--    Expected result/shape: One row per `role_name`, with `role_name` and
+--    `responsibility`, ordered by `role_name`; the accompanying record includes
+--    decision timestamps, injected failures, achieved RPO/RTO, gaps, cleanup,
+--    owners, and next rehearsal date.
+--    Verify: Every decision and action has exactly one accountable role, every
+--    injected failure links to observed evidence, and all unresolved gaps have
+--    an owner/due date. Compare achieved RPO/RTO with Exercise 3's requirements.
+--    Hint ladder, rung 1: This is an authority and evidence-coverage check, not
+--    a permission-granting exercise.
 
 ROLLBACK;
 \echo 'SQL-OPS-02 complete: pro_recovery_lab was rolled back'

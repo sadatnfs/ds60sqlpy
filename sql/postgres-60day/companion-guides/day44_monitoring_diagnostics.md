@@ -148,7 +148,7 @@ Complete these in the
 2. Conditionally rank `pg_stat_statements` by mean and total time.
    **Inputs/evidence:** For sql-44 Exercise 2, inspect `to_regclass('public.pg_stat_statements')`, then read the optional `public.pg_stat_statements` view into the course-owned temporary `top_statement_stats` table. Build `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`; do not install the extension or reset shared statistics.
    **Expected result/shape:** For sql-44 Exercise 2, expected output: up to 20 rows when `pg_stat_statements` is installed and loaded, with at most 10 rows per ranking label (`total_exec_time` and `mean_exec_time`); otherwise emit an explanatory notice and return an empty result. Each row is one statement within a ranking, identified by (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`). The final columns are `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`. The final order is `ranking, rank_position`.
-   **Verify:** For sql-44 Exercise 2, if the optional view is absent, require the notice and empty result. If it is present, require only the `total_exec_time` and `mean_exec_time` labels, at most 10 rows per label, unique (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`), consecutive `rank_position` values from 1 through N, nonincreasing `total_exec_time` order for its label, nonincreasing `mean_exec_time` order for its label, and values that match a fresh read of `public.pg_stat_statements`.
+   **Verify:** For sql-44 Exercise 2, if the optional view is absent or raises `object_not_in_prerequisite_state` because the module was not preloaded, require an explanatory notice and an empty result. If it is readable, require only the `total_exec_time` and `mean_exec_time` labels, at most 10 rows per label, unique (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`), consecutive `rank_position` values from 1 through N, nonincreasing `total_exec_time` order for its label, nonincreasing `mean_exec_time` order for its label, and values that match a fresh read of `public.pg_stat_statements`.
 3. Compare statement age with transaction age.
    **Inputs/evidence:** For sql-44 Exercise 3, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `state`, `transaction_age`, and `statement_age`; keep `pid` visible because the output grain is one backend session.
    **Expected result/shape:** For sql-44 Exercise 3, expected output: one row per `pid`. The final columns are `pid`, `usename`, `state`, `transaction_age`, and `statement_age`. The final order is `transaction_age DESC NULLS LAST`.
@@ -209,6 +209,18 @@ The starter queries `pg_stat_activity`, then runs `EXPLAIN ANALYZE` on recent
 category units. Its `pg_stat_statements` query is commented because the
 extension may require server configuration and elevated access.
 
+There are three distinct states to reason about:
+
+1. **Absent:** `to_regclass('public.pg_stat_statements')` is NULL.
+2. **Installed but not loaded:** the view exists, but reading it raises
+   `object_not_in_prerequisite_state` because
+   `shared_preload_libraries` did not load the module at server startup.
+3. **Installed and loaded:** the view is readable and can be ranked.
+
+The portable solution treats the first two states as an explained empty
+optional result. It catches only the known not-preloaded condition; unrelated
+SQL errors still stop the script and must be diagnosed.
+
 For PostgreSQL 16, the relevant extension columns include `calls`,
 `total_exec_time`, and `mean_exec_time`. Use the current `_exec_time` names
 rather than column names from older PostgreSQL examples.
@@ -227,8 +239,9 @@ Use the numbered **Exercises** section above as the single authoritative practic
   observation window.
 - Never install extensions, change `shared_preload_libraries`, reset statistics,
   cancel queries, or terminate backends merely to complete this lesson.
-- The executable solution can remain portable by checking for the extension
-  view and using dynamic SQL only when it exists.
+- The executable solution remains portable by checking for the extension view,
+  using dynamic SQL only when it exists, and catching only the defined
+  installed-but-not-preloaded SQLSTATE around that optional read.
 
 ## Expanded practice lab
 

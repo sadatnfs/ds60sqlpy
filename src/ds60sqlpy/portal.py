@@ -382,7 +382,7 @@ class PortalRequestHandler(BaseHTTPRequestHandler):
         if require_origin:
             origin = self.headers.get("Origin")
             expected_origin = f"http://{self.portal.expected_host}"
-            if origin not in {None, expected_origin}:
+            if origin != expected_origin:
                 self._send_error(HTTPStatus.FORBIDDEN, "Unexpected request origin.")
                 return False
         return True

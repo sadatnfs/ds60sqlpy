@@ -40,6 +40,15 @@ installation to the current process path, and Jupyter launched from the portal
 inherits it. If the notebook says `psql` is missing, close Jupyter, return to
 this PowerShell window, rerun the doctor, and start the portal again.
 
+Software discovery and database authentication are separate. If you installed
+PostgreSQL natively on Windows, first complete
+[Let the guided notebook authenticate without a hidden prompt](setup/windows.md#let-the-guided-notebook-authenticate-without-a-hidden-prompt).
+That step keeps the password in Windows PostgreSQL's per-user `pgpass.conf`,
+sets only a password-free local `DS60_DATABASE_URL` in the launching
+PowerShell process, and verifies the connection before Jupyter starts. The
+repository's Docker Compose service already matches the course runner's
+disposable default connection.
+
 The normal portal action is the easiest route. The reopened dashboard says
 **Private launcher mode is active**. Choose any SQL card and select
 **Open SQL workspace**, or open the lesson reader and select
@@ -49,13 +58,16 @@ copy and lesson-specific notebook, then open that exact notebook in JupyterLab.
 ## macOS and Linux path
 
 ```bash
-bash scripts/setup.sh --advanced
+bash scripts/setup.sh
 .venv/bin/python scripts/course.py doctor
 .venv/bin/python scripts/course.py portal
 ```
 
 Start the portal from the terminal where `psql` and any
-`DS60_DATABASE_URL` value are available.
+`DS60_DATABASE_URL` value are available. The normal setup is sufficient for a
+guided lesson notebook because it delegates complete scripts to `psql`. Use
+`--advanced` only for the separate JupySQL `%sql`/`%%sql` magics lesson or
+another cataloged advanced dependency.
 
 ## Generate without the portal
 
@@ -165,7 +177,9 @@ passes the validated target to libpq through the child environment rather than
 a visible command argument, and uses `--no-password` so a kernel cannot hang at
 an invisible password prompt.
 Configure native authentication, a local password file, or the disposable
-Compose URL before starting the portal.
+Compose URL before starting the portal. Native Windows learners should follow
+the linked password-file steps above rather than putting a password in a
+notebook or repository file.
 
 Database preparation is deliberately a separate cell with
 `CONFIRM_COURSE_RESET = False`. Change it to `True` only after reading the

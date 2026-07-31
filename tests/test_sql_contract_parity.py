@@ -182,6 +182,17 @@ def _guide_contract(lesson_id: str, exercise_number: int) -> Contract:
     return contracts[exercise_number]
 
 
+def _executable_solution(lesson_id: str) -> str:
+    lesson = CATALOG.get(lesson_id)
+    paths = [
+        CATALOG.resolve(relative_path)
+        for relative_path in lesson.solution_paths
+        if Path(relative_path).suffix.lower() == ".sql"
+    ]
+    assert len(paths) == 1, f"{lesson_id} must catalog exactly one executable SQL solution"
+    return paths[0].read_text(encoding="utf-8").lower()
+
+
 def _contract_text(contract: Contract) -> str:
     return " ".join((contract.inputs, contract.expected, contract.verify)).lower()
 
@@ -250,6 +261,14 @@ def test_sql_05_exercise_5_preserves_unordered_employee_pair_grain() -> None:
     _assert_read_only_contract(contract)
 
 
+def test_sql_05_executable_solution_removes_self_and_mirrored_pairs() -> None:
+    source = _executable_solution("sql-05")
+
+    assert "left_employee.employee_id as first_employee_id" in source
+    assert "right_employee.employee_id as second_employee_id" in source
+    assert "left_employee.employee_id < right_employee.employee_id" in source
+
+
 def test_sql_19_exercise_4_preserves_three_row_window_peer_example() -> None:
     contract = _guide_contract("sql-19", 4)
     text = _contract_text(contract)
@@ -260,6 +279,21 @@ def test_sql_19_exercise_4_preserves_three_row_window_peer_example() -> None:
     assert "peer" in contract.verify.lower()
     assert "exactly one summary row" not in text
     assert "require exactly one output row" not in text
+
+
+def test_sql_19_executable_solution_makes_rows_and_range_peers_observable() -> None:
+    source = _executable_solution("sql-19")
+
+    assert all(f"({row})" in source for row in ("1, 1, 10", "2, 1, 20", "3, 2, 5"))
+    assert re.search(
+        r"order by sort_value,\s*row_id\s+"
+        r"rows between unbounded preceding and current row",
+        source,
+    )
+    assert re.search(
+        r"order by sort_value\s+range between unbounded preceding and current row",
+        source,
+    )
 
 
 def test_sql_44_monitoring_contracts_keep_exact_grains_and_read_only_operations() -> None:
@@ -322,6 +356,19 @@ def test_sql_44_monitoring_contracts_keep_exact_grains_and_read_only_operations(
     assert "transaction_age" in _contract_text(exercise_6)
 
 
+def test_sql_44_executable_solution_keeps_two_stable_statement_rankings() -> None:
+    source = _executable_solution("sql-44")
+
+    for field in ("rank_position", "userid", "dbid", "toplevel", "queryid"):
+        assert re.search(rf"^\s*{field}\s+", source, flags=re.MULTILINE)
+    assert source.count("row_number() over") == 2
+    assert source.count("limit 10") == 2
+    assert "'total_exec_time'" in source
+    assert "'mean_exec_time'" in source
+    assert source.count("order by ranking, rank_position;") == 2
+    assert "pg_stat_statements_reset" not in source
+
+
 def test_sql_57_forecast_comparisons_keep_model_grain() -> None:
     exercise_1 = _guide_contract("sql-57", 1)
     _assert_read_only_contract(exercise_1)
@@ -344,3 +391,16 @@ def test_sql_57_forecast_comparisons_keep_model_grain() -> None:
         assert field in exercise_4.verify.lower()
     assert "by `model_name`" in exercise_4.verify.lower()
     assert "by `model_name`, `mae`" not in exercise_4.verify.lower()
+
+
+def test_sql_57_executable_solution_compares_models_at_model_grain() -> None:
+    source = _executable_solution("sql-57")
+
+    assert "select 'ma(7)' as model" in source
+    assert "select 'seasonal naive (lag 7)'" in source
+    assert "union all" in source
+    assert "common_scoring_rows as (" in source
+    assert re.search(
+        r"from common_scoring_rows\s+group by model_name\s+order by model_name;",
+        source,
+    )

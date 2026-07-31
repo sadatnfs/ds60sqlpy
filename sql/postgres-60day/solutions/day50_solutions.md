@@ -256,9 +256,9 @@ ORDER BY month, category;
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-50 Exercise 6, aggregate `expenses` into `expense_monthly` and `budgets` into `budget_monthly`, each keyed by (`month`, `category`), before the `FULL JOIN`.
-- **Expected result/shape:** For sql-50 Exercise 6, expected output: one row per (`month`, `category`) found on either side, with `actual`, `budget`, and `status`, ordered by `month, category`.
-- **Independent verification:** For sql-50 Exercise 6, separately sum each source by (`month`, `category`) and compare those controls to `actual` and `budget`. Their grand totals must equal the corresponding totals after the join; no monthly budget may be multiplied by the number of expense rows.
+- **Inputs/evidence:** For sql-50 Exercise 6, aggregate `expenses` and `budgets` independently to (`month`, `category`) before joining.
+- **Expected result/shape:** For sql-50 Exercise 6, expected output: one row per (`month`, `category`) found in either source, with `actual`, `budget`, and `status`.
+- **Independent verification:** For sql-50 Exercise 6, reconcile joined actual and budget totals to independent source totals. Test actual-only, budget-only, and zero-budget keys; a budget must never be multiplied by expense-row fanout.
 - **Intermediate relation check:** For sql-50 Exercise 6, prove `expense_monthly` and `budget_monthly` are each unique on (`month`, `category`) before joining; then inspect actual-only and budget-only keys.
 - **Clause check:** For sql-50 Exercise 6, each `GROUP BY` establishes the join grain, `FULL JOIN ... USING (month, category)` preserves one-sided keys, and `COALESCE` creates the canonical output key before `CASE` assigns status.
 - **Alternative/trade-off:** For sql-50 Exercise 6, the chosen form is justified by this lesson-specific rationale: The CASE checks missing and zero budgets before normal overspend. Evaluate another form against the concrete expected result (one row per `category`, and `status`) and the verification above.

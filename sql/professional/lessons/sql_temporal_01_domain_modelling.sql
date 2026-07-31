@@ -230,11 +230,54 @@ CREATE TABLE pro_temporal_lab.change_ledger (
     event_kind text NOT NULL,
     effective_at timestamptz NOT NULL,
     recorded_at timestamptz NOT NULL,
-    payload jsonb NOT NULL CHECK (jsonb_typeof(payload) = 'object'),
+    payload jsonb NOT NULL CHECK (
+        jsonb_typeof(payload) = 'object'
+        AND payload ? 'amount'
+        AND payload ? 'currency'
+        AND payload ->> 'amount' ~ '^-?[0-9]+([.][0-9]{1,2})?$'
+    ),
     idempotency_key text NOT NULL UNIQUE,
-    reverses_entry_id bigint
+    reverses_entry_id bigint UNIQUE
         REFERENCES pro_temporal_lab.change_ledger (ledger_entry_id)
 );
+
+CREATE FUNCTION pro_temporal_lab.validate_ledger_reversal()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = pg_catalog
+AS $function$
+DECLARE
+    prior_entry pro_temporal_lab.change_ledger%ROWTYPE;
+BEGIN
+    IF NEW.reverses_entry_id IS NULL THEN
+        RETURN NEW;
+    END IF;
+
+    SELECT prior.*
+    INTO prior_entry
+    FROM pro_temporal_lab.change_ledger AS prior
+    WHERE prior.ledger_entry_id = NEW.reverses_entry_id
+    FOR KEY SHARE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'reversed ledger entry % does not exist',
+            NEW.reverses_entry_id
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+
+    IF NEW.subject_key IS DISTINCT FROM prior_entry.subject_key
+       OR NEW.payload ->> 'currency'
+          IS DISTINCT FROM prior_entry.payload ->> 'currency'
+       OR (NEW.payload ->> 'amount')::numeric
+          + (prior_entry.payload ->> 'amount')::numeric <> 0 THEN
+        RAISE EXCEPTION
+            'a reversal must negate the same subject and currency'
+            USING ERRCODE = 'check_violation';
+    END IF;
+    RETURN NEW;
+END
+$function$;
 
 CREATE FUNCTION pro_temporal_lab.reject_ledger_mutation()
 RETURNS trigger
@@ -247,6 +290,11 @@ BEGIN
         USING ERRCODE = 'check_violation';
 END
 $function$;
+
+CREATE TRIGGER change_ledger_validate_reversal
+BEFORE INSERT ON pro_temporal_lab.change_ledger
+FOR EACH ROW
+EXECUTE FUNCTION pro_temporal_lab.validate_ledger_reversal();
 
 CREATE TRIGGER change_ledger_immutable
 BEFORE UPDATE OR DELETE ON pro_temporal_lab.change_ledger
@@ -304,6 +352,42 @@ BEGIN
 END
 $expected_immutability$;
 
+DO $expected_delete_and_retry_rejections$
+BEGIN
+    BEGIN
+        DELETE FROM pro_temporal_lab.change_ledger
+        WHERE idempotency_key = 'LEDGER-100';
+        RAISE EXCEPTION 'ledger deletion unexpectedly succeeded';
+    EXCEPTION
+        WHEN check_violation THEN
+            RAISE NOTICE 'Expected append-only DELETE rejection';
+    END;
+
+    BEGIN
+        INSERT INTO pro_temporal_lab.change_ledger (
+            subject_key,
+            event_kind,
+            effective_at,
+            recorded_at,
+            payload,
+            idempotency_key
+        )
+        VALUES (
+            'CUS-100',
+            'credit.applied',
+            TIMESTAMPTZ '2026-03-01 00:00:00+00',
+            TIMESTAMPTZ '2026-03-01 00:01:00+00',
+            '{"amount":"5.00","currency":"USD"}',
+            'LEDGER-100'
+        );
+        RAISE EXCEPTION 'duplicate idempotency key unexpectedly succeeded';
+    EXCEPTION
+        WHEN unique_violation THEN
+            RAISE NOTICE 'Expected idempotent-retry rejection';
+    END;
+END
+$expected_delete_and_retry_rejections$;
+
 CREATE TABLE pro_temporal_lab.retention_classes (
     retention_class text PRIMARY KEY,
     minimum_retention interval NOT NULL,
@@ -352,80 +436,72 @@ ORDER BY rr.record_key;
 --
 -- 1. Add a retroactive valid-time correction recorded April 1. Query the value
 --    valid February 15 as known March 15 versus as known April 2.
---    Inputs: For sql-temporal-01 Exercise 1, complete the retroactive correction written analysis and support its claims with read-only evidence from `pro_temporal_lab.customer_terms`, `ON`, and `pro_temporal_lab.global_maintenance_windows`. Mark unverified assumptions explicitly.
---    Expected result/shape: For sql-temporal-01 Exercise 1, expected output: a completed the retroactive correction written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
---    Verify: For sql-temporal-01 Exercise 1, check the retroactive correction written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
---    Hint ladder, rung 1: For sql-temporal-01 Exercise 1, check the retroactive correction written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+--    Inputs: For sql-temporal-01 Exercise 1, Close only the current `CUS-100` row whose `valid_period` contains `2026-02-15` at system time `2026-04-01 00:00+00`, then append the corrected rate as a new current `pro_temporal_lab.customer_terms` row.
+--    Expected result/shape: For sql-temporal-01 Exercise 1, One row per `(valid_on, system_as_of)` probe, with `valid_on`, `system_as_of`, `term_version_id`, `monthly_rate`, and `recorded_reason`, ordered by `system_as_of`; March 15 returns the prior rate and April 2 returns the retroactive correction.
+--    Verify: For sql-temporal-01 Exercise 1, Group the as-of join by both probe columns and require exactly one match per probe. Prove the earlier system-period row still exists and that no current valid periods overlap for `CUS-100`.
 -- 2. Test facts exactly at every valid/system upper boundary. Prove [lower,upper)
 --    gives at most one current match.
---    Inputs: For sql-temporal-01 Exercise 2, read from `pro_temporal_lab.facts`. Build the answer toward `valid_on`, `known_at`, and `matching_versions`; keep `valid_on`, and `known_at` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-temporal-01 Exercise 2, expected output: one row per `valid_on`, and `known_at`. The final columns are `valid_on`, `known_at`, and `matching_versions`. The final order is `probe.valid_on`.
---    Verify: For sql-temporal-01 Exercise 2, independently aggregate `pro_temporal_lab.facts` by `valid_on`, and `known_at`; require one output row for every distinct `valid_on`, and `known_at` tuple and compare `matching_versions` tuple by tuple. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
---    Hint ladder, rung 1: For sql-temporal-01 Exercise 2, start with the first relation in `pro_temporal_lab.facts`; after each join, record total rows and distinct `valid_on`, and `known_at` so the exact fanout or loss is visible.
+--    Inputs: For sql-temporal-01 Exercise 2, Build an inline probe relation around every lower and upper bound in `pro_temporal_lab.customer_terms`: immediately before, exactly at, and immediately after each valid-date or system-time boundary.
+--    Expected result/shape: For sql-temporal-01 Exercise 2, One row per `probe_id`, with `valid_on`, `known_at`, `matching_versions`, and `expected_matches`, ordered by `probe_id`; no `matching_versions` value is greater than one.
+--    Verify: For sql-temporal-01 Exercise 2, Independently count matching `term_version_id` values for every probe. Require the old version to stop at the upper bound and an adjacent successor, when present, to begin there without a double match.
 -- 3. If btree_gist is already approved in an isolated environment, write (do
 --    not run here) an exclusion constraint for customer_key equality and current
 --    valid-period overlap. Compare it with the advisory-lock trigger fallback.
---    Inputs: For sql-temporal-01 Exercise 3, complete the overlap enforcement written analysis and support its claims with read-only evidence from `pro_temporal_lab.customer_terms`, `ON`, and `pro_temporal_lab.global_maintenance_windows`. Mark unverified assumptions explicitly.
---    Expected result/shape: For sql-temporal-01 Exercise 3, expected output: a completed the overlap enforcement written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `btree_gist`, `customer_key`, and `valid_period`.
---    Verify: For sql-temporal-01 Exercise 3, check the overlap enforcement written analysis against `btree_gist`, `customer_key`, and `valid_period`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
---    Hint ladder, rung 1: For sql-temporal-01 Exercise 3, check the overlap enforcement written analysis against `btree_gist`, `customer_key`, and `valid_period`.
+--    Inputs: For sql-temporal-01 Exercise 3, Use the read-only `pg_available_extensions` result, the existing advisory-lock trigger, and a written (not executed) `btree_gist` exclusion constraint design for `customer_key WITH =, valid_period WITH &&`.
+--    Expected result/shape: For sql-temporal-01 Exercise 3, One comparison row per enforcement approach, with `approach`, `enforcement_mechanism`, `assumption_or_limit`, and `concurrent_failure_behavior`.
+--    Verify: For sql-temporal-01 Exercise 3, Explain which writes each approach locks or constrains, how a conflicting concurrent transaction fails, and what happens if an application writer bypasses the agreed advisory-lock protocol.
 -- 4. Add a correction ledger entry that reverses LEDGER-101 without updating
 --    history. Verify idempotency keys and reversal references.
---    Inputs: For sql-temporal-01 Exercise 4, read the target keys from `pro_temporal_lab.ledger` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
---    Expected result/shape: For sql-temporal-01 Exercise 4, expected output: the command tag and an independently counted set of affected `entry_id` values. The final columns are `entry_id`. The final order is `l.entry_id`.
---    Verify: For sql-temporal-01 Exercise 4, materialize the intended `entry_id` target set first; require the command tag/`RETURNING` set to match it, then query `pro_temporal_lab.ledger` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `entry_id` values in both cases.
---    Hint ladder, rung 1: For sql-temporal-01 Exercise 4, materialize the intended `entry_id` target set first; require the command tag/`RETURNING` set to match it, then query `pro_temporal_lab.ledger` again and prove rollback or idempotent retry.
+--    Inputs: For sql-temporal-01 Exercise 4, Append `LEDGER-102` to `pro_temporal_lab.change_ledger` as the exact same-subject, same-currency negation of `LEDGER-101`; set `reverses_entry_id` from the referenced row instead of hard-coding it.
+--    Expected result/shape: For sql-temporal-01 Exercise 4, One row per `ledger_entry_id`, with `idempotency_key`, `event_kind`, signed amount, `reverses_entry_id`, and a scalar reconciled amount, ordered by `ledger_entry_id`.
+--    Verify: For sql-temporal-01 Exercise 4, Require three rows and a reconciled amount of `5.00`. Prove an UPDATE, DELETE, duplicate `LEDGER-102` retry, second reversal of the same entry, and wrong-sign reversal all fail without changing the row count.
 -- 5. Add a retention exception/hold release workflow with approver, reason,
 --    decision time, and immutable audit. Do not auto-delete fixture rows.
---    Inputs: For sql-temporal-01 Exercise 5, read the target keys from `pro_temporal_lab.retention_decisions`, `pro_temporal_lab.facts`, and `pro_temporal_lab.ledger` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
---    Expected result/shape: For sql-temporal-01 Exercise 5, expected output: the command tag and an independently counted set of affected `affected_row_count` values. The final columns are `affected_row_count`, and `command_tag`.
---    Verify: For sql-temporal-01 Exercise 5, materialize the intended `affected_row_count` target set first; require the command tag/`RETURNING` set to match it, then query `pro_temporal_lab.retention_decisions`, `pro_temporal_lab.facts`, and `pro_temporal_lab.ledger` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `command_tag` values in both cases.
---    Hint ladder, rung 1: For sql-temporal-01 Exercise 5, materialize the intended `affected_row_count` target set first; require the command tag/`RETURNING` set to match it, then query `pro_temporal_lab.retention_decisions`, `pro_temporal_lab.facts`, and `pro_temporal_lab.ledger` again and prove rollback or idempotent retry.
+--    Inputs: For sql-temporal-01 Exercise 5, Create append-only `pro_temporal_lab.retention_decisions` with a stable decision idempotency key, `record_key`, decision, approver, reason, and authoritative `decided_at`. Lock per record and reject backdated decisions or a deletion approval while the latest decision is a hold.
+--    Expected result/shape: For sql-temporal-01 Exercise 5, One row per retained `record_key`, with the latest decision event/key, approver, reason, decision time, and `eligible_for_deletion_review`, ordered by `record_key`.
+--    Verify: For sql-temporal-01 Exercise 5, Prove decision UPDATE/DELETE and duplicate/backdated appends fail. Keep a held fixture ineligible, release another through an ordered event, and confirm no `retained_records` row is actually deleted.
 -- 6. State domain assumptions: time zone, clock authority, late arrival,
 --    overlap/gap policy, deletion/anonymization, ledger meaning, and who may
 --    correct system history.
---    Inputs: For sql-temporal-01 Exercise 6, complete the assumption register written analysis and support its claims with read-only evidence from `pro_temporal_lab.customer_terms`, `ON`, and `pro_temporal_lab.global_maintenance_windows`. Mark unverified assumptions explicitly.
---    Expected result/shape: For sql-temporal-01 Exercise 6, expected output: a completed the assumption register written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
---    Verify: For sql-temporal-01 Exercise 6, check the assumption register written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
---    Hint ladder, rung 1: For sql-temporal-01 Exercise 6, check the assumption register written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+--    Inputs: For sql-temporal-01 Exercise 6, Use observed lesson behavior plus explicitly labeled assumptions for time zone, clock authority, lateness, overlap/gaps, correction authority, ledger units, retention/holds, and replicas/backups.
+--    Expected result/shape: For sql-temporal-01 Exercise 6, One row per assumption topic, with `topic`, `decision_or_assumption`, `evidence`, `owner`, and `failure_response`.
+--    Verify: For sql-temporal-01 Exercise 6, Every row names an accountable owner and an operational response; every claimed fact cites a query/catalog result, while policy not present in the repository is labeled as an assumption needing approval.
 -- 7. Model a local-time business rule across a daylight-saving transition.
 --    Store the source zone and UTC instant, test ambiguous/nonexistent local
 --    times, and explain why a bare timestamp or fixed UTC offset is insufficient.
---    Inputs: For sql-temporal-01 Exercise 7, read from the inline `VALUES` fixture. Build the answer toward `local_time`, `zone_name`, and `interpreted_instant`; keep `zone_name` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-temporal-01 Exercise 7, expected output: one row per `zone_name`. The final columns are `local_time`, `zone_name`, and `interpreted_instant`. The final order is `local_time`.
---    Verify: For sql-temporal-01 Exercise 7, reselect the returned keys directly from the source; require unique `zone_name` where the expected grain is one row per key and confirm the projected `local_time`, `zone_name`, and `interpreted_instant` against the inline `VALUES` fixture. Add one source row with a new `zone_name`; verify the result gains exactly one row carrying that `zone_name` value.
---    Hint ladder, rung 1: For sql-temporal-01 Exercise 7, check `local_time` before applying the row cap.
+--    Inputs: For sql-temporal-01 Exercise 7, Use three keyed civil-time cases in `America/Los_Angeles`: spring `2026-03-08 02:30`, fall `2026-11-01 01:30`, and one ordinary time. Round-trip candidate UTC instants rather than trusting one silent `AT TIME ZONE` default.
+--    Expected result/shape: For sql-temporal-01 Exercise 7, One row per `case_id`, with `local_time`, `zone_name`, `civil_time_status`, candidate instants, PostgreSQL's default interpreted instant, and `resolution_policy`, ordered by `case_id`.
+--    Verify: For sql-temporal-01 Exercise 7, Require exactly one `nonexistent`, one `ambiguous`, and one `ordinary` case. A nonexistent time has zero round-trip candidates; an ambiguous time has more than one and requires explicit disambiguation.
 -- 8. Distinguish event time, ingestion time, and processing time for late data.
 --    Define a watermark and allowed lateness, then show how a late event changes
 --    a previously published aggregate and how the correction is communicated.
---    Inputs: For sql-temporal-01 Exercise 8, read from `pro_temporal_lab.timed_events`. Build the answer toward `maximum_event_time`, `example_watermark`, and `maximum_arrival_delay`; keep `example_watermark` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-temporal-01 Exercise 8, expected output: one row per `example_watermark`. The final columns are `maximum_event_time`, `example_watermark`, and `maximum_arrival_delay`.
---    Verify: For sql-temporal-01 Exercise 8, reselect the returned keys directly from the source; require unique `example_watermark` where the expected grain is one row per key and confirm the projected `maximum_event_time`, `example_watermark`, and `maximum_arrival_delay` against `pro_temporal_lab.timed_events`. Add one source row with a new `example_watermark`; verify the result gains exactly one row carrying that `example_watermark` value.
---    Hint ladder, rung 1: For sql-temporal-01 Exercise 8, select `example_watermark` from `pro_temporal_lab.timed_events` before adding derived columns.
+--    Inputs: For sql-temporal-01 Exercise 8, Create `pro_temporal_lab.timed_events(event_key, event_at, ingested_at, processed_at)` with one on-time and one late event. Use a fixed 15-minute example lateness allowance.
+--    Expected result/shape: For sql-temporal-01 Exercise 8, Exactly one summary row with `event_count`, `maximum_event_time`, `example_watermark`, `maximum_arrival_delay`, `maximum_processing_delay`, `events_behind_watermark`, and the correction policy.
+--    Verify: For sql-temporal-01 Exercise 8, Recompute arrival and processing delays row by row, require the late fixture to fall behind the watermark, and describe a stable window/version identity for the corrected aggregate.
 -- 9. Implement a Type-2 dimension as-of join with surrogate key, business key,
 --    effective half-open range, current marker, and correction metadata. Prove
 --    every fact resolves to at most one dimension row.
---    Inputs: For sql-temporal-01 Exercise 9, read from `pro_temporal_lab.customer_dimension`. Build the answer toward `order_key`, `ordered_on`, `customer_version_id`, and `segment`; keep `customer_version_id` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-temporal-01 Exercise 9, expected output: one row per `customer_version_id`. The final columns are `order_key`, `ordered_on`, `customer_version_id`, and `segment`. The final order is `order_fact.order_key`.
---    Verify: For sql-temporal-01 Exercise 9, project `customer_version_id` plus the raw source columns from `pro_temporal_lab.customer_dimension` at each join stage; record row count and distinct `customer_version_id`, then assert the final `order_key`, `ordered_on`, `customer_version_id`, and `segment` values match those staged rows without unintended fanout or loss. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
---    Hint ladder, rung 1: For sql-temporal-01 Exercise 9, start with the first relation in `pro_temporal_lab.customer_dimension`; after each join, record total rows and distinct `customer_version_id` so the exact fanout or loss is visible.
+--    Inputs: For sql-temporal-01 Exercise 9, Create `pro_temporal_lab.customer_dimension` with surrogate `customer_version_id`, business key, half-open `effective_period`, `is_current`, segment, correction reason, and record time; join `pro_temporal_lab.order_facts` on business key plus range containment.
+--    Expected result/shape: For sql-temporal-01 Exercise 9, One row per `order_key`, with `ordered_on`, `customer_version_id`, segment, effective period, current marker, and correction metadata, ordered by `order_key`.
+--    Verify: For sql-temporal-01 Exercise 9, Require output count to equal fact count and group by `order_key` with `HAVING count(customer_version_id) > 1` returning no rows. Inject one overlapping dimension row, prove the diagnostic catches it, then roll it back.
 -- 10. Design temporal referential integrity when a child period must be
 --     contained by a parent period. Compare trigger/exclusion approaches,
 --     concurrency locking, deferred validation, and repair of historical gaps.
---    Inputs: For sql-temporal-01 Exercise 10, complete the temporal parent written analysis and support its claims with read-only evidence from `pro_temporal_lab.customer_terms`, `ON`, and `pro_temporal_lab.global_maintenance_windows`. Mark unverified assumptions explicitly.
---    Expected result/shape: For sql-temporal-01 Exercise 10, expected output: a completed the temporal parent written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
---    Verify: For sql-temporal-01 Exercise 10, check the temporal parent written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
---    Hint ladder, rung 1: For sql-temporal-01 Exercise 10, check the temporal parent written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
+--    Inputs: For sql-temporal-01 Exercise 10, Cover child insert/update, parent shrink/delete, bulk historical repair, and deferred validation. State the shared business-key locking namespace and containment predicate for each write path.
+--    Expected result/shape: For sql-temporal-01 Exercise 10, One row per write path, with `write_path`, `concurrency_or_validation_control`, and `failure_response`.
+--    Verify: For sql-temporal-01 Exercise 10, Walk through two concurrent transactions for both child insertion and parent shrink. Identify the lock acquired first and show that cutover is blocked whenever the final containment diagnostic is nonempty.
 -- 11. Produce a deterministic gap-and-overlap report per business key using
 --     lag/lead and multirange operations. Define whether adjacency is valid and
 --     fail on duplicate or empty periods.
---    Inputs: For sql-temporal-01 Exercise 11, read from `periods`. Build the answer toward `period_id`, `valid_period`, and `relationship_to_prior_coverage`; keep `period_id` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-temporal-01 Exercise 11, expected output: one row per `period_id`. The final columns are `period_id`, `valid_period`, and `relationship_to_prior_coverage`. The final order is `lower(w.valid_period), upper(w.valid_period), w.period_id`.
---    Verify: For sql-temporal-01 Exercise 11, reselect the returned keys directly from the source; require unique `period_id` where the expected grain is one row per key and confirm the projected `period_id`, `valid_period`, and `relationship_to_prior_coverage` against `periods`. Add duplicate source candidates for `period_id`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
---    Hint ladder, rung 1: For sql-temporal-01 Exercise 11, run `with_prior` one at a time. Record each CTE's row count and `period_id` uniqueness before the next stage uses it.
+--    Inputs: For sql-temporal-01 Exercise 11, Use keyed fixtures containing duplicate, overlapping, adjacent, gapped, empty, and unbounded-upper `daterange` values. Preserve unbounded prior coverage with `upper_inf()` or an explicit infinity sentinel.
+--    Expected result/shape: For sql-temporal-01 Exercise 11, One row per `period_id`, with `business_key`, `valid_period`, `has_unbounded_upper`, duplicate count, prior maximum upper bound, and `relationship_to_prior_coverage`, ordered by bounds and `period_id`.
+--    Verify: For sql-temporal-01 Exercise 11, Require explicit `duplicate`, `empty`, `gap`, `adjacent`, and `overlap` outcomes. Add a bounded period after an unbounded range and prove it is classified as overlap rather than first/gap.
 -- 12. Plan time-based partition archival without violating legal holds.
 --     Inventory cross-partition keys, indexes, detach/archive/verify steps,
 --     encryption and access, hold exceptions, restore tests, and deletion proof.
+--    Inputs: For sql-temporal-01 Exercise 12, Design ordered phases for inventory, hold gate, detach, encrypted archive, reconciliation, restore test, and eventual source deletion.
+--    Expected result/shape: For sql-temporal-01 Exercise 12, One row per `step_number`, with `phase`, `required_control`, and `required_evidence`, ordered by `step_number`.
+--    Verify: For sql-temporal-01 Exercise 12, Each phase names a stop condition. Trace one active-hold fixture through every maintained copy and require a successful isolated restore plus source/archive count and checksum reconciliation before deletion.
 
 DO $self_check$
 BEGIN
@@ -444,10 +520,6 @@ BEGIN
     END IF;
 END
 $self_check$;
---    Inputs: For sql-temporal-01 Exercise 12, use `pro_temporal_lab.customer_terms`, `ON`, and `pro_temporal_lab.global_maintenance_windows` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
---    Expected result/shape: For sql-temporal-01 Exercise 12, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `artifact_name`, `restored_object`, `row_count`, and `reconciliation_status`.
---    Verify: For sql-temporal-01 Exercise 12, restore into an isolated target and reconcile `pro_temporal_lab.customer_terms`, `ON`, and `pro_temporal_lab.global_maintenance_windows` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
---    Hint ladder, rung 1: For sql-temporal-01 Exercise 12, restore into an isolated target and reconcile `pro_temporal_lab.customer_terms`, `ON`, and `pro_temporal_lab.global_maintenance_windows` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
 
 ROLLBACK;
 \echo 'SQL-TEMPORAL-01 complete: pro_temporal_lab was rolled back'

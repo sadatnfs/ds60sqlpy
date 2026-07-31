@@ -215,7 +215,7 @@ WHERE current_version.is_current
 
 - **Inputs/evidence:** For sql-53 Exercise 5, compare the current `dim_customer` row to `desired_customer_state`, which is copied from the same `staged_customer_change` used by Exercise 2.
 - **Expected result/shape:** For sql-53 Exercise 5, expected output: exactly one aggregate row, `unchanged_rows_that_would_version = 0`.
-- **Independent verification:** For sql-53 Exercise 5, rerun the nullable-safe attribute comparison against `desired_customer_state`; require zero differences. Then alter one staged attribute and require exactly one difference before applying any close/insert statements.
+- **Independent verification:** For sql-53 Exercise 5, rerun the nullable-safe attribute comparison against `desired_customer_state`; the result must report zero differences. Then alter one staged attribute and require a result of exactly one difference before applying any close/insert statements.
 - **Intermediate relation check:** For sql-53 Exercise 5, prove `desired_customer_state` and the current dimension are each unique on `customer_id` before comparing attributes.
 - **Clause check:** For sql-53 Exercise 5, `IS DISTINCT FROM` compares nullable attributes, while `dc.is_current` restricts the check to the one version that a replay would consider.
 - **Alternative/trade-off:** For sql-53 Exercise 5, the chosen form is justified by this lesson-specific rationale: `IS DISTINCT FROM` compares nullable attributes safely. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.

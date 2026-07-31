@@ -8,6 +8,12 @@ deadline.
 
 Start at the repository [README](../../README.md), and run every command from the repository root.
 
+Examples on this page use `python` for compactness. If the environment is not
+activated, use the repository interpreter instead: `& $CoursePython
+scripts\course.py ...` in Windows PowerShell, or `.venv/bin/python
+scripts/course.py ...` on macOS/Linux. The Windows setup guide shows how to
+resolve `$CoursePython` for either supported `.venv` layout.
+
 ## Requirements
 
 - PostgreSQL 16 or newer
@@ -96,11 +102,20 @@ Both `--reset` commands recreate the disposable `training` schema first.
 
 ## Study a lesson
 
-1. Read the matching [companion guide](companion-guides/README.md).
-2. Run the learner SQL file with stop-on-error behavior.
-3. Inspect results and query plans where requested.
-4. Attempt exercises in your own scratch file or transaction.
-5. Read the separate solution only after an honest attempt.
+1. Open the private portal with `START_DS60.cmd` on Windows or
+   `.venv/bin/python scripts/learning_portal.py` on macOS/Linux.
+2. Open the lesson reader, read the matching
+   [companion guide](companion-guides/README.md), and choose
+   **Create/open guided SQL notebook**. The ignored editable workspace under
+   `.learning/sql/<lesson-id>/` is preserved when you reopen it.
+3. Run the readiness cells, explicitly confirm the disposable training-schema
+   reset, edit the learner SQL copy, and run the fixed `psql -f` cell. Inspect
+   its result columns, row grain, ordering, row counts, and first error.
+4. If you prefer a terminal, run the cataloged learner SQL file with the
+   `psql -X -v ON_ERROR_STOP=1 ... -f <file>` form shown below. Use the host and
+   role flags from your operating-system setup guide.
+5. Attempt exercises before opening either separate solution. A browser-rendered
+   source preview is for reading; it does not execute SQL.
 
 If you are new to relational databases, begin with Day 1 and the supplied
 training schema. Add the named relational-engineering modules only after their

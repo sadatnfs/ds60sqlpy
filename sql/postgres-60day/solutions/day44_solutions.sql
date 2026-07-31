@@ -47,44 +47,54 @@ CREATE TEMP TABLE top_statement_stats (
 DO $optional_pg_stat_statements$
 BEGIN
   IF to_regclass('public.pg_stat_statements') IS NOT NULL THEN
-    EXECUTE $by_total$
-      INSERT INTO top_statement_stats
-      SELECT 'total_exec_time',
-             row_number() OVER (
-               ORDER BY total_exec_time DESC,
-                        userid, dbid, toplevel, queryid
-             )::integer,
-             userid,
-             dbid,
-             toplevel,
-             queryid,
-             left(query, 200),
-             calls,
-             mean_exec_time,
-             total_exec_time
-      FROM public.pg_stat_statements
-      ORDER BY total_exec_time DESC, userid, dbid, toplevel, queryid
-      LIMIT 10
-    $by_total$;
-    EXECUTE $by_mean$
-      INSERT INTO top_statement_stats
-      SELECT 'mean_exec_time',
-             row_number() OVER (
-               ORDER BY mean_exec_time DESC,
-                        userid, dbid, toplevel, queryid
-             )::integer,
-             userid,
-             dbid,
-             toplevel,
-             queryid,
-             left(query, 200),
-             calls,
-             mean_exec_time,
-             total_exec_time
-      FROM public.pg_stat_statements
-      ORDER BY mean_exec_time DESC, userid, dbid, toplevel, queryid
-      LIMIT 10
-    $by_mean$;
+    BEGIN
+      EXECUTE $by_total$
+        INSERT INTO top_statement_stats
+        SELECT 'total_exec_time',
+               row_number() OVER (
+                 ORDER BY total_exec_time DESC,
+                          userid, dbid, toplevel, queryid
+               )::integer,
+               userid,
+               dbid,
+               toplevel,
+               queryid,
+               left(query, 200),
+               calls,
+               mean_exec_time,
+               total_exec_time
+        FROM public.pg_stat_statements
+        ORDER BY total_exec_time DESC, userid, dbid, toplevel, queryid
+        LIMIT 10
+      $by_total$;
+      EXECUTE $by_mean$
+        INSERT INTO top_statement_stats
+        SELECT 'mean_exec_time',
+               row_number() OVER (
+                 ORDER BY mean_exec_time DESC,
+                          userid, dbid, toplevel, queryid
+               )::integer,
+               userid,
+               dbid,
+               toplevel,
+               queryid,
+               left(query, 200),
+               calls,
+               mean_exec_time,
+               total_exec_time
+        FROM public.pg_stat_statements
+        ORDER BY mean_exec_time DESC, userid, dbid, toplevel, queryid
+        LIMIT 10
+      $by_mean$;
+    EXCEPTION
+      WHEN object_not_in_prerequisite_state THEN
+        -- The extension can be installed (so its view exists) without being
+        -- loaded at server startup. Roll back either partial ranking and
+        -- preserve the same empty optional-result contract as absence.
+        TRUNCATE top_statement_stats;
+        RAISE NOTICE
+          'pg_stat_statements exists but is not loaded via shared_preload_libraries; optional result is empty';
+    END;
   ELSE
     RAISE NOTICE 'pg_stat_statements is not installed; optional result is empty';
   END IF;
