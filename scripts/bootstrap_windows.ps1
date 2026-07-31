@@ -42,6 +42,8 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 $DryRun = [bool]$WhatIfPreference
+$script:LastPythonProbeError = ""
+$script:PythonDiscoveryReport = ""
 
 if ($env:OS -ne "Windows_NT") {
     throw "bootstrap_windows.ps1 is intended for Windows 10 or Windows 11."
@@ -139,6 +141,7 @@ function Invoke-PythonSource {
     param(
         [Parameter(Mandatory = $true)][string]$PythonPath,
         [Parameter(Mandatory = $true)][string]$Source,
+        [string[]]$ArgumentList = @(),
         [switch]$Capture
     )
 
@@ -155,11 +158,15 @@ function Invoke-PythonSource {
             [Text.UTF8Encoding]::new($false)
         )
         if ($Capture) {
+            $PythonArguments = @($ProbePath)
+            $PythonArguments += $ArgumentList
             return Invoke-NativeCapture `
                 -FilePath $PythonPath `
-                -ArgumentList @($ProbePath)
+                -ArgumentList $PythonArguments
         }
-        Invoke-Native -FilePath $PythonPath -ArgumentList @($ProbePath)
+        $PythonArguments = @($ProbePath)
+        $PythonArguments += $ArgumentList
+        Invoke-Native -FilePath $PythonPath -ArgumentList $PythonArguments
     } finally {
         Remove-Item `
             -LiteralPath $ProbePath `
@@ -317,12 +324,10 @@ function Get-CondaCommands {
 function Find-UsableConda {
     foreach ($Candidate in Get-CondaCommands) {
         try {
-            $VersionOutput = Invoke-NativeCapture `
+            $null = Invoke-Native `
                 -FilePath $Candidate `
                 -ArgumentList @("--version")
-            if ((Get-LastNonEmptyLine -Text $VersionOutput) -match "^conda\s+\d") {
-                return $Candidate
-            }
+            return $Candidate
         } catch {
             Write-Verbose "Ignoring unusable conda candidate $Candidate."
         }
@@ -368,18 +373,25 @@ function Get-PythonCandidates {
         }
     }
 
-    # Ask every discoverable conda installation for its base directory.
+    # Each maintained conda executable lives below either Scripts or condabin,
+    # so its parent directory identifies the distribution root without parsing
+    # native stdout under Windows PowerShell 5.1.
     foreach ($Conda in Get-CondaCommands) {
-        try {
-            $BaseOutput = Invoke-NativeCapture -FilePath $Conda -ArgumentList @("info", "--base")
-            $BaseDirectory = Get-LastNonEmptyLine -Text $BaseOutput
-            Add-ExistingFile `
-                -Candidates $Candidates `
-                -Seen $Seen `
-                -Path (Join-Path $BaseDirectory "python.exe")
-        } catch {
-            Write-Verbose "Could not query conda through $Conda."
-        }
+        $CondaDirectory = Split-Path -Parent $Conda
+        $BaseDirectory = Split-Path -Parent $CondaDirectory
+        Add-ExistingFile `
+            -Candidates $Candidates `
+            -Seen $Seen `
+            -Path (Join-Path $BaseDirectory "python.exe")
+    }
+
+    # actions/setup-python and some managed Windows installers publish their
+    # selected interpreter root through this process-scoped variable.
+    if (-not [string]::IsNullOrWhiteSpace($env:pythonLocation)) {
+        Add-ExistingFile `
+            -Candidates $Candidates `
+            -Seen $Seen `
+            -Path (Join-Path $env:pythonLocation "python.exe")
     }
 
     # Python.org and compatible distributions register PythonCore install paths.
@@ -482,23 +494,26 @@ function Get-PythonCandidates {
 function Get-PythonInfo {
     param([Parameter(Mandatory = $true)][string]$Path)
 
+    $InfoPath = [IO.Path]::GetTempFileName()
     $Probe = @'
 import json
+from pathlib import Path
 import sys
-print(json.dumps({
+
+Path(sys.argv[1]).write_text(json.dumps({
     "executable": sys.executable,
     "major": sys.version_info.major,
     "minor": sys.version_info.minor,
     "micro": sys.version_info.micro,
-}))
+}), encoding="utf-8")
 '@
 
     try {
-        $Output = Invoke-PythonSource `
+        $null = Invoke-PythonSource `
             -PythonPath $Path `
             -Source $Probe `
-            -Capture
-        $Data = Get-LastNonEmptyLine -Text $Output | ConvertFrom-Json
+            -ArgumentList @($InfoPath)
+        $Data = Get-Content -LiteralPath $InfoPath -Raw | ConvertFrom-Json
         return [PSCustomObject]@{
             Path = (Resolve-Path -LiteralPath $Data.executable).Path
             Major = [int]$Data.major
@@ -507,17 +522,30 @@ print(json.dumps({
             Version = "$($Data.major).$($Data.minor).$($Data.micro)"
         }
     } catch {
-        Write-Verbose "Ignoring unusable Python candidate $Path."
+        $script:LastPythonProbeError = $_.Exception.Message
+        Write-Verbose "Ignoring unusable Python candidate $Path`: $script:LastPythonProbeError"
         return $null
+    } finally {
+        Remove-Item `
+            -LiteralPath $InfoPath `
+            -Force `
+            -ErrorAction SilentlyContinue `
+            -WhatIf:$false
     }
 }
 
 function Find-SupportedPython {
     $Found = @()
-    foreach ($Candidate in Get-PythonCandidates) {
+    $Failures = [System.Collections.Generic.List[string]]::new()
+    $CandidatePaths = @(Get-PythonCandidates)
+    foreach ($Candidate in $CandidatePaths) {
+        $script:LastPythonProbeError = ""
         $Info = Get-PythonInfo -Path $Candidate
         if ($Info) {
             $Found += $Info
+        } else {
+            $Failure = $script:LastPythonProbeError -replace "\s+", " "
+            $Failures.Add("$Candidate -> $Failure") | Out-Null
         }
     }
 
@@ -533,12 +561,28 @@ function Find-SupportedPython {
                     @{ Expression = { $_.Path }; Descending = $false }
     )
     if ($Supported.Count -gt 0) {
+        $script:PythonDiscoveryReport = (
+            "Validated $($Supported.Count) supported interpreter(s) from " +
+            "$($CandidatePaths.Count) discovered candidate(s)."
+        )
         return $Supported[0]
     }
 
     if ($Found.Count -gt 0) {
         $Versions = ($Found | ForEach-Object { "$($_.Version) at $($_.Path)" }) -join "; "
+        $script:PythonDiscoveryReport = "Unsupported candidates: $Versions"
         Write-Warning "Python was found, but no supported 3.11-3.12 interpreter was found: $Versions"
+    } elseif ($CandidatePaths.Count -eq 0) {
+        $script:PythonDiscoveryReport = (
+            "No executable candidate was found through PATH, the Python launcher, " +
+            "pythonLocation, conda, the registry, or maintained install locations."
+        )
+    } else {
+        $FailureSummary = @($Failures | Select-Object -First 3) -join "; "
+        $script:PythonDiscoveryReport = (
+            "Discovered $($CandidatePaths.Count) candidate(s), but validation failed: " +
+            $FailureSummary
+        )
     }
     return $null
 }
@@ -860,6 +904,8 @@ if (-not $PythonInfo -and -not $ExistingVenvInfo -and -not $CondaForEnvironment)
     throw @"
 No supported Python interpreter was found.
 
+$script:PythonDiscoveryReport
+
 Install Python 3.12 or Anaconda/Miniconda, then rerun.
 To allow an explicit winget installation instead, rerun with:
   -InstallMissingWithWinget
@@ -1174,22 +1220,22 @@ import sqlalchemy
 Invoke-PythonSource -PythonPath $VenvPython -Source $ImportProbe
 Invoke-Native -FilePath $VenvPython -ArgumentList @("-m", "jupyter", "--version")
 
-$KernelJson = Invoke-NativeCapture `
-    -FilePath $VenvPython `
-    -ArgumentList @("-m", "jupyter", "kernelspec", "list", "--json")
-$KernelData = $KernelJson | ConvertFrom-Json
-$KernelProperty = $KernelData.kernelspecs.PSObject.Properties["ds60sqlpy"]
-if (-not $KernelProperty) {
-    throw "Jupyter did not report the ds60sqlpy kernel after registration."
-}
-$KernelPython = $KernelProperty.Value.spec.argv[0]
-if (
-    [IO.Path]::GetFullPath($KernelPython).TrimEnd("\") -ine
-    [IO.Path]::GetFullPath($VenvPython).TrimEnd("\")
-) {
-    throw "The ds60sqlpy kernel does not point to this repository's .venv."
-}
-Write-Host "Kernel verified: Python (ds60sqlpy) -> $KernelPython"
+$KernelProbe = @'
+import os
+import sys
+
+from jupyter_client.kernelspec import KernelSpecManager
+
+kernel = KernelSpecManager().get_kernel_spec("ds60sqlpy")
+kernel_python = os.path.normcase(os.path.abspath(kernel.argv[0]))
+course_python = os.path.normcase(os.path.abspath(sys.executable))
+if kernel_python != course_python:
+    raise SystemExit(
+        "The Python (ds60sqlpy) kernel does not point to this repository environment."
+    )
+print(f"Kernel verified: Python (ds60sqlpy) -> {kernel.argv[0]}")
+'@
+Invoke-PythonSource -PythonPath $VenvPython -Source $KernelProbe
 
 if ($PsqlInfo) {
     Invoke-Native -FilePath $PsqlInfo.Path -ArgumentList @("--version")

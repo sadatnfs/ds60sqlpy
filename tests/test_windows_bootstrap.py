@@ -109,11 +109,13 @@ def test_bootstrap_discovers_anaconda_and_postgresql_without_path() -> None:
     assert "Major -ge 16" in text
     assert '$CondaPrefixPython = Join-Path $VenvDirectory "python.exe"' in text
     assert "Find-UsableConda" in text
+    assert "$null = Invoke-Native `" in text
     assert '"create", "--yes", "--no-default-packages"' in text
     assert '"--prefix", $VenvDirectory, "python=3.12", "pip"' in text
     assert "$VenvPython = $CondaPrefixPython" in text
     assert "$ReadyVenvInfo = Get-PythonInfo -Path $VenvPython" in text
     assert 'Join-Path $VenvDirectory "Library\\bin"' in text
+    assert 'Join-Path $env:pythonLocation "python.exe"' in text
 
 
 def test_discovery_helpers_accept_initially_empty_mutable_lists() -> None:
@@ -135,7 +137,7 @@ def test_command_discovery_handles_multiple_path_matches() -> None:
     text = script_text()
     python_lookup_start = text.index('foreach ($Name in @("python", "python3"))')
     python_lookup_end = text.index(
-        "# Ask every discoverable conda installation",
+        "# Each maintained conda executable",
         python_lookup_start,
     )
     python_lookup = text[python_lookup_start:python_lookup_end]
@@ -228,7 +230,7 @@ def test_bootstrap_installs_both_profiles_and_verifies_notebook_stack() -> None:
     assert '"--name", "ds60sqlpy"' in text
     assert '"--display-name", "Python (ds60sqlpy)"' in text
     assert '"scripts\\course.py", "doctor", "--no-database"' in text
-    assert '"kernelspec", "list", "--json"' in text
+    assert 'KernelSpecManager().get_kernel_spec("ds60sqlpy")' in text
     assert 'Write-Host "  & `"$VenvPython`" -m jupyter lab"' in text
 
 
@@ -285,11 +287,18 @@ def test_python_probes_avoid_legacy_native_quote_serialization() -> None:
     assert "[IO.File]::WriteAllText(" in text
     assert '@("-c", $Probe)' not in text
     assert '@("-c", $ImportProbe)' not in text
+    assert "Path(sys.argv[1]).write_text(json.dumps({" in text
+    assert "$null = Invoke-PythonSource `" in text
+    assert "-ArgumentList @($InfoPath)" in text
+    assert "$script:PythonDiscoveryReport" in text
+    assert "pythonLocation, conda, the registry" in text
     assert "Remove-Item `" in text
     assert "-LiteralPath $ProbePath `" in text
     assert '$ErrorActionPreference = "Continue"' in text
     assert "1> $OutputPath 2> $ErrorPath" in text
     assert "-WhatIf:$false" in text
+    assert "KernelSpecManager().get_kernel_spec" in text
+    assert '"kernelspec", "list", "--json"' not in text
 
 
 @pytest.mark.skipif(POWERSHELL_PARSER is None, reason="PowerShell is not installed")
