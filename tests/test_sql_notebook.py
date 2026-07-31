@@ -332,12 +332,12 @@ def test_generation_mirrors_relative_includes_and_preserves_psql_semantics(
     )
     dependency = catalog.repo_root / "sql/fixtures/prepare.sql"
     dependency.parent.mkdir(parents=True)
-    dependency.write_text("\\echo 'prepare'\nSELECT 1;\n", encoding="utf-8")
+    dependency.write_bytes(b"\\echo 'prepare'\r\nSELECT 1;\r\n")
 
     workspace = generate_sql_notebook(catalog, "sql-52")
     mirrored = workspace.notebook_path.parent / "workspace" / "sql" / "fixtures" / "prepare.sql"
 
-    assert mirrored.read_text(encoding="utf-8") == dependency.read_text(encoding="utf-8")
+    assert mirrored.read_bytes() == dependency.read_bytes()
     assert workspace.sql_path.relative_to(workspace.notebook_path.parent).as_posix() == (
         "workspace/sql/lessons/sql-52.sql"
     )

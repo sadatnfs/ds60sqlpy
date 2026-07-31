@@ -857,11 +857,7 @@ def _copy_relative_include_dependencies(
         if destination.is_symlink():
             raise SqlNotebookError("A mirrored psql include is a symbolic link.")
         if not destination.exists():
-            destination.write_text(
-                source.read_text(encoding="utf-8"),
-                encoding="utf-8",
-                newline="\n",
-            )
+            destination.write_bytes(source.read_bytes())
 
 
 def _validate_workspace_meta_commands(
