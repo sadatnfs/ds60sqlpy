@@ -331,7 +331,6 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 25 (<code>python-25</code>): chart selection, visual encodings, labels, and static export. Plotly and Altair are in the <code>data</code> dependency group.</p>
-<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
@@ -352,8 +351,7 @@
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 26 — interactive visualization with plotly and altair to practice interactive visual encodings, bounded interaction, and portable HTML export and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
-<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Lesson outcome:</strong> use day 26 — interactive visualization with plotly and altair to practice interactive visual encodings, bounded interaction, and portable HTML export and explain the evidence produced by your code.</p>
 <h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>Interaction is useful when it helps a reader answer a question—inspect a point, filter a segment, zoom a dense range, or compare parameter choices. It is not a substitute for a clear initial view. The chart still needs an honest title, visible axes/legend, sensible defaults, units, and a bounded amount of data.</p>
@@ -416,7 +414,7 @@ fig = px.scatter(
 <li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
 </ol>
 <p><strong>Useful alternative:</strong> Use a static chart when one fixed comparison tells the story; add interaction only for a clear reader task.</p>
-<p><strong>Boundary to remember:</strong> Million-row payloads, missing fields, huge tooltips, misleading default aggregation, offline JavaScript, and inaccessible color-only groups need handling. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Boundary to remember:</strong> Million-row payloads, missing fields, huge tooltips, misleading default aggregation, offline JavaScript, and inaccessible color-only groups need handling.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Tooltip:</strong> details shown for a hovered mark.</li>
@@ -545,8 +543,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li>Add tooltips, selections, and simple dashboards.</li>
 <li>Export HTML.</li>
 </ul></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
-<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>This is the editable learner artifact for <code>python-26</code>. Read <code>python/ds-60day/companion-guides/day26_viz_plotly_altair.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
 <p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
 <p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
@@ -752,7 +749,6 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-26-solutions-interactive-visualization-plotly-altair">Day 26 — Solutions: Interactive Visualization (Plotly / Altair)<a class="heading-anchor" href="#solution-1--day-26-solutions-interactive-visualization-plotly-altair" aria-label="Link to this section">#</a></h3>
-<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>interactive visual encodings, bounded interaction, and portable HTML export</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Interaction is useful when it helps a reader answer a question—inspect a point, filter a segment, zoom a dense range, or compare parameter choices. It is not a substitute for a clear initial view. The chart still needs an honest title, visible axes/legend, sensible defaults, units, and a bounded amount of data.</p>
@@ -767,7 +763,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li><strong>self-contained HTML:</strong> a file embedding the assets needed to work offline.</li>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
-<p>For this lesson&#x27;s <strong>interactive visual encodings, bounded interaction, and portable HTML export</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<p>For this lesson&#x27;s <strong>interactive visual encodings, bounded interaction, and portable HTML export</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
 <h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Create an interactive histogram whose bin count can be changed only within sensible bounds. <strong>Plotly route:</strong> isolate a builder accepting <code>bins</code>; <strong>Altair route:</strong> bind a range input to a parameter. <strong>Expected behavior:</strong> changing bins alters aggregation without changing the underlying observations. <strong>Verify:</strong> test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values.</p>

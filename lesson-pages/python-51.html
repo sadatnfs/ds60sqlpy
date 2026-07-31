@@ -392,7 +392,6 @@ training = pd.DataFrame(
 summary = training.groupby(&quot;category&quot;)[&quot;target&quot;].agg([&quot;mean&quot;, &quot;count&quot;])
 print(summary)</code></pre>
 <p>The rare category has an extreme mean based on one row. Smoothing combines its estimate with the global training mean, with the count determining how strongly to trust the category-specific value.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 51 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -484,7 +483,6 @@ assert encoded.iloc[2] == prior and encoded.iloc[3] == prior</code></pre>
 <p><strong>Mistake:</strong> Building one full-training target map and applying it back to those same training rows.</p>
 <p><strong>Debug it deliberately:</strong> Attach source fold and map-training row IDs to a tiny example; assert every encoded training row is absent from its map&#x27;s target aggregation.</p>
 <p><strong>Stop condition:</strong> Do not use target encoding until the split unit, unseen fallback, smoothing strength, and fit/transform boundaries are testable.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Add K-fold target encoding to a scikit-learn pipeline through a custom transformer or <code>FunctionTransformer</code>.</li>
@@ -1011,7 +1009,6 @@ print(df[[&quot;group&quot;, &quot;ts&quot;, &quot;y&quot;, &quot;grp_roll_mean_
 <li><code>min_periods=5</code> intentionally leaves early rows as NaN until enough history exists</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -1026,7 +1023,6 @@ print(df[[&quot;group&quot;, &quot;ts&quot;, &quot;y&quot;, &quot;grp_roll_mean_
 <p><strong>Edge case to test:</strong> Singletons, all-missing categories, unseen values, multiclass targets, time-dependent meaning, and grouped duplicates need explicit policy.</p>
 <p><strong>Evidence of correctness:</strong> Prove each training row is excluded from its map, compare against one-hot on identical folds, test unseen/missing categories, and report category support plus smoothing.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
@@ -1262,7 +1258,6 @@ print(df[[&quot;group&quot;, &quot;ts&quot;, &quot;y&quot;, &quot;grp_roll_mean_
 <li><code>min_periods=5</code> intentionally leaves early rows as NaN until enough history exists</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-9--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-9--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -1277,7 +1272,6 @@ print(df[[&quot;group&quot;, &quot;ts&quot;, &quot;y&quot;, &quot;grp_roll_mean_
 <p><strong>Edge case to test:</strong> Singletons, all-missing categories, unseen values, multiclass targets, time-dependent meaning, and grouped duplicates need explicit policy.</p>
 <p><strong>Evidence of correctness:</strong> Prove each training row is excluded from its map, compare against one-hot on identical folds, test unseen/missing categories, and report category support plus smoothing.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-9--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-9--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-9--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

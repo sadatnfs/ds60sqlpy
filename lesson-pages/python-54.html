@@ -391,7 +391,6 @@ def psi(reference: np.ndarray, current: np.ndarray, bins: int = 10) -&gt; float:
         )
     )</code></pre>
 <p>Quantile edges are learned from the reference and extended to infinity so current out-of-range observations are counted. Duplicated quantiles, missing values, and tiny samples need explicit handling in real code.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 54 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -485,7 +484,6 @@ assert label_coverage == 0.12</code></pre>
 <p><strong>Mistake:</strong> Treating a PSI threshold as automatic proof of performance degradation or retraining need.</p>
 <p><strong>Debug it deliberately:</strong> Break the alert into data window, reference, bins, counts, slices, label coverage, service changes, and upstream incidents; reproduce the statistic independently.</p>
 <p><strong>Stop condition:</strong> Do not retrain or roll back from one unexplained alert without owner, evidence gate, and impact assessment.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Compute PSI for multiple features or score windows over time.</li>
@@ -917,7 +915,6 @@ plot_dist(data_train, data_prod)</code></pre>
 <li>Promote to Production with change record; set up monitoring alerts and rollback plan</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -932,7 +929,6 @@ plot_dist(data_train, data_prod)</code></pre>
 <p><strong>Edge case to test:</strong> Zero-count bins, tiny slices, delayed/missing labels, seasonality, upstream schema changes, and changed model versions can create misleading trends.</p>
 <p><strong>Evidence of correctness:</strong> Freeze reference/bins and recompute PSI, report counts/windows/slices/label coverage, connect alerts to owners/actions, and rehearse rollback with artifact evidence.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
@@ -1074,7 +1070,6 @@ plot_dist(data_train, data_prod)</code></pre>
 <li>Promote to Production with change record; set up monitoring alerts and rollback plan</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-3--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-3--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -1089,7 +1084,6 @@ plot_dist(data_train, data_prod)</code></pre>
 <p><strong>Edge case to test:</strong> Zero-count bins, tiny slices, delayed/missing labels, seasonality, upstream schema changes, and changed model versions can create misleading trends.</p>
 <p><strong>Evidence of correctness:</strong> Freeze reference/bins and recompute PSI, report counts/windows/slices/label coverage, connect alerts to owners/actions, and rehearse rollback with artifact evidence.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-3--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-3--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-3--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

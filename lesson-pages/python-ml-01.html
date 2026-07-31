@@ -371,7 +371,6 @@ all hashes + runtime -&gt; manifest.json
                          +-&gt; verify -&gt; compatibility -&gt; promotion evidence
                                                    -&gt; registry stage</code></pre>
 <p>Every generated file stays in a temporary directory.</p>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
@@ -422,7 +421,6 @@ assert mismatches == [&quot;model.json&quot;]</code></pre>
 <p><strong>Common mistake:</strong> Hashing noncanonical JSON, loading untrusted pickle first, or calling an environment dump a compatibility policy.</p>
 <p><strong>Diagnostic:</strong> Rebuild the canonical bytes, print schema/version differences, verify every manifest path/hash before parse, and reload/predict in a clean process.</p>
 <p><strong>Transfer question:</strong> What compatibility rule allows an additive nullable feature without silently changing an older model&#x27;s ordered input?</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--1-complete-snapshot-hashing">1. Complete snapshot hashing<a class="heading-anchor" href="#guide--1-complete-snapshot-hashing" aria-label="Link to this section">#</a></h5>
 <p>Require a nonempty unique <code>record_id</code>, sort by it, serialize with sorted keys, reject NaN, and hash UTF-8 bytes. Verify reversed rows retain the hash while one changed value does not.</p>
@@ -857,7 +855,6 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p>In a larger system MLflow may record runs and artifacts, but the same lineage and compatibility evidence is still necessary. Hosted accounts are not required for this local contract.</p>
 <p>Edge cases include duplicated record identities, floating NaN (rejected by canonical JSON), schema reorder, a package major-version change, artifact tampering, promotion without tests, and rollback to a version whose external dependencies no longer exist.</p>
 <hr>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--reasoning-before-implementation">Reasoning before implementation<a class="heading-anchor" href="#solution-1--reasoning-before-implementation" aria-label="Link to this section">#</a></h4>
 <p>The solution creates stable identities and verifies a constrained bundle from outside in before allowing promotion or prediction.</p>
 <ol>
@@ -888,7 +885,6 @@ changed = [{&quot;record_id&quot;: &quot;b&quot;, &quot;x&quot;: 3}, {&quot;reco
 assert snapshot(records) != snapshot(changed)</code></pre>
 <p><strong>Expected observation:</strong> Declared row ordering does not change the identity, while one semantic value change does.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-ml-01.html#solution-2"><code>py_ml_01_reproducible_delivery_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
 <h5 id="solution-1--exercise-1-complete-snapshot-hashing">Exercise 1 — Complete snapshot hashing<a class="heading-anchor" href="#solution-1--exercise-1-complete-snapshot-hashing" aria-label="Link to this section">#</a></h5>

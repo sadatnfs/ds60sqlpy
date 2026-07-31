@@ -331,7 +331,6 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 24 (<code>python-24</code>): EDA questions, distributions, segmentation, and data-quality caveats.</p>
-<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
@@ -352,8 +351,7 @@
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 25 — visualization with matplotlib and seaborn to practice static chart choice, figure/axes ownership, labeling, and reproducible export and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
-<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Lesson outcome:</strong> use day 25 — visualization with matplotlib and seaborn to practice static chart choice, figure/axes ownership, labeling, and reproducible export and explain the evidence produced by your code.</p>
 <h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>A visualization maps data fields to visual encodings such as position, length, color, shape, or size. Choose a chart from the analytical question and variable types: bars compare categories, histograms show a numeric distribution, lines emphasize ordered/time trends, and scatter plots show relationships between two numeric variables.</p>
@@ -413,7 +411,7 @@ fig2.tight_layout()
 <li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
 </ol>
 <p><strong>Useful alternative:</strong> Seaborn offers statistical defaults on top of Matplotlib; use the returned axes and retain explicit labeling/export control.</p>
-<p><strong>Boundary to remember:</strong> Long labels, zero/missing groups, extreme skew, overlapping points, color-vision differences, and tiny figures require adaptation. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Boundary to remember:</strong> Long labels, zero/missing groups, extreme skew, overlapping points, color-vision differences, and tiny figures require adaptation.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Figure:</strong> entire output canvas; <strong>Axes:</strong> one plotting area within it.</li>
@@ -542,8 +540,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li>Aesthetics and themes.</li>
 <li>Save figures for reports.</li>
 </ul></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
-<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>This is the editable learner artifact for <code>python-25</code>. Read <code>python/ds-60day/companion-guides/day25_viz_matplotlib_seaborn.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
 <p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
 <p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
@@ -749,7 +746,6 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-25-solutions-visualization-with-matplotlib-seaborn">Day 25 — Solutions: Visualization with Matplotlib &amp; Seaborn<a class="heading-anchor" href="#solution-1--day-25-solutions-visualization-with-matplotlib-seaborn" aria-label="Link to this section">#</a></h3>
-<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>static chart choice, figure/axes ownership, labeling, and reproducible export</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>A visualization maps data fields to visual encodings such as position, length, color, shape, or size. Choose a chart from the analytical question and variable types: bars compare categories, histograms show a numeric distribution, lines emphasize ordered/time trends, and scatter plots show relationships between two numeric variables.</p>
@@ -764,7 +760,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li><strong>accessibility:</strong> design that remains interpretable across vision and interaction needs.</li>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
-<p>For this lesson&#x27;s <strong>static chart choice, figure/axes ownership, labeling, and reproducible export</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<p>For this lesson&#x27;s <strong>static chart choice, figure/axes ownership, labeling, and reproducible export</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
 <h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Recreate two Day 24 plots and improve their communication. <strong>For each:</strong> write the question and reader, choose the mark/encoding, label units and denominator, order categories deliberately, and add accessible non-color cues where needed. <strong>Expected behavior:</strong> a reader can state the intended comparison without reading surrounding code. <strong>Verify:</strong> reconcile plotted counts/summary values to the source DataFrame.</p>

@@ -331,7 +331,6 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 20 (<code>python-20</code>): indexes, table grain, grouping, and validation.</p>
-<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
@@ -352,8 +351,7 @@
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 21 — time series with pandas to practice time-aware indexes, timezone policy, resampling, rolling windows, and lag features and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
-<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Lesson outcome:</strong> use day 21 — time series with pandas to practice time-aware indexes, timezone policy, resampling, rolling windows, and lag features and explain the evidence produced by your code.</p>
 <h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>A timestamp represents a point or label in time; a duration represents an elapsed amount. Parsing text is only the first step: decide whether timestamps are timezone-naive or timezone-aware and what business zone controls calendar boundaries. Localizing assigns a zone to wall-clock values; converting changes the representation of an already-known instant.</p>
@@ -412,7 +410,7 @@ time_features.round(2)</code></pre>
 <li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
 </ol>
 <p><strong>Useful alternative:</strong> Use row-count windows for evenly sampled observations and time-offset windows when elapsed time—not row count—defines the question.</p>
-<p><strong>Boundary to remember:</strong> Daylight-saving ambiguity/nonexistence, duplicate times, irregular gaps, empty bins, and partial boundary windows need policy. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Boundary to remember:</strong> Daylight-saving ambiguity/nonexistence, duplicate times, irregular gaps, empty bins, and partial boundary windows need policy.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Timestamp:</strong> one point in time or an unzoned wall-clock reading.</li>
@@ -531,8 +529,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li>Resampling (D/W/M), rolling windows.</li>
 <li>Time zone awareness basics.</li>
 </ul></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
-<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>This is the editable learner artifact for <code>python-21</code>. Read <code>python/ds-60day/companion-guides/day21_time_series_pandas.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
 <p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
 <p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
@@ -732,7 +729,6 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-21-solutions-time-series-with-pandas">Day 21 — Solutions: Time Series with Pandas<a class="heading-anchor" href="#solution-1--day-21-solutions-time-series-with-pandas" aria-label="Link to this section">#</a></h3>
-<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>time-aware indexes, timezone policy, resampling, rolling windows, and lag features</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>A timestamp represents a point or label in time; a duration represents an elapsed amount. Parsing text is only the first step: decide whether timestamps are timezone-naive or timezone-aware and what business zone controls calendar boundaries. Localizing assigns a zone to wall-clock values; converting changes the representation of an already-known instant.</p>
@@ -747,7 +743,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li><strong>rolling window:</strong> a calculation over neighboring rows or an elapsed interval.</li>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
-<p>For this lesson&#x27;s <strong>time-aware indexes, timezone policy, resampling, rolling windows, and lag features</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<p>For this lesson&#x27;s <strong>time-aware indexes, timezone policy, resampling, rolling windows, and lag features</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
 <h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Parse the supplied timestamp strings, reject unparseable values, localize according to a written source-timezone policy, and convert the result to UTC. <strong>Expected behavior:</strong> the final dtype is timezone-aware UTC and invalid text is reported rather than silently dropped. <strong>Verify:</strong> inspect the earliest/latest instant and demonstrate that conversion preserves the instant.</p>

@@ -405,7 +405,6 @@
 <p>A semaphore limits active operations, but a producer can still create a million waiting task objects. A bounded queue controls pending work as well:</p>
 <pre><code class="language-text">producer -&gt; queue(maxsize=2) -&gt; three long-lived consumers</code></pre>
 <p>When the queue is full, <code>await queue.put(...)</code> pauses the producer. This is backpressure. The consumer count bounds active worker calls.</p>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
@@ -468,7 +467,6 @@ assert results == [0, 2, 4, 6, 8, 10] and peak == 2</code></pre>
 <p><strong>Common mistake:</strong> Wrapping CPU-bound Python in threads or constructing millions of async tasks behind a semaphore.</p>
 <p><strong>Diagnostic:</strong> Measure sequential and candidate paths, record active/queued counts, per-item results, timeout/cancellation cleanup, serialization size, and platform start method.</p>
 <p><strong>Transfer question:</strong> Design a two-stage pipeline with blocking file reads followed by CPU parsing; where are the two separate bounds?</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--exercise-1-choose-a-model">Exercise 1 — choose a model<a class="heading-anchor" href="#guide--exercise-1-choose-a-model" aria-label="Link to this section">#</a></h5>
 <p>Implement <code>choose_execution_model</code> in the learner artifact. For each case, write one sentence explaining the choice:</p>
@@ -979,7 +977,6 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h4 id="solution-1--expected-behavior">Expected behavior<a class="heading-anchor" href="#solution-1--expected-behavior" aria-label="Link to this section">#</a></h4>
 <p>The tests prove ordered results, peak active work at or below the limit, timeout and failure propagation, cancellation cleanup, deterministic lost updates, thread output, and a small spawned-process calculation. No test relies on a narrow elapsed-time threshold, random scheduling, or external I/O.</p>
 <hr>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--reasoning-before-implementation">Reasoning before implementation<a class="heading-anchor" href="#solution-1--reasoning-before-implementation" aria-label="Link to this section">#</a></h4>
 <p>The solution treats primitive choice, admission control, lifecycle, and result accounting as separate contracts validated under forced interleavings.</p>
 <ol>
@@ -1008,7 +1005,6 @@ assert choose_execution(waits_nonblocking=True) == &quot;asyncio&quot;
 assert choose_execution(cpu_python=True) == &quot;processes-or-native-vectorization&quot;</code></pre>
 <p><strong>Expected observation:</strong> The decision follows where time is spent, not a belief that one primitive is universally faster.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-pro-02.html#solution-2"><code>py_pro_02_concurrency_parallelism_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
 <h5 id="solution-1--exercise-1-choose-a-model">Exercise 1 — choose a model<a class="heading-anchor" href="#solution-1--exercise-1-choose-a-model" aria-label="Link to this section">#</a></h5>

@@ -330,7 +330,6 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 2 (<code>python-02</code>): types, conversions, comparisons, and truthiness.</p>
-<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
@@ -351,8 +350,7 @@
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 3 — control flow, truthiness, and exceptions to practice branch selection, loop decisions, and narrow exception boundaries and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
-<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Lesson outcome:</strong> use day 3 — control flow, truthiness, and exceptions to practice branch selection, loop decisions, and narrow exception boundaries and explain the evidence produced by your code.</p>
 <h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>Control flow is the route execution takes through a program. An <code>if</code>/<code>elif</code>/<code>else</code> chain chooses exactly one branch: Python tests from top to bottom and stops at the first true condition. Put narrow or more specific rules before broader ones, and validate impossible inputs before classifying valid ones.</p>
@@ -415,7 +413,7 @@
 <li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
 </ol>
 <p><strong>Useful alternative:</strong> Return a sentinel only when absence is part of the function&#x27;s contract; otherwise raise a specific exception and let the caller decide.</p>
-<p><strong>Boundary to remember:</strong> Boundary values such as 0, 1, 59, 60, 89, 90, and 100 expose gaps and overlaps in ordered conditions. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Boundary to remember:</strong> Boundary values such as 0, 1, 59, 60, 89, 90, and 100 expose gaps and overlaps in ordered conditions.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Branch:</strong> one possible route through a program.</li>
@@ -537,8 +535,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li>try/except/else/finally.</li>
 <li>Define and raise custom exceptions.</li>
 </ul></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
-<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>This is the editable learner artifact for <code>python-03</code>. Read <code>python/ds-60day/companion-guides/day03_control_flow_exceptions.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
 <p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
 <p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
@@ -774,7 +771,6 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-03-solutions-control-flow-truthiness-and-exceptions">Day 03 — Solutions: Control Flow, Truthiness, and Exceptions<a class="heading-anchor" href="#solution-1--day-03-solutions-control-flow-truthiness-and-exceptions" aria-label="Link to this section">#</a></h3>
-<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>branch selection, loop decisions, and narrow exception boundaries</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Control flow is the route execution takes through a program. An <code>if</code>/<code>elif</code>/<code>else</code> chain chooses exactly one branch: Python tests from top to bottom and stops at the first true condition. Put narrow or more specific rules before broader ones, and validate impossible inputs before classifying valid ones.</p>
@@ -789,7 +785,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li><strong>handler:</strong> an <code>except</code> block for a named exception type.</li>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
-<p>For this lesson&#x27;s <strong>branch selection, loop decisions, and narrow exception boundaries</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<p>For this lesson&#x27;s <strong>branch selection, loop decisions, and narrow exception boundaries</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
 <h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Print FizzBuzz for every integer from 1 through 30 inclusive. <strong>Rules:</strong> multiples of both 3 and 5 print <code>FizzBuzz</code>; only 3 prints <code>Fizz</code>; only 5 prints <code>Buzz</code>; all others print the number. <strong>Constraints:</strong> use one ordered <code>if</code>/<code>elif</code>/<code>else</code> chain. <strong>Verify:</strong> capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal <code>Fizz</code>, <code>Buzz</code>, <code>FizzBuzz</code>, <code>16</code>, and <code>FizzBuzz</code>.</p>

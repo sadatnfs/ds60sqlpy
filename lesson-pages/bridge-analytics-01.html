@@ -337,7 +337,6 @@
 <pre><code class="language-bash"># macOS/Linux
 .venv/bin/python bridge/professional/solutions/bridge_analytics_01_local_project_solution.py</code></pre>
 <p>The solution builds twice in the same in-memory connection and asserts that the ordered snapshot is identical. Closing the process removes all tables.</p>
-<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: HOW TO RUN --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start at the repository root. The answer-free starter is deliberately safe to run: it prints orientation text and does not call unfinished functions or contact PostgreSQL.</p>
 <pre><code class="language-powershell"># Windows PowerShell
@@ -346,7 +345,7 @@
 <pre><code class="language-bash"># macOS/Linux
 .venv/bin/python bridge/professional/lessons/bridge_analytics_01_local_project.py
 .venv/bin/python -m pytest bridge/professional/tests -q</code></pre>
-<p>Read this guide first, implement one boundary at a time in <code>bridge/professional/lessons/bridge_analytics_01_local_project.py</code>, and use small fakes or recording doubles for the default evidence path. This lesson uses only an in-memory DuckDB database created by the process. Closing the process removes it; do not create or commit a local database file. &lt;!-- END BRIDGE ENRICHMENT: HOW TO RUN --&gt;</p>
+<p>Read this guide first, implement one boundary at a time in <code>bridge/professional/lessons/bridge_analytics_01_local_project.py</code>, and use small fakes or recording doubles for the default evidence path. This lesson uses only an in-memory DuckDB database created by the process. Closing the process removes it; do not create or commit a local database file.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end, you can:</p>
 <ul>
@@ -752,7 +751,6 @@ unit: currency units</code></pre>
 <li><strong>Claiming incremental idempotency from a full rebuild:</strong> stateful incremental behavior needs its own fixtures and watermarks.</li>
 <li><strong>Writing a local <code>.duckdb</code> file by default:</strong> in-memory execution keeps tests isolated and USB-safe.</li>
 </ul>
-<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: ASK CODEX --&gt;</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Use the checked-in <code>guide-ds60sqlpy-learning</code> skill as a tutor, not as an answer generator. The direct catalog prerequisites are <code>bridge-05</code>, <code>python-data-01</code>, <code>sql-analytics-01</code>. The prompt below deliberately names exact paths so a new Codex task can orient itself without guessing.</p>
 <pre><code class="language-text">Tutor me through stable lesson ID bridge-analytics-01: Analytics Engineering, Lineage, and Data Contracts.
@@ -782,7 +780,6 @@ disposable advanced_sql_training database; never ask me to paste the URL.
 Done when every numbered exercise has its own evidence, normal/edge/failure
 behavior is explained in my words, the relevant offline tests pass, and I can
 solve the final transfer problem without opening solutions/.</code></pre>
-<p>&lt;!-- END BRIDGE ENRICHMENT: ASK CODEX --&gt;</p>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Complete the <a href="bridge-analytics-01.html#learner">learner file</a> and add a deliberately failing contract case before reviewing the <a href="bridge-analytics-01.html#solution-2">reference implementation</a> and <a href="bridge-analytics-01.html#solution-1">solution reasoning</a>. Then adapt the same source → staging → intermediate → mart pattern to a small local dataset whose grain and ownership you can state precisely.</p></div>
       </section>
@@ -1197,7 +1194,6 @@ solve the final transfer problem without opening solutions/.</code></pre>
 <li>In-memory DuckDB is portable and fast but does not prove PostgreSQL or cloud warehouse behavior.</li>
 </ul>
 <p>Extend this project only when a new model has a declared grain, dependencies, contract, violation queries, independent reconciliation where applicable, and a deterministic expected change to the final snapshot.</p>
-<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE --&gt;</p>
 <h4 id="solution-1--small-executable-check">Small executable check<a class="heading-anchor" href="#solution-1--small-executable-check" aria-label="Link to this section">#</a></h4>
 <p>The checked-in model graph has a deterministic dependency order:</p>
 <pre><code class="language-python">from bridge.professional.solutions.bridge_analytics_01_local_project_solution import (
@@ -1209,7 +1205,6 @@ solve the final transfer problem without opening solutions/.</code></pre>
 ordered_names = tuple(model.name for model in topological_order(MODELS, source_names=SOURCE_NAMES))
 assert ordered_names[-1] == &quot;mart_daily_revenue&quot;
 assert ordered_names.index(&quot;int_order_revenue&quot;) &lt; ordered_names.index(&quot;mart_daily_revenue&quot;)</code></pre>
-<p>&lt;!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE --&gt;</p>
 <h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
 <p>These walkthroughs map one-for-one to the answer-free learner artifact and companion guide. The executable reference is <code>bridge/professional/solutions/bridge_analytics_01_local_project_solution.py</code>.</p>
 <p><strong>Shared failure rule:</strong> A model can execute successfully while still duplicating grain, drifting schema, misdefining a metric, or failing reconciliation.</p>

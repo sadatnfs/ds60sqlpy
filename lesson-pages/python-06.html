@@ -330,7 +330,6 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 5 (<code>python-05</code>): functions, collection annotations, and contracts.</p>
-<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
@@ -351,8 +350,7 @@
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 6 — lists, tuples, sets, and dictionaries to practice choosing lists, tuples, sets, and dictionaries by semantics and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
-<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Lesson outcome:</strong> use day 6 — lists, tuples, sets, and dictionaries to practice choosing lists, tuples, sets, and dictionaries by semantics and explain the evidence produced by your code.</p>
 <h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>Python&#x27;s core collections answer different questions. A list keeps ordered, possibly repeated values and can change. A tuple is an ordered fixed record-like sequence. A set represents unique hashable members and makes membership tests fast. A dictionary maps unique hashable keys to values.</p>
@@ -409,7 +407,7 @@ totals</code></pre>
 <li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
 </ol>
 <p><strong>Useful alternative:</strong> <code>dict.fromkeys(values)</code> is a compact stable de-duplication technique for hashable values, while an explicit loop adapts to a derived key.</p>
-<p><strong>Boundary to remember:</strong> Nested mutable values, unhashable records, missing keys, empty inputs, and repeated records with the same identity expose collection-policy choices. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Boundary to remember:</strong> Nested mutable values, unhashable records, missing keys, empty inputs, and repeated records with the same identity expose collection-policy choices.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>List:</strong> mutable, ordered sequence that permits duplicates.</li>
@@ -527,8 +525,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li>Choose the right structure for the task.</li>
 <li>Common patterns: frequency count, dedupe, grouping.</li>
 </ul></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
-<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>This is the editable learner artifact for <code>python-06</code>. Read <code>python/ds-60day/companion-guides/day06_data_structures.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
 <p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
 <p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
@@ -730,7 +727,6 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-06-solutions-lists-tuples-sets-dicts">Day 06 — Solutions: Lists, Tuples, Sets, Dicts<a class="heading-anchor" href="#solution-1--day-06-solutions-lists-tuples-sets-dicts" aria-label="Link to this section">#</a></h3>
-<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>choosing lists, tuples, sets, and dictionaries by semantics</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Python&#x27;s core collections answer different questions. A list keeps ordered, possibly repeated values and can change. A tuple is an ordered fixed record-like sequence. A set represents unique hashable members and makes membership tests fast. A dictionary maps unique hashable keys to values.</p>
@@ -745,7 +741,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li><strong>shallow copy:</strong> a new outer container that shares referenced inner objects.</li>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
-<p>For this lesson&#x27;s <strong>choosing lists, tuples, sets, and dictionaries by semantics</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<p>For this lesson&#x27;s <strong>choosing lists, tuples, sets, and dictionaries by semantics</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
 <h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Implement <code>stable_unique(values)</code> for <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;, &#x27;a&#x27;]</code>. <strong>Expected result:</strong> <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;c&#x27;]</code>. <strong>Constraints:</strong> preserve the first occurrence, leave the input unchanged, use a set for membership and a list for output, and state that items must be hashable. <strong>Verify:</strong> test the example, an empty list, and a list with no duplicates.</p>

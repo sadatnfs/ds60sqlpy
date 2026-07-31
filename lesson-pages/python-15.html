@@ -331,7 +331,6 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Days 1–14, especially packages (<code>python-09</code>), pytest (<code>python-10</code>), logging (<code>python-11</code>), and quality tooling (<code>python-14</code>).</p>
-<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
@@ -352,8 +351,7 @@
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 15 — project: a testable cli data tool to practice a small command-line application with separated boundaries and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
-<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Lesson outcome:</strong> use day 15 — project: a testable cli data tool to practice a small command-line application with separated boundaries and explain the evidence produced by your code.</p>
 <h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>A command-line interface (CLI) has three layers: parse external strings, call ordinary Python logic with typed values, then present a result and choose an exit status. Keeping the core logic free from <code>sys.argv</code>, printing, and process exit makes it reusable from tests and notebooks.</p>
@@ -413,7 +411,7 @@ select_names(args.names, limit=args.limit)</code></pre>
 <li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
 </ol>
 <p><strong>Useful alternative:</strong> A notebook suits interactive exploration; a CLI suits repeatable parameterized execution; a library function should hold shared core logic.</p>
-<p><strong>Boundary to remember:</strong> Paths with spaces, missing files, invalid encodings, empty input, existing output files, and Windows shell quoting need tests. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Boundary to remember:</strong> Paths with spaces, missing files, invalid encodings, empty input, existing output files, and Windows shell quoting need tests.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>CLI:</strong> command-line interface.</li>
@@ -543,8 +541,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-15-project-cli-data-tool">Day 15 — Project: CLI data tool<a class="heading-anchor" href="#learner--cell-1--day-15-project-cli-data-tool" aria-label="Link to this section">#</a></h3>
 <p>Build a small command-line script that ingests a CSV, cleans it, and outputs a summary with tests and linting.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
-<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>This is the editable learner artifact for <code>python-15</code>. Read <code>python/ds-60day/companion-guides/day15_cli_project.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
 <p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
 <p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
@@ -800,7 +797,6 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-15-solutions-cli-data-tool-project">Day 15 — Solutions: CLI Data Tool Project<a class="heading-anchor" href="#solution-1--day-15-solutions-cli-data-tool-project" aria-label="Link to this section">#</a></h3>
-<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>a small command-line application with separated boundaries</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>A command-line interface (CLI) has three layers: parse external strings, call ordinary Python logic with typed values, then present a result and choose an exit status. Keeping the core logic free from <code>sys.argv</code>, printing, and process exit makes it reusable from tests and notebooks.</p>
@@ -815,7 +811,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li><strong>entry point:</strong> the small boundary that starts application execution.</li>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
-<p>For this lesson&#x27;s <strong>a small command-line application with separated boundaries</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<p>For this lesson&#x27;s <strong>a small command-line application with separated boundaries</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
 <h4 id="solution-1--exercises-1-5-worked-answers">Exercises 1–5 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-5-worked-answers" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. <strong>Architecture:</strong> <code>build_parser()</code>, pure core function(s), and <code>main(argv=None) -&gt; int</code>. <strong>Constraints:</strong> use <code>pathlib</code>, UTF-8, no notebook-only state, and no hard-coded absolute paths. <strong>Verify:</strong> assert <code>--help</code> exits <code>0</code> and names the command/options, a valid fixture exits <code>0</code> with the expected bounded output, and invalid input exits nonzero with a useful stderr message.</p>

@@ -384,7 +384,6 @@
 <p>macOS/Linux:</p>
 <pre><code class="language-bash">.venv/bin/python python/professional/solutions/py_svc_01_reliable_http_clients_solution.py</code></pre>
 <p>Inspect the printed first log event. Its authorization value must be <code>&lt;redacted&gt;</code>.</p>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
@@ -442,7 +441,6 @@ for _ in range(10):
 <p><strong>Common mistake:</strong> Retrying every exception with a fresh idempotency key and a full per-attempt timeout.</p>
 <p><strong>Diagnostic:</strong> Use a scripted fake to record attempt count, request identities, timeouts, delays, response closure, cursor history, and redacted log fields.</p>
 <p><strong>Transfer question:</strong> How would the policy change for a streaming download that may fail after bytes were consumed?</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--exercise-1-classify-status">Exercise 1 — classify status<a class="heading-anchor" href="#guide--exercise-1-classify-status" aria-label="Link to this section">#</a></h5>
 <p>Implement <code>classify_status</code>. Treat 2xx as success and 408/425/429/500/502/503/504 as retryable. Other valid statuses are permanent for this course policy. Reject impossible values.</p>
@@ -955,7 +953,6 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h4 id="solution-1--expected-results">Expected results<a class="heading-anchor" href="#solution-1--expected-results" aria-label="Link to this section">#</a></h4>
 <p>Tests prove that only permitted failures replay, attempts and delays are bounded, 429 delay is honored, identities are stable, timeout errors retain context, pagination terminates or fails safely, and no test credential reaches logs. All behavior is local and deterministic.</p>
 <hr>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--reasoning-before-implementation">Reasoning before implementation<a class="heading-anchor" href="#solution-1--reasoning-before-implementation" aria-label="Link to this section">#</a></h4>
 <p>A small transport seam exposes every attempt, allowing policy tests to prove timing, replay, pagination, validation, and secrecy without a network.</p>
 <ol>
@@ -987,7 +984,6 @@ print(decisions)
 assert decisions == [True, False, True, False]</code></pre>
 <p><strong>Expected observation:</strong> A transient status is insufficient for an unsafe mutation without a stable idempotency identity.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-svc-01.html#solution-2"><code>py_svc_01_reliable_http_clients_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
 <h5 id="solution-1--exercise-1-classify-status">Exercise 1 — classify status<a class="heading-anchor" href="#solution-1--exercise-1-classify-status" aria-label="Link to this section">#</a></h5>

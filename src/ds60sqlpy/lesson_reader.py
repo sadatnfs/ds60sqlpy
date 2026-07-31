@@ -45,6 +45,7 @@ COURSE_GUIDE_REFERENCE_PATHS = (
 )
 _REFERENCE_SUFFIXES = {".md", ".sql"}
 _FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})\s*([^`]*)$")
+_FENCE_LINE_RE = re.compile(r"^[ \t]*(?:`{3,}|~{3,})", re.MULTILINE)
 _HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
 _LIST_RE = re.compile(r"^\s*(?P<marker>[-+*]|\d+[.)])\s+(?P<body>.*)$")
 _TABLE_SEPARATOR_RE = re.compile(r"^:?-{3,}:?$")
@@ -405,6 +406,82 @@ def _starts_block(lines: list[str], index: int) -> bool:
     )
 
 
+def _strip_html_comments_outside_fences(source: str) -> str:
+    """Remove authoring-only HTML comments without changing fenced examples.
+
+    Markdown comments are useful as stable boundaries for curriculum-maintenance
+    scripts, but they are not learner content. The reader intentionally escapes
+    raw HTML, so leaving comments in the input would display ``<!-- ... -->`` as
+    prose. Strip them before block parsing while preserving comments inside
+    fenced code, where they are part of an example the learner should see.
+    """
+
+    normalized = source.replace("\r\n", "\n").replace("\r", "\n")
+    output: list[str] = []
+    fence_marker: str | None = None
+    position = 0
+
+    while position < len(normalized):
+        at_line_start = position == 0 or normalized[position - 1] == "\n"
+        if at_line_start:
+            line_end = normalized.find("\n", position)
+            if line_end == -1:
+                line_end = len(normalized)
+            line = normalized[position:line_end]
+
+            if fence_marker is not None:
+                output.append(line)
+                if line_end < len(normalized):
+                    output.append("\n")
+                if line.lstrip().startswith(fence_marker[0] * len(fence_marker)):
+                    fence_marker = None
+                position = line_end + (line_end < len(normalized))
+                continue
+
+            fence = _FENCE_RE.match(line)
+            if fence:
+                fence_marker = fence.group(1)
+                output.append(line)
+                if line_end < len(normalized):
+                    output.append("\n")
+                position = line_end + (line_end < len(normalized))
+                continue
+
+        if normalized[position] == "`":
+            marker_end = position
+            while marker_end < len(normalized) and normalized[marker_end] == "`":
+                marker_end += 1
+            marker = normalized[position:marker_end]
+            line_end = normalized.find("\n", marker_end)
+            search_end = len(normalized) if line_end == -1 else line_end
+            closing = normalized.find(marker, marker_end, search_end)
+            if closing != -1:
+                closing += len(marker)
+                output.append(normalized[position:closing])
+                position = closing
+                continue
+
+        if normalized.startswith("<!--", position):
+            closing = normalized.find("-->", position + 4)
+            nested_opening = normalized.find("<!--", position + 4)
+            crosses_fence = (
+                closing != -1
+                and _FENCE_LINE_RE.search(normalized, position + 4, closing) is not None
+            )
+            if (
+                closing != -1
+                and (nested_opening == -1 or nested_opening > closing)
+                and not crosses_fence
+            ):
+                position = closing + 3
+                continue
+
+        output.append(normalized[position])
+        position += 1
+
+    return "".join(output)
+
+
 def render_markdown(
     source: str,
     *,
@@ -414,7 +491,7 @@ def render_markdown(
 ) -> str:
     """Render a conservative Markdown subset as safe, readable HTML."""
 
-    lines = source.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    lines = _strip_html_comments_outside_fences(source).split("\n")
     output: list[str] = []
     heading_ids = HeadingIds()
     index = 0

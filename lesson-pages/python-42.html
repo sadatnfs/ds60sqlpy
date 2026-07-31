@@ -393,7 +393,6 @@ for k in range(2, 7):
     labels = model.fit_predict(X_scaled)
     print(k, model.inertia_, silhouette_score(X_scaled, labels))</code></pre>
 <p>Scaling is appropriate when each numeric dimension should contribute comparably to Euclidean distance. Do not scale mechanically when original distances have a meaningful common unit.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 42 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -489,7 +488,6 @@ assert {200, 201}.issubset(set(most_unusual))</code></pre>
 <p><strong>Mistake:</strong> Naming clusters as real customer types or anomalies as fraud solely because the algorithm produced labels.</p>
 <p><strong>Debug it deliberately:</strong> Check scaling, seed/init stability, cluster sizes, centroid movement, score distribution, synthetic controls, and representative reviewed cases.</p>
 <p><strong>Stop condition:</strong> Do not operationalize unsupervised labels without a semantic validation and false-positive handling plan.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Try several values of <code>k</code> and plot inertia versus <code>k</code> (the elbow plot).</li>
@@ -906,7 +904,6 @@ lof_rate = (pred_lof == -1).mean()
 <li>Always validate detected anomalies with domain knowledge; synthetic labels can be used for benchmarking if available</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -921,7 +918,6 @@ lof_rate = (pred_lof == -1).mean()
 <p><strong>Edge case to test:</strong> Duplicate points, all-identical data, fewer rows than clusters, high-dimensional distance concentration, or changing contamination break naive interpretations.</p>
 <p><strong>Evidence of correctness:</strong> Compare scaled/unscaled results, repeat seeds, report cluster sizes and stability, retain continuous anomaly scores, and review synthetic plus domain controls.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

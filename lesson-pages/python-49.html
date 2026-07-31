@@ -394,7 +394,6 @@ sentiment = pipeline(
 for text in [&quot;I love this course!&quot;, &quot;This is terrible...&quot;]:
     print(text, sentiment(text))</code></pre>
 <p>Record the exact model identifier and package version. A confidence-like score is not automatically calibrated probability, and sentiment labels may fail on sarcasm, dialect, negation, or domain-specific language.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 49 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -475,7 +474,6 @@ assert token_ids[-1] == vocabulary[&quot;[UNK]&quot;]</code></pre>
 <p><strong>Mistake:</strong> Calling an unpinned default pipeline that downloads a model, then interpreting its label and score without reading the model contract.</p>
 <p><strong>Debug it deliberately:</strong> Record model/tokenizer IDs and revisions, cache status, token IDs/offsets, truncation length, label mapping, and evaluation slices.</p>
 <p><strong>Stop condition:</strong> Do not send sensitive learner text to a remote model or persist raw text/logits without explicit purpose, access, and retention rules.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Try a zero-shot-classification pipeline with your own candidate labels.</li>
@@ -999,7 +997,6 @@ for mid, start, end in matcher(doc):
 <li>For long docs, prefer nlp.pipe for speed</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -1014,7 +1011,6 @@ for mid, start, end in matcher(doc):
 <p><strong>Edge case to test:</strong> Empty/long text, unusual Unicode, unsupported language, label-map mismatch, missing cache, and domain shift require tests.</p>
 <p><strong>Evidence of correctness:</strong> Reconstruct text from offsets, test unknown/truncation behavior, pin and record model artifacts, evaluate task-specific slices, and prove raw sensitive text is not leaked.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
@@ -1295,7 +1291,6 @@ for mid, start, end in matcher(doc):
 <li>For long docs, prefer nlp.pipe for speed</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-7--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-7--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -1310,7 +1305,6 @@ for mid, start, end in matcher(doc):
 <p><strong>Edge case to test:</strong> Empty/long text, unusual Unicode, unsupported language, label-map mismatch, missing cache, and domain shift require tests.</p>
 <p><strong>Evidence of correctness:</strong> Reconstruct text from offsets, test unknown/truncation behavior, pin and record model artifacts, evaluate task-specific slices, and prove raw sensitive text is not leaked.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-7--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-7--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-7--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

@@ -395,7 +395,6 @@ model = Pipeline(
 model.fit(X_train, y_train)
 print(model.score(X_test, y_test))</code></pre>
 <p><code>StandardScaler.fit</code> sees only <code>X_train</code>. Calling <code>fit_transform</code> on the entire dataset before splitting would leak global means and variances into the test evaluation.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 34 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -488,7 +487,6 @@ assert transformed[0].sum() == 0</code></pre>
 <p><strong>Mistake:</strong> Calling <code>fit_transform</code> on the entire dataset before splitting or cross-validation.</p>
 <p><strong>Debug it deliberately:</strong> Inspect every learned underscore attribute and ask which row IDs contributed to it; wrap all learned preprocessing in the pipeline.</p>
 <p><strong>Stop condition:</strong> Do not report evaluation results until the split happened before fitting and the complete feature pipeline was evaluated.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Swap <code>LinearRegression</code> for <code>Ridge</code> and compare test scores.</li>
@@ -889,7 +887,6 @@ coefs_scaled, coefs_noscale</code></pre>
 <li>Try regularized models (Ridge/Lasso) and select hyperparameters via CV</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -904,7 +901,6 @@ coefs_scaled, coefs_noscale</code></pre>
 <p><strong>Edge case to test:</strong> Unknown categories, missing columns, changed column order, and sparse/dense output expectations must be part of the input contract.</p>
 <p><strong>Evidence of correctness:</strong> Inspect fitted step attributes, prove test rows did not enter learned preprocessing, verify feature shape/order, and execute prediction on an unknown-category boundary.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

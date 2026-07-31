@@ -331,7 +331,6 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>None. Start with the operating-system setup in <a href="../reference-pages/docs/setup/windows.md.html"><code>docs/setup/windows.md</code></a> or the corresponding macOS/Linux guide. Python 3.12 is the canonical version; 3.11 is also supported.</p>
-<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
@@ -352,8 +351,7 @@
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 1 — setup, repl, virtual environments, and packages to practice execution contexts and a trustworthy course environment and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
-<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Lesson outcome:</strong> use day 1 — setup, repl, virtual environments, and packages to practice execution contexts and a trustworthy course environment and explain the evidence produced by your code.</p>
 <h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>Python code always runs inside a particular <strong>interpreter process</strong>. That process has a version, a filesystem location, an installed package set, and a current working directory. A terminal REPL, a script, and a notebook may look like three different tools, but each eventually asks an interpreter to execute Python.</p>
@@ -412,7 +410,7 @@ message</code></pre>
 <li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
 </ol>
 <p><strong>Useful alternative:</strong> A one-line REPL experiment is fast; a saved script is reproducible; a notebook is best when prose, code, and observations belong together.</p>
-<p><strong>Boundary to remember:</strong> Paths differ across Windows, macOS, and Linux, so verify meaningful path components instead of hard-coding an entire developer-specific path. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Boundary to remember:</strong> Paths differ across Windows, macOS, and Linux, so verify meaningful path components instead of hard-coding an entire developer-specific path.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Interpreter:</strong> the program that executes Python code.</li>
@@ -551,8 +549,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p>Prerequisites: None</p>
 <p>At the end of this notebook you will be able to create a clean environment, identify its interpreter, and run code in Jupyter.</p>
 <p>A brand-new machine needs a connection for tools and packages. The lesson itself runs offline after that documented bootstrap.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
-<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>This is the editable learner artifact for <code>python-01</code>. Read <code>python/ds-60day/companion-guides/day01_setup_and_repl.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
 <p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
 <p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
@@ -854,7 +851,6 @@ if __name__ == &#x27;__main__&#x27;:
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-01-solutions-setup-repl-virtual-envs-package-management">Day 01 — Solutions: Setup, REPL, Virtual Envs, Package Management<a class="heading-anchor" href="#solution-1--day-01-solutions-setup-repl-virtual-envs-package-management" aria-label="Link to this section">#</a></h3>
-<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>execution contexts and a trustworthy course environment</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Python code always runs inside a particular <strong>interpreter process</strong>. That process has a version, a filesystem location, an installed package set, and a current working directory. A terminal REPL, a script, and a notebook may look like three different tools, but each eventually asks an interpreter to execute Python.</p>
@@ -869,7 +865,7 @@ if __name__ == &#x27;__main__&#x27;:
 <li><strong>working directory:</strong> the base directory used to resolve relative paths.</li>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
-<p>For this lesson&#x27;s <strong>execution contexts and a trustworthy course environment</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<p>For this lesson&#x27;s <strong>execution contexts and a trustworthy course environment</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
 <h4 id="solution-1--exercises-1-5-worked-answers">Exercises 1–5 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-5-worked-answers" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Run the repository setup, then run <code>scripts/course.py doctor</code> with the repository interpreter. <strong>Required evidence:</strong> copy the Python version and interpreter path from the report. <strong>Success:</strong> the version is 3.11 or 3.12, the path belongs to this repository&#x27;s <code>.venv</code>, and the doctor does not report a blocking core failure. <strong>Constraint:</strong> do not install or delete anything while diagnosing. <strong>Verify:</strong> Save the doctor output showing Python 3.11/3.12 and an interpreter path inside this repository&#x27;s <code>.venv</code>; record that no blocking core check failed.</p>

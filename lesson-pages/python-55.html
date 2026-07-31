@@ -401,7 +401,6 @@ curl -X POST http://127.0.0.1:8000/predict \
 $body = @{ features = @(5.1, 3.5, 1.4, 0.2) } | ConvertTo-Json
 Invoke-RestMethod -Method Post -Uri &#x27;http://127.0.0.1:8000/predict&#x27; `
   -ContentType &#x27;application/json&#x27; -Body $body</code></pre>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 55 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -504,7 +503,6 @@ assert during_dependency_outage == {&quot;healthy&quot;: True, &quot;ready&quot;
 <p><strong>Mistake:</strong> Copying the whole repository into an image, baking credentials into layers, or binding a development server publicly.</p>
 <p><strong>Debug it deliberately:</strong> Inspect build context, image history/SBOM, user, exposed ports, process signals, environment, artifact hash, and health/readiness responses.</p>
 <p><strong>Stop condition:</strong> Do not publish an image until secrets, base/dependency provenance, non-root runtime, probes, resource limits, and rollback are reviewed.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Create a slim dependency file containing only direct API runtime needs.</li>
@@ -952,7 +950,6 @@ CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0
 <li>For compiled packages, install compilers only in the builder stage</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -967,7 +964,6 @@ CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0
 <p><strong>Edge case to test:</strong> Architecture mismatch, missing system libraries, read-only filesystem, signal handling, corrupt model artifact, and absent Docker daemon require checks.</p>
 <p><strong>Evidence of correctness:</strong> Inspect context and image history, scan dependencies, run as non-root, test valid/invalid requests and signals, distinguish health/readiness, and rebuild deterministically.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
@@ -1132,7 +1128,6 @@ CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0
 <li>For compiled packages, install compilers only in the builder stage</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-5--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-5--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -1147,7 +1142,6 @@ CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0
 <p><strong>Edge case to test:</strong> Architecture mismatch, missing system libraries, read-only filesystem, signal handling, corrupt model artifact, and absent Docker daemon require checks.</p>
 <p><strong>Evidence of correctness:</strong> Inspect context and image history, scan dependencies, run as non-root, test valid/invalid requests and signals, distinguish health/readiness, and rebuild deterministically.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-5--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-5--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-5--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-5--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

@@ -330,7 +330,6 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 13 (<code>python-13</code>), Day 10 testing (<code>python-10</code>), and Day 5 type hints (<code>python-05</code>).</p>
-<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
@@ -351,8 +350,7 @@
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 14 — code quality with ruff, mypy, and pytest to practice automated formatting, linting, and static type feedback and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
-<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Lesson outcome:</strong> use day 14 — code quality with ruff, mypy, and pytest to practice automated formatting, linting, and static type feedback and explain the evidence produced by your code.</p>
 <h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>Code-quality tools answer different questions. A formatter applies one consistent layout. A linter detects selected suspicious or inconsistent patterns. A static type checker compares annotated contracts without executing the program. Tests still check runtime behavior; no one tool replaces the others.</p>
@@ -407,7 +405,7 @@ round(discounted_total, 2)</code></pre>
 <li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
 </ol>
 <p><strong>Useful alternative:</strong> Editor-on-save feedback is fast, while command-line checks are reproducible; continuous integration should run the same checked-in configuration.</p>
-<p><strong>Boundary to remember:</strong> Generated files, notebook code, untyped third-party libraries, version drift, and broad suppressions can create misleading results. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Boundary to remember:</strong> Generated files, notebook code, untyped third-party libraries, version drift, and broad suppressions can create misleading results.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Formatter:</strong> rewrites layout consistently.</li>
@@ -532,8 +530,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li>Use mypy to check type contracts before runtime.</li>
 <li>Distinguish formatting, linting, type checking, and tests.</li>
 </ul></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
-<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>This is the editable learner artifact for <code>python-14</code>. Read <code>python/ds-60day/companion-guides/day14_code_quality_tooling.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
 <p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
 <p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
@@ -734,7 +731,6 @@ python -m mypy .</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-14-solutions-code-quality-with-ruff-and-mypy">Day 14 — Solutions: Code Quality with Ruff and mypy<a class="heading-anchor" href="#solution-1--day-14-solutions-code-quality-with-ruff-and-mypy" aria-label="Link to this section">#</a></h3>
-<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>automated formatting, linting, and static type feedback</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Code-quality tools answer different questions. A formatter applies one consistent layout. A linter detects selected suspicious or inconsistent patterns. A static type checker compares annotated contracts without executing the program. Tests still check runtime behavior; no one tool replaces the others.</p>
@@ -749,7 +745,7 @@ python -m mypy .</code></pre>
 <li><strong>suppression:</strong> an explicit request to ignore one diagnostic, ideally with rationale.</li>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
-<p>For this lesson&#x27;s <strong>automated formatting, linting, and static type feedback</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<p>For this lesson&#x27;s <strong>automated formatting, linting, and static type feedback</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
 <h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Run Ruff formatting and lint checks on a small intentionally messy Python file. <strong>Evidence:</strong> record at least one formatter change and one lint diagnostic with its rule code. <strong>Constraints:</strong> understand each automatic fix, do not run broad fixes over unrelated repository files, and delete only the scratch file you created. <strong>Verify:</strong> both <code>ruff format --check</code> and <code>ruff check</code> pass afterward.</p>

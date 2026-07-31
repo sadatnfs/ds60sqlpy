@@ -398,7 +398,6 @@ for _ in range(200):
     optimizer.step()
     history.append(loss.item())</code></pre>
 <p>The seed controls parameter initialization and generated noise on this CPU path. Hardware and library differences can still affect exact floating-point results, so reproducibility means bounded, explainable variation—not bitwise identity everywhere.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 46 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -484,7 +483,6 @@ assert (first, accumulated, cleared) == (4.0, 8.0, 0.0)</code></pre>
 <p><strong>Mistake:</strong> Forgetting <code>zero_grad</code>, calling <code>step</code> before <code>backward</code>, or evaluating with dropout active and gradient tracking enabled.</p>
 <p><strong>Debug it deliberately:</strong> Print tensor shape/dtype/device, <code>requires_grad</code>, loss value, gradient norms, parameter deltas, and train/validation curves for one tiny batch.</p>
 <p><strong>Stop condition:</strong> Stop training when loss is non-finite, gradients explode/vanish, validation degrades, or the data/label shape contract is uncertain.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Plot the loss over epochs.</li>
@@ -994,7 +992,6 @@ for xb, yb in tr_dl:
 <li>Combine proper nonlinearity, init, normalization, residuals, and clipping for stable deep training.</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -1009,7 +1006,6 @@ for xb, yb in tr_dl:
 <p><strong>Edge case to test:</strong> Wrong dtype/device, unintended broadcasting, detached tensors, retained graphs, or non-finite loss can make training fail or silently optimize the wrong quantity.</p>
 <p><strong>Evidence of correctness:</strong> Check a hand-computable gradient, assert shapes/dtypes, show parameters change after one step, separate train/eval modes, and report both training and validation behavior.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
@@ -1298,7 +1294,6 @@ assert abs(epoch_loss - direct_loss) &lt; 1e-4 * max(1.0, abs(direct_loss))</cod
 <li>Combine proper nonlinearity, init, normalization, residuals, and clipping for stable deep training.</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-9--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-9--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -1313,7 +1308,6 @@ assert abs(epoch_loss - direct_loss) &lt; 1e-4 * max(1.0, abs(direct_loss))</cod
 <p><strong>Edge case to test:</strong> Wrong dtype/device, unintended broadcasting, detached tensors, retained graphs, or non-finite loss can make training fail or silently optimize the wrong quantity.</p>
 <p><strong>Evidence of correctness:</strong> Check a hand-computable gradient, assert shapes/dtypes, show parameters change after one step, separate train/eval modes, and report both training and validation behavior.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-9--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-9--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-9--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

@@ -423,7 +423,6 @@ pipeline = make_pipeline(
     LogisticRegression(max_iter=1_000),
 )</code></pre>
 <p>Fit and serialize this complete pipeline, not separately transformed arrays. A future input must pass through the exact fitted preprocessing.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 45 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -532,7 +531,6 @@ assert all(gates.values())</code></pre>
 <p><strong>Mistake:</strong> Treating a high notebook score as the project outcome while omitting baseline, leakage audit, artifact reload, and limitations.</p>
 <p><strong>Debug it deliberately:</strong> Trace every claim backward to metric rows, split, feature pipeline, data version, environment, and command; rerun in a fresh kernel/process.</p>
 <p><strong>Stop condition:</strong> Do not promote a project when a gate is unknown, final evaluation influenced iteration, or the intended decision and harm boundaries are vague.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>The notebook&#x27;s project checklist is the exercise:</p>
 <ol>
@@ -1096,7 +1094,6 @@ curl -s -X POST http://127.0.0.1:8000/predict -H &#x27;Content-Type: application
 </ul>
 <hr>
 <p><strong>Portable worker default:</strong> These reference runs use <code>n_jobs=1</code> so they behave predictably on Windows, CI runners, and constrained notebook environments. After correctness is established, benchmark a larger worker count on your own workload rather than assuming <code>n_jobs=1</code> is faster.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -1111,7 +1108,6 @@ curl -s -X POST http://127.0.0.1:8000/predict -H &#x27;Content-Type: application
 <p><strong>Edge case to test:</strong> Missing categories, changed schema, data drift, tiny slices, artifact incompatibility, and unavailable first-run Seaborn cache need explicit behavior.</p>
 <p><strong>Evidence of correctness:</strong> Reproduce from a fresh environment, validate data and split hashes, beat a same-split baseline, reload the complete pipeline, test slices, and connect every claim to an artifact.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

@@ -390,7 +390,6 @@ print(frame.npartitions, lazy_mean)
 result = lazy_mean.compute()
 print(type(result), result.head())</code></pre>
 <p>Nothing expensive happens until an execution trigger such as <code>compute</code>, <code>persist</code>, or a write. Inspect the task and expected output size before triggering it.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 52 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -485,7 +484,6 @@ assert result == 42 and calls == [21]</code></pre>
 <p><strong>Mistake:</strong> Calling <code>compute()</code> after every transformation or persisting a collection larger than available memory.</p>
 <p><strong>Debug it deliberately:</strong> Inspect partition count/sizes, graph task count, shuffle boundaries, memory, and final result size; benchmark against pandas on the same data.</p>
 <p><strong>Stop condition:</strong> Do not claim scalability from elapsed time on one tiny demo or create partitions without a memory and overhead rationale.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Read a large local CSV with Dask and compute groupby aggregations.</li>
@@ -954,7 +952,6 @@ finally:
 <li>Close client when done to free resources: <code>client.close()</code></li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -969,7 +966,6 @@ finally:
 <p><strong>Edge case to test:</strong> Skewed keys, global sorts/shuffles, dtype inference drift, empty chunks, and a final result too large for memory defeat naive scaling.</p>
 <p><strong>Evidence of correctness:</strong> Reconcile results with pandas/standard library, inspect graph and partition sizes, measure repeated runs, bound memory/final output, and prove reducers are associative.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
@@ -1156,7 +1152,6 @@ finally:
 <li>Close client when done to free resources: <code>client.close()</code></li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-7--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-7--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -1171,7 +1166,6 @@ finally:
 <p><strong>Edge case to test:</strong> Skewed keys, global sorts/shuffles, dtype inference drift, empty chunks, and a final result too large for memory defeat naive scaling.</p>
 <p><strong>Evidence of correctness:</strong> Reconcile results with pandas/standard library, inspect graph and partition sizes, measure repeated runs, bound memory/final output, and prove reducers are associative.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-7--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-7--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-7--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

@@ -380,7 +380,6 @@
 <li>Inspect or retain the sdist when downstream builders need source.</li>
 <li>Do not assume that successfully importing from the checkout proves either artifact works.</li>
 </ul>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
@@ -427,7 +426,6 @@ assert len(digest) == 64</code></pre>
 <p><strong>Common mistake:</strong> Running an import from the repo root and concluding that the wheel contains the right packages and data.</p>
 <p><strong>Diagnostic:</strong> Inspect wheel ZIP paths/METADATA/RECORD, install into a new environment, change the working directory, and print <code>module.<strong>file</strong></code> plus distribution version.</p>
 <p><strong>Transfer question:</strong> What extra checks would a package with a console script, typed marker, and package data need before publication?</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <p>Work in <a href="python-pro-01.html#learner"><code>lessons/py_pro_01_package_engineering.py</code></a> or a copy under <code>.learning/</code>.</p>
 <h5 id="guide--exercise-1-classify-artifacts">Exercise 1 — classify artifacts<a class="heading-anchor" href="#guide--exercise-1-classify-artifacts" aria-label="Link to this section">#</a></h5>
@@ -892,7 +890,6 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h4 id="solution-1--expected-result">Expected result<a class="heading-anchor" href="#solution-1--expected-result" aria-label="Link to this section">#</a></h4>
 <p>With local build tools installed, the solution reports one wheel, one sdist, an import path under a temporary <code>site</code> directory, version <code>0.1.0</code>, console script <code>ds60-greet</code>, and <code>Hello, wheel!</code>. Without those optional tools, it identifies the missing bootstrap dependency without attempting a download.</p>
 <hr>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--reasoning-before-implementation">Reasoning before implementation<a class="heading-anchor" href="#solution-1--reasoning-before-implementation" aria-label="Link to this section">#</a></h4>
 <p>The reference workflow separates source, build, artifact inspection, installation, and runtime proof so each failure has a clear owner.</p>
 <ol>
@@ -917,7 +914,6 @@ assert distribution_name.replace(&quot;-&quot;, &quot;_&quot;) != import_name
 print(&quot;installed import available:&quot;, importlib.util.find_spec(import_name) is not None)</code></pre>
 <p><strong>Expected observation:</strong> Installer and import identifiers can differ; availability must be checked through the intended interface.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-pro-01.html#solution-2"><code>py_pro_01_package_engineering_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
 <h5 id="solution-1--exercise-1-classify-artifacts">Exercise 1 — classify artifacts<a class="heading-anchor" href="#solution-1--exercise-1-classify-artifacts" aria-label="Link to this section">#</a></h5>

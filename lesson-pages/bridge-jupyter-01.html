@@ -353,14 +353,13 @@ code .</code></pre>
 <pre><code class="language-bash"># macOS/Linux, after setting DS60_DATABASE_URL
 .venv/bin/python -m jupyter lab</code></pre>
 <p>Do not print the environment value, paste it into a cell, save it in notebook output, or commit a credential file.</p>
-<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: HOW TO RUN --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>From the repository root, complete the Windows-first advanced setup with <code>&amp; .\scripts\bootstrap_windows.ps1 -Profile Advanced</code> (or <code>bash scripts/setup.sh --advanced</code> on macOS/Linux).</li>
 <li>Start PostgreSQL only for the live cells, reset the disposable <code>advanced_sql_training</code> database, and set <code>DS60_DATABASE_URL</code> in the same shell that launches VS Code or JupyterLab.</li>
 <li>Open <code>bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb</code>, select the <code>ds60sqlpy</code> kernel, and run cells from top to bottom. Never paste or display the connection URL in a cell.</li>
 <li>If PostgreSQL is unavailable, complete every static review, prediction, parameter-safety, and notebook-hygiene exercise offline. Live behavior is optional evidence, not a completion requirement.</li>
-<li>Keep outputs clear before committing. The completed notebook under <code>solutions/</code> stays closed until the attempt and evidence phases are done. &lt;!-- END BRIDGE ENRICHMENT: HOW TO RUN --&gt;</li>
+<li>Keep outputs clear before committing. The completed notebook under <code>solutions/</code> stays closed until the attempt and evidence phases are done.</li>
 </ol>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end, you can:</p>
@@ -697,7 +696,6 @@ frame = %sql SELECT customer_id, full_name FROM training.customers ORDER BY cust
 <li><strong>Assuming <code>%sql --close</code> disposes every resource:</strong> explicitly dispose the SQLAlchemy engine as well.</li>
 <li><strong>Installing from a notebook:</strong> <code>%pip</code> mutates the environment and may require a kernel restart. Use repository setup while connected.</li>
 </ul>
-<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: ASK CODEX --&gt;</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Use the checked-in <code>guide-ds60sqlpy-learning</code> skill as a tutor, not as an answer generator. The direct catalog prerequisites are <code>python-18</code>, <code>sql-15</code>, <code>bridge-03</code>. The prompt below deliberately names exact paths so a new Codex task can orient itself without guessing.</p>
 <pre><code class="language-text">Tutor me through stable lesson ID bridge-jupyter-01: PostgreSQL in Jupyter with SQL Magics.
@@ -727,7 +725,6 @@ disposable advanced_sql_training database; never ask me to paste the URL.
 Done when every numbered exercise has its own evidence, normal/edge/failure
 behavior is explained in my words, the relevant offline tests pass, and I can
 solve the final transfer problem without opening solutions/.</code></pre>
-<p>&lt;!-- END BRIDGE ENRICHMENT: ASK CODEX --&gt;</p>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Attempt the <a href="bridge-jupyter-01.html#learner">learner notebook</a> before reviewing the <a href="bridge-jupyter-01.html#solution-2">completed notebook</a> and <a href="bridge-jupyter-01.html#solution-1">solution reasoning</a>. Then use Bridge Days 3–5 to move a reusable query behind a typed, tested Psycopg boundary, or continue to BRIDGE-OPS-01 for migration delivery and operational evidence.</p></div>
       </section>
@@ -1083,7 +1080,6 @@ solve the final transfer problem without opening solutions/.</code></pre>
 <li>A static identifier is intentionally less flexible. The reduced attack and review surface is usually desirable during exploration.</li>
 </ul>
 <p>The structural tests verify metadata, clean execution state, tag coverage, required concepts, named parameters, and prohibited credential/setup patterns. Only an opt-in live run can prove the local PostgreSQL and JupySQL integration.</p>
-<p>&lt;!-- BEGIN BRIDGE ENRICHMENT: SOLUTION EXAMPLE --&gt;</p>
 <h4 id="solution-1--small-query-check">Small query check<a class="heading-anchor" href="#solution-1--small-query-check" aria-label="Link to this section">#</a></h4>
 <p>The completed notebook keeps changing data in named parameters and keeps identifiers static:</p>
 <pre><code class="language-sql">SELECT customer_id, full_name
@@ -1091,7 +1087,7 @@ FROM training.customers
 WHERE country = :exercise_country
 ORDER BY customer_id
 LIMIT 10;</code></pre>
-<p>Before running it, define <code>exercise_country</code> in a Python cell. The variable&#x27;s value must not be pasted into the SQL source or displayed as connection text. &lt;!-- END BRIDGE ENRICHMENT: SOLUTION EXAMPLE --&gt;</p>
+<p>Before running it, define <code>exercise_country</code> in a Python cell. The variable&#x27;s value must not be pasted into the SQL source or displayed as connection text.</p>
 <h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
 <p>These walkthroughs map one-for-one to the answer-free learner artifact and companion guide. The executable reference is <code>bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solution.ipynb</code>.</p>
 <p><strong>Shared failure rule:</strong> Notebook output, connection displays, Jinja rendering, or unbounded result materialization can leak secrets or turn exploration into unsafe application behavior.</p>

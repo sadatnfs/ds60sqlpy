@@ -372,7 +372,6 @@ NonBlankText      -&gt; descriptor class/instance access
 ApiRecord         -&gt; cooperative super() through its MRO
 Handler           -&gt; __init_subclass__ registry</code></pre>
 <p>Static checking catches impossible uses before execution. Runtime code still validates text, schemas, transaction state, and descriptor assignments.</p>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
@@ -425,7 +424,6 @@ except StopIteration:
 <p><strong>Common mistake:</strong> Assuming <code>isinstance</code> with a runtime Protocol validates generic arguments or decoded field types.</p>
 <p><strong>Diagnostic:</strong> Run mypy/pyright on intended and intentionally invalid uses, then separately test runtime boundary validation and every data-model lifecycle edge.</p>
 <p><strong>Transfer question:</strong> How would a read-only covariant repository change if it gained a <code>save(value)</code> method?</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--1-complete-and-type-the-overloaded-parser">1. Complete and type the overloaded parser<a class="heading-anchor" href="#guide--1-complete-and-type-the-overloaded-parser" aria-label="Link to this section">#</a></h5>
 <p>Implement the three promised return behaviors. Reject boolean text other than <code>true</code> and <code>false</code>. In VS Code, inspect the inferred type of:</p>
@@ -850,7 +848,6 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p>Metaclasses can customize class creation, but they complicate inheritance and tooling. The solution uses <code><strong>init_subclass</strong></code> for a small registry, which is usually sufficient. Metaclasses remain appropriate for framework-level class construction when simpler hooks cannot express the invariant.</p>
 <p>Edge cases include exhausted iterators, zero batch sizes, exceptions inside a transaction, corrupted descriptor storage, conflicting mixin order, and a runtime object that has a <code>name</code> attribute of the wrong semantic type.</p>
 <hr>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--reasoning-before-implementation">Reasoning before implementation<a class="heading-anchor" href="#solution-1--reasoning-before-implementation" aria-label="Link to this section">#</a></h4>
 <p>The solution aligns each static promise with explicit runtime behavior and implements Python hooks through their observable protocol.</p>
 <ol>
@@ -886,7 +883,6 @@ print(label(PlainRecord(&quot;ada&quot;)))
 assert label(PlainRecord(&quot;ada&quot;)) == &quot;ADA&quot;</code></pre>
 <p><strong>Expected observation:</strong> <code>PlainRecord</code> never inherits from <code>Named</code>; static structural matching uses its available member.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-lang-01.html#solution-2"><code>py_lang_01_typing_data_model_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
 <h5 id="solution-1--exercise-1-complete-and-type-the-overloaded-parser">Exercise 1 — Complete and type the overloaded parser<a class="heading-anchor" href="#solution-1--exercise-1-complete-and-type-the-overloaded-parser" aria-label="Link to this section">#</a></h5>

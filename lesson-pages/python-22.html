@@ -331,7 +331,6 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 21 (<code>python-21</code>) and Day 19 grouping (<code>python-19</code>).</p>
-<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
@@ -352,8 +351,7 @@
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 22 — advanced pandas: vectorization, <code>query</code>, and categoricals to practice pandas vectorization, expression APIs, and memory-aware categoricals and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
-<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Lesson outcome:</strong> use day 22 — advanced pandas: vectorization, <code>query</code>, and categoricals to practice pandas vectorization, expression APIs, and memory-aware categoricals and explain the evidence produced by your code.</p>
 <h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>Pandas is fastest and clearest when an operation can be expressed over entire columns: arithmetic, comparisons, string/datetime accessors, mapping, masks, or group transforms. A row-wise <code>apply(axis=1)</code> builds a Series and calls Python for each row, so it should be a last resort for genuinely row-dependent logic, not a default.</p>
@@ -415,7 +413,7 @@ categorical = labels.astype(&quot;category&quot;)
 <li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
 </ol>
 <p><strong>Useful alternative:</strong> A named Python function plus <code>apply</code> is acceptable for truly irregular per-row objects; benchmark and keep the contract explicit.</p>
-<p><strong>Boundary to remember:</strong> Missing values in conditions, divide-by-zero, nearly unique strings, unseen category levels, and unsafe dynamic expressions require care. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Boundary to remember:</strong> Missing values in conditions, divide-by-zero, nearly unique strings, unseen category levels, and unsafe dynamic expressions require care.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Row-wise apply:</strong> Python function called once per row; flexible but often slow.</li>
@@ -535,8 +533,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li>Use query/eval for performance.</li>
 <li>Use Categorical dtype to reduce memory.</li>
 </ul></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
-<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>This is the editable learner artifact for <code>python-22</code>. Read <code>python/ds-60day/companion-guides/day22_advanced_pandas_apply_query_eval.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
 <p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
 <p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
@@ -739,7 +736,6 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-22-solutions-advanced-pandas-apply-vs-vectorize-query-eval-categoricals">Day 22 — Solutions: Advanced Pandas (apply vs vectorize, query/eval, categoricals)<a class="heading-anchor" href="#solution-1--day-22-solutions-advanced-pandas-apply-vs-vectorize-query-eval-categoricals" aria-label="Link to this section">#</a></h3>
-<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>pandas vectorization, expression APIs, and memory-aware categoricals</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Pandas is fastest and clearest when an operation can be expressed over entire columns: arithmetic, comparisons, string/datetime accessors, mapping, masks, or group transforms. A row-wise <code>apply(axis=1)</code> builds a Series and calls Python for each row, so it should be a last resort for genuinely row-dependent logic, not a default.</p>
@@ -754,7 +750,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li><strong>memory profiling:</strong> measuring retained memory under a stated representation.</li>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
-<p>For this lesson&#x27;s <strong>pandas vectorization, expression APIs, and memory-aware categoricals</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<p>For this lesson&#x27;s <strong>pandas vectorization, expression APIs, and memory-aware categoricals</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
 <h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Find one row-wise <code>apply(axis=1)</code> in a supplied example and replace it with column arithmetic, string methods, mapping, masks, <code>np.select</code>, or group transform as appropriate. <strong>Expected behavior:</strong> values and index match the original for normal and missing inputs. <strong>Constraints:</strong> do not optimize by changing the contract. <strong>Verify:</strong> use <code>pd.testing</code> to assert equal values, dtype, and index, then report repeated median execution seconds for both implementations on the same representative frame.</p>

@@ -389,7 +389,6 @@ print(f&quot;first 10 average: {running_mean[9]:.3f}&quot;)
 print(f&quot;final average:    {running_mean[-1]:.3f}&quot;)</code></pre>
 <p>The running average should finish near <code>0.6</code>, but it may move away from <code>0.6</code> for short stretches. The law of large numbers describes eventual convergence; it does not promise a smooth path or an exact answer in a finite sample.</p>
 <p>For a Binomial variable, the theoretical mean is \(np\) and the variance is \(np(1-p)\). Compare those values with a large simulated sample as a diagnostic, not as a replacement for the formulas.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 31 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -482,7 +481,6 @@ assert 0 &lt; positive_predictive_value &lt; sensitivity</code></pre>
 <p><strong>Mistake:</strong> Using sensitivity as <code>P(disease | positive)</code> reverses the condition and ignores the base rate.</p>
 <p><strong>Debug it deliberately:</strong> Draw a two-by-two count table for a concrete population and verify that true and false positives both appear in the denominator.</p>
 <p><strong>Stop condition:</strong> Do not interpret a probability until the event, denominator, independence assumption, and simulation grain are explicit.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Complete these in the learner notebook:</p>
 <ol>
@@ -887,7 +885,6 @@ posterior</code></pre>
 <li>Increasing specificity improves PPV when prevalence is low</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -902,7 +899,6 @@ posterior</code></pre>
 <p><strong>Edge case to test:</strong> A condition with zero observed support makes empirical conditional probability undefined, not zero.</p>
 <p><strong>Evidence of correctness:</strong> Probabilities must remain in [0, 1], analytic and seeded simulation results should agree within a stated tolerance, and every conditional estimate must report its denominator.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

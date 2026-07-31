@@ -375,7 +375,6 @@
 
 startup -&gt; SHA-256 verification -&gt; constrained JSON artifact</code></pre>
 <p>Its main function serves one local request, flips a dependency probe, and shows readiness fail while health stays available.</p>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
@@ -428,7 +427,6 @@ assert forbidden == {&quot;request_id&quot;, &quot;user_id&quot;}</code></pre>
 <p><strong>Common mistake:</strong> Making liveness depend on every dependency or attaching request/user/token values to metrics.</p>
 <p><strong>Diagnostic:</strong> Inject dependency, auth, limiter, saturation, artifact, handler, and telemetry failures; assert status, cleanup, bounded log event, and metric outcome.</p>
 <p><strong>Transfer question:</strong> How should admission and telemetry behave while a process drains existing work during a deploy?</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--1-validate-startup-configuration">1. Validate startup configuration<a class="heading-anchor" href="#guide--1-validate-startup-configuration" aria-label="Link to this section">#</a></h5>
 <p>Parse maximum concurrency, rate capacity, and refill rate. Reject zero, negative, blank, or nonnumeric values before constructing the service. Keep credential retrieval outside dataclass representations and logs.</p>
@@ -909,7 +907,6 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p>Artifact bytes are hashed before JSON is trusted. The loader deliberately rejects pickle and nested arbitrary objects. The incident drill turns a dependency probe false, observes readiness fail, verifies new work receives 503, and checks logs and metrics retain enough context.</p>
 <p>Edge cases include double lease release, clock movement, rate keys with unbounded cardinality, health checks that perform expensive dependency calls, logs containing request bodies, metrics labeled by user, authorization policy drift, artifact replacement after verification, and a readiness dependency that flaps.</p>
 <hr>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--reasoning-before-implementation">Reasoning before implementation<a class="heading-anchor" href="#solution-1--reasoning-before-implementation" aria-label="Link to this section">#</a></h4>
 <p>A fixed admission sequence and injected policy components make overload, auth, trust, telemetry, and incident behavior deterministic under tests.</p>
 <ol>
@@ -942,7 +939,6 @@ print(outage)
 assert outage == {&quot;healthy&quot;: True, &quot;ready&quot;: False}</code></pre>
 <p><strong>Expected observation:</strong> A dependency outage removes traffic readiness while avoiding a harmful restart loop.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-svc-02.html#solution-2"><code>py_svc_02_hardening_observability_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
 <h5 id="solution-1--exercise-1-validate-startup-configuration">Exercise 1 — Validate startup configuration<a class="heading-anchor" href="#solution-1--exercise-1-validate-startup-configuration" aria-label="Link to this section">#</a></h5>

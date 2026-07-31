@@ -366,7 +366,6 @@
 <pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_stats_01_resampling_experiments.py</code></pre>
 <p>The fixture has eight completed units per arm, identical baseline score distributions, and treatment outcomes shifted upward by two. It is deliberately small enough for all <code>C(16, 8) = 12,870</code> assignments to be enumerated.</p>
 <p>The solution reports the estimate, standardized effect, bootstrap interval, exact permutation p-value, approximate sample plan, and adjusted p-values. None alone establishes that a real-world causal design was implemented.</p>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
@@ -417,7 +416,6 @@ print({&quot;observed&quot;: observed, &quot;two_sided_p&quot;: p_value})</code>
 <p><strong>Common mistake:</strong> Resampling rows independently when treatment or outcomes are clustered, repeated, or time-dependent.</p>
 <p><strong>Diagnostic:</strong> Write the estimand, unit, assignment/sampling mechanism, statistic, resampling rule, seed/runs, interval/test convention, and assumption violations.</p>
 <p><strong>Transfer question:</strong> How would both examples change if four observations came from two households rather than eight independent people?</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--1-define-the-experiment-before-analysis">1. Define the experiment before analysis<a class="heading-anchor" href="#guide--1-define-the-experiment-before-analysis" aria-label="Link to this section">#</a></h5>
 <p>Write an <code>ExperimentPlan</code> containing:</p>
@@ -879,7 +877,6 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p>Randomization supports causal claims only when assignment was implemented, units did not interfere, outcome handling remained credible, and attrition did not destroy comparability. Observational differences remain associational even when bootstrap intervals are narrow.</p>
 <p>Edge cases include zero variance, tiny groups, a metric chosen after seeing results, assignment and analysis units that differ, cluster correlation, noncompliance, missing outcomes, many secondary metrics, and stopping early because an ordinary p-value crossed 0.05.</p>
 <hr>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--reasoning-before-implementation">Reasoning before implementation<a class="heading-anchor" href="#solution-1--reasoning-before-implementation" aria-label="Link to this section">#</a></h4>
 <p>The reference makes the resampling unit and null/estimand explicit, then separates statistical uncertainty from causal identification.</p>
 <ol>
@@ -908,7 +905,6 @@ interval = np.quantile(draws, [0.025, 0.975])
 print({&quot;estimate&quot;: treatment.mean() - control.mean(), &quot;interval&quot;: interval})</code></pre>
 <p><strong>Expected observation:</strong> The resampled interval describes uncertainty under independent within-group resampling; the small sample makes it wide/discrete.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-stats-01.html#solution-2"><code>py_stats_01_resampling_experiments_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
 <h5 id="solution-1--exercise-1-define-the-experiment-before-analysis">Exercise 1 — Define the experiment before analysis<a class="heading-anchor" href="#solution-1--exercise-1-define-the-experiment-before-analysis" aria-label="Link to this section">#</a></h5>

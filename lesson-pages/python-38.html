@@ -389,7 +389,6 @@ for depth in [1, 2, 4, 8, None]:
     tree.fit(X_train, y_train)
     print(depth, tree.score(X_train, y_train), tree.score(X_test, y_test))</code></pre>
 <p>The gap between training and held-out accuracy is one diagnostic, not a complete model-selection procedure. Choose complexity with validation or CV and report a separate test estimate.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 38 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -489,7 +488,6 @@ print({&quot;noise_importance&quot;: importance.importances_mean[-1],
 <p><strong>Mistake:</strong> Treating <code>feature_importances_</code> as causal effect or as reliable when correlated features can substitute for one another.</p>
 <p><strong>Debug it deliberately:</strong> Compare train/validation scores, tree depth/leaf counts, repeated permutation intervals, and a synthetic noise feature.</p>
 <p><strong>Stop condition:</strong> Do not interpret importance from a poorly performing model or from the same rows used to fit it.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Plot tree depth versus accuracy.</li>
@@ -886,7 +884,6 @@ order_imp, order_perm</code></pre>
 </ul>
 <hr>
 <p><strong>Portable worker default:</strong> These reference runs use <code>n_jobs=1</code> so they behave predictably on Windows, CI runners, and constrained notebook environments. After correctness is established, benchmark a larger worker count on your own workload rather than assuming <code>n_jobs=1</code> is faster.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -901,7 +898,6 @@ order_imp, order_perm</code></pre>
 <p><strong>Edge case to test:</strong> Tiny classes, duplicated/correlated features, missing values, and high-cardinality identifiers can distort splits and importance.</p>
 <p><strong>Evidence of correctness:</strong> Report train and held-out scores across capacity settings, set seeds and <code>n_jobs</code>, test a noise feature, and include variability for permutation importance.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

@@ -393,7 +393,6 @@ with mlflow.start_run(run_name=&quot;baseline&quot;) as run:
 <p>Windows PowerShell:</p>
 <pre><code class="language-powershell">.\.venv\Scripts\mlflow.exe ui --backend-store-uri mlruns</code></pre>
 <p>Open <code>http://127.0.0.1:5000</code>, and stop the process with Ctrl+C when finished. The server binds locally and the lesson works offline.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 53 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -495,7 +494,6 @@ mlflow.set_tracking_uri(original_uri)</code></pre>
 <p><strong>Mistake:</strong> Comparing runs with different splits/metrics or logging only the model score while omitting data and environment identity.</p>
 <p><strong>Debug it deliberately:</strong> Query the run by ID, inspect status/params/metrics/tags/artifacts, reload the model in a fresh process, and reconcile inputs and predictions.</p>
 <p><strong>Stop condition:</strong> Do not promote the top UI row without acceptance gates, comparable evidence, artifact verification, and ownership.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Log additional parameters such as Logistic Regression <code>C</code> and compare runs.</li>
@@ -928,7 +926,6 @@ print(&#x27;Loaded AUC:&#x27;, roc_auc_score(yte, loaded.predict_proba(Xte)[:,1]
 </ul>
 <hr>
 <p><strong>Portable worker default:</strong> These reference runs use <code>n_jobs=1</code> so they behave predictably on Windows, CI runners, and constrained notebook environments. After correctness is established, benchmark a larger worker count on your own workload rather than assuming <code>n_jobs=1</code> is faster.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -943,7 +940,6 @@ print(&#x27;Loaded AUC:&#x27;, roc_auc_score(yte, loaded.predict_proba(Xte)[:,1]
 <p><strong>Edge case to test:</strong> Nested/failed runs, duplicate parameter writes, missing artifacts, deleted tracking directories, incompatible signatures, and sensitive tags require policy.</p>
 <p><strong>Evidence of correctness:</strong> Query exact run ID/status, record data/split/code/environment, distinguish params and metrics, hash artifacts, and reload with a representative input signature.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
@@ -1091,7 +1087,6 @@ print(&#x27;Loaded AUC:&#x27;, roc_auc_score(yte, loaded.predict_proba(Xte)[:,1]
 </ul>
 <hr>
 <p><strong>Portable worker default:</strong> These reference runs use <code>n_jobs=1</code> so they behave predictably on Windows, CI runners, and constrained notebook environments. After correctness is established, benchmark a larger worker count on your own workload rather than assuming <code>n_jobs=1</code> is faster.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-7--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-7--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -1106,7 +1101,6 @@ print(&#x27;Loaded AUC:&#x27;, roc_auc_score(yte, loaded.predict_proba(Xte)[:,1]
 <p><strong>Edge case to test:</strong> Nested/failed runs, duplicate parameter writes, missing artifacts, deleted tracking directories, incompatible signatures, and sensitive tags require policy.</p>
 <p><strong>Evidence of correctness:</strong> Query exact run ID/status, record data/split/code/environment, distinguish params and metrics, hash artifacts, and reload with a representative input signature.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-7--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-7--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-7--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

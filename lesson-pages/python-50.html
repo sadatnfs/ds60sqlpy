@@ -399,7 +399,6 @@ seasonal_naive = train.iloc[-30:].to_numpy()
 print(&quot;last:&quot;, mean_absolute_error(test, last_value))
 print(&quot;seasonal:&quot;, mean_absolute_error(test, seasonal_naive))</code></pre>
 <p>Every candidate must use this same 30-day horizon and metric. A more complex model earns its cost only if it improves the relevant evidence reliably.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 50 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -489,7 +488,6 @@ assert features.loc[3, &quot;trailing_mean_2&quot;] == 25.0</code></pre>
 <p><strong>Mistake:</strong> Computing rolling features before shifting or tuning seasonal order against the final horizon.</p>
 <p><strong>Debug it deliberately:</strong> For one prediction timestamp, list the maximum source timestamp for every feature and assert it is no later than the forecast origin.</p>
 <p><strong>Stop condition:</strong> Do not report a forecast metric without horizon, origins, timestamp alignment, baseline, missing-period policy, and leakage audit.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Fit <code>auto_arima</code> with <code>m=7</code> and <code>m=30</code>; compare mean absolute error on the same test window.</li>
@@ -936,7 +934,6 @@ err.plot(title=&#x27;Forecast error&#x27;); plt.axhline(0,color=&#x27;k&#x27;,lw
 <li>For multi-step forecasting, compare direct and recursive strategies with validated ARIMA or lag-feature baselines before adding a heavier model</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -951,7 +948,6 @@ err.plot(title=&#x27;Forecast error&#x27;); plt.axhline(0,color=&#x27;k&#x27;,lw
 <p><strong>Edge case to test:</strong> Duplicate/missing timestamps, time zones, daylight-saving changes, insufficient seasonal history, and exogenous data publication delays need policies.</p>
 <p><strong>Evidence of correctness:</strong> Assert timestamp ordering/alignment and feature-source cutoffs, beat last/seasonal naive on identical origins, and report errors by origin plus uncertainty.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
@@ -1127,7 +1123,6 @@ err.plot(title=&#x27;Forecast error&#x27;); plt.axhline(0,color=&#x27;k&#x27;,lw
 <li>For multi-step forecasting, compare direct and recursive strategies with validated ARIMA or lag-feature baselines before adding a heavier model</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-9--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-9--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -1142,7 +1137,6 @@ err.plot(title=&#x27;Forecast error&#x27;); plt.axhline(0,color=&#x27;k&#x27;,lw
 <p><strong>Edge case to test:</strong> Duplicate/missing timestamps, time zones, daylight-saving changes, insufficient seasonal history, and exogenous data publication delays need policies.</p>
 <p><strong>Evidence of correctness:</strong> Assert timestamp ordering/alignment and feature-source cutoffs, beat last/seasonal naive on identical origins, and report errors by origin plus uncertainty.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-9--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-9--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-9--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

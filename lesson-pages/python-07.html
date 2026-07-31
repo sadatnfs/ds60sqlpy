@@ -330,7 +330,6 @@
 </ul>
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 6 (<code>python-06</code>): lists, sets, dictionaries, and iteration.</p>
-<p>&lt;!-- BEGIN HOW TO RUN --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
 <ol>
@@ -351,8 +350,7 @@
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 7 — strings, regular expressions, and <code>pathlib</code> to practice text normalization, bounded pattern matching, and portable paths and explain the evidence produced by your code. &lt;!-- END HOW TO RUN --&gt;</p>
-<p>&lt;!-- BEGIN BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Lesson outcome:</strong> use day 7 — strings, regular expressions, and <code>pathlib</code> to practice text normalization, bounded pattern matching, and portable paths and explain the evidence produced by your code.</p>
 <h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>Strings are immutable sequences of Unicode characters. Ordinary string methods are the clearest tool for fixed separators and normalization. A regular expression describes a family of text shapes; it should be used when the format truly varies according to a pattern, not as a default replacement for simple string operations.</p>
@@ -407,7 +405,7 @@ report = Path(&quot;artifacts&quot;) / &quot;daily sales.csv&quot;
 <li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
 </ol>
 <p><strong>Useful alternative:</strong> Prefer <code>split</code>, <code>partition</code>, <code>startswith</code>, and <code>endswith</code> for fixed formats; use a parser rather than regex for languages such as HTML.</p>
-<p><strong>Boundary to remember:</strong> Mixed case, Unicode, multiple suffixes, existing destinations, and two source names that normalize to the same target need explicit policy. &lt;!-- END BEGINNER DEEP DIVE --&gt;</p>
+<p><strong>Boundary to remember:</strong> Mixed case, Unicode, multiple suffixes, existing destinations, and two source names that normalize to the same target need explicit policy.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Normalization:</strong> convert equivalent text forms to one consistent form.</li>
@@ -527,8 +525,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li>Use regex for parsing.</li>
 <li>Work with file paths using pathlib.</li>
 </ul></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>&lt;!-- BEGIN BEGINNER NOTEBOOK DEEP DIVE --&gt;</p>
-<h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>This is the editable learner artifact for <code>python-07</code>. Read <code>python/ds-60day/companion-guides/day07_strings_regex_pathlib.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
 <p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
 <p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
@@ -729,7 +726,6 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-07-solutions-strings-regex-pathlib">Day 07 — Solutions: Strings, Regex, Pathlib<a class="heading-anchor" href="#solution-1--day-07-solutions-strings-regex-pathlib" aria-label="Link to this section">#</a></h3>
-<p>&lt;!-- BEGIN BEGINNER SOLUTION REVIEW --&gt;</p>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>text normalization, bounded pattern matching, and portable paths</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Strings are immutable sequences of Unicode characters. Ordinary string methods are the clearest tool for fixed separators and normalization. A regular expression describes a family of text shapes; it should be used when the format truly varies according to a pattern, not as a default replacement for simple string operations.</p>
@@ -744,7 +740,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <li><strong>suffix:</strong> a final filename extension such as <code>.csv</code>.</li>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
-<p>For this lesson&#x27;s <strong>text normalization, bounded pattern matching, and portable paths</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer. &lt;!-- END BEGINNER SOLUTION REVIEW --&gt;</p>
+<p>For this lesson&#x27;s <strong>text normalization, bounded pattern matching, and portable paths</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
 <h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. <strong>Constraints:</strong> use one bounded regex for extraction, then separate normalization and de-duplication steps; do not attempt full Internet-email validation. <strong>Verify:</strong> assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns <code>[]</code>.</p>

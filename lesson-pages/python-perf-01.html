@@ -379,7 +379,6 @@
 <p>macOS/Linux:</p>
 <pre><code class="language-bash">.venv/bin/python python/professional/solutions/py_perf_01_measurement_optimization_solution.py</code></pre>
 <p>Numbers will differ by machine. Compare report structure and conclusions about where work occurs, not exact seconds.</p>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
@@ -438,7 +437,6 @@ print(&quot;both implementations agree on measured inputs&quot;)</code></pre>
 <p><strong>Common mistake:</strong> Optimizing a microbenchmark that excludes the actual I/O/serialization bottleneck or accepting a speedup that changes semantics.</p>
 <p><strong>Diagnostic:</strong> Reproduce the workload, record environment, profile CPU/memory/I/O, validate outputs, change one hotspot, and compare repeated end-to-end distributions.</p>
 <p><strong>Transfer question:</strong> Which evidence would distinguish Python-loop overhead from file I/O, database latency, or native NumPy work?</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--1-define-semantics-before-speed">1. Define semantics before speed<a class="heading-anchor" href="#guide--1-define-semantics-before-speed" aria-label="Link to this section">#</a></h5>
 <p>For <code>[4, 1, 3, 2, 3, 4]</code>, the answer is <code>3</code>: the duplicate whose <em>second</em> occurrence appears first. Complete <code>first_duplicate_linear</code> with a set and prove equivalence for empty, unique, immediate, and competing duplicates.</p>
@@ -946,7 +944,6 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p>Native extensions and foreign-function interfaces (FFIs) add packaging, portability, safety, and boundary-transfer costs. Improve the algorithm first. When native work owns a measured hotspot, batch calls and data transfer rather than crossing the boundary in a tight Python loop.</p>
 <p>Edge cases include benchmarks smaller than timer noise, cold imports, thermal or background-load variation, changed semantics, hash/cache keys that retain large objects, process copies hidden by copy-on-write assumptions, native allocations invisible to <code>tracemalloc</code>, and microbenchmarks that do not represent production data.</p>
 <hr>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--reasoning-before-implementation">Reasoning before implementation<a class="heading-anchor" href="#solution-1--reasoning-before-implementation" aria-label="Link to this section">#</a></h4>
 <p>The workflow preserves a correctness oracle and performance budget while using profiles and scaling evidence to justify each change.</p>
 <ol>
@@ -978,7 +975,6 @@ print(report)
 assert report[&quot;min_seconds&quot;] &lt;= report[&quot;median_seconds&quot;] &lt;= report[&quot;max_seconds&quot;]</code></pre>
 <p><strong>Expected observation:</strong> Repeated timings vary; median and range reveal noise that one measurement hides.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-perf-01.html#solution-2"><code>py_perf_01_measurement_optimization_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
 <h5 id="solution-1--exercise-1-define-semantics-before-speed">Exercise 1 — Define semantics before speed<a class="heading-anchor" href="#solution-1--exercise-1-define-semantics-before-speed" aria-label="Link to this section">#</a></h5>

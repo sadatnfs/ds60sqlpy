@@ -396,7 +396,6 @@ def detected_kinds(text: str) -&gt; set[str]:
     return kinds</code></pre>
 <p>Regex has false positives and false negatives across languages and formats. A scanner should route suspected content for controlled handling; it must not certify that undetected text is safe.</p>
 <p>The notebook uses a hard-coded salt only to make a deterministic demo. A real pseudonymization key belongs in an approved secret manager, must be rotated under policy, and should use a keyed construction such as HMAC—not a public, reused repository constant.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 57 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -488,7 +487,6 @@ assert report[&quot;group_b&quot;][&quot;support&quot;] == 5</code></pre>
 <p><strong>Mistake:</strong> Calling hashed identifiers anonymous, treating a regex scan as complete protection, or optimizing parity without decision context.</p>
 <p><strong>Debug it deliberately:</strong> Build a data-flow inventory: source, purpose, lawful/ethical basis, fields, access, retention, logs/artifacts, deletion, owners, and incident route.</p>
 <p><strong>Stop condition:</strong> Do not expose real sensitive data in a lesson, log, screenshot, model artifact, prompt, or group report without explicit authorization and minimization.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Build a DataFrame PII scanner covering column names and free text.</li>
@@ -965,7 +963,6 @@ print({&#x27;precision_gap&#x27;: prec_gap, &#x27;recall_gap&#x27;: rec_gap})</c
 - Versioning, monitoring, rollback plan
 - Contact for incidents</code></pre>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -980,7 +977,6 @@ print({&#x27;precision_gap&#x27;: prec_gap, &#x27;recall_gap&#x27;: rec_gap})</c
 <p><strong>Edge case to test:</strong> Small groups, intersectional re-identification, proxy variables, deletion across derived artifacts, and model inversion require review beyond regexes.</p>
 <p><strong>Evidence of correctness:</strong> Prove forbidden fields never cross the boundary, test scanner misses/false hits, report group numerators/denominators and uncertainty, and assign owners/retention/incident actions.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
@@ -1146,7 +1142,6 @@ print({&#x27;precision_gap&#x27;: prec_gap, &#x27;recall_gap&#x27;: rec_gap})</c
 - Versioning, monitoring, rollback plan
 - Contact for incidents</code></pre>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-3--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-3--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -1161,7 +1156,6 @@ print({&#x27;precision_gap&#x27;: prec_gap, &#x27;recall_gap&#x27;: rec_gap})</c
 <p><strong>Edge case to test:</strong> Small groups, intersectional re-identification, proxy variables, deletion across derived artifacts, and model inversion require review beyond regexes.</p>
 <p><strong>Evidence of correctness:</strong> Prove forbidden fields never cross the boundary, test scanner misses/false hits, report group numerators/denominators and uncertainty, and assign owners/retention/incident actions.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-2--cell-3--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-3--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-3--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

@@ -380,7 +380,6 @@
 <p>macOS/Linux:</p>
 <pre><code class="language-bash">.venv/bin/python python/professional/solutions/py_data_01_arrow_duckdb_solution.py</code></pre>
 <p>If PyArrow or DuckDB is absent, the program says so and still completes the CSV and partition exercises. It never tries to install a package.</p>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Windows PowerShell:</p>
@@ -423,7 +422,6 @@ assert projected == [{&quot;region&quot;: &quot;north&quot;, &quot;units&quot;: 
 <p><strong>Common mistake:</strong> Inferring a schema from one batch and claiming it guarantees later files, or treating <code>EXPLAIN</code> as bytes-read proof.</p>
 <p><strong>Diagnostic:</strong> Validate schema/nulls/keys/ranges, inspect file/row-group metadata and plan, then profile a bounded query against a CSV/pandas fallback.</p>
 <p><strong>Transfer question:</strong> How would decimal precision, timestamp timezone, and an additive nullable field be versioned across readers?</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--exercise-1-define-the-csv-contract">Exercise 1 — define the CSV contract<a class="heading-anchor" href="#guide--exercise-1-define-the-csv-contract" aria-label="Link to this section">#</a></h5>
 <p>Implement <code>parse_nullable_text</code> and <code>total_revenue</code>. Parse dates, integers, and prices in one place rather than scattering conversion across analysis code. Test blank notes and a malformed number.</p>
@@ -927,7 +925,6 @@ merely ran is not evidence of mastery.</code></pre></div>
 <h4 id="solution-1--expected-results">Expected results<a class="heading-anchor" href="#solution-1--expected-results" aria-label="Link to this section">#</a></h4>
 <p>The portable path reports six rows, revenue <code>114.60</code>, three null notes, and three region partitions. With optional packages, the Parquet schema round trip is equal and DuckDB reports qualifying revenue for north, south, and west while its plan exposes filter and projection information.</p>
 <hr>
-<p>&lt;!-- BEGIN PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--reasoning-before-implementation">Reasoning before implementation<a class="heading-anchor" href="#solution-1--reasoning-before-implementation" aria-label="Link to this section">#</a></h4>
 <p>Boundary parsing proves semantic types first; round-trip, plan, and cross-engine reconciliation then prove storage/query behavior.</p>
 <ol>
@@ -953,7 +950,6 @@ print(row, types)
 assert set(types.values()) == {&quot;str&quot;}</code></pre>
 <p><strong>Expected observation:</strong> Dates, units, prices, and blanks all arrive as strings and must be interpreted by an explicit contract.</p>
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
-<p>&lt;!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-data-01.html#solution-2"><code>py_data_01_arrow_duckdb_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
 <h5 id="solution-1--exercise-1-define-the-csv-contract">Exercise 1 — define the CSV contract<a class="heading-anchor" href="#solution-1--exercise-1-define-the-csv-contract" aria-label="Link to this section">#</a></h5>

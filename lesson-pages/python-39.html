@@ -394,7 +394,6 @@ model.fit(X_train, y_train)
 auc = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
 print(f&quot;{auc=:.3f}&quot;)</code></pre>
 <p>This is a survey-scale baseline, not a production prescription. A result on one small dataset does not establish a universal library winner.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 39 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -493,7 +492,6 @@ for rate, rounds in ((0.2, 30), (0.03, 200)):
 <p><strong>Mistake:</strong> Tuning rounds against the final test set or assuming a lower training loss means a better model.</p>
 <p><strong>Debug it deliberately:</strong> Plot training and validation metric by round, record best iteration, compare wall time, and hold all other split/metric choices fixed.</p>
 <p><strong>Stop condition:</strong> Do not compare XGBoost and LightGBM results produced from different preprocessing, row splits, metrics, or early-stopping data.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Tune <code>learning_rate</code> and <code>n_estimators</code> with a simple loop.</li>
@@ -957,7 +955,6 @@ else:
 <li>Tune depth/num_leaves and regularization to control overfitting</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -972,7 +969,6 @@ else:
 <p><strong>Edge case to test:</strong> Single-class validation, missing-value semantics, class imbalance, backend version differences, and CPU thread oversubscription need explicit handling.</p>
 <p><strong>Evidence of correctness:</strong> Use identical splits/metrics, record train and validation curves, best iteration and compute budget, and confirm the final test was never used for stopping.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

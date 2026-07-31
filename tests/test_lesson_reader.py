@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from html.parser import HTMLParser
 from pathlib import Path
 
 from ds60sqlpy.catalog import Catalog
@@ -26,6 +27,25 @@ RAW_LOCAL_ARTIFACT_HREF = re.compile(
     r'href="(?!https?://|mailto:|#|vscode:)[^"]+\.(?:md|sql|ipynb|py)(?:[?#][^"]*)?"',
     flags=re.IGNORECASE,
 )
+LEAKED_AUTHORING_COMMENT = re.compile(
+    r"<!--\s*(?:(?:BEGIN|END)\b|beginner-solution-enrichment\b)",
+    re.IGNORECASE,
+)
+
+
+class _VisibleTextParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.parts: list[str] = []
+
+    def handle_data(self, data: str) -> None:
+        self.parts.append(data)
+
+
+def _visible_text(document: str) -> str:
+    parser = _VisibleTextParser()
+    parser.feed(document)
+    return " ".join(parser.parts)
 
 
 def test_every_catalog_entry_has_a_current_portable_reader() -> None:
@@ -49,6 +69,7 @@ def test_every_catalog_entry_has_a_current_portable_reader() -> None:
         assert '<link rel="stylesheet"' not in rendered
         assert 'const SERVER_TOKEN = "";' in rendered
         assert RAW_LOCAL_ARTIFACT_HREF.search(rendered) is None
+        assert LEAKED_AUTHORING_COMMENT.search(_visible_text(rendered)) is None
         assert rendered.endswith("\n")
         assert all(line == line.rstrip() for line in rendered.splitlines())
 
@@ -140,6 +161,43 @@ def test_markdown_renderer_escapes_html_and_blocks_unsafe_schemes() -> None:
     assert "javascript:" not in rendered
 
 
+def test_markdown_renderer_hides_comments_except_in_fenced_examples() -> None:
+    catalog = Catalog.load(REPO_ROOT)
+    guide = catalog.resolve(catalog.get("python-01").guide_path)
+    resolver = LinkResolver(
+        repo_root=REPO_ROOT,
+        source_path=guide,
+        targets=artifact_targets(catalog),
+    )
+
+    rendered = render_markdown(
+        """# Visible heading
+
+<!-- BEGIN INTERNAL AUTHORING MARKER -->
+Visible before <!-- inline maintainer note --> visible after.
+<!-- a multiline note
+that must not reach learners -->
+
+Inline code keeps the literal marker: `<!-- learner-visible example -->`.
+
+An unclosed marker stays visible and cannot swallow the rest: <!-- unfinished
+
+```html
+<!-- This fenced comment is lesson content. -->
+```
+""",
+        resolver=resolver,
+    )
+
+    assert "INTERNAL AUTHORING MARKER" not in rendered
+    assert "inline maintainer note" not in rendered
+    assert "that must not reach learners" not in rendered
+    assert "Visible before  visible after." in rendered
+    assert "&lt;!-- learner-visible example --&gt;" in rendered
+    assert "&lt;!-- unfinished" in rendered
+    assert "&lt;!-- This fenced comment is lesson content. --&gt;" in rendered
+
+
 def test_markdown_emphasis_can_span_inline_code() -> None:
     catalog = Catalog.load(REPO_ROOT)
     guide = catalog.resolve(catalog.get("python-01").guide_path)
@@ -172,6 +230,7 @@ def test_rendered_references_cover_recursive_local_markdown_and_sql_links() -> N
         assert "<title>" in rendered
         assert "Back to lessons" in rendered
         assert RAW_LOCAL_ARTIFACT_HREF.search(rendered) is None
+        assert LEAKED_AUTHORING_COMMENT.search(_visible_text(rendered)) is None
         assert '<script src="' not in rendered
         assert '<link rel="stylesheet"' not in rendered
         assert rendered.endswith("\n")

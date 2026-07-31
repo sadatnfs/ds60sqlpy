@@ -390,7 +390,6 @@ ci_95 = (
     estimate + critical * standard_error,
 )</code></pre>
 <p>The estimate and interval communicate location and uncertainty. The p-value addresses compatibility with the specific null value <code>0.0</code>. Report all three with the sample size and assumptions; a p-value alone hides the effect magnitude.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 32 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -483,7 +482,6 @@ assert abs(standardized_effect) &lt; 0.05</code></pre>
 <p><strong>Mistake:</strong> Reporting <code>p &lt; 0.05</code> without the estimate, interval, assumptions, sample size, or practical decision threshold.</p>
 <p><strong>Debug it deliberately:</strong> Reconstruct the test statistic from estimate divided by standard error, inspect the data-generating grain, and calculate an effect size.</p>
 <p><strong>Stop condition:</strong> Do not make a population claim when independence, selection, multiplicity, or the measurement process is unexplained.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Draw groups from <code>Normal(0, 1)</code> and <code>Normal(0.3, 1)</code>, then test the difference in means with Welch&#x27;s t-test.</li>
@@ -883,7 +881,6 @@ print({&#x27;chi2&#x27;: chi2, &#x27;p&#x27;: pval, &#x27;dof&#x27;: dof})
 <li>Multiple tests inflate false positives; control FDR or adjust alpha</li>
 </ul>
 <hr>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -898,7 +895,6 @@ print({&#x27;chi2&#x27;: chi2, &#x27;p&#x27;: pval, &#x27;dof&#x27;: dof})
 <p><strong>Edge case to test:</strong> Constant data, tiny samples, missing values, or empty contingency cells can invalidate formulas or produce undefined statistics.</p>
 <p><strong>Evidence of correctness:</strong> Report the estimate, sample size, standard error or interval, exact hypothesis, assumptions, and a practical effect measure; independently recompute at least one statistic.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>

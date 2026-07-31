@@ -14,6 +14,11 @@ to the browser. Markdown becomes semantic HTML, notebook Markdown and code
 cells become a read-only notebook preview, and Python/SQL source becomes an
 escaped, line-numbered listing. Notebook outputs are never executed while the
 pages are built or viewed. Untrusted rich HTML output is not reproduced.
+HTML comments in Markdown are treated as maintainer-only authoring metadata and
+are omitted from learner pages. Comments inside inline or fenced code remain
+escaped lesson content, so a lesson can demonstrate comment syntax without
+allowing raw HTML to execute. An incomplete comment is escaped rather than
+hiding the remainder of a lesson.
 
 Local Markdown and SQL links that are not themselves cataloged lesson
 artifacts route to deterministic pages under `reference-pages/`. This includes

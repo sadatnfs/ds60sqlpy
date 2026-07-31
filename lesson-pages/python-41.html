@@ -398,7 +398,6 @@ scores = model.predict_proba(X_test)[:, 1]
 print(classification_report(y_test, scores &gt;= 0.5, digits=3))
 print(&quot;average precision:&quot;, average_precision_score(y_test, scores))</code></pre>
 <p>The 0.5 threshold is a starting convention, not a law. Select an operating point using validation data and an explicit cost, capacity, recall, or precision goal.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 41 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -491,7 +490,6 @@ print({&quot;threshold&quot;: chosen[0], &quot;precision&quot;: chosen[1], &quot
 <p><strong>Mistake:</strong> Applying SMOTE or another sampler before the train/test split, which creates related synthetic evidence across boundaries.</p>
 <p><strong>Debug it deliberately:</strong> Trace row IDs through split, sampling, fitting, calibration, threshold selection, and final evaluation; print class counts at each stage.</p>
 <p><strong>Stop condition:</strong> Do not choose a threshold or sampler from final test results or claim synthetic rows add real-world evidence.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Compare <code>class_weight=&quot;balanced&quot;</code> with a SMOTE strategy.</li>
@@ -919,7 +917,6 @@ plt.legend(); plt.tight_layout(); plt.show()</code></pre>
 </ul>
 <hr>
 <p><strong>Portable worker default:</strong> These reference runs use <code>n_jobs=1</code> so they behave predictably on Windows, CI runners, and constrained notebook environments. After correctness is established, benchmark a larger worker count on your own workload rather than assuming <code>n_jobs=1</code> is faster.</p>
-<p>&lt;!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
 <p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
 <ol>
@@ -934,7 +931,6 @@ plt.legend(); plt.tight_layout(); plt.show()</code></pre>
 <p><strong>Edge case to test:</strong> A split with zero positives, group leakage, changing prevalence, or an undefined precision denominator requires a redesigned evaluation.</p>
 <p><strong>Evidence of correctness:</strong> Report class counts, confusion outcomes, PR metrics and threshold, prove resampling is training-only, and recheck calibration under the deployment prevalence.</p>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
-<p>&lt;!-- END ADVANCED PYTHON CONCEPT ENRICHMENT --&gt;</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
