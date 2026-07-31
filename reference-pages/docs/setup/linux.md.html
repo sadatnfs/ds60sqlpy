@@ -121,7 +121,7 @@
 <h3 id="1-install-base-tools">1. Install base tools<a class="heading-anchor" href="#1-install-base-tools" aria-label="Link to this section">#</a></h3>
 <p>On a distribution that provides Python 3.12:</p>
 <pre><code class="language-bash">sudo apt-get update
-sudo apt-get install -y git python3.12 python3.12-venv python3-pip
+sudo apt-get install -y git libgomp1 python3.12 python3.12-venv python3-pip
 git --version
 python3.12 --version</code></pre>
 <p>Install <a href="https://code.visualstudio.com/docs/setup/linux">Visual Studio Code</a> through the supported package for your distribution.</p>
@@ -143,7 +143,7 @@ python scripts/course.py doctor</code></pre>
 <p>In VS Code, select <code>.venv/bin/python</code> as the interpreter and notebook kernel. See <a href="../vscode.md.html">VS Code</a>.</p>
 <p>Core setup installs notebook, data, and quality tooling. Before the engineering bridge, PostgreSQL-in-Jupyter lesson, professional modules, or later machine-learning, production, deep-learning, natural-language-processing, or geospatial lessons, install the advanced profile while connected:</p>
 <pre><code class="language-bash">bash scripts/setup.sh --advanced</code></pre>
-<p>The advanced profile can take substantially longer and depends on compatible platform wheels. You may defer it until the generated catalog shows that a planned lesson needs it. Use the <a href="../dependency-profiles.md.html">catalog-label mapping</a>: labels such as <code>core</code>, <code>postgres</code>, and <code>advanced</code> are not literal package extras.</p>
+<p><code>libgomp1</code> supplies the OpenMP runtime used by the LightGBM and XGBoost Linux wheels. The advanced profile can take substantially longer and depends on compatible platform wheels. You may defer it until the generated catalog shows that a planned lesson needs it. Use the <a href="../dependency-profiles.md.html">catalog-label mapping</a>: labels such as <code>core</code>, <code>postgres</code>, and <code>advanced</code> are not literal package extras.</p>
 <h3 id="4-set-up-postgresql">4. Set up PostgreSQL<a class="heading-anchor" href="#4-set-up-postgresql" aria-label="Link to this section">#</a></h3>
 <p>Install PostgreSQL 16 or newer. Ubuntu 24.04 provides PostgreSQL 16 in its standard repository:</p>
 <pre><code class="language-bash">sudo apt-get install -y postgresql postgresql-contrib

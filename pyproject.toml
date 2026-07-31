@@ -47,6 +47,11 @@ ml = [
   "imbalanced-learn>=0.12",
   "lightgbm>=4.3",
   "lime>=0.2.0.1",
+  # SHAP leaves Numba unbounded away from Intel macOS. These platform-specific
+  # floors reject legacy releases with incomplete Python metadata while
+  # retaining Python 3.12 wheels on every supported operating system.
+  "numba>=0.62.1,<0.63; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+  "numba>=0.66; sys_platform != 'darwin' or platform_machine != 'x86_64'",
   "pmdarima>=2.0",
   "shap>=0.45",
   "xgboost>=2.0",

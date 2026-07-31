@@ -146,8 +146,9 @@ test -f README.md</code></pre>
 python scripts/course.py doctor</code></pre>
 <p>In VS Code, select <code>.venv/bin/python</code> as the interpreter and notebook kernel. See <a href="../vscode.md.html">VS Code</a>.</p>
 <p>Core setup installs notebook, data, and quality tooling. Before the engineering bridge, PostgreSQL-in-Jupyter lesson, professional modules, or later machine-learning, production, deep-learning, natural-language-processing, or geospatial lessons, install the advanced profile while connected:</p>
-<pre><code class="language-bash">bash scripts/setup.sh --advanced</code></pre>
-<p>The advanced profile can take substantially longer. You may defer it until the generated catalog shows that a planned lesson needs it. Use the <a href="../dependency-profiles.md.html">catalog-label mapping</a>: labels such as <code>core</code>, <code>postgres</code>, and <code>advanced</code> are not literal package extras.</p>
+<pre><code class="language-bash">brew install libomp
+bash scripts/setup.sh --advanced</code></pre>
+<p>The Homebrew OpenMP runtime is required by the LightGBM and XGBoost macOS wheels. The advanced profile can take substantially longer. You may defer it until the generated catalog shows that a planned lesson needs it. Use the <a href="../dependency-profiles.md.html">catalog-label mapping</a>: labels such as <code>core</code>, <code>postgres</code>, and <code>advanced</code> are not literal package extras.</p>
 <h3 id="4-set-up-postgresql">4. Set up PostgreSQL<a class="heading-anchor" href="#4-set-up-postgresql" aria-label="Link to this section">#</a></h3>
 <h4 id="option-a-homebrew">Option A: Homebrew<a class="heading-anchor" href="#option-a-homebrew" aria-label="Link to this section">#</a></h4>
 <p>Install and start a supported PostgreSQL version. PostgreSQL 17 matches the canonical automation:</p>

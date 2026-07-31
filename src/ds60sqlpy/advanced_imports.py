@@ -45,6 +45,7 @@ ADVANCED_IMPORT_TARGETS: tuple[ImportTarget, ...] = (
     ImportTarget("ml", "imbalanced-learn", "imblearn"),
     ImportTarget("ml", "lightgbm", "lightgbm"),
     ImportTarget("ml", "lime", "lime"),
+    ImportTarget("ml", "numba", "numba"),
     ImportTarget("ml", "pmdarima", "pmdarima"),
     ImportTarget("ml", "shap", "shap"),
     ImportTarget("ml", "xgboost", "xgboost"),

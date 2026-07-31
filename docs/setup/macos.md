@@ -56,11 +56,13 @@ machine-learning, production, deep-learning, natural-language-processing, or
 geospatial lessons, install the advanced profile while connected:
 
 ```bash
+brew install libomp
 bash scripts/setup.sh --advanced
 ```
 
-The advanced profile can take substantially longer. You may defer it until the
-generated catalog shows that a planned lesson needs it. Use the
+The Homebrew OpenMP runtime is required by the LightGBM and XGBoost macOS
+wheels. The advanced profile can take substantially longer. You may defer it
+until the generated catalog shows that a planned lesson needs it. Use the
 [catalog-label mapping](../dependency-profiles.md): labels such as `core`,
 `postgres`, and `advanced` are not literal package extras.
 

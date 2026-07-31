@@ -149,10 +149,10 @@ trackable files. The Windows runner first executes
 PowerShell parsing and discovery without changing PATH, installing packages,
 registering a kernel, or requiring a database server on the CI image.
 
-The weekly and manually dispatched heavy job resolves, installs, and imports
-every direct package in the `bridge`, `professional`, `sql-notebooks`, `ml`,
-`production`, `deep-learning`, `nlp`, and `geo` extras on fresh Windows and
-Ubuntu Python 3.12 runners:
+The weekly and manually dispatched heavy job validates the lock, installs every
+extra, then exercises the maintained advanced import manifest for the `bridge`,
+`professional`, `sql-notebooks`, `ml`, `production`, `deep-learning`, `nlp`,
+and `geo` lesson stacks on fresh Windows and Ubuntu Python 3.12 runners:
 
 ```text
 uv sync --frozen --all-extras
@@ -164,7 +164,11 @@ weights, spaCy pipelines, or external services. This proves locked package
 installation and basic import compatibility on those two platforms; it does
 not prove model training, GPU support, asset availability, live APIs, or every
 advanced lesson's runtime behavior. macOS receives the core matrix but not this
-heavy all-extras gate.
+heavy all-extras gate. The ML extra constrains Numba by platform because SHAP's
+transitive requirement is otherwise broad enough for a legacy source release
+with incomplete Python-version metadata to enter a valid-looking lock. The
+bounds retain Python 3.12 wheels on Windows, Linux, Intel macOS, and Apple
+silicon.
 
 ## Local validation evidence (2026-07-30)
 

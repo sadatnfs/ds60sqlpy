@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import tomllib
+from pathlib import Path
+
 from ds60sqlpy.advanced_imports import (
     ADVANCED_IMPORT_TARGETS,
     ImportResult,
@@ -21,7 +24,22 @@ def test_advanced_import_manifest_is_complete_and_unique() -> None:
         "nlp",
         "geo",
     }
-    assert len(ADVANCED_IMPORT_TARGETS) == 33
+    assert len(ADVANCED_IMPORT_TARGETS) == 34
+    assert ImportTarget("ml", "numba", "numba") in ADVANCED_IMPORT_TARGETS
+
+
+def test_ml_extra_has_cross_platform_numba_compatibility_bounds() -> None:
+    pyproject_path = Path(__file__).resolve().parents[1] / "pyproject.toml"
+    pyproject = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+    ml_requirements = pyproject["project"]["optional-dependencies"]["ml"]
+    numba_requirements = {
+        requirement for requirement in ml_requirements if requirement.startswith("numba")
+    }
+
+    assert numba_requirements == {
+        "numba>=0.62.1,<0.63; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+        "numba>=0.66; sys_platform != 'darwin' or platform_machine != 'x86_64'",
+    }
 
 
 def test_probe_code_uses_distribution_and_module_names() -> None:

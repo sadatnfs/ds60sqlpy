@@ -10,7 +10,7 @@ On a distribution that provides Python 3.12:
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y git python3.12 python3.12-venv python3-pip
+sudo apt-get install -y git libgomp1 python3.12 python3.12-venv python3-pip
 git --version
 python3.12 --version
 ```
@@ -57,9 +57,10 @@ geospatial lessons, install the advanced profile while connected:
 bash scripts/setup.sh --advanced
 ```
 
-The advanced profile can take substantially longer and depends on compatible
-platform wheels. You may defer it until the generated catalog shows that a
-planned lesson needs it. Use the
+`libgomp1` supplies the OpenMP runtime used by the LightGBM and XGBoost Linux
+wheels. The advanced profile can take substantially longer and depends on
+compatible platform wheels. You may defer it until the generated catalog shows
+that a planned lesson needs it. Use the
 [catalog-label mapping](../dependency-profiles.md): labels such as `core`,
 `postgres`, and `advanced` are not literal package extras.
 
