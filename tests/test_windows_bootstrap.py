@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -12,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "bootstrap_windows.ps1"
 GUIDE = REPO_ROOT / "docs" / "setup" / "windows-bootstrap.md"
 VSCODE_TASKS = REPO_ROOT / ".vscode" / "tasks.json"
+SETUP_SCRIPT = REPO_ROOT / "scripts" / "setup.ps1"
 
 
 def script_text() -> str:
@@ -113,6 +115,24 @@ def test_discovery_helpers_accept_initially_empty_mutable_lists() -> None:
         r"\[AllowEmptyCollection\(\)\]\s+\[string\[\]\]\$Entries",
         text,
     )
+
+
+def test_command_discovery_handles_multiple_path_matches() -> None:
+    text = script_text()
+    python_lookup_start = text.index('foreach ($Name in @("python", "python3"))')
+    python_lookup_end = text.index(
+        "# Ask every discoverable conda installation",
+        python_lookup_start,
+    )
+    python_lookup = text[python_lookup_start:python_lookup_end]
+    setup = SETUP_SCRIPT.read_text(encoding="utf-8")
+
+    assert "$Command = Get-Command $Name" not in python_lookup
+    assert "$Command in @(" in python_lookup
+    assert "-Path $Command.Source" in python_lookup
+    assert "$PythonCommands = @(" in setup
+    assert "foreach ($Python in $PythonCommands)" in setup
+    assert "Invoke-Native -FilePath $PythonPath" in setup
 
 
 def test_bootstrap_reuses_both_windows_environment_layouts() -> None:
@@ -249,7 +269,7 @@ def test_powershell_parser_accepts_bootstrap_script() -> None:
     parser_command = (
         "$tokens = $null; $errors = $null; "
         "[System.Management.Automation.Language.Parser]::ParseFile("
-        "(Resolve-Path $args[0]), [ref]$tokens, [ref]$errors) | Out-Null; "
+        "$env:DS60_SCRIPT_TO_PARSE, [ref]$tokens, [ref]$errors) | Out-Null; "
         "if ($errors.Count -gt 0) { "
         "$errors | ForEach-Object { Write-Error $_.Message }; exit 1 }"
     )
@@ -261,10 +281,10 @@ def test_powershell_parser_accepts_bootstrap_script() -> None:
             "-NonInteractive",
             "-Command",
             parser_command,
-            str(SCRIPT),
         ],
         check=False,
         capture_output=True,
+        env={**os.environ, "DS60_SCRIPT_TO_PARSE": str(SCRIPT)},
         text=True,
     )
 

@@ -159,9 +159,10 @@ function Get-CondaCommands {
     $Candidates = [System.Collections.Generic.List[string]]::new()
     $Seen = @{}
 
-    $Command = Get-Command "conda" -ErrorAction SilentlyContinue
-    if ($Command -and $Command.Source) {
-        Add-ExistingFile -Candidates $Candidates -Seen $Seen -Path $Command.Source
+    foreach ($Command in @(Get-Command "conda" -ErrorAction SilentlyContinue)) {
+        if ($Command.Source) {
+            Add-ExistingFile -Candidates $Candidates -Seen $Seen -Path $Command.Source
+        }
     }
 
     $CondaRoots = [System.Collections.Generic.List[string]]::new()
@@ -257,8 +258,11 @@ function Get-PythonCandidates {
 
     # The Python launcher knows about Python.org installations even when their
     # directories were not added to PATH.
-    $Launcher = Get-Command "py" -CommandType Application -ErrorAction SilentlyContinue
-    if ($Launcher) {
+    foreach (
+        $Launcher in @(
+            Get-Command "py" -CommandType Application -ErrorAction SilentlyContinue
+        )
+    ) {
         foreach ($Version in @("-3.12", "-3.11")) {
             try {
                 $Output = Invoke-NativeCapture `
@@ -275,9 +279,14 @@ function Get-PythonCandidates {
     }
 
     foreach ($Name in @("python", "python3")) {
-        $Command = Get-Command $Name -CommandType Application -ErrorAction SilentlyContinue
-        if ($Command -and $Command.Source -notmatch "\\Microsoft\\WindowsApps\\python(?:3)?\.exe$") {
-            Add-ExistingFile -Candidates $Candidates -Seen $Seen -Path $Command.Source
+        foreach (
+            $Command in @(
+                Get-Command $Name -CommandType Application -ErrorAction SilentlyContinue
+            )
+        ) {
+            if ($Command.Source -notmatch "\\Microsoft\\WindowsApps\\python(?:3)?\.exe$") {
+                Add-ExistingFile -Candidates $Candidates -Seen $Seen -Path $Command.Source
+            }
         }
     }
 
@@ -457,8 +466,11 @@ function Get-PsqlCandidates {
     $Candidates = [System.Collections.Generic.List[string]]::new()
     $Seen = @{}
 
-    $Command = Get-Command "psql" -CommandType Application -ErrorAction SilentlyContinue
-    if ($Command) {
+    foreach (
+        $Command in @(
+            Get-Command "psql" -CommandType Application -ErrorAction SilentlyContinue
+        )
+    ) {
         Add-ExistingFile -Candidates $Candidates -Seen $Seen -Path $Command.Source
     }
 
@@ -565,9 +577,14 @@ function Find-SupportedPsql {
 }
 
 function Find-Winget {
-    $Command = Get-Command "winget" -CommandType Application -ErrorAction SilentlyContinue
-    if ($Command) {
-        return $Command.Source
+    foreach (
+        $Command in @(
+            Get-Command "winget" -CommandType Application -ErrorAction SilentlyContinue
+        )
+    ) {
+        if ($Command.Source) {
+            return $Command.Source
+        }
     }
     return $null
 }
@@ -663,8 +680,11 @@ function Add-PathEntries {
 function Find-Uv {
     $Candidates = [System.Collections.Generic.List[string]]::new()
     $Seen = @{}
-    $Command = Get-Command "uv" -CommandType Application -ErrorAction SilentlyContinue
-    if ($Command) {
+    foreach (
+        $Command in @(
+            Get-Command "uv" -CommandType Application -ErrorAction SilentlyContinue
+        )
+    ) {
         # Do not select uv from the environment it is about to synchronize.
         # Windows cannot reliably replace a running executable in that venv.
         $CommandPath = [IO.Path]::GetFullPath($Command.Source)

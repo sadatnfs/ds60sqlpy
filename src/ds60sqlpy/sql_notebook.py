@@ -189,13 +189,35 @@ def course_psql_environment(
     application_name: str,
     connect_timeout: int,
 ) -> dict[str, str]:
-    """Build a child environment that cannot reroute the validated target."""
+    """Build a child environment that cannot reroute the validated target.
+
+    ``PGDATABASE`` accepts a database name, but it does not reliably expand a
+    connection URI the way a command-line ``dbname`` parameter does.  Split a
+    validated URI into libpq's individual environment variables so PostgreSQL
+    receives the intended local host, port, identity, and database without
+    placing credentials in process arguments.
+    """
 
     validated = validate_course_database_target(target)
     environment = os.environ.copy()
     for name in LIBPQ_ROUTING_ENVIRONMENT:
         environment.pop(name, None)
-    environment["PGDATABASE"] = validated
+    if validated == COURSE_DATABASE_NAME:
+        environment["PGDATABASE"] = validated
+    else:
+        parsed = urlsplit(validated)
+        environment["PGDATABASE"] = unquote(parsed.path.removeprefix("/"))
+        if parsed.hostname is not None:
+            environment["PGHOST"] = unquote(parsed.hostname)
+        if parsed.port is not None:
+            environment["PGPORT"] = str(parsed.port)
+        if parsed.username is not None:
+            environment["PGUSER"] = unquote(parsed.username)
+        if parsed.password is not None:
+            environment["PGPASSWORD"] = unquote(parsed.password)
+        sslmode = parse_qs(parsed.query, keep_blank_values=True).get("sslmode")
+        if sslmode:
+            environment["PGSSLMODE"] = sslmode[-1]
     environment["PGAPPNAME"] = application_name
     environment["PGCONNECT_TIMEOUT"] = str(connect_timeout)
     return environment

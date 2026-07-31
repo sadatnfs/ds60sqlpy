@@ -4,6 +4,7 @@ import json
 import subprocess
 from pathlib import Path
 from unittest.mock import call, patch
+from urllib.parse import quote
 
 import nbformat
 import pytest
@@ -255,6 +256,32 @@ def test_course_psql_environment_removes_inherited_routing_overrides(
         "PGSERVICEFILE",
         "PGOPTIONS",
     }
+
+
+def test_course_psql_environment_decomposes_url_without_exposing_it(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    password = "temporary password"
+    authority = (
+        f"course-user:{quote(password)}@127.0.0.1:55432/{COURSE_DATABASE_NAME}?sslmode=disable"
+    )
+    target = "://".join(("postgresql", authority))
+    monkeypatch.setenv("PGHOST", "untrusted.example")
+    monkeypatch.setenv("PGPORT", "6543")
+
+    environment = course_psql_environment(
+        target,
+        application_name="ds60sqlpy-test",
+        connect_timeout=7,
+    )
+
+    assert environment["PGDATABASE"] == COURSE_DATABASE_NAME
+    assert environment["PGHOST"] == "127.0.0.1"
+    assert environment["PGPORT"] == "55432"
+    assert environment["PGUSER"] == "course-user"
+    assert environment["PGPASSWORD"] == password
+    assert environment["PGSSLMODE"] == "disable"
+    assert target not in environment.values()
 
 
 def test_workspace_run_uses_fixed_psql_flags_without_a_shell(

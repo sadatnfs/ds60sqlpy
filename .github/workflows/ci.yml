@@ -14,6 +14,7 @@ jobs:
   core:
     name: Core checks (${{ matrix.os }}, Python ${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     env:
       # .python-version is the learner default. CI must instead exercise the
       # interpreter selected by each matrix leg.

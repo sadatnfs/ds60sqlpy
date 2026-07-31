@@ -10,12 +10,14 @@ PYPROJECT = REPO_ROOT / "pyproject.toml"
 
 def test_core_matrix_overrides_learner_python_default_and_asserts_version() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
+    core_job = workflow.split("  learner-bootstrap:", maxsplit=1)[0]
 
     assert "UV_PYTHON: ${{ matrix.python-version }}" in workflow
     assert "DS60_EXPECTED_PYTHON: ${{ matrix.python-version }}" in workflow
     assert "- name: Verify the matrix interpreter" in workflow
     assert "actual = sys.version_info[:2]" in workflow
     assert "assert actual == expected" in workflow
+    assert "timeout-minutes: 30" in core_job
 
 
 def test_pytest_console_entrypoint_can_import_repository_scripts() -> None:

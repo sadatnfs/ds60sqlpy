@@ -37,19 +37,32 @@ if (Get-Command py -ErrorAction SilentlyContinue) {
 }
 
 if (-not $Created) {
-    $Python = Get-Command python -ErrorAction SilentlyContinue
-    if (-not $Python) {
+    $PythonPath = $null
+    $PythonCommands = @(
+        Get-Command python -CommandType Application -ErrorAction SilentlyContinue
+    )
+    if ($PythonCommands.Count -eq 0) {
         throw "Python was not found. Install Python 3.12, then rerun this script."
     }
-    try {
-        Invoke-Native -FilePath $Python.Source -ArgumentList @(
-            "-c",
-            "import sys; raise SystemExit(not ((3, 11) <= sys.version_info[:2] < (3, 13)))"
-        )
-    } catch {
+    foreach ($Python in $PythonCommands) {
+        if (-not $Python.Source) {
+            continue
+        }
+        try {
+            Invoke-Native -FilePath $Python.Source -ArgumentList @(
+                "-c",
+                "import sys; raise SystemExit(not ((3, 11) <= sys.version_info[:2] < (3, 13)))"
+            )
+            $PythonPath = [string]$Python.Source
+            break
+        } catch {
+            Write-Verbose "Ignoring an unsupported Python command at $($Python.Source)."
+        }
+    }
+    if (-not $PythonPath) {
         throw "This course supports Python 3.11-3.12. Install Python 3.12, then rerun."
     }
-    Invoke-Native -FilePath $Python.Source -ArgumentList @("-m", "venv", ".venv")
+    Invoke-Native -FilePath $PythonPath -ArgumentList @("-m", "venv", ".venv")
 }
 
 $VenvPython = Join-Path $RepoRoot ".venv\Scripts\python.exe"

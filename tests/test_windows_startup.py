@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import shutil
 import subprocess
@@ -163,7 +164,7 @@ def test_powershell_parser_accepts_startup_script() -> None:
     parser_command = (
         "$tokens = $null; $errors = $null; "
         "[System.Management.Automation.Language.Parser]::ParseFile("
-        "(Resolve-Path $args[0]), [ref]$tokens, [ref]$errors) | Out-Null; "
+        "$env:DS60_SCRIPT_TO_PARSE, [ref]$tokens, [ref]$errors) | Out-Null; "
         "if ($errors.Count -gt 0) { "
         "$errors | ForEach-Object { Write-Error $_.Message }; exit 1 }"
     )
@@ -175,10 +176,10 @@ def test_powershell_parser_accepts_startup_script() -> None:
             "-NonInteractive",
             "-Command",
             parser_command,
-            str(POWERSHELL_LAUNCHER),
         ],
         check=False,
         capture_output=True,
+        env={**os.environ, "DS60_SCRIPT_TO_PARSE": str(POWERSHELL_LAUNCHER)},
         text=True,
     )
 

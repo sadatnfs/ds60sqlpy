@@ -100,9 +100,14 @@ function Get-CoursePsql {
     $Candidates = [System.Collections.Generic.List[string]]::new()
     $Seen = @{}
 
-    $Command = Get-Command "psql" -CommandType Application -ErrorAction SilentlyContinue
-    if ($Command -and $Command.Source) {
-        $Candidates.Add($Command.Source) | Out-Null
+    foreach (
+        $Command in @(
+            Get-Command "psql" -CommandType Application -ErrorAction SilentlyContinue
+        )
+    ) {
+        if ($Command.Source) {
+            $Candidates.Add($Command.Source) | Out-Null
+        }
     }
 
     foreach ($AppPath in @(
@@ -177,9 +182,10 @@ function Get-CoursePsql {
 }
 
 function Get-CourseVsCode {
-    $Command = Get-Command "code" -ErrorAction SilentlyContinue
-    if ($Command -and $Command.Source) {
-        return (Resolve-Path -LiteralPath $Command.Source).Path
+    foreach ($Command in @(Get-Command "code" -ErrorAction SilentlyContinue)) {
+        if ($Command.Source) {
+            return (Resolve-Path -LiteralPath $Command.Source).Path
+        }
     }
 
     $Candidates = [System.Collections.Generic.List[string]]::new()

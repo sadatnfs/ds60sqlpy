@@ -31,7 +31,12 @@ def test_course_database_check_is_noninteractive_and_read_only(
     assert "-w" in observed
     assert observed[-1] == "SELECT current_database();"
     assert connection not in observed
-    assert observed_environment["PGDATABASE"] == connection
+    assert observed_environment["PGDATABASE"] == "advanced_sql_training"
+    assert observed_environment["PGHOST"] == "localhost"
+    assert observed_environment["PGPORT"] == "5432"
+    assert observed_environment["PGUSER"] == "ds60"
+    assert observed_environment["PGPASSWORD"] == "temporary"
+    assert connection not in observed_environment.values()
     assert "DS60_DATABASE_URL" not in observed_environment
     assert not any(fragment in observed for fragment in ("CREATE", "DROP", "00_setup.sql"))
 

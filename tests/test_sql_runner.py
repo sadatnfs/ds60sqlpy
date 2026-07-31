@@ -86,5 +86,9 @@ def test_runner_keeps_password_bearing_target_out_of_process_arguments(
     environment = run.call_args.kwargs["env"]
     assert result.returncode == 0
     assert connection not in command
-    assert environment["PGDATABASE"] == connection
+    assert environment["PGDATABASE"] == "advanced_sql_training"
+    assert environment["PGHOST"] == "localhost"
+    assert environment["PGUSER"] == "course-user"
+    assert environment["PGPASSWORD"] == "temporary-password"
+    assert connection not in environment.values()
     assert "DS60_DATABASE_URL" not in environment
