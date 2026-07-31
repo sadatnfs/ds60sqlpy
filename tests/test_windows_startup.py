@@ -201,16 +201,20 @@ def test_ci_executes_native_windows_startup_diagnostics() -> None:
     assert r"-File .\scripts\start_ds60.ps1 `" in startup_step
     assert "-DiagnosticsOnly -NonInteractive -SkipPostgreSql" in startup_step
     assert "-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass" in startup_step
-    assert "powershell.exe" in bootstrap_step
-    assert "-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass" in bootstrap_step
-    assert r"-File .\scripts\bootstrap_windows.ps1" in bootstrap_step
+    native_shell = (
+        "shell: powershell -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}"
+    )
+    assert native_shell in bootstrap_step
+    assert r"& .\scripts\bootstrap_windows.ps1" in bootstrap_step
     assert "-SkipPostgreSql -WhatIf" in bootstrap_step
     learner_setup_step = text.split(
         "- name: Run the Windows learner setup",
         maxsplit=1,
     )[1].split("- name: Run the macOS/Linux learner setup", maxsplit=1)[0]
-    assert r"-File .\scripts\bootstrap_windows.ps1" in learner_setup_step
-    assert "-SkipPostgreSql -DependencyMode Locked" in learner_setup_step
+    assert native_shell in learner_setup_step
+    assert r"& .\scripts\bootstrap_windows.ps1 `" in learner_setup_step
+    assert "-SkipPostgreSql `" in learner_setup_step
+    assert "-DependencyMode Locked" in learner_setup_step
     assert r"-File .\scripts\setup.ps1" not in learner_setup_step
 
 
@@ -335,10 +339,13 @@ def test_startup_python_probe_avoids_legacy_native_quote_serialization() -> None
     assert "function Invoke-PythonSource" in text
     assert "[IO.File]::WriteAllText(" in text
     assert '& $PythonPath "-c" $Probe' not in text
-    assert "Remove-Item -LiteralPath $ProbePath" in text
+    assert "Remove-Item `" in text
+    assert "-LiteralPath $ProbePath `" in text
     assert '$ErrorActionPreference = "Continue"' in text
     assert "function Invoke-NativeCapture" in text
     assert "2>&1" not in text
+    assert "1> $OutputPath 2> $ErrorPath" in text
+    assert "-WhatIf:$false" in text
 
 
 @pytest.mark.skipif(POWERSHELL_PARSER is None, reason="PowerShell is not installed")

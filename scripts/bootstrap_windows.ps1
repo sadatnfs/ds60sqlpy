@@ -96,17 +96,20 @@ function Invoke-NativeCapture {
     # Keep stderr out of structured stdout such as JSON and version probes.
     # This also avoids the Windows PowerShell 5.1 behavior where redirected
     # native stderr obeys $ErrorActionPreference.
+    $OutputPath = [IO.Path]::GetTempFileName()
     $ErrorPath = [IO.Path]::GetTempFileName()
     try {
         $PreviousErrorActionPreference = $ErrorActionPreference
         try {
             $ErrorActionPreference = "Continue"
-            $Output = (& $FilePath @ArgumentList 2> $ErrorPath | Out-String).Trim()
+            & $FilePath @ArgumentList 1> $OutputPath 2> $ErrorPath
             $ExitCode = $LASTEXITCODE
         } finally {
             $ErrorActionPreference = $PreviousErrorActionPreference
         }
 
+        $Output = [string](Get-Content -LiteralPath $OutputPath -Raw)
+        $Output = $Output.Trim()
         $ErrorText = [string](Get-Content -LiteralPath $ErrorPath -Raw)
         $ErrorText = $ErrorText.Trim()
         if ($ExitCode -ne 0) {
@@ -122,7 +125,13 @@ function Invoke-NativeCapture {
         }
         return $Output
     } finally {
-        Remove-Item -LiteralPath $ErrorPath -Force -ErrorAction SilentlyContinue
+        # Cleanup must override the caller's -WhatIf preference because these
+        # two files are implementation details that this function created.
+        Remove-Item `
+            -LiteralPath $OutputPath, $ErrorPath `
+            -Force `
+            -ErrorAction SilentlyContinue `
+            -WhatIf:$false
     }
 }
 
@@ -152,7 +161,11 @@ function Invoke-PythonSource {
         }
         Invoke-Native -FilePath $PythonPath -ArgumentList @($ProbePath)
     } finally {
-        Remove-Item -LiteralPath $ProbePath -Force -ErrorAction SilentlyContinue
+        Remove-Item `
+            -LiteralPath $ProbePath `
+            -Force `
+            -ErrorAction SilentlyContinue `
+            -WhatIf:$false
     }
 }
 

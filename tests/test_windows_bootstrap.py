@@ -285,9 +285,11 @@ def test_python_probes_avoid_legacy_native_quote_serialization() -> None:
     assert "[IO.File]::WriteAllText(" in text
     assert '@("-c", $Probe)' not in text
     assert '@("-c", $ImportProbe)' not in text
-    assert "Remove-Item -LiteralPath $ProbePath" in text
+    assert "Remove-Item `" in text
+    assert "-LiteralPath $ProbePath `" in text
     assert '$ErrorActionPreference = "Continue"' in text
-    assert "2> $ErrorPath" in text
+    assert "1> $OutputPath 2> $ErrorPath" in text
+    assert "-WhatIf:$false" in text
 
 
 @pytest.mark.skipif(POWERSHELL_PARSER is None, reason="PowerShell is not installed")

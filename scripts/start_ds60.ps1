@@ -103,17 +103,20 @@ function Invoke-NativeCapture {
 
     # Keep stderr out of structured stdout and prevent Windows PowerShell 5.1
     # from escalating benign native warnings under the script's strict mode.
+    $OutputPath = [IO.Path]::GetTempFileName()
     $ErrorPath = [IO.Path]::GetTempFileName()
     try {
         $PreviousErrorActionPreference = $ErrorActionPreference
         try {
             $ErrorActionPreference = "Continue"
-            $Output = (& $FilePath @ArgumentList 2> $ErrorPath | Out-String).Trim()
+            & $FilePath @ArgumentList 1> $OutputPath 2> $ErrorPath
             $ExitCode = $LASTEXITCODE
         } finally {
             $ErrorActionPreference = $PreviousErrorActionPreference
         }
 
+        $Output = [string](Get-Content -LiteralPath $OutputPath -Raw)
+        $Output = $Output.Trim()
         $ErrorText = [string](Get-Content -LiteralPath $ErrorPath -Raw)
         $ErrorText = $ErrorText.Trim()
         if ($ExitCode -ne 0) {
@@ -129,7 +132,11 @@ function Invoke-NativeCapture {
         }
         return $Output
     } finally {
-        Remove-Item -LiteralPath $ErrorPath -Force -ErrorAction SilentlyContinue
+        Remove-Item `
+            -LiteralPath $OutputPath, $ErrorPath `
+            -Force `
+            -ErrorAction SilentlyContinue `
+            -WhatIf:$false
     }
 }
 
@@ -157,7 +164,11 @@ function Invoke-PythonSource {
             -ArgumentList @($ProbePath) `
             -AllowFailure:$AllowFailure
     } finally {
-        Remove-Item -LiteralPath $ProbePath -Force -ErrorAction SilentlyContinue
+        Remove-Item `
+            -LiteralPath $ProbePath `
+            -Force `
+            -ErrorAction SilentlyContinue `
+            -WhatIf:$false
     }
 }
 

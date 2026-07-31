@@ -140,18 +140,32 @@ jobs:
           enable-cache: true
       - name: Exercise the Windows discovery bootstrap
         if: runner.os == 'Windows'
-        shell: pwsh
-        run: >-
-          powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass
-          -File .\scripts\bootstrap_windows.ps1
-          -SkipPostgreSql -WhatIf
+        shell: powershell -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          try {
+            & .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -WhatIf
+          } catch {
+            $Message = [string]$_.Exception.Message
+            $Message = $Message.Replace("%", "%25")
+            $Message = $Message.Replace("`r", "%0D").Replace("`n", "%0A")
+            Write-Output "::error title=Windows bootstrap preview failed::$Message"
+            throw
+          }
       - name: Run the Windows learner setup
         if: runner.os == 'Windows'
-        shell: pwsh
-        run: >-
-          powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass
-          -File .\scripts\bootstrap_windows.ps1
-          -SkipPostgreSql -DependencyMode Locked
+        shell: powershell -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        run: |
+          try {
+            & .\scripts\bootstrap_windows.ps1 `
+              -SkipPostgreSql `
+              -DependencyMode Locked
+          } catch {
+            $Message = [string]$_.Exception.Message
+            $Message = $Message.Replace("%", "%25")
+            $Message = $Message.Replace("`r", "%0D").Replace("`n", "%0A")
+            Write-Output "::error title=Windows learner setup failed::$Message"
+            throw
+          }
       - name: Run the macOS/Linux learner setup
         if: runner.os != 'Windows'
         run: bash scripts/setup.sh
