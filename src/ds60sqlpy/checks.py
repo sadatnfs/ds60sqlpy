@@ -13,6 +13,7 @@ from typing import Literal
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.catalog_builder import PROFESSIONAL_LESSON_SPECS, build_catalog
+from ds60sqlpy.curriculum_framework import RUNNER_SOURCE_SUFFIXES, RUNNERS, load_extensions
 
 Severity = Literal["pass", "warn", "fail"]
 
@@ -53,8 +54,13 @@ def check_catalog(catalog: Catalog) -> list[CheckResult]:
         track: core + sum(spec["track"] == track for spec in PROFESSIONAL_LESSON_SPECS)
         for track, core in (("python", 60), ("sql", 60), ("bridge", 8))
     }
+    extensions = load_extensions(root)
+    for track in extensions.tracks:
+        expected_counts.setdefault(track, 0)
+    for lesson_definition in extensions.lessons:
+        expected_counts[lesson_definition["track"]] += 1
     for track, expected in expected_counts.items():
-        count = len(catalog.lessons(track))  # type: ignore[arg-type]
+        count = len(catalog.lessons(track))
         severity: Severity = "pass" if count == expected else "fail"
         results.append(
             _result(
@@ -104,12 +110,30 @@ def check_catalog(catalog: Catalog) -> list[CheckResult]:
                         root,
                     )
                 )
-        if len(lesson.solution_paths) != 2:
+        reading = RUNNERS[lesson.runner].kind == "reading"
+        solution_requirement = (
+            "at least one reasoning solution" if reading else "two solution artifacts"
+        )
+        if (reading and not lesson.solution_paths) or (
+            not reading and len(lesson.solution_paths) != 2
+        ):
             results.append(
                 _result(
                     "fail",
                     "catalog.solution.coverage",
-                    f"{lesson.id} has {len(lesson.solution_paths)}/2 solution artifacts",
+                    f"{lesson.id} needs {solution_requirement}; found {len(lesson.solution_paths)}",
+                )
+            )
+        solution_suffixes = {Path(path).suffix.lower() for path in lesson.solution_paths}
+        needs_reference = RUNNER_SOURCE_SUFFIXES.get(lesson.runner, set())
+        if ".md" not in solution_suffixes or (
+            needs_reference and not solution_suffixes.intersection(needs_reference)
+        ):
+            results.append(
+                _result(
+                    "fail",
+                    "catalog.solution.format",
+                    f"{lesson.id} needs a Markdown explanation and a runner reference artifact.",
                 )
             )
 
@@ -172,6 +196,7 @@ def check_notebooks(catalog: Catalog) -> list[CheckResult]:
         [
             *(root / "python" / "ds-60day").rglob("*.ipynb"),
             *(root / "bridge" / "professional").rglob("*.ipynb"),
+            *(root / "courses").rglob("*.ipynb"),
         ]
     )
     results: list[CheckResult] = []
@@ -447,7 +472,7 @@ def check_sql_guide_contract(catalog: Catalog) -> list[CheckResult]:
     """Require the learner-facing authoring contract in every SQL guide."""
 
     root = catalog.repo_root
-    lessons = catalog.lessons("sql")
+    lessons = tuple(lesson for lesson in catalog if lesson.runner == "sql")
     results: list[CheckResult] = []
     contract_errors = 0
 

@@ -131,17 +131,19 @@
 <li>Lesson artifacts and <code>src/ds60sqlpy/catalog_builder.py</code>: inputs for lesson identity, ordering, prerequisites, dependency groups, network behavior, and artifact availability</li>
 <li><code>src/ds60sqlpy/catalog.py</code>: catalog loading and learner-facing ordering; named modules can use an explicit order override to appear at their prerequisite milestone without renumbering the historical day tracks</li>
 <li><code>curriculum/catalog.json</code>: checked-in generated index consumed by tools; regenerate it rather than editing it by hand</li>
+<li><code>curriculum/extensions/*.json</code> and <code>src/ds60sqlpy/curriculum_framework.py</code>: additive track, lesson, and goal registration plus explicit runner capabilities. Use <a href="docs/curriculum-extension-playbook.md.html">the extension playbook</a> before adding a language, operations topic, or reading-only track.</li>
 <li><code>README.md</code>: learner entry point</li>
 <li><code>docs/setup/</code>: operating-system setup</li>
 <li><code>docs/content-authoring.md</code>: lesson contract</li>
 <li><code>docs/curriculum-design-references.md</code>: source-backed teaching patterns and the rationale for the repository&#x27;s lesson sequence</li>
 <li><code>docs/validation.md</code>: verification policy</li>
 <li><code>curriculum/practice_baseline.json</code> and <code>scripts/audit_practice.py</code>: immutable pre-enrichment counts and the per-surface exercise-doubling gate</li>
-<li><code>scripts/audit_lesson_depth.py</code> and <code>docs/lesson-depth-report.md</code>: structural minimums for self-contained beginner explanations, runnable examples, exercise contracts, explanatory solutions, historical Python notebook depth, and per-lesson Codex prompts across all three tracks</li>
+<li><code>scripts/audit_lesson_depth.py</code> and <code>docs/lesson-depth-report.md</code>: structural minimums for self-contained beginner explanations, runnable examples, exercise contracts, explanatory solutions, Python notebook depth, and per-lesson Codex prompts across all three tracks</li>
 <li><code>scripts/build_course_guide.py</code>: source for generated <code>START_HERE.html</code>; never hand-edit the HTML</li>
 <li><code>src/ds60sqlpy/lesson_reader.py</code> and <code>scripts/build_lesson_readers.py</code>: sources for generated <code>lesson-pages/&lt;lesson-id&gt;.html</code> and linked <code>reference-pages/&lt;source&gt;.html</code>; never hand-edit those readers</li>
 <li><code>src/ds60sqlpy/sql_notebook.py</code> and <code>scripts/build_sql_lesson_notebook.py</code>: catalog-restricted generator and runner for learner-local SQL notebooks under <code>.learning/sql/</code>; never check generated workspaces into Git</li>
-<li><code>START_DS60.cmd</code> and <code>scripts/start_ds60.ps1</code>: Windows learner entry point; keep it path-safe, PowerShell 5.1-compatible, and aligned with <code>scripts/bootstrap_windows.ps1</code></li>
+<li><code>START_DOCKER_LAB.cmd</code> and <code>scripts/start_docker_windows.ps1</code>: Windows beginner container entry point, including consented prerequisite setup. Re-detect after a manual reboot; preserve existing engines and learner work.</li>
+<li><code>START_DS60.cmd</code> and <code>scripts/start_ds60.ps1</code>: optional Windows native entry point; keep it path-safe, PowerShell 5.1-compatible, and aligned with <code>scripts/bootstrap_windows.ps1</code></li>
 <li><code>src/ds60sqlpy/portal.py</code>: optional loopback launcher and shared <code>.learning/progress.json</code> boundary</li>
 <li><code>docs/curriculum-gap-backlog.md</code>: implemented gap record and maintenance rules</li>
 <li><code>.agents/skills/guide-ds60sqlpy-learning/</code>: Codex tutoring workflow</li>
@@ -166,7 +168,7 @@
 <li>Ask the learner to predict behavior and attempt exercises.</li>
 <li>Give progressive hints before opening or reproducing official solutions.</li>
 <li>Use the sequence <strong>guide → prediction → learner attempt → progressive hints → solution comparison</strong>. Opening a file or checking a box is not evidence of mastery.</li>
-<li>Treat every rendered lesson page as a readable, read-only preview. Send learners to the cataloged file in VS Code or JupyterLab, or to the generated <code>.learning/sql/</code> working copy, when they need to execute or edit code.</li>
+<li>Treat every rendered lesson page as a readable, read-only preview. In the coding lab, use the lesson&#x27;s capability notice and saved pad/evidence route. Native editor/Jupyter and generated <code>.learning/sql/</code> working copies remain alternatives. A reading lesson needs written reasoning, not an invented run command or an automatic completion.</li>
 <li>Do not overwrite learner work.</li>
 <li>Keep solutions separate from learner artifacts.</li>
 <li>Do not silently skip failures or hide exceptions that teach an important concept.</li>
@@ -203,6 +205,15 @@
 <li>Make each <code>Expected</code>/<code>Verify</code> contract independently inspectable. It may not merely restate the exercise or apply a generic checklist unrelated to that exercise&#x27;s mechanism.</li>
 </ol>
 <p>Do not expand the curriculum merely to increase lesson count. Add content only when it closes a documented learning gap.</p>
+<p>For future tracks, keep these extension boundaries:</p>
+<ol>
+<li>Author content under <code>courses/&lt;track&gt;/</code> with a plan and a local <code>AGENTS.md</code>. Register it through an additive manifest; keep historical IDs, day values, and the immutable practice baseline intact.</li>
+<li>Separate a subject from its execution tool. Deep learning can use the Python runner; LLM theory can use <code>none</code>. C++, Scala/Spark, and Kubernetes descriptors do not by themselves implement execution.</li>
+<li>Add every new lesson to <code>curriculum/practice_expansion.json</code> with baseline zero and target six. The guide, learner, and every explanatory solution still need six distinct, inspectable exercises and the full depth contract.</li>
+<li>A <code>none</code> lesson requires a separate explanatory solution and worked reasoning with expected observations. Other runners require two solution artifacts, including an explanation. Do not generate filler to pass counts.</li>
+<li>Do not place shell text, image commands, cluster targets, or credentials in a manifest. Actual adapters belong in reviewed backend code and require bounded execution, truthful capability reporting, and failure/cleanup tests.</li>
+<li>Regenerate the catalog, dashboard, lesson readers, and reference pages. Prove search, prerequisite plans, the app, and MCP discover the new IDs in an isolated fixture before claiming a track is integrated.</li>
+</ol>
 <h3 id="validation">Validation<a class="heading-anchor" href="#validation" aria-label="Link to this section">#</a></h3>
 <p>Use the narrowest relevant check during iteration, then run:</p>
 <pre><code class="language-text">python scripts/course.py doctor
@@ -247,7 +258,7 @@ python -m pytest tests/test_course_guide.py tests/test_lesson_depth_audit.py tes
 <li>SQL is not covered by the configured language servers; search with <code>rg</code> and prove behavior with PostgreSQL.</li>
 <li>Markdown/YAML indexing helps navigation but does not replace link or schema validation.</li>
 </ul>
-<p>Keep durable truth in checked-in artifacts, authoring metadata, docs, and the regenerated catalog—not only in generated Serena memories.</p>
+<p>Keep durable truth in checked-in artifacts, authoring metadata, docs, and the regenerated catalog - not only in generated Serena memories.</p>
 <h3 id="scope-boundaries">Scope boundaries<a class="heading-anchor" href="#scope-boundaries" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><code>python/AGENTS.md</code> governs Python, notebooks, companion guides, and Python solutions.</li>

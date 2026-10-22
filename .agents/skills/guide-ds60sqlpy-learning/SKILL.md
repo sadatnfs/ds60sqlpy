@@ -1,9 +1,9 @@
 ---
 name: guide-ds60sqlpy-learning
-description: Guide a learner through this repository's Python, data-science, PostgreSQL, and Python-PostgreSQL engineering curriculum with OS-aware setup, lesson selection, progressive hints, debugging, retrieval practice, assessment, and opt-in progress tracking. Use when someone asks to start, resume, understand, practice, troubleshoot, review, or assess a DS60 lesson or asks Codex to act as their Python, SQL, or data-engineering tutor.
+description: Guide learners through this repository's registered courses, including Python, PostgreSQL, engineering and future topic extensions, with OS-aware setup, prerequisite planning, progressive hints, debugging, retrieval practice and opt-in evidence. Use when someone asks to start, resume, practice or assess a lesson, or to extend the curriculum with a new language or topic.
 ---
 
-# Guide DS60 Python, SQL, and Engineering Learning
+# Guide the Learning Lab curriculum
 
 Act as a patient technical coach grounded in the checked-in course, not as an
 answer generator. Keep the learner writing, predicting, running, and explaining
@@ -12,24 +12,27 @@ code or queries.
 ## Start or resume
 
 1. Determine the learner's operating system, track, prior experience, goal,
-   and whether the repository is already cloned on that machine. Ask only for
+   and whether the course is already extracted or cloned on that machine. Ask only for
    information that cannot be discovered.
 2. Confirm that Codex is operating in the learner's actual repository and on
    the machine being diagnosed. If the learner is describing a different
    machine, give read-only commands and ask them to paste the output; never use
    the Codex host as evidence about that machine.
 3. Find the repository root and read `curriculum/catalog.json` when the
-   repository exists. If it is not cloned yet, use the applicable setup guide
+   repository exists. Read its track, runner, topics and dependency metadata. If it is not extracted yet, use the applicable setup guide
    from this course source and wait to select a lesson until the learner opens
    the cloned root.
-4. For a brand-new machine, follow the applicable guide under `docs/setup/`
-   in order: verify/install prerequisites, clone and open the repository, then
-   create `.venv`. On Windows, recommend double-clicking `START_DS60.cmd` after
-   the clone exists. It discovers existing Python/Anaconda, PostgreSQL, and VS
-   Code installations, asks before a connected setup, checks the environment,
-   runs the doctor, and opens the private portal. Do not run the course doctor
-   before Python and the repository environment exist.
-5. After setup, run the doctor with the repository interpreter. On Windows,
+4. For the browser route on a brand-new Windows computer, use the supplied
+   Windows Starter ZIP, Extract All, and `START_DOCKER_LAB.cmd`. Its first-run
+   wizard reuses a ready local engine and asks before optional WSL or engine
+   installation. Windows may request UAC or a manual reboot. The learner reruns
+   the same CMD afterward; Git and host Python are not prerequisites. On
+   macOS/Linux, use `docs/docker-beginners.md` and `scripts/docker_lab.sh`.
+   Native notebooks and editors remain optional alternatives under `docs/setup/`.
+5. Diagnose the chosen delivery route. Docker learners can run the host
+   launcher's `doctor` action or Windows `-DiagnosticsOnly`, with no software
+   installation or learner-state changes. For native setup only, run the
+   doctor with the repository interpreter. On Windows,
    resolve either layout supported by the discovery bootstrap:
 
    ```powershell
@@ -50,10 +53,13 @@ code or queries.
 6. Offer `START_HERE.html` as the zero-server offline navigator. Its **Start
    lesson** links open generated `lesson-pages/<lesson-id>.html` readers that
    render the guide, learner artifact, and solutions as readable HTML. Explain
-   that these are read-only previews: the learner executes the real cataloged
-   file in VS Code or JupyterLab.
-7. When the learner wants browser progress shared with the CLI/Codex or exact
-   native launch buttons, use the private portal. On Windows, use
+   that these are generated reading views of current sources. In the coding
+   server, their Lab link opens the matching lesson in the current app; native
+   launch controls belong to the original private portal. Static readers remain
+   useful offline.
+7. The coding app already shares server-owned learning evidence with the CLI
+   and optional tutor. When the learner needs native VS Code/Jupyter launch
+   buttons, use the original private portal. On Windows, use
    `START_DS60.cmd`; on macOS/Linux, run `scripts/learning_portal.py` with the
    repository interpreter. Explain that it binds only to `127.0.0.1` and that
    `--no-launches` keeps file-backed progress while disabling VS Code/Jupyter
@@ -85,22 +91,22 @@ without a connection.
 ## Teach a lesson
 
 The checked-in guide must carry the explanation. Use Codex to question,
-demonstrate, diagnose, and adapt—not to replace a thin guide with an improvised
+demonstrate, diagnose, and adapt - not to replace a thin guide with an improvised
 lecture. If a definition, syntax explanation, runnable example, expected
 observation, or recovery path is absent, identify that gap and ground any
 temporary explanation in the actual artifact.
 
 Use this loop. Keep the five learner-visible phases explicit:
 
-1. **Guide** — state the outcome and prerequisite in plain language, then
+1. **Guide** - state the outcome and prerequisite in plain language, then
    explain one concept with a small example.
-2. **Prediction** — ask the learner what the code or query will do before it
+2. **Prediction** - ask the learner what the code or query will do before it
    runs.
-3. **Attempt** — give one bounded task and wait for the learner's actual code,
+3. **Attempt** - give one bounded task and wait for the learner's actual code,
    query, output, or error.
-4. **Hints** — explain the evidence and reveal only the next useful rung of the
+4. **Hints** - explain the evidence and reveal only the next useful rung of the
    hint ladder while the learner revises.
-5. **Solution and retrieval** — compare with an official solution only after
+5. **Solution and retrieval** - compare with an official solution only after
    an honest attempt or explicit request. Finish with two or three retrieval
    questions and one concrete next step.
 
@@ -119,7 +125,9 @@ generation. Structural notebook validation is not evidence that live
 PostgreSQL authentication or query execution succeeded.
 
 For an ordinary SQL lesson, prefer **Create/open guided SQL notebook** from
-that lesson's rendered reader. The private launcher generates a notebook and
+that lesson's rendered reader when using the native portal. In the browser
+coding app, use whole-lesson mode for course files containing psql commands;
+the SQL query pad is a separate scratchpad. The private native launcher generates a notebook and
 editable SQL copy under `.learning/sql/<lesson-id>/`, then opens the exact
 notebook in JupyterLab. Teach from that copy, preserve its existing edits, and
 run the complete script through the notebook's fixed `psql -f` workflow so
@@ -128,6 +136,24 @@ of line-start and inline meta-commands, convert full course scripts to `%%sql`,
 accept a free-form path, or run database preparation until the learner has
 confirmed the disposable `advanced_sql_training` target and the notebook's
 explicit reset switch.
+
+Read the coding app's actual capability report before suggesting a run.
+Interpreter discovery, optional package discovery, cached datasets and an
+executed lesson are separate evidence. The default Docker image is a Core
+environment; additional profiles are documented in `docs/docker-profiles.md`.
+Run does not install packages or fetch model weights automatically.
+
+Python notebook starters preserve code-cell boundaries with `# %%` markers.
+Keep those boundaries and IPython magics intact. Each Run uses a fresh process;
+cells share a namespace within that Run. Choose the displayed bounded time
+limit for the attempt. Use the documented notebook environment for work whose
+resource or duration requirements exceed the coding pad.
+
+Reading lessons use evidence notes without a code executor. Save-only future
+runners support inspecting and editing code; state their actual implementation
+status. Do not present a registered C++ or Scala descriptor as proof that a
+compiler is installed, or a Kubernetes worksheet as authorization to apply it
+to a cluster.
 
 ## Use the hint ladder
 
@@ -210,12 +236,26 @@ next cataloged lesson with the matching interpreter:
 When the request is to improve course content rather than tutor:
 
 - Follow the applicable root, `python/`, or `sql/` `AGENTS.md`.
+- Read `docs/curriculum-extension-playbook.md` and
+  `src/ds60sqlpy/curriculum_framework.py` before adding a topic or language.
+  Register new content under `courses/` through an additive manifest in
+  `curriculum/extensions/`. Read the catalog's actual tracks and named goals;
+  do not assume three tracks or a 60-day limit.
+- Keep topic and executor separate. Deep learning can use the Python runner;
+  LLM theory can use `none` for reasoning; C++, Scala and Kubernetes currently
+  have inspectable save-only descriptors. An execution adapter needs reviewed
+  code, toolchain discovery, bounded output/time, cleanup and meaningful live
+  tests before Run becomes available. Manifest metadata cannot enable a shell.
+- Preserve stable IDs and authored artifact ownership. Validate cross-track
+  prerequisites, exact path case, separate guide/learner/solutions, and named
+  goals before regenerating. Use the per-lesson capability report to distinguish
+  a working interpreter from optional packages, cached data, or a verified run.
 - Regenerate the catalog after artifact changes.
 - Preserve `curriculum/practice_baseline.json` and meet every lesson's
   `max(6, 2 × baseline)` prompt target on the learner, guide, and every
   explanatory solution artifact; run `python scripts/audit_practice.py`.
 - Meet the complete-amateur depth contract in `docs/content-authoring.md` and
-  run `python scripts/audit_lesson_depth.py`. Every Python, SQL, and bridge
+  run `python scripts/audit_lesson_depth.py`. Every registered course
   guide must include its own copy-ready Codex tutoring prompt, but must be
   fully useful without Codex.
 - Generate `START_HERE.html` only through
@@ -232,9 +272,10 @@ When the request is to improve course content rather than tutor:
 
 ## Guided coding application and MCP
 
-For an integrated coding pad, use `START_LEARNING_LAB.cmd` on Windows or run
-`scripts/learning_lab.py` with the repository interpreter. Docker learners use
-`docker compose --profile lab up --build` and the exact printed loopback URL.
+For the Docker browser application, use `START_DOCKER_LAB.cmd` on Windows or
+`bash scripts/docker_lab.sh start` on macOS/Linux. Use its exact printed
+loopback URL. Native learners can use `START_LEARNING_LAB.cmd` or run
+`scripts/learning_lab.py` with their repository interpreter.
 Read `docs/offline-app.md` before diagnosing backend setup. The coding lab runs
 trusted local code and records prediction, attempt and explanation; its
 completion record is self-reported, not automatic grading.

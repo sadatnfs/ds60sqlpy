@@ -6,6 +6,9 @@ on:
     paths:
       - "src/**"
       - "scripts/build_app.py"
+      - "scripts/build_windows_starter.py"
+      - "scripts/start_docker_windows.ps1"
+      - "START_DOCKER_LAB.cmd"
       - "scripts/learning_lab.py"
       - "scripts/docker_lab.*"
       - "docker/**"
@@ -18,6 +21,22 @@ permissions:
   contents: read
 
 jobs:
+  windows-starter:
+    name: Portable Windows Docker starter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Package the complete first-run Windows starter
+        run: python scripts/build_windows_starter.py
+      - uses: actions/upload-artifact@v6
+        with:
+          name: DS60LearningLab-Windows-Starter
+          path: dist/*Windows-Starter.zip
+          retention-days: 14
+
   native:
     name: Native application (${{ matrix.os }})
     runs-on: ${{ matrix.os }}

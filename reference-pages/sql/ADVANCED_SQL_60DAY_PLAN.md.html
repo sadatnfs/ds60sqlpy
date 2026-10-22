@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>PostgreSQL 16+ learning plan — 60-day track · DS60 reference</title>
+  <title>PostgreSQL 16+ learning plan - 60-day track · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -112,12 +112,12 @@
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>PostgreSQL 16+ learning plan — 60-day track</h1>
+      <h1>PostgreSQL 16+ learning plan - 60-day track</h1>
       <p class="source-path">Generated from <code>sql/ADVANCED_SQL_60DAY_PLAN.md</code></p>
     </header>
-    <article class="document"><h2 id="postgresql-16-learning-plan-60-day-track">PostgreSQL 16+ learning plan — 60-day track<a class="heading-anchor" href="#postgresql-16-learning-plan-60-day-track" aria-label="Link to this section">#</a></h2>
+    <article class="document"><h2 id="postgresql-16-learning-plan-60-day-track">PostgreSQL 16+ learning plan - 60-day track<a class="heading-anchor" href="#postgresql-16-learning-plan-60-day-track" aria-label="Link to this section">#</a></h2>
 <p>This plan describes the repository&#x27;s actual PostgreSQL curriculum. “60 days” is an ordered sequence, not a deadline: repeat a lesson, split a project across several sessions, or pause whenever the concepts need more practice.</p>
-<p>The exact machine-readable artifact map is <a href="../../curriculum/catalog.json"><code>curriculum/catalog.json</code></a>. Before starting, read the <a href="postgres-60day/README.md.html">PostgreSQL track README</a>. Narrative pre-reads are indexed in the <a href="postgres-60day/companion-guides/README.md.html">companion-guide README</a>, and worked answers are described in the <a href="postgres-60day/solutions/README.md.html">solution README</a>.</p>
+<p>The exact machine-readable artifact map is <a href="../curriculum/catalog.json.html"><code>curriculum/catalog.json</code></a>. Before starting, read the <a href="postgres-60day/README.md.html">PostgreSQL track README</a>. Narrative pre-reads are indexed in the <a href="postgres-60day/companion-guides/README.md.html">companion-guide README</a>, and worked answers are described in the <a href="postgres-60day/solutions/README.md.html">solution README</a>.</p>
 <h3 id="how-to-use-the-track">How to use the track<a class="heading-anchor" href="#how-to-use-the-track" aria-label="Link to this section">#</a></h3>
 <p>For each lesson:</p>
 <ol>
@@ -139,103 +139,103 @@
 <li>Day 44 can use <code>pg_stat_statements</code> when an administrator has installed and configured it. The core lesson remains usable without that extension.</li>
 <li>Query plans and timings depend on PostgreSQL version, statistics, cache state, hardware, concurrency, and data volume. The small deterministic seed can rationally produce sequential scans even when an index is well designed. There is no portable fixed speedup or runtime guarantee.</li>
 </ul>
-<h3 id="phase-1-relational-querying-and-report-foundations-days-1-15">Phase 1 — Relational querying and report foundations (Days 1–15)<a class="heading-anchor" href="#phase-1-relational-querying-and-report-foundations-days-1-15" aria-label="Link to this section">#</a></h3>
+<h3 id="phase-1-relational-querying-and-report-foundations-days-1-15">Phase 1 - Relational querying and report foundations (Days 1–15)<a class="heading-anchor" href="#phase-1-relational-querying-and-report-foundations-days-1-15" aria-label="Link to this section">#</a></h3>
 <h4 id="core-queries-joins-and-sets">Core queries, joins, and sets<a class="heading-anchor" href="#core-queries-joins-and-sets" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><a href="../../lesson-pages/sql-01.html#learner">Day 1 — <code>SELECT</code>, <code>WHERE</code>, ordering, and limits</a>: filter customers and products, create derived columns, and return deterministic top-N results.</li>
-<li><a href="../../lesson-pages/sql-02.html#learner">Day 2 — aggregates, <code>GROUP BY</code>, and <code>HAVING</code></a>: payment totals, customer tenure, and category gross-margin summaries.</li>
-<li><a href="../../lesson-pages/sql-03.html#learner">Day 3 — inner joins</a>: traverse customers, orders, lines, products, payments, departments, and the employee hierarchy while watching join fanout.</li>
-<li><a href="../../lesson-pages/sql-04.html#learner">Day 4 — outer joins and NULL-aware reconciliation</a>: find unpaid orders, unsold products, and customers without recent orders.</li>
-<li><a href="../../lesson-pages/sql-05.html#learner">Day 5 — cross joins and self-joins</a>: create category-country combinations and three-level employee hierarchies.</li>
-<li><a href="../../lesson-pages/sql-06.html#learner">Day 6 — <code>UNION</code>, <code>UNION ALL</code>, <code>INTERSECT</code>, and <code>EXCEPT</code></a>: compare customer, product, promotion, and order sets with compatible result shapes.</li>
-<li><a href="../../lesson-pages/sql-07.html#learner">Day 7 — week-one report project</a>: extend recent country-category revenue with payment method and customer cohort dimensions while preventing payment fanout.</li>
+<li><a href="../../lesson-pages/sql-01.html#learner">Day 1 - <code>SELECT</code>, <code>WHERE</code>, ordering, and limits</a>: filter customers and products, create derived columns, and return deterministic top-N results.</li>
+<li><a href="../../lesson-pages/sql-02.html#learner">Day 2 - aggregates, <code>GROUP BY</code>, and <code>HAVING</code></a>: payment totals, customer tenure, and category gross-margin summaries.</li>
+<li><a href="../../lesson-pages/sql-03.html#learner">Day 3 - inner joins</a>: traverse customers, orders, lines, products, payments, departments, and the employee hierarchy while watching join fanout.</li>
+<li><a href="../../lesson-pages/sql-04.html#learner">Day 4 - outer joins and NULL-aware reconciliation</a>: find unpaid orders, unsold products, and customers without recent orders.</li>
+<li><a href="../../lesson-pages/sql-05.html#learner">Day 5 - cross joins and self-joins</a>: create category-country combinations and three-level employee hierarchies.</li>
+<li><a href="../../lesson-pages/sql-06.html#learner">Day 6 - <code>UNION</code>, <code>UNION ALL</code>, <code>INTERSECT</code>, and <code>EXCEPT</code></a>: compare customer, product, promotion, and order sets with compatible result shapes.</li>
+<li><a href="../../lesson-pages/sql-07.html#learner">Day 7 - week-one report project</a>: extend recent country-category revenue with payment method and customer cohort dimensions while preventing payment fanout.</li>
 </ul>
 <h4 id="subqueries-safe-dml-and-postgresql-functions">Subqueries, safe DML, and PostgreSQL functions<a class="heading-anchor" href="#subqueries-safe-dml-and-postgresql-functions" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><a href="../../lesson-pages/sql-08.html#learner">Day 8 — scalar and inline subqueries</a>: calculate country maximum orders and each customer&#x27;s first order date.</li>
-<li><a href="../../lesson-pages/sql-09.html#learner">Day 9 — correlated subqueries and existence tests</a>: use <code>EXISTS</code> for high-value customers and <code>NOT EXISTS</code> for unsold products.</li>
-<li><a href="../../lesson-pages/sql-10.html#learner">Day 10 — DML with subqueries</a>: practice temporary-table creation, <code>UPDATE</code>, <code>DELETE</code>, <code>RETURNING</code>, and rollback verification without persisting changes.</li>
-<li><a href="../../lesson-pages/sql-11.html#learner">Day 11 — <code>CASE</code> expressions</a>: create revenue tiers, time-of-day buckets, and conditional aggregates.</li>
-<li><a href="../../lesson-pages/sql-12.html#learner">Day 12 — string functions</a>: normalize country values and build labels using PostgreSQL text functions and <code>to_char</code> for numeric presentation.</li>
-<li><a href="../../lesson-pages/sql-13.html#learner">Day 13 — date, time, intervals, and time zones</a>: calculate quarters and days since last order. Because the repository defines no fiscal start month, the maintained answer states its UTC calendar-quarter assumption.</li>
-<li><a href="../../lesson-pages/sql-14.html#learner">Day 14 — numeric precision and casting</a>: use exact <code>numeric</code>, <code>ROUND</code>, <code>CEIL</code>, <code>FLOOR</code>, safe division, casts, and JSONB text extraction.</li>
-<li><a href="../../lesson-pages/sql-15.html#learner">Day 15 — segmented revenue project</a>: extend monthly segment-country revenue with at least two documented dimensions and reconcile the result against line-item totals.</li>
+<li><a href="../../lesson-pages/sql-08.html#learner">Day 8 - scalar and inline subqueries</a>: calculate country maximum orders and each customer&#x27;s first order date.</li>
+<li><a href="../../lesson-pages/sql-09.html#learner">Day 9 - correlated subqueries and existence tests</a>: use <code>EXISTS</code> for high-value customers and <code>NOT EXISTS</code> for unsold products.</li>
+<li><a href="../../lesson-pages/sql-10.html#learner">Day 10 - DML with subqueries</a>: practice temporary-table creation, <code>UPDATE</code>, <code>DELETE</code>, <code>RETURNING</code>, and rollback verification without persisting changes.</li>
+<li><a href="../../lesson-pages/sql-11.html#learner">Day 11 - <code>CASE</code> expressions</a>: create revenue tiers, time-of-day buckets, and conditional aggregates.</li>
+<li><a href="../../lesson-pages/sql-12.html#learner">Day 12 - string functions</a>: normalize country values and build labels using PostgreSQL text functions and <code>to_char</code> for numeric presentation.</li>
+<li><a href="../../lesson-pages/sql-13.html#learner">Day 13 - date, time, intervals, and time zones</a>: calculate quarters and days since last order. Because the repository defines no fiscal start month, the maintained answer states its UTC calendar-quarter assumption.</li>
+<li><a href="../../lesson-pages/sql-14.html#learner">Day 14 - numeric precision and casting</a>: use exact <code>numeric</code>, <code>ROUND</code>, <code>CEIL</code>, <code>FLOOR</code>, safe division, casts, and JSONB text extraction.</li>
+<li><a href="../../lesson-pages/sql-15.html#learner">Day 15 - segmented revenue project</a>: extend monthly segment-country revenue with at least two documented dimensions and reconcile the result against line-item totals.</li>
 </ul>
-<h3 id="phase-2-windows-ctes-and-semi-structured-data-days-16-30">Phase 2 — Windows, CTEs, and semi-structured data (Days 16–30)<a class="heading-anchor" href="#phase-2-windows-ctes-and-semi-structured-data-days-16-30" aria-label="Link to this section">#</a></h3>
+<h3 id="phase-2-windows-ctes-and-semi-structured-data-days-16-30">Phase 2 - Windows, CTEs, and semi-structured data (Days 16–30)<a class="heading-anchor" href="#phase-2-windows-ctes-and-semi-structured-data-days-16-30" aria-label="Link to this section">#</a></h3>
 <h4 id="window-functions">Window functions<a class="heading-anchor" href="#window-functions" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><a href="../../lesson-pages/sql-16.html#learner">Day 16 — window fundamentals</a>: compute customer lifetime totals and product share of category revenue without collapsing detail rows.</li>
-<li><a href="../../lesson-pages/sql-17.html#learner">Day 17 — <code>ROW_NUMBER</code>, <code>RANK</code>, and <code>DENSE_RANK</code></a>: compare tie behavior and return top customers within country.</li>
-<li><a href="../../lesson-pages/sql-18.html#learner">Day 18 — <code>LAG</code> and <code>LEAD</code></a>: compare dense product-month sales and find the next strictly higher department salary.</li>
-<li><a href="../../lesson-pages/sql-19.html#learner">Day 19 — running and moving aggregates</a>: build a dense daily calendar for literal 30-day revenue windows and cumulative product quantities.</li>
-<li><a href="../../lesson-pages/sql-20.html#learner">Day 20 — <code>FIRST_VALUE</code> and <code>LAST_VALUE</code></a>: compare product revenue with its first observed month and study frame boundaries. The employee exercise explicitly simulates history because the schema has no salary-history table.</li>
-<li><a href="../../lesson-pages/sql-21.html#learner">Day 21 — <code>NTILE</code> and <code>PERCENT_RANK</code></a>: assign product sales deciles and rank orders within customer.</li>
-<li><a href="../../lesson-pages/sql-22.html#learner">Day 22 — multi-level windows</a>: rank category revenue within country and overall, then compare department and company salary ranks.</li>
+<li><a href="../../lesson-pages/sql-16.html#learner">Day 16 - window fundamentals</a>: compute customer lifetime totals and product share of category revenue without collapsing detail rows.</li>
+<li><a href="../../lesson-pages/sql-17.html#learner">Day 17 - <code>ROW_NUMBER</code>, <code>RANK</code>, and <code>DENSE_RANK</code></a>: compare tie behavior and return top customers within country.</li>
+<li><a href="../../lesson-pages/sql-18.html#learner">Day 18 - <code>LAG</code> and <code>LEAD</code></a>: compare dense product-month sales and find the next strictly higher department salary.</li>
+<li><a href="../../lesson-pages/sql-19.html#learner">Day 19 - running and moving aggregates</a>: build a dense daily calendar for literal 30-day revenue windows and cumulative product quantities.</li>
+<li><a href="../../lesson-pages/sql-20.html#learner">Day 20 - <code>FIRST_VALUE</code> and <code>LAST_VALUE</code></a>: compare product revenue with its first observed month and study frame boundaries. The employee exercise explicitly simulates history because the schema has no salary-history table.</li>
+<li><a href="../../lesson-pages/sql-21.html#learner">Day 21 - <code>NTILE</code> and <code>PERCENT_RANK</code></a>: assign product sales deciles and rank orders within customer.</li>
+<li><a href="../../lesson-pages/sql-22.html#learner">Day 22 - multi-level windows</a>: rank category revenue within country and overall, then compare department and company salary ranks.</li>
 </ul>
 <h4 id="cte-pipelines-reshaping-jsonb-xml-and-text-search">CTE pipelines, reshaping, JSONB, XML, and text search<a class="heading-anchor" href="#cte-pipelines-reshaping-jsonb-xml-and-text-search" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><a href="../../lesson-pages/sql-23.html#learner">Day 23 — common table expressions</a>: name monthly-revenue and Electronics-revenue stages and understand PostgreSQL&#x27;s CTE inlining behavior.</li>
-<li><a href="../../lesson-pages/sql-24.html#learner">Day 24 — recursive CTEs</a>: enumerate every manager&#x27;s direct and indirect reports with cycle-safe paths, then generate and sum integers 1 through 100.</li>
-<li><a href="../../lesson-pages/sql-25.html#learner">Day 25 — multiple CTEs and hierarchies</a>: combine employee-manager levels with department metrics and build a filter → enrich → aggregate → present pipeline.</li>
-<li><a href="../../lesson-pages/sql-26.html#learner">Day 26 — CTEs with windows</a>: calculate month-over-month growth and top product-order contributions.</li>
-<li><a href="../../lesson-pages/sql-27.html#learner">Day 27 — pivot and unpivot patterns</a>: reshape data with conditional aggregation and lateral <code>VALUES</code>; optionally study <code>tablefunc.crosstab</code>. The seeded <code>budgets</code> table is already long-form, so the unpivot exercise demonstrates a deliberate wide-to-long round trip.</li>
-<li><a href="../../lesson-pages/sql-28.html#learner">Day 28 — JSONB and XML</a>: extract event metadata, group path segments, parse <code>xml_docs.payload</code> with <code>xpath</code>, and reconcile XML order status with relational data.</li>
-<li><a href="../../lesson-pages/sql-29.html#learner">Day 29 — pattern matching and full-text search</a>: use <code>LIKE</code>/<code>ILIKE</code>, PostgreSQL POSIX regular expressions, <code>to_tsvector</code>, and <code>to_tsquery</code>.</li>
-<li><a href="../../lesson-pages/sql-30.html#learner">Day 30 — cohort retention and CLV project</a>: extend cohort-month revenue with cohort size, retention rate, and a documented moving-average CLV heuristic.</li>
+<li><a href="../../lesson-pages/sql-23.html#learner">Day 23 - common table expressions</a>: name monthly-revenue and Electronics-revenue stages and understand PostgreSQL&#x27;s CTE inlining behavior.</li>
+<li><a href="../../lesson-pages/sql-24.html#learner">Day 24 - recursive CTEs</a>: enumerate every manager&#x27;s direct and indirect reports with cycle-safe paths, then generate and sum integers 1 through 100.</li>
+<li><a href="../../lesson-pages/sql-25.html#learner">Day 25 - multiple CTEs and hierarchies</a>: combine employee-manager levels with department metrics and build a filter → enrich → aggregate → present pipeline.</li>
+<li><a href="../../lesson-pages/sql-26.html#learner">Day 26 - CTEs with windows</a>: calculate month-over-month growth and top product-order contributions.</li>
+<li><a href="../../lesson-pages/sql-27.html#learner">Day 27 - pivot and unpivot patterns</a>: reshape data with conditional aggregation and lateral <code>VALUES</code>; optionally study <code>tablefunc.crosstab</code>. The seeded <code>budgets</code> table is already long-form, so the unpivot exercise demonstrates a deliberate wide-to-long round trip.</li>
+<li><a href="../../lesson-pages/sql-28.html#learner">Day 28 - JSONB and XML</a>: extract event metadata, group path segments, parse <code>xml_docs.payload</code> with <code>xpath</code>, and reconcile XML order status with relational data.</li>
+<li><a href="../../lesson-pages/sql-29.html#learner">Day 29 - pattern matching and full-text search</a>: use <code>LIKE</code>/<code>ILIKE</code>, PostgreSQL POSIX regular expressions, <code>to_tsvector</code>, and <code>to_tsquery</code>.</li>
+<li><a href="../../lesson-pages/sql-30.html#learner">Day 30 - cohort retention and CLV project</a>: extend cohort-month revenue with cohort size, retention rate, and a documented moving-average CLV heuristic.</li>
 </ul>
-<h3 id="phase-3-plans-physical-design-concurrency-and-operations-days-31-45">Phase 3 — Plans, physical design, concurrency, and operations (Days 31–45)<a class="heading-anchor" href="#phase-3-plans-physical-design-concurrency-and-operations-days-31-45" aria-label="Link to this section">#</a></h3>
+<h3 id="phase-3-plans-physical-design-concurrency-and-operations-days-31-45">Phase 3 - Plans, physical design, concurrency, and operations (Days 31–45)<a class="heading-anchor" href="#phase-3-plans-physical-design-concurrency-and-operations-days-31-45" aria-label="Link to this section">#</a></h3>
 <h4 id="plans-indexes-and-query-structure">Plans, indexes, and query structure<a class="heading-anchor" href="#plans-indexes-and-query-structure" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><a href="../../lesson-pages/sql-31.html#learner">Day 31 — <code>EXPLAIN</code> and <code>EXPLAIN ANALYZE</code></a>: compare estimates with actual rows and observe predicate selectivity.</li>
-<li><a href="../../lesson-pages/sql-32.html#learner">Day 32 — index fundamentals</a>: create rollback-safe B-tree demonstrations and compare plans with and without indexes.</li>
-<li><a href="../../lesson-pages/sql-33.html#learner">Day 33 — composite, covering, and partial indexes</a>: study leftmost-prefix behavior, <code>INCLUDE</code>, and immutable partial-index predicates.</li>
-<li><a href="../../lesson-pages/sql-34.html#learner">Day 34 — query optimization</a>: compare subqueries and joins, push selective work to the right stage, bound rows safely, and project only needed columns.</li>
-<li><a href="../../lesson-pages/sql-35.html#learner">Day 35 — performance pitfalls</a>: rewrite function-wrapped timestamp predicates and correlated aggregates while preserving result semantics.</li>
-<li><a href="../../lesson-pages/sql-36.html#learner">Day 36 — materialized views</a>: create, query, refresh, and compare a reporting snapshot with its base query.</li>
-<li><a href="../../lesson-pages/sql-37.html#learner">Day 37 — native range partitioning</a>: build monthly event partitions, observe pruning, and test partition indexes. The runnable lesson is single-cluster PostgreSQL partitioning; cross-server sharding remains an architectural discussion, not a feature implemented by this script.</li>
+<li><a href="../../lesson-pages/sql-31.html#learner">Day 31 - <code>EXPLAIN</code> and <code>EXPLAIN ANALYZE</code></a>: compare estimates with actual rows and observe predicate selectivity.</li>
+<li><a href="../../lesson-pages/sql-32.html#learner">Day 32 - index fundamentals</a>: create rollback-safe B-tree demonstrations and compare plans with and without indexes.</li>
+<li><a href="../../lesson-pages/sql-33.html#learner">Day 33 - composite, covering, and partial indexes</a>: study leftmost-prefix behavior, <code>INCLUDE</code>, and immutable partial-index predicates.</li>
+<li><a href="../../lesson-pages/sql-34.html#learner">Day 34 - query optimization</a>: compare subqueries and joins, push selective work to the right stage, bound rows safely, and project only needed columns.</li>
+<li><a href="../../lesson-pages/sql-35.html#learner">Day 35 - performance pitfalls</a>: rewrite function-wrapped timestamp predicates and correlated aggregates while preserving result semantics.</li>
+<li><a href="../../lesson-pages/sql-36.html#learner">Day 36 - materialized views</a>: create, query, refresh, and compare a reporting snapshot with its base query.</li>
+<li><a href="../../lesson-pages/sql-37.html#learner">Day 37 - native range partitioning</a>: build monthly event partitions, observe pruning, and test partition indexes. The runnable lesson is single-cluster PostgreSQL partitioning; cross-server sharding remains an architectural discussion, not a feature implemented by this script.</li>
 </ul>
 <h4 id="transactions-analytics-quality-and-database-operations">Transactions, analytics, quality, and database operations<a class="heading-anchor" href="#transactions-analytics-quality-and-database-operations" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><a href="../../lesson-pages/sql-38.html#learner">Day 38 — transactions and isolation</a>: study ACID, savepoints, <code>READ COMMITTED</code>, <code>REPEATABLE READ</code>, and <code>SERIALIZABLE</code>; use multiple sessions for non-repeatable reads, phantoms, and serialization failures.</li>
-<li><a href="../../lesson-pages/sql-39.html#learner">Day 39 — locks and deadlocks</a>: inspect <code>pg_locks</code>, reproduce blocking and deadlocks in separate sessions, apply consistent lock ordering, and use <code>FOR UPDATE SKIP LOCKED</code> for queue claiming.</li>
-<li><a href="../../lesson-pages/sql-40.html#learner">Day 40 — advanced analytics</a>: calculate rolling variance and standard deviation, z-scores, ordered-set percentiles, and ratio-to-total metrics.</li>
-<li><a href="../../lesson-pages/sql-41.html#learner">Day 41 — complex aggregations</a>: combine aggregate <code>FILTER</code>, conditional metrics, and ordered <code>string_agg</code>.</li>
-<li><a href="../../lesson-pages/sql-42.html#learner">Day 42 — data-quality validation</a>: profile NULLs, duplicates, invalid domains, and referential or constraint violations.</li>
-<li><a href="../../lesson-pages/sql-43.html#learner">Day 43 — backup and recovery concepts</a>: distinguish server-side <code>COPY</code> from client-side <code>\copy</code>, stage a subset, and discuss logical restore, WAL, and point-in-time recovery boundaries.</li>
-<li><a href="../../lesson-pages/sql-44.html#learner">Day 44 — monitoring and diagnostics</a>: inspect <code>pg_stat_activity</code>, use plans for diagnosis, and optionally query administrator-enabled <code>pg_stat_statements</code>.</li>
-<li><a href="../../lesson-pages/sql-45.html#learner">Day 45 — optimization project</a>: compare a non-sargable baseline, a range-predicate rewrite, an index, and pre-aggregation. Report locally observed plans, rows, buffers, and timings; do not claim a universal percentage improvement.</li>
+<li><a href="../../lesson-pages/sql-38.html#learner">Day 38 - transactions and isolation</a>: study ACID, savepoints, <code>READ COMMITTED</code>, <code>REPEATABLE READ</code>, and <code>SERIALIZABLE</code>; use multiple sessions for non-repeatable reads, phantoms, and serialization failures.</li>
+<li><a href="../../lesson-pages/sql-39.html#learner">Day 39 - locks and deadlocks</a>: inspect <code>pg_locks</code>, reproduce blocking and deadlocks in separate sessions, apply consistent lock ordering, and use <code>FOR UPDATE SKIP LOCKED</code> for queue claiming.</li>
+<li><a href="../../lesson-pages/sql-40.html#learner">Day 40 - advanced analytics</a>: calculate rolling variance and standard deviation, z-scores, ordered-set percentiles, and ratio-to-total metrics.</li>
+<li><a href="../../lesson-pages/sql-41.html#learner">Day 41 - complex aggregations</a>: combine aggregate <code>FILTER</code>, conditional metrics, and ordered <code>string_agg</code>.</li>
+<li><a href="../../lesson-pages/sql-42.html#learner">Day 42 - data-quality validation</a>: profile NULLs, duplicates, invalid domains, and referential or constraint violations.</li>
+<li><a href="../../lesson-pages/sql-43.html#learner">Day 43 - backup and recovery concepts</a>: distinguish server-side <code>COPY</code> from client-side <code>\copy</code>, stage a subset, and discuss logical restore, WAL, and point-in-time recovery boundaries.</li>
+<li><a href="../../lesson-pages/sql-44.html#learner">Day 44 - monitoring and diagnostics</a>: inspect <code>pg_stat_activity</code>, use plans for diagnosis, and optionally query administrator-enabled <code>pg_stat_statements</code>.</li>
+<li><a href="../../lesson-pages/sql-45.html#learner">Day 45 - optimization project</a>: compare a non-sargable baseline, a range-predicate rewrite, an index, and pre-aggregation. Report locally observed plans, rows, buffers, and timings; do not claim a universal percentage improvement.</li>
 </ul>
-<h3 id="phase-4-applied-postgresql-projects-days-46-60">Phase 4 — Applied PostgreSQL projects (Days 46–60)<a class="heading-anchor" href="#phase-4-applied-postgresql-projects-days-46-60" aria-label="Link to this section">#</a></h3>
+<h3 id="phase-4-applied-postgresql-projects-days-46-60">Phase 4 - Applied PostgreSQL projects (Days 46–60)<a class="heading-anchor" href="#phase-4-applied-postgresql-projects-days-46-60" aria-label="Link to this section">#</a></h3>
 <h4 id="project-1-e-commerce-analytics">Project 1: e-commerce analytics<a class="heading-anchor" href="#project-1-e-commerce-analytics" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><a href="../../lesson-pages/sql-46.html#learner">Day 46 — LTV segmentation and cohort setup</a>: calculate customer lifetime value, threshold segments, and revenue by cohort offsets.</li>
-<li><a href="../../lesson-pages/sql-47.html#learner">Day 47 — cohort retention</a>: turn active-customer counts into retention rates and prepare retention curves for the latest cohorts.</li>
-<li><a href="../../lesson-pages/sql-48.html#learner">Day 48 — product affinity and campaign attribution</a>: build market-basket pairs, first/last touch summaries, assisted conversions, and fractional multi-touch attribution.</li>
+<li><a href="../../lesson-pages/sql-46.html#learner">Day 46 - LTV segmentation and cohort setup</a>: calculate customer lifetime value, threshold segments, and revenue by cohort offsets.</li>
+<li><a href="../../lesson-pages/sql-47.html#learner">Day 47 - cohort retention</a>: turn active-customer counts into retention rates and prepare retention curves for the latest cohorts.</li>
+<li><a href="../../lesson-pages/sql-48.html#learner">Day 48 - product affinity and campaign attribution</a>: build market-basket pairs, first/last touch summaries, assisted conversions, and fractional multi-touch attribution.</li>
 </ul>
 <h4 id="project-2-finance-and-operations">Project 2: finance and operations<a class="heading-anchor" href="#project-2-finance-and-operations" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><a href="../../lesson-pages/sql-49.html#learner">Day 49 — revenue forecasts</a>: compare monthly revenue, year-over-year growth, seasonal-naive forecasts, and moving-average forecasts with explicit error metrics.</li>
-<li><a href="../../lesson-pages/sql-50.html#learner">Day 50 — expense and budget variance</a>: reconcile monthly actuals with budgets, calculate rolling variance, flag overspend, and reshape a variance report.</li>
-<li><a href="../../lesson-pages/sql-51.html#learner">Day 51 — cash-flow projection</a>: combine cash inflow, expense outflow, operating margin, rolling periods, and seasonal net-cash projections.</li>
+<li><a href="../../lesson-pages/sql-49.html#learner">Day 49 - revenue forecasts</a>: compare monthly revenue, year-over-year growth, seasonal-naive forecasts, and moving-average forecasts with explicit error metrics.</li>
+<li><a href="../../lesson-pages/sql-50.html#learner">Day 50 - expense and budget variance</a>: reconcile monthly actuals with budgets, calculate rolling variance, flag overspend, and reshape a variance report.</li>
+<li><a href="../../lesson-pages/sql-51.html#learner">Day 51 - cash-flow projection</a>: combine cash inflow, expense outflow, operating margin, rolling periods, and seasonal net-cash projections.</li>
 </ul>
 <h4 id="project-3-dimensional-warehouse">Project 3: dimensional warehouse<a class="heading-anchor" href="#project-3-dimensional-warehouse" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><a href="../../lesson-pages/sql-52.html#learner">Day 52 — star schema and initial load</a>: reset and commit <code>dwh</code>, load date/customer/product dimensions and the sales fact, then extend the model with country and payment structures.</li>
-<li><a href="../../lesson-pages/sql-53.html#learner">Day 53 — slowly changing dimensions</a>: practice Type 2 customer and product change capture, date-valid fact lookup, and audit columns against the Day 52 warehouse.</li>
-<li><a href="../../lesson-pages/sql-54.html#learner">Day 54 — warehouse aggregates and checks</a>: build monthly sales aggregates, validate them against facts, and design product-month refresh logic.</li>
+<li><a href="../../lesson-pages/sql-52.html#learner">Day 52 - star schema and initial load</a>: reset and commit <code>dwh</code>, load date/customer/product dimensions and the sales fact, then extend the model with country and payment structures.</li>
+<li><a href="../../lesson-pages/sql-53.html#learner">Day 53 - slowly changing dimensions</a>: practice Type 2 customer and product change capture, date-valid fact lookup, and audit columns against the Day 52 warehouse.</li>
+<li><a href="../../lesson-pages/sql-54.html#learner">Day 54 - warehouse aggregates and checks</a>: build monthly sales aggregates, validate them against facts, and design product-month refresh logic.</li>
 </ul>
 <p>Run these three files in order. Day 52 intentionally persists only the course-owned warehouse schema; Days 53 and 54 roll their demonstrations back.</p>
 <h4 id="project-4-multidimensional-bi">Project 4: multidimensional BI<a class="heading-anchor" href="#project-4-multidimensional-bi" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><a href="../../lesson-pages/sql-55.html#learner">Day 55 — drill-down and subtotal design</a>: use <code>ROLLUP</code>, <code>CUBE</code>, grouping indicators, and top-N detail across reporting dimensions.</li>
-<li><a href="../../lesson-pages/sql-56.html#learner">Day 56 — percentiles and multidimensional rankings</a>: calculate country-month percentiles, product ranks, and multi-dimension subtotals while measuring row-count growth.</li>
-<li><a href="../../lesson-pages/sql-57.html#learner">Day 57 — trends, anomalies, and forecast accuracy</a>: compare rolling standard-deviation and median-absolute-deviation anomaly scores, seasonal baselines, and forecast error.</li>
+<li><a href="../../lesson-pages/sql-55.html#learner">Day 55 - drill-down and subtotal design</a>: use <code>ROLLUP</code>, <code>CUBE</code>, grouping indicators, and top-N detail across reporting dimensions.</li>
+<li><a href="../../lesson-pages/sql-56.html#learner">Day 56 - percentiles and multidimensional rankings</a>: calculate country-month percentiles, product ranks, and multi-dimension subtotals while measuring row-count growth.</li>
+<li><a href="../../lesson-pages/sql-57.html#learner">Day 57 - trends, anomalies, and forecast accuracy</a>: compare rolling standard-deviation and median-absolute-deviation anomaly scores, seasonal baselines, and forecast error.</li>
 </ul>
 <h4 id="final-integrated-capstone">Final integrated capstone<a class="heading-anchor" href="#final-integrated-capstone" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><a href="../../lesson-pages/sql-58.html#learner">Day 58 — staging, cleaning, and validation</a>: normalize messy customer input, parse dates, validate JSONB and email/country domains, upsert valid rows, and extend the staging contract where requested.</li>
-<li><a href="../../lesson-pages/sql-59.html#learner">Day 59 — business logic and stakeholder queries</a>: assemble LTV, funnels, market baskets, finance variance, assisted marketing conversions, index experiments, and scale considerations.</li>
-<li><a href="../../lesson-pages/sql-60.html#learner">Day 60 — integration and evidence-based sign-off</a>: create rollback-safe quality and business views, run stakeholder queries, inspect plans, propose indexes, and document tradeoffs and exceptions.</li>
+<li><a href="../../lesson-pages/sql-58.html#learner">Day 58 - staging, cleaning, and validation</a>: normalize messy customer input, parse dates, validate JSONB and email/country domains, upsert valid rows, and extend the staging contract where requested.</li>
+<li><a href="../../lesson-pages/sql-59.html#learner">Day 59 - business logic and stakeholder queries</a>: assemble LTV, funnels, market baskets, finance variance, assisted marketing conversions, index experiments, and scale considerations.</li>
+<li><a href="../../lesson-pages/sql-60.html#learner">Day 60 - integration and evidence-based sign-off</a>: create rollback-safe quality and business views, run stakeholder queries, inspect plans, propose indexes, and document tradeoffs and exceptions.</li>
 </ul>
 <p>The capstone has no hardware-independent runtime threshold. Define acceptance criteria for the database and dataset you actually test, preserve before/after plans, reconcile business totals, and explain any remaining quality exception.</p>
 <h3 id="relational-foundations-and-professional-extensions">Relational foundations and professional extensions<a class="heading-anchor" href="#relational-foundations-and-professional-extensions" aria-label="Link to this section">#</a></h3>

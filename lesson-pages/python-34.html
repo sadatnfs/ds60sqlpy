@@ -230,6 +230,9 @@
           Track completion on the course dashboard
         </a>
         <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=python-34" hidden>
+          Open this lesson in the coding lab
+        </a>
       </div>
     </div>
   </header>
@@ -254,7 +257,7 @@
         <div>
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
-          <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <p id="run-guidance">Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
           <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
           </div>
@@ -269,6 +272,9 @@
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
 
+          <a class="button lab-only" href="../learn?lesson=python-34" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
         </div>
       </section>
 
@@ -369,7 +375,7 @@
 <td>Information unavailable at prediction time influencing training or evaluation</td>
 </tr>
 <tr>
-<td>(R^2)</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>R</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">R^2</annotation></semantics></math></td>
 <td>Regression score comparing squared error with a mean-target baseline</td>
 </tr>
 </tbody></table></div>
@@ -525,7 +531,7 @@ assert transformed[0].sum() == 0</code></pre>
 <ul>
 <li>Which methods are called on each pipeline step during <code>fit</code> and <code>predict</code>?</li>
 <li>Why does a fixed <code>random_state</code> aid comparison without eliminating sampling uncertainty?</li>
-<li>What baseline does a negative test \(R^2\) fail to beat?</li>
+<li>What baseline does a negative test <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>R</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">R^2</annotation></semantics></math> fail to beat?</li>
 <li>If you save only the final Ridge object, what information is missing?</li>
 </ul>
 <p>Expected behavior: both models run from package-bundled data with no network access. Their test scores may be close; regularization is not guaranteed to win on one split.</p>
@@ -1195,11 +1201,24 @@ merely ran is not evidence of mastery.</textarea>
     const LEARNER_PATH = "python/ds-60day/notebooks/day34_sklearn_intro_pipelines.ipynb";
     const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
     const SERVER_TOKEN = "";
+    const LAB_MODE = false;
     const launcherMode = Boolean(
       SERVER_TOKEN &&
+      !LAB_MODE &&
       location.protocol === "http:" &&
       location.hostname === "127.0.0.1"
     );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
 
     document.documentElement.classList.add("tabs-ready");
     const panels = [...document.querySelectorAll("[data-panel]")];

@@ -280,6 +280,7 @@ class PortalServer(ThreadingHTTPServer):
     """HTTP server state shared with portal request handlers."""
 
     daemon_threads = True
+    is_learning_lab = False
 
     def __init__(
         self,
@@ -367,8 +368,9 @@ class PortalRequestHandler(BaseHTTPRequestHandler):
     def log_message(self, format: str, *args: object) -> None:
         """Keep terminal logs concise and free of request tokens."""
 
-        if self.path.startswith("/api/"):
-            print(f"[portal] {self.command} {urlsplit(self.path).path} -> {args[1]}")
+        path = getattr(self, "path", "")
+        if path.startswith("/api/") and len(args) >= 2:
+            print(f"[portal] {getattr(self, 'command', '')} {urlsplit(path).path} -> {args[1]}")
 
     def _authorized_api_request(self, *, require_origin: bool) -> bool:
         if self.headers.get("Host") != self.portal.expected_host:
@@ -472,6 +474,8 @@ class PortalRequestHandler(BaseHTTPRequestHandler):
             f"const SERVER_TOKEN = {json.dumps(self.portal.token)};",
             1,
         )
+        if self.portal.is_learning_lab:
+            document = document.replace("const LAB_MODE = false;", "const LAB_MODE = true;", 1)
         encoded = document.encode("utf-8")
         self.send_response(HTTPStatus.OK)
         self._security_headers("text/html; charset=utf-8", len(encoded))
@@ -530,6 +534,8 @@ class PortalRequestHandler(BaseHTTPRequestHandler):
                 f"const SERVER_TOKEN = {json.dumps(self.portal.token)};",
                 1,
             )
+            if self.portal.is_learning_lab:
+                document = document.replace("const LAB_MODE = false;", "const LAB_MODE = true;", 1)
             encoded = document.encode("utf-8")
         content_type = mimetypes.guess_type(target.name)[0] or "application/octet-stream"
         self.send_response(HTTPStatus.OK)

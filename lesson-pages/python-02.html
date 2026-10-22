@@ -230,6 +230,9 @@
           Track completion on the course dashboard
         </a>
         <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=python-02" hidden>
+          Open this lesson in the coding lab
+        </a>
       </div>
     </div>
   </header>
@@ -254,7 +257,7 @@
         <div>
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
-          <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <p id="run-guidance">Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
           <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
           </div>
@@ -269,6 +272,9 @@
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
 
+          <a class="button lab-only" href="../learn?lesson=python-02" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
         </div>
       </section>
 
@@ -317,7 +323,7 @@
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-2-variables-and-core-types">Day 2 — Variables and Core Types<a class="heading-anchor" href="#guide--day-2-variables-and-core-types" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-2-variables-and-core-types">Day 2 - Variables and Core Types<a class="heading-anchor" href="#guide--day-2-variables-and-core-types" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>Python values have types; variable names refer to those values. This lesson turns text input into useful values and formats results clearly.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -350,8 +356,8 @@
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 2 — variables and core types to practice objects, names, built-in types, conversion, and truthiness and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 2 - variables and core types to practice objects, names, built-in types, conversion, and truthiness and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive - build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>A Python value is an <strong>object</strong> with a type and behavior. A variable is a name that refers to an object; it is not a box permanently restricted to one type. Operators choose behavior from the operand types, which is why <code>7 + 2</code> performs arithmetic while <code>&quot;7&quot; + &quot;2&quot;</code> joins text.</p>
 <p>Input enters a program as text unless a boundary explicitly parses it. Keep three stages visible: normalize the raw text, convert it to the intended type, then calculate. Formatting turns a result back into text for a person. Truthiness is a separate idea: zero, empty collections, empty strings, and <code>None</code> are false-like, but the non-empty string <code>&quot;False&quot;</code> is truthy.</p>
@@ -366,7 +372,7 @@
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p>In <code>price = float(raw_price.strip())</code>, Python first looks up <code>raw_price</code>, calls the string method <code>strip</code>, passes the returned text to <code>float</code>, and finally binds the resulting number to <code>price</code>. The right-hand side completes before assignment. In <code>f&quot;${price:.2f}&quot;</code>, the colon starts a format specification; <code>.2f</code> means fixed-point display with two digits after the decimal.</p>
-<h5 id="guide--worked-example-1-parse-calculate-then-format">Worked example 1 — Parse, calculate, then format<a class="heading-anchor" href="#guide--worked-example-1-parse-calculate-then-format" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-parse-calculate-then-format">Worked example 1 - Parse, calculate, then format<a class="heading-anchor" href="#guide--worked-example-1-parse-calculate-then-format" aria-label="Link to this section">#</a></h5>
 <p>Keep representation changes separate from arithmetic. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre><code class="language-python">raw_quantity = &quot; 3 &quot;
 raw_price = &quot;4.50&quot;
@@ -377,7 +383,7 @@ total = quantity * price
 <p><strong>Expected observation</strong></p>
 <pre><code class="language-text">`(3, 4.5, 13.5, &#x27;$13.50&#x27;)`. The final string is presentation; `total` remains numeric.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-make-boolean-parsing-explicit">Worked example 2 — Make Boolean parsing explicit<a class="heading-anchor" href="#guide--worked-example-2-make-boolean-parsing-explicit" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-make-boolean-parsing-explicit">Worked example 2 - Make Boolean parsing explicit<a class="heading-anchor" href="#guide--worked-example-2-make-boolean-parsing-explicit" aria-label="Link to this section">#</a></h5>
 <p>Do not confuse a non-empty spelling with a Boolean value. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre><code class="language-python">raw_enabled = &quot; FALSE &quot;
 normalized = raw_enabled.strip().lower()
@@ -464,7 +470,7 @@ print(f&quot;{label}: {fahrenheit:.1f} °F&quot;)</code></pre>
 <ul>
 <li><a href="python-02.html#learner">Open the learner notebook</a></li>
 <li><a href="python-02.html#solution-1">Check the separate transfer solutions</a></li>
-<li><a href="python-03.html#guide">Next: Day 3 — Control flow and exceptions</a></li>
+<li><a href="python-03.html#guide">Next: Day 3 - Control flow and exceptions</a></li>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
@@ -515,7 +521,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-2-basic-syntax-types-str-int-float-bool">Day 2 — Basic syntax &amp; types (str, int, float, bool)<a class="heading-anchor" href="#learner--cell-1--day-2-basic-syntax-types-str-int-float-bool" aria-label="Link to this section">#</a></h3>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-2-basic-syntax-types-str-int-float-bool">Day 2 - Basic syntax &amp; types (str, int, float, bool)<a class="heading-anchor" href="#learner--cell-1--day-2-basic-syntax-types-str-int-float-bool" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
 <ul>
 <li>Variables and assignment.</li>
@@ -542,7 +548,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h4 id="learner--cell-5--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-5--syntax-anatomy" aria-label="Link to this section">#</a></h4>
 <p>In <code>price = float(raw_price.strip())</code>, Python first looks up <code>raw_price</code>, calls the string method <code>strip</code>, passes the returned text to <code>float</code>, and finally binds the resulting number to <code>price</code>. The right-hand side completes before assignment. In <code>f&quot;${price:.2f}&quot;</code>, the colon starts a format specification; <code>.2f</code> means fixed-point display with two digits after the decimal.</p>
-<h5 id="learner--cell-5--worked-example-1-parse-calculate-then-format">Worked example 1 — Parse, calculate, then format<a class="heading-anchor" href="#learner--cell-5--worked-example-1-parse-calculate-then-format" aria-label="Link to this section">#</a></h5>
+<h5 id="learner--cell-5--worked-example-1-parse-calculate-then-format">Worked example 1 - Parse, calculate, then format<a class="heading-anchor" href="#learner--cell-5--worked-example-1-parse-calculate-then-format" aria-label="Link to this section">#</a></h5>
 <p>Keep representation changes separate from arithmetic. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span>raw_quantity = &quot; 3 &quot;</span>
 <span>raw_price = &quot;4.50&quot;</span>
@@ -553,7 +559,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>(3, 4.5, 13.5, &#x27;$13.50&#x27;)</code>. The final string is presentation; <code>total</code> remains numeric.</p>
 <p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
-<h5 id="learner--cell-7--worked-example-2-make-boolean-parsing-explicit">Worked example 2 — Make Boolean parsing explicit<a class="heading-anchor" href="#learner--cell-7--worked-example-2-make-boolean-parsing-explicit" aria-label="Link to this section">#</a></h5>
+<h5 id="learner--cell-7--worked-example-2-make-boolean-parsing-explicit">Worked example 2 - Make Boolean parsing explicit<a class="heading-anchor" href="#learner--cell-7--worked-example-2-make-boolean-parsing-explicit" aria-label="Link to this section">#</a></h5>
 <p>Do not confuse a non-empty spelling with a Boolean value. Predict first; then run the next cell.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span>raw_enabled = &quot; FALSE &quot;</span>
 <span>normalized = raw_enabled.strip().lower()</span>
@@ -620,10 +626,10 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <span># Use this cell for your own transformations; no answer is prefilled.</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-1-prediction-attempt-and-evidence">Practice 1 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Prompt twice with <code>input()</code> for numbers such as <code>12.5</code> and <code>7.25</code>, convert both strings to <code>float</code>, and print <code>19.75</code>. <strong>Constraints:</strong> display a short label with the result and do not concatenate the raw strings. <strong>Verify:</strong> first show that <code>type(input(...))</code> is <code>str</code>, then test whole-number and decimal text.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 1 — your work</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span># Practice 1 - your work</span>
 <span># Short contract: Prompt twice with `input()` for numbers such as `12.5` and `7.25`, convert both strings to `float`, and print `19.75`. display a short label with the result and do not concatena...</span>
 <span># Prediction:</span>
 <span> </span>
@@ -632,10 +638,10 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-2-prediction-attempt-and-evidence">Practice 2 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Starting from <code>raw = &#x27; Data Science &#x27;</code>, create a new value exactly equal to <code>&#x27;data science&#x27;</code>. <strong>Constraints:</strong> use string methods rather than slicing or a hard-coded replacement. <strong>Verify:</strong> assert the normalized result and show that <code>raw</code> itself is unchanged because strings are immutable.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 2 — your work</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span># Practice 2 - your work</span>
 <span># Short contract: Starting from `raw = &#x27; Data Science &#x27;`, create a new value exactly equal to `&#x27;data science&#x27;`. use string methods rather than slicing or a hard-coded replacement. assert the norm...</span>
 <span># Prediction:</span>
 <span> </span>
@@ -644,10 +650,10 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-3-prediction-attempt-and-evidence">Practice 3 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> Convert the text <code>&#x27;3.14&#x27;</code> to a floating-point number, double it, and format the result as <code>6.28</code>. <strong>Constraints:</strong> keep the original text in one name and the numeric value in another. <strong>Verify:</strong> assert the parsed value has type <code>float</code> and explain why <code>&#x27;3.14&#x27; * 2</code> is not numeric multiplication.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 3 — your work</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span># Practice 3 - your work</span>
 <span># Short contract: Convert the text `&#x27;3.14&#x27;` to a floating-point number, double it, and format the result as `6.28`. keep the original text in one name and the numeric value in another. assert the...</span>
 <span># Prediction:</span>
 <span> </span>
@@ -656,10 +662,10 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-4-prediction-attempt-and-evidence">Practice 4 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict the value and type of <code>&quot;7&quot; * 2</code>, <code>7 / 2</code>, <code>7 // 2</code>, <code>bool(&quot;&quot;)</code>, and <code>bool(&quot;0&quot;)</code> before running them. <strong>Progressive hint:</strong> Operators follow operand types; non-empty strings are truthy. <strong>Verify:</strong> Create a table of predicted/actual value and type for all five expressions; every row must match, including <code>bool(&#x27;0&#x27;) is True</code>.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 4 — your work</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span># Practice 4 - your work</span>
 <span># Short contract: Predict the value and type of `&quot;7&quot; * 2`, `7 / 2`, `7 // 2`, `bool(&quot;&quot;)`, and `bool(&quot;0&quot;)` before running them. Operators follow operand types; non-empty strings are truthy. Create...</span>
 <span># Prediction:</span>
 <span> </span>
@@ -668,10 +674,10 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-5-prediction-attempt-and-evidence">Practice 5 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace <code>raw = &#x27; 0042 &#x27;; cleaned = raw.strip(); number = int(cleaned)</code> and record the value/type after every assignment. <strong>Progressive hint:</strong> String methods return new strings; conversion constructs an integer. <strong>Verify:</strong> Record <code>repr(value)</code> and <code>type(value).<strong>name</strong></code> after <code>raw</code>, <code>cleaned</code>, and <code>number</code>; confirm the original string still contains spaces.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 5 — your work</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span># Practice 5 - your work</span>
 <span># Short contract: Trace `raw = &#x27; 0042 &#x27;; cleaned = raw.strip(); number = int(cleaned)` and record the value/type after every assignment. String methods return new strings; conversion constructs a...</span>
 <span># Prediction:</span>
 <span> </span>
@@ -680,10 +686,10 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 15</div><h5 id="learner--cell-25--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-25--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 15</div><h5 id="learner--cell-25--practice-6-prediction-attempt-and-evidence">Practice 6 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-25--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement <code>parse_temperature(text)</code> so surrounding whitespace is accepted and the result is a float, then format one decimal place. <strong>Progressive hint:</strong> Keep parsing separate from f-string presentation. <strong>Verify:</strong> Assert whitespace inputs such as <code>&#x27; 32.5 &#x27;</code> return <code>32.5</code> and format as <code>&#x27;32.5&#x27;</code>; prove invalid text follows the documented exception path.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span># Practice 6 — your work</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span># Practice 6 - your work</span>
 <span># Short contract: Implement `parse_temperature(text)` so surrounding whitespace is accepted and the result is a float, then format one decimal place. Keep parsing separate from f-string presentat...</span>
 <span># Prediction:</span>
 <span> </span>
@@ -692,10 +698,10 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 16</div><h5 id="learner--cell-27--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-27--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 16</div><h5 id="learner--cell-27--practice-7-prediction-attempt-and-evidence">Practice 7 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-27--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Repair <code>enabled = bool(raw)</code> for inputs such as <code>&quot;true&quot;</code>, <code>&quot;false&quot;</code>, and <code>&quot; FALSE &quot;</code>. Reject unknown spellings. <strong>Progressive hint:</strong> Normalize the text and compare explicit accepted tokens. <strong>Verify:</strong> Assert accepted case/whitespace variants map to the intended Booleans and that an unknown token such as <code>&#x27;yes-ish&#x27;</code> raises a specific <code>ValueError</code>.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 12</div><pre class="source-code language-python"><code><span># Practice 7 — your work</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 12</div><pre class="source-code language-python"><code><span># Practice 7 - your work</span>
 <span># Short contract: Repair `enabled = bool(raw)` for inputs such as `&quot;true&quot;`, `&quot;false&quot;`, and `&quot; FALSE &quot;`. Reject unknown spellings. Normalize the text and compare explicit accepted tokens. Assert a...</span>
 <span># Prediction:</span>
 <span> </span>
@@ -704,10 +710,10 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <span># Verification (assert or inspect exactly what the prompt requires):</span>
 <span> </span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 17</div><h5 id="learner--cell-29--practice-8-prediction-attempt-and-evidence">Practice 8 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-29--practice-8-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 17</div><h5 id="learner--cell-29--practice-8-prediction-attempt-and-evidence">Practice 8 - prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-29--practice-8-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Model an optional discount where <code>None</code> means not supplied and <code>0.0</code> means supplied but zero. Explain why a truthiness check loses meaning. <strong>Progressive hint:</strong> Use <code>is None</code> when absence is distinct from a numeric zero. <strong>Verify:</strong> Test <code>None</code>, <code>0.0</code>, and <code>0.25</code> separately; assert the first is absent while the latter two remain supplied numeric discounts.</p>
 <p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
-<article class="notebook-cell code-cell"><div class="cell-label">Code cell 13</div><pre class="source-code language-python"><code><span># Practice 8 — your work</span>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 13</div><pre class="source-code language-python"><code><span># Practice 8 - your work</span>
 <span># Short contract: Model an optional discount where `None` means not supplied and `0.0` means supplied but zero. Explain why a truthiness check loses meaning. Use `is None` when absence is distinc...</span>
 <span># Prediction:</span>
 <span> </span>
@@ -1065,11 +1071,24 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
     const LEARNER_PATH = "python/ds-60day/notebooks/day02_basics_types.ipynb";
     const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
     const SERVER_TOKEN = "";
+    const LAB_MODE = false;
     const launcherMode = Boolean(
       SERVER_TOKEN &&
+      !LAB_MODE &&
       location.protocol === "http:" &&
       location.hostname === "127.0.0.1"
     );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
 
     document.documentElement.classList.add("tabs-ready");
     const panels = [...document.querySelectorAll("[data-panel]")];

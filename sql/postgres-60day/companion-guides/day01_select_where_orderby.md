@@ -1,4 +1,4 @@
-# Day 01 — SELECT, WHERE, ORDER BY, LIMIT/OFFSET (Companion Guide)
+# Day 01 - SELECT, WHERE, ORDER BY, LIMIT/OFFSET (Companion Guide)
 
 ## Level and prerequisites
 
@@ -67,7 +67,7 @@ recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL without
 permanently changing `PATH`. If PostgreSQL reports that the database or a
 `training` relation does not exist, return to the notebook preparation cell
 and explicitly prepare the disposable database. For authentication errors,
-rerun the setup/doctor flow—do not paste a password into a lesson, notebook, or
+rerun the setup/doctor flow - do not paste a password into a lesson, notebook, or
 committed file. With `ON_ERROR_STOP`, fix the first reported error and rerun the
 whole transactional script rather than continuing from partial state.
 
@@ -228,7 +228,7 @@ For every result, write its row grain and expected shape first.
 
 ## Next step
 
-Continue to [Day 02 — aggregations and grouping](day02_aggregates_groupby_having.md).
+Continue to [Day 02 - aggregations and grouping](day02_aggregates_groupby_having.md).
 
 ## Deep dive and reference
 
@@ -283,7 +283,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in Codex:
 
 ```text
-Tutor me through sql-01 — Select Where Orderby.
+Tutor me through sql-01 - Select Where Orderby.
 
 I am a beginner who completed the direct catalog prerequisite sql-start-03. Reuse its small-stage debugging workflow and explain new clauses before relying on them. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day01_select_where_orderby.md

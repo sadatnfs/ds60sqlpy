@@ -174,7 +174,7 @@ def test_generate_solution_selects_only_cataloged_executable_sql(catalog: Catalo
 
     with pytest.raises(SqlNotebookError, match="solution 2 does not exist"):
         generate_sql_notebook(catalog, "sql-01", "solution", 2)
-    with pytest.raises(SqlNotebookError, match="not in the SQL track"):
+    with pytest.raises(SqlNotebookError, match="SQL runner"):
         generate_sql_notebook(catalog, "python-01")
     with pytest.raises(SqlNotebookError, match="Unknown lesson ID"):
         generate_sql_notebook(catalog, "sql-does-not-exist")

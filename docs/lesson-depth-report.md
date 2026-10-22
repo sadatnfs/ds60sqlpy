@@ -14,7 +14,7 @@ examples actually teach the named topic.
 - Verify contracts without observable, topic-specific evidence: **not allowed**
 - Duplicate authoritative numbered solution sections: **not allowed**
 - SQL wildcard result columns or nested-query text presented as final order: **not allowed**
-- Historical Python notebook minimum: **8 cells**, **3 code cells**, and **550 Markdown words**
+- Python notebook minimum: **8 cells**, **3 code cells**, and **550 Markdown words**
 
 | Lesson | Guide words | Examples | Terms | Exercises checked | Solution words | Notebook | Status |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
@@ -181,7 +181,7 @@ examples actually teach the named topic.
 | `bridge-06` | 2160 | 8 | 17 | 14/14 | 1596 | notebook gate n/a | PASS |
 | `bridge-07` | 2057 | 8 | 13 | 14/14 | 1531 | notebook gate n/a | PASS |
 | `bridge-08` | 2310 | 7 | 15 | 16/16 | 1824 | notebook gate n/a | PASS |
-| `bridge-jupyter-01` | 3488 | 18 | 20 | 18/18 | 2426 | notebook gate n/a | PASS |
+| `bridge-jupyter-01` | 3488 | 18 | 20 | 18/18 | 2426 | 33 cells / 18 code / 1911 words | PASS |
 | `bridge-ops-01` | 3138 | 10 | 20 | 20/20 | 2574 | notebook gate n/a | PASS |
 | `bridge-ai-01` | 3228 | 11 | 22 | 22/22 | 2464 | notebook gate n/a | PASS |
 | `bridge-analytics-01` | 3429 | 11 | 22 | 24/24 | 2536 | notebook gate n/a | PASS |

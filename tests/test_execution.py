@@ -16,6 +16,7 @@ from urllib.parse import quote, urlsplit, urlunsplit
 import pytest
 
 from ds60sqlpy.catalog import Catalog
+from ds60sqlpy.curriculum_framework import RUNNERS
 from ds60sqlpy.execution import MAX_OUTPUT_BYTES, PadResult, PadRunner, external_program_environment
 from ds60sqlpy.sql_notebook import validate_course_database_target
 
@@ -139,6 +140,61 @@ def test_python_backend_does_not_inherit_implicit_notebook_state(course: Catalog
     result = runner.run("python-01", "python", "print(answer)")
     assert result["returncode"] != 0
     assert "NameError" in result["output"]
+
+
+def test_notebook_cells_share_only_this_run_and_report_original_error_lines(
+    course: Catalog,
+) -> None:
+    pytest.importorskip("IPython")
+    runner = PadRunner(course)
+    source = "# %%\nanswer = 42\n# %%\n%timeit -n1 -r1 answer + 1\nprint(answer)\n"
+    result = runner.run("python-01", "python", source)
+    assert result["returncode"] == 0 and "42" in result["output"]
+    failed = runner.run(
+        "python-01", "python", "# %%\ndef broken():\n    return 1 / 0\n# %%\nbroken()\n"
+    )
+    assert failed["returncode"] != 0 and failed["error_line"] == 3
+    assert "ZeroDivisionError" in failed["output"]
+    fresh = runner.run("python-01", "python", "# %%\nprint(answer)\n")
+    assert fresh["returncode"] != 0 and "NameError" in fresh["output"]
+
+
+@pytest.mark.parametrize("inline", [False, True])
+def test_agg_and_inline_notebook_plots_survive_show_and_cell_close(
+    course: Catalog, inline: bool
+) -> None:
+    pytest.importorskip("matplotlib")
+    if inline:
+        pytest.importorskip("IPython")
+        pytest.importorskip("matplotlib_inline")
+    source = (
+        ("# %%\n%matplotlib inline\n" if inline else "")
+        + "import matplotlib.pyplot as plt\n"
+        + ("# %%\n" if inline else "")
+        + "plt.plot([1, 2], [1, 4])\nplt.show()\n"
+        + "import warnings\nwarnings.warn('keep learner warning')\n"
+    )
+    result = PadRunner(course).run("python-01", "python", source, timeout_seconds=60)
+    assert result["returncode"] == 0, result["output"]
+    assert result["figures"] and result["figures"][0].startswith("data:image/png;base64,")
+    assert "keep learner warning" in result["output"]
+    assert "FigureCanvasAgg is non-interactive" not in result["output"]
+
+
+@pytest.mark.parametrize("value", [{"error_line": 999}, {"error_line": True}, [1], {}])
+def test_python_source_diagnostics_reject_invalid_worker_metadata(
+    course: Catalog, monkeypatch: pytest.MonkeyPatch, value: object
+) -> None:
+    runner = PadRunner(course)
+
+    def capture(command: list[str], environment: dict[str, str], language: str) -> PadResult:
+        (Path(command[-1]) / "execution.json").write_text(json.dumps(value), encoding="utf-8")
+        return PadResult(
+            language="python", returncode=1, output="", elapsed_seconds=0, stopped=None
+        )
+
+    monkeypatch.setattr(runner, "_execute", capture)
+    assert "error_line" not in runner.run("python-01", "python", "raise ValueError()\n")
 
 
 def test_public_course_default_does_not_corrupt_username_or_column_observations(
@@ -474,3 +530,186 @@ def test_live_sql_pad_rejects_elevated_flags_and_server_file_role_membership(
     result = PadRunner(course).run("python-01", "sql", "SELECT 1;")
     assert result["returncode"] != 0
     assert json.loads(result["output"])["error_type"] == "CourseRoleError"
+
+
+@pytest.mark.parametrize("language", ["none", "cpp", "scala", "kubernetes"])
+def test_registered_future_runner_saves_history_but_never_executes(
+    course: Catalog, language: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runner = PadRunner(course)
+    path = runner.save("python-01", language, "first\n")
+    assert path.suffix == RUNNERS[language].file_suffix
+    runner.save("python-01", language, "second\n")
+    assert runner.read("python-01", language) == "second\n"
+    history = runner.history("python-01", language)
+    assert runner.read_history("python-01", language, history[0]["id"]) == "first\n"
+
+    def unexpected(*args: object, **kwargs: object) -> None:
+        raise AssertionError("An unimplemented adapter started a process.")
+
+    monkeypatch.setattr(runner, "_execute", unexpected)
+    with pytest.raises(ValueError, match="not implemented"):
+        runner.run("python-01", language, "new submission")
+    assert runner.read("python-01", language) == "second\n"
+
+
+def test_longer_run_limit_does_not_leak_into_the_next_request(course: Catalog) -> None:
+    runner = PadRunner(course, timeout=0.05)
+    code = "import time; time.sleep(0.15); print('finished')"
+    extended = runner.run("python-01", "python", code, timeout_seconds=15)
+    assert extended["returncode"] == 0 and extended["output"].strip() == "finished"
+    ordinary = runner.run("python-01", "python", code)
+    assert ordinary["stopped"] == "time limit"
+    assert ordinary["elapsed_seconds"] < 1
+
+
+@pytest.mark.parametrize("timeout", [True, 0, 121, 15.0, "15"])
+def test_run_limit_override_rejects_unbounded_or_ambiguous_values(
+    course: Catalog, timeout: Any
+) -> None:
+    with pytest.raises(ValueError, match="15, 60 or 120"):
+        PadRunner(course).run("python-01", "python", "print(1)", timeout_seconds=timeout)
+    assert not (course.repo_root / ".learning").exists()
+
+
+def test_live_capabilities_distinguish_limited_login_from_bootstrap_administrator(
+    course: Catalog, live_database: LiveDatabase, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ds60sqlpy.capabilities import CapabilityService
+
+    service = CapabilityService(course, sys.executable)
+    limited = service.runner("python-01", "sql")
+    assert limited["available"] and limited["can_run"], limited
+    monkeypatch.setenv("DS60_DATABASE_URL", live_database.admin_target)
+    privileged = service.runner("python-01", "sql")
+    assert not privileged["available"] and "limited course login" in privileged["reason"]
+    assert live_database.admin_target not in json.dumps(privileged)
+
+
+def sql_lesson_catalog(course: Catalog, source: str) -> Catalog:
+    root = course.repo_root / "sql"
+    root.mkdir(exist_ok=True)
+    (root / "includes").mkdir(exist_ok=True)
+    (root / "local.sql").write_text(source, encoding="utf-8", newline="\n")
+    (root / "includes/fixed.sql").write_text(
+        "\\echo fixed include ran\nSELECT 8 AS fixed_value;\n", encoding="utf-8", newline="\n"
+    )
+    (root / "guide.md").write_text("# Whole SQL lesson\n", encoding="utf-8")
+    lesson = replace(
+        course.get("python-01"),
+        id="sql-local",
+        track="sql",
+        runner="sql",
+        day=1,
+        dependency_group="postgres",
+        lesson_path="sql/local.sql",
+        guide_path="sql/guide.md",
+        solution_paths=(),
+        prerequisites=(),
+    )
+    return Catalog(course.repo_root, (lesson,))
+
+
+def test_live_whole_sql_runs_the_edited_copy_with_fixed_conditionals_and_includes(
+    course: Catalog, live_database: LiveDatabase
+) -> None:
+    from ds60sqlpy.sql_lesson import SqlLessonRunner
+
+    source = (
+        "\\set ON_ERROR_STOP on\nSELECT true AS gate \\gset\n\\if :gate\n"
+        "SELECT 7 AS source_value;\n\\else\nSELECT 1/0;\n\\endif\n"
+        "\\ir includes/fixed.sql\n"
+    )
+    catalog = sql_lesson_catalog(course, source)
+    lessons = SqlLessonRunner(catalog, PadRunner(catalog))
+    assert lessons.read("sql-local")["code"] == source
+    edited = source.replace("SELECT 7 AS", "SELECT 9 AS")
+    result = lessons.run("sql-local", edited, timeout_seconds=15)
+    assert result["returncode"] == 0, result["output"]
+    assert "source_value" in result["output"] and "fixed include ran" in result["output"]
+    assert "9" in result["output"] and "__DS60_SESSION__" not in result["output"]
+    assert (catalog.repo_root / "sql/local.sql").read_text() == source
+    assert lessons.read("sql-local")["code"] == edited
+    assert lessons.history("sql-local")
+    failed = lessons.run("sql-local", source.replace("SELECT 7 AS", "SELECT 1/0 AS"))
+    assert failed["returncode"] != 0 and failed["error_line"] == 4
+    corrupt = edited + "\\! this_must_never_start\n"
+    with pytest.raises(ValueError, match="meta-command"):
+        lessons.run("sql-local", corrupt)
+    assert lessons.read("sql-local")["code"] == corrupt
+    assert not list((catalog.repo_root / ".learning/sql").rglob(".submission-*"))
+
+
+@pytest.mark.parametrize(
+    "directive", ["\\! echo forbidden", "\\connect private", "\\o unsafe", "\\echo `uname`"]
+)
+def test_whole_sql_client_directives_are_viewable_but_never_executed(
+    course: Catalog, directive: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ds60sqlpy.sql_lesson import SqlLessonRunner
+
+    catalog = sql_lesson_catalog(course, directive + "\nSELECT 1;\n")
+    pads = PadRunner(catalog)
+    lessons = SqlLessonRunner(catalog, pads)
+    assert directive in lessons.read("sql-local")["code"]
+
+    def unexpected(*args: object, **kwargs: object) -> None:
+        raise AssertionError("Unsafe psql source started a process.")
+
+    monkeypatch.setattr(pads, "_execute", unexpected)
+    with pytest.raises(ValueError, match="directive"):
+        lessons.run("sql-local", directive + "\nSELECT 1;\n")
+
+
+def test_live_sql_timeout_cancels_the_exact_session_after_application_name_changes(
+    course: Catalog, live_database: LiveDatabase
+) -> None:
+    changed = "ds60-changed-" + uuid.uuid4().hex
+    result = PadRunner(course, timeout=0.5).run(
+        "python-01",
+        "sql",
+        f"SET statement_timeout=0; SET application_name='{changed}'; SELECT pg_sleep(30);",
+    )
+    assert result["stopped"] == "time limit"
+    assert result["elapsed_seconds"] < 4
+    with live_database.driver.connect(live_database.target) as connection:
+        active = connection.execute(
+            "SELECT count(*) FROM pg_stat_activity WHERE application_name=%s AND state='active'",
+            (changed,),
+        ).fetchone()[0]
+    assert active == 0
+
+
+def test_whole_script_capture_drains_bounded_output_and_retains_final_errors(
+    course: Catalog,
+) -> None:
+    from ds60sqlpy.execution import WORKER_GATE
+
+    code = (
+        WORKER_GATE + "import sys\nprint('FIRST SENTINEL')\n"
+        "print('\\u20ac' * 100000)\n"
+        "print('FINAL ERROR SENTINEL', file=sys.stderr)\nraise SystemExit(7)"
+    )
+    result = PadRunner(course)._execute(
+        [sys.executable, "-u", "-c", code],
+        external_program_environment(),
+        "python",
+        truncate_output=True,
+    )
+    assert result.returncode == 7 and result.stopped is None
+    assert result.output_truncated
+    assert "FIRST SENTINEL" in result.output and "FINAL ERROR SENTINEL" in result.output
+    assert len(result.output.encode()) <= MAX_OUTPUT_BYTES
+
+
+def test_whole_script_output_drain_still_obeys_the_process_time_limit(course: Catalog) -> None:
+    from ds60sqlpy.execution import WORKER_GATE
+
+    result = PadRunner(course, timeout=0.2)._execute(
+        [sys.executable, "-u", "-c", WORKER_GATE + "while True: print('x' * 8192)"],
+        external_program_environment(),
+        "python",
+        truncate_output=True,
+    )
+    assert result.stopped == "time limit" and result.elapsed_seconds < 3
+    assert len(result.output.encode()) <= MAX_OUTPUT_BYTES

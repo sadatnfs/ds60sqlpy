@@ -40,7 +40,11 @@ else echo 'Docker CLI not found. Install/start your local Docker engine, then re
 endpoint="${DOCKER_HOST:-}"
 if [ -n "$endpoint" ]; then unset DOCKER_CONTEXT; fi
 if [ -z "$endpoint" ]; then endpoint="$("$docker_cli" context inspect --format '{{.Endpoints.docker.Host}}')"; fi
-case "$endpoint" in unix://*|npipe://*|tcp://127.0.0.1:*|tcp://localhost:*) ;;
+case "$endpoint" in unix:///*|npipe:////./pipe/*|npipe://./pipe/*) ;;
+  tcp://*)
+    if ! [[ "$endpoint" =~ ^tcp://(127[.]0[.]0[.]1|localhost):[0-9]{1,5}$ ]]; then
+      echo 'Choose an exact local Docker TCP endpoint without credentials or path suffixes.' >&2; exit 2
+    fi ;;
   *) echo 'Choose a local Docker context so host-saved progress stays on this machine.' >&2; exit 2 ;;
 esac
 "$docker_cli" compose version >/dev/null

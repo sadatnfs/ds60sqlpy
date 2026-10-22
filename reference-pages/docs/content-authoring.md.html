@@ -130,17 +130,17 @@
 <h3 id="lesson-contract">Lesson contract<a class="heading-anchor" href="#lesson-contract" aria-label="Link to this section">#</a></h3>
 <p>Every lesson should include:</p>
 <ol>
-<li><strong>Title and level</strong> — beginner, intermediate, or advanced</li>
-<li><strong>Prerequisites</strong> — concepts and environment</li>
-<li><strong>Objectives</strong> — observable abilities, not vague familiarity</li>
-<li><strong>Motivation</strong> — why the learner should care</li>
-<li><strong>Vocabulary</strong> — define new terms before use</li>
-<li><strong>Worked examples</strong> — small, runnable, and explained</li>
-<li><strong>Exercises</strong> — progress from recall to application</li>
-<li><strong>Self-check</strong> — expected behavior, assertions, or questions</li>
-<li><strong>Common mistakes</strong> — include how to diagnose them</li>
-<li><strong>Next steps</strong> — review or successor lessons</li>
-<li><strong>Separate solution</strong> — reasoning, alternatives, and edge cases</li>
+<li><strong>Title and level</strong> - beginner, intermediate, or advanced</li>
+<li><strong>Prerequisites</strong> - concepts and environment</li>
+<li><strong>Objectives</strong> - observable abilities, not vague familiarity</li>
+<li><strong>Motivation</strong> - why the learner should care</li>
+<li><strong>Vocabulary</strong> - define new terms before use</li>
+<li><strong>Worked examples</strong> - small, runnable, and explained</li>
+<li><strong>Exercises</strong> - progress from recall to application</li>
+<li><strong>Self-check</strong> - expected behavior, assertions, or questions</li>
+<li><strong>Common mistakes</strong> - include how to diagnose them</li>
+<li><strong>Next steps</strong> - review or successor lessons</li>
+<li><strong>Separate solution</strong> - reasoning, alternatives, and edge cases</li>
 </ol>
 <p>Prefer “write a query that returns…” or “implement and verify…” over “understand…”. For a named professional module, list every direct catalog prerequisite by its exact backticked stable ID inside <code>## Level and prerequisites</code>. Put transitive background and merely helpful material in separately labeled prose so Codex and learners do not mistake it for a hard gate.</p>
 <h3 id="complete-amateur-depth-standard">Complete-amateur depth standard<a class="heading-anchor" href="#complete-amateur-depth-standard" aria-label="Link to this section">#</a></h3>
@@ -188,6 +188,7 @@
 <li>checks and expected observations; and</li>
 <li>retrieval questions and next steps.</li>
 </ol>
+<p>The notebook cell, code-cell, and teaching-text minimums apply to every Python-runner learner notebook, including a new track or a lesson numbered beyond sixty. A new topic name must not bypass notebook depth checks.</p>
 <p>The exact number of cells may vary, but each cell should have one teaching job. Do not hide all examples in one large code cell or all instructions in one large Markdown cell. A learner must be able to run top to bottom from a fresh kernel without relying on state created out of order.</p>
 <h4 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Every companion guide must end with an optional <code>## Ask Codex about this lesson</code> section containing a copy-ready fenced <code>text</code> prompt. The course prose must remain sufficient without it.</p>
@@ -308,17 +309,23 @@ python scripts/course.py validate</code></pre>
 <ol>
 <li>rendered companion guide;</li>
 <li>read-only learner-artifact preview with a path to the real file;</li>
-<li>execution in VS Code, JupyterLab, or the guided SQL workspace; and</li>
+<li>an honest handoff to the coding lab&#x27;s declared capability, or a documented native editor/Jupyter/guided SQL workflow; and</li>
 <li>visibly separated solutions after the attempt.</li>
 </ol>
 <p>Reader generation must remain offline and self-contained. Escape source, reject unsafe URL schemes, render no untrusted notebook HTML, load no remote fonts/scripts/analytics, and rewrite known course links to the matching reader section. A static <code>file://</code> page may offer a best-effort registered VS Code URL, but only the authenticated loopback launcher may start allowlisted native actions.</p>
-<p>Every learner-visible local Markdown or SQL link from the dashboard, lesson readers, or rendered references must point to generated HTML. The generator derives a deterministic recursive closure from explicit dashboard references and links rendered from catalog artifacts; do not replace it with a scan of arbitrary untracked files. Keep completion on the dashboard in static mode and show the per-lesson checkbox only when the private launcher token is present.</p>
+<p>Every learner-visible local Markdown or SQL link from the dashboard, lesson readers, or rendered references must point to generated HTML. The generator derives a deterministic recursive closure from explicit dashboard references and links rendered from catalog artifacts; do not replace it with a scan of arbitrary untracked files. Seed each registered track&#x27;s plan from catalog metadata, including plans that the original three tracks never link to. Keep completion on the dashboard in static mode. The native private portal can show its per-lesson checkbox; lab-served readers link back to that lesson&#x27;s saved evidence workflow and hide native launch actions. A server token alone does not mean that VS Code/Jupyter launching is enabled.</p>
 <p>Do not create hand-maintained SQL notebooks for every lesson. For a cataloged SQL lesson, the private launcher derives an ignored working notebook and editable SQL copy under <code>.learning/sql/&lt;lesson-id&gt;/</code> through <code>src/ds60sqlpy/sql_notebook.py</code>. The generator must preserve existing learner files, accept only stable catalog identities, keep paths below <code>.learning/sql/</code>, run fixed non-shell <code>psql -f</code> commands, detect changed meta-commands even when they follow SQL on the same line, hide connection values, and require explicit confirmation before resetting the disposable course schema.</p>
 <p>After lesson artifacts, paths, or catalog metadata change, regenerate and check both navigation layers:</p>
 <pre><code class="language-text">python scripts/build_course_guide.py
 python scripts/build_lesson_readers.py
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check</code></pre>
+<h3 id="extending-subjects-languages-and-learning-modes">Extending subjects, languages, and learning modes<a class="heading-anchor" href="#extending-subjects-languages-and-learning-modes" aria-label="Link to this section">#</a></h3>
+<p>Follow <a href="curriculum-extension-playbook.md.html">the curriculum extension playbook</a> when adding a new track. Add a manifest under <code>curriculum/extensions/</code> rather than editing the generated catalog or stretching the historical day-number scanner. Its schema supports track metadata, complete lesson records, cross-track prerequisites, topic tags, and goal targets. An inactive <a href="examples/curriculum-extension.json.html">example manifest</a> shows the required fields; create its authored files and quality evidence before registering it.</p>
+<p>The lesson&#x27;s <code>runner</code> describes how a learner works. The <code>track</code> and <code>topics</code> describe what they learn. Deep learning uses Python when its exercise is Python; LLM theory can use <code>none</code> when its evidence is written reasoning. Planned C++, Scala, and Kubernetes runner descriptors allow correctly labeled reading and saved work, with execution available only after a real backend adapter is implemented and verified. A manifest never grants permission to execute an arbitrary command.</p>
+<p>Every new ID needs an explicit <code>curriculum/practice_expansion.json</code> entry with baseline zero and target six. Keep the historical baseline unchanged. All shared teaching gates remain: self-contained definitions, two worked examples, six progressive and bounded exercises on each required surface, inspectable expected results and verification, explanations of failure, retrieval questions, and the exact lesson-specific Codex block. Reading-only lessons can use fenced text examples and reasoned counterexamples; they still need a separate explanatory solution and the same minimum teaching depth. Code and operations lessons require two solution artifacts, including a written explanation.</p>
+<p>For C++/Scala learner sources, label prompts <code>// Exercise 1:</code> through the final number. For Kubernetes YAML, use <code># Exercise 1:</code> comments. Labels identify distinct tasks; repeated labels and answer steps do not increase the audited count. Keep guide and solution prompts aligned with the same numbered tasks.</p>
+<p>Preserve one-click setup and offline behavior. List any compiler, JVM, cluster, GPU, model, or first download beside the lesson&#x27;s run instructions. An operations exercise must name its local target and cleanup boundary. A new execution adapter also needs timeout, output, cancellation, invalid-input, saved-work, and failure-cleanup evidence before its capability becomes runnable.</p>
 <h3 id="accessibility-and-tone">Accessibility and tone<a class="heading-anchor" href="#accessibility-and-tone" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Use plain language without talking down to the learner.</li>

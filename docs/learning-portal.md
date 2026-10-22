@@ -104,7 +104,7 @@ run setup first if the portal reports that it is missing.
 ## Progress and portability
 
 A completion check means the learner can explain the concept and produce a
-working attempt—not merely that a file was opened.
+working attempt - not merely that a file was opened.
 
 Private launcher mode and these CLI commands share
 `.learning/progress.json`:

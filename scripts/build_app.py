@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import os
 import shutil
 import subprocess
@@ -13,28 +14,68 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from ds60sqlpy.curriculum_framework import is_content_link  # noqa: E402
 from ds60sqlpy.desktop import BUNDLE_PATHS  # noqa: E402
 
 
-def stage_course(destination: Path) -> None:
+def ignore_private_files(directory: str, names: list[str]) -> set[str]:
+    """Exclude local state and authentication files, including nested copies."""
+    ignored = set()
+    patterns = (
+        "__pycache__",
+        "*.pyc",
+        "*.egg-info",
+        "*.dist-info",
+        ".ds_store",
+        "cache",
+        ".ipynb_checkpoints",
+        ".git",
+        ".learning",
+        ".venv",
+        ".env",
+        ".env.*",
+        ".ssh",
+        ".aws",
+        ".oci",
+        ".pgpass",
+        "pgpass.conf",
+        ".npmrc",
+        ".pypirc",
+        "credentials",
+        "credentials.json",
+        "id_rsa",
+        "id_dsa",
+        "id_ecdsa",
+        "id_ed25519",
+        "*.pem",
+        "*.key",
+        "*.p12",
+        "*.pfx",
+        "*.jks",
+    )
+    for name in names:
+        if is_content_link(Path(directory) / name) or (
+            name.casefold() != ".env.example"
+            and any(fnmatch.fnmatchcase(name.casefold(), pattern) for pattern in patterns)
+        ):
+            ignored.add(name)
+    return ignored
+
+
+def stage_course(destination: Path, *, source_root: Path | None = None) -> None:
     """Copy an allowlisted course payload, excluding all learner-local state."""
 
     destination.mkdir(parents=True, exist_ok=False)
+    root = ROOT if source_root is None else source_root
     for name in BUNDLE_PATHS:
-        source, target = ROOT / name, destination / name
+        source, target = root / name, destination / name
+        if is_content_link(source):
+            continue
         if source.is_dir():
             shutil.copytree(
                 source,
                 target,
-                ignore=shutil.ignore_patterns(
-                    "__pycache__",
-                    "*.pyc",
-                    "*.egg-info",
-                    "*.dist-info",
-                    ".DS_Store",
-                    "cache",
-                    ".ipynb_checkpoints",
-                ),
+                ignore=ignore_private_files,
             )
         elif source.is_file():
             shutil.copy2(source, target)

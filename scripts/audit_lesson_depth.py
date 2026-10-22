@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit beginner-facing teaching depth across Python and SQL lessons."""
+"""Audit teaching depth across every registered curriculum track."""
 
 from __future__ import annotations
 
@@ -511,7 +511,7 @@ def _solution_structure_issues(catalog: Catalog, lesson: Lesson) -> list[str]:
                 f"{', '.join(repr(phrase) for phrase in residue)}; replace it with "
                 "the exercise's actual concept, grain, objects, and evidence"
             )
-        if lesson.track == "sql":
+        if lesson.runner == "sql":
             malformed_orders = _malformed_final_orders(source)
             if malformed_orders:
                 issues.append(
@@ -528,7 +528,7 @@ def _solution_structure_issues(catalog: Catalog, lesson: Lesson) -> list[str]:
                 f"{relative_path} repeats authoritative exercise labels "
                 f"{', '.join(duplicates)}; consolidate each answer under one numbered section"
             )
-        if lesson.track in {"python", "bridge"}:
+        if lesson.runner == "python":
             python_errors = _python_fence_errors(source)
             if python_errors:
                 issues.append(
@@ -560,7 +560,7 @@ def _guide_issues(
         )
     if definitions < MIN_DEFINITIONS:
         issues.append(f"guide defines {definitions} terms; needs at least {MIN_DEFINITIONS}")
-    if lesson.track in {"python", "bridge"}:
+    if lesson.runner == "python":
         python_errors = _python_fence_errors(source)
         if python_errors:
             issues.append(f"guide contains invalid runnable Python: {python_errors[0]}")
@@ -632,7 +632,7 @@ def _guide_issues(
             "lesson's actual concept, grain, objects, and evidence"
         )
 
-    if lesson.track == "sql":
+    if lesson.runner == "sql":
         malformed_orders = _malformed_final_orders(source)
         if malformed_orders:
             issues.append(
@@ -661,7 +661,7 @@ def _guide_issues(
 
 
 def measure_lesson(catalog: Catalog, lesson: Lesson) -> LessonDepth:
-    """Measure one Python or SQL lesson against the depth standard."""
+    """Measure one registered lesson against the shared depth standard."""
 
     guide_source = catalog.resolve(lesson.guide_path).read_text(encoding="utf-8")
     solution_words, solution_code_blocks = _solution_markdown(catalog, lesson)
@@ -683,7 +683,7 @@ def measure_lesson(catalog: Catalog, lesson: Lesson) -> LessonDepth:
             f"{', '.join(repr(phrase) for phrase in learner_residue)}; replace it "
             "with the exercise's actual concept, grain, objects, and evidence"
         )
-    if lesson.track == "sql":
+    if lesson.runner == "sql":
         malformed_orders = _malformed_final_orders(_artifact_text(lesson_path))
         if malformed_orders:
             issues.append(
@@ -691,11 +691,7 @@ def measure_lesson(catalog: Catalog, lesson: Lesson) -> LessonDepth:
                 "contracts that confuse a nested window/subquery clause with the "
                 "final ORDER BY"
             )
-    if (
-        lesson.track == "python"
-        and 1 <= lesson.day <= 60
-        and lesson_path.suffix.lower() == ".ipynb"
-    ):
+    if lesson.runner == "python" and lesson_path.suffix.lower() == ".ipynb":
         notebook = _notebook_depth(lesson_path)
         repeated_notebook_checks = _repeated_check_lines([_notebook_markdown(lesson_path)])
         if repeated_notebook_checks:
@@ -770,7 +766,7 @@ def render_report(rows: list[LessonDepth]) -> str:
         "- SQL wildcard result columns or nested-query text presented as final order: "
         "**not allowed**",
         (
-            "- Historical Python notebook minimum: "
+            "- Python notebook minimum: "
             f"**{MIN_NOTEBOOK_CELLS} cells**, **{MIN_NOTEBOOK_CODE_CELLS} code cells**, "
             f"and **{MIN_NOTEBOOK_MARKDOWN_WORDS} Markdown words**"
         ),

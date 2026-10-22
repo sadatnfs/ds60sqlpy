@@ -1,5 +1,5 @@
 -- SQL-OPS-01: Index types, statistics, and maintenance lifecycle
--- BEGINNER WORKFLOW — sql-ops-01: Index Types, Statistics, and Maintenance Lifecycle
+-- BEGINNER WORKFLOW - sql-ops-01: Index Types, Statistics, and Maintenance Lifecycle
 -- Guide: sql/professional/companion-guides/sql_ops_01_indexes_statistics_maintenance.md
 -- Recommended runner: open the private lesson reader and choose
 -- "Create/open guided SQL notebook". It verifies advanced_sql_training,
@@ -215,7 +215,7 @@ SELECT
 --
 --    Inputs: For sql-ops-01 Exercise 1, match the query's equality/range/order/projection with a partial covering btree on `(device_id, occurred_at DESC)` including severity/message and predicated on `severity >= 4`.
 --    Expected result/shape: For sql-ops-01 Exercise 1, expected output: catalog command evidence, one EXPLAIN plan, and up to 25 underlying rows with `occurred_at`, `severity`, and `message` for device-005 in descending time order.
---    Verify: For sql-ops-01 Exercise 1, assert every result satisfies the partial predicate, compare returned rows with the same SELECT without planner settings, inspect the exact index predicate/include columns, and treat scan type as observed evidence—not a guaranteed contract.
+--    Verify: For sql-ops-01 Exercise 1, assert every result satisfies the partial predicate, compare returned rows with the same SELECT without planner settings, inspect the exact index predicate/include columns, and treat scan type as observed evidence - not a guaranteed contract.
 --    Hint ladder, rung 1: For sql-ops-01 Exercise 1, inspect `pg_catalog.pg_index`, `pg_catalog.pg_indexes`, and `information_schema.columns` for `events_high_device_time_covering`, and `pro_ops_lab.events`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object.
 -- 2. Explain which operators each GIN, GiST, SP-GiST, and BRIN example serves.
 --    Show one superficially similar query that cannot use that operator class.

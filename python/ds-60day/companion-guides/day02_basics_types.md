@@ -1,4 +1,4 @@
-# Day 2 — Variables and Core Types
+# Day 2 - Variables and Core Types
 
 **Level:** Beginner
 
@@ -53,12 +53,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 2 — variables and core types to practice objects, names, built-in types, conversion, and truthiness
+**Lesson outcome:** use day 2 - variables and core types to practice objects, names, built-in types, conversion, and truthiness
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive - build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -92,7 +92,7 @@ right-hand side completes before assignment. In
 `f"${price:.2f}"`, the colon starts a format specification; `.2f` means
 fixed-point display with two digits after the decimal.
 
-### Worked example 1 — Parse, calculate, then format
+### Worked example 1 - Parse, calculate, then format
 
 Keep representation changes separate from arithmetic. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -115,7 +115,7 @@ total = quantity * price
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Make Boolean parsing explicit
+### Worked example 2 - Make Boolean parsing explicit
 
 Do not confuse a non-empty spelling with a Boolean value. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -259,7 +259,7 @@ original string unchanged, and formatted output is readable.
 
 - [Open the learner notebook](../notebooks/day02_basics_types.ipynb)
 - [Check the separate transfer solutions](../solutions/day02_basics_types/day02_solutions.md)
-- [Next: Day 3 — Control flow and exceptions](day03_control_flow_exceptions.md)
+- [Next: Day 3 - Control flow and exceptions](day03_control_flow_exceptions.md)
 
 ## Ask Codex about this lesson
 

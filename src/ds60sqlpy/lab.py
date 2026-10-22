@@ -10,19 +10,24 @@ import webbrowser
 from http import HTTPStatus
 from importlib.resources import files
 from pathlib import Path
-from typing import Any, Literal, cast
+from typing import Any, cast
 from urllib.parse import urlsplit
 
+from ds60sqlpy.capabilities import CapabilityService
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.coaching import CoachingService
-from ds60sqlpy.execution import PadRunner
+from ds60sqlpy.curriculum_framework import RUNNERS
+from ds60sqlpy.execution import ALLOWED_TIMEOUT_SECONDS, PadRunner
 from ds60sqlpy.lesson_reader import render_artifact, rendered_targets
 from ds60sqlpy.portal import PortalError, PortalRequestHandler, PortalServer
+from ds60sqlpy.sql_lesson import SqlLessonRunner
 from ds60sqlpy.sql_runner import SqlRunner, SqlRunnerError
 
 
 class LabServer(PortalServer):
     """A separate execution-capable server; the original portal stays read-only."""
+
+    is_learning_lab = True
 
     # Keep bounded execution controllers alive during shutdown so their finally
     # blocks reap workers and descendants before the application exits.
@@ -56,6 +61,8 @@ class LabServer(PortalServer):
         self.RequestHandlerClass = LabRequestHandler
         self.coaching = CoachingService(catalog, self.progress)
         self.pads = PadRunner(catalog, python=python)
+        self.sql_lessons = SqlLessonRunner(catalog, self.pads)
+        self.capabilities = CapabilityService(catalog, self.pads.python)
         self.execution_lock = threading.Lock()
         self.targets = rendered_targets(catalog)
 
@@ -102,13 +109,22 @@ class LabServer(PortalServer):
         if not isinstance(lesson_id, str):
             raise ValueError("Choose a cataloged lesson ID.")
         lesson = self.catalog.get(lesson_id)
+        if action == "capabilities":
+            return self.capabilities.lesson(lesson_id)
         if action == "lesson":
             return {
                 **self.coaching.lesson(lesson_id),
+                "capabilities": self.capabilities.lesson(lesson_id),
+                "sql_snippet_starter": (
+                    "SELECT current_database() AS database_name, current_user AS database_user;\n"
+                    if lesson.runner == "sql"
+                    else "SELECT 42 AS answer;\n"
+                ),
                 "guide_html": render_artifact(
                     self.catalog.resolve(lesson.guide_path),
                     repo_root=self.repo_root,
                     targets=self.targets,
+                    id_prefix="lab-guide--",
                     output_path="learn",
                 ),
             }
@@ -126,11 +142,49 @@ class LabServer(PortalServer):
             return self.coaching.solution(lesson_id, reveal=payload.get("reveal") is True)
         if action == "complete":
             return self.coaching.complete(lesson_id, confirmed=payload.get("confirmed") is True)
+        if action == "run-lesson":
+            code = payload.get("code")
+            timeout = payload.get("timeout_seconds", 60)
+            if not isinstance(code, str):
+                raise ValueError("Supply the learner SQL working copy as text.")
+            if type(timeout) is not int or timeout not in ALLOWED_TIMEOUT_SECONDS:
+                raise ValueError("Choose a run limit of 15, 60 or 120 seconds.")
+            if not self.execution_lock.acquire(blocking=False):
+                raise ValueError(
+                    "A pad is already running. Wait for its result before running again."
+                )
+            try:
+                return self.sql_lessons.run(lesson_id, code, timeout_seconds=timeout)
+            finally:
+                self.execution_lock.release()
         if action in {"save-pad", "read-pad", "pad-history", "read-history", "run"}:
             language = payload.get("language")
-            if language not in {"python", "sql"}:
-                raise ValueError("Choose the Python or SQL backend.")
-            language = cast(Literal["python", "sql"], language)
+            if not isinstance(language, str) or language not in RUNNERS:
+                raise ValueError("Choose a registered lesson runner.")
+            mode = payload.get("mode", "snippet")
+            if not isinstance(mode, str) or mode not in {"snippet", "lesson"}:
+                raise ValueError("Choose SQL snippet or whole lesson mode.")
+            if mode == "lesson":
+                if language != "sql":
+                    raise ValueError(
+                        "Whole lesson mode is available only for cataloged SQL scripts."
+                    )
+                if action == "read-pad":
+                    return self.sql_lessons.read(lesson_id)
+                if action == "pad-history":
+                    return {"history": self.sql_lessons.history(lesson_id)}
+                if action == "read-history":
+                    history_id = payload.get("history_id")
+                    if not isinstance(history_id, str):
+                        raise ValueError("Choose an existing pad history ID.")
+                    return {"code": self.sql_lessons.read_history(lesson_id, history_id)}
+                if action == "save-pad":
+                    code = payload.get("code")
+                    if not isinstance(code, str):
+                        raise ValueError("Supply SQL as text.")
+                    self.sql_lessons.save(lesson_id, code)
+                    return {"ok": True}
+                raise ValueError("Use the explicit run-lesson action for whole SQL mode.")
             if action == "read-pad":
                 return {
                     "code": self.pads.read(lesson_id, language),
@@ -149,12 +203,21 @@ class LabServer(PortalServer):
             if action == "save-pad":
                 self.pads.save(lesson_id, language, code)
                 return {"ok": True}
+            timeout = payload.get("timeout_seconds")
+            if timeout is not None and (
+                type(timeout) is not int or timeout not in ALLOWED_TIMEOUT_SECONDS
+            ):
+                raise ValueError("Choose a run limit of 15, 60 or 120 seconds.")
             if not self.execution_lock.acquire(blocking=False):
                 raise ValueError(
                     "A pad is already running. Wait for its result before running again."
                 )
             try:
-                return self.pads.run(lesson_id, language, code)
+                return (
+                    self.pads.run(lesson_id, language, code)
+                    if timeout is None
+                    else self.pads.run(lesson_id, language, code, timeout_seconds=timeout)
+                )
             finally:
                 self.execution_lock.release()
         raise ValueError("Unknown learning-lab action.")

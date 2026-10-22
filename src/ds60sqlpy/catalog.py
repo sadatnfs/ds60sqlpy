@@ -7,9 +7,16 @@ import os
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal, cast
+from typing import Any
 
-Track = Literal["python", "sql", "bridge"]
+from ds60sqlpy.curriculum_framework import (
+    DEFAULT_TRACKS,
+    RUNNERS,
+    infer_runner,
+    validate_identifier,
+)
+
+Track = str
 TRACK_ORDER: dict[Track, int] = {"python": 0, "sql": 1, "bridge": 2}
 LESSON_ORDER_OVERRIDES: dict[str, float] = {
     "python-foundations-01": 1.5,
@@ -25,11 +32,12 @@ def catalog_order_key(
     track: Track,
     day: int,
     lesson_id: str,
+    track_order: dict[str, int] | None = None,
 ) -> tuple[int, float, str]:
     """Return the learner-facing order without changing a stable lesson ID."""
 
     return (
-        TRACK_ORDER[track],
+        (track_order or TRACK_ORDER).get(track, len(track_order or TRACK_ORDER)),
         LESSON_ORDER_OVERRIDES.get(lesson_id, float(day)),
         lesson_id,
     )
@@ -53,18 +61,26 @@ class Lesson:
     dependency_group: str
     network: str
     stateful_group: str | None = None
+    runner: str = ""
+    topics: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not self.runner:
+            object.__setattr__(self, "runner", infer_runner(self.lesson_path, self.track))
+        if self.runner not in RUNNERS:
+            raise ValueError(f"Unsupported lesson runner: {self.runner}")
 
     @classmethod
-    def from_mapping(cls, value: dict[str, Any]) -> Lesson:
+    def from_mapping(cls, value: dict[str, Any], *, known_tracks: set[str] | None = None) -> Lesson:
         """Create a lesson from a decoded catalog mapping."""
 
         raw_track = str(value["track"])
-        if raw_track not in {"python", "sql", "bridge"}:
+        if raw_track not in (known_tracks if known_tracks is not None else DEFAULT_TRACKS):
             raise ValueError(f"Unsupported lesson track: {raw_track}")
 
         return cls(
             id=str(value["id"]),
-            track=cast(Track, raw_track),
+            track=raw_track,
             day=int(value["day"]),
             title=str(value["title"]),
             level=str(value["level"]),
@@ -79,6 +95,8 @@ class Lesson:
             stateful_group=(
                 str(value["stateful_group"]) if value.get("stateful_group") is not None else None
             ),
+            runner=str(value.get("runner", infer_runner(str(value["lesson_path"]), raw_track))),
+            topics=tuple(map(str, value.get("topics", []))),
         )
 
 
@@ -107,8 +125,28 @@ def find_repo_root(start: Path | None = None) -> Path:
 class Catalog:
     """In-memory view of ``curriculum/catalog.json``."""
 
-    def __init__(self, repo_root: Path, lessons: Iterable[Lesson]) -> None:
+    def __init__(
+        self,
+        repo_root: Path,
+        lessons: Iterable[Lesson],
+        *,
+        tracks: dict[str, dict[str, str]] | None = None,
+        learning_paths: dict[str, dict[str, Any]] | None = None,
+    ) -> None:
         self.repo_root = repo_root.resolve()
+        self.tracks = {
+            key: dict(value)
+            for key, value in (DEFAULT_TRACKS if tracks is None else tracks).items()
+        }
+        for track, metadata in self.tracks.items():
+            validate_identifier(track, "Track ID")
+            if not all(
+                isinstance(metadata.get(field), str) and metadata[field].strip()
+                for field in ("title", "plan")
+            ):
+                raise ValueError(f"Track {track} needs title and plan metadata.")
+        self.learning_paths = dict(learning_paths or {})
+        track_order = {track: index for index, track in enumerate(self.tracks)}
         self._lessons = tuple(
             sorted(
                 lessons,
@@ -116,6 +154,7 @@ class Catalog:
                     lesson.track,
                     lesson.day,
                     lesson.id,
+                    track_order,
                 ),
             )
         )
@@ -126,6 +165,9 @@ class Catalog:
         if len(track_days) != len(set(track_days)):
             raise ValueError("Catalog contains duplicate track/day pairs.")
         self._by_id = {lesson.id: lesson for lesson in self._lessons}
+        unknown = {lesson.track for lesson in self._lessons} - self.tracks.keys()
+        if unknown:
+            raise ValueError(f"Catalog contains unregistered lesson tracks: {sorted(unknown)}")
 
     @classmethod
     def load(cls, repo_root: Path | None = None) -> Catalog:
@@ -143,7 +185,20 @@ class Catalog:
         raw_lessons = payload.get("lessons")
         if not isinstance(raw_lessons, list):
             raise ValueError("Catalog field 'lessons' must be a list.")
-        return cls(root, (Lesson.from_mapping(item) for item in raw_lessons))
+        tracks = payload.get("tracks", DEFAULT_TRACKS)
+        if not isinstance(tracks, dict) or not all(
+            isinstance(key, str) and isinstance(value, dict) for key, value in tracks.items()
+        ):
+            raise ValueError("Catalog tracks must contain registered track metadata.")
+        learning_paths = payload.get("learning_paths", {})
+        if not isinstance(learning_paths, dict):
+            raise ValueError("Catalog learning_paths must be an object.")
+        return cls(
+            root,
+            (Lesson.from_mapping(item, known_tracks=set(tracks)) for item in raw_lessons),
+            tracks=tracks,
+            learning_paths=learning_paths,
+        )
 
     def __iter__(self) -> Iterator[Lesson]:
         return iter(self._lessons)
@@ -153,6 +208,8 @@ class Catalog:
 
         if track is None:
             return self._lessons
+        if track not in self.tracks:
+            raise ValueError(f"Unknown registered track: {track}")
         return tuple(lesson for lesson in self._lessons if lesson.track == track)
 
     def get(self, lesson_id: str) -> Lesson:

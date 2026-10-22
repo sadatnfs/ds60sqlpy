@@ -9,7 +9,17 @@ from urllib.request import Request, urlopen
 import pytest
 
 from ds60sqlpy.catalog import Catalog
-from ds60sqlpy.portal import PortalError, PortalLauncher, create_portal_server
+from ds60sqlpy.portal import PortalError, PortalLauncher, PortalRequestHandler, create_portal_server
+
+
+def test_idle_or_partial_request_timeout_does_not_break_logging(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    handler = object.__new__(PortalRequestHandler)
+    handler.log_message("Request timed out: %r", TimeoutError())
+    handler.path = "/api/lab"
+    handler.log_message("Request timed out: %r", TimeoutError())
+    assert capsys.readouterr().out == ""
 
 
 def _request(

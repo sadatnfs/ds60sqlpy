@@ -59,12 +59,21 @@ def docker_environment() -> dict[str, str]:
     return env
 
 
+def is_local_endpoint(endpoint: str) -> bool:
+    """Validate the complete endpoint, including TCP authority boundaries."""
+    return bool(
+        re.fullmatch(r"unix:///[^\r\n]+", endpoint)
+        or re.fullmatch(r"npipe:/{2,4}\./pipe/[A-Za-z0-9_.-]+", endpoint)
+        or re.fullmatch(r"tcp://(?:127\.0\.0\.1|localhost):[0-9]{1,5}", endpoint)
+    )
+
+
 def local_engine(docker: str, env: dict[str, str]) -> bool:
     """Refuse remote bind mounts; return whether this is a rootless local engine."""
     endpoint = env.get("DOCKER_HOST") or output(
         [docker, "context", "inspect", "--format", "{{.Endpoints.docker.Host}}"], env
     )
-    if not endpoint.startswith(("unix://", "npipe://", "tcp://127.0.0.1:", "tcp://localhost:")):
+    if not is_local_endpoint(endpoint):
         raise LaunchError(
             "Choose a local Docker context. Host-saved progress cannot use a remote engine path."
         )

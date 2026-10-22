@@ -118,7 +118,7 @@
     <article class="document"><h2 id="ds60-learning-lab-python-data-science-sql-and-engineering">DS60 Learning Lab: Python, Data Science, SQL, and Engineering<a class="heading-anchor" href="#ds60-learning-lab-python-data-science-sql-and-engineering" aria-label="Link to this section">#</a></h2>
 <p><a href="https://github.com/sadatnfs/ds60sqlpy/actions/workflows/ci.yml/badge.svg">![Course validation</a>](https://github.com/sadatnfs/ds60sqlpy/actions/workflows/ci.yml)</p>
 <p>DS60 is a self-paced repository for learning practical Python, data science, and PostgreSQL from introductory material through substantial projects. The existing tracks are organized as 60 numbered lessons, but the number is a navigation aid rather than a deadline: take the time you need, repeat lessons, and use the curriculum catalog to choose prerequisites.</p>
-<blockquote><p>[!TIP] Start with the <strong>guided coding application</strong> below. On Windows, double-click <code>START_LEARNING_LAB.cmd</code> after cloning; it checks or prepares the environment and opens the lab. Docker includes the Python and PostgreSQL backends. <a href="../START_HERE.html">START_HERE.html</a> remains the static offline reading library, and <code>START_DS60.cmd</code> opens its editor/Jupyter launcher.</p></blockquote>
+<blockquote><p>[!TIP] Start with the <strong>guided coding application</strong> below. On a new Windows computer, extract the Windows Starter ZIP and double-click <code>START_DOCKER_LAB.cmd</code>. Its wizard guides setup, then opens the lab with Python and PostgreSQL backends. <a href="../START_HERE.html">START_HERE.html</a> remains the static offline reading library, and <code>START_DS60.cmd</code> opens its editor/Jupyter launcher.</p></blockquote>
 <p>The repository is designed for:</p>
 <ul>
 <li>A learner using the browser coding lab, Visual Studio Code, or JupyterLab</li>
@@ -126,12 +126,13 @@
 <li>A one-time connected setup followed by offline study</li>
 <li>Optional guidance from Codex without requiring Codex to run the lessons</li>
 </ul>
-<p>Each Python, SQL, and bridge guide is designed to stand on its own: it defines the mental model and vocabulary, breaks down syntax or query anatomy, provides runnable examples and visible checks, diagnoses common mistakes, and supplies a progression of practice. Its final <strong>Ask Codex about this lesson</strong> block is optional, copy-ready coaching context—not a replacement for the lesson.</p>
+<p>Each Python, SQL, and bridge guide is designed to stand on its own: it defines the mental model and vocabulary, breaks down syntax or query anatomy, provides runnable examples and visible checks, diagnoses common mistakes, and supplies a progression of practice. Its final <strong>Ask Codex about this lesson</strong> block is optional, copy-ready coaching context - not a replacement for the lesson.</p>
 <blockquote><p>[!IMPORTANT] The repository runs locally after setup, but a brand-new machine still needs internet access to install Python packages, PostgreSQL or Docker, and VS Code extensions. A few lessons use Seaborn datasets that download on first use and are cached afterward. Pretrained Hugging Face, spaCy, and torchvision exercises can also require a deliberate first download; their lesson notes identify those cases. See <a href="docs/setup/offline.md.html">Offline use</a>.</p></blockquote>
 <h3 id="start-the-guided-coding-application">Start the guided coding application<a class="heading-anchor" href="#start-the-guided-coding-application" aria-label="Link to this section">#</a></h3>
 <p>The course now includes a browser workspace with Python and PostgreSQL coding pads, a lesson guide beside your code, saved work and evidence, progressive hints, and a route generated from your goal&#x27;s prerequisites. It runs locally and works offline after the required tools, images, and lesson packages have been prepared.</p>
 <p><strong>Docker browser lab on Windows, macOS, or Linux:</strong> follow the <a href="docs/docker-beginners.md.html">beginner walkthrough</a> to install the engine, prepare Windows WSL 2 if needed, and extract the course folder. No host Python, PostgreSQL, or course package installation is required for this route.</p>
-<p>With the engine running, Windows users can double-click <code>START_DOCKER_LAB.cmd</code>; Mac users can double-click <code>START_DOCKER_LAB.command</code>. The terminal alternatives, from the folder containing <code>compose.yaml</code>, are:</p>
+<p><strong>New Windows computer:</strong> download the supplied Windows Starter ZIP (or a repository ZIP containing the first-run wizard), choose <strong>Extract All</strong>, then double-click <strong><code>START_DOCKER_LAB.cmd</code></strong> in the extracted folder. Its first-run wizard reuses a ready engine or offers prerequisite installation. No host Python or Git is needed. Windows may request installation approval or a restart; rerun the same launcher afterward to continue. See the <a href="docs/docker-beginners.md.html#windows-start-with-the-first-run-wizard">Windows first-run walkthrough</a>.</p>
+<p>With a configured engine, Mac users can double-click <code>START_DOCKER_LAB.command</code>. Runtime-only terminal alternatives, from the folder containing <code>compose.yaml</code>, are:</p>
 <pre><code class="language-powershell"># Windows PowerShell
 powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 start</code></pre>
 <pre><code class="language-bash"># macOS, Linux, or an integrated WSL 2 terminal
@@ -173,7 +174,7 @@ bash scripts/docker_lab.sh start</code></pre>
 <pre><code class="language-text">python scripts/course.py catalog</code></pre>
 <p>After the shared lessons, use <a href="docs/professional-paths.md.html">professional and specialization paths</a> for the named modules. A new SQL learner starts with <code>sql-start-01</code>, <code>sql-start-02</code>, and <code>sql-start-03</code> before <code>sql-01</code>; relational design (<code>sql-found-01</code>) is the milestone between Days 15 and 16, and safe versioned migrations (<code>sql-found-02</code>) sit between Days 39 and 40.</p>
 <h3 id="quick-start">Quick start<a class="heading-anchor" href="#quick-start" aria-label="Link to this section">#</a></h3>
-<p>Run commands from the repository root—the directory containing this README.</p>
+<p>Run commands from the repository root - the directory containing this README.</p>
 <h4 id="1-install-prerequisites">1. Install prerequisites<a class="heading-anchor" href="#1-install-prerequisites" aria-label="Link to this section">#</a></h4>
 <p>The recommended compatibility baseline is:</p>
 <ul>
@@ -309,10 +310,10 @@ docs/
 <h3 id="continuous-validation">Continuous validation<a class="heading-anchor" href="#continuous-validation" aria-label="Link to this section">#</a></h3>
 <p>The badge at the top reflects <code>.github/workflows/ci.yml</code>. Every push and pull request runs locked core checks on Ubuntu (Python 3.11 and 3.12), Windows (3.12), and macOS (3.12), exercises the learner bootstrap, and executes the complete learner/solution SQL sequence against PostgreSQL 17. A scheduled or manual job also verifies every optional dependency group on Windows, Ubuntu, and macOS. See <a href="docs/validation.md.html">Validation</a> for the exact local equivalents and the difference between structural, smoke, and full execution evidence.</p>
 <h3 id="scope-and-expectations">Scope and expectations<a class="heading-anchor" href="#scope-and-expectations" aria-label="Link to this section">#</a></h3>
-<p>The Python track is strongest as a practical Python-for-data-science path; it is not a substitute for the complete Python language reference. The SQL track targets PostgreSQL. The bridge adds focused application-engineering practice, not a full distributed-systems or database-administration program. Treat lesson objectives and the generated catalog view—not a promise to teach “everything”—as the contract.</p>
+<p>The Python track is strongest as a practical Python-for-data-science path; it is not a substitute for the complete Python language reference. The SQL track targets PostgreSQL. The bridge adds focused application-engineering practice, not a full distributed-systems or database-administration program. Treat lesson objectives and the generated catalog view - not a promise to teach “everything” - as the contract.</p>
 <p>Progress matters more than the 60-day label. A good session ends with runnable work, an explanation in your own words, and one small note about what to revisit.</p>
 <h3 id="license">License<a class="heading-anchor" href="#license" aria-label="Link to this section">#</a></h3>
-<p>See <a href="../LICENSE">LICENSE</a>.</p></article>
+<p>See <a href="LICENSE.html">LICENSE</a>.</p></article>
   </main>
 </body>
 </html>

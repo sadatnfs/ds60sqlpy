@@ -1,4 +1,4 @@
-# SQL-OPS-01 Solutions — Indexes and Maintenance
+# SQL-OPS-01 Solutions - Indexes and Maintenance
 
 
 <!-- beginner-solution-enrichment -->
@@ -62,7 +62,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solution
 The solution rolls back `pro_ops_lab` and performs no vacuum or configuration
 change.
 
-## Exercise 1 — Covering partial index
+## Exercise 1 - Covering partial index
 
 The solution pairs its exact high-severity device-history query with:
 
@@ -82,9 +82,9 @@ cost.
 
 - **Inputs/evidence:** For sql-ops-01 Exercise 1, match the query's equality/range/order/projection with a partial covering btree on `(device_id, occurred_at DESC)` including severity/message and predicated on `severity >= 4`.
 - **Expected result/shape:** For sql-ops-01 Exercise 1, expected output: catalog command evidence, one EXPLAIN plan, and up to 25 underlying rows with `occurred_at`, `severity`, and `message` for device-005 in descending time order.
-- **Independent verification:** For sql-ops-01 Exercise 1, assert every result satisfies the partial predicate, compare returned rows with the same SELECT without planner settings, inspect the exact index predicate/include columns, and treat scan type as observed evidence—not a guaranteed contract.
+- **Independent verification:** For sql-ops-01 Exercise 1, assert every result satisfies the partial predicate, compare returned rows with the same SELECT without planner settings, inspect the exact index predicate/include columns, and treat scan type as observed evidence - not a guaranteed contract.
 
-## Exercise 2 — Operator compatibility
+## Exercise 2 - Operator compatibility
 
 - GIN array ops support containment/overlap, not arbitrary element
   transformations.
@@ -102,7 +102,7 @@ class.
 - **Expected result/shape:** For sql-ops-01 Exercise 2, expected output: four ordered rows with `method`, `suitable_types`, `target_operators`, and `tradeoff`.
 - **Independent verification:** For sql-ops-01 Exercise 2, identify the exact operator class available for the target type, test representative data distribution/write cost, and reject any recommendation that names only an access method without its query operator.
 
-## Exercise 3 — Correlated statistics
+## Exercise 3 - Correlated statistics
 
 The fixture deliberately correlates `category` and `severity`. Dependencies and
 MCV statistics can improve combined-filter cardinality after `ANALYZE`.
@@ -115,7 +115,7 @@ as data distribution changes.
 - **Expected result/shape:** For sql-ops-01 Exercise 3, expected output: exactly one statistics row with its name, kinds, and attribute names.
 - **Independent verification:** For sql-ops-01 Exercise 3, compare EXPLAIN estimated rows before/after ANALYZE for a correlated predicate, retain actual counts as control, and do not claim extended statistics replace ordinary column statistics.
 
-## Exercise 4 — Lifecycle review
+## Exercise 4 - Lifecycle review
 
 The solution inventories size, scans, predicate, uniqueness, and primary-key
 ownership. A real decision also records stats-reset/restart time, full workload
@@ -128,7 +128,7 @@ evidence. Constraint-owned indexes are not casual drop candidates.
 - **Expected result/shape:** For sql-ops-01 Exercise 4, expected output: one row per index ordered by `index_name`, including the primary and partial covering indexes.
 - **Independent verification:** For sql-ops-01 Exercise 4, reconcile index identities with `pg_index`, record workload observation window and stats reset, and require query/constraint/replica evidence before any reviewed drop; zero scans alone is never sufficient.
 
-## Exercise 5 — Maintenance
+## Exercise 5 - Maintenance
 
 VACUUM makes dead tuple space reusable, advances freeze safety, and updates
 visibility. ANALYZE samples values for estimates. Autovacuum triggers each using
@@ -142,7 +142,7 @@ and locks, so it is exceptional maintenance.
 - **Expected result/shape:** For sql-ops-01 Exercise 5, expected output: four ordered rows with `command`, `evidence_domain`, `primary_effect`, and `important_limit`; the lesson executes no VACUUM inside its transaction.
 - **Independent verification:** For sql-ops-01 Exercise 5, compare each matrix row with observed dead-tuple/freeze/visibility or estimate evidence, assert the command's stated effect and limit, and require a lock/rewrite test result before VACUUM FULL.
 
-## Exercise 6 — Statement statistics
+## Exercise 6 - Statement statistics
 
 A safe `pg_stat_statements` plan requires approved preload/extension ownership,
 restricted view access, retention/reset rules, normalized `queryid` analysis,
@@ -156,7 +156,7 @@ contain confidential values. This course does not enable the extension or alter
 - **Expected result/shape:** For sql-ops-01 Exercise 6, expected output: exactly one capability-state row plus four privacy controls with owner; all host states produce a safe result or SAFE SKIP.
 - **Independent verification:** For sql-ops-01 Exercise 6, test absent and installed/preload variants where available, distinguish capability from permission, and require restricted access, redaction, bounded retention, and aggregate-only exports before production use.
 
-## Exercise 7 — Redundancy is a hypothesis
+## Exercise 7 - Redundancy is a hypothesis
 
 Compare index key attributes in order, INCLUDE columns, predicate,
 `indisunique`/constraint ownership, expressions, collations, sort direction,
@@ -174,7 +174,7 @@ generate/drop automatically from catalog similarity or one zero scan count.
 - **Expected result/shape:** For sql-ops-01 Exercise 7, expected output: one row per events index ordered by `index_name`, with key and included attributes separated using `indnkeyatts`.
 - **Independent verification:** For sql-ops-01 Exercise 7, compare semantic properties rather than similar SQL text or names, account for constraints and replicas, and emit candidates for human review without automatically dropping anything.
 
-## Exercise 8 — Expression index and collation
+## Exercise 8 - Expression index and collation
 
 An index on `lower(device_name) COLLATE ...` helps a query only when its
 expression/operator/collation is compatible. PostgreSQL will not infer every
@@ -192,7 +192,7 @@ inspect the exact transformed value.
 - **Expected result/shape:** For sql-ops-01 Exercise 8, expected output: one plan followed by the first ten deterministic `(event_id, device_id)` rows matching device-007.
 - **Independent verification:** For sql-ops-01 Exercise 8, compare expression trees and collation/operator semantics, assert all displayed device IDs normalize to device-007, and show that a different expression need not use this index.
 
-## Exercise 9 — HOT and dead tuples
+## Exercise 9 - HOT and dead tuples
 
 HOT can avoid new index entries when no indexed column changes and the same heap
 page has room. Lower fillfactor may reserve that room at a storage/scan cost.
@@ -209,7 +209,7 @@ behavior, not one universal dead-tuple percentage.
 - **Expected result/shape:** For sql-ops-01 Exercise 9, expected output: a transaction-local row reporting 100 updates and the observed HOT subset, plus a separate cumulative stats row that may lag.
 - **Independent verification:** For sql-ops-01 Exercise 9, assert the xact update count rather than the asynchronous cumulative value, treat HOT rate as observational, and relate it to indexed columns, tuple size/page space, and vacuum horizons.
 
-## Exercise 10 — Partitioned indexing
+## Exercise 10 - Partitioned indexing
 
 Partition pruning removes irrelevant children when bounds can be inferred.
 Indexes and statistics are physically per partition even when declared through
@@ -226,7 +226,7 @@ attach validation, locks, detached-partition queries, and lifecycle automation.
 - **Expected result/shape:** For sql-ops-01 Exercise 10, expected output: an EXPLAIN plan naming only the February partition, one matching row, three `pg_partition_tree` rows with bounds, and two child-index catalog rows derived from the parent partitioned index.
 - **Independent verification:** For sql-ops-01 Exercise 10, assert the query result independently, inspect child indexes and bounds, prove January is pruned, and state that cross-partition uniqueness normally includes the partition key because PostgreSQL has no general global index.
 
-## Exercise 11 — Reading plan instrumentation safely
+## Exercise 11 - Reading plan instrumentation safely
 
 Plain EXPLAIN estimates without executing. EXPLAIN ANALYZE executes and adds
 actual timing/rows; BUFFERS shows cache/I/O counters, WAL shows generated WAL,
@@ -243,7 +243,7 @@ about that setup, not a production capacity claim.
 - **Expected result/shape:** For sql-ops-01 Exercise 11, expected output: one plan, one scalar `matching_rows` control, and three statement-class warnings; ANALYZE is execution, not hypothetical planning.
 - **Independent verification:** For sql-ops-01 Exercise 11, reconcile plan actual rows with the scalar control, label cache/fixture effects, and require rollback-only disposable targets before EXPLAIN ANALYZE on INSERT/UPDATE/DELETE.
 
-## Exercise 12 — Owned maintenance scorecard
+## Exercise 12 - Owned maintenance scorecard
 
 Track semantic signals: relation/index growth, dead/live tuples, last analyze,
 invalid indexes, long transactions, lock waits, WAL/replica lag, query latency,

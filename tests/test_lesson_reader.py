@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import re
+from dataclasses import replace
 from html.parser import HTMLParser
 from pathlib import Path
+
+import pytest
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.lesson_reader import (
@@ -97,6 +100,132 @@ def test_reader_renders_notebooks_and_sql_as_html_not_raw_downloads() -> None:
     assert "advanced_sql_training" in sql_reader
     assert "complete psql transcript/query result" in sql_reader
     assert "Projection, Predicate, Deterministic ordering" in sql_reader
+
+
+@pytest.mark.parametrize(
+    ("runner", "suffix", "source", "expected"),
+    [
+        ("cpp", ".cpp", "#include <iostream>\n// Exercise 1: inspect <script>.", "C++ source file"),
+        ("scala", ".scala", '// Exercise 1: inspect println("<hello>").', "Scala source file"),
+        ("kubernetes", ".yaml", "# Exercise 1: explain replicas.\nreplicas: 2", "YAML manifest"),
+        ("none", ".md", "## Exercises\n\n1. Explain the evidence.", "record your evidence"),
+    ],
+)
+def test_future_readers_preserve_language_and_capability_boundaries(
+    tmp_path: Path, runner: str, suffix: str, source: str, expected: str
+) -> None:
+    original = Catalog.load(REPO_ROOT).get("python-01")
+    lesson = replace(
+        original,
+        id="future-01",
+        track="future",
+        day=1,
+        runner=runner,
+        prerequisites=(),
+        lesson_path=f"courses/future/learner{suffix}",
+        guide_path="courses/future/guide.md",
+        solution_paths=("courses/future/solutions/explanation.md",),
+    )
+    for path, content in (
+        (lesson.lesson_path, source),
+        (lesson.guide_path, "# Future lesson\n\nA readable guide."),
+        (lesson.solution_paths[0], "# Explanation\n\nSeparate worked reasoning."),
+    ):
+        destination = tmp_path / path
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(content, encoding="utf-8")
+    catalog = Catalog(
+        tmp_path,
+        [lesson],
+        tracks={"future": {"title": "Future track", "plan": lesson.guide_path}},
+    )
+    document = build_lesson_html(catalog, lesson, targets=artifact_targets(catalog))
+
+    assert expected in document
+    assert "Run this Python file" not in document
+    assert "Run this notebook with the course kernel" not in document
+    assert 'id="solution-1"' in document and 'id="solution-2"' not in document
+    assert "const LAB_MODE = false;" in document
+    assert 'class="lab-only" href="../learn?lesson=future-01" hidden' in document
+    assert "<script>." not in document
+    if runner != "none":
+        assert "execution adapter is not implemented" in document
+
+
+def test_registered_plan_is_rendered_without_a_link_from_existing_docs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("ds60sqlpy.lesson_reader.COURSE_GUIDE_REFERENCE_PATHS", ())
+    plan = tmp_path / "courses" / "new-topic" / "README.md"
+    plan.parent.mkdir(parents=True)
+    plan.write_text("# A new track\n\nIts plan is catalog metadata.", encoding="utf-8")
+    catalog = Catalog(
+        tmp_path,
+        [],
+        tracks={"new-topic": {"title": "New topic", "plan": "courses/new-topic/README.md"}},
+    )
+
+    references = build_reference_files(catalog)
+
+    assert reference_relative_path("courses/new-topic/README.md") in references
+
+
+def test_math_in_tables_keeps_conditional_probability_and_superscripts() -> None:
+    resolver = LinkResolver(repo_root=REPO_ROOT, source_path=REPO_ROOT / "README.md", targets={})
+    document = render_markdown(
+        "| Concept | Notation |\n| --- | --- |\n"
+        r"| Conditional | \(P(A\mid B)\) |" + "\n"
+        r"| Score | \(R^2\) |" + "\n"
+        r"| Escaped pipe | a\|b |" + "\n",
+        resolver=resolver,
+    )
+
+    assert '<math xmlns="http://www.w3.org/1998/Math/MathML"' in document
+    assert "<mo>|</mo>" in document and "<msup>" in document
+    assert "Amid B" not in document and "<td>a|b</td>" in document
+    assert render_inline(r"`\(R^2\)`", resolver) == r"<code>\(R^2\)</code>"
+
+
+@pytest.mark.parametrize("suffix", [".cpp", ".scala", ".yaml", ".json", ".csv", ".txt", ".toml"])
+def test_authored_text_reference_is_escaped_and_rendered(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, suffix: str
+) -> None:
+    monkeypatch.setattr("ds60sqlpy.lesson_reader.COURSE_GUIDE_REFERENCE_PATHS", ())
+    plan = tmp_path / "courses" / "future" / "README.md"
+    plan.parent.mkdir(parents=True)
+    plan.write_text(f"# Track\n\n[Fixture](fixture{suffix})", encoding="utf-8")
+    (plan.parent / f"fixture{suffix}").write_text("<script>example</script>", encoding="utf-8")
+    catalog = Catalog(
+        tmp_path, [], tracks={"future": {"title": "Future", "plan": "courses/future/README.md"}}
+    )
+
+    references = build_reference_files(catalog)
+    reference = reference_relative_path(f"courses/future/fixture{suffix}")
+
+    assert reference in references
+    assert "&lt;script&gt;example&lt;/script&gt;" in references[reference]
+    assert "<script>example</script>" not in references[reference]
+    plan_reference = references[reference_relative_path("courses/future/README.md")]
+    assert f"fixture{suffix}.html" in plan_reference
+
+
+@pytest.mark.parametrize(
+    "path", [".learning/pads/saved.json", "artifacts/private.json", "courses/a/credentials.json"]
+)
+def test_private_files_are_not_rendered_as_reference_pages(path: str) -> None:
+    with pytest.raises(ValueError, match="Unsafe source path"):
+        reference_relative_path(path)
+
+
+def test_license_has_a_safe_text_reference(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("ds60sqlpy.lesson_reader.COURSE_GUIDE_REFERENCE_PATHS", ())
+    (tmp_path / "README.md").write_text("# Track\n\n[License](LICENSE)", encoding="utf-8")
+    (tmp_path / "LICENSE").write_text("Permission to use <authored> text.", encoding="utf-8")
+    catalog = Catalog(tmp_path, [], tracks={"future": {"title": "Future", "plan": "README.md"}})
+
+    references = build_reference_files(catalog)
+
+    assert "&lt;authored&gt;" in references[reference_relative_path("LICENSE")]
 
 
 def test_reader_uses_the_guides_lesson_specific_codex_prompt() -> None:

@@ -45,8 +45,8 @@ for the checked-in generated inventory in `curriculum/catalog.json`. The index i
 ### Comfortable with another programming language
 
 Review Python Days 1–9, then focus on testing, tooling, data work, and
-projects. Begin SQL at Day 1 unless a placement check shows that you should
-skip basic querying; take the relational-design and migration modules only
+projects. Begin SQL with `sql-start-01` through `sql-start-03`, then Day 1,
+unless a placement check demonstrates those foundations. Take the relational-design and migration modules only
 after their declared catalog prerequisites.
 
 ### Comfortable with SQL
@@ -177,7 +177,10 @@ Use Codex for a diagnostic quiz with [Learning with Codex](learning-with-codex.m
 
 The repository may grow beyond the historical numbering. New material should close a documented gap, declare prerequisites, and receive a stable catalog ID. Do not renumber established lessons merely to preserve a marketing total.
 
-See [Content authoring](content-authoring.md).
+See [Content authoring](content-authoring.md) and the
+[curriculum extension playbook](curriculum-extension-playbook.md). New tracks
+register their plan, lessons, topics, and goal targets additively; the app and
+reading library use that shared metadata rather than a fixed sixty-lesson list.
 
 For the audited gap record and implementation criteria, see the
 [curriculum gap backlog](curriculum-gap-backlog.md).

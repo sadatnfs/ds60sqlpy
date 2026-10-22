@@ -1,5 +1,5 @@
 -- SQL-OPS-01 executable solutions
--- SOLUTION READING MAP — sql-ops-01: Index Types, Statistics, and Maintenance Lifecycle
+-- SOLUTION READING MAP - sql-ops-01: Index Types, Statistics, and Maintenance Lifecycle
 -- Explanation: sql/professional/solutions/sql_ops_01_indexes_statistics_maintenance_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_ops_01_indexes_statistics_maintenance_solutions.sql

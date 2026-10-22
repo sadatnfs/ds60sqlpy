@@ -18,6 +18,8 @@ BUNDLE_PATHS = (
     "LICENSE",
     "pyproject.toml",
     "curriculum",
+    "courses",
+    "examples",
     "python",
     "sql",
     "bridge",

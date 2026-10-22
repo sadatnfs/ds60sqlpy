@@ -9,6 +9,7 @@ without a web server or network connection.
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import sys
 from pathlib import Path
@@ -66,6 +67,33 @@ def build_html(payload: dict[str, Any]) -> str:
     python_count = track_counts.get("python", 0)
     sql_count = track_counts.get("sql", 0)
     bridge_count = track_counts.get("bridge", 0)
+    tracks = payload["tracks"]
+    plan_targets: dict[str, str] = {}
+    for lesson in lessons:
+        reader = f"lesson-pages/{lesson['id']}.html"
+        plan_targets[str(lesson["guide_path"])] = f"{reader}#guide"
+        plan_targets[str(lesson["lesson_path"])] = f"{reader}#learner"
+        for index, solution in enumerate(lesson["solution_paths"], start=1):
+            plan_targets[str(solution)] = f"{reader}#solution-{index}"
+    track_progress = "\n".join(
+        '<div class="track-progress" data-progress-track="'
+        + html.escape(str(track), quote=True)
+        + '"><strong><a href="'
+        + html.escape(
+            plan_targets.get(str(metadata["plan"]), reference_relative_path(metadata["plan"])),
+            quote=True,
+        )
+        + '">'
+        + html.escape(str(metadata["title"]))
+        + "</a></strong><span>0 complete</span>"
+        + '<div class="progress-bar"><i style="--track-progress: 0%"></i></div></div>'
+        for track, metadata in tracks.items()
+    )
+    track_options = "\n".join(
+        f'<option value="{html.escape(str(track), quote=True)}">'
+        f"{html.escape(str(metadata['title']))}</option>"
+        for track, metadata in tracks.items()
+    )
     catalog_json = _embedded_catalog(payload)
 
     document = r"""<!doctype html>
@@ -101,6 +129,7 @@ def build_html(payload: dict[str, Any]) -> str:
         "Segoe UI", sans-serif;
     }
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
@@ -708,7 +737,7 @@ def build_html(payload: dict[str, Any]) -> str:
         <span>Learning Guide</span>
       </a>
       <nav aria-label="Primary">
-        <a href="http://127.0.0.1:8765/learn">Docker coding lab</a>
+        <a href="http://127.0.0.1:8765/learn" data-coding-lab-link>Coding lab</a>
         <a href="#setup">Set up</a>
         <a href="#run-sql">Run SQL</a>
         <a href="#paths">Choose a path</a>
@@ -738,7 +767,7 @@ def build_html(payload: dict[str, Any]) -> str:
     <aside class="hero-card" aria-label="Course inventory">
       <div class="stats">
         <div class="stat"><strong>__LESSON_COUNT__</strong><span>cataloged lessons</span></div>
-        <div class="stat"><strong>3</strong><span>connected tracks</span></div>
+        <div class="stat"><strong>__TRACK_COUNT__</strong><span>connected tracks</span></div>
         <div class="stat"><strong>__PYTHON_COUNT__</strong><span>Python modules</span></div>
         <div class="stat"><strong>__SQL_COUNT__</strong><span>SQL modules</span></div>
         <div class="stat"><strong>__BRIDGE_COUNT__</strong><span>bridge modules</span></div>
@@ -760,10 +789,13 @@ def build_html(payload: dict[str, Any]) -> str:
         <p>
           Guides, notebooks, Python, and SQL are rendered here as read-only
           lesson pages, but a normal browser page cannot safely start VS Code,
-          Jupyter, Python, or PostgreSQL. On Windows, double-click
-          <code>START_DS60.cmd</code>. On macOS/Linux, run
-          <code>.venv/bin/python scripts/learning_portal.py</code>. The reopened
-          page will say <em>Private launcher mode</em> and show real launch buttons.
+          Jupyter, Python, or PostgreSQL. For the coding lab, extract the course
+          and double-click <code>START_DOCKER_LAB.cmd</code> on Windows, or follow
+          <a href="docs/docker-beginners.md">the container walkthrough</a> for
+          macOS/Linux. If you prefer native VS Code and Jupyter, use
+          <code>START_DS60.cmd</code> or
+          <code>.venv/bin/python scripts/learning_portal.py</code>; that separate
+          page says <em>Private launcher mode</em> and provides native launch buttons.
         </p>
       </div>
     </div>
@@ -776,6 +808,14 @@ def build_html(payload: dict[str, Any]) -> str:
           or generate and open guided notebooks in JupyterLab. Keep the launcher
           terminal open; it is the private bridge between this page and your apps.
         </p>
+      </div>
+    </div>
+    <div class="mode-notice private" id="lab-mode-banner" hidden>
+      <span class="mode-icon" aria-hidden="true">✓</span>
+      <div><strong>This is your coding lab's reading library.</strong>
+        <p>Browse the complete course here, then
+          <a href="/learn" data-coding-lab-link>return to the coding lab</a>
+          to keep your attempt, phase evidence, and completion together.</p>
       </div>
     </div>
   </div>
@@ -798,9 +838,9 @@ def build_html(payload: dict[str, Any]) -> str:
             <h2>Prepare this machine once.</h2>
           </div>
           <p>
-            Work from the repository root in VS Code. Choose your operating
-            system; the commands below deliberately use the repository
-            interpreter so PATH and activation mistakes are visible.
+            Choose the container route for a browser workspace with its Python
+            and PostgreSQL backends. Native VS Code and Jupyter setup remains
+            available below when you want those tools on your own computer.
           </p>
         </div>
 
@@ -813,23 +853,24 @@ def build_html(payload: dict[str, Any]) -> str:
         <div id="os-windows" class="os-panel panel" role="tabpanel" aria-labelledby="tab-windows" data-os-panel="windows">
           <div class="callout" id="windows-quick-start">
             <p class="eyebrow">Recommended Windows route</p>
-            <h3>Double-click <code>START_DS60.cmd</code>.</h3>
+            <h3>Extract All, then double-click <code>START_DOCKER_LAB.cmd</code>.</h3>
             <p>
-              Open the cloned repository in File Explorer and double-click
-              <code>START_DS60.cmd</code>. It checks or prepares the course
-              environment, runs readiness diagnostics, and reopens this guide
-              in private launcher mode. Keep its terminal window open while
-              studying so lesson buttons can open VS Code and Jupyter for you.
+              Download the supplied Windows Starter ZIP, use File Explorer's
+              <strong>Extract All</strong>, then open the complete extracted
+              folder. Its first-run wizard reuses a ready local engine or asks
+              before installing prerequisites, then builds the course and opens
+              the coding lab. No host Python or Git is required.
             </p>
             <p class="microcopy">
-              The first connected start installs missing course packages.
-              Missing system tools are diagnosed with guided next steps;
-              installing them through WinGet remains an explicit opt-in.
-              Normal lessons can run offline afterward.
+              The first setup needs internet and may require installation
+              approval or a manual restart. Rerun the same starter afterward;
+              it checks the current machine state. Read the
+              <a href="docs/docker-beginners.md">beginner container guide</a>
+              for supported Windows versions, saved work, and troubleshooting.
             </p>
           </div>
           <details style="margin-top: 1rem">
-            <summary><strong>Manual setup or repair commands</strong></summary>
+            <summary><strong>Optional native VS Code/Jupyter setup</strong></summary>
           <h3>Windows PowerShell</h3>
           <p>
             If Anaconda and PostgreSQL are installed but absent from PATH, use
@@ -856,6 +897,11 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
         </div>
 
         <div id="os-macos" class="os-panel panel" role="tabpanel" aria-labelledby="tab-macos" data-os-panel="macos" hidden>
+          <h3>Browser coding lab</h3>
+          <p>After installing a local engine, double-click
+            <code>START_DOCKER_LAB.command</code>, or follow
+            <a href="docs/docker-beginners.md">the container walkthrough</a>.</p>
+          <details><summary><strong>Optional native VS Code/Jupyter setup</strong></summary>
           <h3>macOS terminal</h3>
           <pre><code>bash scripts/setup.sh
 .venv/bin/python scripts/course.py doctor
@@ -864,9 +910,16 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
             See <a href="docs/setup/macos.md">the complete macOS guide</a> for
             Python, PostgreSQL, VS Code, Apple Silicon, and shell details.
           </p>
+          </details>
         </div>
 
         <div id="os-linux" class="os-panel panel" role="tabpanel" aria-labelledby="tab-linux" data-os-panel="linux" hidden>
+          <h3>Browser coding lab</h3>
+          <p>After installing a local engine and Compose, run
+            <code>bash scripts/docker_lab.sh start</code>. Follow
+            <a href="docs/docker-beginners.md">the container walkthrough</a>
+            for engine installation and your first visible results.</p>
+          <details><summary><strong>Optional native VS Code/Jupyter setup</strong></summary>
           <h3>Linux terminal</h3>
           <pre><code>bash scripts/setup.sh
 .venv/bin/python scripts/course.py doctor
@@ -875,6 +928,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
             See <a href="docs/setup/linux.md">the complete Linux guide</a> for
             supported package-manager examples and PostgreSQL service setup.
           </p>
+          </details>
         </div>
 
         <div class="grid three" style="margin-top: 1rem">
@@ -1049,7 +1103,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
               <strong>Open SQL workspace</strong> button that creates the
               lesson-specific guided notebook for you.
             </p>
-            <a class="button" href="lesson-pages/sql-01.html">Start SQL Day 1</a>
+            <a class="button" href="lesson-pages/sql-start-01.html">Start the first SQL lab</a>
           </div>
           <div class="callout warning">
             <h3>If a cell fails</h3>
@@ -1104,6 +1158,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           <article class="panel path-card">
             <h3>New to both</h3>
             <ul>
+              <li>Python starter labs and three tiny-table SQL starter labs</li>
               <li>Python Days 1–15</li>
               <li>SQL Days 1–15</li>
               <li>Relational design between SQL Days 15–16</li>
@@ -1135,6 +1190,8 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           </article>
         </div>
         <p class="microcopy" style="margin-top: 1rem">
+          These three buttons group the built-in routes. The catalog search and
+          track filter below include every registered extension track as well.
           See the narrative <a href="docs/curriculum-map.md">curriculum map</a>
           and <a href="docs/professional-paths.md">professional paths</a> for
           milestone advice and specialization lanes. Curious how the teaching
@@ -1230,18 +1287,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           </div>
         </div>
         <div class="track-progress-grid" id="track-progress" aria-label="Progress by track">
-          <div class="track-progress" data-progress-track="python">
-            <strong>Python</strong><span>0 complete</span>
-            <div class="progress-bar"><i style="--track-progress: 0%"></i></div>
-          </div>
-          <div class="track-progress" data-progress-track="sql">
-            <strong>SQL</strong><span>0 complete</span>
-            <div class="progress-bar"><i style="--track-progress: 0%"></i></div>
-          </div>
-          <div class="track-progress" data-progress-track="bridge">
-            <strong>Bridge</strong><span>0 complete</span>
-            <div class="progress-bar"><i style="--track-progress: 0%"></i></div>
-          </div>
+          __TRACK_PROGRESS__
         </div>
 
         <div class="controls">
@@ -1253,9 +1299,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
             Track
             <select id="track-filter">
               <option value="">All tracks</option>
-              <option value="python">Python</option>
-              <option value="sql">SQL</option>
-              <option value="bridge">Bridge</option>
+              __TRACK_OPTIONS__
             </select>
           </label>
           <label class="control">
@@ -1350,11 +1394,23 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
     const lessonById = new Map(lessons.map((lesson) => [lesson.id, lesson]));
     const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
     const SERVER_TOKEN = "";
+    const LAB_MODE = false;
     const launcherMode = Boolean(
       SERVER_TOKEN &&
+      !LAB_MODE &&
       location.protocol === "http:" &&
       location.hostname === "127.0.0.1"
     );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelector("#static-mode-banner").hidden = true;
+      document.querySelector("#lab-mode-banner").hidden = false;
+      document.querySelectorAll("[data-coding-lab-link]").forEach((link) => { link.href = "/learn"; });
+      ["import-progress", "clear-progress"].forEach((id) => { document.getElementById(id).hidden = true; });
+    }
     const state = loadState();
 
     function loadState() {
@@ -1402,10 +1458,10 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
     }
 
     async function loadServerProgress() {
-      if (!launcherMode) return;
+      if (!launcherMode && !labMode) return;
       document.querySelector("#static-mode-banner").hidden = true;
-      document.querySelector("#private-mode-banner").hidden = false;
-      document.querySelector("#launcher-panel").hidden = false;
+      document.querySelector("#private-mode-banner").hidden = !launcherMode;
+      document.querySelector("#launcher-panel").hidden = !launcherMode;
       try {
         const payload = await apiRequest("/api/status");
         state.completed = payload.completed.filter((id) => lessonById.has(id));
@@ -1501,7 +1557,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
       const solutions = lesson.solution_paths
         .map((_path, index) => `<a href="${reader}#solution-${index + 1}">Solution ${index + 1}</a>`)
         .join("");
-      const learnerLauncher = lesson.track === "sql"
+      const learnerLauncher = lesson.runner === "sql"
         ? `<button type="button" class="ghost" data-open-sql="${escapeHtml(lesson.id)}">Open SQL workspace</button>`
         : String(lesson.lesson_path).toLowerCase().endsWith(".ipynb")
           ? `<button type="button" class="ghost" data-open-notebook="${escapeHtml(lesson.id)}">Open notebook</button>`
@@ -1510,10 +1566,12 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
         <article class="lesson-card ${completed ? "complete" : ""}" data-lesson-id="${escapeHtml(lesson.id)}">
           <div class="lesson-top">
             <span class="lesson-id">${escapeHtml(lesson.id)}</span>
-            <label class="completion">
+            ${labMode
+              ? `<a href="/learn?lesson=${encodeURIComponent(lesson.id)}">Open in coding lab</a>`
+              : `<label class="completion">
               <input type="checkbox" data-complete="${escapeHtml(lesson.id)}" ${completed ? "checked" : ""}>
               Complete
-            </label>
+            </label>`}
           </div>
           <h3>${escapeHtml(lesson.title)}</h3>
           <div class="lesson-meta">
@@ -1561,7 +1619,9 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           lesson.title,
           lesson.phase,
           lesson.track,
+          lesson.runner,
           lesson.level,
+          ...(lesson.topics || []),
           ...lesson.prerequisites
         ].join(" ").toLowerCase();
         if (query && !haystack.includes(query)) return false;
@@ -1649,10 +1709,11 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
         : completed.size === lessons.length
           ? "Every cataloged lesson is complete."
           : "Complete prerequisites to unlock the next cataloged lesson.";
-      ["python", "sql", "bridge"].forEach((track) => {
+      Object.keys(course.tracks).forEach((track) => {
         const trackLessons = lessons.filter((lesson) => lesson.track === track);
         const trackComplete = trackLessons.filter((lesson) => completed.has(lesson.id)).length;
-        const trackPercentage = Math.round((trackComplete / trackLessons.length) * 100);
+        const trackPercentage = trackLessons.length
+          ? Math.round((trackComplete / trackLessons.length) * 100) : 0;
         const panel = document.querySelector(`[data-progress-track="${track}"]`);
         panel.querySelector("span").textContent =
           `${trackComplete} of ${trackLessons.length} complete`;
@@ -1819,8 +1880,12 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
       const prerequisites = lesson.prerequisites.length
         ? lesson.prerequisites.join(", ")
         : "none";
-      const executionBoundary = lesson.track === "sql"
+      const executionBoundary = lesson.runner === "sql"
         ? `For runnable work, use only the local disposable advanced_sql_training database. Prefer the selected lesson reader's Create/open guided SQL notebook action. Before execution, have me state the expected row grain; afterwards, inspect my complete psql transcript and result shape.`
+        : lesson.runner === "none"
+          ? `This is a reading lesson. Check my written prediction and explanation against the guide's evidence contract; no execution is required.`
+        : lesson.runner !== "python"
+          ? `Check this lesson's declared runner capability. Follow only the guide's explicit local setup, bounded verification, and cleanup; do not assume a language or operations adapter is implemented.`
         : String(lesson.lesson_path).toLowerCase().endsWith(".ipynb")
           ? `For runnable work, use the repository environment and select the Python (ds60sqlpy) kernel. Have me restart the kernel, run the notebook from the first cell downward, and show my actual output, assertion, or traceback.`
           : `For runnable work, use the repository environment and run the cataloged learner artifact from the repository root. Inspect my actual output, assertion, test result, or traceback.`;
@@ -1881,6 +1946,9 @@ I can produce a working result, explain why it works in my own words, identify o
 
     replacements = {
         "__LESSON_COUNT__": str(lesson_count),
+        "__TRACK_COUNT__": str(len(tracks)),
+        "__TRACK_PROGRESS__": track_progress,
+        "__TRACK_OPTIONS__": track_options,
         "__PYTHON_COUNT__": str(python_count),
         "__SQL_COUNT__": str(sql_count),
         "__BRIDGE_COUNT__": str(bridge_count),

@@ -74,7 +74,8 @@ the host folder; database volume deletion is a separate destructive operation.
 The image uses `uv.lock` and includes Core dependencies plus PostgreSQL 17
 client tools. Building needs downloads. Later starts reuse local images;
 heavy deep-learning, NLP, and geospatial dependencies and first-use lesson
-assets remain optional. Rehearse planned lessons while connected using
+assets remain optional. Build the [optional Docker package profiles](docker-profiles.md)
+you need explicitly; pressing Run does not install packages. Rehearse planned lessons while connected using
 [offline preparation](setup/offline.md). For direct Compose without the
 launcher, explicitly create the bind directory and pass the correct host UID
 and GID as shown in the [manual route](docker-beginners.md#direct-compose-alternative-without-host-python).
@@ -82,9 +83,11 @@ and GID as shown in the [manual route](docker-beginners.md#direct-compose-altern
 The app does not seed or reset SQL automatically. Start with
 `SELECT 1 AS first_result;`, then use the beginner lesson's temporary fixture
 or explicitly prepare the course schema through the UI. Read the `RESET
-TRAINING` acknowledgement before replacing seeded data. Complete SQL files
-containing `psql` backslash commands use their guided notebook or terminal
-route; the pad accepts SQL statements. The app runs trusted local learner
+TRAINING` acknowledgement before replacing seeded data. Use **Whole SQL lesson
+(psql)** mode for a cataloged SQL file with its reviewed backslash directives
+and relative includes. Keep those fixed directives intact. **SQL snippet** mode
+accepts ordinary SQL statements through Psycopg. The guided SQL notebook and
+terminal remain alternatives. The app runs trusted local learner
 code, under the configured mapped user, and exposes no public classroom or
 hosted submission service.
 
@@ -115,7 +118,7 @@ A free loopback port is chosen. Keep the terminal open; Ctrl+C stops the server.
 
 1. Choose a goal and a realistic weekly time budget. **Build my route** expands actual catalog prerequisites and excludes saved completions. Time estimates exclude repeated attempts and review.
 2. Read the guide beside the pad. Follow its prerequisites and the small worked examples. The full reader opens in another tab if you want the learner artifact and separate solutions together.
-3. Write a prediction before running code. The pad uses a fresh process or connection for each submission. Python names do not persist between runs; saved code does.
+3. Write a prediction before running code. Each Run starts a fresh process or connection. Python cells within that one Run share names; names do not carry into the next Run. Saved code does.
 4. Use `print()` and assertions to inspect Python results. Ordinary Matplotlib figures are captured as PNG images after execution. SQL result sets show a bounded table and a transcript; `NULL` is displayed explicitly.
 5. Save your attempt and actual evidence. Hints come from the checked-in guide when available; the fallback asks you to inspect an input, result, or boundary. This offline guidance does not generate a personalized AI answer.
 6. Reveal the worked solution only when you choose to compare. Record what changed in your understanding.
@@ -123,7 +126,45 @@ A free loopback port is chosen. Keep the terminal open; Ctrl+C stops the server.
 
 Both pads save under `.learning/pads/<lesson-id>/`; coaching notes live in `.learning/coaching.json`. Progress uses `.learning/progress.json`, shared with the portal, CLI, and optional MCP server. Existing files are preserved. Switching lessons saves the current pad and evidence. Closing a tab with unsaved edits prompts you to save first.
 
-The default Python run limit is 15 seconds, with bounded printed output. Long model training, interactive input, interactive plots, notebook magics, and advanced server exercises use the notebook/editor workflow described in their lesson. SQL has statement/lock timeouts and displays at most 100 rows per result set. Submissions use the database transaction by default; explicit transaction statements in your SQL change that boundary. Errors show the real exit status or SQLSTATE rather than silently counting as success.
+### Python notebook cells and magics
+
+**Run code** executes the current pad from the beginning. Loaded notebook
+starters keep top-level `# %%` boundaries between their code cells. Within a
+single Run, those cells execute in order in one fresh IPython namespace, so an
+import or variable from an earlier cell is available to later cells. A new Run
+starts over; it does not resume a persistent Jupyter kernel. Keep the dependency
+chain you need in the pad. Ordinary Python scripts without cell markers or
+IPython syntax keep normal script execution.
+
+Line magics such as `%timeit` and cell magics such as `%%sql` are preserved.
+Keep each cell-magic header and its body in the same marked cell. A syntax or
+execution error stops subsequent cells and reports a submitted-source line when
+available. IPython needs the selected backend's `notebooks` profile; Docker
+Core includes it. Missing lesson packages still need their declared profile
+and any explicit first-download preparation. See
+[dependency profiles](dependency-profiles.md) and
+[optional Docker profiles](docker-profiles.md). No package is installed by Run.
+
+Static Matplotlib plots, including inline notebook figures, appear in the
+output. Desktop GUI event loops, interactive `input()`, long-running services,
+and jobs beyond the available budget use the notebook/editor workflow in their
+lesson. These controls do not create a persistent kernel or an unbounded run.
+
+### Run limits and SQL modes
+
+Python and SQL snippets default to a 15-second run budget; whole SQL lessons
+default to 60 seconds. **Run limit** offers 15, 60, or 120 seconds. Source and
+printed output remain bounded at 60,000 and 128,000 UTF-8 bytes respectively;
+stopping at a limit is reported as a stop, not successful completion.
+
+SQL snippets use a fresh database connection, show at most 100 rows per result
+set, and commit their current transaction on success. An error rolls back the
+current transaction; explicit `COMMIT` or `ROLLBACK` statements establish their
+own boundaries. Whole SQL mode uses guarded `psql` execution and console tables;
+the script controls transaction boundaries, so earlier committed statements
+can remain after a later failure. Both modes retain the disposable database
+boundary and statement/lock limits. Use `BEGIN` and `ROLLBACK` for a temporary
+fixture. Errors preserve the real exit status, traceback, or SQLSTATE.
 
 ## Build a native executable
 
@@ -159,8 +200,9 @@ The manual **Application builds** GitHub Actions workflow defines Windows, macOS
 | --- | --- | --- |
 | No browser opens | Terminal URL and server process | Copy the printed exact loopback URL; keep the process open |
 | `ModuleNotFoundError` in a pad | Backend path and selected lesson profile | Install the profile in that backend, not another Python environment |
-| Python variables disappear | Each Run is a fresh process | Keep the complete small example in the pad or use the lesson notebook |
-| SQL syntax error at `\` | Complete script contains `psql` commands | Run the complete script through its guided notebook, or copy one pure SQL query |
+| Python variables disappear | Each Run is a fresh process | Keep dependent cells together with their `# %%` boundaries; rerun the complete chain |
+| A magic reports missing IPython | Selected backend's notebook packages | Install the `notebooks` profile in that backend; Docker Core already includes it |
+| SQL syntax error at `\` | Mode and fixed script directives | Use whole SQL lesson mode for its cataloged script, or SQL snippet mode for ordinary SQL only |
 | `UndefinedTable` | SQLSTATE `42P01` and target database | Complete seed setup, or run the lesson's temporary fixture in the same submission |
 | SQL backend unavailable | Interpreter's Psycopg import and local database | Follow the native or container authentication route; do not paste credentials into notes |
 | Pad reaches the time limit | Workload and printed stop reason | Reduce the example; use the documented notebook workflow for long jobs |
@@ -475,3 +517,54 @@ The image installs `postgresql-client-17` from the PostgreSQL project's
 [signed Debian package repository](https://www.postgresql.org/download/linux/debian/),
 matching the PostgreSQL 17 course server. This repository/key setup exists
 inside the image; it does not change the host's package sources or trust store.
+
+## Package the Windows starter
+
+The Windows starter is a complete source ZIP with `START_DOCKER_LAB.cmd` at
+its entry point. A learner extracts it and double-clicks that file; Git and
+host Python are not required. The first-run Windows wizard checks the engine
+and prerequisites before handing over to the normal Docker launcher. Windows
+installation consent, UAC, or a required restart remain visible steps. See the
+[beginner Windows walkthrough](docker-beginners.md#windows-start-with-the-first-run-wizard).
+
+Maintainers can build the ZIP on any supported development OS:
+
+```bash
+python scripts/build_windows_starter.py
+```
+
+Or use `make windows-starter` on macOS/Linux. The archive is written to
+`dist/DS60LearningLab-0.3.0-Windows-Starter.zip`. Packaging checks the generated
+readers, includes the authored course and Docker build files, and excludes
+local progress, environments, authentication files, and symlinks. The
+application-build workflow also produces this starter as a downloadable CI
+artifact. It does not publish a release or push an image.
+
+## Watch a local image build
+
+Run a build in the foreground with plain progress output:
+
+```bash
+BUILDKIT_PROGRESS=plain bash scripts/docker_lab.sh build
+```
+
+The terminal shows the Dockerfile steps, package installation, and cache hits.
+The command builds the local image and does not start services or push it.
+Cached steps report `CACHED`; this is expected after a successful build. To
+inspect a completely fresh dependency installation, use the direct Compose
+command `docker compose --progress plain --profile lab build --no-cache lab`.
+This reruns dependency installation, so it takes longer. BuildKit's separate
+package-download caches can still avoid downloading every package again.
+
+On a network that requires the verified alternate base above:
+
+```bash
+DS60_BASE_IMAGE=ghcr.io/astral-sh/uv:python3.12-bookworm-slim BUILDKIT_PROGRESS=plain bash scripts/docker_lab.sh build
+```
+
+Windows PowerShell uses the same plain-output environment setting:
+
+```powershell
+$env:BUILDKIT_PROGRESS = 'plain'
+.\scripts\docker_lab.ps1 build
+```

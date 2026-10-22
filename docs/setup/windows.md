@@ -10,24 +10,46 @@ If terminals, packages, or notebooks are new to you, follow
 Windows and WSL environments separate; this guide uses native Windows Python,
 not a Python interpreter inside WSL.
 
-## Browser lab with Docker
+## Browser lab: download, extract, and double-click
 
-For the browser coding application, start with the complete
-[Docker beginner walkthrough](../docker-beginners.md). It covers Windows WSL 2,
-Docker Desktop or Rancher Desktop with Moby, getting the repository without
-Git, and finding your files. Recommended Windows WSL users keep the checkout
-in their Linux home and run `bash scripts/docker_lab.sh start` from Ubuntu.
-The native PowerShell alternative uses a Windows folder and
-`START_DOCKER_LAB.cmd`.
+For a new supported Windows 11 x64 machine, use the course's first-run
+Docker wizard. Existing compatible engines are reused without reinstalling:
 
-The launchers build when needed, wait for the app, and open the browser. They
-need no host Python, native PostgreSQL, or VS Code installation. Saved work is
-in the host `.learning` folder; the database is in its own Docker volume.
-The default browser address is `http://127.0.0.1:8765/learn`. A fresh Docker
-course database uses the limited login `admin` / password `admin`.
+1. Download the supplied **`DS60LearningLab-0.3.0-Windows-Starter.zip`**, or
+   use **Code**, then **Download ZIP** on a
+   [repository version](https://github.com/sadatnfs/ds60sqlpy) containing the
+   Windows first-run wizard. No Git installation is needed.
+2. In File Explorer, use **Extract All** and open the extracted course folder.
+   Do not launch from the compressed ZIP preview.
+3. Double-click **`START_DOCKER_LAB.cmd`**. No host Python, native PostgreSQL,
+   or VS Code installation is needed for the browser route.
+4. The wizard reuses a compatible local engine when ready. If prerequisites
+   are missing, follow its offered installation choices and consent prompts.
+   A fresh Windows setup recommends Rancher Desktop with Moby; Docker Desktop
+   with its WSL 2 backend is another choice.
+5. Windows may need administrator approval for installation or WSL 2 and may
+   require a restart. Save other work, restart yourself when asked, and rerun
+   the **same launcher** afterward. It re-detects the current setup rather
+   than deleting state or starting the course over.
 
-If you want native notebooks or editor execution instead, continue below.
-Keep that native Windows Python environment separate from a WSL Linux one.
+The wizard uses WSL 2 without requiring a user Ubuntu distribution, so no Linux
+account or terminal is necessary for this Windows-folder route. If WinGet is
+missing or installation is managed by your organization, follow the official
+installer/IT route shown in the setup guidance, then run the launcher again.
+See the [complete Windows Docker walkthrough](../docker-beginners.md#windows-start-with-the-first-run-wizard)
+for the exact requirements, manual alternative, and first visible results.
+
+Once ready, the launcher opens `http://127.0.0.1:8765/learn`. Saved pads,
+history, evidence, and progress live in the host `.learning` folder; the
+PostgreSQL database uses a separate persistent volume. The fresh Docker course
+login is the limited `admin` account with password `admin`. The browser supplies
+that connection internally.
+
+Existing engine settings, saved files, and database volumes are preserved.
+Updating the image or rerunning setup does not reset lesson progress. If you
+already work in an Ubuntu/WSL terminal, the separate Linux-home workflow in
+the Docker guide remains available. The native Windows Python instructions
+below are optional and apply when you want host notebooks or editor execution.
 
 ## Native notebook route: double-click the guided launcher
 

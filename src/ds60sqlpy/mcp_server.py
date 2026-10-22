@@ -14,7 +14,7 @@ from typing import Any
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.coaching import MAX_NOTE_CHARACTERS, PHASES, CoachingService
-from ds60sqlpy.study_plan import LEARNING_PATHS
+from ds60sqlpy.study_plan import learning_paths
 
 INSTRUCTIONS = (
     "Tutor from the checked-in DS60 guides. Explain, ask for a prediction, wait for "
@@ -90,7 +90,7 @@ class TutorAdapter:
                 _schema(
                     {
                         "query": {"type": "string", "maxLength": 200},
-                        "track": {"enum": ["all", "python", "sql", "bridge"]},
+                        "track": {"enum": ["all", *self.service.catalog.tracks]},
                         "limit": {"type": "integer", "minimum": 1, "maximum": 50},
                         "cursor": {"type": "string", "maxLength": 200},
                     }
@@ -185,12 +185,11 @@ class TutorAdapter:
         if name == "course_paths":
             return self.service.paths()
         if name == "course_plan":
+            paths = learning_paths(self.service.catalog)
             targets = [
                 lesson_id
                 for target in arguments["targets"]
-                for lesson_id in (
-                    LEARNING_PATHS[target].targets if target in LEARNING_PATHS else (target,)
-                )
+                for lesson_id in (paths[target].targets if target in paths else (target,))
             ]
             result = self.service.plan(targets, arguments.get("weekly_hours", 5))
             for lesson in result["lessons"]:
@@ -224,6 +223,8 @@ class TutorAdapter:
         """Return a bounded catalog page, preserving prerequisite lesson order."""
 
         terms = query.casefold().split()
+        if track != "all" and track not in self.service.catalog.tracks:
+            raise ValueError(f"Unknown registered track: {track}")
         lessons = [
             lesson
             for lesson in self.service.catalog
@@ -231,7 +232,7 @@ class TutorAdapter:
             and all(
                 term
                 in f"{lesson.id} {lesson.title} {lesson.phase} "
-                f"{lesson.dependency_group} {lesson.level}".casefold()
+                f"{lesson.dependency_group} {lesson.level} {' '.join(lesson.topics)}".casefold()
                 for term in terms
             )
         ]

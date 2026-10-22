@@ -146,8 +146,8 @@ psycopg_url = course_url.set(drivername="postgresql+psycopg")
 engine = create_engine(psycopg_url, pool_pre_ping=True)
 ```
 
-It then loads the extension and passes the engine object—not a password-bearing
-string—to the magic:
+It then loads the extension and passes the engine object - not a password-bearing
+string - to the magic:
 
 ```text
 %load_ext sql
@@ -204,16 +204,16 @@ top to bottom against the disposable database for that evidence.
 
 ## Common failures
 
-- **`No module named sql`** — install the `sql-notebooks` extra in the selected
+- **`No module named sql`** - install the `sql-notebooks` extra in the selected
   kernel and restart it.
-- **`Line magic function %sql not found`** — run `%load_ext sql`; also check
+- **`Line magic function %sql not found`** - run `%load_ext sql`; also check
   that no local file named `sql.py` shadows the extension.
-- **`No module named psycopg2`** — use the explicit
+- **`No module named psycopg2`** - use the explicit
   `postgresql+psycopg://` URL for the course's Psycopg 3 dependency.
-- **Connection refused** — start PostgreSQL and check host and port.
-- **Authentication failed** — verify the local role without displaying the
+- **Connection refused** - start PostgreSQL and check host and port.
+- **Authentication failed** - verify the local role without displaying the
   password.
-- **Queries affect more rows than expected** — stop, confirm the database is
+- **Queries affect more rows than expected** - stop, confirm the database is
   `advanced_sql_training`, and restore the lesson's bounded/read-only setup.
 
 See [Troubleshooting](../troubleshooting.md) for the general environment and

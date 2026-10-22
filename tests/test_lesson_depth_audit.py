@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import re
+from dataclasses import replace
 from pathlib import Path
 
 from ds60sqlpy.catalog import Catalog, Lesson
@@ -15,8 +17,66 @@ from scripts.audit_lesson_depth import (
     _template_residue,
     _weak_verify_lines,
     audit,
+    measure_lesson,
     render_report,
 )
+
+
+def test_language_checks_follow_runner_instead_of_track() -> None:
+    lesson = replace(
+        Catalog.load(Path(__file__).resolve().parents[1]).get("python-01"),
+        track="language-agnostic",
+        runner="none",
+    )
+    source = "# Guide\n\n```python\ndef deliberately broken\n```\n"
+    reading = _guide_issues(lesson, source, solution_words=700, solution_code_blocks=1)
+    python = _guide_issues(
+        replace(lesson, runner="python"), source, solution_words=700, solution_code_blocks=1
+    )
+
+    assert not any("invalid runnable Python" in issue for issue in reading)
+    assert any("invalid runnable Python" in issue for issue in python)
+    assert any("missing a exercises section" in issue for issue in reading)
+
+
+def test_sql_rules_apply_to_sql_runner_in_any_registered_track() -> None:
+    lesson = replace(
+        Catalog.load(Path(__file__).resolve().parents[1]).get("sql-start-01"),
+        track="database-specialization",
+    )
+    issues = _guide_issues(lesson, "# Guide", solution_words=700, solution_code_blocks=1)
+
+    assert "SQL guide does not name the disposable course database" in issues
+    assert "SQL guide does not name the exact ignored learner SQL working copy" in issues
+
+
+def test_future_python_notebooks_keep_the_full_teaching_density_gate(tmp_path: Path) -> None:
+    lesson = replace(
+        Catalog.load(Path(__file__).resolve().parents[1]).get("python-01"),
+        id="deep-learning-01",
+        track="deep-learning",
+        day=101,
+        lesson_path="learner.ipynb",
+        guide_path="guide.md",
+        solution_paths=("solution.md",),
+        prerequisites=(),
+    )
+    (tmp_path / "learner.ipynb").write_text(
+        json.dumps({"cells": [{"cell_type": "code", "source": ["pass"]}]}), encoding="utf-8"
+    )
+    for path in ("guide.md", "solution.md"):
+        (tmp_path / path).write_text("# Incomplete draft\n", encoding="utf-8")
+    catalog = Catalog(
+        tmp_path,
+        [lesson],
+        tracks={"deep-learning": {"title": "Deep learning", "plan": "guide.md"}},
+    )
+
+    result = measure_lesson(catalog, lesson)
+
+    assert result.notebook is not None and result.notebook.cells == 1
+    assert any("needs at least 8" in issue for issue in result.issues)
+    assert any("needs at least 550" in issue for issue in result.issues)
 
 
 def test_practice_blocks_require_an_actual_exercise_heading() -> None:

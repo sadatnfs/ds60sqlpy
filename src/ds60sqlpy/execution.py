@@ -23,10 +23,11 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, cast
 from urllib.parse import unquote, urlsplit
 
 from ds60sqlpy.catalog import Catalog
+from ds60sqlpy.curriculum_framework import RUNNERS
 from ds60sqlpy.runtime_environment import (
     external_dll_directory as external_dll_directory,
 )
@@ -35,6 +36,7 @@ from ds60sqlpy.runtime_environment import (
 )
 from ds60sqlpy.sql_notebook import (
     SqlNotebookError,
+    _psql_meta_segments,
     course_psql_environment,
     validate_course_database_target,
 )
@@ -43,6 +45,20 @@ from ds60sqlpy.state_files import locked_update
 
 MAX_CODE_BYTES = 60_000
 MAX_OUTPUT_BYTES = 128_000
+ALLOWED_TIMEOUT_SECONDS = (15, 60, 120)
+
+COURSE_ROLE_QUERY = """
+    SELECT rolsuper OR rolcreaterole OR rolcreatedb
+        OR pg_catalog.pg_has_role(current_user, 'pg_execute_server_program', 'MEMBER')
+        OR pg_catalog.pg_has_role(current_user, 'pg_read_server_files', 'MEMBER')
+        OR pg_catalog.pg_has_role(current_user, 'pg_write_server_files', 'MEMBER')
+        OR EXISTS (
+            SELECT 1 FROM pg_catalog.pg_roles elevated
+            WHERE (elevated.rolsuper OR elevated.rolcreaterole OR elevated.rolcreatedb)
+                AND pg_catalog.pg_has_role(current_user, elevated.oid, 'MEMBER')
+        )
+    FROM pg_catalog.pg_roles WHERE rolname = current_user
+"""
 
 
 def matplotlib_cache_environment(repo_root: Path) -> dict[str, str]:
@@ -67,21 +83,68 @@ while not os.path.isfile(os.environ["DS60_PAD_READY"]):
 PYTHON_WORKER = (
     WORKER_GATE
     + r"""
-import runpy, sys
+import base64, hashlib, io, sys, warnings
 from pathlib import Path
+from ds60sqlpy.notebook_execution import execute_python_file, python_cells
+
+runtime = Path(sys.argv[2])
+captured = set()
+def save_png(data):
+    if len(data) > 2_000_000 or not data.startswith(b'\x89PNG\r\n\x1a\n'):
+        return False
+    digest = hashlib.sha256(data).digest()
+    if digest in captured:
+        return True
+    if len(captured) >= 4:
+        return False
+    (runtime / f'figure-{len(captured)+1}.png').write_bytes(data)
+    captured.add(digest)
+    return True
+
+# An inline notebook backend publishes and closes figures between cells.
+# Capture its PNG MIME payload before that close, without importing IPython
+# for ordinary scripts or replacing any source/magic text.
+_, interactive = python_cells(Path(sys.argv[1]).read_text(encoding='utf-8'))
+if interactive:
+    try:
+        from IPython.core.displaypub import DisplayPublisher
+    except ImportError:
+        pass  # The execution helper prints the actionable profile message.
+    else:
+        original_publish = DisplayPublisher.publish
+        def publish(self, data, *args, **kwargs):
+            encoded = data.get('image/png') if isinstance(data, dict) else None
+            if isinstance(encoded, (str, bytes)) and len(encoded) <= 2_700_000:
+                try:
+                    if save_png(base64.b64decode(encoded, validate=True)):
+                        return
+                except (ValueError, TypeError):
+                    pass
+            return original_publish(self, data, *args, **kwargs)
+        DisplayPublisher.publish = publish
+warnings.filterwarnings('ignore',
+    message=r'FigureCanvasAgg is non-interactive, and thus cannot be shown',
+    category=UserWarning)
 try:
-    runpy.run_path(sys.argv[1], run_name="__main__")
+    status = execute_python_file(Path(sys.argv[1]), runtime)
+    if status:
+        raise SystemExit(status)
 finally:
     pyplot = sys.modules.get("matplotlib.pyplot")
     if pyplot is not None:
-        for index, number in enumerate(pyplot.get_fignums()[:4], 1):
-            pyplot.figure(number).savefig(Path(sys.argv[2]) / f"figure-{index}.png")
+        for number in pyplot.get_fignums()[:4]:
+            image = io.BytesIO()
+            pyplot.figure(number).savefig(image, format='png')
+            save_png(image.getvalue())
         pyplot.close("all")
 """
 )
 
 SQL_WORKER = (
     WORKER_GATE
+    + "COURSE_ROLE_QUERY = "
+    + repr(COURSE_ROLE_QUERY)
+    + "\n"
     + r"""
 import json, sys
 from pathlib import Path
@@ -101,22 +164,15 @@ try:
             options="-c statement_timeout=5000 -c lock_timeout=2000") as conn:
         if conn.info.dbname != "advanced_sql_training":
             raise ValueError("The SQL pad requires the disposable course database.")
-        privileged = conn.execute('''
-            SELECT rolsuper OR rolcreaterole OR rolcreatedb
-                OR pg_catalog.pg_has_role(current_user, 'pg_execute_server_program', 'MEMBER')
-                OR pg_catalog.pg_has_role(current_user, 'pg_read_server_files', 'MEMBER')
-                OR pg_catalog.pg_has_role(current_user, 'pg_write_server_files', 'MEMBER')
-                OR EXISTS (
-                    SELECT 1 FROM pg_catalog.pg_roles elevated
-                    WHERE (elevated.rolsuper OR elevated.rolcreaterole OR elevated.rolcreatedb)
-                        AND pg_catalog.pg_has_role(current_user, elevated.oid, 'MEMBER')
-                )
-            FROM pg_catalog.pg_roles WHERE rolname = current_user
-        ''').fetchone()
+        privileged = conn.execute(COURSE_ROLE_QUERY).fetchone()
         if not privileged or privileged[0]:
             raise CourseRoleError(
                 "SQL pads require a limited course login. See docs/offline-app.md for role setup."
             )
+        started = conn.execute(
+            'SELECT backend_start::text FROM pg_stat_activity WHERE pid=pg_backend_pid()'
+        ).fetchone()[0]
+        Path(os.environ["DS60_PAD_BACKEND_START"]).write_text(started)
         Path(os.environ["DS60_PAD_BACKEND_PID"]).write_text(str(conn.info.backend_pid))
         with conn.cursor() as cur:
             cur.execute(query, prepare=False)
@@ -134,8 +190,13 @@ try:
         "transaction": "Committed success; explicit COMMIT/ROLLBACK change boundaries."},
         default=str))
 except Exception as exc:
+    position = getattr(getattr(exc, 'diag', None), 'statement_position', None)
+    error_line = (query[:int(position)-1].count('\n')+1
+        if isinstance(position, str) and position.isdecimal()
+            and 1 <= int(position) <= len(query)+1 else None)
     print(json.dumps({"error_type": type(exc).__name__,
         "sqlstate": getattr(exc, "sqlstate", None),
+        "error_line": error_line,
         "message": str(exc).splitlines()[0] if isinstance(exc, CourseRoleError)
             or isinstance(exc, psycopg.Error) and getattr(exc, "sqlstate", None)
             else "SQL backend unavailable or input rejected.",
@@ -155,8 +216,9 @@ with psycopg.connect("", connect_timeout=1,
         FROM pg_catalog.pg_stat_activity
         WHERE pid = %s AND usename = current_user
             AND datname = 'advanced_sql_training'
-            AND application_name = 'ds60-coding-pad'
-    ''', (int(sys.argv[1]),))
+            AND ((%s <> '' AND backend_start = NULLIF(%s, '')::timestamptz)
+                OR (%s = '' AND application_name = 'ds60-coding-pad'))
+    ''', (int(sys.argv[1]), sys.argv[2], sys.argv[2], sys.argv[2]))
 """
 
 
@@ -245,6 +307,7 @@ class PadResult:
     output: str
     elapsed_seconds: float
     stopped: str | None
+    output_truncated: bool = False
 
 
 class PadRunner:
@@ -318,7 +381,7 @@ class PadRunner:
                 continue
         return None
 
-    def read(self, lesson_id: str, language: Literal["python", "sql"]) -> str:
+    def read(self, lesson_id: str, language: str) -> str:
         """Read only the named lesson's saved pad, never an arbitrary file."""
 
         with self._lock:
@@ -327,21 +390,23 @@ class PadRunner:
                 raise ValueError("Saved pad exceeds the size limit. Preserve it before repairing.")
             return path.read_text(encoding="utf-8") if path.exists() else ""
 
-    def saved(self, lesson_id: str, language: Literal["python", "sql"]) -> bool:
+    def saved(self, lesson_id: str, language: str) -> bool:
         """Distinguish an intentionally empty saved pad from an unsaved pad."""
 
         with self._lock:
             return self._path(lesson_id, language).is_file()
 
-    def history(
-        self, lesson_id: str, language: Literal["python", "sql"], *, limit: int = 10
-    ) -> list[dict[str, Any]]:
+    def history(self, lesson_id: str, language: str, *, limit: int = 10) -> list[dict[str, Any]]:
         """List recent content-addressed backups without deleting older learner work."""
+
+        return self._history_path(self._path(lesson_id, language), limit=limit)
+
+    def _history_path(self, path: Path, *, limit: int = 10) -> list[dict[str, Any]]:
+        """Share history with an internally validated whole-lesson workspace."""
 
         if type(limit) is not int or not 1 <= limit <= 50:
             raise ValueError("History page size must be between 1 and 50.")
         with self._lock:
-            path = self._path(lesson_id, language)
             directory = self._history_directory(path)
             pattern = re.compile(rf"practice-([a-f0-9]{{64}}){re.escape(path.suffix)}")
             backups = [
@@ -359,15 +424,16 @@ class PadRunner:
                 for item in backups[:limit]
             ]
 
-    def read_history(
-        self, lesson_id: str, language: Literal["python", "sql"], history_id: str
-    ) -> str:
+    def read_history(self, lesson_id: str, language: str, history_id: str) -> str:
         """Read one verified backup by digest, never a caller-supplied path."""
+
+        return self._read_history_path(self._path(lesson_id, language), history_id)
+
+    def _read_history_path(self, path: Path, history_id: str) -> str:
 
         if not isinstance(history_id, str) or re.fullmatch(r"[a-f0-9]{64}", history_id) is None:
             raise ValueError("Choose a saved history ID.")
         with self._lock:
-            path = self._path(lesson_id, language)
             backup = self._history_directory(path) / f"practice-{history_id}{path.suffix}"
             if backup.is_symlink() or not backup.is_file():
                 raise ValueError("That pad backup is unavailable.")
@@ -387,12 +453,16 @@ class PadRunner:
             raise ValueError("Pad history must remain inside the lesson's saved-work directory.")
         return directory
 
-    def save(self, lesson_id: str, language: Literal["python", "sql"], code: str) -> Path:
+    def save(self, lesson_id: str, language: str, code: str) -> Path:
         """Save a learner's explicit submission beneath ignored .learning/pads/."""
+
+        return self._save_path(self._path(lesson_id, language), code)
+
+    def _save_path(self, path: Path, code: str) -> Path:
+        """Preserve text versions at an internally validated learner path."""
 
         if not isinstance(code, str) or len(code.encode("utf-8")) > MAX_CODE_BYTES:
             raise ValueError(f"Pad input must be text of at most {MAX_CODE_BYTES} UTF-8 bytes.")
-        path = self._path(lesson_id, language)
         with self._lock, locked_update(path):
             path.parent.mkdir(parents=True, exist_ok=True)
             if path.exists():
@@ -432,9 +502,24 @@ class PadRunner:
                     temporary.unlink(missing_ok=True)
             return path
 
-    def run(self, lesson_id: str, language: Literal["python", "sql"], code: str) -> dict[str, Any]:
+    def run(
+        self, lesson_id: str, language: str, code: str, *, timeout_seconds: int | None = None
+    ) -> dict[str, Any]:
         """Save, execute, and bound one trusted local code submission."""
 
+        definition = RUNNERS.get(language)
+        if definition is None:
+            raise ValueError("Choose a registered lesson runner.")
+        if definition.executor not in {"python", "sql"}:
+            raise ValueError(
+                f"{definition.title} supports saving and reading; its execution adapter "
+                "is not implemented. Follow the lesson's external practice instructions."
+            )
+        if timeout_seconds is not None and (
+            type(timeout_seconds) is not int or timeout_seconds not in ALLOWED_TIMEOUT_SECONDS
+        ):
+            raise ValueError("Choose a run limit of 15, 60 or 120 seconds.")
+        executor = cast(Literal["python", "sql"], definition.executor)
         if self.python is None:
             raise ValueError("Install Python 3.12, then set DS60_PYTHON to its executable path.")
         path = self.save(lesson_id, language, code)
@@ -453,13 +538,23 @@ class PadRunner:
             ) as source:
                 snapshot = Path(source.name)
                 source.write(code)
-            result = self._run_snapshot(snapshot, language)
+            result = (
+                self._run_snapshot(snapshot, executor)
+                if timeout_seconds is None
+                else self._run_snapshot(snapshot, executor, timeout_seconds=timeout_seconds)
+            )
             return {**result, "source_sha256": hashlib.sha256(code.encode("utf-8")).hexdigest()}
         finally:
             if snapshot is not None:
                 snapshot.unlink(missing_ok=True)
 
-    def _run_snapshot(self, path: Path, language: Literal["python", "sql"]) -> dict[str, Any]:
+    def _run_snapshot(
+        self,
+        path: Path,
+        language: Literal["python", "sql"],
+        *,
+        timeout_seconds: int | None = None,
+    ) -> dict[str, Any]:
         assert self.python is not None
         environment = external_program_environment()
         environment["PYTHONIOENCODING"] = "utf-8"
@@ -471,7 +566,13 @@ class PadRunner:
             environment.update(matplotlib_cache_environment(self.catalog.repo_root))
             with tempfile.TemporaryDirectory(prefix="figures-", dir=path.parent) as figures:
                 command = [self.python, "-u", "-c", PYTHON_WORKER, str(path), figures]
-                result = self._execute(command, environment, language)
+                result = (
+                    self._execute(command, environment, language)
+                    if timeout_seconds is None
+                    else self._execute(
+                        command, environment, language, timeout_seconds=timeout_seconds
+                    )
+                )
                 images = []
                 for figure in sorted(Path(figures).glob("figure-*.png"))[:4]:
                     if figure.is_symlink() or figure.stat().st_size > 2_000_000:
@@ -479,8 +580,24 @@ class PadRunner:
                     data = figure.read_bytes()
                     if data.startswith(b"\x89PNG\r\n\x1a\n"):
                         images.append("data:image/png;base64," + base64.b64encode(data).decode())
-            return {**asdict(result), "figures": images}
+                response = {**asdict(result), "figures": images}
+                metadata = Path(figures) / "execution.json"
+                with contextlib.suppress(OSError, ValueError, TypeError):
+                    if not metadata.is_symlink() and metadata.stat().st_size <= 1_000:
+                        value = json.loads(metadata.read_text(encoding="utf-8"))
+                        line = value.get("error_line") if isinstance(value, dict) else None
+                        if (
+                            type(line) is int
+                            and 1 <= line <= path.read_text(encoding="utf-8").count("\n") + 1
+                        ):
+                            response["error_line"] = line
+            return response
         try:
+            if _psql_meta_segments(path.read_text(encoding="utf-8")):
+                raise ValueError(
+                    "This input contains psql client directives. Use whole SQL lesson mode "
+                    "for a cataloged SQL script, or the documented psql/Jupyter workflow."
+                )
             target = validate_course_database_target(
                 os.environ.get("DS60_DATABASE_URL") or default_course_database_url()
             )
@@ -498,15 +615,26 @@ class PadRunner:
             {name: value for name, value in database_environment.items() if name.startswith("PG")}
         )
         command = [self.python, "-I", "-u", "-c", SQL_WORKER, str(path)]
-        return asdict(self._execute(command, environment, language))
+        result = (
+            self._execute(command, environment, language)
+            if timeout_seconds is None
+            else self._execute(command, environment, language, timeout_seconds=timeout_seconds)
+        )
+        response = asdict(result)
+        with contextlib.suppress(ValueError, TypeError):
+            diagnostic = json.loads(result.output)
+            line = diagnostic.get("error_line") if isinstance(diagnostic, dict) else None
+            if type(line) is int and 1 <= line <= path.read_text(encoding="utf-8").count("\n") + 1:
+                response["error_line"] = line
+        return response
 
     def _path(self, lesson_id: str, language: str) -> Path:
         self.catalog.get(lesson_id)
-        if language not in {"python", "sql"}:
-            raise ValueError("Choose the Python or SQL pad.")
-        suffix = "py" if language == "python" else "sql"
+        definition = RUNNERS.get(language)
+        if definition is None:
+            raise ValueError("Choose a registered lesson runner.")
         root = self.catalog.repo_root / ".learning" / "pads"
-        path = root / lesson_id / f"practice.{suffix}"
+        path = root / lesson_id / f"practice{definition.file_suffix}"
         if not path.resolve().is_relative_to(root.resolve()):
             raise ValueError("The saved pad must remain inside .learning/pads/.")
         return path
@@ -547,7 +675,15 @@ class PadRunner:
             transcript = transcript.replace(secret, "[redacted]")
         return transcript
 
-    def _execute(self, command: list[str], environment: dict[str, str], language: str) -> PadResult:
+    def _execute(
+        self,
+        command: list[str],
+        environment: dict[str, str],
+        language: str,
+        *,
+        timeout_seconds: int | None = None,
+        truncate_output: bool = False,
+    ) -> PadResult:
         started = time.monotonic()
         stopped = None
         captured = bytearray()
@@ -561,6 +697,7 @@ class PadRunner:
                 **environment,
                 "DS60_PAD_READY": str(Path(gate) / "ready"),
                 "DS60_PAD_BACKEND_PID": str(Path(gate) / "backend-pid"),
+                "DS60_PAD_BACKEND_START": str(Path(gate) / "backend-start"),
             }
             try:
                 with external_dll_directory():
@@ -583,6 +720,17 @@ class PadRunner:
 
                 def capture() -> None:
                     while chunk := pipe.read(8192):
+                        if truncate_output:
+                            captured.extend(chunk)
+                            if len(captured) > MAX_OUTPUT_BYTES:
+                                output_limit.set()
+                                marker = (
+                                    b"\n[... output truncated; keeping beginning and end ...]\n"
+                                )
+                                tail = 16_384
+                                head = MAX_OUTPUT_BYTES - tail - len(marker)
+                                captured[:] = captured[:head] + marker + captured[-tail:]
+                            continue
                         remaining = MAX_OUTPUT_BYTES - len(captured)
                         captured.extend(chunk[:remaining])
                         if len(chunk) > remaining:
@@ -592,10 +740,12 @@ class PadRunner:
                 reader = threading.Thread(target=capture, daemon=True)
                 reader.start()
                 while process.poll() is None:
-                    if output_limit.is_set():
+                    if output_limit.is_set() and not truncate_output:
                         stopped = "output limit"
                         break
-                    if time.monotonic() - started > self.timeout:
+                    if time.monotonic() - started > (
+                        self.timeout if timeout_seconds is None else timeout_seconds
+                    ):
                         stopped = "time limit"
                         break
                     time.sleep(0.01)
@@ -615,15 +765,22 @@ class PadRunner:
                     if process.stdout is not None and (reader is None or not reader.is_alive()):
                         process.stdout.close()
         assert process is not None
-        if output_limit.is_set():
+        if output_limit.is_set() and not truncate_output:
             stopped = stopped or "output limit"
         transcript = self._redact(captured.decode("utf-8", errors="replace"), environment)
         encoded = transcript.encode("utf-8")
         if len(encoded) > MAX_OUTPUT_BYTES:
-            stopped = stopped or "output limit"
+            output_limit.set()
+            if not truncate_output:
+                stopped = stopped or "output limit"
             transcript = encoded[:MAX_OUTPUT_BYTES].decode("utf-8", errors="ignore")
         return PadResult(
-            language, process.returncode, transcript, round(time.monotonic() - started, 3), stopped
+            language,
+            process.returncode,
+            transcript,
+            round(time.monotonic() - started, 3),
+            stopped,
+            output_limit.is_set(),
         )
 
     def _cancel_sql(self, environment: dict[str, str]) -> None:
@@ -635,10 +792,14 @@ class PadRunner:
             pid = Path(environment["DS60_PAD_BACKEND_PID"]).read_text(encoding="utf-8")
             if not pid.isdecimal() or len(pid) > 10:
                 return
+            start_path = Path(environment["DS60_PAD_BACKEND_START"])
+            started = start_path.read_text(encoding="utf-8") if start_path.exists() else ""
+            if len(started) > 120:
+                return
             cancel_environment = {**environment, "PGAPPNAME": "ds60-coding-pad-cancel"}
             with external_dll_directory():
                 subprocess.run(
-                    [self.python, "-I", "-c", SQL_CANCEL, pid],
+                    [self.python, "-I", "-c", SQL_CANCEL, pid, started],
                     env=cancel_environment,
                     stdin=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,

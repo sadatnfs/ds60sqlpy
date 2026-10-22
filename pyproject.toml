@@ -184,3 +184,14 @@ source = ["ds60sqlpy"]
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
+
+# Portable course environments use CPU wheels on Windows/Linux. Accelerator
+# deployments require their own deliberate device/runtime configuration.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux' or sys_platform == 'win32'" }]
+torchvision = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux' or sys_platform == 'win32'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

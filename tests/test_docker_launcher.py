@@ -137,6 +137,37 @@ def test_remote_engine_is_rejected_before_contact(
 
 
 @pytest.mark.parametrize(
+    "endpoint",
+    [
+        # secret-scan: allow-fixture
+        "tcp://localhost:2375@remote.example",
+        # secret-scan: allow-fixture
+        "tcp://127.0.0.1:2375@remote.example",
+        "tcp://localhost:2375/remote",
+        "unix://remote.example/socket",
+    ],
+)
+@pytest.mark.parametrize(
+    "launcher",
+    [
+        "python",
+        pytest.param("bash", marks=pytest.mark.skipif(os.name == "nt", reason="POSIX shell")),
+    ],
+)
+def test_misleading_local_prefix_cannot_contact_a_remote_engine(
+    fake_engine: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch, endpoint: str, launcher: str
+) -> None:
+    monkeypatch.setenv("DOCKER_HOST", endpoint)
+    if launcher == "python":
+        assert docker_lab.main(["doctor"]) == 2
+    else:
+        script = Path(__file__).resolve().parents[1] / "scripts/docker_lab.sh"
+        result = subprocess.run(["bash", str(script), "doctor"], capture_output=True, check=False)
+        assert result.returncode == 2
+    assert not fake_engine[1].exists()
+
+
+@pytest.mark.parametrize(
     "launcher",
     [
         "python",

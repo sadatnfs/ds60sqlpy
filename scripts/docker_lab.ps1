@@ -30,7 +30,7 @@ try {
         $Endpoint = & $Docker context inspect --format '{{.Endpoints.docker.Host}}'
         if ($LASTEXITCODE -ne 0) { throw 'Could not read the Docker context.' }
     }
-    if ($Endpoint -notmatch '^(unix://|npipe://|tcp://127\.0\.0\.1:|tcp://localhost:)') {
+    if ($Endpoint -notmatch '^(unix:///[^\r\n]+|npipe:/{2,4}\./pipe/[A-Za-z0-9_.-]+|tcp://(127\.0\.0\.1|localhost):[0-9]{1,5})$') {
         throw 'Choose a local Docker context so progress stays on this computer.'
     }
     & $Docker compose version

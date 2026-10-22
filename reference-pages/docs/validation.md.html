@@ -125,8 +125,8 @@
 </tr></thead><tbody>
 <tr>
 <td>Full local suite</td>
-<td>653 passed and 10 subtests passed, with no skips</td>
-<td>Includes live PostgreSQL tests and portable PowerShell parser checks on macOS; this is not native Windows execution.</td>
+<td>885 passed and 10 subtests passed, with no skips</td>
+<td>Includes live PostgreSQL tests and portable PowerShell checks on macOS; this is not native Windows execution.</td>
 </tr>
 <tr>
 <td>Catalog and structure</td>
@@ -140,8 +140,8 @@
 </tr>
 <tr>
 <td>Generated delivery</td>
-<td>Course dashboard, 168 readers, 47 references regenerated and drift-checked</td>
-<td>Generated outputs derive from authored sources and catalog metadata.</td>
+<td>Course dashboard, 168 readers, 56 references regenerated and drift-checked; 226 served pages and 12,626 local links/fragments checked</td>
+<td>Zero broken links, missing/extra readers, or duplicate IDs; the read-only audit created no learner-state folder.</td>
 </tr>
 <tr>
 <td>Notebook structure</td>
@@ -152,6 +152,11 @@
 <td>Notebook execution</td>
 <td>13/13 dependency-light, offline-capable smoke notebooks executed</td>
 <td>Host process-introspection warnings appeared under the restricted macOS environment; cell execution completed. An air-gapped whole-course run was not performed.</td>
+</tr>
+<tr>
+<td>Notebook-aware coding pads</td>
+<td>33 helper tests; actual 12-cell Python 16 starter with <code>%timeit</code>; actual 18-cell JupySQL learner starter; inline PNGs, original-source error lines, shared cells and fresh next Run verified</td>
+<td>IPython magics retain marked cell boundaries. Desktop GUI loops, persistent kernels, interactive services and long training use their authored external workflows.</td>
 </tr>
 <tr>
 <td>New Python/capstone</td>
@@ -169,13 +174,18 @@
 <td>Actual server and client 17.11; privileged settings/statistics issues found during these checks were repaired.</td>
 </tr>
 <tr>
+<td>Whole SQL lesson mode</td>
+<td>All 78 learner files passed the guarded whole-script runner with the limited login and Linux <code>psql</code> 17; 147 combined live backend/Lab/helper tests passed</td>
+<td>Preserves reviewed client directives/includes, separate query pads, bounded head/tail transcripts, exact session cancellation and learner copies. Scripts control their own transaction boundaries.</td>
+</tr>
+<tr>
 <td>Live concurrency</td>
 <td>Two-session READ COMMITTED and REPEATABLE READ observations and cleanup passed</td>
 <td>This proves the bounded local lab, not production concurrency behavior.</td>
 </tr>
 <tr>
 <td>Browser application</td>
-<td>Actual Python/SQL runs and plots, multiple SQL result tables with NULL, recovery history, blank pads, saved evidence, route restoration, editor shortcuts, keyboard tabs, mobile focus behavior, and a clean console</td>
+<td>Actual Python/SQL and notebook runs, inline plots, syntax highlighting, verified source-line jumps, large whole-SQL output, separate script/snippet history, blank pads, saved evidence, route restoration, keyboard navigation and mobile focus behavior</td>
 <td>Browser review used the live local application, not screenshots alone; small text contrast was measured.</td>
 </tr>
 <tr>
@@ -187,6 +197,11 @@
 <td>Docker application</td>
 <td>Local Linux ARM64 image built and started with limited admin/admin course credentials; Python/SQL HTTP smoke, reset, restricted-role checks, and both host launchers passed</td>
 <td>54 in-container backend/app tests passed. Shared font cache warmup produced first plots in about 1.6 seconds. Other workloads were preserved; no image was pushed.</td>
+</tr>
+<tr>
+<td>Optional Docker packages</td>
+<td>Frozen Advanced Linux ARM64 CPU image built; 23 isolated optional imports and tiny autograd, randomly initialized BERT, blank spaCy and geometry checks passed with networking disabled</td>
+<td>No pretrained model, map tiles, GPU, full training or native Windows/macOS imports were verified by that container proof.</td>
 </tr>
 <tr>
 <td>Data preservation</td>
@@ -204,9 +219,19 @@
 <td>No model was called and no claim is made about model teaching quality or bundled offline AI.</td>
 </tr>
 <tr>
+<td>Future curriculum</td>
+<td>Extension tests exercise a real added theory track through catalog, CLI, planner, served readers and MCP; validate paths, graph and artifact identities; preserve existing IDs</td>
+<td>C++, Scala and Kubernetes source modes support reading and saved work. Their execution adapters remain explicitly unavailable.</td>
+</tr>
+<tr>
+<td>Windows first run</td>
+<td>45 wizard tests cover consent, reboot/resume, engine reuse, remote-endpoint rejection, native arguments, stream forwarding and timeouts; complete starter packaging excludes learner/private files</td>
+<td>Tests used fake Windows operations and official portable PowerShell 7.6.8 on macOS. Actual Windows 5.1, WinGet, UAC, WSL installation and reboot remain target-platform validation.</td>
+</tr>
+<tr>
 <td>Portability and quality</td>
-<td>Four-platform all-extras lock dry-runs, Ruff, formatting, strict mypy, secret/history scan, and diff checks passed. Seven fake-Docker PowerShell launcher scenarios and 42 PowerShell/51 Bash documentation fences passed</td>
-<td>Official portable PowerShell 7.6.8 was checksum-verified and used privately on macOS. Windows 5.1 syntax compatibility was inspected; native Windows/Linux runtime and a rootless daemon were not executed locally.</td>
+<td>Five-platform all-extras lock dry-runs, Ruff, formatting, strict mypy, secret/history scan, diff checks, launcher cases and documentation parsing passed</td>
+<td>Locked plans cover Windows x64, Linux x64/ARM64 and macOS Intel/ARM64. Native Windows/Linux runtime and a rootless daemon were not executed locally.</td>
 </tr>
 </tbody></table></div>
 <p>The coding application is a personal trusted-code environment. Default runs have bounded execution/output and process cleanup. SQL uses only the exact local disposable target and a limited login. Completion records require saved prediction, attempt and explanation, but remain learner-confirmed evidence rather than automatic grading. See <a href="offline-app.md.html">application and build details</a> and <a href="mcp-tutor.md.html">MCP tutoring</a>.</p>

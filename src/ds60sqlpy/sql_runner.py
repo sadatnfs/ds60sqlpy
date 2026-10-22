@@ -149,15 +149,17 @@ class SqlRunner:
         """Run one SQL lesson by stable catalog ID."""
 
         lesson = self.catalog.get(lesson_id)
-        if lesson.track != "sql":
-            raise SqlRunnerError(f"Lesson is not in the SQL track: {lesson_id}")
+        if lesson.runner != "sql":
+            raise SqlRunnerError(f"Lesson does not use the SQL runner: {lesson_id}")
         return self.run_file(self.catalog.resolve(lesson.lesson_path))
 
     def all_lessons(self) -> tuple[SqlRun, ...]:
         """Run every SQL lesson sequentially, preserving explicit project state."""
 
         runs: list[SqlRun] = []
-        for lesson in self.catalog.lessons("sql"):
+        for lesson in self.catalog:
+            if lesson.runner != "sql":
+                continue
             run = self.run_file(self.catalog.resolve(lesson.lesson_path))
             runs.append(run)
             if run.returncode != 0:
@@ -169,7 +171,8 @@ class SqlRunner:
 
         return tuple(
             self.catalog.resolve(path)
-            for lesson in self.catalog.lessons("sql")
+            for lesson in self.catalog
+            if lesson.runner == "sql"
             for path in lesson.solution_paths
             if Path(path).suffix == ".sql"
         )

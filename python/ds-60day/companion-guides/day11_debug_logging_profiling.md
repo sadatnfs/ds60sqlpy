@@ -1,4 +1,4 @@
-# Day 11 — Debugging, Logging, and Profiling
+# Day 11 - Debugging, Logging, and Profiling
 
 **Level:** Beginner
 
@@ -54,12 +54,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 11 — debugging, logging, and profiling to practice evidence-driven debugging, useful logs, and measurement before optimization
+**Lesson outcome:** use day 11 - debugging, logging, and profiling to practice evidence-driven debugging, useful logs, and measurement before optimization
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive - build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -93,7 +93,7 @@ enabled. In a traceback, the last line names the exception, while the
 preceding frames show calls from outermost to innermost. With `timeit`,
 setup and repeated statement execution are deliberately separated.
 
-### Worked example 1 — Add context at the boundary
+### Worked example 1 - Add context at the boundary
 
 A small function logs an outcome without dumping the input records. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -121,7 +121,7 @@ The function returns `2`; when the notebook has a visible logging handler, one I
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Measure two equivalent membership strategies
+### Worked example 2 - Measure two equivalent membership strategies
 
 Use repeated representative work instead of one noisy timestamp. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -279,7 +279,7 @@ identifies a measured bottleneck, and tests still pass after optimization.
 
 - [Open the learner notebook](../notebooks/day11_debug_logging_profiling.ipynb)
 - [Check the separate solution](../solutions/day11_debug_logging_profiling/day11_solutions.md)
-- [Next: Day 12 — OOP and dataclasses](day12_oop_dataclasses.md)
+- [Next: Day 12 - OOP and dataclasses](day12_oop_dataclasses.md)
 
 ## Ask Codex about this lesson
 

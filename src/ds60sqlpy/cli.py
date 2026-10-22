@@ -17,7 +17,7 @@ from ds60sqlpy.portal import serve_portal
 from ds60sqlpy.progress import ProgressStore
 from ds60sqlpy.sql_notebook import SqlNotebookError, generate_sql_notebook
 from ds60sqlpy.sql_runner import SqlRunner, SqlRunnerError
-from ds60sqlpy.study_plan import LEARNING_PATHS, build_study_plan
+from ds60sqlpy.study_plan import build_study_plan, learning_paths
 
 STATUS_MARK = {"pass": "PASS", "warn": "WARN", "fail": "FAIL"}
 
@@ -88,11 +88,14 @@ def _cmd_validate(args: argparse.Namespace, catalog: Catalog) -> int:
 
 
 def _cmd_plan(args: argparse.Namespace, catalog: Catalog) -> int:
+    paths = learning_paths(catalog)
     targets = list(args.targets)
     if args.path:
-        targets.extend(LEARNING_PATHS[args.path].targets)
+        if args.path not in paths:
+            raise ValueError(f"Unknown learning path: {args.path}. Choose from {', '.join(paths)}.")
+        targets.extend(paths[args.path].targets)
     if not targets:
-        for name, path in LEARNING_PATHS.items():
+        for name, path in paths.items():
             print(f"{name}: {path.title}. {path.description}")
         print("\nChoose --path NAME or one or more stable lesson IDs.")
         return 0
@@ -145,15 +148,17 @@ def _cmd_progress(args: argparse.Namespace, catalog: Catalog) -> int:
     if completions:
         print("Completed lessons:")
         for completion in completions:
-            suffix = f" — {completion.notes}" if completion.notes else ""
+            suffix = f": {completion.notes}" if completion.notes else ""
             print(f"  {completion.lesson_id} ({completion.completed_at}){suffix}")
     else:
         print("No local progress recorded yet.")
-    tracks: tuple[Track, ...] = ("python", "sql", "bridge")
-    for track in tracks:
+    for track in catalog.tracks:
+        if not catalog.lessons(track):
+            print(f"{catalog.tracks[track]['title']}: no published lessons yet.")
+            continue
         next_lesson = store.next_lesson(track)
         if next_lesson:
-            print(f"Next {track}: {next_lesson.id} — {next_lesson.title}")
+            print(f"Next {track}: {next_lesson.id}: {next_lesson.title}")
         else:
             print(f"{track.capitalize()} track complete.")
     return 0
@@ -233,7 +238,7 @@ def _cmd_sql(args: argparse.Namespace, catalog: Catalog) -> int:
                 return verify_run.returncode
         runs = runner.all_lessons()
         passed = sum(run.returncode == 0 for run in runs)
-        expected = len(catalog.lessons("sql"))
+        expected = sum(lesson.runner == "sql" for lesson in catalog)
         print(f"SQL lessons passed: {passed}/{expected}")
         return 0 if len(runs) == expected and passed == expected else 1
 
@@ -249,7 +254,8 @@ def _cmd_sql(args: argparse.Namespace, catalog: Catalog) -> int:
         passed = sum(run.returncode == 0 for run in runs)
         expected = sum(
             Path(path).suffix == ".sql"
-            for lesson in catalog.lessons("sql")
+            for lesson in catalog
+            if lesson.runner == "sql"
             for path in lesson.solution_paths
         )
         print(f"Executable SQL solutions passed: {passed}/{expected}")
@@ -281,12 +287,12 @@ def _parser() -> argparse.ArgumentParser:
     )
 
     catalog_parser = subparsers.add_parser("catalog", help="List cataloged lessons.")
-    catalog_parser.add_argument("--track", choices=("python", "sql", "bridge"))
+    catalog_parser.add_argument("--track", metavar="TRACK", help="A registered track ID.")
     catalog_parser.add_argument("--json", action="store_true")
 
     plan_parser = subparsers.add_parser("plan", help="Plan a prerequisite-aware learning route.")
     plan_parser.add_argument("targets", nargs="*", help="Stable target lesson IDs.")
-    plan_parser.add_argument("--path", choices=tuple(LEARNING_PATHS))
+    plan_parser.add_argument("--path", metavar="NAME", help="A registered learning path ID.")
     plan_parser.add_argument("--weekly-hours", type=float, default=5)
     plan_parser.add_argument("--use-progress", action="store_true")
     plan_parser.add_argument("--json", action="store_true")
@@ -407,4 +413,8 @@ def main(argv: list[str] | None = None) -> int:
         "portal": _cmd_portal,
         "sql": _cmd_sql,
     }
-    return handlers[args.command](args, catalog)
+    try:
+        return handlers[args.command](args, catalog)
+    except (KeyError, ValueError) as exc:
+        print(str(exc), file=sys.stderr)
+        return 2

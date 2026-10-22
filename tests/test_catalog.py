@@ -14,7 +14,7 @@ def test_find_repo_root_from_nested_directory() -> None:
 def test_catalog_has_all_complete_tracks() -> None:
     catalog = Catalog.load()
     for track, core in (("python", 60), ("sql", 60), ("bridge", 8)):
-        assert len(catalog.lessons(track)) == core + sum(  # type: ignore[arg-type]
+        assert len(catalog.lessons(track)) == core + sum(
             spec["track"] == track for spec in PROFESSIONAL_LESSON_SPECS
         )
     assert catalog.by_day("python", 1).id == "python-01"

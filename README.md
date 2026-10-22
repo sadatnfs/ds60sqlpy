@@ -5,9 +5,9 @@
 DS60 is a self-paced repository for learning practical Python, data science, and PostgreSQL from introductory material through substantial projects. The existing tracks are organized as 60 numbered lessons, but the number is a navigation aid rather than a deadline: take the time you need, repeat lessons, and use the curriculum catalog to choose prerequisites.
 
 > [!TIP]
-> Start with the **guided coding application** below. On Windows, double-click
-> `START_LEARNING_LAB.cmd` after cloning; it checks or prepares the environment
-> and opens the lab. Docker includes the Python and PostgreSQL backends.
+> Start with the **guided coding application** below. On a new Windows computer,
+> extract the Windows Starter ZIP and double-click `START_DOCKER_LAB.cmd`.
+> Its wizard guides setup, then opens the lab with Python and PostgreSQL backends.
 > [START_HERE.html](START_HERE.html) remains the static offline reading library,
 > and `START_DS60.cmd` opens its editor/Jupyter launcher.
 
@@ -23,7 +23,7 @@ Each Python, SQL, and bridge guide is designed to stand on its own: it defines t
 mental model and vocabulary, breaks down syntax or query anatomy, provides
 runnable examples and visible checks, diagnoses common mistakes, and supplies
 a progression of practice. Its final **Ask Codex about this lesson** block is
-optional, copy-ready coaching context—not a replacement for the lesson.
+optional, copy-ready coaching context - not a replacement for the lesson.
 
 > [!IMPORTANT]
 > The repository runs locally after setup, but a brand-new machine still needs internet access to install Python packages, PostgreSQL or Docker, and VS Code extensions. A few lessons use Seaborn datasets that download on first use and are cached afterward. Pretrained Hugging Face, spaCy, and torchvision exercises can also require a deliberate first download; their lesson notes identify those cases. See [Offline use](docs/setup/offline.md).
@@ -41,9 +41,17 @@ been prepared.
 prepare Windows WSL 2 if needed, and extract the course folder. No host Python,
 PostgreSQL, or course package installation is required for this route.
 
-With the engine running, Windows users can double-click
-`START_DOCKER_LAB.cmd`; Mac users can double-click `START_DOCKER_LAB.command`.
-The terminal alternatives, from the folder containing `compose.yaml`, are:
+**New Windows computer:** download the supplied Windows Starter ZIP (or a
+repository ZIP containing the first-run wizard), choose **Extract All**, then
+double-click **`START_DOCKER_LAB.cmd`** in the extracted folder. Its
+first-run wizard reuses a ready engine or offers prerequisite installation.
+No host Python or Git is needed. Windows may request installation approval or
+a restart; rerun the same launcher afterward to continue. See the
+[Windows first-run walkthrough](docs/docker-beginners.md#windows-start-with-the-first-run-wizard).
+
+With a configured engine, Mac users can double-click
+`START_DOCKER_LAB.command`. Runtime-only terminal alternatives, from the folder
+containing `compose.yaml`, are:
 
 ```powershell
 # Windows PowerShell
@@ -110,7 +118,7 @@ migrations (`sql-found-02`) sit between Days 39 and 40.
 
 ## Quick start
 
-Run commands from the repository root—the directory containing this README.
+Run commands from the repository root - the directory containing this README.
 
 ### 1. Install prerequisites
 
@@ -374,8 +382,8 @@ The Python track is strongest as a practical Python-for-data-science path; it
 is not a substitute for the complete Python language reference. The SQL track
 targets PostgreSQL. The bridge adds focused application-engineering practice,
 not a full distributed-systems or database-administration program. Treat lesson
-objectives and the generated catalog view—not a promise to teach
-“everything”—as the contract.
+objectives and the generated catalog view - not a promise to teach
+“everything” - as the contract.
 
 Progress matters more than the 60-day label. A good session ends with runnable work, an explanation in your own words, and one small note about what to revisit.
 

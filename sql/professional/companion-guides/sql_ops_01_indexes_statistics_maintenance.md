@@ -1,4 +1,4 @@
-# SQL-OPS-01 — Index Types, Statistics, and Maintenance Lifecycle
+# SQL-OPS-01 - Index Types, Statistics, and Maintenance Lifecycle
 
 ## Level and prerequisites
 
@@ -41,7 +41,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-OPS-01 — Index Types, Statistics, and Maintenance Lifecycle** and choose
+2. Open **SQL-OPS-01 - Index Types, Statistics, and Maintenance Lifecycle** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -75,7 +75,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor - never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -266,7 +266,7 @@ before/after evidence, write/storage cost, owner, review date, and rollback:
    predicate and identify which columns are keys versus payload.
    **Inputs/evidence:** For sql-ops-01 Exercise 1, match the query's equality/range/order/projection with a partial covering btree on `(device_id, occurred_at DESC)` including severity/message and predicated on `severity >= 4`.
    **Expected result/shape:** For sql-ops-01 Exercise 1, expected output: catalog command evidence, one EXPLAIN plan, and up to 25 underlying rows with `occurred_at`, `severity`, and `message` for device-005 in descending time order.
-   **Verify:** For sql-ops-01 Exercise 1, assert every result satisfies the partial predicate, compare returned rows with the same SELECT without planner settings, inspect the exact index predicate/include columns, and treat scan type as observed evidence—not a guaranteed contract.
+   **Verify:** For sql-ops-01 Exercise 1, assert every result satisfies the partial predicate, compare returned rows with the same SELECT without planner settings, inspect the exact index predicate/include columns, and treat scan type as observed evidence - not a guaranteed contract.
 2. **Access methods:** map each GIN, GiST, SP-GiST, and BRIN index to supported
    operators and one nonmatching query.
    **Inputs/evidence:** For sql-ops-01 Exercise 2, map GIN, GiST, SP-GiST, and BRIN to concrete type/operator workloads and state one important trade-off for each.
@@ -350,7 +350,7 @@ before/after evidence, write/storage cost, owner, review date, and rollback:
 
 ## Next step
 
-Continue to [SQL-TEST-01 — SQL tests, migration checks, and data contracts](sql_test_01_contracts_migrations.md).
+Continue to [SQL-TEST-01 - SQL tests, migration checks, and data contracts](sql_test_01_contracts_migrations.md).
 Then use [SQL-OPS-02](sql_ops_02_backup_restore_recovery.md) to include index,
 statistics, extension, and post-restore verification in a recovery rehearsal.
 
@@ -361,7 +361,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in Codex:
 
 ```text
-Tutor me through sql-ops-01 — Index Types, Statistics, and Maintenance Lifecycle.
+Tutor me through sql-ops-01 - Index Types, Statistics, and Maintenance Lifecycle.
 
 I have completed the direct catalog prerequisites: `sql-35`, `sql-types-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_ops_01_indexes_statistics_maintenance.md

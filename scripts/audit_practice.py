@@ -44,6 +44,11 @@ PYTHON_NUMBERED_PROMPT = re.compile(
     r"(?P<number>\d+)[.):\s-]",
     re.IGNORECASE,
 )
+SLASH_NUMBERED_PROMPT = re.compile(
+    r"^\s*//\s*(?:(?:exercise|practice|challenge|task)\s+)?"
+    r"(?P<number>\d+)[.):\s-]",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -174,16 +179,25 @@ def count_practice_source(
         )
     if suffix == ".md":
         return _markdown_practice_count(source, solution=solution)
+    if suffix == ".txt":
+        # A reading worksheet can keep Markdown-shaped exercise sections or
+        # plain, explicit "Exercise N:" labels. Arbitrary numbered prose still
+        # does not count, and repeated labels contribute only one prompt.
+        return _markdown_practice_count(source, solution=True)
     if suffix == ".sql":
         return _sql_practice_count(source)
-    if suffix == ".py":
-        numbers = {
-            match.group("number")
-            for line in source.splitlines()
-            if (match := PYTHON_NUMBERED_PROMPT.match(line)) is not None
-        }
-        return len(numbers)
-    return 0
+    if suffix in {".py", ".yaml", ".yml", ".sh"}:
+        pattern = PYTHON_NUMBERED_PROMPT
+    elif suffix in {".cpp", ".cc", ".cxx", ".h", ".hpp", ".scala"}:
+        pattern = SLASH_NUMBERED_PROMPT
+    else:
+        return 0
+    numbers = {
+        match.group("number")
+        for line in source.splitlines()
+        if (match := pattern.match(line)) is not None
+    }
+    return len(numbers)
 
 
 def count_practice(path: Path, *, solution: bool = False) -> int:

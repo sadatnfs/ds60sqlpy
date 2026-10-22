@@ -115,24 +115,24 @@ For `sql-01`, the generated files are:
 
 The notebook follows this learning sequence:
 
-1. **Goal and three-program mental model** — identifies the lesson, guide,
+1. **Goal and three-program mental model** - identifies the lesson, guide,
    official source, editable copy, and the separate roles of Jupyter, Python,
    `psql`, and the PostgreSQL server.
-2. **Before-you-run checklist** — confirms the selected course kernel, local
+2. **Before-you-run checklist** - confirms the selected course kernel, local
    tools, disposable database name, and the difference between reading and
    execution.
-3. **Secret-free readiness** — locates the repository, validates the database
+3. **Secret-free readiness** - locates the repository, validates the database
    target, and explains each pass, warning, or failure.
-4. **Study and edit** — renders the official SQL for comparison and points to
+4. **Study and edit** - renders the official SQL for comparison and points to
    the preserved editable copy.
-5. **Explicit preparation** — requires the learner to confirm the destructive
+5. **Explicit preparation** - requires the learner to confirm the destructive
    reset switch before preparing the course schema.
-6. **Run and inspect** — executes the complete copy through fixed `psql -f`,
+6. **Run and inspect** - executes the complete copy through fixed `psql -f`,
    then teaches the learner to read the exit status, transcript, result
    columns, row grain, counts, and ordering.
-7. **Checks and recovery** — reruns deterministic database invariants and maps
+7. **Checks and recovery** - reruns deterministic database invariants and maps
    common failures to the responsible layer.
-8. **Reflection and next step** — asks for evidence in the learner's own words
+8. **Reflection and next step** - asks for evidence in the learner's own words
    before progress is recorded.
 
 The notebook is deliberately more than a wrapper around a command. It teaches

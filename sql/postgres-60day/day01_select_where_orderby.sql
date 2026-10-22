@@ -1,5 +1,5 @@
 -- Day 1: SELECT, WHERE, ORDER BY, LIMIT
--- BEGINNER WORKFLOW — sql-01: Select Where Orderby
+-- BEGINNER WORKFLOW - sql-01: Select Where Orderby
 -- Guide: sql/postgres-60day/companion-guides/day01_select_where_orderby.md
 -- Recommended runner: open the private lesson reader and choose
 -- "Create/open guided SQL notebook". It verifies advanced_sql_training,

@@ -43,6 +43,24 @@ def test_python_pad_executes_and_preserves_learner_work(tmp_path: Path) -> None:
     assert runner.read("python-01", "python").startswith("raise")
 
 
+def test_embedded_guide_headings_cannot_shadow_coding_pad_controls(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    catalog = local_catalog(tmp_path)
+    catalog.resolve(catalog.get("python-01").guide_path).write_text(
+        "# Code\n\n## Solution\n", encoding="utf-8"
+    )
+    monkeypatch.setattr("ds60sqlpy.lab.rendered_targets", lambda catalog: {})
+    server = LabServer(catalog, progress_path=tmp_path / "progress.json")
+    try:
+        result = server.action({"action": "lesson", "lesson_id": "python-01"})
+        assert 'id="lab-guide--code"' in result["guide_html"]
+        assert 'id="lab-guide--solution"' in result["guide_html"]
+        assert 'id="code"' not in result["guide_html"]
+    finally:
+        server.server_close()
+
+
 def test_python_pad_stops_hangs_and_bounds_output(tmp_path: Path) -> None:
     runner = PadRunner(local_catalog(tmp_path), timeout=0.4)
     result = runner.run("python-01", "python", "while True: pass")
@@ -269,3 +287,93 @@ def test_workspace_initialization_preserves_prebound_learning_folder(tmp_path: P
     assert (workspace / "README.md").read_text() == "current course"
     assert (learning / "progress.json").read_bytes() == prior
     assert (learning / "practice.py").read_text() == "my prior code"
+
+
+def test_authenticated_capabilities_generic_saved_work_and_bounded_run_options(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    catalog = local_catalog(tmp_path / "course")
+    base = catalog.get("python-01")
+    (catalog.repo_root / "cpp").mkdir()
+    (catalog.repo_root / "cpp/practice.cpp").write_text("int main() { return 0; }\n")
+    (catalog.repo_root / "cpp/guide.md").write_text("# C++ practice\n")
+    catalog = Catalog(
+        catalog.repo_root,
+        (
+            base,
+            replace(
+                base,
+                id="cpp-demo",
+                day=2,
+                runner="cpp",
+                lesson_path="cpp/practice.cpp",
+                guide_path="cpp/guide.md",
+                solution_paths=(),
+            ),
+        ),
+    )
+    monkeypatch.setattr(
+        "ds60sqlpy.capabilities.probe_python",
+        lambda *args: {"available": True, "missing_modules": [], "python_version": "3.12"},
+    )
+    monkeypatch.setattr(
+        "ds60sqlpy.capabilities.probe_sql", lambda *args: (False, "Local SQL offline")
+    )
+    monkeypatch.setattr("ds60sqlpy.lab.rendered_targets", lambda catalog: {})
+    server = LabServer(catalog, progress_path=tmp_path / "progress.json", python=sys.executable)
+    serving = threading.Thread(target=server.serve_forever, daemon=True)
+    serving.start()
+
+    def call(payload: dict[str, object]) -> dict[str, object]:
+        request = Request(
+            server.url + "api/lab",
+            data=json.dumps(payload).encode(),
+            headers={
+                "Content-Type": "application/json",
+                "Origin": server.url.rstrip("/"),
+                "X-DS60-Token": server.token,
+            },
+        )
+        with urlopen(request, timeout=5) as response:
+            result: dict[str, object] = json.loads(response.read())
+            return result
+
+    try:
+        capabilities = call({"action": "capabilities", "lesson_id": "cpp-demo"})
+        assert capabilities["default_runner"] == "cpp"
+        assert not (catalog.repo_root / ".learning").exists()
+        cpp = {"lesson_id": "cpp-demo", "language": "cpp"}
+        call({"action": "save-pad", **cpp, "code": "int main() { return 0; }\n"})
+        saved = call({"action": "read-pad", **cpp})
+        assert saved["saved"] and str(saved["code"]).startswith("int main")
+        with pytest.raises(HTTPError) as unsupported:
+            call({"action": "run", **cpp, "code": "do not execute this"})
+        assert unsupported.value.code == 400
+        assert b"not implemented" in unsupported.value.read()
+        assert call({"action": "read-pad", **cpp}) == saved
+        for timeout in (True, 0, 121, 15.0, "15"):
+            with pytest.raises(HTTPError) as invalid:
+                call(
+                    {
+                        "action": "run",
+                        "lesson_id": "python-01",
+                        "language": "python",
+                        "code": "print(42)",
+                        "timeout_seconds": timeout,
+                    }
+                )
+            assert invalid.value.code == 400
+        result = call(
+            {
+                "action": "run",
+                "lesson_id": "python-01",
+                "language": "python",
+                "code": "print(42)",
+                "timeout_seconds": 120,
+            }
+        )
+        assert result["returncode"] == 0 and str(result["output"]).strip() == "42"
+    finally:
+        server.shutdown()
+        server.server_close()
+        serving.join(timeout=3)

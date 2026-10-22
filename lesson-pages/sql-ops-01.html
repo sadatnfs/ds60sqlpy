@@ -230,6 +230,9 @@
           Track completion on the course dashboard
         </a>
         <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=sql-ops-01" hidden>
+          Open this lesson in the coding lab
+        </a>
       </div>
     </div>
   </header>
@@ -254,7 +257,7 @@
         <div>
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Open your guided SQL workspace</h2>
-          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database, never a shared or valuable one.</p>
+          <p id="run-guidance">In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database, never a shared or valuable one.</p>
           <div class="static-help">
             <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
           </div>
@@ -269,11 +272,14 @@
           </button>
 
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+          <a class="button lab-only" href="../learn?lesson=sql-ops-01" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
         </div>
       </section>
 
 
-      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+      <section class="sql-run-guide native-only" aria-labelledby="sql-run-guide-heading">
         <p class="eyebrow">SQL beginner path</p>
         <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
         <p>
@@ -377,7 +383,7 @@
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--sql-ops-01-index-types-statistics-and-maintenance-lifecycle">SQL-OPS-01 — Index Types, Statistics, and Maintenance Lifecycle<a class="heading-anchor" href="#guide--sql-ops-01-index-types-statistics-and-maintenance-lifecycle" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--sql-ops-01-index-types-statistics-and-maintenance-lifecycle">SQL-OPS-01 - Index Types, Statistics, and Maintenance Lifecycle<a class="heading-anchor" href="#guide--sql-ops-01-index-types-statistics-and-maintenance-lifecycle" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Advanced</li>
@@ -397,7 +403,7 @@
 <p>On macOS or Linux, run:</p>
 <pre><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
-<li>Open <strong>SQL-OPS-01 — Index Types, Statistics, and Maintenance Lifecycle</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Open <strong>SQL-OPS-01 - Index Types, Statistics, and Maintenance Lifecycle</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
 <li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-ops-01/lesson/workspace/sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
@@ -408,7 +414,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\professional\le
 <pre><code class="language-bash"># macOS/Linux, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor - never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Access method, Operator class, Partial index, Expression index, Covering index, BRIN range. Its worked SQL reads or creates <code>pro_ops_lab.events</code>, <code>pg_catalog.pg_index</code>, <code>pg_catalog.pg_class</code>, <code>pg_catalog.pg_namespace</code>, <code>pg_catalog.pg_am</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
@@ -508,7 +514,7 @@ LIMIT 20;</code></pre>
 <p>Use <code>EXPLAIN</code> as evidence, not as a pass/fail assertion that one node type must appear on every machine or data size.</p>
 <p>Every recommendation needs target query, operator, representative data, before/after evidence, write/storage cost, owner, review date, and rollback:</p>
 <ol>
-<li><strong>Covering partial index:</strong> make the query predicate imply the index predicate and identify which columns are keys versus payload. <strong>Inputs/evidence:</strong> For sql-ops-01 Exercise 1, match the query&#x27;s equality/range/order/projection with a partial covering btree on <code>(device_id, occurred_at DESC)</code> including severity/message and predicated on <code>severity &gt;= 4</code>. <strong>Expected result/shape:</strong> For sql-ops-01 Exercise 1, expected output: catalog command evidence, one EXPLAIN plan, and up to 25 underlying rows with <code>occurred_at</code>, <code>severity</code>, and <code>message</code> for device-005 in descending time order. <strong>Verify:</strong> For sql-ops-01 Exercise 1, assert every result satisfies the partial predicate, compare returned rows with the same SELECT without planner settings, inspect the exact index predicate/include columns, and treat scan type as observed evidence—not a guaranteed contract.</li>
+<li><strong>Covering partial index:</strong> make the query predicate imply the index predicate and identify which columns are keys versus payload. <strong>Inputs/evidence:</strong> For sql-ops-01 Exercise 1, match the query&#x27;s equality/range/order/projection with a partial covering btree on <code>(device_id, occurred_at DESC)</code> including severity/message and predicated on <code>severity &gt;= 4</code>. <strong>Expected result/shape:</strong> For sql-ops-01 Exercise 1, expected output: catalog command evidence, one EXPLAIN plan, and up to 25 underlying rows with <code>occurred_at</code>, <code>severity</code>, and <code>message</code> for device-005 in descending time order. <strong>Verify:</strong> For sql-ops-01 Exercise 1, assert every result satisfies the partial predicate, compare returned rows with the same SELECT without planner settings, inspect the exact index predicate/include columns, and treat scan type as observed evidence - not a guaranteed contract.</li>
 <li><strong>Access methods:</strong> map each GIN, GiST, SP-GiST, and BRIN index to supported operators and one nonmatching query. <strong>Inputs/evidence:</strong> For sql-ops-01 Exercise 2, map GIN, GiST, SP-GiST, and BRIN to concrete type/operator workloads and state one important trade-off for each. <strong>Expected result/shape:</strong> For sql-ops-01 Exercise 2, expected output: four ordered rows with <code>method</code>, <code>suitable_types</code>, <code>target_operators</code>, and <code>tradeoff</code>. <strong>Verify:</strong> For sql-ops-01 Exercise 2, identify the exact operator class available for the target type, test representative data distribution/write cost, and reject any recommendation that names only an access method without its query operator.</li>
 <li><strong>Extended statistics:</strong> choose correlated columns, analyze, inspect, and explain the planner’s freedom. <strong>Inputs/evidence:</strong> For sql-ops-01 Exercise 3, create dependency and MCV extended statistics on the correlated <code>category</code>/<code>severity</code> pair, ANALYZE, then inspect <code>pg_stats_ext</code>. <strong>Expected result/shape:</strong> For sql-ops-01 Exercise 3, expected output: exactly one statistics row with its name, kinds, and attribute names. <strong>Verify:</strong> For sql-ops-01 Exercise 3, compare EXPLAIN estimated rows before/after ANALYZE for a correlated predicate, retain actual counts as control, and do not claim extended statistics replace ordinary column statistics.</li>
 <li><strong>Lifecycle review:</strong> combine usage window, size, writes, constraints, and plans without producing an automatic drop list. <strong>Inputs/evidence:</strong> For sql-ops-01 Exercise 4, inventory each events index with size, observed scan count, uniqueness/primary flags, predicate, observation timestamp, and database statistics-reset timestamp. <strong>Expected result/shape:</strong> For sql-ops-01 Exercise 4, expected output: one row per index ordered by <code>index_name</code>, including the primary and partial covering indexes. <strong>Verify:</strong> For sql-ops-01 Exercise 4, reconcile index identities with <code>pg_index</code>, record workload observation window and stats reset, and require query/constraint/replica evidence before any reviewed drop; zero scans alone is never sufficient.</li>
@@ -543,10 +549,10 @@ LIMIT 20;</code></pre>
 <li>Query text from monitoring views can disclose confidential literals.</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-test-01.html#guide">SQL-TEST-01 — SQL tests, migration checks, and data contracts</a>. Then use <a href="sql-ops-02.html#guide">SQL-OPS-02</a> to include index, statistics, extension, and post-restore verification in a recovery rehearsal.</p>
+<p>Continue to <a href="sql-test-01.html#guide">SQL-TEST-01 - SQL tests, migration checks, and data contracts</a>. Then use <a href="sql-ops-02.html#guide">SQL-OPS-02</a> to include index, statistics, extension, and post-restore verification in a recovery rehearsal.</p>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-ops-01 — Index Types, Statistics, and Maintenance Lifecycle.
+<pre><code class="language-text">Tutor me through sql-ops-01 - Index Types, Statistics, and Maintenance Lifecycle.
 
 I have completed the direct catalog prerequisites: `sql-35`, `sql-types-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_ops_01_indexes_statistics_maintenance.md
@@ -605,7 +611,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-OPS-01: Index types, statistics, and maintenance lifecycle</span>
-<span>-- BEGINNER WORKFLOW — sql-ops-01: Index Types, Statistics, and Maintenance Lifecycle</span>
+<span>-- BEGINNER WORKFLOW - sql-ops-01: Index Types, Statistics, and Maintenance Lifecycle</span>
 <span>-- Guide: sql/professional/companion-guides/sql_ops_01_indexes_statistics_maintenance.md</span>
 <span>-- Recommended runner: open the private lesson reader and choose</span>
 <span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
@@ -821,7 +827,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span>--</span>
 <span>--    Inputs: For sql-ops-01 Exercise 1, match the query&#x27;s equality/range/order/projection with a partial covering btree on `(device_id, occurred_at DESC)` including severity/message and predicated on `severity &gt;= 4`.</span>
 <span>--    Expected result/shape: For sql-ops-01 Exercise 1, expected output: catalog command evidence, one EXPLAIN plan, and up to 25 underlying rows with `occurred_at`, `severity`, and `message` for device-005 in descending time order.</span>
-<span>--    Verify: For sql-ops-01 Exercise 1, assert every result satisfies the partial predicate, compare returned rows with the same SELECT without planner settings, inspect the exact index predicate/include columns, and treat scan type as observed evidence—not a guaranteed contract.</span>
+<span>--    Verify: For sql-ops-01 Exercise 1, assert every result satisfies the partial predicate, compare returned rows with the same SELECT without planner settings, inspect the exact index predicate/include columns, and treat scan type as observed evidence - not a guaranteed contract.</span>
 <span>--    Hint ladder, rung 1: For sql-ops-01 Exercise 1, inspect `pg_catalog.pg_index`, `pg_catalog.pg_indexes`, and `information_schema.columns` for `events_high_device_time_covering`, and `pro_ops_lab.events`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object.</span>
 <span>-- 2. Explain which operators each GIN, GiST, SP-GiST, and BRIN example serves.</span>
 <span>--    Show one superficially similar query that cannot use that operator class.</span>
@@ -962,7 +968,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--sql-ops-01-solutions-indexes-and-maintenance">SQL-OPS-01 Solutions — Indexes and Maintenance<a class="heading-anchor" href="#solution-1--sql-ops-01-solutions-indexes-and-maintenance" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--sql-ops-01-solutions-indexes-and-maintenance">SQL-OPS-01 Solutions - Indexes and Maintenance<a class="heading-anchor" href="#solution-1--sql-ops-01-solutions-indexes-and-maintenance" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre><code class="language-powershell"># Windows PowerShell, from the repository root
@@ -985,7 +991,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
 <p>Run:</p>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_ops_01_indexes_statistics_maintenance_solutions.sql</code></pre>
 <p>The solution rolls back <code>pro_ops_lab</code> and performs no vacuum or configuration change.</p>
-<h4 id="solution-1--exercise-1-covering-partial-index">Exercise 1 — Covering partial index<a class="heading-anchor" href="#solution-1--exercise-1-covering-partial-index" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-covering-partial-index">Exercise 1 - Covering partial index<a class="heading-anchor" href="#solution-1--exercise-1-covering-partial-index" aria-label="Link to this section">#</a></h4>
 <p>The solution pairs its exact high-severity device-history query with:</p>
 <pre><code class="language-sql">CREATE INDEX events_high_device_time_covering
 ON pro_ops_lab.events (device_id, occurred_at DESC)
@@ -996,9 +1002,9 @@ WHERE severity &gt;= 4;</code></pre>
 <ul>
 <li><strong>Inputs/evidence:</strong> For sql-ops-01 Exercise 1, match the query&#x27;s equality/range/order/projection with a partial covering btree on <code>(device_id, occurred_at DESC)</code> including severity/message and predicated on <code>severity &gt;= 4</code>.</li>
 <li><strong>Expected result/shape:</strong> For sql-ops-01 Exercise 1, expected output: catalog command evidence, one EXPLAIN plan, and up to 25 underlying rows with <code>occurred_at</code>, <code>severity</code>, and <code>message</code> for device-005 in descending time order.</li>
-<li><strong>Independent verification:</strong> For sql-ops-01 Exercise 1, assert every result satisfies the partial predicate, compare returned rows with the same SELECT without planner settings, inspect the exact index predicate/include columns, and treat scan type as observed evidence—not a guaranteed contract.</li>
+<li><strong>Independent verification:</strong> For sql-ops-01 Exercise 1, assert every result satisfies the partial predicate, compare returned rows with the same SELECT without planner settings, inspect the exact index predicate/include columns, and treat scan type as observed evidence - not a guaranteed contract.</li>
 </ul>
-<h4 id="solution-1--exercise-2-operator-compatibility">Exercise 2 — Operator compatibility<a class="heading-anchor" href="#solution-1--exercise-2-operator-compatibility" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-operator-compatibility">Exercise 2 - Operator compatibility<a class="heading-anchor" href="#solution-1--exercise-2-operator-compatibility" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>GIN array ops support containment/overlap, not arbitrary element transformations.</li>
 <li>GiST point ops support geometry and distance, not text equality.</li>
@@ -1012,7 +1018,7 @@ WHERE severity &gt;= 4;</code></pre>
 <li><strong>Expected result/shape:</strong> For sql-ops-01 Exercise 2, expected output: four ordered rows with <code>method</code>, <code>suitable_types</code>, <code>target_operators</code>, and <code>tradeoff</code>.</li>
 <li><strong>Independent verification:</strong> For sql-ops-01 Exercise 2, identify the exact operator class available for the target type, test representative data distribution/write cost, and reject any recommendation that names only an access method without its query operator.</li>
 </ul>
-<h4 id="solution-1--exercise-3-correlated-statistics">Exercise 3 — Correlated statistics<a class="heading-anchor" href="#solution-1--exercise-3-correlated-statistics" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-correlated-statistics">Exercise 3 - Correlated statistics<a class="heading-anchor" href="#solution-1--exercise-3-correlated-statistics" aria-label="Link to this section">#</a></h4>
 <p>The fixture deliberately correlates <code>category</code> and <code>severity</code>. Dependencies and MCV statistics can improve combined-filter cardinality after <code>ANALYZE</code>. Statistics shape estimates; they do not force an access method and need refresh as data distribution changes.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1020,7 +1026,7 @@ WHERE severity &gt;= 4;</code></pre>
 <li><strong>Expected result/shape:</strong> For sql-ops-01 Exercise 3, expected output: exactly one statistics row with its name, kinds, and attribute names.</li>
 <li><strong>Independent verification:</strong> For sql-ops-01 Exercise 3, compare EXPLAIN estimated rows before/after ANALYZE for a correlated predicate, retain actual counts as control, and do not claim extended statistics replace ordinary column statistics.</li>
 </ul>
-<h4 id="solution-1--exercise-4-lifecycle-review">Exercise 4 — Lifecycle review<a class="heading-anchor" href="#solution-1--exercise-4-lifecycle-review" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-lifecycle-review">Exercise 4 - Lifecycle review<a class="heading-anchor" href="#solution-1--exercise-4-lifecycle-review" aria-label="Link to this section">#</a></h4>
 <p>The solution inventories size, scans, predicate, uniqueness, and primary-key ownership. A real decision also records stats-reset/restart time, full workload cycle, replica usage, query regressions, write amplification, and rollback evidence. Constraint-owned indexes are not casual drop candidates.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1028,7 +1034,7 @@ WHERE severity &gt;= 4;</code></pre>
 <li><strong>Expected result/shape:</strong> For sql-ops-01 Exercise 4, expected output: one row per index ordered by <code>index_name</code>, including the primary and partial covering indexes.</li>
 <li><strong>Independent verification:</strong> For sql-ops-01 Exercise 4, reconcile index identities with <code>pg_index</code>, record workload observation window and stats reset, and require query/constraint/replica evidence before any reviewed drop; zero scans alone is never sufficient.</li>
 </ul>
-<h4 id="solution-1--exercise-5-maintenance">Exercise 5 — Maintenance<a class="heading-anchor" href="#solution-1--exercise-5-maintenance" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-maintenance">Exercise 5 - Maintenance<a class="heading-anchor" href="#solution-1--exercise-5-maintenance" aria-label="Link to this section">#</a></h4>
 <p>VACUUM makes dead tuple space reusable, advances freeze safety, and updates visibility. ANALYZE samples values for estimates. Autovacuum triggers each using table-size/change thresholds and can be tuned per table after measurement. Ordinary VACUUM usually does not shrink the relation file; <code>VACUUM FULL</code> rewrites and locks, so it is exceptional maintenance.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1036,7 +1042,7 @@ WHERE severity &gt;= 4;</code></pre>
 <li><strong>Expected result/shape:</strong> For sql-ops-01 Exercise 5, expected output: four ordered rows with <code>command</code>, <code>evidence_domain</code>, <code>primary_effect</code>, and <code>important_limit</code>; the lesson executes no VACUUM inside its transaction.</li>
 <li><strong>Independent verification:</strong> For sql-ops-01 Exercise 5, compare each matrix row with observed dead-tuple/freeze/visibility or estimate evidence, assert the command&#x27;s stated effect and limit, and require a lock/rewrite test result before VACUUM FULL.</li>
 </ul>
-<h4 id="solution-1--exercise-6-statement-statistics">Exercise 6 — Statement statistics<a class="heading-anchor" href="#solution-1--exercise-6-statement-statistics" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-statement-statistics">Exercise 6 - Statement statistics<a class="heading-anchor" href="#solution-1--exercise-6-statement-statistics" aria-label="Link to this section">#</a></h4>
 <p>A safe <code>pg_stat_statements</code> plan requires approved preload/extension ownership, restricted view access, retention/reset rules, normalized <code>queryid</code> analysis, and redaction awareness. Do not expose raw query text by default; literals can contain confidential values. This course does not enable the extension or alter <code>shared_preload_libraries</code>.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1044,7 +1050,7 @@ WHERE severity &gt;= 4;</code></pre>
 <li><strong>Expected result/shape:</strong> For sql-ops-01 Exercise 6, expected output: exactly one capability-state row plus four privacy controls with owner; all host states produce a safe result or SAFE SKIP.</li>
 <li><strong>Independent verification:</strong> For sql-ops-01 Exercise 6, test absent and installed/preload variants where available, distinguish capability from permission, and require restricted access, redaction, bounded retention, and aggregate-only exports before production use.</li>
 </ul>
-<h4 id="solution-1--exercise-7-redundancy-is-a-hypothesis">Exercise 7 — Redundancy is a hypothesis<a class="heading-anchor" href="#solution-1--exercise-7-redundancy-is-a-hypothesis" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-7-redundancy-is-a-hypothesis">Exercise 7 - Redundancy is a hypothesis<a class="heading-anchor" href="#solution-1--exercise-7-redundancy-is-a-hypothesis" aria-label="Link to this section">#</a></h4>
 <p>Compare index key attributes in order, INCLUDE columns, predicate, <code>indisunique</code>/constraint ownership, expressions, collations, sort direction, NULL ordering, and operator classes. A left-prefix match can produce a review candidate, but a differently ordered, partial, unique, or specialized index is not equivalent.</p>
 <p>Then inspect representative plans and a full workload observation window on primary and replicas. Output a candidate report with evidence and owner; never generate/drop automatically from catalog similarity or one zero scan count.</p>
 <h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
@@ -1053,7 +1059,7 @@ WHERE severity &gt;= 4;</code></pre>
 <li><strong>Expected result/shape:</strong> For sql-ops-01 Exercise 7, expected output: one row per events index ordered by <code>index_name</code>, with key and included attributes separated using <code>indnkeyatts</code>.</li>
 <li><strong>Independent verification:</strong> For sql-ops-01 Exercise 7, compare semantic properties rather than similar SQL text or names, account for constraints and replicas, and emit candidates for human review without automatically dropping anything.</li>
 </ul>
-<h4 id="solution-1--exercise-8-expression-index-and-collation">Exercise 8 — Expression index and collation<a class="heading-anchor" href="#solution-1--exercise-8-expression-index-and-collation" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-8-expression-index-and-collation">Exercise 8 - Expression index and collation<a class="heading-anchor" href="#solution-1--exercise-8-expression-index-and-collation" aria-label="Link to this section">#</a></h4>
 <p>An index on <code>lower(device_name) COLLATE ...</code> helps a query only when its expression/operator/collation is compatible. PostgreSQL will not infer every semantically similar spelling. The function must be index-safe (IMMUTABLE from the database&#x27;s perspective).</p>
 <p>Record the normalization and collation contract. Provider/version changes can invalidate ordering assumptions and require review/reindex. A generated normalized column is often clearer when many writers/queries must share and inspect the exact transformed value.</p>
 <h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
@@ -1062,7 +1068,7 @@ WHERE severity &gt;= 4;</code></pre>
 <li><strong>Expected result/shape:</strong> For sql-ops-01 Exercise 8, expected output: one plan followed by the first ten deterministic <code>(event_id, device_id)</code> rows matching device-007.</li>
 <li><strong>Independent verification:</strong> For sql-ops-01 Exercise 8, compare expression trees and collation/operator semantics, assert all displayed device IDs normalize to device-007, and show that a different expression need not use this index.</li>
 </ul>
-<h4 id="solution-1--exercise-9-hot-and-dead-tuples">Exercise 9 — HOT and dead tuples<a class="heading-anchor" href="#solution-1--exercise-9-hot-and-dead-tuples" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-9-hot-and-dead-tuples">Exercise 9 - HOT and dead tuples<a class="heading-anchor" href="#solution-1--exercise-9-hot-and-dead-tuples" aria-label="Link to this section">#</a></h4>
 <p>HOT can avoid new index entries when no indexed column changes and the same heap page has room. Lower fillfactor may reserve that room at a storage/scan cost. Updating an indexed value, a full page, or an incompatible chain prevents HOT.</p>
 <p>Use before/after stats with a controlled workload and account for asynchronous collector visibility and reset time. Long transactions retain old tuple versions; vacuum may run yet be unable to remove them. Tune from measured table behavior, not one universal dead-tuple percentage.</p>
 <h5 id="solution-1--reasoning-and-verification-9">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-9" aria-label="Link to this section">#</a></h5>
@@ -1071,7 +1077,7 @@ WHERE severity &gt;= 4;</code></pre>
 <li><strong>Expected result/shape:</strong> For sql-ops-01 Exercise 9, expected output: a transaction-local row reporting 100 updates and the observed HOT subset, plus a separate cumulative stats row that may lag.</li>
 <li><strong>Independent verification:</strong> For sql-ops-01 Exercise 9, assert the xact update count rather than the asynchronous cumulative value, treat HOT rate as observational, and relate it to indexed columns, tuple size/page space, and vacuum horizons.</li>
 </ul>
-<h4 id="solution-1--exercise-10-partitioned-indexing">Exercise 10 — Partitioned indexing<a class="heading-anchor" href="#solution-1--exercise-10-partitioned-indexing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-10-partitioned-indexing">Exercise 10 - Partitioned indexing<a class="heading-anchor" href="#solution-1--exercise-10-partitioned-indexing" aria-label="Link to this section">#</a></h4>
 <p>Partition pruning removes irrelevant children when bounds can be inferred. Indexes and statistics are physically per partition even when declared through the partitioned parent; verify new/attached partitions and analyze data distribution individually.</p>
 <p>PostgreSQL has no general global index spanning partitions, so global uniqueness normally must include the partition key or use another design. Plan index build, attach validation, locks, detached-partition queries, and lifecycle automation.</p>
 <h5 id="solution-1--reasoning-and-verification-10">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-10" aria-label="Link to this section">#</a></h5>
@@ -1080,7 +1086,7 @@ WHERE severity &gt;= 4;</code></pre>
 <li><strong>Expected result/shape:</strong> For sql-ops-01 Exercise 10, expected output: an EXPLAIN plan naming only the February partition, one matching row, three <code>pg_partition_tree</code> rows with bounds, and two child-index catalog rows derived from the parent partitioned index.</li>
 <li><strong>Independent verification:</strong> For sql-ops-01 Exercise 10, assert the query result independently, inspect child indexes and bounds, prove January is pruned, and state that cross-partition uniqueness normally includes the partition key because PostgreSQL has no general global index.</li>
 </ul>
-<h4 id="solution-1--exercise-11-reading-plan-instrumentation-safely">Exercise 11 — Reading plan instrumentation safely<a class="heading-anchor" href="#solution-1--exercise-11-reading-plan-instrumentation-safely" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-11-reading-plan-instrumentation-safely">Exercise 11 - Reading plan instrumentation safely<a class="heading-anchor" href="#solution-1--exercise-11-reading-plan-instrumentation-safely" aria-label="Link to this section">#</a></h4>
 <p>Plain EXPLAIN estimates without executing. EXPLAIN ANALYZE executes and adds actual timing/rows; BUFFERS shows cache/I/O counters, WAL shows generated WAL, and TIMING can add measurable overhead. A data-changing statement really changes data unless isolated and rolled back.</p>
 <p>Compare cold/warm cache, parameters, concurrency, row counts, server settings, and repeated runs. Planning/execution time in one tiny transaction is evidence about that setup, not a production capacity claim.</p>
 <h5 id="solution-1--reasoning-and-verification-11">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-11" aria-label="Link to this section">#</a></h5>
@@ -1089,7 +1095,7 @@ WHERE severity &gt;= 4;</code></pre>
 <li><strong>Expected result/shape:</strong> For sql-ops-01 Exercise 11, expected output: one plan, one scalar <code>matching_rows</code> control, and three statement-class warnings; ANALYZE is execution, not hypothetical planning.</li>
 <li><strong>Independent verification:</strong> For sql-ops-01 Exercise 11, reconcile plan actual rows with the scalar control, label cache/fixture effects, and require rollback-only disposable targets before EXPLAIN ANALYZE on INSERT/UPDATE/DELETE.</li>
 </ul>
-<h4 id="solution-1--exercise-12-owned-maintenance-scorecard">Exercise 12 — Owned maintenance scorecard<a class="heading-anchor" href="#solution-1--exercise-12-owned-maintenance-scorecard" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-12-owned-maintenance-scorecard">Exercise 12 - Owned maintenance scorecard<a class="heading-anchor" href="#solution-1--exercise-12-owned-maintenance-scorecard" aria-label="Link to this section">#</a></h4>
 <p>Track semantic signals: relation/index growth, dead/live tuples, last analyze, invalid indexes, long transactions, lock waits, WAL/replica lag, query latency, and error/regression evidence. Attach source, observation window, reset state, budget, owner, runbook, and review cadence to each.</p>
 <p>Thresholds depend on workload and capacity. Use trends and service objectives, define warning/critical escalation, suppress known maintenance windows carefully, and require human review before invasive maintenance.</p>
 <h5 id="solution-1--reasoning-and-verification-12">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-12" aria-label="Link to this section">#</a></h5>
@@ -1138,7 +1144,7 @@ WHERE severity &gt;= 4;</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- SQL-OPS-01 executable solutions</span>
-<span>-- SOLUTION READING MAP — sql-ops-01: Index Types, Statistics, and Maintenance Lifecycle</span>
+<span>-- SOLUTION READING MAP - sql-ops-01: Index Types, Statistics, and Maintenance Lifecycle</span>
 <span>-- Explanation: sql/professional/solutions/sql_ops_01_indexes_statistics_maintenance_solutions.md</span>
 <span>-- Run from the repository root only against advanced_sql_training:</span>
 <span>--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_ops_01_indexes_statistics_maintenance_solutions.sql</span>
@@ -1639,7 +1645,7 @@ WHERE severity &gt;= 4;</code></pre>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-ops-01 — Index Types, Statistics, and Maintenance Lifecycle.
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-ops-01 - Index Types, Statistics, and Maintenance Lifecycle.
 
 I have completed the direct catalog prerequisites: `sql-35`, `sql-types-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_ops_01_indexes_statistics_maintenance.md
@@ -1690,11 +1696,24 @@ transfer task that I answer without looking back. Done when I can explain the ro
     const LEARNER_PATH = "sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql";
     const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
     const SERVER_TOKEN = "";
+    const LAB_MODE = false;
     const launcherMode = Boolean(
       SERVER_TOKEN &&
+      !LAB_MODE &&
       location.protocol === "http:" &&
       location.hostname === "127.0.0.1"
     );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
 
     document.documentElement.classList.add("tabs-ready");
     const panels = [...document.querySelectorAll("[data-panel]")];

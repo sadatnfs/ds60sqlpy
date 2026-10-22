@@ -176,7 +176,7 @@ if course_url.database != &quot;advanced_sql_training&quot;:
 
 psycopg_url = course_url.set(drivername=&quot;postgresql+psycopg&quot;)
 engine = create_engine(psycopg_url, pool_pre_ping=True)</code></pre>
-<p>It then loads the extension and passes the engine object—not a password-bearing string—to the magic:</p>
+<p>It then loads the extension and passes the engine object - not a password-bearing string - to the magic:</p>
 <pre><code class="language-text">%load_ext sql
 %config SqlMagic.displaycon = False
 %sql engine --alias ds60-course</code></pre>
@@ -202,12 +202,12 @@ engine = create_engine(psycopg_url, pool_pre_ping=True)</code></pre>
 <p>After packages and PostgreSQL are installed, the notebook needs no internet connection. The database server must still be running locally. Structural validation does not prove live authentication; execute the solution notebook top to bottom against the disposable database for that evidence.</p>
 <h3 id="common-failures">Common failures<a class="heading-anchor" href="#common-failures" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><strong><code>No module named sql</code></strong> — install the <code>sql-notebooks</code> extra in the selected kernel and restart it.</li>
-<li><strong><code>Line magic function %sql not found</code></strong> — run <code>%load_ext sql</code>; also check that no local file named <code>sql.py</code> shadows the extension.</li>
-<li><strong><code>No module named psycopg2</code></strong> — use the explicit <code>postgresql+psycopg://</code> URL for the course&#x27;s Psycopg 3 dependency.</li>
-<li><strong>Connection refused</strong> — start PostgreSQL and check host and port.</li>
-<li><strong>Authentication failed</strong> — verify the local role without displaying the password.</li>
-<li><strong>Queries affect more rows than expected</strong> — stop, confirm the database is <code>advanced_sql_training</code>, and restore the lesson&#x27;s bounded/read-only setup.</li>
+<li><strong><code>No module named sql</code></strong> - install the <code>sql-notebooks</code> extra in the selected kernel and restart it.</li>
+<li><strong><code>Line magic function %sql not found</code></strong> - run <code>%load_ext sql</code>; also check that no local file named <code>sql.py</code> shadows the extension.</li>
+<li><strong><code>No module named psycopg2</code></strong> - use the explicit <code>postgresql+psycopg://</code> URL for the course&#x27;s Psycopg 3 dependency.</li>
+<li><strong>Connection refused</strong> - start PostgreSQL and check host and port.</li>
+<li><strong>Authentication failed</strong> - verify the local role without displaying the password.</li>
+<li><strong>Queries affect more rows than expected</strong> - stop, confirm the database is <code>advanced_sql_training</code>, and restore the lesson&#x27;s bounded/read-only setup.</li>
 </ul>
 <p>See <a href="../troubleshooting.md.html">Troubleshooting</a> for the general environment and PostgreSQL checks.</p></article>
   </main>

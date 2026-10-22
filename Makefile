@@ -1,9 +1,10 @@
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 
-.PHONY: help setup generate check lab mcp app docker docker-stop docker-status
+.PHONY: help setup generate check lab mcp app windows-starter docker docker-stop docker-status
 help:
 	@echo "setup: install learner environment; lab: open coding lab; app: build native executable"
-	@echo "generate: refresh catalog/readers/reports; check: validate; docker: build browser lab"
+	@echo "generate: refresh catalog/readers/reports; check: validate; docker: build and start lab"
+	@echo "windows-starter: package the complete double-click Windows starter ZIP"
 
 setup:
 	bash scripts/setup.sh
@@ -27,6 +28,9 @@ mcp:
 
 app: generate
 	$(PYTHON) scripts/build_app.py
+
+windows-starter: generate
+	$(PYTHON) scripts/build_windows_starter.py
 
 docker:
 	bash scripts/docker_lab.sh start --build

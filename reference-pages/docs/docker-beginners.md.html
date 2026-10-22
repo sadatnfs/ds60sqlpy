@@ -160,34 +160,30 @@
 <h3 id="2-install-one-local-container-engine">2. Install one local container engine<a class="heading-anchor" href="#2-install-one-local-container-engine" aria-label="Link to this section">#</a></h3>
 <p>Choose the instructions for your operating system. You need a working <strong>Docker CLI</strong>, <strong>Docker API</strong>, and <strong>Compose v2</strong>. Docker Desktop bundles these components. Docker Engine users install the Compose plugin separately. <a href="https://docs.docker.com/compose/install/">Docker&#x27;s Compose installation guide</a> explains that distinction.</p>
 <p>Rancher Desktop with <strong>dockerd (moby)</strong> is also suitable. Its Moby engine exposes the Docker API; its containerd choice uses a different command-line workflow. The repository&#x27;s actual macOS container verification used Rancher Desktop with Moby. Other operating-system installation steps below follow vendor documentation and include checks you can perform locally. <a href="https://docs.rancherdesktop.io/ui/preferences/container-engine/general/">Rancher&#x27;s engine documentation</a> explains the engine choices.</p>
-<h4 id="windows-install-or-update-wsl-2-first">Windows: install or update WSL 2 first<a class="heading-anchor" href="#windows-install-or-update-wsl-2-first" aria-label="Link to this section">#</a></h4>
-<p>WSL means Windows Subsystem for Linux. WSL 2 supplies the Linux environment used by the desktop container engine. You can keep using Windows PowerShell and a normal Windows folder for this course; you do not have to learn an Ubuntu terminal first.</p>
+<h4 id="windows-start-with-the-first-run-wizard">Windows: start with the first-run wizard<a class="heading-anchor" href="#windows-start-with-the-first-run-wizard" aria-label="Link to this section">#</a></h4>
+<p>For a new Windows computer, begin with the course ZIP and its launcher. You do not need to install Python or Git, open Ubuntu, or type Docker commands first. The guided fresh installation targets supported <strong>Windows 11 x64</strong> machines. An existing compatible local engine can be reused without reinstalling it. Use an internet connection for initial downloads; other architectures or managed installation policies use the manual vendor/IT route below.</p>
 <ol>
-<li>Check the current <a href="https://docs.docker.com/desktop/setup/install/windows-install/">Docker Desktop Windows requirements</a> before downloading. Use a currently supported Windows version with hardware virtualization available. On an organization-managed machine, use its approved installation route if administrator access is controlled.</li>
-<li>Open the Start menu, type <strong>PowerShell</strong>, right-click it, and choose <strong>Run as administrator</strong> for this installation step.</li>
-<li>If WSL is not installed, run:</li>
+<li>Download the supplied <strong><code>DS60LearningLab-0.3.0-Windows-Starter.zip</code><strong>. Alternatively, use </strong>Code<strong>, then </strong>Download ZIP</strong> on a <a href="https://github.com/sadatnfs/ds60sqlpy">repository version</a> that includes <code>START_DOCKER_LAB.cmd</code> and <code>scripts/start_docker_windows.ps1</code>. Sign in if repository access requires it.</li>
+<li>In File Explorer, right-click the ZIP and choose <strong>Extract All</strong>. Extract the complete course into a normal user-owned folder. Open the extracted folder containing <code>README.md</code>, <code>compose.yaml</code>, and <code>scripts</code>.</li>
+<li>Double-click <strong><code>START_DOCKER_LAB.cmd</code></strong>. Do this from the extracted folder, not from the compressed ZIP preview. Keep the setup window open so you can read its progress and any instruction.</li>
+<li>The first-run wizard inspects the local runtime. If a compatible engine is already ready, it uses it and starts the lab. If setup is missing, it offers the supported installation path and asks before installing software. For the recommended fresh setup, type <code>R</code> for Rancher Desktop, then type <code>Y</code> only when you approve the described installation. <code>D</code> selects Docker Desktop; pressing Enter at the choice cancels without installing.</li>
+<li>If Windows requests administrator approval, approve only the installation or WSL action you chose. If a restart is required, save other work, restart Windows yourself, and double-click the <strong>same</strong> <code>START_DOCKER_LAB.cmd</code> again. It rechecks what is installed and continues from the current machine state. The wizard does not force a restart.</li>
+<li>Once the engine and app are ready, the browser opens at the printed local address, normally <code>http://127.0.0.1:8765/learn</code>. Continue with <a href="#5-get-one-python-result-and-one-sql-result">your first Python and SQL results</a>.</li>
 </ol>
-<pre><code class="language-powershell">   wsl --install</code></pre>
-<ol>
-<li>Restart Windows if requested. If an Ubuntu window opens, complete its first-run username/password prompts. That Linux password is separate from your Windows password and the course database password. Password characters may not appear while you type.</li>
-<li>In PowerShell, update and inspect WSL:</li>
-</ol>
-<pre><code class="language-powershell">   wsl --update
-   wsl --version
-   wsl -l -v</code></pre>
-<p>A listed Linux distribution should show <code>2</code> in the <code>VERSION</code> column. If an existing distribution shows <code>1</code>, use its exact displayed name in <code>wsl --set-version NAME 2</code>, replacing <code>NAME</code>. Do not convert or remove a distribution you use for other work without preserving that work.</p>
-<p>Microsoft documents the installation and reboot sequence in <a href="https://learn.microsoft.com/en-us/windows/wsl/install">Install WSL</a> and the inspection/update commands in <a href="https://learn.microsoft.com/en-us/windows/wsl/reference">Basic WSL commands</a>. If WSL reports that virtualization is unavailable, follow that installation page&#x27;s troubleshooting guidance for your hardware rather than repeatedly reinstalling the course.</p>
-<p>Then install <strong>one</strong> desktop engine:</p>
-<ul>
-<li><strong>Docker Desktop:</strong> download its Windows installer from the official page, run it, and start Docker Desktop from the Start menu. Use Linux containers and its WSL 2 engine. If the WSL option is shown in settings, enable it and apply the change. Docker documents this in its <a href="https://docs.docker.com/desktop/features/wsl/">WSL 2 backend guide</a>.</li>
-<li><strong>Rancher Desktop:</strong> use its <a href="https://docs.rancherdesktop.io/getting-started/installation/">official installer</a>, start the application, and select <strong>dockerd (moby)</strong> under Container Engine. Kubernetes is not required for this course.</li>
-</ul>
-<p>Wait for the engine to report that it is ready. Installing an application and having its engine running are different steps. Choose one Windows workflow:</p>
-<ul>
-<li><strong>Recommended for a Linux-based course workspace:</strong> open Ubuntu from the Start menu, enable its engine integration, and keep the repository in your Linux home folder. Follow the <a href="#9-recommended-windows-wsl-2-terminal-workflow">WSL terminal steps</a> below and use the Bash command blocks.</li>
-<li><strong>Native Windows alternative:</strong> open a new ordinary PowerShell window and keep the checkout in a normal Windows folder. Use the PowerShell blocks and <code>START_DOCKER_LAB.cmd</code>. Docker Desktop still uses its WSL 2 engine; it does not require a particular user Linux distribution for this route.</li>
-</ul>
-<p>Keep one choice for a session so paths and saved work stay easy to locate.</p>
+<p>This is one entry point for setup and later starts. Windows can still require installation consent, its administrator prompt, or a reboot before containers can run. WSL installation runs in an elevated child process when needed; the desktop engine and browser start in your original user session. Missing hardware virtualization or organization-managed installation restrictions need the machine owner&#x27;s normal setup process; the course cannot change firmware or bypass a policy.</p>
+<p>The recommended fresh Windows engine is <strong>Rancher Desktop</strong> with <strong>dockerd (moby)</strong> and Kubernetes disabled. Fresh configuration is applied only after you choose that installation. After a requested reboot, a newly installed, unused Rancher application may ask separately to initialize those settings; approve that step only when it matches your choice. An already initialized or uncertain existing profile is left unchanged and may need its normal first-run UI completed manually. Docker Desktop with its WSL 2 backend is another choice; its guided Windows 11 installation requires version 23H2 (build 22631) or newer and a release still supported by Microsoft, plus the <a href="https://docs.docker.com/desktop/setup/install/windows-install/">current Docker hardware requirements</a>. An existing engine, its workloads, and its saved learning data are preserved; installing another engine is not a required step when a compatible local engine already works.</p>
+<p>WSL means Windows Subsystem for Linux. Its version 2 provides the Linux backend for the desktop engine. The wizard&#x27;s WSL installation uses <code>--no-distribution</code>, so this Windows-folder route does not require an Ubuntu account or Linux terminal. If you already prefer a Linux-local checkout, the <a href="#9-recommended-windows-wsl-2-terminal-workflow">optional WSL terminal workflow</a> remains available after setup.</p>
+<p>If WinGet, Microsoft&#x27;s application installer command, is unavailable or blocked, use the official installer guidance shown by the wizard, then rerun the same course launcher. Use your organization&#x27;s approved engine on managed machines. The launcher does not delete database volumes, reset WSL distributions, or replace an existing <code>.learning</code> folder to repair setup.</p>
+<p>For read-only troubleshooting, the wizard also has a diagnostic mode:</p>
+<pre><code class="language-powershell">powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start_docker_windows.ps1 -DiagnosticsOnly</code></pre>
+<p>It reports readiness without installing software or starting the course. Keep the output if you need help with the first failing prerequisite. It does not require you to reveal a database password.</p>
+<h5 id="manual-windows-setup-alternative">Manual Windows setup alternative<a class="heading-anchor" href="#manual-windows-setup-alternative" aria-label="Link to this section">#</a></h5>
+<p>For manual installation or an IT-managed machine, use the current <a href="https://docs.docker.com/desktop/setup/install/windows-install/">Docker Desktop Windows requirements</a> or <a href="https://docs.rancherdesktop.io/getting-started/installation/">Rancher Desktop installation instructions</a>. WSL setup and its possible reboot are documented by <a href="https://learn.microsoft.com/en-us/windows/wsl/install">Microsoft</a>. A manual WSL installation can be started from PowerShell opened with <strong>Run as administrator</strong>:</p>
+<pre><code class="language-powershell">wsl --install --no-distribution</code></pre>
+<p>Restart when requested. Use an ordinary PowerShell window to inspect/update WSL, or follow the installer if it requests elevation for an update:</p>
+<pre><code class="language-powershell">wsl --update
+wsl --version</code></pre>
+<p>Start the selected desktop engine and wait for it to become ready. Rancher Desktop users choose Moby; Docker Desktop users use Linux containers with its <a href="https://docs.docker.com/desktop/features/wsl/">WSL 2 engine</a>. Then rerun <code>START_DOCKER_LAB.cmd</code>. Keep a native Windows checkout in a Windows folder; choose a separate Linux-home checkout only when following the optional WSL terminal instructions. <a href="https://learn.microsoft.com/en-gb/windows/package-manager/winget/">WinGet documentation</a> explains the application-installation tool used when it is available.</p>
 <h4 id="macos-install-and-start-the-desktop-engine">macOS: install and start the desktop engine<a class="heading-anchor" href="#macos-install-and-start-the-desktop-engine" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Apple menu and <strong>About This Mac</strong>. Note whether it says an Apple chip such as M1/M2/M3 or an Intel processor.</li>
@@ -241,7 +237,7 @@ ls compose.yaml</code></pre>
 <li><strong>macOS:</strong> double-click <code>START_DOCKER_LAB.command</code>. If you prefer Terminal, use the command below.</li>
 <li><strong>Linux:</strong> use the terminal command below from the repository root.</li>
 </ul>
-<p>Windows PowerShell alternative:</p>
+<p>The double-click Windows launcher includes first-run setup. The following PowerShell command is the <strong>runtime-only</strong> alternative for an engine that is already configured and running:</p>
 <pre><code class="language-powershell">powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 start</code></pre>
 <p>macOS/Linux alternative:</p>
 <pre><code class="language-bash">bash scripts/docker_lab.sh start</code></pre>
@@ -270,7 +266,7 @@ docker compose --project-name ds60-learning --profile lab up --build --detach</c
 <h3 id="5-get-one-python-result-and-one-sql-result">5. Get one Python result and one SQL result<a class="heading-anchor" href="#5-get-one-python-result-and-one-sql-result" aria-label="Link to this section">#</a></h3>
 <p>In the browser&#x27;s left sidebar, enter <code>python-01</code> under <strong>Or open a stable lesson ID</strong>, then choose <strong>Open lesson</strong>. The guide appears beside the coding pad.</p>
 <ol>
-<li>Keep <strong>Backend</strong> set to <strong>Python</strong>.</li>
+<li>Keep <strong>Workspace</strong> set to <strong>Python</strong>.</li>
 <li>In <strong>Your code</strong>, enter:</li>
 </ol>
 <pre><code class="language-python">   print(2 + 3)</code></pre>
@@ -278,11 +274,12 @@ docker compose --project-name ds60-learning --profile lab up --build --detach</c
 <li>Choose <strong>Run code</strong>. The output should contain <code>5</code> and a successful exit.</li>
 <li>Choose <strong>Save pad</strong>. In <strong>Work the idea through</strong>, write a short prediction or observation and choose <strong>Save evidence</strong>.</li>
 </ol>
-<p>Now open <code>sql-start-01</code> in the same sidebar. With <strong>PostgreSQL</strong> selected as Backend, enter:</p>
+<p>Now open <code>sql-start-01</code> in the same sidebar. Choose <strong>PostgreSQL</strong> under <strong>Workspace</strong>, then choose <strong>SQL snippet</strong> under <strong>Mode</strong>. Enter:</p>
 <pre><code class="language-sql">SELECT current_database() AS database_name, 2 + 3 AS first_result;</code></pre>
 <p>Choose <strong>Run code</strong>. Expect one row containing <code>advanced_sql_training</code> and <code>5</code>. This first query needs no seed or reset. Choose <strong>Save pad</strong>.</p>
-<p>For the full beginner lesson, choose <strong>Load lesson starter</strong> and run its complete temporary-table fixture in one submission. It ends in <code>ROLLBACK</code>. Later historical lessons that need seeded tables use <strong>Prepare the disposable SQL training data</strong>, then <strong>Reset and verify training schema</strong>. Read the notice and type <code>RESET TRAINING</code> only when you want to replace the course-owned training schema. That reset preserves saved pads and progress; it does replace SQL training data. Use only the disposable course database.</p>
+<p>For the full beginner lesson, switch <strong>Mode</strong> to <strong>Whole SQL lesson (psql)</strong>, choose <strong>Load lesson starter</strong>, and run its complete temporary-table fixture in one submission. Keep the fixed script directives intact. It ends in <code>ROLLBACK</code>. Later historical lessons that need seeded tables use <strong>Prepare the disposable SQL training data</strong>, then <strong>Reset and verify training schema</strong>. Read the notice and type <code>RESET TRAINING</code> only when you want to replace the course-owned training schema. That reset preserves saved pads and progress; it does replace SQL training data. Use only the disposable course database.</p>
 <p>Choose a learning goal and <strong>Build my route</strong> when you are ready for the ordered lessons. Completion is your confirmed evidence, not an automatic award for opening the page or running these two checks.</p>
+<p>Python notebook starters retain <code># %%</code> cell boundaries. One Run executes their cells in order with shared names, while the next Run starts a fresh process. Keep dependent cells together. <code>%timeit</code> and <code>%%sql</code> use the notebook-aware backend; the Docker Core image includes IPython. <strong>Run limit</strong> offers 15, 60, or 120 seconds. For heavier packages, build the <a href="docker-profiles.md.html">optional Docker profiles</a> before studying offline.</p>
 <h3 id="6-find-the-host-files-that-preserve-your-work">6. Find the host files that preserve your work<a class="heading-anchor" href="#6-find-the-host-files-that-preserve-your-work" aria-label="Link to this section">#</a></h3>
 <p>The launcher&#x27;s default learning folder is <strong><code>.learning</code> inside your course folder</strong>. It is bind-mounted as <code>/workspace/.learning</code> inside the app container. The container path and host path name the same saved files. A bind mount persists because the files live in your own folder, independently of a particular container.</p>
 <div class="table-wrap"><table><thead><tr>

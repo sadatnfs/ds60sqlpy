@@ -1,4 +1,4 @@
-# Day 9 — Modules, Packages, Imports, and `__main__`
+# Day 9 - Modules, Packages, Imports, and `__main__`
 
 **Level:** Beginner
 
@@ -54,12 +54,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 9 — modules, packages, imports, and `__main__` to practice modules, package namespaces, imports, and safe entry points
+**Lesson outcome:** use day 9 - modules, packages, imports, and `__main__` to practice modules, package namespaces, imports, and safe entry points
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive - build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -92,7 +92,7 @@ executing a nested file often does not. The `if __name__ ==
 visible ownership at each call. In a module, `__name__` equals
 `"__main__"` only when that module is the executed entry point.
 
-### Worked example 1 — Compare module and attribute imports
+### Worked example 1 - Compare module and attribute imports
 
 Both styles work; the module-qualified call preserves origin. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -114,7 +114,7 @@ values = [2, 3, 100]
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Observe the import cache
+### Worked example 2 - Observe the import cache
 
 Repeated imports normally return the same module object. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -280,7 +280,7 @@ does not run a CLI, and module execution uses the intended entry point.
 
 - [Open the learner notebook](../notebooks/day09_modules_packages.ipynb)
 - [Check the separate solution](../solutions/day09_modules_packages/day09_solutions.md)
-- [Next: Day 10 — Testing with pytest](day10_testing_pytest.md)
+- [Next: Day 10 - Testing with pytest](day10_testing_pytest.md)
 
 ## Ask Codex about this lesson
 

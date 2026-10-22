@@ -239,8 +239,8 @@ def _cataloged_sql_source(
         lesson = catalog.get(lesson_id)
     except KeyError as exc:
         raise SqlNotebookError(str(exc)) from exc
-    if lesson.track != "sql":
-        raise SqlNotebookError(f"Lesson is not in the SQL track: {lesson_id}")
+    if lesson.runner != "sql":
+        raise SqlNotebookError(f"Lesson does not use the SQL runner: {lesson_id}")
     if not LESSON_ID_PATTERN.fullmatch(lesson.id):
         raise SqlNotebookError(f"SQL lesson has an unsafe catalog ID: {lesson.id!r}")
     if artifact_kind == "lesson":
@@ -749,7 +749,7 @@ def _notebook_document(
                     "psql",
                     "sql",
                 ],
-                "track": "sql",
+                "track": lesson.track,
             },
             "kernelspec": {
                 "display_name": "Python (ds60sqlpy)",
@@ -998,8 +998,14 @@ def _copy_relative_include_dependencies(
 def _validate_workspace_meta_commands(
     catalog: Catalog,
     workspace: SqlNotebookWorkspace,
+    submitted_code: str | None = None,
 ) -> None:
-    if _meta_command_segments(workspace.sql_path) != _meta_command_segments(workspace.source_path):
+    segments = (
+        _meta_command_segments(workspace.sql_path)
+        if submitted_code is None
+        else _psql_meta_segments(submitted_code)
+    )
+    if segments != _meta_command_segments(workspace.source_path):
         raise SqlNotebookError(
             "The editable SQL copy changed a psql meta-command. Restore the "
             "cataloged meta-command segments; edit SQL exercises only."
@@ -1191,8 +1197,11 @@ def prepare_sql_workspace(
 
     predecessors = (
         candidate
-        for candidate in catalog.lessons("sql")
-        if candidate.stateful_group == lesson.stateful_group and candidate.day < lesson.day
+        for candidate in catalog
+        if candidate.runner == "sql"
+        and candidate.track == lesson.track
+        and candidate.stateful_group == lesson.stateful_group
+        and candidate.day < lesson.day
     )
     for predecessor in predecessors:
         predecessor_path = catalog.resolve(predecessor.lesson_path)
@@ -1207,13 +1216,15 @@ def prepare_sql_workspace(
     return tuple(runs)
 
 
-def run_sql_workspace(
+def validate_sql_workspace(
     catalog: Catalog,
     lesson_id: str,
     artifact_kind: SqlArtifactKind = "lesson",
     solution_index: int = 1,
-) -> SqlNotebookRun:
-    """Run only the computed learner-local SQL copy for a cataloged artifact."""
+    *,
+    submitted_code: str | None = None,
+) -> SqlNotebookWorkspace:
+    """Validate a computed working copy and fixed includes without executing it."""
 
     workspace = _workspace_for(
         catalog,
@@ -1231,7 +1242,19 @@ def run_sql_workspace(
             "The generated SQL working copy is missing or unsafe. Reopen the "
             "cataloged artifact from the course portal."
         )
-    _validate_workspace_meta_commands(catalog, workspace)
+    _validate_workspace_meta_commands(catalog, workspace, submitted_code)
+    return workspace
+
+
+def run_sql_workspace(
+    catalog: Catalog,
+    lesson_id: str,
+    artifact_kind: SqlArtifactKind = "lesson",
+    solution_index: int = 1,
+) -> SqlNotebookRun:
+    """Run only the computed learner-local SQL copy for a cataloged artifact."""
+
+    workspace = validate_sql_workspace(catalog, lesson_id, artifact_kind, solution_index)
     return _run_psql(
         catalog,
         workspace.sql_path,

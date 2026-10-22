@@ -166,14 +166,14 @@ python scripts/build_sql_lesson_notebook.py sql-01 --artifact solution</code></p
             └── workspace/sql/postgres-60day/solutions/day01_solutions.sql</code></pre>
 <p>The notebook follows this learning sequence:</p>
 <ol>
-<li><strong>Goal and three-program mental model</strong> — identifies the lesson, guide, official source, editable copy, and the separate roles of Jupyter, Python, <code>psql</code>, and the PostgreSQL server.</li>
-<li><strong>Before-you-run checklist</strong> — confirms the selected course kernel, local tools, disposable database name, and the difference between reading and execution.</li>
-<li><strong>Secret-free readiness</strong> — locates the repository, validates the database target, and explains each pass, warning, or failure.</li>
-<li><strong>Study and edit</strong> — renders the official SQL for comparison and points to the preserved editable copy.</li>
-<li><strong>Explicit preparation</strong> — requires the learner to confirm the destructive reset switch before preparing the course schema.</li>
-<li><strong>Run and inspect</strong> — executes the complete copy through fixed <code>psql -f</code>, then teaches the learner to read the exit status, transcript, result columns, row grain, counts, and ordering.</li>
-<li><strong>Checks and recovery</strong> — reruns deterministic database invariants and maps common failures to the responsible layer.</li>
-<li><strong>Reflection and next step</strong> — asks for evidence in the learner&#x27;s own words before progress is recorded.</li>
+<li><strong>Goal and three-program mental model</strong> - identifies the lesson, guide, official source, editable copy, and the separate roles of Jupyter, Python, <code>psql</code>, and the PostgreSQL server.</li>
+<li><strong>Before-you-run checklist</strong> - confirms the selected course kernel, local tools, disposable database name, and the difference between reading and execution.</li>
+<li><strong>Secret-free readiness</strong> - locates the repository, validates the database target, and explains each pass, warning, or failure.</li>
+<li><strong>Study and edit</strong> - renders the official SQL for comparison and points to the preserved editable copy.</li>
+<li><strong>Explicit preparation</strong> - requires the learner to confirm the destructive reset switch before preparing the course schema.</li>
+<li><strong>Run and inspect</strong> - executes the complete copy through fixed <code>psql -f</code>, then teaches the learner to read the exit status, transcript, result columns, row grain, counts, and ordering.</li>
+<li><strong>Checks and recovery</strong> - reruns deterministic database invariants and maps common failures to the responsible layer.</li>
+<li><strong>Reflection and next step</strong> - asks for evidence in the learner&#x27;s own words before progress is recorded.</li>
 </ol>
 <p>The notebook is deliberately more than a wrapper around a command. It teaches how to tell whether a query ran, where output came from, why the database is safe to reset, and what evidence should be captured before a learner edits again.</p>
 <p>Generation never overwrites an existing notebook or SQL copy. Reopening a lesson therefore preserves experiments and notes. To start over, first save anything worth keeping, remove only that lesson&#x27;s <code>.learning/sql/&lt;lesson-id&gt;/</code> directory, and reopen the cataloged artifact.</p>

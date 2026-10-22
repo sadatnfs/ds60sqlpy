@@ -50,6 +50,7 @@ services:
       context: .
       args:
         DS60_BASE_IMAGE: ${DS60_BASE_IMAGE:-python:3.12-slim-bookworm}
+        DS60_DOCKER_PROFILES: ${DS60_DOCKER_PROFILES:-core}
     profiles: ["lab"]
     network_mode: "service:postgres"
     environment:
@@ -70,7 +71,7 @@ services:
       postgres:
         condition: service_healthy
     init: true
-    mem_limit: 2g
+    mem_limit: ${DS60_LAB_MEMORY:-2g}
     pids_limit: 128
     cap_drop: [ALL]
     cap_add: [CHOWN, SETUID, SETGID]

@@ -10,10 +10,11 @@ from threading import RLock
 from typing import Any
 
 from ds60sqlpy.catalog import Catalog
+from ds60sqlpy.curriculum_framework import RUNNERS
 from ds60sqlpy.lesson_reader import codex_coaching_prompt
 from ds60sqlpy.progress import ProgressStore
 from ds60sqlpy.state_files import atomic_json_write, locked_update
-from ds60sqlpy.study_plan import LEARNING_PATHS, build_study_plan
+from ds60sqlpy.study_plan import build_study_plan, learning_paths
 
 PHASES = ("read", "predict", "attempt", "compare", "explain")
 MAX_NOTE_CHARACTERS = 12_000
@@ -32,7 +33,9 @@ class CoachingService:
         """Describe available goals and saved completion IDs without writing."""
 
         return {
-            "paths": {name: asdict(path) for name, path in LEARNING_PATHS.items()},
+            "paths": {name: asdict(path) for name, path in learning_paths(self.catalog).items()},
+            "tracks": self.catalog.tracks,
+            "runners": {name: asdict(runner) for name, runner in RUNNERS.items()},
             "completed": [item.lesson_id for item in self.progress.completions()],
             "lesson_count": len(self.catalog.lessons()),
         }
@@ -53,13 +56,24 @@ class CoachingService:
         guide = self.catalog.resolve(lesson.guide_path).read_text(encoding="utf-8")
         learner = self.catalog.resolve(lesson.lesson_path).read_text(encoding="utf-8")
         learner_code = learner
+        notebook_cells: list[dict[str, Any]] = []
         if Path(lesson.lesson_path).suffix == ".ipynb":
             notebook = json.loads(learner)
-            learner_code = "\n\n".join(
-                "".join(cell["source"]) if isinstance(cell["source"], list) else cell["source"]
-                for cell in notebook["cells"]
-                if cell["cell_type"] == "code"
-            )
+            fragments: list[str] = []
+            next_line = 1
+            for index, cell in enumerate(notebook["cells"], 1):
+                if cell["cell_type"] != "code":
+                    continue
+                source = (
+                    "".join(cell["source"]) if isinstance(cell["source"], list) else cell["source"]
+                )
+                if fragments:
+                    next_line += 2
+                notebook_cells.append({"index": index, "code": source, "start_line": next_line + 1})
+                fragment = "# %%\n" + source
+                fragments.append(fragment)
+                next_line += fragment.count("\n")
+            learner_code = "\n\n".join(fragments)
             learner = "\n\n".join(
                 "".join(cell["source"]) if isinstance(cell["source"], list) else cell["source"]
                 for cell in notebook["cells"]
@@ -70,6 +84,7 @@ class CoachingService:
             "guide": guide,
             "learner": learner,
             "learner_code": learner_code,
+            "notebook_cells": notebook_cells,
             "coaching_prompt": codex_coaching_prompt(self.catalog, lesson),
             "missing_prerequisites": [p for p in lesson.prerequisites if p not in completed],
             "session": self.session(lesson_id),

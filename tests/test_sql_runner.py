@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import subprocess
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
 from ds60sqlpy.catalog import Catalog
-from ds60sqlpy.sql_runner import SqlRunner, SqlRunnerError
+from ds60sqlpy.sql_runner import SqlRun, SqlRunner, SqlRunnerError
 
 
 def _password_url(password: str) -> str:
@@ -34,8 +35,29 @@ def test_named_foundation_resolves_cataloged_sql(runner: SqlRunner) -> None:
 
 
 def test_named_lesson_rejects_non_sql_track(runner: SqlRunner) -> None:
-    with pytest.raises(SqlRunnerError, match="not in the SQL track"):
+    with pytest.raises(SqlRunnerError, match="SQL runner"):
         runner.lesson_id("python-pro-01")
+
+
+def test_sql_runner_is_reusable_from_a_registered_future_track(runner: SqlRunner) -> None:
+    original = runner.catalog
+    lesson = replace(original.get("sql-start-01"), id="analytics-01", track="analytics", day=1)
+    runner.catalog = Catalog(
+        original.repo_root,
+        [lesson],
+        tracks={
+            **original.tracks,
+            "analytics": {"title": "Analytics", "plan": "docs/learning-paths.md"},
+        },
+    )
+    expected = original.resolve(lesson.lesson_path)
+    with patch.object(runner, "run_file", return_value=SqlRun(expected, 0)) as run_file:
+        assert runner.lesson_id(lesson.id).returncode == 0
+        assert len(runner.all_lessons()) == 1
+    assert all(call.args[0] == expected for call in run_file.call_args_list)
+    assert runner.solution_files() == tuple(
+        original.resolve(path) for path in lesson.solution_paths if path.endswith(".sql")
+    )
 
 
 def test_solution_files_follow_catalog_and_are_sql(runner: SqlRunner) -> None:

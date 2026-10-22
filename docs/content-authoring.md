@@ -27,17 +27,17 @@ foundation, elective, or specialization into a misleading sequential day.
 
 Every lesson should include:
 
-1. **Title and level** — beginner, intermediate, or advanced
-2. **Prerequisites** — concepts and environment
-3. **Objectives** — observable abilities, not vague familiarity
-4. **Motivation** — why the learner should care
-5. **Vocabulary** — define new terms before use
-6. **Worked examples** — small, runnable, and explained
-7. **Exercises** — progress from recall to application
-8. **Self-check** — expected behavior, assertions, or questions
-9. **Common mistakes** — include how to diagnose them
-10. **Next steps** — review or successor lessons
-11. **Separate solution** — reasoning, alternatives, and edge cases
+1. **Title and level** - beginner, intermediate, or advanced
+2. **Prerequisites** - concepts and environment
+3. **Objectives** - observable abilities, not vague familiarity
+4. **Motivation** - why the learner should care
+5. **Vocabulary** - define new terms before use
+6. **Worked examples** - small, runnable, and explained
+7. **Exercises** - progress from recall to application
+8. **Self-check** - expected behavior, assertions, or questions
+9. **Common mistakes** - include how to diagnose them
+10. **Next steps** - review or successor lessons
+11. **Separate solution** - reasoning, alternatives, and edge cases
 
 Prefer “write a query that returns…” or “implement and verify…” over “understand…”.
 For a named professional module, list every direct catalog prerequisite by its
@@ -157,6 +157,10 @@ tutorial notebook should normally separate:
 7. independent and debugging practice with scratch cells;
 8. checks and expected observations; and
 9. retrieval questions and next steps.
+
+The notebook cell, code-cell, and teaching-text minimums apply to every
+Python-runner learner notebook, including a new track or a lesson numbered
+beyond sixty. A new topic name must not bypass notebook depth checks.
 
 The exact number of cells may vary, but each cell should have one teaching job.
 Do not hide all examples in one large code cell or all instructions in one
@@ -356,7 +360,8 @@ Each reader must keep this learner journey:
 
 1. rendered companion guide;
 2. read-only learner-artifact preview with a path to the real file;
-3. execution in VS Code, JupyterLab, or the guided SQL workspace; and
+3. an honest handoff to the coding lab's declared capability, or a documented
+   native editor/Jupyter/guided SQL workflow; and
 4. visibly separated solutions after the attempt.
 
 Reader generation must remain offline and self-contained. Escape source,
@@ -370,8 +375,12 @@ Every learner-visible local Markdown or SQL link from the dashboard, lesson
 readers, or rendered references must point to generated HTML. The generator
 derives a deterministic recursive closure from explicit dashboard references
 and links rendered from catalog artifacts; do not replace it with a scan of
-arbitrary untracked files. Keep completion on the dashboard in static mode and
-show the per-lesson checkbox only when the private launcher token is present.
+arbitrary untracked files. Seed each registered track's plan from catalog
+metadata, including plans that the original three tracks never link to. Keep
+completion on the dashboard in static mode. The native private portal can
+show its per-lesson checkbox; lab-served readers link back to that lesson's
+saved evidence workflow and hide native launch actions. A server token alone
+does not mean that VS Code/Jupyter launching is enabled.
 
 Do not create hand-maintained SQL notebooks for every lesson. For a cataloged SQL lesson,
 the private launcher derives an ignored working notebook and editable SQL copy
@@ -391,6 +400,45 @@ python scripts/build_lesson_readers.py
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check
 ```
+
+## Extending subjects, languages, and learning modes
+
+Follow [the curriculum extension playbook](curriculum-extension-playbook.md)
+when adding a new track. Add a manifest under `curriculum/extensions/` rather
+than editing the generated catalog or stretching the historical day-number
+scanner. Its schema supports track metadata, complete lesson records,
+cross-track prerequisites, topic tags, and goal targets. An inactive
+[example manifest](examples/curriculum-extension.json) shows the required
+fields; create its authored files and quality evidence before registering it.
+
+The lesson's `runner` describes how a learner works. The `track` and `topics`
+describe what they learn. Deep learning uses Python when its exercise is Python;
+LLM theory can use `none` when its evidence is written reasoning. Planned
+C++, Scala, and Kubernetes runner descriptors allow correctly labeled reading
+and saved work, with execution available only after a real backend adapter is
+implemented and verified. A manifest never grants permission to execute an
+arbitrary command.
+
+Every new ID needs an explicit `curriculum/practice_expansion.json` entry with
+baseline zero and target six. Keep the historical baseline unchanged. All
+shared teaching gates remain: self-contained definitions, two worked examples,
+six progressive and bounded exercises on each required surface, inspectable
+expected results and verification, explanations of failure, retrieval questions,
+and the exact lesson-specific Codex block. Reading-only lessons can use fenced
+text examples and reasoned counterexamples; they still need a separate
+explanatory solution and the same minimum teaching depth. Code and operations
+lessons require two solution artifacts, including a written explanation.
+
+For C++/Scala learner sources, label prompts `// Exercise 1:` through the final
+number. For Kubernetes YAML, use `# Exercise 1:` comments. Labels identify
+distinct tasks; repeated labels and answer steps do not increase the audited
+count. Keep guide and solution prompts aligned with the same numbered tasks.
+
+Preserve one-click setup and offline behavior. List any compiler, JVM, cluster,
+GPU, model, or first download beside the lesson's run instructions. An
+operations exercise must name its local target and cleanup boundary. A new
+execution adapter also needs timeout, output, cancellation, invalid-input,
+saved-work, and failure-cleanup evidence before its capability becomes runnable.
 
 ## Accessibility and tone
 

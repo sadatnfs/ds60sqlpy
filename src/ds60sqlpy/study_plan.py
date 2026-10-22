@@ -57,6 +57,19 @@ LEARNING_PATHS = {
 }
 
 
+def learning_paths(catalog: Catalog) -> dict[str, LearningPath]:
+    """Merge validated extension goals with the original curated routes."""
+    result = dict(LEARNING_PATHS)
+    for key, definition in catalog.learning_paths.items():
+        if key in result:
+            raise ValueError(f"Extensions must not replace an existing learning path: {key}")
+        targets = tuple(definition["targets"])
+        for target in targets:
+            catalog.get(target)
+        result[key] = LearningPath(definition["title"], definition["description"], targets)
+    return result
+
+
 @dataclass(frozen=True, slots=True)
 class StudyPlan:
     """A topological lesson sequence and a transparent time estimate."""

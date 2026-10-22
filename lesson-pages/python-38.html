@@ -230,6 +230,9 @@
           Track completion on the course dashboard
         </a>
         <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=python-38" hidden>
+          Open this lesson in the coding lab
+        </a>
       </div>
     </div>
   </header>
@@ -254,7 +257,7 @@
         <div>
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
-          <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <p id="run-guidance">Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
           <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
           </div>
@@ -269,6 +272,9 @@
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
 
+          <a class="button lab-only" href="../learn?lesson=python-38" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
         </div>
       </section>
 
@@ -1107,11 +1113,24 @@ merely ran is not evidence of mastery.</textarea>
     const LEARNER_PATH = "python/ds-60day/notebooks/day38_tree_models_random_forest.ipynb";
     const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
     const SERVER_TOKEN = "";
+    const LAB_MODE = false;
     const launcherMode = Boolean(
       SERVER_TOKEN &&
+      !LAB_MODE &&
       location.protocol === "http:" &&
       location.hostname === "127.0.0.1"
     );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
 
     document.documentElement.classList.add("tabs-ready");
     const panels = [...document.querySelectorAll("[data-panel]")];

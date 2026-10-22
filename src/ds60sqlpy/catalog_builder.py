@@ -8,6 +8,8 @@ from pathlib import Path
 from typing import Any
 
 from ds60sqlpy.catalog import catalog_order_key, find_repo_root
+from ds60sqlpy.curriculum_framework import infer_runner, load_extensions
+from ds60sqlpy.study_plan import LEARNING_PATHS
 
 DAY_PATTERN = re.compile(r"^day(?P<day>\d{2})_(?P<slug>.+)$")
 SEABORN_CACHE_DAYS = {17, 18, 19, 22, 24, 25, 26, 28, 45, 51, 56}
@@ -1034,35 +1036,65 @@ def build_catalog(repo_root: Path | None = None) -> dict[str, Any]:
     """Return the complete catalog payload."""
 
     root = find_repo_root(repo_root)
+    extensions = load_extensions(root)
     lessons = [
         *_python_lessons(root),
         *_sql_lessons(root),
         *_bridge_lessons(root),
         *_professional_lessons(),
+        *extensions.lessons,
     ]
+    identifiers = [item["id"] for item in lessons]
+    if len(identifiers) != len(set(identifiers)):
+        raise ValueError("Extensions must not replace existing lesson IDs.")
+    track_days = [(item["track"], item["day"]) for item in lessons]
+    if len(track_days) != len(set(track_days)):
+        raise ValueError("Catalog contains duplicate track/day pairs.")
+    for item in lessons:
+        item.setdefault("runner", infer_runner(item["lesson_path"], item["track"]))
+        missing = set(item["prerequisites"]) - set(identifiers)
+        if missing:
+            raise ValueError(f"{item['id']} has unknown prerequisites: {sorted(missing)}")
+    artifact_owners: dict[str, str] = {}
+    for item in lessons:
+        for path in (item["lesson_path"], item["guide_path"], *item["solution_paths"]):
+            identity = (root / path).resolve().as_posix().casefold()
+            if identity in artifact_owners:
+                raise ValueError(
+                    f"Catalog artifact appears more than once: {path} "
+                    f"({artifact_owners[identity]}, {item['id']})"
+                )
+            artifact_owners[identity] = item["id"]
+    remaining = {item["id"]: set(item["prerequisites"]) for item in lessons}
+    while ready := {key for key, prerequisites in remaining.items() if not prerequisites}:
+        for key in ready:
+            del remaining[key]
+        for prerequisites in remaining.values():
+            prerequisites.difference_update(ready)
+    if remaining:
+        raise ValueError(f"Catalog has a prerequisite cycle: {sorted(remaining)}")
+    for path_id, path in extensions.learning_paths.items():
+        if path_id in identifiers:
+            raise ValueError(f"Learning path IDs must not collide with lesson IDs: {path_id}")
+        if path_id in LEARNING_PATHS:
+            raise ValueError(f"Extensions must not replace an existing learning path: {path_id}")
+        if set(path["targets"]) - set(identifiers):
+            raise ValueError(f"Learning path {path_id} has unknown target lessons.")
+    track_order = {track: index for index, track in enumerate(extensions.tracks)}
     return {
         "schema_version": 1,
-        "generated_from": "course artifact filenames and professional lesson specifications",
-        "tracks": {
-            "python": {
-                "title": "Python and data science",
-                "plan": "python/PYTHON_TRAINING.md",
-            },
-            "sql": {
-                "title": "PostgreSQL",
-                "plan": "sql/ADVANCED_SQL_60DAY_PLAN.md",
-            },
-            "bridge": {
-                "title": "Python and PostgreSQL engineering",
-                "plan": "bridge/README.md",
-            },
-        },
+        "generated_from": (
+            "course artifact filenames, professional specifications and registered extensions"
+        ),
+        "tracks": extensions.tracks,
+        "learning_paths": extensions.learning_paths,
         "lessons": sorted(
             lessons,
             key=lambda item: catalog_order_key(
                 item["track"],
                 item["day"],
                 item["id"],
+                track_order,
             ),
         ),
     }

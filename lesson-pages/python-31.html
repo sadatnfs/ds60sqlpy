@@ -230,6 +230,9 @@
           Track completion on the course dashboard
         </a>
         <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=python-31" hidden>
+          Open this lesson in the coding lab
+        </a>
       </div>
     </div>
   </header>
@@ -254,7 +257,7 @@
         <div>
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Run this notebook with the course kernel</h2>
-          <p>Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <p id="run-guidance">Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
           <div class="static-help">
             Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
           </div>
@@ -269,6 +272,9 @@
           </button>
           <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
 
+          <a class="button lab-only" href="../learn?lesson=python-31" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
         </div>
       </section>
 
@@ -348,12 +354,12 @@
 </tr>
 <tr>
 <td>Bernoulli distribution</td>
-<td>One trial with result 0 or 1 and success probability (p)</td>
+<td>One trial with result 0 or 1 and success probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></td>
 <td>One possibly biased coin flip</td>
 </tr>
 <tr>
 <td>Binomial distribution</td>
-<td>Number of successes in (n) independent Bernoulli trials with constant (p)</td>
+<td>Number of successes in <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math> independent Bernoulli trials with constant <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></td>
 <td>“How many successes?” rather than “success or failure?”</td>
 </tr>
 <tr>
@@ -368,8 +374,8 @@
 </tr>
 <tr>
 <td>Conditional probability</td>
-<td>Probability of (A) after learning (B), written (P(Amid B))</td>
-<td>Restrict the population to cases where (B) happened</td>
+<td>Probability of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math> after learning <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math>, written <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>P</mi><mo>(</mo><mi>A</mi><mo>|</mo><mi>B</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">P(A\mid B)</annotation></semantics></math></td>
+<td>Restrict the population to cases where <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math> happened</td>
 </tr>
 <tr>
 <td>Law of large numbers</td>
@@ -388,7 +394,7 @@ running_mean = np.cumsum(draws) / np.arange(1, len(draws) + 1)
 print(f&quot;first 10 average: {running_mean[9]:.3f}&quot;)
 print(f&quot;final average:    {running_mean[-1]:.3f}&quot;)</code></pre>
 <p>The running average should finish near <code>0.6</code>, but it may move away from <code>0.6</code> for short stretches. The law of large numbers describes eventual convergence; it does not promise a smooth path or an exact answer in a finite sample.</p>
-<p>For a Binomial variable, the theoretical mean is \(np\) and the variance is \(np(1-p)\). Compare those values with a large simulated sample as a diagnostic, not as a replacement for the formulas.</p>
+<p>For a Binomial variable, the theoretical mean is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>n</mi><mi>p</mi></mrow><annotation encoding="application/x-tex">np</annotation></semantics></math> and the variance is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>n</mi><mi>p</mi><mo>(</mo><mn>1</mn><mo>-</mo><mi>p</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">np(1-p)</annotation></semantics></math>. Compare those values with a large simulated sample as a diagnostic, not as a replacement for the formulas.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Open the Day 31 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -492,7 +498,7 @@ assert 0 &lt; positive_predictive_value &lt; sensitivity</code></pre>
 </ol>
 <p><strong>Verify:</strong> Practice 2 — probability models, conditional evidence, and simulation error — with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| &lt; 0.05 and |variance - 1| &lt; 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.</p>
 <ol>
-<li>Given sensitivity <code>0.95</code>, specificity <code>0.90</code>, and prevalence <code>0.01</code>, compute \(P(\text{disease}\mid\text{positive})\).</li>
+<li>Given sensitivity <code>0.95</code>, specificity <code>0.90</code>, and prevalence <code>0.01</code>, compute <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>P</mi><mo>(</mo><mtext>disease</mtext><mo>|</mo><mtext>positive</mtext><mo>)</mo></mrow><annotation encoding="application/x-tex">P(\text{disease}\mid\text{positive})</annotation></semantics></math>.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3 — probability models, conditional evidence, and simulation error — show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
@@ -739,7 +745,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ol>
 <p><strong>Verify:</strong> Practice 2 — probability models, conditional evidence, and simulation error — with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| &lt; 0.05 and |variance - 1| &lt; 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.</p>
 <ol>
-<li>Given sensitivity <code>0.95</code>, specificity <code>0.90</code>, and prevalence <code>0.01</code>, compute \(P(\text{disease}\mid\text{positive})\).</li>
+<li>Given sensitivity <code>0.95</code>, specificity <code>0.90</code>, and prevalence <code>0.01</code>, compute <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>P</mi><mo>(</mo><mtext>disease</mtext><mo>|</mo><mtext>positive</mtext><mo>)</mo></mrow><annotation encoding="application/x-tex">P(\text{disease}\mid\text{positive})</annotation></semantics></math>.</li>
 </ol>
 <p><strong>Verify:</strong> Practice 3 — probability models, conditional evidence, and simulation error — show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.</p>
 <h5 id="learner--cell-10--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-10--progressive-hints" aria-label="Link to this section">#</a></h5>
@@ -912,7 +918,7 @@ posterior</code></pre>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Practice 2 — probability models, conditional evidence, and simulation error — with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| &lt; 0.05 and |variance - 1| &lt; 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Given sensitivity <code>0.95</code>, specificity <code>0.90</code>, and prevalence <code>0.01</code>, compute \(P(\text{disease}\mid\text{positive})\).</p>
+<p><strong>Prompt:</strong> Given sensitivity <code>0.95</code>, specificity <code>0.90</code>, and prevalence <code>0.01</code>, compute <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>P</mi><mo>(</mo><mtext>disease</mtext><mo>|</mo><mtext>positive</mtext><mo>)</mo></mrow><annotation encoding="application/x-tex">P(\text{disease}\mid\text{positive})</annotation></semantics></math>.</p>
 <p><strong>How to reason about it:</strong> Bayes&#x27; denominator includes both true positives and false positives. Write every term with a conditional-probability label before inserting numbers; this prevents confusing specificity with the false-positive rate.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Practice 3 — probability models, conditional evidence, and simulation error — show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.</p>
@@ -1066,7 +1072,7 @@ assert validate_binomial(4, 1) == (4, 1.0)</code></pre>
 <p><strong>How to reason about it:</strong> A density histogram must use density=True before its height can be compared with a probability-density curve. Check the sample mean and variance numerically as well, and state whether variance uses the population convention (ddof=0) or an unbiased sample estimate.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <h5 id="solution-2--cell-9--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
-<p><strong>Prompt:</strong> Given sensitivity <code>0.95</code>, specificity <code>0.90</code>, and prevalence <code>0.01</code>, compute \(P(\text{disease}\mid\text{positive})\).</p>
+<p><strong>Prompt:</strong> Given sensitivity <code>0.95</code>, specificity <code>0.90</code>, and prevalence <code>0.01</code>, compute <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>P</mi><mo>(</mo><mtext>disease</mtext><mo>|</mo><mtext>positive</mtext><mo>)</mo></mrow><annotation encoding="application/x-tex">P(\text{disease}\mid\text{positive})</annotation></semantics></math>.</p>
 <p><strong>How to reason about it:</strong> Bayes&#x27; denominator includes both true positives and false positives. Write every term with a conditional-probability label before inserting numbers; this prevents confusing specificity with the false-positive rate.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <h5 id="solution-2--cell-9--exercise-4-prediction-and-uncertainty">Exercise 4 — Prediction and uncertainty<a class="heading-anchor" href="#solution-2--cell-9--exercise-4-prediction-and-uncertainty" aria-label="Link to this section">#</a></h5>
@@ -1209,11 +1215,24 @@ merely ran is not evidence of mastery.</textarea>
     const LEARNER_PATH = "python/ds-60day/notebooks/day31_probability_basics.ipynb";
     const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
     const SERVER_TOKEN = "";
+    const LAB_MODE = false;
     const launcherMode = Boolean(
       SERVER_TOKEN &&
+      !LAB_MODE &&
       location.protocol === "http:" &&
       location.hostname === "127.0.0.1"
     );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
 
     document.documentElement.classList.add("tabs-ready");
     const panels = [...document.querySelectorAll("[data-panel]")];

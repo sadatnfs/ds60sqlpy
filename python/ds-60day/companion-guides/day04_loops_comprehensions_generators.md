@@ -1,4 +1,4 @@
-# Day 4 — Loops, Comprehensions, and Generators
+# Day 4 - Loops, Comprehensions, and Generators
 
 **Level:** Beginner
 
@@ -53,12 +53,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 4 — loops, comprehensions, and generators to practice iteration, eager collection building, and lazy generators
+**Lesson outcome:** use day 4 - loops, comprehensions, and generators to practice iteration, eager collection building, and lazy generators
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive - build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -93,7 +93,7 @@ In a generator function, each `yield value` pauses the function while
 preserving local state; the next request resumes immediately after that
 `yield`.
 
-### Worked example 1 — Translate an append loop one clause at a time
+### Worked example 1 - Translate an append loop one clause at a time
 
 Use the loop as a readable specification before compressing it. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -118,7 +118,7 @@ compact = [c * 9 / 5 + 32 for c in temperatures if c > 0]
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Observe a generator's saved position
+### Worked example 2 - Observe a generator's saved position
 
 Consumption advances the iterator instead of restarting it. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -266,7 +266,7 @@ generator is lazy, and frequency counts include every occurrence.
 
 - [Open the learner notebook](../notebooks/day04_loops_comprehensions_generators.ipynb)
 - [Check the separate solution](../solutions/day04_loops_comprehensions_generators/day04_solutions.md)
-- [Next: Day 5 — Functions and type hints](day05_functions_type_hints.md)
+- [Next: Day 5 - Functions and type hints](day05_functions_type_hints.md)
 
 ## Ask Codex about this lesson
 

@@ -12,7 +12,7 @@ LABEL org.opencontainers.image.title="DS60 Learning Lab" \
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DS60_CONTAINER=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl ca-certificates gosu \
+    curl ca-certificates gosu libgomp1 libexpat1 \
     && install -d /usr/share/postgresql-common/pgdg \
     && curl --fail --silent --show-error --location --retry 3 \
        https://www.postgresql.org/media/keys/ACCC4CF8.asc \
@@ -26,13 +26,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --create-home --uid 1000 learner
 WORKDIR /opt/course
+ARG DS60_DOCKER_PROFILES=core
+ENV DS60_DOCKER_PROFILES=${DS60_DOCKER_PROFILES}
 ENV PATH="/opt/course/.venv/bin:$PATH"
 RUN python -m pip install --no-cache-dir uv==0.11.6
 COPY pyproject.toml uv.lock README.md ./
+COPY src/ds60sqlpy/docker_profiles.py /tmp/ds60-docker-profiles.py
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --python /usr/local/bin/python --no-dev --no-install-project \
-       --extra notebooks --extra data --extra bridge --extra quality \
-       --extra professional --extra sql-notebooks
+    python /tmp/ds60-docker-profiles.py --profiles "$DS60_DOCKER_PROFILES"
 COPY . .
 RUN uv pip install --offline --python /opt/course/.venv/bin/python \
        --no-deps --no-build-isolation -e . \

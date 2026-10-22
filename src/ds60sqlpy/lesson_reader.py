@@ -23,6 +23,8 @@ from typing import Any
 from urllib.parse import quote, unquote, urlsplit
 
 from ds60sqlpy.catalog import Catalog, Lesson
+from ds60sqlpy.curriculum_framework import RUNNERS
+from ds60sqlpy.reader_math import INLINE_MATH, render_math
 
 LESSON_PAGES_DIR = "lesson-pages"
 REFERENCE_PAGES_DIR = "reference-pages"
@@ -50,7 +52,34 @@ COURSE_GUIDE_REFERENCE_PATHS = (
     "docs/setup/windows.md",
     "docs/validation.md",
 )
-_REFERENCE_SUFFIXES = {".md", ".sql"}
+_SOURCE_LANGUAGES = {
+    ".py": "python",
+    ".sql": "sql",
+    ".cpp": "cpp",
+    ".cc": "cpp",
+    ".cxx": "cpp",
+    ".h": "cpp",
+    ".hpp": "cpp",
+    ".scala": "scala",
+    ".yaml": "yaml",
+    ".yml": "yaml",
+    ".json": "json",
+    ".txt": "text",
+    ".sh": "bash",
+    ".csv": "csv",
+    ".toml": "toml",
+}
+_REFERENCE_SUFFIXES = {".md", ".ipynb", *_SOURCE_LANGUAGES}
+_PRIVATE_REFERENCE_PARTS = {"artifacts", "htmlcov", "mlruns", "node_modules", "__pycache__"}
+_PRIVATE_REFERENCE_NAMES = {
+    "credentials",
+    "credentials.json",
+    "id_dsa",
+    "id_ecdsa",
+    "id_ed25519",
+    "id_rsa",
+    "pgpass.conf",
+}
 _FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})\s*([^`]*)$")
 _FENCE_LINE_RE = re.compile(r"^[ \t]*(?:`{3,}|~{3,})", re.MULTILINE)
 _HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
@@ -102,14 +131,20 @@ def reader_relative_path(lesson_id: str) -> str:
 
 
 def reference_relative_path(relative_path: str | Path) -> str:
-    """Return the stable rendered path for a repository Markdown or SQL file."""
+    """Return the stable rendered path for an allowlisted authored text file."""
 
     pure_path = PurePosixPath(Path(relative_path).as_posix())
     if (
         pure_path.is_absolute()
         or not pure_path.parts
-        or any(part in {"", ".", ".."} or part.startswith(".") for part in pure_path.parts)
-        or pure_path.suffix.lower() not in _REFERENCE_SUFFIXES
+        or any(
+            part in {"", ".", ".."}
+            or part.startswith(".")
+            or part.lower() in _PRIVATE_REFERENCE_PARTS
+            for part in pure_path.parts
+        )
+        or pure_path.name.lower() in _PRIVATE_REFERENCE_NAMES
+        or (pure_path.suffix.lower() not in _REFERENCE_SUFFIXES and pure_path.name != "LICENSE")
     ):
         raise ValueError(f"Unsafe source path for rendered reference: {relative_path}")
     return f"{REFERENCE_PAGES_DIR}/{pure_path.as_posix()}.html"
@@ -162,7 +197,7 @@ def _linked_reference_sources(
     *,
     repo_root: Path,
 ) -> Iterable[Path]:
-    """Yield safe local Markdown/SQL link targets rendered by this module."""
+    """Yield safe local authored-text link targets rendered by this module."""
 
     for match in _LINK_OR_CODE_RE.finditer(source):
         if match.group("code") is not None or match.group("image"):
@@ -176,14 +211,18 @@ def _linked_reference_sources(
         if (
             candidate.is_relative_to(repo_root)
             and candidate.is_file()
-            and candidate.suffix.lower() in _REFERENCE_SUFFIXES
-            and not any(part.startswith(".") for part in candidate.relative_to(repo_root).parts)
+            and (candidate.suffix.lower() in _REFERENCE_SUFFIXES or candidate.name == "LICENSE")
+            and not any(
+                part.startswith(".") or part.lower() in _PRIVATE_REFERENCE_PARTS
+                for part in candidate.relative_to(repo_root).parts
+            )
+            and candidate.name.lower() not in _PRIVATE_REFERENCE_NAMES
         ):
             yield candidate
 
 
 def reference_source_paths(catalog: Catalog) -> tuple[Path, ...]:
-    """Return the deterministic closure of non-lesson Markdown/SQL references."""
+    """Return the deterministic closure of non-lesson authored-text references."""
 
     repo_root = catalog.repo_root.resolve()
     lesson_targets = artifact_targets(catalog)
@@ -197,8 +236,12 @@ def reference_source_paths(catalog: Catalog) -> tuple[Path, ...]:
         if (
             not resolved.is_relative_to(repo_root)
             or not resolved.is_file()
-            or resolved.suffix.lower() not in _REFERENCE_SUFFIXES
-            or any(part.startswith(".") for part in resolved.relative_to(repo_root).parts)
+            or (resolved.suffix.lower() not in _REFERENCE_SUFFIXES and resolved.name != "LICENSE")
+            or any(
+                part.startswith(".") or part.lower() in _PRIVATE_REFERENCE_PARTS
+                for part in resolved.relative_to(repo_root).parts
+            )
+            or resolved.name.lower() in _PRIVATE_REFERENCE_NAMES
         ):
             raise ValueError(f"Unsafe or missing rendered reference source: {path}")
         references.add(resolved)
@@ -206,6 +249,8 @@ def reference_source_paths(catalog: Catalog) -> tuple[Path, ...]:
 
     for relative_path in COURSE_GUIDE_REFERENCE_PATHS:
         add_reference(repo_root / relative_path)
+    for metadata in catalog.tracks.values():
+        add_reference(catalog.resolve(metadata["plan"]))
 
     for artifact_path in sorted(lesson_targets):
         for source in _markdown_link_sources(artifact_path):
@@ -300,6 +345,15 @@ class LinkResolver:
         candidate = (self.source_path.parent / decoded_path).resolve()
         if not candidate.is_relative_to(self.repo_root):
             return None
+        relative_parts = candidate.relative_to(self.repo_root).parts
+        if (
+            any(
+                part.startswith(".") or part.lower() in _PRIVATE_REFERENCE_PARTS
+                for part in relative_parts
+            )
+            or candidate.name.lower() in _PRIVATE_REFERENCE_NAMES
+        ):
+            return None
 
         reader_target = self.targets.get(candidate)
         if reader_target is not None:
@@ -326,7 +380,14 @@ class LinkResolver:
 def _format_plain_inline(text: str) -> str:
     """Escape plain inline text and support a small safe emphasis subset."""
 
-    escaped = html.escape(text, quote=True)
+    parts: list[str] = []
+    position = 0
+    for match in INLINE_MATH.finditer(text):
+        parts.append(html.escape(text[position : match.start()], quote=True))
+        parts.append(render_math(match.group("expression")))
+        position = match.end()
+    parts.append(html.escape(text[position:], quote=True))
+    escaped = "".join(parts)
     escaped = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", escaped)
     escaped = re.sub(r"__(.+?)__", r"<strong>\1</strong>", escaped)
     escaped = re.sub(r"(?<!\*)\*([^*\n]+?)\*(?!\*)", r"<em>\1</em>", escaped)
@@ -378,6 +439,8 @@ def _split_table_row(line: str) -> list[str]:
     escaped = False
     for character in source:
         if escaped:
+            if character != "|":
+                current.append("\\")
             current.append(character)
             escaped = False
         elif character == "\\":
@@ -755,8 +818,8 @@ def render_artifact(
             id_prefix=id_prefix,
             output_path=output_path,
         )
-    if suffix in {".py", ".sql"}:
-        language = "python" if suffix == ".py" else "sql"
+    if suffix in _SOURCE_LANGUAGES or path.name == "LICENSE":
+        language = _SOURCE_LANGUAGES.get(suffix, "text")
         return (
             '<div class="preview-note" role="note"><strong>Readable preview.</strong> '
             "This page does not execute source code. Use the run controls above in the "
@@ -773,6 +836,17 @@ def _path_kind(path: str) -> str:
         ".py": "Python source file",
         ".sql": "PostgreSQL script",
         ".md": "lesson notes",
+        ".cpp": "C++ source file",
+        ".cc": "C++ source file",
+        ".cxx": "C++ source file",
+        ".h": "C++ header",
+        ".hpp": "C++ header",
+        ".scala": "Scala source file",
+        ".yaml": "YAML manifest",
+        ".yml": "YAML manifest",
+        ".json": "JSON artifact",
+        ".txt": "text artifact",
+        ".sh": "shell script",
     }.get(suffix, "lesson artifact")
 
 
@@ -781,6 +855,28 @@ def _run_copy(lesson: Lesson) -> tuple[str, str]:
 
     suffix = Path(lesson.lesson_path).suffix.lower()
     escaped_path = html.escape(lesson.lesson_path)
+    if lesson.runner == "none":
+        return (
+            "Read, reason, and record your evidence",
+            "This reading lesson has no code runner. Use the worked examples, "
+            "write your predictions and explanations, and compare them with the "
+            "lesson's evidence checks. Opening the page does not complete the lesson.",
+        )
+    if lesson.runner not in {"python", "sql"}:
+        capability = RUNNERS[lesson.runner]
+        execution_note = (
+            "Its execution adapter is not implemented in the coding lab. "
+            if capability.executor is None
+            else "Use the coding lab's declared execution controls when available. "
+        )
+        return (
+            f"Study this {_path_kind(lesson.lesson_path)}",
+            "The course renders this artifact for inspection. "
+            + execution_note
+            + "Follow the guide's explicit "
+            "prerequisites, manual verification, and cleanup when using external "
+            f"tools. The cataloged path is <code>{escaped_path}</code>.",
+        )
     if suffix == ".ipynb":
         return (
             "Run this notebook with the course kernel",
@@ -814,7 +910,15 @@ def _run_copy(lesson: Lesson) -> tuple[str, str]:
 def _static_run_help(lesson: Lesson) -> str:
     """Explain the safest runnable handoff when no loopback launcher exists."""
 
-    if lesson.track == "sql":
+    if lesson.runner == "none":
+        return "Keep a written attempt and use the guide's checks before comparing solutions."
+    if lesson.runner not in {"python", "sql"}:
+        return (
+            "This is a reading preview, not an external tool launcher. Save your "
+            "attempt separately and use only the explicitly documented local setup "
+            "and cleanup for this lesson."
+        )
+    if lesson.runner == "sql":
         return (
             "<strong>If the green SQL-notebook button is not visible, this is reading "
             "mode.</strong><br><strong>Windows:</strong> return to the repository folder "
@@ -839,20 +943,32 @@ def _default_codex_coaching_prompt(lesson: Lesson) -> str:
     """Build a context-rich fallback prompt when a guide has no prompt block."""
 
     prerequisites = ", ".join(lesson.prerequisites) if lesson.prerequisites else "none"
-    execution_boundary = (
-        "For runnable work, use only the disposable advanced_sql_training database. "
-        "Prefer the lesson reader's Create/open guided SQL notebook action, explain "
-        "the expected row grain before execution, and inspect my actual psql transcript."
-        if lesson.track == "sql"
-        else (
+    if lesson.runner == "sql":
+        execution_boundary = (
+            "For runnable work, use only the disposable advanced_sql_training database. "
+            "Prefer the lesson reader's Create/open guided SQL notebook action, explain "
+            "the expected row grain before execution, and inspect my actual psql transcript."
+        )
+    elif lesson.runner == "python":
+        execution_boundary = (
             "For runnable work, use the repository environment and the Python "
             "(ds60sqlpy) kernel. Have me run cells or the cataloged source in order, "
             "then inspect my actual output, assertions, or error."
         )
-    )
+    elif lesson.runner == "none":
+        execution_boundary = (
+            "This is a reading lesson. Inspect my written predictions and explanations "
+            "against the guide's checks; no code runner is required."
+        )
+    else:
+        execution_boundary = (
+            f"This lesson uses {RUNNERS[lesson.runner].title}. Check the declared runner "
+            "capability before execution. Follow only the guide's explicit local setup, "
+            "bounded verification, and cleanup; do not invent an available adapter."
+        )
     return dedent(
         f"""\
-        Use $guide-ds60sqlpy-learning to coach me through `{lesson.id}` —
+        Use $guide-ds60sqlpy-learning to coach me through `{lesson.id}`:
         {lesson.title}.
 
         Goal:
@@ -922,11 +1038,11 @@ def codex_coaching_prompt(catalog: Catalog, lesson: Lesson) -> str:
 def _sql_run_walkthrough(lesson: Lesson) -> str:
     """Render a concrete first-run path for a SQL lesson reader."""
 
-    if lesson.track != "sql":
+    if lesson.runner != "sql":
         return ""
     workspace = f".learning/sql/{lesson.id}/lesson/"
     return f"""
-      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+      <section class="sql-run-guide native-only" aria-labelledby="sql-run-guide-heading">
         <p class="eyebrow">SQL beginner path</p>
         <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
         <p>
@@ -1153,7 +1269,7 @@ def build_lesson_html(
     sql_notebook_action = (
         '<button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>'
         "Create/open guided SQL notebook</button>"
-        if lesson.track == "sql"
+        if lesson.runner == "sql"
         else ""
     )
 
@@ -1389,6 +1505,9 @@ def build_lesson_html(
           Track completion on the course dashboard
         </a>
         <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson={html.escape(lesson.id, quote=True)}" hidden>
+          Open this lesson in the coding lab
+        </a>
       </div>
     </div>
   </header>
@@ -1413,7 +1532,7 @@ def build_lesson_html(
         <div>
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">{html.escape(run_heading)}</h2>
-          <p>{run_guidance}</p>
+          <p id="run-guidance">{run_guidance}</p>
           <div class="static-help">
             {static_run_help}
           </div>
@@ -1428,6 +1547,9 @@ def build_lesson_html(
           </button>
           {notebook_action}
           {sql_notebook_action}
+          <a class="button lab-only" href="../learn?lesson={html.escape(lesson.id, quote=True)}" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
         </div>
       </section>
 
@@ -1486,11 +1608,24 @@ def build_lesson_html(
     const LEARNER_PATH = {lesson_path_json};
     const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
     const SERVER_TOKEN = "";
+    const LAB_MODE = false;
     const launcherMode = Boolean(
       SERVER_TOKEN &&
+      !LAB_MODE &&
       location.protocol === "http:" &&
       location.hostname === "127.0.0.1"
     );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {{
+      document.querySelectorAll(".lab-only").forEach((element) => {{ element.hidden = false; }});
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => {{ element.hidden = true; }});
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }}
 
     document.documentElement.classList.add("tabs-ready");
     const panels = [...document.querySelectorAll("[data-panel]")];
@@ -1707,7 +1842,7 @@ def build_reference_html(
     *,
     targets: Mapping[Path, ReaderTarget] | None = None,
 ) -> str:
-    """Build one safe, standalone rendered Markdown or SQL reference page."""
+    """Build one safe, standalone rendered authored-text reference page."""
 
     resolved_source = source_path.resolve()
     if not resolved_source.is_relative_to(catalog.repo_root) or not resolved_source.is_file():
@@ -1740,6 +1875,14 @@ def build_reference_html(
             )
         )
         kind = "Rendered SQL reference"
+    elif resolved_source.suffix.lower() in _REFERENCE_SUFFIXES or resolved_source.name == "LICENSE":
+        rendered = render_artifact(
+            resolved_source,
+            repo_root=catalog.repo_root,
+            targets=target_map,
+            output_path=output_path,
+        )
+        kind = "Rendered course artifact"
     else:
         raise ValueError(f"Unsupported reference source: {source_relative}")
 

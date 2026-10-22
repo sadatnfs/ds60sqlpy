@@ -119,257 +119,257 @@
 <p>Overview</p>
 <ul>
 <li>Goal: Progress from first Python programs to substantial data-science and production projects. “Day” is a stable lesson number, not a deadline.</li>
-<li>Structure: 4 Phases — Core Python &amp; Good Coding (Days 1–15), Data Manipulation &amp; Visualization (Days 16–30), Statistics &amp; Machine Learning (Days 31–45), Advanced Topics, Production &amp; Capstone (Days 46–60).  </li>
+<li>Structure: 4 Phases - Core Python &amp; Good Coding (Days 1–15), Data Manipulation &amp; Visualization (Days 16–30), Statistics &amp; Machine Learning (Days 31–45), Advanced Topics, Production &amp; Capstone (Days 46–60).</li>
 <li>Each lesson: companion reading, a runnable learner notebook, hands-on exercises, a self-check, and a separate worked solution.</li>
 </ul>
-<p>Start with the <a href="ds-60day/README.md.html">track guide</a>. The machine-readable paths, prerequisites, dependency groups, and network notes live in <a href="../../curriculum/catalog.json"><code>curriculum/catalog.json</code></a>.</p>
+<p>Start with the <a href="ds-60day/README.md.html">track guide</a>. The machine-readable paths, prerequisites, dependency groups, and network notes live in <a href="../curriculum/catalog.json.html"><code>curriculum/catalog.json</code></a>.</p>
 <p>Four foundation checkpoints now sit after Days 1, 3, 8, and 10. They teach program tracing, evidence-led debugging, explicit record-cleaning policies, and a complete first data investigation. Follow their prerequisite links in the catalog before the next numbered lesson. These checkpoints provide time to consolidate ideas without assuming that a beginner can absorb every new topic in one sitting.</p>
 <hr>
-<h3 id="phase-1-core-python-good-coding-practices-days-1-15">Phase 1 — Core Python &amp; Good Coding Practices (Days 1–15)<a class="heading-anchor" href="#phase-1-core-python-good-coding-practices-days-1-15" aria-label="Link to this section">#</a></h3>
-<p>Day 1 — Python setup &amp; REPL, virtual environments, package management</p>
+<h3 id="phase-1-core-python-good-coding-practices-days-1-15">Phase 1 - Core Python &amp; Good Coding Practices (Days 1–15)<a class="heading-anchor" href="#phase-1-core-python-good-coding-practices-days-1-15" aria-label="Link to this section">#</a></h3>
+<p>Day 1 - Python setup &amp; REPL, virtual environments, package management</p>
 <ul>
 <li>Objectives: Run the repository setup for Windows, macOS, or Linux; select the <code>.venv</code> interpreter in VS Code; use Python and Jupyter.</li>
 <li>Exercise: Verify the environment, run a simple script, and launch Jupyter.</li>
 </ul>
-<p>Day 2 — Basic syntax, variables, data types (str, int, float, bool)</p>
+<p>Day 2 - Basic syntax, variables, data types (str, int, float, bool)</p>
 <ul>
 <li>Exercise: Small script manipulating types and printing results.</li>
 </ul>
-<p>Day 3 — Control flow: conditionals, truthiness, exceptions</p>
+<p>Day 3 - Control flow: conditionals, truthiness, exceptions</p>
 <ul>
 <li>Exercise: Implement input validation and custom exceptions.</li>
 </ul>
-<p>Day 4 — Loops, comprehensions (list/dict/set), generator basics</p>
+<p>Day 4 - Loops, comprehensions (list/dict/set), generator basics</p>
 <ul>
 <li>Exercise: Convert loops to comprehensions; write a generator.</li>
 </ul>
-<p>Day 5 — Functions, args/kwargs, scope, docstrings, type hints</p>
+<p>Day 5 - Functions, args/kwargs, scope, docstrings, type hints</p>
 <ul>
 <li>Exercise: Write well-typed utility functions with docstrings.</li>
 </ul>
-<p>Day 6 — Data structures: lists, tuples, sets, dicts — performance &amp; use-cases</p>
+<p>Day 6 - Data structures: lists, tuples, sets, dicts - performance &amp; use-cases</p>
 <ul>
 <li>Exercise: Implement common tasks (frequency count, dedupe).</li>
 </ul>
-<p>Day 7 — String manipulation, regex basics, pathlib for files</p>
+<p>Day 7 - String manipulation, regex basics, pathlib for files</p>
 <ul>
 <li>Exercise: Parse and clean a text file using regex.</li>
 </ul>
-<p>Day 8 — Working with files, JSON, CSV, context managers</p>
+<p>Day 8 - Working with files, JSON, CSV, context managers</p>
 <ul>
 <li>Exercise: Read/write CSV and JSON, ensure robust error handling.</li>
 </ul>
-<p>Day 9 — Modules, packages, import system, <strong>main</strong>, packaging basics</p>
+<p>Day 9 - Modules, packages, import system, <strong>main</strong>, packaging basics</p>
 <ul>
 <li>Exercise: Create a small package and import it in a script.</li>
 </ul>
-<p>Day 10 — Testing fundamentals: pytest, writing unit tests, assertions</p>
+<p>Day 10 - Testing fundamentals: pytest, writing unit tests, assertions</p>
 <ul>
 <li>Exercise: Add tests for previous utilities; run pytest.</li>
 </ul>
-<p>Day 11 — Debugging, logging, profiling basics (cProfile, timeit)</p>
+<p>Day 11 - Debugging, logging, profiling basics (cProfile, timeit)</p>
 <ul>
 <li>Exercise: Profile a slow function and add logging.</li>
 </ul>
-<p>Day 12 — OOP basics: classes, properties, inheritance, dataclasses</p>
+<p>Day 12 - OOP basics: classes, properties, inheritance, dataclasses</p>
 <ul>
 <li>Exercise: Model a dataset/entity with dataclass and methods.</li>
 </ul>
-<p>Day 13 — Functional tools: itertools, functools, map/filter, lambda</p>
+<p>Day 13 - Functional tools: itertools, functools, map/filter, lambda</p>
 <ul>
 <li>Exercise: Use itertools to create streaming transformations.</li>
 </ul>
-<p>Day 14 — Code quality: linting and formatting with Ruff, type checking with mypy</p>
+<p>Day 14 - Code quality: linting and formatting with Ruff, type checking with mypy</p>
 <ul>
 <li>Exercise: Apply Ruff and mypy to existing code and fix issues.</li>
 </ul>
-<p>Day 15 — Project: Small CLI data tool combining above skills</p>
+<p>Day 15 - Project: Small CLI data tool combining above skills</p>
 <ul>
 <li>Exercise: Build a command-line script that ingests a CSV, cleans it, outputs summary; include tests and linting.</li>
 </ul>
 <hr>
-<h3 id="phase-2-data-manipulation-visualization-days-16-30">Phase 2 — Data Manipulation &amp; Visualization (Days 16–30)<a class="heading-anchor" href="#phase-2-data-manipulation-visualization-days-16-30" aria-label="Link to this section">#</a></h3>
-<p>Day 16 — NumPy fundamentals: arrays, vectorization, broadcasting</p>
+<h3 id="phase-2-data-manipulation-visualization-days-16-30">Phase 2 - Data Manipulation &amp; Visualization (Days 16–30)<a class="heading-anchor" href="#phase-2-data-manipulation-visualization-days-16-30" aria-label="Link to this section">#</a></h3>
+<p>Day 16 - NumPy fundamentals: arrays, vectorization, broadcasting</p>
 <ul>
 <li>Exercise: Convert loops to vectorized NumPy operations.</li>
 </ul>
-<p>Day 17 — Pandas intro: Series, DataFrame, indexing, selection</p>
+<p>Day 17 - Pandas intro: Series, DataFrame, indexing, selection</p>
 <ul>
 <li>Exercise: Load CSV into DataFrame, inspect, and slice.</li>
 </ul>
-<p>Day 18 — Pandas I/O &amp; cleaning: handling missing, types, parsing dates</p>
+<p>Day 18 - Pandas I/O &amp; cleaning: handling missing, types, parsing dates</p>
 <ul>
 <li>Exercise: Clean a messy dataset (NA handling, type conversions).</li>
 </ul>
-<p>Day 19 — Data transformation: groupby, agg, pivot_table, melt</p>
+<p>Day 19 - Data transformation: groupby, agg, pivot_table, melt</p>
 <ul>
 <li>Exercise: Aggregations and reshaping on real dataset.</li>
 </ul>
-<p>Day 20 — Merging &amp; joins in pandas; efficient joins for large data</p>
+<p>Day 20 - Merging &amp; joins in pandas; efficient joins for large data</p>
 <ul>
 <li>Exercise: Join multiple tables and resolve key issues.</li>
 </ul>
-<p>Day 21 — Time series basics with pandas: date index, resampling, rolling</p>
+<p>Day 21 - Time series basics with pandas: date index, resampling, rolling</p>
 <ul>
 <li>Exercise: Resample and compute rolling statistics.</li>
 </ul>
-<p>Day 22 — Advanced pandas: apply vs vectorization, query, eval, categorical dtypes</p>
+<p>Day 22 - Advanced pandas: apply vs vectorization, query, eval, categorical dtypes</p>
 <ul>
 <li>Exercise: Optimize slow apply usage; convert high-cardinality to appropriate types.</li>
 </ul>
-<p>Day 23 — Data pipelines: functions, generators, memory-efficient processing</p>
+<p>Day 23 - Data pipelines: functions, generators, memory-efficient processing</p>
 <ul>
 <li>Exercise: Build a pipeline to stream, clean, and yield batches.</li>
 </ul>
-<p>Day 24 — Exploratory Data Analysis (EDA) best practices &amp; checklist</p>
+<p>Day 24 - Exploratory Data Analysis (EDA) best practices &amp; checklist</p>
 <ul>
 <li>Exercise: Produce an EDA summary notebook for a dataset.</li>
 </ul>
-<p>Day 25 — Visualization with Matplotlib + Seaborn fundamentals</p>
+<p>Day 25 - Visualization with Matplotlib + Seaborn fundamentals</p>
 <ul>
 <li>Exercise: Plot distributions, pairplots, correlation heatmap.</li>
 </ul>
-<p>Day 26 — Advanced visualizations: interactive plots with Plotly or Altair</p>
+<p>Day 26 - Advanced visualizations: interactive plots with Plotly or Altair</p>
 <ul>
 <li>Exercise: Create one interactive dashboard chart.</li>
 </ul>
-<p>Day 27 — Geospatial basics with GeoPandas</p>
+<p>Day 27 - Geospatial basics with GeoPandas</p>
 <ul>
 <li>Exercise: Plot simple geospatial data; the optional map dataset has a disclosed first-use download and cache.</li>
 </ul>
-<p>Day 28 — Feature engineering: encoding, scaling, bins, missing flags</p>
+<p>Day 28 - Feature engineering: encoding, scaling, bins, missing flags</p>
 <ul>
 <li>Exercise: Engineer features for a modeling task.</li>
 </ul>
-<p>Day 29 — Data validation &amp; schemas with Pandera</p>
+<p>Day 29 - Data validation &amp; schemas with Pandera</p>
 <ul>
 <li>Exercise: Add schema checks to ingest pipeline.</li>
 </ul>
-<p>Day 30 — Project: EDA + preprocessing notebook on a mid-size dataset</p>
+<p>Day 30 - Project: EDA + preprocessing notebook on a mid-size dataset</p>
 <ul>
 <li>Exercise: Deliver cleaned dataset and EDA report with visuals.</li>
 </ul>
 <hr>
-<h3 id="phase-3-statistics-machine-learning-days-31-45">Phase 3 — Statistics &amp; Machine Learning (Days 31–45)<a class="heading-anchor" href="#phase-3-statistics-machine-learning-days-31-45" aria-label="Link to this section">#</a></h3>
-<p>Day 31 — Probability refresh: distributions, Bayes basics, sampling</p>
+<h3 id="phase-3-statistics-machine-learning-days-31-45">Phase 3 - Statistics &amp; Machine Learning (Days 31–45)<a class="heading-anchor" href="#phase-3-statistics-machine-learning-days-31-45" aria-label="Link to this section">#</a></h3>
+<p>Day 31 - Probability refresh: distributions, Bayes basics, sampling</p>
 <ul>
 <li>Exercise: Simulate sampling and estimate probabilities.</li>
 </ul>
-<p>Day 32 — Statistical inference: hypothesis testing, confidence intervals</p>
+<p>Day 32 - Statistical inference: hypothesis testing, confidence intervals</p>
 <ul>
 <li>Exercise: Run t-test/chi-square on dataset questions.</li>
 </ul>
-<p>Day 33 — Linear algebra &amp; matrices for ML intuition (NumPy practice)</p>
+<p>Day 33 - Linear algebra &amp; matrices for ML intuition (NumPy practice)</p>
 <ul>
 <li>Exercise: Implement simple linear regression with matrix ops.</li>
 </ul>
-<p>Day 34 — scikit-learn intro: API, pipelines, fit/predict/transform</p>
+<p>Day 34 - scikit-learn intro: API, pipelines, fit/predict/transform</p>
 <ul>
 <li>Exercise: Train a baseline classifier with pipeline.</li>
 </ul>
-<p>Day 35 — Model evaluation: metrics for classification/regression, cross-validation</p>
+<p>Day 35 - Model evaluation: metrics for classification/regression, cross-validation</p>
 <ul>
 <li>Exercise: Compare metrics and implement k-fold CV.</li>
 </ul>
-<p>Day 36 — Feature selection &amp; dimensionality reduction (PCA, SelectKBest)</p>
+<p>Day 36 - Feature selection &amp; dimensionality reduction (PCA, SelectKBest)</p>
 <ul>
 <li>Exercise: Apply PCA and interpret components.</li>
 </ul>
-<p>Day 37 — Regularization &amp; linear models (Ridge, Lasso, Logistic)</p>
+<p>Day 37 - Regularization &amp; linear models (Ridge, Lasso, Logistic)</p>
 <ul>
 <li>Exercise: Tune regularization and visualize coef shrinkage.</li>
 </ul>
-<p>Day 38 — Tree-based models: Decision Trees, Random Forests, feature importances</p>
+<p>Day 38 - Tree-based models: Decision Trees, Random Forests, feature importances</p>
 <ul>
 <li>Exercise: Train RF and analyze feature importances.</li>
 </ul>
-<p>Day 39 — Gradient boosting intro: XGBoost/LightGBM basics, tuning tips</p>
+<p>Day 39 - Gradient boosting intro: XGBoost/LightGBM basics, tuning tips</p>
 <ul>
 <li>Exercise: Implement a GBM model, tune key params.</li>
 </ul>
-<p>Day 40 — Model tuning &amp; pipelines: GridSearchCV/RandomizedSearchCV, nested CV</p>
+<p>Day 40 - Model tuning &amp; pipelines: GridSearchCV/RandomizedSearchCV, nested CV</p>
 <ul>
 <li>Exercise: Build pipeline and run parameter search.</li>
 </ul>
-<p>Day 41 — Handling imbalance: sampling, class weights, metrics for imbalanced data</p>
+<p>Day 41 - Handling imbalance: sampling, class weights, metrics for imbalanced data</p>
 <ul>
 <li>Exercise: Apply SMOTE or class weighting and compare results.</li>
 </ul>
-<p>Day 42 — Unsupervised learning basics: clustering (KMeans), anomaly detection</p>
+<p>Day 42 - Unsupervised learning basics: clustering (KMeans), anomaly detection</p>
 <ul>
 <li>Exercise: Cluster a dataset and interpret clusters.</li>
 </ul>
-<p>Day 43 — Model interpretation: SHAP, partial dependence, LIME basics</p>
+<p>Day 43 - Model interpretation: SHAP, partial dependence, LIME basics</p>
 <ul>
 <li>Exercise: Generate SHAP explanations for a model.</li>
 </ul>
-<p>Day 44 — Model deployment basics: saving models with joblib, typed APIs with FastAPI</p>
+<p>Day 44 - Model deployment basics: saving models with joblib, typed APIs with FastAPI</p>
 <ul>
 <li>Exercise: Save model and create a minimal prediction endpoint.</li>
 </ul>
-<p>Day 45 — Project: End-to-end modeling mini-project (data → model → evaluation → save)</p>
+<p>Day 45 - Project: End-to-end modeling mini-project (data → model → evaluation → save)</p>
 <ul>
 <li>Exercise: Deliver notebook/script with reproducible pipeline and README.</li>
 </ul>
 <hr>
-<h3 id="phase-4-advanced-topics-production-capstone-days-46-60">Phase 4 — Advanced Topics, Production &amp; Capstone (Days 46–60)<a class="heading-anchor" href="#phase-4-advanced-topics-production-capstone-days-46-60" aria-label="Link to this section">#</a></h3>
-<p>Day 46 — Introduction to deep learning with PyTorch</p>
+<h3 id="phase-4-advanced-topics-production-capstone-days-46-60">Phase 4 - Advanced Topics, Production &amp; Capstone (Days 46–60)<a class="heading-anchor" href="#phase-4-advanced-topics-production-capstone-days-46-60" aria-label="Link to this section">#</a></h3>
+<p>Day 46 - Introduction to deep learning with PyTorch</p>
 <ul>
 <li>Exercise: Compare a neural model with a simpler baseline and run a small, deterministic example.</li>
 </ul>
-<p>Day 47 — PyTorch basics: tensors, autograd, a small neural network, training loop</p>
+<p>Day 47 - PyTorch basics: tensors, autograd, a small neural network, training loop</p>
 <ul>
 <li>Exercise: Train a small network on local generated data.</li>
 </ul>
-<p>Day 48 — Transfer learning &amp; convolutional-network basics</p>
+<p>Day 48 - Transfer learning &amp; convolutional-network basics</p>
 <ul>
 <li>Exercise: Adapt a model on a small local dataset, with pretrained weights as an explicitly optional first download.</li>
 </ul>
-<p>Day 49 — NLP basics with Hugging Face and spaCy: tokenization and embeddings</p>
+<p>Day 49 - NLP basics with Hugging Face and spaCy: tokenization and embeddings</p>
 <ul>
 <li>Exercise: Build a local text-classification baseline, then optionally compare it with a cached pretrained model.</li>
 </ul>
-<p>Day 50 — Time-series modeling and forecast evaluation</p>
+<p>Day 50 - Time-series modeling and forecast evaluation</p>
 <ul>
 <li>Exercise: Forecast a local time series, compare with a naive baseline, and evaluate without leakage.</li>
 </ul>
-<p>Day 51 — Advanced feature engineering: target encoding, leakage prevention, pipelines</p>
+<p>Day 51 - Advanced feature engineering: target encoding, leakage prevention, pipelines</p>
 <ul>
 <li>Exercise: Implement robust target encoding with CV folds.</li>
 </ul>
-<p>Day 52 — Scalability with Dask and chunked processing</p>
+<p>Day 52 - Scalability with Dask and chunked processing</p>
 <ul>
 <li>Exercise: Process a bounded generated dataset with Dask and reason about partition and memory tradeoffs.</li>
 </ul>
-<p>Day 53 — MLOps intro: experiment tracking (MLflow), reproducibility, CI basics</p>
+<p>Day 53 - MLOps intro: experiment tracking (MLflow), reproducibility, CI basics</p>
 <ul>
 <li>Exercise: Track experiments and log artifacts.</li>
 </ul>
-<p>Day 54 — Monitoring &amp; model governance: drift detection, retraining strategies</p>
+<p>Day 54 - Monitoring &amp; model governance: drift detection, retraining strategies</p>
 <ul>
 <li>Exercise: Simulate data drift and design retraining triggers.</li>
 </ul>
-<p>Day 55 — APIs &amp; containerization: Dockerize a prediction service</p>
+<p>Day 55 - APIs &amp; containerization: Dockerize a prediction service</p>
 <ul>
 <li>Exercise: Create Dockerfile for model API and run locally.</li>
 </ul>
-<p>Day 56 — Orchestration basics with Prefect</p>
+<p>Day 56 - Orchestration basics with Prefect</p>
 <ul>
 <li>Exercise: Write a local Prefect flow for preprocessing and training.</li>
 </ul>
-<p>Day 57 — Security, data privacy &amp; ethical considerations for data science</p>
+<p>Day 57 - Security, data privacy &amp; ethical considerations for data science</p>
 <ul>
 <li>Exercise: Perform basic PII scan and redact sample dataset.</li>
 </ul>
-<p>Day 58 — Code review, refactoring, and maintainer checklist for DS codebases</p>
+<p>Day 58 - Code review, refactoring, and maintainer checklist for DS codebases</p>
 <ul>
 <li>Exercise: Refactor a notebook into modular scripts; add tests.</li>
 </ul>
-<p>Day 59 — Capstone project kickoff: define problem, dataset, evaluation plan</p>
+<p>Day 59 - Capstone project kickoff: define problem, dataset, evaluation plan</p>
 <ul>
 <li>Exercise: Create project repo structure, baseline model, data pipeline.</li>
 </ul>
-<p>Day 60 — Capstone completion &amp; presentation: finalize model, prepare report &amp; slides</p>
+<p>Day 60 - Capstone completion &amp; presentation: finalize model, prepare report &amp; slides</p>
 <ul>
 <li>Exercise: Present results (notebook + README), include reproducible run instructions.</li>
 </ul>
@@ -380,7 +380,7 @@
 <hr>
 <h3 id="suggested-rhythm">Suggested rhythm<a class="heading-anchor" href="#suggested-rhythm" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>5 focused weekdays (learning + exercises), 1 lighter day for reading/recap, 1 day for mini-projects or catch-up.  </li>
+<li>5 focused weekdays (learning + exercises), 1 lighter day for reading/recap, 1 day for mini-projects or catch-up.</li>
 <li>Keep a daily journal: what you learned, 3 takeaways, 1 blocker.</li>
 <li>Pause at phase projects and repeat material as needed; project lessons often take more than one session.</li>
 </ul>

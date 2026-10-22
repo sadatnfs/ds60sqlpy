@@ -27,6 +27,7 @@ def notebook_paths(repo_root: Path) -> Iterable[Path]:
         [
             *(repo_root / COURSE_ROOT_RELATIVE).rglob("*.ipynb"),
             *(repo_root / BRIDGE_NOTEBOOK_ROOT_RELATIVE).rglob("*.ipynb"),
+            *(repo_root / "courses").rglob("*.ipynb"),
         ]
     )
 

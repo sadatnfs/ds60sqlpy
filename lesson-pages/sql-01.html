@@ -230,6 +230,9 @@
           Track completion on the course dashboard
         </a>
         <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=sql-01" hidden>
+          Open this lesson in the coding lab
+        </a>
       </div>
     </div>
   </header>
@@ -254,7 +257,7 @@
         <div>
           <p class="eyebrow">Your working copy</p>
           <h2 id="run-heading">Open your guided SQL workspace</h2>
-          <p>In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database, never a shared or valuable one.</p>
+          <p id="run-guidance">In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database, never a shared or valuable one.</p>
           <div class="static-help">
             <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
           </div>
@@ -269,11 +272,14 @@
           </button>
 
           <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+          <a class="button lab-only" href="../learn?lesson=sql-01" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
         </div>
       </section>
 
 
-      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
+      <section class="sql-run-guide native-only" aria-labelledby="sql-run-guide-heading">
         <p class="eyebrow">SQL beginner path</p>
         <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
         <p>
@@ -377,7 +383,7 @@
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-01-select-where-order-by-limit-offset-companion-guide">Day 01 — SELECT, WHERE, ORDER BY, LIMIT/OFFSET (Companion Guide)<a class="heading-anchor" href="#guide--day-01-select-where-order-by-limit-offset-companion-guide" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-01-select-where-order-by-limit-offset-companion-guide">Day 01 - SELECT, WHERE, ORDER BY, LIMIT/OFFSET (Companion Guide)<a class="heading-anchor" href="#guide--day-01-select-where-order-by-limit-offset-companion-guide" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Foundation (beginner)</li>
@@ -405,7 +411,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql\postgres-60day\
 <pre><code class="language-bash"># macOS/Linux, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL without permanently changing <code>PATH</code>. If PostgreSQL reports that the database or a <code>training</code> relation does not exist, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication errors, rerun the setup/doctor flow—do not paste a password into a lesson, notebook, or committed file. With <code>ON_ERROR_STOP</code>, fix the first reported error and rerun the whole transactional script rather than continuing from partial state.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL without permanently changing <code>PATH</code>. If PostgreSQL reports that the database or a <code>training</code> relation does not exist, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication errors, rerun the setup/doctor flow - do not paste a password into a lesson, notebook, or committed file. With <code>ON_ERROR_STOP</code>, fix the first reported error and rerun the whole transactional script rather than continuing from partial state.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence of the table&#x27;s subject; in <code>training.customers</code>, one row represents one customer. A <strong>result set</strong> is the temporary, table-shaped answer printed by a query. It does not change stored rows. The <strong>grain</strong> says what one output row represents; state it before writing a query.</p>
 <p>For the opening query, imagine a pipeline:</p>
@@ -486,7 +492,7 @@ LIMIT 15;</code></pre>
 <li>Does the learner file complete under <code>psql -X -v ON_ERROR_STOP=1</code> and finish with <code>ROLLBACK</code>?</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-02.html#guide">Day 02 — aggregations and grouping</a>.</p>
+<p>Continue to <a href="sql-02.html#guide">Day 02 - aggregations and grouping</a>.</p>
 <h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
 <p>Learning objectives</p>
 <ul>
@@ -537,7 +543,7 @@ LIMIT 15;</code></pre>
 </ul>
 <h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
-<pre><code class="language-text">Tutor me through sql-01 — Select Where Orderby.
+<pre><code class="language-text">Tutor me through sql-01 - Select Where Orderby.
 
 I am a beginner who completed the direct catalog prerequisite sql-start-03. Reuse its small-stage debugging workflow and explain new clauses before relying on them. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day01_select_where_orderby.md
@@ -596,7 +602,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- Day 1: SELECT, WHERE, ORDER BY, LIMIT</span>
-<span>-- BEGINNER WORKFLOW — sql-01: Select Where Orderby</span>
+<span>-- BEGINNER WORKFLOW - sql-01: Select Where Orderby</span>
 <span>-- Guide: sql/postgres-60day/companion-guides/day01_select_where_orderby.md</span>
 <span>-- Recommended runner: open the private lesson reader and choose</span>
 <span>-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span>
@@ -1162,7 +1168,7 @@ LIMIT 10;</code></pre>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-01 — Select Where Orderby.
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-01 - Select Where Orderby.
 
 I am a beginner who completed the direct catalog prerequisite sql-start-03. Reuse its small-stage debugging workflow and explain new clauses before relying on them. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day01_select_where_orderby.md
@@ -1213,11 +1219,24 @@ transfer task that I answer without looking back. Done when I can explain the ro
     const LEARNER_PATH = "sql/postgres-60day/day01_select_where_orderby.sql";
     const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
     const SERVER_TOKEN = "";
+    const LAB_MODE = false;
     const launcherMode = Boolean(
       SERVER_TOKEN &&
+      !LAB_MODE &&
       location.protocol === "http:" &&
       location.hostname === "127.0.0.1"
     );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
 
     document.documentElement.classList.add("tabs-ready");
     const panels = [...document.querySelectorAll("[data-panel]")];

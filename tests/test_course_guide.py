@@ -40,10 +40,11 @@ def test_portable_course_guide_has_no_remote_runtime_dependencies() -> None:
     assert "localStorage" in rendered
     assert "DS60_DATABASE_URL" in rendered
     assert "START_DS60.cmd" in rendered
-    assert "Double-click" in rendered
+    assert "double-click" in rendered.casefold()
     assert "You are in portable reading mode." in rendered
     assert "rendered here as read-only" in rendered
     assert "Private launcher mode is active." in rendered
+    assert "[hidden] { display: none !important; }" in rendered
     assert 'id="run-sql"' in rendered
     assert "Open SQL workspace" in rendered
     assert 'launchNative("jupyter-sql"' in rendered
@@ -51,7 +52,8 @@ def test_portable_course_guide_has_no_remote_runtime_dependencies() -> None:
     assert "Open PostgreSQL magics lab" in rendered
     assert "What the guide gives you before you ask for help" in rendered
     assert "evidence-based done condition" in rendered
-    assert 'href="lesson-pages/sql-01.html">Start SQL Day 1' in rendered
+    assert 'href="lesson-pages/sql-start-01.html">Start the first SQL lab' in rendered
+    assert "Extract All, then double-click <code>START_DOCKER_LAB.cmd</code>" in rendered
     assert "relational design between Days 15–16" in rendered
     assert "Companion guide: ${lesson.guide_path}" in rendered
     assert "Answer-free learner artifact: ${lesson.lesson_path}" in rendered
@@ -79,6 +81,19 @@ def test_portable_course_guide_has_runnable_windows_resolver() -> None:
         "}"
     ) in rendered
     assert "$CoursePython = if (Test-Path .\\.venv\\Scripts\\python.exe) {{" not in rendered
+
+
+def test_registered_tracks_appear_in_filters_progress_and_inventory() -> None:
+    payload = _catalog_payload()
+    payload["tracks"]["cpp"] = {"title": "C++ systems <practice>", "plan": "README.md"}
+    rendered = build_html(payload)
+
+    assert "<strong>4</strong><span>connected tracks</span>" in rendered
+    assert '<option value="cpp">C++ systems &lt;practice&gt;</option>' in rendered
+    assert 'data-progress-track="cpp"><strong><a href="reference-pages/README.md.html">' in rendered
+    assert ">C++ systems &lt;practice&gt;</a></strong>" in rendered
+    assert "Object.keys(course.tracks).forEach" in rendered
+    assert "trackLessons.length\n          ?" in rendered
 
 
 def test_embedded_catalog_is_valid_json() -> None:

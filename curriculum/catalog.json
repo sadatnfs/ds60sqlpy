@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_from": "course artifact filenames and professional lesson specifications",
+  "generated_from": "course artifact filenames, professional specifications and registered extensions",
   "tracks": {
     "python": {
       "title": "Python and data science",
@@ -15,6 +15,7 @@
       "plan": "bridge/README.md"
     }
   },
+  "learning_paths": {},
   "lessons": [
     {
       "id": "python-01",
@@ -32,7 +33,8 @@
         "python/ds-60day/solutions/day01_setup_and_repl/day01_solutions.ipynb"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-foundations-01",
@@ -52,7 +54,8 @@
       "solution_paths": [
         "python/professional/solutions/py_foundations_01_read_trace_state_solutions.md",
         "python/professional/solutions/py_foundations_01_read_trace_state_solution.py"
-      ]
+      ],
+      "runner": "python"
     },
     {
       "id": "python-02",
@@ -72,7 +75,8 @@
         "python/ds-60day/solutions/day02_basics_types/day02_solutions.ipynb"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-03",
@@ -92,7 +96,8 @@
         "python/ds-60day/solutions/day03_control_flow_exceptions/day03_solutions.ipynb"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-foundations-02",
@@ -112,7 +117,8 @@
       "solution_paths": [
         "python/professional/solutions/py_foundations_02_debug_evidence_solutions.md",
         "python/professional/solutions/py_foundations_02_debug_evidence_solution.py"
-      ]
+      ],
+      "runner": "python"
     },
     {
       "id": "python-04",
@@ -132,7 +138,8 @@
         "python/ds-60day/solutions/day04_loops_comprehensions_generators/day04_solutions.ipynb"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-05",
@@ -152,7 +159,8 @@
         "python/ds-60day/solutions/day05_functions_type_hints/day05_solutions.ipynb"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-06",
@@ -172,7 +180,8 @@
         "python/ds-60day/solutions/day06_data_structures/day06_solutions.ipynb"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-07",
@@ -192,7 +201,8 @@
         "python/ds-60day/solutions/day07_strings_regex_pathlib/day07_solutions.ipynb"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-08",
@@ -212,7 +222,8 @@
         "python/ds-60day/solutions/day08_files_json_csv_context/day08_solutions.ipynb"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-foundations-03",
@@ -232,7 +243,8 @@
       "solution_paths": [
         "python/professional/solutions/py_foundations_03_clean_records_solutions.md",
         "python/professional/solutions/py_foundations_03_clean_records_solution.py"
-      ]
+      ],
+      "runner": "python"
     },
     {
       "id": "python-09",
@@ -252,7 +264,8 @@
         "python/ds-60day/solutions/day09_modules_packages/day09_solutions.ipynb"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-10",
@@ -272,7 +285,8 @@
         "python/ds-60day/solutions/day10_testing_pytest/day10_solutions.ipynb"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-foundations-04",
@@ -293,7 +307,8 @@
       "solution_paths": [
         "python/professional/solutions/py_foundations_04_first_investigation_solutions.md",
         "python/professional/solutions/py_foundations_04_first_investigation_solution.py"
-      ]
+      ],
+      "runner": "python"
     },
     {
       "id": "python-11",
@@ -313,7 +328,8 @@
         "python/ds-60day/solutions/day11_debug_logging_profiling/day11_solutions.ipynb"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-12",
@@ -333,7 +349,8 @@
         "python/ds-60day/solutions/day12_oop_dataclasses/day12_solutions.ipynb"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-13",
@@ -353,7 +370,8 @@
         "python/ds-60day/solutions/day13_functional_tools/day13_solutions.ipynb"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-14",
@@ -373,7 +391,8 @@
         "python/ds-60day/solutions/day14_code_quality_tooling/day14_solutions.ipynb"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-15",
@@ -393,7 +412,8 @@
         "python/ds-60day/solutions/day15_cli_project/day15_solutions.ipynb"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-16",
@@ -413,7 +433,8 @@
         "python/ds-60day/solutions/day16_numpy_fundamentals/day16_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-17",
@@ -433,7 +454,8 @@
         "python/ds-60day/solutions/day17_pandas_intro/day17_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache"
+      "network": "first-run-seaborn-cache",
+      "runner": "python"
     },
     {
       "id": "python-18",
@@ -453,7 +475,8 @@
         "python/ds-60day/solutions/day18_pandas_io_cleaning/day18_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache"
+      "network": "first-run-seaborn-cache",
+      "runner": "python"
     },
     {
       "id": "python-19",
@@ -473,7 +496,8 @@
         "python/ds-60day/solutions/day19_pandas_groupby_pivot/day19_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache"
+      "network": "first-run-seaborn-cache",
+      "runner": "python"
     },
     {
       "id": "python-20",
@@ -493,7 +517,8 @@
         "python/ds-60day/solutions/day20_pandas_merging_joins/day20_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-21",
@@ -513,7 +538,8 @@
         "python/ds-60day/solutions/day21_time_series_pandas/day21_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-22",
@@ -533,7 +559,8 @@
         "python/ds-60day/solutions/day22_advanced_pandas_apply_query_eval/day22_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache"
+      "network": "first-run-seaborn-cache",
+      "runner": "python"
     },
     {
       "id": "python-23",
@@ -553,7 +580,8 @@
         "python/ds-60day/solutions/day23_data_pipelines_generators/day23_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-24",
@@ -573,7 +601,8 @@
         "python/ds-60day/solutions/day24_eda_best_practices/day24_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache"
+      "network": "first-run-seaborn-cache",
+      "runner": "python"
     },
     {
       "id": "python-25",
@@ -593,7 +622,8 @@
         "python/ds-60day/solutions/day25_viz_matplotlib_seaborn/day25_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache"
+      "network": "first-run-seaborn-cache",
+      "runner": "python"
     },
     {
       "id": "python-26",
@@ -613,7 +643,8 @@
         "python/ds-60day/solutions/day26_viz_plotly_altair/day26_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache"
+      "network": "first-run-seaborn-cache",
+      "runner": "python"
     },
     {
       "id": "python-27",
@@ -633,7 +664,8 @@
         "python/ds-60day/solutions/day27_geospatial_or_domain_viz/day27_solutions.ipynb"
       ],
       "dependency_group": "geo",
-      "network": "optional-map-download"
+      "network": "optional-map-download",
+      "runner": "python"
     },
     {
       "id": "python-28",
@@ -653,7 +685,8 @@
         "python/ds-60day/solutions/day28_feature_engineering/day28_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache"
+      "network": "first-run-seaborn-cache",
+      "runner": "python"
     },
     {
       "id": "python-29",
@@ -673,7 +706,8 @@
         "python/ds-60day/solutions/day29_data_validation_schemas/day29_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-30",
@@ -693,7 +727,8 @@
         "python/ds-60day/solutions/day30_project_eda_preprocessing/day30_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-31",
@@ -713,7 +748,8 @@
         "python/ds-60day/solutions/day31_probability_basics/day31_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-32",
@@ -733,7 +769,8 @@
         "python/ds-60day/solutions/day32_statistical_inference/day32_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-33",
@@ -753,7 +790,8 @@
         "python/ds-60day/solutions/day33_linear_algebra_matrices/day33_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-34",
@@ -773,7 +811,8 @@
         "python/ds-60day/solutions/day34_sklearn_intro_pipelines/day34_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-35",
@@ -793,7 +832,8 @@
         "python/ds-60day/solutions/day35_model_evaluation_cv/day35_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-36",
@@ -813,7 +853,8 @@
         "python/ds-60day/solutions/day36_dimensionality_reduction_pca/day36_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-37",
@@ -833,7 +874,8 @@
         "python/ds-60day/solutions/day37_regularization_linear_models/day37_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-38",
@@ -853,7 +895,8 @@
         "python/ds-60day/solutions/day38_tree_models_random_forest/day38_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-39",
@@ -873,7 +916,8 @@
         "python/ds-60day/solutions/day39_gradient_boosting_xgboost_lightgbm/day39_solutions.ipynb"
       ],
       "dependency_group": "ml",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-40",
@@ -893,7 +937,8 @@
         "python/ds-60day/solutions/day40_model_tuning_searchcv/day40_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-41",
@@ -913,7 +958,8 @@
         "python/ds-60day/solutions/day41_imbalance_handling/day41_solutions.ipynb"
       ],
       "dependency_group": "ml",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-42",
@@ -933,7 +979,8 @@
         "python/ds-60day/solutions/day42_unsupervised_kmeans_anomaly/day42_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-43",
@@ -953,7 +1000,8 @@
         "python/ds-60day/solutions/day43_model_interpretation_shap_pdp/day43_solutions.ipynb"
       ],
       "dependency_group": "ml",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-44",
@@ -973,7 +1021,8 @@
         "python/ds-60day/solutions/day44_model_deployment_fastapi/day44_solutions.ipynb"
       ],
       "dependency_group": "production",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-45",
@@ -993,7 +1042,8 @@
         "python/ds-60day/solutions/day45_end_to_end_modeling_project/day45_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache"
+      "network": "first-run-seaborn-cache",
+      "runner": "python"
     },
     {
       "id": "python-46",
@@ -1013,7 +1063,8 @@
         "python/ds-60day/solutions/day46_deep_learning_overview/day46_solutions.ipynb"
       ],
       "dependency_group": "deep-learning",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-47",
@@ -1033,7 +1084,8 @@
         "python/ds-60day/solutions/day47_pytorch_basics_nn_training_loop/day47_solutions.ipynb"
       ],
       "dependency_group": "deep-learning",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-48",
@@ -1053,7 +1105,8 @@
         "python/ds-60day/solutions/day48_transfer_learning_cnn/day48_solutions.ipynb"
       ],
       "dependency_group": "deep-learning",
-      "network": "optional-model-download"
+      "network": "optional-model-download",
+      "runner": "python"
     },
     {
       "id": "python-49",
@@ -1073,7 +1126,8 @@
         "python/ds-60day/solutions/day49_nlp_basics_hf_spacy/day49_solutions.ipynb"
       ],
       "dependency_group": "nlp",
-      "network": "optional-model-download"
+      "network": "optional-model-download",
+      "runner": "python"
     },
     {
       "id": "python-50",
@@ -1093,7 +1147,8 @@
         "python/ds-60day/solutions/day50_time_series_modeling/day50_solutions.ipynb"
       ],
       "dependency_group": "ml",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-51",
@@ -1113,7 +1168,8 @@
         "python/ds-60day/solutions/day51_advanced_feature_engineering_target_encoding/day51_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "first-run-seaborn-cache"
+      "network": "first-run-seaborn-cache",
+      "runner": "python"
     },
     {
       "id": "python-52",
@@ -1133,7 +1189,8 @@
         "python/ds-60day/solutions/day52_scalability_dask/day52_solutions.ipynb"
       ],
       "dependency_group": "production",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-53",
@@ -1153,7 +1210,8 @@
         "python/ds-60day/solutions/day53_mlops_mlflow_experiment_tracking/day53_solutions.ipynb"
       ],
       "dependency_group": "production",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-54",
@@ -1173,7 +1231,8 @@
         "python/ds-60day/solutions/day54_monitoring_model_governance/day54_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-55",
@@ -1193,7 +1252,8 @@
         "python/ds-60day/solutions/day55_apis_containerization_docker/day55_solutions.ipynb"
       ],
       "dependency_group": "production",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-56",
@@ -1213,7 +1273,8 @@
         "python/ds-60day/solutions/day56_orchestration_prefect_intro/day56_solutions.ipynb"
       ],
       "dependency_group": "production",
-      "network": "first-run-seaborn-cache"
+      "network": "first-run-seaborn-cache",
+      "runner": "python"
     },
     {
       "id": "python-57",
@@ -1233,7 +1294,8 @@
         "python/ds-60day/solutions/day57_security_privacy_ethics/day57_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-58",
@@ -1253,7 +1315,8 @@
         "python/ds-60day/solutions/day58_code_review_refactor_tests/day58_solutions.ipynb"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-59",
@@ -1273,7 +1336,8 @@
         "python/ds-60day/solutions/day59_capstone_kickoff/day59_solutions.ipynb"
       ],
       "dependency_group": "advanced",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-60",
@@ -1293,7 +1357,8 @@
         "python/ds-60day/solutions/day60_capstone_completion_presentation/day60_solutions.ipynb"
       ],
       "dependency_group": "advanced",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-pro-01",
@@ -1313,7 +1378,8 @@
         "python/professional/solutions/py_pro_01_package_engineering_solution.py"
       ],
       "dependency_group": "professional",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-svc-01",
@@ -1333,7 +1399,8 @@
         "python/professional/solutions/py_svc_01_reliable_http_clients_solution.py"
       ],
       "dependency_group": "professional",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-pro-02",
@@ -1353,7 +1420,8 @@
         "python/professional/solutions/py_pro_02_concurrency_parallelism_solution.py"
       ],
       "dependency_group": "professional",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-data-01",
@@ -1373,7 +1441,8 @@
         "python/professional/solutions/py_data_01_arrow_duckdb_solution.py"
       ],
       "dependency_group": "professional",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-test-01",
@@ -1393,7 +1462,8 @@
         "python/professional/solutions/py_test_01_architecture_generative_solution.py"
       ],
       "dependency_group": "professional",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-lang-01",
@@ -1413,7 +1483,8 @@
         "python/professional/solutions/py_lang_01_typing_data_model_solution.py"
       ],
       "dependency_group": "quality",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-stats-01",
@@ -1433,7 +1504,8 @@
         "python/professional/solutions/py_stats_01_resampling_experiments_solution.py"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-ml-01",
@@ -1453,7 +1525,8 @@
         "python/professional/solutions/py_ml_01_reproducible_delivery_solution.py"
       ],
       "dependency_group": "production",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-svc-02",
@@ -1476,7 +1549,8 @@
         "python/professional/solutions/py_svc_02_hardening_observability_solution.py"
       ],
       "dependency_group": "production",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-perf-01",
@@ -1497,7 +1571,8 @@
         "python/professional/solutions/py_perf_01_measurement_optimization_solution.py"
       ],
       "dependency_group": "data",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "python-data-02",
@@ -1518,7 +1593,8 @@
       "solution_paths": [
         "python/professional/solutions/py_data_02_exact_values_time_text_solutions.md",
         "python/professional/solutions/py_data_02_exact_values_time_text_solution.py"
-      ]
+      ],
+      "runner": "python"
     },
     {
       "id": "python-ml-02",
@@ -1539,7 +1615,8 @@
       "solution_paths": [
         "python/professional/solutions/py_ml_02_group_time_evaluation_solutions.md",
         "python/professional/solutions/py_ml_02_group_time_evaluation_solution.py"
-      ]
+      ],
+      "runner": "python"
     },
     {
       "id": "python-pro-03",
@@ -1560,7 +1637,8 @@
       "solution_paths": [
         "python/professional/solutions/py_pro_03_restartable_file_pipeline_solutions.md",
         "python/professional/solutions/py_pro_03_restartable_file_pipeline_solution.py"
-      ]
+      ],
+      "runner": "python"
     },
     {
       "id": "sql-start-01",
@@ -1578,7 +1656,8 @@
         "sql/professional/solutions/sql_start_01_tables_and_grain_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-start-02",
@@ -1598,7 +1677,8 @@
         "sql/professional/solutions/sql_start_02_values_null_order_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-start-03",
@@ -1618,7 +1698,8 @@
         "sql/professional/solutions/sql_start_03_query_debugging_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-01",
@@ -1638,7 +1719,8 @@
         "sql/postgres-60day/solutions/day01_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-02",
@@ -1658,7 +1740,8 @@
         "sql/postgres-60day/solutions/day02_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-03",
@@ -1678,7 +1761,8 @@
         "sql/postgres-60day/solutions/day03_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-04",
@@ -1698,7 +1782,8 @@
         "sql/postgres-60day/solutions/day04_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-05",
@@ -1718,7 +1803,8 @@
         "sql/postgres-60day/solutions/day05_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-06",
@@ -1738,7 +1824,8 @@
         "sql/postgres-60day/solutions/day06_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-07",
@@ -1758,7 +1845,8 @@
         "sql/postgres-60day/solutions/day07_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-08",
@@ -1778,7 +1866,8 @@
         "sql/postgres-60day/solutions/day08_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-09",
@@ -1798,7 +1887,8 @@
         "sql/postgres-60day/solutions/day09_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-10",
@@ -1818,7 +1908,8 @@
         "sql/postgres-60day/solutions/day10_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-11",
@@ -1838,7 +1929,8 @@
         "sql/postgres-60day/solutions/day11_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-12",
@@ -1858,7 +1950,8 @@
         "sql/postgres-60day/solutions/day12_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-13",
@@ -1878,7 +1971,8 @@
         "sql/postgres-60day/solutions/day13_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-14",
@@ -1898,7 +1992,8 @@
         "sql/postgres-60day/solutions/day14_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-15",
@@ -1918,7 +2013,8 @@
         "sql/postgres-60day/solutions/day15_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-found-01",
@@ -1938,7 +2034,8 @@
         "sql/professional/solutions/sql_found_01_relational_design_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-16",
@@ -1958,7 +2055,8 @@
         "sql/postgres-60day/solutions/day16_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-17",
@@ -1978,7 +2076,8 @@
         "sql/postgres-60day/solutions/day17_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-18",
@@ -1998,7 +2097,8 @@
         "sql/postgres-60day/solutions/day18_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-19",
@@ -2018,7 +2118,8 @@
         "sql/postgres-60day/solutions/day19_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-20",
@@ -2038,7 +2139,8 @@
         "sql/postgres-60day/solutions/day20_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-21",
@@ -2058,7 +2160,8 @@
         "sql/postgres-60day/solutions/day21_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-22",
@@ -2078,7 +2181,8 @@
         "sql/postgres-60day/solutions/day22_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-23",
@@ -2098,7 +2202,8 @@
         "sql/postgres-60day/solutions/day23_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-24",
@@ -2118,7 +2223,8 @@
         "sql/postgres-60day/solutions/day24_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-25",
@@ -2138,7 +2244,8 @@
         "sql/postgres-60day/solutions/day25_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-26",
@@ -2158,7 +2265,8 @@
         "sql/postgres-60day/solutions/day26_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-27",
@@ -2178,7 +2286,8 @@
         "sql/postgres-60day/solutions/day27_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-28",
@@ -2198,7 +2307,8 @@
         "sql/postgres-60day/solutions/day28_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-29",
@@ -2218,7 +2328,8 @@
         "sql/postgres-60day/solutions/day29_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-30",
@@ -2238,7 +2349,8 @@
         "sql/postgres-60day/solutions/day30_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-31",
@@ -2258,7 +2370,8 @@
         "sql/postgres-60day/solutions/day31_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-32",
@@ -2278,7 +2391,8 @@
         "sql/postgres-60day/solutions/day32_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-33",
@@ -2298,7 +2412,8 @@
         "sql/postgres-60day/solutions/day33_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-34",
@@ -2318,7 +2433,8 @@
         "sql/postgres-60day/solutions/day34_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-35",
@@ -2338,7 +2454,8 @@
         "sql/postgres-60day/solutions/day35_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-36",
@@ -2358,7 +2475,8 @@
         "sql/postgres-60day/solutions/day36_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-37",
@@ -2378,7 +2496,8 @@
         "sql/postgres-60day/solutions/day37_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-38",
@@ -2398,7 +2517,8 @@
         "sql/postgres-60day/solutions/day38_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-39",
@@ -2418,7 +2538,8 @@
         "sql/postgres-60day/solutions/day39_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-found-02",
@@ -2439,7 +2560,8 @@
         "sql/professional/solutions/sql_found_02_versioned_migrations_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-40",
@@ -2459,7 +2581,8 @@
         "sql/postgres-60day/solutions/day40_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-41",
@@ -2479,7 +2602,8 @@
         "sql/postgres-60day/solutions/day41_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-42",
@@ -2499,7 +2623,8 @@
         "sql/postgres-60day/solutions/day42_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-43",
@@ -2519,7 +2644,8 @@
         "sql/postgres-60day/solutions/day43_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-44",
@@ -2539,7 +2665,8 @@
         "sql/postgres-60day/solutions/day44_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-45",
@@ -2559,7 +2686,8 @@
         "sql/postgres-60day/solutions/day45_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-46",
@@ -2579,7 +2707,8 @@
         "sql/postgres-60day/solutions/day46_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-47",
@@ -2599,7 +2728,8 @@
         "sql/postgres-60day/solutions/day47_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-48",
@@ -2619,7 +2749,8 @@
         "sql/postgres-60day/solutions/day48_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-49",
@@ -2639,7 +2770,8 @@
         "sql/postgres-60day/solutions/day49_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-50",
@@ -2659,7 +2791,8 @@
         "sql/postgres-60day/solutions/day50_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-51",
@@ -2679,7 +2812,8 @@
         "sql/postgres-60day/solutions/day51_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-52",
@@ -2700,7 +2834,8 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
-      "stateful_group": "dwh-project"
+      "stateful_group": "dwh-project",
+      "runner": "sql"
     },
     {
       "id": "sql-53",
@@ -2721,7 +2856,8 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
-      "stateful_group": "dwh-project"
+      "stateful_group": "dwh-project",
+      "runner": "sql"
     },
     {
       "id": "sql-54",
@@ -2742,7 +2878,8 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
-      "stateful_group": "dwh-project"
+      "stateful_group": "dwh-project",
+      "runner": "sql"
     },
     {
       "id": "sql-55",
@@ -2762,7 +2899,8 @@
         "sql/postgres-60day/solutions/day55_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-56",
@@ -2782,7 +2920,8 @@
         "sql/postgres-60day/solutions/day56_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-57",
@@ -2802,7 +2941,8 @@
         "sql/postgres-60day/solutions/day57_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-58",
@@ -2822,7 +2962,8 @@
         "sql/postgres-60day/solutions/day58_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-59",
@@ -2842,7 +2983,8 @@
         "sql/postgres-60day/solutions/day59_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-60",
@@ -2862,7 +3004,8 @@
         "sql/postgres-60day/solutions/day60_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-sec-01",
@@ -2883,7 +3026,8 @@
         "sql/professional/solutions/sql_sec_01_roles_privileges_rls_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-prog-01",
@@ -2903,7 +3047,8 @@
         "sql/professional/solutions/sql_prog_01_routines_triggers_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-types-01",
@@ -2923,7 +3068,8 @@
         "sql/professional/solutions/sql_types_01_native_types_search_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-ops-01",
@@ -2944,7 +3090,8 @@
         "sql/professional/solutions/sql_ops_01_indexes_statistics_maintenance_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-test-01",
@@ -2965,7 +3112,8 @@
         "sql/professional/solutions/sql_test_01_contracts_migrations_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-analytics-01",
@@ -2986,7 +3134,8 @@
         "sql/professional/solutions/sql_analytics_01_query_patterns_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-ops-02",
@@ -3007,7 +3156,8 @@
         "sql/professional/solutions/sql_ops_02_backup_restore_recovery_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "optional-container-image"
+      "network": "optional-container-image",
+      "runner": "sql"
     },
     {
       "id": "sql-ext-01",
@@ -3028,7 +3178,8 @@
         "sql/professional/solutions/sql_ext_01_extensions_spatial_vector_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "optional-container-image"
+      "network": "optional-container-image",
+      "runner": "sql"
     },
     {
       "id": "sql-repl-01",
@@ -3050,7 +3201,8 @@
         "sql/professional/solutions/sql_repl_01_cdc_high_availability_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "optional-container-image"
+      "network": "optional-container-image",
+      "runner": "sql"
     },
     {
       "id": "sql-temporal-01",
@@ -3074,7 +3226,8 @@
         "sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-quality-01",
@@ -3096,7 +3249,8 @@
         "sql/professional/solutions/sql_quality_01_bags_and_fanout_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-scale-01",
@@ -3118,7 +3272,8 @@
         "sql/professional/solutions/sql_scale_01_cursors_and_batches_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "sql-concurrency-01",
@@ -3139,7 +3294,8 @@
         "sql/professional/solutions/sql_concurrency_01_isolation_and_versions_solutions.sql"
       ],
       "dependency_group": "postgres",
-      "network": "offline"
+      "network": "offline",
+      "runner": "sql"
     },
     {
       "id": "bridge-01",
@@ -3160,7 +3316,8 @@
         "bridge/solutions/day01_solution.py"
       ],
       "dependency_group": "bridge",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "bridge-02",
@@ -3180,7 +3337,8 @@
         "bridge/solutions/day02_solution.py"
       ],
       "dependency_group": "bridge",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "bridge-03",
@@ -3200,7 +3358,8 @@
         "bridge/solutions/day03_solution.py"
       ],
       "dependency_group": "bridge",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "bridge-04",
@@ -3220,7 +3379,8 @@
         "bridge/solutions/day04_solution.py"
       ],
       "dependency_group": "bridge",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "bridge-05",
@@ -3240,7 +3400,8 @@
         "bridge/solutions/day05_solution.py"
       ],
       "dependency_group": "bridge",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "bridge-06",
@@ -3260,7 +3421,8 @@
         "bridge/solutions/day06_solution.py"
       ],
       "dependency_group": "bridge",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "bridge-07",
@@ -3280,7 +3442,8 @@
         "bridge/solutions/day07_solution.py"
       ],
       "dependency_group": "bridge",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "bridge-08",
@@ -3300,7 +3463,8 @@
         "bridge/solutions/day08_solution.py"
       ],
       "dependency_group": "bridge",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "bridge-jupyter-01",
@@ -3322,7 +3486,8 @@
         "bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solution.ipynb"
       ],
       "dependency_group": "sql-notebooks",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "bridge-ops-01",
@@ -3343,7 +3508,8 @@
         "bridge/professional/solutions/bridge_ops_01_migration_observability_solution.py"
       ],
       "dependency_group": "bridge",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "bridge-ai-01",
@@ -3364,7 +3530,8 @@
         "bridge/professional/solutions/bridge_ai_01_application_engineering_solution.py"
       ],
       "dependency_group": "bridge",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "bridge-analytics-01",
@@ -3386,7 +3553,8 @@
         "bridge/professional/solutions/bridge_analytics_01_local_project_solution.py"
       ],
       "dependency_group": "professional",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     },
     {
       "id": "bridge-capstone-01",
@@ -3408,7 +3576,8 @@
         "bridge/professional/solutions/bridge_capstone_01_evidence_review_solution.py"
       ],
       "dependency_group": "core",
-      "network": "offline"
+      "network": "offline",
+      "runner": "python"
     }
   ]
 }

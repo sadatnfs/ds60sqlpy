@@ -89,3 +89,8 @@ on OS and CPU. A lock resolution for another platform proves dependency
 selection, not native execution there. Advanced imports do not download or
 verify model assets. Check the actual CI run before treating a configured
 matrix job as passing evidence.
+
+Docker users can add exact optional groups without changing the lightweight
+Core default. See [optional Docker profiles](docker-profiles.md) for explicit
+build commands, CPU wheel selection, memory limits, disk use, and model/data
+cache boundaries.
