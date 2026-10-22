@@ -136,7 +136,8 @@
 <li>Multi-part projects need an idempotent fixture or explicit, validated persistence instructions.</li>
 <li>Days 52–54 are the declared stateful warehouse sequence: Day 52 resets and commits the course-owned <code>dwh</code> schema, then Days 53 and 54 run in order.</li>
 <li>Superuser-only operations must be optional and labeled.</li>
-<li><code>sql-found-01</code> follows SQL Day 15 and is the direct prerequisite for Day 16. <code>sql-found-02</code> follows Day 39 and precedes schema-evolution and operational modules. Other named modules under <code>sql/professional/</code> extend the track without renumbering established days; a new SQL learner still starts at <code>sql-01</code>.</li>
+<li><code>sql-found-01</code> follows SQL Day 15 and is the direct prerequisite for Day 16. <code>sql-found-02</code> follows Day 39 and precedes schema-evolution and operational modules. Other named modules under <code>sql/professional/</code> extend the track without renumbering established days. A new SQL learner first completes <code>sql-start-01</code>, <code>sql-start-02</code>, and <code>sql-start-03</code>, then begins <code>sql-01</code>. The on-ramp uses supplied temporary fixtures and assumes no SQL background.</li>
+<li><code>sql-concurrency-01</code> defaults to a rollback-safe single-session model. Only its explicitly optional two-session lab commits <code>sql_concurrency_live</code> state; preparation must refuse existing state and cleanup must avoid CASCADE.</li>
 <li>Role administration, extensions, physical recovery, and replication need a capability check plus a useful default path when the local server cannot perform the optional operation.</li>
 </ul>
 <h3 id="lesson-sql">Lesson SQL<a class="heading-anchor" href="#lesson-sql" aria-label="Link to this section">#</a></h3>

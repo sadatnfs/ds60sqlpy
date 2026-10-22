@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from ds60sqlpy.catalog import Catalog
+from ds60sqlpy.runtime_environment import external_dll_directory, external_program_environment
 from ds60sqlpy.sql_notebook import (
     SqlNotebookError,
     course_psql_environment,
@@ -28,6 +29,8 @@ class SqlRun:
 
     path: Path
     returncode: int
+    stdout: str = ""
+    stderr: str = ""
 
 
 class SqlRunner:
@@ -39,8 +42,9 @@ class SqlRunner:
         database_url: str | None = None,
         *,
         quiet: bool = False,
+        capture_output: bool = False,
     ) -> None:
-        executable = shutil.which("psql")
+        executable = shutil.which("psql", path=external_program_environment().get("PATH"))
         if executable is None:
             raise SqlRunnerError(
                 "psql is not on PATH. Install PostgreSQL client tools or use the "
@@ -59,6 +63,7 @@ class SqlRunner:
                 "advanced_sql_training course database."
             ) from exc
         self.quiet = quiet
+        self.capture_output = capture_output
 
     def run_file(self, path: Path) -> SqlRun:
         """Run one SQL file with safe psql startup and stop-on-error behavior."""
@@ -77,15 +82,35 @@ class SqlRunner:
             application_name="ds60sqlpy-course-runner",
             connect_timeout=10,
         )
-        stdout = subprocess.DEVNULL if self.quiet else None
-        result = subprocess.run(
-            command,
-            check=False,
-            env=environment,
-            stdin=subprocess.DEVNULL,
-            stdout=stdout,
+        environment = external_program_environment(environment)
+        stdout = (
+            subprocess.PIPE if self.capture_output else subprocess.DEVNULL if self.quiet else None
         )
-        return SqlRun(path=path, returncode=result.returncode)
+        if self.capture_output:
+            environment["PGOPTIONS"] = "-c statement_timeout=30000 -c lock_timeout=2000"
+        try:
+            with external_dll_directory():
+                result = subprocess.run(
+                    command,
+                    check=False,
+                    env=environment,
+                    stdin=subprocess.DEVNULL,
+                    stdout=stdout,
+                    stderr=subprocess.PIPE if self.capture_output else None,
+                    text=True,
+                    timeout=60 if self.capture_output else None,
+                )
+        except subprocess.TimeoutExpired as exc:
+            raise SqlRunnerError(
+                "Course SQL preparation timed out. The training schema may be incomplete. "
+                "Inspect database availability, then explicitly reset and verify it again."
+            ) from exc
+        return SqlRun(
+            path=path,
+            returncode=result.returncode,
+            stdout=(result.stdout or "") if self.capture_output else "",
+            stderr=(result.stderr or "") if self.capture_output else "",
+        )
 
     def setup(self) -> SqlRun:
         """Reset and seed the course-owned ``training`` schema."""

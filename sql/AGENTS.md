@@ -27,8 +27,12 @@ Do not present MySQL, SQL Server, or Oracle syntax as runnable PostgreSQL. Porta
 - `sql-found-01` follows SQL Day 15 and is the direct prerequisite for Day 16.
   `sql-found-02` follows Day 39 and precedes schema-evolution and operational
   modules. Other named modules under `sql/professional/` extend the track
-  without renumbering established days; a new SQL learner still starts at
-  `sql-01`.
+  without renumbering established days. A new SQL learner first completes
+  `sql-start-01`, `sql-start-02`, and `sql-start-03`, then begins `sql-01`.
+  The on-ramp uses supplied temporary fixtures and assumes no SQL background.
+- `sql-concurrency-01` defaults to a rollback-safe single-session model. Only
+  its explicitly optional two-session lab commits `sql_concurrency_live` state;
+  preparation must refuse existing state and cleanup must avoid CASCADE.
 - Role administration, extensions, physical recovery, and replication need a
   capability check plus a useful default path when the local server cannot
   perform the optional operation.

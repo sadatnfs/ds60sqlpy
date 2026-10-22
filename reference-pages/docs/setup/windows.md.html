@@ -117,10 +117,12 @@
     </header>
     <article class="document"><h2 id="windows-setup">Windows setup<a class="heading-anchor" href="#windows-setup" aria-label="Link to this section">#</a></h2>
 <p>This guide assumes a new Windows 10 or Windows 11 machine and PowerShell. The recommended course baseline is Python 3.12, PostgreSQL 16 or newer, and Visual Studio Code.</p>
-<p>Run course commands from the repository root—the directory containing <code>README.md</code>.</p>
+<p>Run course commands from the repository root, the directory containing <code>README.md</code>.</p>
+<p>If terminals, packages, or notebooks are new to you, follow <a href="first-success.md.html">Your first successful session</a> alongside this guide. Use <strong>Windows PowerShell</strong> from the Start menu for PowerShell blocks. Keep native Windows and WSL environments separate; this guide uses native Windows Python, not a Python interpreter inside WSL.</p>
 <h3 id="fastest-route-double-click-the-guided-launcher">Fastest route: double-click the guided launcher<a class="heading-anchor" href="#fastest-route-double-click-the-guided-launcher" aria-label="Link to this section">#</a></h3>
 <p>After downloading or cloning the repository, open its folder in File Explorer and double-click:</p>
 <pre><code class="language-text">START_DS60.cmd</code></pre>
+<p>For a ZIP download, use <strong>Extract All</strong> before launching. Do not run from inside File Explorer&#x27;s compressed-folder view. A normal user-owned local folder is preferable to a protected system directory or a folder whose cloud sync can replace files while they are running.</p>
 <p>The launcher finds the repository from its own location, so the folder may contain spaces and you do not need to type a path. It:</p>
 <ol>
 <li>Reuses either <code>.venv\Scripts\python.exe</code> or the Anaconda conda-prefix <code>.venv\python.exe</code> layout.</li>
@@ -158,6 +160,7 @@ code .</code></pre>
 <p>If the repository is already cloned:</p>
 <pre><code class="language-powershell">Set-Location &lt;path-to-ds60sqlpy&gt;
 code .</code></pre>
+<p>Replace the angle-bracket placeholder with your actual folder. Quote paths with spaces, for example <code>Set-Location &quot;C:\Users\Ada\Documents\ds60sqlpy&quot;</code>.</p>
 <p>Confirm that PowerShell is at the root:</p>
 <pre><code class="language-powershell">Test-Path .\README.md</code></pre>
 <p>The result should be <code>True</code>.</p>
@@ -235,6 +238,7 @@ psql -X -v ON_ERROR_STOP=1 -h localhost -U postgres -d advanced_sql_training -f 
 <p>For the repository&#x27;s Docker Compose service, do not create this native password-file entry. Its disposable <code>ds60</code> connection is already the course runner&#x27;s default.</p>
 <h4 id="option-b-canonical-container-environment">Option B: Canonical container environment<a class="heading-anchor" href="#option-b-canonical-container-environment" aria-label="Link to this section">#</a></h4>
 <p>Docker-based automation uses PostgreSQL 17 and gives every operating system the same database behavior. Docker Desktop requires virtualization support and a one-time image download.</p>
+<p>If you choose only Docker and have no host <code>psql</code>, bootstrap Python with <code>&amp; .\scripts\bootstrap_windows.ps1 -SkipPostgreSql</code>. You can run the SQL files through the container commands below. Guided SQL notebooks additionally need host PostgreSQL client tools because they launch <code>psql</code> in the Windows process. See <a href="postgresql.md.html#route-a-the-course-container">Local PostgreSQL</a> for the first query, client distinction, and a port-conflict walkthrough.</p>
 <p>From PowerShell at the repository root:</p>
 <pre><code class="language-powershell">docker compose up -d postgres
 docker compose run --rm sql-runner -f sql/postgres-60day/00_setup.sql
@@ -259,6 +263,7 @@ docker compose down</code></pre>
 <pre><code class="language-powershell">psql -X -v ON_ERROR_STOP=1 -h localhost -U postgres -d advanced_sql_training -f .\sql\postgres-60day\day01_select_where_orderby.sql</code></pre>
 <p>The SQL lesson ends with <code>ROLLBACK</code>, so normal lesson examples should not persist changes.</p>
 <p>To run PostgreSQL from the course&#x27;s Python notebook kernel with <code>%sql</code> and <code>%%sql</code>, follow <a href="jupyter-postgresql.md.html">PostgreSQL in Jupyter</a>. Its connection is limited to the same disposable training database.</p>
+<p>Finish the <a href="first-success.md.html#3-make-a-scratch-notebook-and-run-one-cell">scratch-notebook walkthrough</a> to verify the <code>.venv</code> kernel, run <code>2 + 3</code>, and practice restarting before working through Python Day 1.</p>
 <h3 id="7-powershell-equivalents-used-in-later-lessons">7. PowerShell equivalents used in later lessons<a class="heading-anchor" href="#7-powershell-equivalents-used-in-later-lessons" aria-label="Link to this section">#</a></h3>
 <p>Use <code>Invoke-RestMethod</code> instead of Bash-style multiline <code>curl</code>:</p>
 <pre><code class="language-powershell">$body = @{ features = @(5.1, 3.5, 1.4, 0.2) } | ConvertTo-Json

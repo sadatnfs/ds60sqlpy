@@ -313,7 +313,7 @@ python scripts/course.py validate</code></pre>
 </ol>
 <p>Reader generation must remain offline and self-contained. Escape source, reject unsafe URL schemes, render no untrusted notebook HTML, load no remote fonts/scripts/analytics, and rewrite known course links to the matching reader section. A static <code>file://</code> page may offer a best-effort registered VS Code URL, but only the authenticated loopback launcher may start allowlisted native actions.</p>
 <p>Every learner-visible local Markdown or SQL link from the dashboard, lesson readers, or rendered references must point to generated HTML. The generator derives a deterministic recursive closure from explicit dashboard references and links rendered from catalog artifacts; do not replace it with a scan of arbitrary untracked files. Keep completion on the dashboard in static mode and show the per-lesson checkbox only when the private launcher token is present.</p>
-<p>Do not create 154 hand-maintained SQL notebooks. For a cataloged SQL lesson, the private launcher derives an ignored working notebook and editable SQL copy under <code>.learning/sql/&lt;lesson-id&gt;/</code> through <code>src/ds60sqlpy/sql_notebook.py</code>. The generator must preserve existing learner files, accept only stable catalog identities, keep paths below <code>.learning/sql/</code>, run fixed non-shell <code>psql -f</code> commands, detect changed meta-commands even when they follow SQL on the same line, hide connection values, and require explicit confirmation before resetting the disposable course schema.</p>
+<p>Do not create hand-maintained SQL notebooks for every lesson. For a cataloged SQL lesson, the private launcher derives an ignored working notebook and editable SQL copy under <code>.learning/sql/&lt;lesson-id&gt;/</code> through <code>src/ds60sqlpy/sql_notebook.py</code>. The generator must preserve existing learner files, accept only stable catalog identities, keep paths below <code>.learning/sql/</code>, run fixed non-shell <code>psql -f</code> commands, detect changed meta-commands even when they follow SQL on the same line, hide connection values, and require explicit confirmation before resetting the disposable course schema.</p>
 <p>After lesson artifacts, paths, or catalog metadata change, regenerate and check both navigation layers:</p>
 <pre><code class="language-text">python scripts/build_course_guide.py
 python scripts/build_lesson_readers.py
@@ -344,7 +344,9 @@ python scripts/build_lesson_readers.py --check</code></pre>
 <li>Guided SQL notebook tests prove catalog/path/reset/no-overwrite boundaries; no <code>.learning/sql/</code> workspace is tracked.</li>
 <li>Unexpected machine-generated artifacts and secrets are absent.</li>
 </ul>
-<p>Run <a href="validation.md.html">repository validation</a> before handoff.</p></article>
+<p>Run <a href="validation.md.html">repository validation</a> before handoff.</p>
+<h3 id="new-lesson-practice-evidence">New-lesson practice evidence<a class="heading-anchor" href="#new-lesson-practice-evidence" aria-label="Link to this section">#</a></h3>
+<p>Do not rewrite historical enrichment counts. Register genuinely new lesson IDs in <code>curriculum/practice_expansion.json</code> with baseline zero and target six; the audit merges this disjoint registry with the immutable historical baseline. The new guides still need distinct inspectable exercises, and the depth and shared guide-contract checks both apply.</p></article>
   </main>
 </body>
 </html>

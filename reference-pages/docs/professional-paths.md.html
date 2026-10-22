@@ -278,7 +278,47 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
     --notes &quot;Built and inspected a wheel from a clean target.&quot;</code></pre>
 <pre><code class="language-bash"># macOS/Linux
 .venv/bin/python scripts/course.py progress complete python-pro-01 \
-  --notes &quot;Built and inspected a wheel from a clean target.&quot;</code></pre></article>
+  --notes &quot;Built and inspected a wheel from a clean target.&quot;</code></pre>
+<h3 id="beginner-confidence-before-professional-work">Beginner confidence before professional work<a class="heading-anchor" href="#beginner-confidence-before-professional-work" aria-label="Link to this section">#</a></h3>
+<p>New learners take the three SQL starter modules before the historical core: <code>sql-start-01</code> (tables and grain), <code>sql-start-02</code> (values, NULL and order), and <code>sql-start-03</code> (constructing and debugging a query). Python&#x27;s four named foundation practice modules appear after Days 1, 3, 8 and 10 in catalog order. They teach tracing, evidence-based debugging, trustworthy records, and an independent investigation without requiring an advanced library.</p>
+<h3 id="advanced-correctness-and-a-cumulative-review">Advanced correctness and a cumulative review<a class="heading-anchor" href="#advanced-correctness-and-a-cumulative-review" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Stable ID</th>
+<th>Practice</th>
+</tr></thead><tbody>
+<tr>
+<td><code>python-data-02</code></td>
+<td>Keep exact values, normalized Unicode and calendar boundaries explicit</td>
+</tr>
+<tr>
+<td><code>python-ml-02</code></td>
+<td>Evaluate groups and time according to deployment, preventing leakage</td>
+</tr>
+<tr>
+<td><code>python-pro-03</code></td>
+<td>Restart a local pipeline with a checkpoint that contains durable result state</td>
+</tr>
+<tr>
+<td><code>sql-quality-01</code></td>
+<td>Compare bags of rows and expose join fanout that equal totals can hide</td>
+</tr>
+<tr>
+<td><code>sql-scale-01</code></td>
+<td>Page with a compound cursor and reason about NULLs, mutation and bounded work</td>
+</tr>
+<tr>
+<td><code>sql-concurrency-01</code></td>
+<td>Observe isolation and use an optimistic version predicate</td>
+</tr>
+<tr>
+<td><code>bridge-capstone-01</code></td>
+<td>Review a data product against independent fixtures, block a faulty release and assess a repair</td>
+</tr>
+</tbody></table></div>
+<p>These modules extend the earlier lanes. Generate their exact routes rather than guessing prerequisites from a day label:</p>
+<pre><code class="language-powershell">&amp; $CoursePython scripts\course.py plan bridge-capstone-01 --weekly-hours 5</code></pre>
+<pre><code class="language-bash">.venv/bin/python scripts/course.py plan bridge-capstone-01 --weekly-hours 5</code></pre>
+<p>The same goal appears in the <a href="offline-app.md.html">guided coding application</a>. See <a href="learning-paths.md.html">placement and learning paths</a> before skipping beginner practice. Consult the generated catalog for each module&#x27;s guide and learner file instead of maintaining another manually copied artifact inventory here.</p></article>
   </main>
 </body>
 </html>

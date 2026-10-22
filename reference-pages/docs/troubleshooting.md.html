@@ -181,6 +181,12 @@ pwd</code></pre>
 <ol>
 <li>Select the repository <code>.venv</code> kernel and restart it.</li>
 </ol>
+<p>Multiple clones share the per-user <code>ds60sqlpy</code> kernel name. Check the complete <code>sys.executable</code> path. A stale registration can point to a moved or deleted folder. Repair only the registration from the intended environment:</p>
+<pre><code class="language-powershell"># Windows, after resolving $CoursePython above
+&amp; $CoursePython -m ipykernel install --user --name ds60sqlpy --display-name &quot;Python (ds60sqlpy)&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python -m ipykernel install --user --name ds60sqlpy --display-name &quot;Python (ds60sqlpy)&quot;</code></pre>
+<p>Restart the kernel and verify its path again. Virtual environments should be recreated after moving them rather than copied between operating systems or folders. See <a href="https://docs.python.org/3.12/library/venv.html">Python venv</a>.</p>
 <h3 id="jupyter-is-not-found"><code>jupyter</code> is not found<a class="heading-anchor" href="#jupyter-is-not-found" aria-label="Link to this section">#</a></h3>
 <p>Use the environment’s Python:</p>
 <p>Windows:</p>
@@ -202,6 +208,8 @@ pwd</code></pre>
 <li>CPU is the supported default; do not install a CUDA build unless a lesson explicitly asks for it.</li>
 <li>Do not work around a failed install by putting packages into the system Python.</li>
 </ul>
+<p>If locked setup reports a stale lock, use the matching source checkout and <code>uv.lock</code>, or ask a maintainer to update the lock. Do not silently remove <code>--locked</code> during a reproducibility check. On a restrictive network, use your organization&#x27;s approved proxy/certificate setup or a prepared <a href="setup/offline.md.html#optional-package-only-offline-bundle">offline wheelhouse</a>. Do not disable TLS verification or include credentials in support commands. A source build instead of a binary wheel can indicate an unsupported Python, CPU architecture, or OS for that package.</p>
+<p>On macOS, missing <code>libomp.dylib</code> during advanced imports calls for the documented <code>brew install libomp</code> runtime. On Debian/Ubuntu, a missing <code>libgomp.so.1</code> calls for <code>libgomp1</code>. Those native runtimes are separate from Python package installation.</p>
 <h3 id="a-seaborn-dataset-fails-offline">A Seaborn dataset fails offline<a class="heading-anchor" href="#a-seaborn-dataset-fails-offline" aria-label="Link to this section">#</a></h3>
 <p>Seaborn sample data downloads on first use.</p>
 <ol>
@@ -236,6 +244,14 @@ pwd</code></pre>
 <li>Container: <code>docker compose ps</code> and <code>docker compose logs postgres</code></li>
 </ul>
 <p>Also check host, port, database, and role. The default port is 5432.</p>
+<h3 id="native-psql-works-but-doctor-or-a-guided-notebook-cannot-connect">Native <code>psql</code> works, but doctor or a guided notebook cannot connect<a class="heading-anchor" href="#native-psql-works-but-doctor-or-a-guided-notebook-cannot-connect" aria-label="Link to this section">#</a></h3>
+<p>Native OS setup uses your local role, while course tools default to the Compose <code>ds60</code> connection. Select the same target as the successful native command in the terminal that starts the portal. For macOS/Linux&#x27;s normal username-and-socket route:</p>
+<pre><code class="language-bash">export DS60_DATABASE_URL=advanced_sql_training
+.venv/bin/python scripts/course.py doctor
+.venv/bin/python scripts/learning_portal.py</code></pre>
+<p>For native Windows, follow the <a href="setup/windows.md.html#let-the-guided-notebook-authenticate-without-a-hidden-prompt">password-file handoff</a> and set its password-free local URL in the launching PowerShell window. Guided notebooks disable password prompts. An interactive login that asked for a password does not prove unattended authentication. See <a href="setup/postgresql.md.html">Local PostgreSQL</a>.</p>
+<h3 id="docker-sql-works-but-the-guided-notebook-says-psql-is-missing">Docker SQL works, but the guided notebook says <code>psql</code> is missing<a class="heading-anchor" href="#docker-sql-works-but-the-guided-notebook-says-psql-is-missing" aria-label="Link to this section">#</a></h3>
+<p><code>docker compose run --rm sql-runner</code> has a client inside its container. Python guided notebooks run host <code>psql</code>, so install that client or continue using container SQL commands. The PostgreSQL server can remain only in Docker. A Docker daemon, a host client, and a Python driver are separate requirements for different workflows.</p>
 <h3 id="docker-is-installed-but-compose-cannot-start-postgresql">Docker is installed but Compose cannot start PostgreSQL<a class="heading-anchor" href="#docker-is-installed-but-compose-cannot-start-postgresql" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Start Docker Desktop or your container daemon.</li>

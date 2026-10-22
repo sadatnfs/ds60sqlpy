@@ -119,104 +119,25 @@
 <p>These named modules extend the numbered PostgreSQL track without renumbering Days 1–60. They teach database responsibilities that are normally encountered in application and production work: owning a relational model, evolving it through reviewed migrations, and enforcing least privilege.</p>
 <p>All runnable work targets PostgreSQL 16 or newer and the disposable <code>advanced_sql_training</code> database. Run commands from the repository root. Never substitute a production, shared, or personally valuable database.</p>
 <h3 id="learning-path">Learning path<a class="heading-anchor" href="#learning-path" aria-label="Link to this section">#</a></h3>
-<div class="table-wrap"><table><thead><tr>
-<th>Module</th>
-<th>Level</th>
-<th>Catalog prerequisites</th>
-<th>Start here</th>
-<th>What you will practise</th>
-</tr></thead><tbody>
-<tr>
-<td><code>sql-found-01</code></td>
-<td>Foundation</td>
-<td>None</td>
-<td><a href="../../../lesson-pages/sql-found-01.html#guide">Relational design guide</a></td>
-<td>Grain, cardinality, keys, constraints, generated values, NULL uniqueness, and normalization decisions</td>
-</tr>
-<tr>
-<td><code>sql-found-02</code></td>
-<td>Intermediate</td>
-<td><code>sql-found-01</code></td>
-<td><a href="../../../lesson-pages/sql-found-02.html#guide">Migration guide</a></td>
-<td>Ordered immutable migrations, metadata, seeds, expand–migrate–contract, backfills, verification, and forward fixes</td>
-</tr>
-<tr>
-<td><code>sql-sec-01</code></td>
-<td>Advanced</td>
-<td><code>sql-found-02</code>, <code>sql-39</code></td>
-<td><a href="../../../lesson-pages/sql-sec-01.html#guide">Security guide</a></td>
-<td>Ownership, schema access, grants, default privileges, safe execution context, and row-level security</td>
-</tr>
-<tr>
-<td><code>sql-prog-01</code></td>
-<td>Advanced</td>
-<td><code>sql-found-02</code></td>
-<td><a href="../../../lesson-pages/sql-prog-01.html#guide">Routines and triggers guide</a></td>
-<td>Functions, procedures, volatility/security attributes, row/statement triggers, transition tables, and audit tests</td>
-</tr>
-<tr>
-<td><code>sql-types-01</code></td>
-<td>Advanced</td>
-<td><code>sql-29</code></td>
-<td><a href="../../../lesson-pages/sql-types-01.html#guide">Native types and search guide</a></td>
-<td>Domains, enums, UUIDs, arrays, ranges, JSONB/JSONPath, full-text search, GIN, and GiST</td>
-</tr>
-<tr>
-<td><code>sql-ops-01</code></td>
-<td>Advanced</td>
-<td><code>sql-35</code>, <code>sql-types-01</code></td>
-<td><a href="../../../lesson-pages/sql-ops-01.html#guide">Index and maintenance guide</a></td>
-<td>B-tree, GIN, GiST, SP-GiST, BRIN, extended statistics, VACUUM/ANALYZE, and index lifecycle</td>
-</tr>
-<tr>
-<td><code>sql-test-01</code></td>
-<td>Advanced</td>
-<td><code>sql-found-02</code>, <code>sql-42</code></td>
-<td><a href="../../../lesson-pages/sql-test-01.html#guide">SQL contracts and tests guide</a></td>
-<td>Fail-fast assertions, fixtures, schema contracts, migration regressions, invariants, and reconciliation</td>
-</tr>
-<tr>
-<td><code>sql-analytics-01</code></td>
-<td>Advanced</td>
-<td><code>sql-30</code>, <code>sql-test-01</code></td>
-<td><a href="../../../lesson-pages/sql-analytics-01.html#guide">Analytical patterns guide</a></td>
-<td>Deduplication, sessions, gaps/islands, funnels, attribution, as-of joins, and cohort retention</td>
-</tr>
-<tr>
-<td><code>sql-ops-02</code></td>
-<td>Advanced</td>
-<td><code>sql-43</code>, <code>sql-ops-01</code></td>
-<td><a href="../../../lesson-pages/sql-ops-02.html#guide">Backup and recovery guide</a></td>
-<td>Logical restore verification, RPO/RTO, physical backups, WAL, PITR, retention, and recovery rehearsals</td>
-</tr>
-<tr>
-<td><code>sql-ext-01</code></td>
-<td>Advanced specialization</td>
-<td><code>sql-types-01</code>, <code>sql-ops-01</code></td>
-<td><a href="../../../lesson-pages/sql-ext-01.html#guide">Extensions, spatial, and vector guide</a></td>
-<td>Extension governance, built-in fallbacks, text search, planar spatial data, exact vector distance, cryptographic hashes, and FDW boundaries</td>
-</tr>
-<tr>
-<td><code>sql-repl-01</code></td>
-<td>Advanced specialization</td>
-<td><code>sql-ops-02</code>, <code>sql-prog-01</code>, <code>sql-test-01</code></td>
-<td><a href="../../../lesson-pages/sql-repl-01.html#guide">CDC, replication, and high-availability guide</a></td>
-<td>Transactional outbox, idempotent consumers, ordering, physical/logical replication boundaries, failover, and recovery objectives</td>
-</tr>
-<tr>
-<td><code>sql-temporal-01</code></td>
-<td>Advanced specialization</td>
-<td><code>sql-found-01</code>, <code>sql-types-01</code>, <code>sql-prog-01</code>, <code>sql-test-01</code>, <code>sql-39</code></td>
-<td><a href="../../../lesson-pages/sql-temporal-01.html#guide">Temporal and domain-modelling guide</a></td>
-<td>Valid/system time, ranges, overlap enforcement, corrections, immutable ledgers, reversals, retention, and legal holds</td>
-</tr>
-</tbody></table></div>
-<p>Complete <code>sql-found-01</code> before the numbered SQL track if you want to design the tables that later lessons query. Complete <code>sql-found-02</code> after relational foundations. Attempt <code>sql-sec-01</code> after the transaction and locking material in SQL Day 39.</p>
-<p>The P1 modules are checkpoint-based rather than one rigid sequence. Follow the direct prerequisites in the table; numbered days are sequential, so a later day also includes its earlier-day background. The P2 specializations then build on the named operational, programming, and test modules shown above.</p>
-<p>Their default paths are deliberately single-database and offline. The extension module detects optional packages but never installs one. The replication module models change capture locally but never creates a publication, subscription, replication slot, or standby. The temporal module reads <code>btree_gist</code> availability but uses a trigger fallback, so it never enables an extension. Optional extension and multi-node labs are operator-reviewed follow-ons, not prerequisites.</p>
+<p>A complete beginner starts with the small-fixture on-ramp:</p>
+<ol>
+<li><a href="../../../lesson-pages/sql-start-01.html#guide">Reading tables and result grain</a> teaches identity, projection, and the difference between an observation and a repeated visible value.</li>
+<li><a href="../../../lesson-pages/sql-start-02.html#guide">Values, NULL, and deterministic order</a> separates missing values from zero and empty text, then constructs a complete order.</li>
+<li><a href="../../../lesson-pages/sql-start-03.html#guide">Query construction and debugging</a> builds one clause at a time and distinguishes syntax, names, and business-logic mistakes.</li>
+</ol>
+<p>Then follow historical <code>sql-01</code> through <code>sql-60</code>. Complete <code>sql-found-01</code> after Day 15 before beginning windows on Day 16, and <code>sql-found-02</code> after Day 39 before the operational and schema-evolution modules. These milestones keep table design and transactions ahead of lessons that depend on them. The existing security, routines, types, maintenance, testing, analytical, recovery, extension, replication, and temporal modules remain available through the generated catalog, with their direct prerequisite chains intact.</p>
+<p>The advanced correctness path adds three focused labs:</p>
+<ul>
+<li><a href="../../../lesson-pages/sql-quality-01.html#guide">Bag reconciliation and join fanout</a> exposes equal-total counterexamples, duplicate multiplicity, and independent-child overcounting.</li>
+<li><a href="../../../lesson-pages/sql-scale-01.html#guide">Cursor pagination and bounded batches</a> handles timestamp ties, NULL phases, mutation cases, and the difference between a cursor and a snapshot.</li>
+<li><a href="../../../lesson-pages/sql-concurrency-01.html#guide">Isolation traces and optimistic concurrency</a> tests versioned writes and supplies a separately prepared, optional two-session visibility experiment.</li>
+</ul>
+<p>Use the generated catalog for the exact inventory, ordering, levels, direct prerequisites, and artifact paths rather than copying a second module table:</p>
+<pre><code class="language-text">python scripts/course.py catalog --track sql</code></pre>
+<p>The professional modules&#x27; default paths are deliberately single-database and offline. The extension module detects optional packages but never installs one. The replication module models change capture locally but never creates a publication, subscription, replication slot, or standby. The temporal module reads <code>btree_gist</code> availability but uses a trigger fallback, so it never enables an extension. Optional extension and multi-node labs are operator-reviewed follow-ons, not prerequisites.</p>
 <h3 id="running-a-learner-script">Running a learner script<a class="heading-anchor" href="#running-a-learner-script" aria-label="Link to this section">#</a></h3>
 <p>The same command works in Windows PowerShell, macOS, and Linux:</p>
-<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_found_01_relational_design.sql</code></pre>
+<pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_start_01_tables_and_grain.sql</code></pre>
 <p>Replace the filename with the module you are studying. The relational-design lesson rolls back its schema. The security lesson either rolls back its roles and schema or prints a safe instructional skip when the connected role cannot administer roles. Every P1 learner and solution script rolls back its lab schema. The operations lessons inspect settings/statistics but do not change host configuration, enable extensions, run VACUUM, create backup files, or perform cluster recovery.</p>
 <p>The migration lesson uses the isolated <code>pro_migration_lab</code> schema. Its learner script resets that schema, runs every migration, verifies the result, and removes the schema on normal completion:</p>
 <pre><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_found_02_versioned_migrations.sql</code></pre>
@@ -234,7 +155,9 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/fixtures
 <p>This runner is also safe for the default local database: it performs only read-only capability inspection outside transaction-scoped labs and leaves extensions, replication configuration, roles, and the filesystem unchanged.</p>
 <h3 id="solutions-and-safe-experimentation">Solutions and safe experimentation<a class="heading-anchor" href="#solutions-and-safe-experimentation" aria-label="Link to this section">#</a></h3>
 <p>Attempt the commented exercises before opening <code>solutions/</code>. Every executable solution cleans up its normal-run objects. Keep <code>-X</code> so personal <code>psql</code> configuration cannot alter a lesson, and keep <code>ON_ERROR_STOP=1</code> so unexpected errors stop immediately.</p>
-<p>Default SQL work needs no network access after PostgreSQL is installed. The optional physical/PITR specialization may require a one-time container-image pull and explicit operator approval; it is documentation-only in this track. No connection string or password belongs in these files. If <code>psql</code> prompts for credentials, use the local authentication method from the operating-system setup guide; do not save secrets in the repository.</p></article>
+<p>Default SQL work needs no network access after PostgreSQL is installed. The optional physical/PITR specialization may require a one-time container-image pull and explicit operator approval; it is documentation-only in this track. No connection string or password belongs in these files. If <code>psql</code> prompts for credentials, use the local authentication method from the operating-system setup guide; do not save secrets in the repository.</p>
+<h3 id="optional-shared-concurrency-fixture">Optional shared concurrency fixture<a class="heading-anchor" href="#optional-shared-concurrency-fixture" aria-label="Link to this section">#</a></h3>
+<p>The concurrency module&#x27;s default learner and solution are single-session, transactional models. Its guide separately documents an optional real READ COMMITTED versus REPEATABLE READ observation using <code>fixtures/concurrency/prepare.sql</code>, two interactive sessions, and explicit <code>cleanup.sql</code> followed by <code>verify_cleanup.sql</code>. That optional preparation commits its one table so the sessions can share it, refuses to overwrite an existing schema, and needs no superuser capability. Do not treat the default model as proof of actual blocking or concurrent visibility.</p></article>
   </main>
 </body>
 </html>

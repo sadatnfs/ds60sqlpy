@@ -1,0 +1,5 @@
+[
+  {"line_id": "L1", "invoice_id": "A", "amount_cents": 6000},
+  {"line_id": "L2", "invoice_id": "A", "amount_cents": 4000},
+  {"line_id": "L3", "invoice_id": "B", "amount_cents": 5000}
+]

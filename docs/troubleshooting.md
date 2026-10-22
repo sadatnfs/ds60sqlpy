@@ -128,6 +128,24 @@ The terminal interpreter and notebook kernel differ.
 
 3. Select the repository `.venv` kernel and restart it.
 
+Multiple clones share the per-user `ds60sqlpy` kernel name. Check the complete
+`sys.executable` path. A stale registration can point to a moved or deleted
+folder. Repair only the registration from the intended environment:
+
+```powershell
+# Windows, after resolving $CoursePython above
+& $CoursePython -m ipykernel install --user --name ds60sqlpy --display-name "Python (ds60sqlpy)"
+```
+
+```bash
+# macOS/Linux
+.venv/bin/python -m ipykernel install --user --name ds60sqlpy --display-name "Python (ds60sqlpy)"
+```
+
+Restart the kernel and verify its path again. Virtual environments should be
+recreated after moving them rather than copied between operating systems or
+folders. See [Python venv](https://docs.python.org/3.12/library/venv.html).
+
 ## `jupyter` is not found
 
 Use the environment’s Python:
@@ -159,6 +177,20 @@ If the module is missing, rerun the setup script and doctor.
 - Optional heavy packages may need more disk, memory, or a platform-specific wheel.
 - CPU is the supported default; do not install a CUDA build unless a lesson explicitly asks for it.
 - Do not work around a failed install by putting packages into the system Python.
+
+If locked setup reports a stale lock, use the matching source checkout and
+`uv.lock`, or ask a maintainer to update the lock. Do not silently remove
+`--locked` during a reproducibility check. On a restrictive network, use your
+organization's approved proxy/certificate setup or a prepared
+[offline wheelhouse](setup/offline.md#optional-package-only-offline-bundle).
+Do not disable TLS verification or include credentials in support commands.
+A source build instead of a binary wheel can indicate an unsupported Python,
+CPU architecture, or OS for that package.
+
+On macOS, missing `libomp.dylib` during advanced imports calls for the
+documented `brew install libomp` runtime. On Debian/Ubuntu, a missing
+`libgomp.so.1` calls for `libgomp1`. Those native runtimes are separate from
+Python package installation.
 
 ## A Seaborn dataset fails offline
 
@@ -208,6 +240,33 @@ Confirm the server is running:
 - Container: `docker compose ps` and `docker compose logs postgres`
 
 Also check host, port, database, and role. The default port is 5432.
+
+## Native `psql` works, but doctor or a guided notebook cannot connect
+
+Native OS setup uses your local role, while course tools default to the
+Compose `ds60` connection. Select the same target as the successful native
+command in the terminal that starts the portal. For macOS/Linux's normal
+username-and-socket route:
+
+```bash
+export DS60_DATABASE_URL=advanced_sql_training
+.venv/bin/python scripts/course.py doctor
+.venv/bin/python scripts/learning_portal.py
+```
+
+For native Windows, follow the [password-file handoff](setup/windows.md#let-the-guided-notebook-authenticate-without-a-hidden-prompt)
+and set its password-free local URL in the launching PowerShell window.
+Guided notebooks disable password prompts. An interactive login that asked
+for a password does not prove unattended authentication. See
+[Local PostgreSQL](setup/postgresql.md).
+
+## Docker SQL works, but the guided notebook says `psql` is missing
+
+`docker compose run --rm sql-runner` has a client inside its container. Python
+guided notebooks run host `psql`, so install that client or continue using
+container SQL commands. The PostgreSQL server can remain only in Docker. A
+Docker daemon, a host client, and a Python driver are separate requirements
+for different workflows.
 
 ## Docker is installed but Compose cannot start PostgreSQL
 

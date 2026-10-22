@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.checks import (
@@ -48,3 +49,13 @@ def test_catalog_is_json() -> None:
     catalog = Catalog.load()
     path = catalog.repo_root / "curriculum" / "catalog.json"
     assert isinstance(json.loads(path.read_text(encoding="utf-8")), dict)
+
+
+def test_link_check_skips_generated_builds_but_checks_authored_docs(tmp_path: Path) -> None:
+    (tmp_path / "build").mkdir()
+    (tmp_path / "build" / "README.md").write_text("[ignored](missing.md)", encoding="utf-8")
+    (tmp_path / "README.md").write_text("[authored](real-missing.md)", encoding="utf-8")
+    results = check_markdown_links(Catalog(tmp_path, ()))
+    failures = [item for item in results if item.severity == "fail" and item.path is not None]
+    assert len(failures) == 1
+    assert failures[0].path == "README.md"

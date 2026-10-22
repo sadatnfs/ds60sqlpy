@@ -289,13 +289,14 @@ class PortalServer(ThreadingHTTPServer):
         progress_path: Path | None = None,
         allow_launches: bool = True,
         token: str | None = None,
+        bind_host: str = "127.0.0.1",
     ) -> None:
         self.catalog = catalog
         self.repo_root = catalog.repo_root
         self.progress = ProgressStore(catalog, progress_path)
         self.launcher = PortalLauncher(catalog, enabled=allow_launches)
         self.token = token or secrets.token_urlsafe(32)
-        super().__init__(("127.0.0.1", port), PortalRequestHandler)
+        super().__init__((bind_host, port), PortalRequestHandler)
         self.expected_host = f"127.0.0.1:{self.server_address[1]}"
 
     @property

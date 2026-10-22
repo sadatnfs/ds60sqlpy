@@ -16,6 +16,7 @@
 -- Keep all numbered exercises answer-free here: write predictions and attempts
 -- only in your ignored working copy.
 --
+-- Prerequisite: sql-start-03 (query construction and debugging on-ramp).
 -- Focus: Query execution order and basic filtering/sorting
 
 BEGIN;

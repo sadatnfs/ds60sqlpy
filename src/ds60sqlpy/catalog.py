@@ -12,6 +12,10 @@ from typing import Any, Literal, cast
 Track = Literal["python", "sql", "bridge"]
 TRACK_ORDER: dict[Track, int] = {"python": 0, "sql": 1, "bridge": 2}
 LESSON_ORDER_OVERRIDES: dict[str, float] = {
+    "python-foundations-01": 1.5,
+    "python-foundations-02": 3.5,
+    "python-foundations-03": 8.5,
+    "python-foundations-04": 10.5,
     "sql-found-01": 15.5,
     "sql-found-02": 39.5,
 }

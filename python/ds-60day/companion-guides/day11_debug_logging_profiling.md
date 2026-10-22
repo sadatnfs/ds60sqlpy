@@ -17,7 +17,7 @@ By the end of this lesson, you can:
 
 ## Prerequisites
 
-Complete Day 10 (`python-10`): tests, exceptions, importable utilities.
+Complete the independent data investigation (`python-foundations-04`), which includes Day 10 (`python-10`). You can separate file boundaries from pure analysis and preserve concrete test evidence.
 
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
@@ -289,8 +289,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-11`
-(Day 11 — Debugging, Logging, and Profiling). Direct catalog prerequisites: `python-10`.
-I have completed the direct prerequisites: `python-10`. Emphasize evidence-driven debugging, useful logs, and measurement before optimization.
+(Day 11 — Debugging, Logging, and Profiling). Direct catalog prerequisites: `python-foundations-04`.
+I have completed the direct prerequisites: `python-foundations-04`. Emphasize evidence-driven debugging, useful logs, and measurement before optimization.
 Read `python/ds-60day/companion-guides/day11_debug_logging_profiling.md` and use the learner notebook
 `python/ds-60day/notebooks/day11_debug_logging_profiling.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

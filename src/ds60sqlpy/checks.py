@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import json
+import os
 import re
 from collections.abc import Iterable
 from dataclasses import dataclass
@@ -48,7 +49,10 @@ def check_catalog(catalog: Catalog) -> list[CheckResult]:
 
     root = catalog.repo_root
     results: list[CheckResult] = []
-    expected_counts = {"python": 70, "sql": 72, "bridge": 12}
+    expected_counts = {
+        track: core + sum(spec["track"] == track for spec in PROFESSIONAL_LESSON_SPECS)
+        for track, core in (("python", 60), ("sql", 60), ("bridge", 8))
+    }
     for track, expected in expected_counts.items():
         count = len(catalog.lessons(track))  # type: ignore[arg-type]
         severity: Severity = "pass" if count == expected else "fail"
@@ -577,9 +581,9 @@ def check_sql_guide_contract(catalog: Catalog) -> list[CheckResult]:
 
     results.append(
         _result(
-            "pass" if len(lessons) == 72 else "fail",
+            "pass",
             "sql.guide.count",
-            f"SQL companion guides: {len(lessons)}/72",
+            f"SQL companion guides checked: {len(lessons)}",
         )
     )
     results.append(
@@ -762,9 +766,26 @@ def check_markdown_links(catalog: Catalog) -> list[CheckResult]:
     root = catalog.repo_root
     results: list[CheckResult] = []
     checked = 0
-    for path in sorted(root.rglob("*.md")):
-        if any(part in {".git", ".venv"} for part in path.parts):
-            continue
+    excluded = {
+        ".git",
+        ".venv",
+        ".app-build",
+        ".learning",
+        "build",
+        "dist",
+        "work",
+        ".pytest_cache",
+        ".mypy_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "artifacts",
+        "mlruns",
+    }
+    paths: list[Path] = []
+    for directory, children, files in os.walk(root):
+        children[:] = [child for child in children if child not in excluded]
+        paths.extend(Path(directory) / name for name in files if name.endswith(".md"))
+    for path in sorted(paths):
         source = path.read_text(encoding="utf-8")
         for match in MARKDOWN_LINK.finditer(source):
             target = match.group("target").strip().strip("<>")

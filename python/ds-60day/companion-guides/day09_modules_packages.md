@@ -17,7 +17,7 @@ By the end of this lesson, you can:
 
 ## Prerequisites
 
-Complete Day 8 (`python-08`): functions, paths, and file boundaries.
+Complete the trustworthy-records on-ramp (`python-foundations-03`), which includes Day 8 (`python-08`). You can write non-mutating validation functions, retain rejected input, and account for every source row.
 
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
@@ -290,8 +290,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-09`
-(Day 9 — Modules, Packages, Imports, and `__main__`). Direct catalog prerequisites: `python-08`.
-I have completed the direct prerequisites: `python-08`. Emphasize modules, package namespaces, imports, and safe entry points.
+(Day 9 — Modules, Packages, Imports, and `__main__`). Direct catalog prerequisites: `python-foundations-03`.
+I have completed the direct prerequisites: `python-foundations-03`. Emphasize modules, package namespaces, imports, and safe entry points.
 Read `python/ds-60day/companion-guides/day09_modules_packages.md` and use the learner notebook
 `python/ds-60day/notebooks/day09_modules_packages.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

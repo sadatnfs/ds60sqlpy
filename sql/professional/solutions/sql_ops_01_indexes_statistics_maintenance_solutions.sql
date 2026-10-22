@@ -86,7 +86,7 @@ FROM (
 ORDER BY method;
 
 -- Exercise 3: category and severity are correlated by fixture construction.
-CREATE STATISTICS events_category_severity_stats (dependencies, mcv)
+CREATE STATISTICS pro_ops_lab.events_category_severity_stats (dependencies, mcv)
 ON category, severity
 FROM pro_ops_lab.events;
 
@@ -183,6 +183,7 @@ DO $solution$
 DECLARE
     installed boolean;
     preloaded boolean;
+    preload_setting text;
     view_name regclass;
 BEGIN
     SELECT EXISTS (
@@ -191,19 +192,14 @@ BEGIN
         WHERE extname = 'pg_stat_statements'
     ) INTO installed;
 
-    preloaded :=
-        'pg_stat_statements' = ANY (
-            pg_catalog.regexp_split_to_array(
-                COALESCE(
-                    pg_catalog.current_setting(
-                        'shared_preload_libraries',
-                        true
-                    ),
-                    ''
-                ),
-                '\s*,\s*'
-            )
-        );
+    -- pg_settings filters settings the caller cannot inspect. A missing row is
+    -- unavailable evidence, not proof that no preload is configured.
+    SELECT setting INTO preload_setting
+    FROM pg_catalog.pg_settings
+    WHERE name = 'shared_preload_libraries';
+    preloaded := 'pg_stat_statements' = ANY (
+        pg_catalog.regexp_split_to_array(preload_setting, '\s*,\s*')
+    );
 
     SELECT to_regclass(
         pg_catalog.quote_ident(n.nspname) || '.pg_stat_statements'
@@ -217,6 +213,12 @@ BEGIN
     IF NOT installed THEN
         INSERT INTO ds60_pgss_probe
         VALUES ('absent', 'extension is not installed; no change was attempted');
+    ELSIF preload_setting IS NULL THEN
+        INSERT INTO ds60_pgss_probe
+        VALUES (
+            'preload_visibility_unavailable',
+            'caller cannot inspect shared_preload_libraries; no privilege change was attempted'
+        );
     ELSIF NOT preloaded THEN
         INSERT INTO ds60_pgss_probe
         VALUES (

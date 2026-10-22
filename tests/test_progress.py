@@ -18,7 +18,7 @@ def test_progress_round_trip(tmp_path: Path) -> None:
 
     assert completion.lesson_id == "python-01"
     assert store.completions()[0].notes == "First lesson"
-    assert store.next_lesson("python").id == "python-02"  # type: ignore[union-attr]
+    assert store.next_lesson("python").id == "python-foundations-01"  # type: ignore[union-attr]
     assert store.next_lesson("bridge").id == "bridge-01"  # type: ignore[union-attr]
 
 

@@ -1,10 +1,12 @@
 # PostgreSQL track
 
-This track contains 60 ordered PostgreSQL lessons, companion guides, and
-projects. New learners start with Day 1. Two named relational-engineering
-modules form the milestones between Days 15–16 and Days 39–40, and ten
-professional modules extend the shared core. The number is a sequence, not a
-deadline.
+The historical core contains 60 ordered PostgreSQL lessons, companion guides,
+and projects. Complete beginners first use the three small-fixture lessons in
+the [SQL on-ramp](../professional/README.md#learning-path), then begin Day 1.
+Two named relational-engineering modules form the milestones between Days
+15-16 and Days 39-40. Professional modules extend the core into deeper database
+responsibilities and correctness labs. The number is a sequence, not a deadline;
+the generated catalog defines the complete current curriculum.
 
 Start at the repository [README](../../README.md), and run every command from the repository root.
 
@@ -117,7 +119,7 @@ Both `--reset` commands recreate the disposable `training` schema first.
 5. Attempt exercises before opening either separate solution. A browser-rendered
    source preview is for reading; it does not execute SQL.
 
-If you are new to relational databases, begin with Day 1 and the supplied
+If you are new to relational databases, begin with the [SQL on-ramp](../professional/README.md#learning-path), then use Day 1 and the supplied
 training schema. Add the named relational-engineering modules only after their
 declared prerequisites:
 

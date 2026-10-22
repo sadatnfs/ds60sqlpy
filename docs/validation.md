@@ -1,5 +1,39 @@
 # Validation
 
+## Verified upgrade on 2026-10-22
+
+These are actual local results from this upgrade, distinct from the July
+record and from configured hosted CI jobs. The source checkout started at
+`3ed0a31`; no source or image was pushed.
+
+| Surface | Observed result | Boundary |
+| --- | --- | --- |
+| Full local suite | 623 passed, 2 skipped, 10 subtests passed | The two skips require a native Windows PowerShell parser unavailable on the macOS host. |
+| Catalog and structure | 168 lessons; structural validation 26 pass, 0 warnings, 0 failures | 77 Python, 78 SQL, and 13 bridge; historical IDs and baseline file preserved. |
+| Practice and lesson depth | 168/168 pass each gate | Structural/count gates supplement the exercised behavior and human content review. |
+| Generated delivery | Course dashboard, 168 readers, 46 references regenerated and drift-checked | Generated outputs derive from authored sources and catalog metadata. |
+| Notebook structure | 122 notebooks valid, with uniform metadata and clean saved state | This does not execute every advanced notebook. |
+| Notebook execution | 13/13 dependency-light, offline-capable smoke notebooks executed | Host process-introspection warnings appeared under the restricted macOS environment; cell execution completed. An air-gapped whole-course run was not performed. |
+| New Python/capstone | Fresh-process scripts, runnable examples, and focused behavioral/failure tests passed | Every new module is deterministic and uses local fixtures; advanced historical model training was not rerun in full. |
+| PostgreSQL 16 | All 78 learner scripts and 78 executable solutions completed against an isolated local database | Separate from optional roles/extensions/replication/PITR capability claims. |
+| Limited PostgreSQL 17 | All 78 learner scripts and 78 executable solutions completed in Docker with the restricted course login | Actual server and client 17.11; privileged settings/statistics issues found during these checks were repaired. |
+| Live concurrency | Two-session READ COMMITTED and REPEATABLE READ observations and cleanup passed | This proves the bounded local lab, not production concurrency behavior. |
+| Browser application | Actual Python/SQL runs, NULL result tables, recovery history, blank pads, saved evidence, keyboard tabs, mobile width, clean console | Browser review used the live local application, not screenshots alone. |
+| Native executable | Built macOS ARM64 bundle; read-only self-check found 168 lessons and no missing assets; authenticated Python/SQL, reset/verify, 500-row seed query, and PNG plot capture passed | Native Windows/Linux bundles were not built or executed locally. |
+| Docker application | Local Linux ARM64 image built and started; Python/SQL HTTP smoke, reset, restricted-role checks, and recreation/image-replacement persistence passed | 46 in-container backend/app tests passed; user containers outside the isolated test project were preserved. No image was pushed. |
+| Data preservation | 12 demo learner-state files preserved byte-for-byte through official asset refresh; 1,103 official assets checked without drift | This was the newly created test workspace, not an overwrite of a human learner's edited course. |
+| Legacy volume migration | Bootstrap-role guard left source roles, ownership, and sentinel rows unchanged; side-by-side dump/restore into a fresh limited-role PostgreSQL 17 database verified | OID10 bootstrap roles cannot be demoted. The tested migration preserves the original volume rather than attempting that operation. |
+| MCP adapter | Real SDK2 stdio initialize/list/call/resource/prompt sessions, gated solutions, opt-in writes, network-denied process, and ten read-only evaluation cases passed | No model was called and no claim is made about model teaching quality or bundled offline AI. |
+| Portability and quality | Four-platform all-extras lock dry-runs, Ruff, formatting, strict mypy, secret/history scan, and diff checks passed | Dependency resolution and workflow definitions are not substitutes for native Windows/Linux execution. |
+
+The coding application is a personal trusted-code environment. Default runs
+have bounded execution/output and process cleanup. SQL uses only the exact
+local disposable target and a limited login. Completion records require saved
+prediction, attempt and explanation, but remain learner-confirmed evidence
+rather than automatic grading. See [application and build details](offline-app.md)
+and [MCP tutoring](mcp-tutor.md).
+
+
 Validation separates structural confidence from actual execution. A notebook that parses has not necessarily run; a SQL file that looks plausible has not necessarily succeeded against PostgreSQL.
 
 Run commands from the repository root.
@@ -122,7 +156,7 @@ both-environment-layout readiness path without opening a browser.
 The focused learner-entry tests cover different boundaries:
 
 - `test_course_guide.py` checks dashboard catalog links, generated copy, and
-  that all 154 guide-authored Codex prompts are embedded without fallback
+  that all cataloged guide-authored Codex prompts are embedded without fallback
   drift.
 - `test_lesson_depth_audit.py` checks the curriculum-wide beginner-depth
   contract, duplicate/template guards, runnable guide fences, and report.

@@ -4,7 +4,7 @@
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
   },
-  "postCreateCommand": "python -m pip install -e '.[notebooks,data,bridge,quality]' && python -m ipykernel install --user --name ds60sqlpy --display-name 'Python (ds60sqlpy)'",
+  "postCreateCommand": "python -m pip install -e '.[notebooks,data,bridge,quality,professional,sql-notebooks]' && python -m ipykernel install --user --name ds60sqlpy --display-name 'Python (ds60sqlpy)'",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -18,8 +18,8 @@
       }
     }
   },
-  "forwardPorts": [5432, 8888],
-  "remoteEnv": {
-    "DS60_DATABASE_URL": "postgresql://ds60:ds60@host.docker.internal:5432/advanced_sql_training"
-  }
+  "forwardPorts": [
+    5432,
+    8888
+  ]
 }

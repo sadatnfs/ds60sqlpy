@@ -51,6 +51,8 @@ param(
 
     [switch]$NoLaunches,
 
+    [switch]$LearningLab,
+
     [switch]$PauseOnError
 )
 
@@ -61,6 +63,9 @@ $DryRun = [bool]$WhatIfPreference
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $BootstrapScript = Join-Path $PSScriptRoot "bootstrap_windows.ps1"
 $PortalScript = Join-Path $PSScriptRoot "learning_portal.py"
+if ($LearningLab) {
+    $PortalScript = Join-Path $PSScriptRoot "learning_lab.py"
+}
 $StandardVenvPython = Join-Path $RepoRoot ".venv\Scripts\python.exe"
 $CondaPrefixPython = Join-Path $RepoRoot ".venv\python.exe"
 
@@ -610,7 +615,7 @@ function Invoke-CourseStart {
     if ($NoBrowser) {
         $PortalArguments += "--no-browser"
     }
-    if ($NoLaunches) {
+    if ($NoLaunches -and -not $LearningLab) {
         $PortalArguments += "--no-launches"
     }
 

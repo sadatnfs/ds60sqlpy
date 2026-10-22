@@ -25,7 +25,7 @@ Run these while connected before relying on the corresponding lessons offline:
 | Seaborn sample datasets | Several data-analysis lessons | Accepted first-run download; Seaborn reuses its local cache afterward |
 | Python packages and platform wheels | Course environment | Installed once by the setup script |
 | PostgreSQL or PostgreSQL container image | SQL track | Runs locally after installation or image pull |
-| JupySQL, pandas, SQLAlchemy, and Psycopg wheels | PostgreSQL notebook bridge | Installed by Windows `Core` bootstrap or macOS/Linux advanced setup; queries stay local afterward |
+| JupySQL, pandas, SQLAlchemy, and Psycopg wheels | PostgreSQL notebook bridge | Installed by the default Core setup on every OS; queries stay local afterward |
 | torchvision pretrained weights | Transfer-learning lesson | Must already be cached, or use the lesson’s non-pretrained fallback |
 | Hugging Face model/tokenizer | NLP lesson | Must already be cached, or use the local fallback |
 | spaCy language model | NLP lesson | Must be installed while connected, or use `spacy.blank(...)` where the lesson permits |
@@ -121,6 +121,24 @@ Common default locations include:
 
 Locations can vary by operating system and environment configuration. Do not commit machine caches to the repository.
 
+Prepare the Seaborn datasets currently used by the historical lessons in a
+scratch notebook while connected:
+
+```python
+import seaborn as sns
+
+for name in ("tips", "titanic", "penguins"):
+    frame = sns.load_dataset(name)
+    print(name, frame.shape)
+```
+
+Expect three nonempty shapes. Then disconnect, restart the kernel, and repeat
+the cell. A successful connected load alone does not prove the second run
+avoids a network lookup. `HF_HUB_OFFLINE` only controls Hugging Face libraries;
+it does not disable Seaborn, pip, Docker pulls, or arbitrary HTTP requests.
+For downloaded model weights, exercise the exact model identifier and revision
+that the lesson uses, or choose its documented local fallback.
+
 ## Fully disconnected installation
 
 A completely offline fresh-machine installation requires a separately prepared bundle containing, at minimum:
@@ -134,6 +152,49 @@ A completely offline fresh-machine installation requires a separately prepared b
 - Checksums and licenses
 
 The Git repository alone is not that bundle. If you build one, generate it on a connected machine for a specific operating system, CPU architecture, and Python version, then install wheels with `--no-index --find-links`. Do not claim another platform is supported until that bundle is tested there.
+
+## Optional package-only offline bundle
+
+On a connected machine matching the target OS, CPU, and Python version, create
+a course wheel and Core dependency wheels in an ignored folder:
+
+```powershell
+# Windows, after resolving $CoursePython as above
+& $CoursePython -m pip wheel --wheel-dir artifacts\wheelhouse ".[notebooks,data,quality,bridge,professional,sql-notebooks]"
+```
+
+```bash
+# macOS/Linux
+.venv/bin/python -m pip wheel --wheel-dir artifacts/wheelhouse ".[notebooks,data,quality,bridge,professional,sql-notebooks]"
+```
+
+On the offline machine, install Python first, copy the repository and matching
+wheelhouse, then create `.venv` and install the built course wheel:
+
+```powershell
+# Native Windows Python.org route
+py -3.12 -m venv .venv
+$CoursePython = (Resolve-Path .\.venv\Scripts\python.exe).Path
+& $CoursePython -m pip install --no-index --find-links artifacts\wheelhouse "ds60sqlpy[notebooks,data,quality,bridge,professional,sql-notebooks]"
+& $CoursePython -m ipykernel install --user --name ds60sqlpy --display-name "Python (ds60sqlpy)"
+& $CoursePython scripts\course.py doctor --no-database
+```
+
+```bash
+# macOS/Linux; use python3.11 if that is the bundle's interpreter
+python3.12 -m venv .venv
+.venv/bin/python -m pip install --no-index --find-links artifacts/wheelhouse "ds60sqlpy[notebooks,data,quality,bridge,professional,sql-notebooks]"
+.venv/bin/python -m ipykernel install --user --name ds60sqlpy --display-name "Python (ds60sqlpy)"
+.venv/bin/python scripts/course.py doctor --no-database
+```
+
+Installing the wheel avoids an offline source build. Keep the repository and
+installed package versions in sync. This is a package-only bundle, separate
+from a standalone application: it omits Python, PostgreSQL, VS Code, extensions,
+datasets, and models. Default setup scripts perform a connected installation;
+they are not offline bundle installers. Verify the intended workflow on the
+actual target OS before distributing it. See [pip wheel](https://pip.pypa.io/en/stable/cli/pip_wheel/)
+and [installing local packages](https://pip.pypa.io/en/stable/user_guide/#installing-from-local-packages).
 
 ## Adding a lesson
 

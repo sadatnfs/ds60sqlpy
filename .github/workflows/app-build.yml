@@ -1,0 +1,70 @@
+name: Application builds
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "src/**"
+      - "scripts/build_app.py"
+      - "scripts/learning_lab.py"
+      - "Dockerfile"
+      - "compose.yaml"
+      - ".dockerignore"
+      - ".github/workflows/app-build.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    name: Native application (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install minimal builder
+        run: python -m pip install ".[desktop-build]"
+      - name: Build the complete course application
+        run: python scripts/build_app.py
+      - name: Verify bundled lesson and solution assets
+        run: >-
+          python -c "import os, subprocess;
+          binary = 'dist/DS60LearningLab.exe' if os.name == 'nt' else 'dist/DS60LearningLab';
+          subprocess.run([binary, '--self-check'], check=True)"
+      - uses: actions/upload-artifact@v6
+        with:
+          name: DS60LearningLab-${{ matrix.os }}
+          path: dist/DS60LearningLab*
+          retention-days: 14
+
+  docker:
+    name: Docker browser lab and live coding pads
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build and start isolated browser lab
+        run: docker compose --profile lab up --build --detach --wait
+      - name: Exercise authenticated browser backend with Python and SQL
+        run: >-
+          python scripts/check_lab_http.py --url http://127.0.0.1:8765
+          --confirm-disposable --reset-sql
+      - name: Recreate the application while preserving its named workspace volume
+        run: docker compose --profile lab up --detach --wait --force-recreate --no-deps lab
+      - name: Verify saved work survives application recreation
+        run: >-
+          python scripts/check_lab_http.py --url http://127.0.0.1:8765
+          --confirm-disposable --check-persistence
+      - name: Capture service diagnostics
+        if: failure()
+        run: docker compose --profile lab logs --no-color
+      - name: Stop this disposable CI environment
+        if: always()
+        run: docker compose --profile lab down --volumes

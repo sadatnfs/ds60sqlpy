@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'">
+<title>DS60 Learning Lab</title>
+<style>
+:root{color-scheme:light;--bg:#f4f6f1;--paper:#fff;--ink:#172c27;--muted:#546b61;--line:#d8e2d8;--accent:#14664e;--soft:#e4f1e7;font:16px/1.6 ui-sans-serif,system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}button,.button{border:1px solid var(--accent);background:var(--accent);color:white;border-radius:8px;padding:.55rem .9rem;cursor:pointer;text-decoration:none}button:hover,.button:hover{filter:brightness(.91)}button:disabled{opacity:.55;cursor:wait}.secondary{background:white;color:var(--accent)}button:focus-visible,a:focus-visible,textarea:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #c57f1f;outline-offset:3px}a{color:var(--accent)}header{background:#102f27;color:#edf5ec;padding:1.1rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}header strong{font-size:1.3rem}header span{font-size:.9rem;color:#b7d5c5}header a{color:#d1e4d7}main{display:grid;grid-template-columns:280px minmax(0,1fr);max-width:1700px;margin:auto;min-height:92vh}aside{padding:1.2rem;border-right:1px solid var(--line);background:#edf1e9}h1{font-size:1.7rem;line-height:1.3;margin:.3rem 0 1rem}h2{font-size:1.22rem}h3{font-size:1.1rem}label{display:block;font-weight:600;font-size:.9rem;margin:.7rem 0 .25rem}select,input{width:100%;padding:.55rem;border:1px solid #8caa99;border-radius:7px;background:white;color:var(--ink)}small,.muted{color:var(--muted)}#route{margin-top:1rem;display:grid;gap:.35rem;max-height:55vh;overflow:auto}#route button{font-size:.8rem;text-align:left;background:transparent;color:var(--ink);border-color:transparent;padding:.55rem}#route button[aria-current=step]{background:#fff;border-color:var(--accent)}#route button.done{color:var(--accent)}.workspace{min-width:0;padding:1.2rem 1.5rem}.intro{background:#e5efe4;border:1px solid #b8ceb9;border-radius:12px;padding:1.2rem}.intro p{max-width:80ch}.pill{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--accent)}.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,1fr);gap:1rem;align-items:start}.panel{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:1.2rem;min-width:0}.toolbar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:.7rem 0}.toolbar select{width:auto}.tabs{display:flex;gap:.3rem;flex-wrap:wrap;margin:1rem 0}.tabs button{background:white;color:var(--accent);border-color:#a9c2b1;padding:.4rem .65rem}.tabs button[aria-selected=true]{background:var(--accent);color:white}textarea{display:block;width:100%;border:1px solid #9eb4a5;border-radius:8px;padding:.75rem;resize:vertical;color:var(--ink);background:#fcfdfb}#code{min-height:320px;font:14px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:4}#notes{min-height:150px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#10271f;color:#e1eee1;border-radius:8px;padding:.85rem;font:13px/1.6 ui-monospace,Consolas,monospace}code{font-family:ui-monospace,Consolas,monospace}#guide{max-height:73vh;overflow:auto;padding-right:.6rem}#guide h2,#guide h3,#guide h4{line-height:1.4}#guide pre{background:#eef3ed;color:#18382a}#guide table{border-collapse:collapse;width:100%;font-size:.88rem;display:block;overflow:auto}td,th{border:1px solid var(--line);padding:.4rem;text-align:left}#status{min-height:1.6rem;padding:.5rem 0;font-size:.9rem}#status.error{color:#a22d23}#hint{border-left:4px solid #bc8939;padding-left:.8rem}details{margin-top:1rem}summary{cursor:pointer;color:var(--accent)}.hidden{display:none!important}#busy{color:#4b6f60}.note{font-size:.85rem;padding:.5rem;background:#f4f2e8;border-radius:6px}.ready{font-size:.8rem;color:var(--accent)}@media(max-width:1100px){.layout{grid-template-columns:1fr}#guide{max-height:65vh}}@media(max-width:700px){main{display:block}aside{border-right:0;border-bottom:1px solid var(--line)}#route{max-height:180px}header{padding:1rem}.workspace{padding:1rem}}
+
+#sqlResults{max-width:100%;overflow:auto;margin-top:1rem}#sqlResults table{border-collapse:collapse;min-width:100%;font-size:.9rem}#sqlResults caption{text-align:left;font-weight:600;margin-bottom:.4rem}#sqlResults th{background:var(--soft)}main[aria-busy=true]{cursor:progress}#phaseContent{min-height:260px}#status.error{font-weight:600}#guide{scrollbar-gutter:stable}a,button{touch-action:manipulation}
+
+@media(min-width:701px){header{position:sticky;top:0;z-index:10}aside{position:sticky;top:85px;max-height:calc(100vh - 85px);overflow:auto;align-self:start}}@media(min-width:1101px){.layout>article.panel{position:sticky;top:85px}}
+</style>
+</head>
+<body>
+<header><div><strong>DS60 / Learning Lab</strong> <span>Read. Predict. Build. Explain.</span></div><a href="/START_HERE.html">Browse the full library</a></header>
+<main>
+<aside aria-label="Learning route">
+<div class="pill">Your learning route</div>
+<label for="path">Choose a goal</label><select id="path"></select>
+<label for="hours">Hours each week</label><input id="hours" type="number" min=".5" step=".5" value="5">
+<div class="toolbar"><button id="plan">Build my route</button></div>
+<p id="estimate" class="muted"></p><small>Estimates exclude review and repeated attempts. Take the time you need.</small>
+<hr><label for="lessonId">Or open a stable lesson ID</label><input id="lessonId" placeholder="python-01 or sql-start-01"><button id="open" class="secondary">Open lesson</button>
+<nav id="route" aria-label="Lessons in prerequisite order"></nav>
+</aside>
+<section class="workspace">
+<div id="welcome" class="intro"><span class="pill">A course you can work through</span><h1>Start small. Build something real.</h1><p>Choose a goal on the left. Your route includes its prerequisites, with beginner practice before the larger projects. Each lesson puts the explanation next to a coding pad and a record of your own reasoning.</p><p>Python runs with your configured local interpreter. SQL runs only in the disposable <code>advanced_sql_training</code> database. In Docker these backends are prepared by the image. Native users can follow the <a href="/reference-pages/docs/setup/first-success.md.html">first-success guide</a>.</p><p class="note">The coding pad runs trusted code with the backend user's permissions. Use your own code and reviewed examples. Notes and saved pads stay on this computer. The lab does not call a hosted AI service.</p></div>
+<div id="status" role="status" aria-live="polite"></div>
+<section id="lesson" class="hidden">
+<div class="pill" id="lessonMeta"></div><h1 id="title"></h1><p id="prereqs" class="muted"></p>
+<div class="layout">
+<article class="panel"><div class="toolbar"><h2 style="margin:0">Lesson guide</h2><a id="reader" target="_blank" rel="noopener">Full lesson reader</a></div><div id="guide"></div></article>
+<div>
+<section class="panel"><h2>Coding pad</h2><label for="language">Backend</label><select id="language"><option value="python">Python</option><option value="sql">PostgreSQL</option></select><p id="padHelp" class="muted"></p><details id="sqlSetup"><summary>Prepare the disposable SQL training data</summary><p>This drops and recreates only the course-owned training schema in advanced_sql_training. Saved SQL pads are preserved.</p><button id="prepareSql" class="secondary">Reset and verify training schema</button></details>
+<label for="code">Your code</label><textarea id="code" spellcheck="false" aria-describedby="padHelp"></textarea>
+<div class="toolbar"><button id="run">Run code</button><button id="saveCode" class="secondary">Save pad</button><button id="starter" class="secondary">Load lesson starter</button></div>
+<details id="padHistory"><summary>Recover an earlier saved pad</summary><p>When saved code changes, its previous contents remain in local history. Loading a copy does not run it.</p><label for="historyVersion">Earlier saved version</label><select id="historyVersion"><option value="">No earlier versions yet</option></select><div class="toolbar"><button id="loadHistory" class="secondary" disabled>Load a copy into the pad</button><button id="refreshHistory" class="secondary">Refresh versions</button></div></details>
+<p id="runMeta" class="muted"></p><div id="sqlResults"></div><div id="figures"></div><pre id="output" aria-label="Run output" aria-live="polite">Your output will appear here.</pre></section>
+<section class="panel" style="margin-top:1rem"><h2>Work the idea through</h2><div id="phases" class="tabs" role="tablist" aria-label="Learning phase"></div><div id="phaseContent" role="tabpanel" aria-labelledby="phase-read"><p id="phaseHelp"></p><label id="notesLabel" for="notes">Your evidence and reasoning</label><textarea id="notes" aria-describedby="phaseHelp" placeholder="Write your prediction, actual output, or explanation here."></textarea>
+<div class="toolbar"><button id="saveNote">Save evidence</button><button id="next" class="secondary">Save and next phase</button><button id="getHint" class="secondary">One hint</button></div><p id="hint" role="status" aria-live="polite"></p></div>
+<details><summary>Compare after your attempt</summary><p>Open the reference when you are ready to compare reasoning and test cases.</p><button id="solution" class="secondary">Reveal worked solution</button><pre id="solutionText" class="hidden"></pre></details>
+<details><summary>Continue with Codex</summary><p>Copy this prompt into Codex, or connect the optional DS60 MCP tutor.</p><pre id="prompt"></pre></details>
+<label><input id="confirmed" type="checkbox" style="width:auto"> I checked my result and can explain it without the solution.</label><button id="complete">Record demonstrated lesson</button><p class="muted">Completion is your evidence record. The app does not automatically grade your answer.</p>
+</section></div></div></section>
+</section></main>
+<script>
+'use strict';
+const SERVER_TOKEN = "";
+const $ = id => document.getElementById(id);
+const phases = ['read', 'predict', 'attempt', 'compare', 'explain'];
+const instructions = {
+  read: 'Read the guide and run one small example. Note the new terms you can now explain.',
+  predict: 'Before running the next example, predict its output and one boundary case.',
+  attempt: 'Write your own code in the pad. Save the input, observed output, and any error you investigated.',
+  compare: 'After an honest attempt, compare your approach with the worked example or solution. Explain one difference.',
+  explain: 'Close the solution. Explain the main idea in your own words and name the evidence that proves your result.'
+};
+let current = null, phase = 'read', session = {}, hintNumber = 1;
+let pendingCode = false, pendingNote = false, working = false, oldLanguage = 'python';
+
+function message(text, error = false) {
+  $('status').textContent = text;
+  $('status').classList.toggle('error', error);
+}
+
+async function api(action, data = {}) {
+  const response = await fetch('/api/lab', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-DS60-Token': SERVER_TOKEN},
+    body: JSON.stringify({action, ...data})
+  });
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.error || 'Request failed');
+  return body;
+}
+
+function setBusy(active) {
+  document.querySelector('main').setAttribute('aria-busy', String(active));
+  for (const control of document.querySelectorAll('button, input, select, textarea')) {
+    control.disabled = active;
+  }
+  if (!active) $('loadHistory').disabled = !$('historyVersion').value;
+}
+
+async function guard(action) {
+  if (working) return;
+  const previousFocus = document.activeElement;
+  working = true;
+  setBusy(true);
+  try {
+    await action();
+  } catch (error) {
+    if ($('output').textContent === 'Running...') $('output').textContent = error.message;
+    message(error.message, true);
+  } finally {
+    working = false;
+    setBusy(false);
+    if (previousFocus && previousFocus !== document.body && previousFocus.isConnected && !previousFocus.disabled) {
+      previousFocus.focus({preventScroll: true});
+    }
+  }
+}
+
+async function saveEvidence() {
+  if (!current) return;
+  session = await api('save', {lesson_id: current.id, phase, note: $('notes').value});
+  pendingNote = false;
+}
+
+async function savePad(force = false) {
+  if (!current || (!force && !pendingCode)) return;
+  await api('save-pad', {
+    lesson_id: current.id, language: $('language').value, code: $('code').value
+  });
+  pendingCode = false;
+}
+
+function recordLocation() {
+  if (!current) return;
+  const state = new URLSearchParams({lesson: current.id, phase});
+  history.replaceState(null, '', '#' + state.toString());
+}
+
+function setPhase(value) {
+  phase = phases.includes(value) ? value : 'read';
+  $('notes').value = session[phase] || '';
+  $('phaseHelp').textContent = instructions[phase];
+  $('notesLabel').textContent = phase[0].toUpperCase() + phase.slice(1) + ': your evidence and reasoning';
+  for (const button of $('phases').children) {
+    const selected = button.dataset.phase === phase;
+    button.setAttribute('aria-selected', String(selected));
+    button.tabIndex = selected ? 0 : -1;
+  }
+  $('phaseContent').setAttribute('aria-labelledby', 'phase-' + phase);
+  pendingNote = false;
+  recordLocation();
+}
+
+async function choosePhase(value) {
+  await saveEvidence();
+  setPhase(value);
+  message('Previous evidence saved. Now work on ' + phase + '.');
+}
+
+function clearResults() {
+  $('output').textContent = 'Your output will appear here.';
+  $('runMeta').textContent = '';
+  $('sqlResults').replaceChildren();
+  $('figures').replaceChildren();
+}
+
+async function loadPad() {
+  const language = $('language').value;
+  const data = await api('read-pad', {lesson_id: current.id, language});
+  const firstExample = language === 'python'
+    ? 'print("Hello, learning lab!")\n' : 'SELECT 1 AS first_result;\n';
+  // A deliberately saved empty pad must stay empty.
+  $('code').value = data.saved === true ? data.code : (data.code || firstExample);
+  $('padHelp').textContent = language === 'python'
+    ? 'Runs in a fresh Python process from the course root, with a 15-second limit. Variables do not persist between runs. Use print() to inspect results.'
+    : 'Uses only the disposable course database. Statement timeout: 5 seconds. Result sets display at most 100 rows. Each run is a fresh connection. Successful statements commit unless you explicitly roll back. Use a transaction ending with ROLLBACK for temporary practice changes. The pad accepts SQL, not psql backslash commands.';
+  oldLanguage = language;
+  pendingCode = false;
+  $('sqlSetup').classList.toggle('hidden', language !== 'sql');
+  clearResults();
+  await refreshHistory();
+}
+
+async function openLesson(id, requestedPhase = null) {
+  if (current) {
+    await saveEvidence();
+    await savePad();
+  }
+  const data = await api('lesson', {lesson_id: id});
+  current = data;
+  session = data.session;
+  hintNumber = 1;
+  $('lesson').classList.remove('hidden');
+  $('welcome').classList.add('hidden');
+  $('title').textContent = data.title;
+  $('lessonMeta').textContent = data.id + ' / ' + data.level + ' / ' + data.estimated_minutes + ' minutes';
+  $('lessonId').value = data.id;
+  $('prereqs').textContent = data.missing_prerequisites.length
+    ? 'Prerequisites to demonstrate: ' + data.missing_prerequisites.join(', ')
+    : 'Prerequisites ready. Predict before you run.';
+  $('guide').innerHTML = data.guide_html;
+  $('reader').href = '/lesson-pages/' + data.id + '.html';
+  $('prompt').textContent = data.coaching_prompt;
+  $('solutionText').classList.add('hidden');
+  $('solutionText').textContent = '';
+  $('hint').textContent = '';
+  $('confirmed').checked = false;
+  $('language').value = data.track === 'sql' ? 'sql' : 'python';
+  $('code').value = '';
+  pendingCode = false;
+  setPhase(requestedPhase || session.phase || 'read');
+  await loadPad();
+  $('guide').scrollTop = 0;
+  for (const button of $('route').children) {
+    if (button.dataset.id === id) button.setAttribute('aria-current', 'step');
+    else button.removeAttribute('aria-current');
+  }
+  document.title = data.title + ' | DS60 Learning Lab';
+  message('Lesson opened. Saved code and phase evidence are restored.');
+}
+
+async function makePlan() {
+  const catalog = await api('paths');
+  const path = catalog.paths[$('path').value];
+  const plan = await api('plan', {targets: path.targets, weekly_hours: Number($('hours').value)});
+  $('estimate').textContent = plan.lessons.length + ' lessons / '
+    + (plan.estimated_minutes / 60).toFixed(1) + ' hours / about ' + plan.estimated_weeks + ' weeks';
+  $('route').replaceChildren();
+  for (const lesson of plan.lessons) {
+    const button = document.createElement('button');
+    button.dataset.id = lesson.id;
+    button.textContent = lesson.id + ' · ' + lesson.title;
+    button.addEventListener('click', () => guard(() => openLesson(lesson.id)));
+    $('route').append(button);
+  }
+  if (plan.lessons.length) await openLesson(plan.lessons[0].id);
+  else message('This route is complete in your local evidence record. Choose a new goal.');
+}
+
+function showSqlResults(output) {
+  let parsed;
+  try { parsed = JSON.parse(output); } catch { return; }
+  let tableNumber = 0;
+  for (const result of parsed.results || []) {
+    if (!result.columns) continue;
+    const table = document.createElement('table');
+    const caption = document.createElement('caption');
+    caption.textContent = 'Query result ' + (++tableNumber);
+    table.append(caption);
+    const head = document.createElement('thead');
+    const heading = document.createElement('tr');
+    for (const column of result.columns) {
+      const cell = document.createElement('th');
+      cell.scope = 'col';
+      cell.textContent = column;
+      heading.append(cell);
+    }
+    head.append(heading);
+    table.append(head);
+    const body = document.createElement('tbody');
+    for (const row of result.rows) {
+      const line = document.createElement('tr');
+      for (const value of row) {
+        const cell = document.createElement('td');
+        cell.textContent = value === null ? 'NULL' : String(value);
+        line.append(cell);
+      }
+      body.append(line);
+    }
+    table.append(body);
+    $('sqlResults').append(table);
+    if (result.truncated) {
+      const note = document.createElement('p');
+      note.textContent = 'Showing the first 100 rows.';
+      $('sqlResults').append(note);
+    }
+  }
+}
+
+$('prepareSql').onclick = () => guard(async () => {
+  const confirmation = window.prompt('This resets the disposable training schema. Type RESET TRAINING to continue.');
+  if (confirmation === null) return;
+  const result = await api('prepare-sql', {confirmation});
+  clearResults();
+  $('output').textContent = result.output;
+  message('SQL preparation exited with status ' + result.returncode, result.returncode !== 0);
+});
+$('plan').onclick = () => guard(makePlan);
+$('open').onclick = () => guard(() => openLesson($('lessonId').value.trim()));
+$('lessonId').onkeydown = event => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    guard(() => openLesson($('lessonId').value.trim()));
+  }
+};
+$('saveNote').onclick = () => guard(async () => { await saveEvidence(); message('Your evidence is saved locally.'); });
+$('saveCode').onclick = () => guard(async () => { await savePad(true); await refreshHistory(); message('Coding pad saved. Earlier changed versions remain recoverable.'); });
+$('next').onclick = () => guard(async () => {
+  await choosePhase(phases[Math.min(phases.indexOf(phase) + 1, phases.length - 1)]);
+});
+$('getHint').onclick = () => guard(async () => {
+  const result = await api('hint', {lesson_id: current.id, number: hintNumber});
+  hintNumber += 1;
+  $('hint').textContent = result.hint;
+  message('Hint ' + result.number + ' of ' + result.total + '. Try one change before asking again.');
+});
+$('solution').onclick = () => guard(async () => {
+  await saveEvidence();
+  const result = await api('solution', {lesson_id: current.id, reveal: true});
+  $('solutionText').textContent = result.content;
+  $('solutionText').classList.remove('hidden');
+  message('Worked solution revealed. Compare its reasoning with your own evidence.');
+});
+$('complete').onclick = () => guard(async () => {
+  await saveEvidence();
+  await savePad();
+  await api('complete', {lesson_id: current.id, confirmed: $('confirmed').checked});
+  message('Recorded with your prediction, attempt, and explanation. Build your route again for the next lesson.');
+});
+$('run').onclick = () => guard(async () => {
+  if (!current) return;
+  await saveEvidence();
+  clearResults();
+  $('output').textContent = 'Running...';
+  message('Running your ' + $('language').value + ' pad. Your prediction is saved.');
+  const result = await api('run', {lesson_id: current.id, language: $('language').value, code: $('code').value});
+  $('output').textContent = result.output || '(No printed output.)';
+  if (result.language === 'sql') showSqlResults(result.output);
+  for (const [index, source] of (result.figures || []).entries()) {
+    const image = document.createElement('img');
+    image.src = source;
+    image.alt = 'Python figure ' + (index + 1);
+    image.style.maxWidth = '100%';
+    $('figures').append(image);
+  }
+  $('runMeta').textContent = 'Exit ' + result.returncode + ' / ' + result.elapsed_seconds
+    + ' seconds' + (result.stopped ? ' / stopped: ' + result.stopped : '');
+  pendingCode = false;
+  await refreshHistory();
+  message(result.returncode === 0
+    ? 'Run finished. Compare the output with your prediction; a successful run is not automatic grading.'
+    : 'Run finished with an error. Inspect the output and preserve the smallest failing input.', result.returncode !== 0);
+});
+$('language').onchange = () => guard(async () => {
+  if (!current) return;
+  if (pendingCode) {
+    await api('save-pad', {lesson_id: current.id, language: oldLanguage, code: $('code').value});
+  }
+  await loadPad();
+  message('Backend changed. Its separate saved pad is restored.');
+});
+$('starter').onclick = () => guard(async () => {
+  if (!current) return;
+  if (!window.confirm('Replace this visible pad with the lesson starter? Your current work is saved first. Changed saved versions can be recovered below.')) return;
+  await savePad(true);
+  $('code').value = current.learner_code || current.learner;
+  pendingCode = true;
+  clearResults();
+  message('Starter loaded. Read its TODOs before running. Notebook code may need one example at a time; psql commands use the guided SQL notebook.');
+});
+async function refreshHistory() {
+  if (!current) return;
+  const previous = $('historyVersion').value;
+  const data = await api('pad-history', {lesson_id: current.id, language: $('language').value});
+  $('historyVersion').replaceChildren();
+  if (!data.history.length) {
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = 'No earlier versions yet';
+    $('historyVersion').append(option);
+  }
+  for (const entry of data.history) {
+    const option = document.createElement('option');
+    option.value = entry.id;
+    option.textContent = new Date(entry.saved_at).toLocaleString() + ' / ' + entry.bytes + ' bytes';
+    $('historyVersion').append(option);
+  }
+  if ([...$('historyVersion').options].some(option => option.value === previous)) $('historyVersion').value = previous;
+  $('loadHistory').disabled = working || !$('historyVersion').value;
+}
+
+$('refreshHistory').onclick = () => guard(async () => {
+  await refreshHistory();
+  message('Earlier saved versions refreshed. Your current pad is unchanged.');
+});
+$('loadHistory').onclick = () => guard(async () => {
+  const historyId = $('historyVersion').value;
+  if (!historyId) return;
+  await savePad(true);
+  const data = await api('read-history', {lesson_id: current.id, language: $('language').value, history_id: historyId});
+  $('code').value = data.code;
+  pendingCode = true;
+  clearResults();
+  await refreshHistory();
+  message('An earlier copy is loaded into the editor. Save or Run to adopt it; the existing saved pad remains preserved until then.');
+});
+$('guide').addEventListener('click', event => {
+  const link = event.target.closest('a');
+  const href = link && link.getAttribute('href');
+  if (!href || !href.startsWith('#')) return;
+  const target = document.getElementById(decodeURIComponent(href.slice(1)));
+  if (target && $('guide').contains(target)) {
+    event.preventDefault();
+    target.scrollIntoView({block: 'nearest'});
+  }
+});
+
+$('code').oninput = () => { pendingCode = true; };
+$('notes').oninput = () => { pendingNote = true; };
+window.addEventListener('beforeunload', event => {
+  if (pendingCode || pendingNote || working) { event.preventDefault(); event.returnValue = ''; }
+});
+for (const value of phases) {
+  const button = document.createElement('button');
+  button.id = 'phase-' + value;
+  button.textContent = value[0].toUpperCase() + value.slice(1);
+  button.dataset.phase = value;
+  button.setAttribute('role', 'tab');
+  button.setAttribute('aria-controls', 'phaseContent');
+  button.onclick = () => guard(() => choosePhase(value));
+  button.onkeydown = event => {
+    let index = phases.indexOf(phase);
+    if (event.key === 'ArrowRight') index = (index + 1) % phases.length;
+    else if (event.key === 'ArrowLeft') index = (index + phases.length - 1) % phases.length;
+    else if (event.key === 'Home') index = 0;
+    else if (event.key === 'End') index = phases.length - 1;
+    else return;
+    event.preventDefault();
+    guard(async () => {
+      await choosePhase(phases[index]);
+      requestAnimationFrame(() => $('phase-' + phases[index]).focus());
+    });
+  };
+  $('phases').append(button);
+}
+guard(async () => {
+  const data = await api('paths');
+  for (const [id, path] of Object.entries(data.paths)) {
+    const option = document.createElement('option');
+    option.value = id;
+    option.textContent = path.title;
+    $('path').append(option);
+  }
+  const requested = new URLSearchParams(location.hash.slice(1));
+  if (requested.get('lesson')) await openLesson(requested.get('lesson'), requested.get('phase'));
+  else message(data.lesson_count + ' lessons, with local coding and saved evidence. Choose a goal to begin.');
+});
+</script>
+</body></html>

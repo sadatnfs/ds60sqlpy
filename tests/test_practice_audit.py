@@ -7,6 +7,7 @@ from scripts.audit_practice import (
     _markdown_practice_count,
     _sql_practice_count,
     audit,
+    practice_targets,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -63,9 +64,7 @@ ROLLBACK;
 
 def test_practice_baseline_covers_the_catalog() -> None:
     catalog = json.loads((REPO_ROOT / "curriculum" / "catalog.json").read_text(encoding="utf-8"))
-    baseline = json.loads(
-        (REPO_ROOT / "curriculum" / "practice_baseline.json").read_text(encoding="utf-8")
-    )
+    baseline = {"lessons": practice_targets()}
 
     assert set(baseline["lessons"]) == {lesson["id"] for lesson in catalog["lessons"]}
     assert all(

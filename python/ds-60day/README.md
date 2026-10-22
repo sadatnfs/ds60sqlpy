@@ -1,9 +1,10 @@
 # Python and data-science track
 
-This track contains 60 ordered lessons covering practical Python, data
-analysis, statistics, machine learning, and selected production topics. Ten
-named professional modules continue the path after Day 60. The number is a
-sequence, not a deadline.
+This track preserves 60 ordered lessons covering practical Python, data
+analysis, statistics, machine learning, and selected production topics.
+Four named foundation checkpoints slow the early learning ramp, and thirteen
+named professional modules extend practice beyond the numbered sequence.
+Use the catalog's prerequisite order rather than treating 60 as a deadline.
 
 Start at the repository [README](../../README.md), and run all commands from the repository root.
 
@@ -61,6 +62,13 @@ For each lesson:
 4. Attempt the exercises.
 5. Check the separate solution only after an honest attempt.
 
+Complete the foundation checkpoints after Days 1, 3, 8, and 10 before
+continuing into their successor lessons. They add program tracing, evidence-led
+debugging, trustworthy text-record cleaning, and a first auditable data project.
+Their [guides and learner scripts](../professional/README.md) use the same
+separate-solution workflow. They are deliberately smaller conceptual steps,
+not additional package installation tasks.
+
 Start with:
 
 - [Day 1 guide](companion-guides/day01_setup_and_repl.md)
@@ -89,8 +97,8 @@ You can also open notebooks directly in VS Code. Select the repository `.venv` a
 - Companion guides: Days 1–60
 - Markdown solutions: Days 1–60
 - Runnable solution notebooks: Days 1–60
-- Professional learner scripts, guides, executable solutions, and solution
-  explanations: ten named modules
+- Named learner scripts, guides, executable solutions, and solution
+  explanations: four foundation checkpoints and thirteen professional modules
 
 Use `python scripts/course.py catalog --track python` rather than inferring that every solution format exists.
 
@@ -98,11 +106,12 @@ Learner notebooks and solutions are intentionally separate. Lessons vary in dept
 
 ## Continue into professional Python
 
-After the numbered track—or earlier when you meet a module's catalog
-prerequisites—continue with the [professional learning paths](../../docs/professional-paths.md).
+After the numbered track, or earlier when you meet a module's catalog
+prerequisites, continue with the [professional learning paths](../../docs/professional-paths.md).
 The extension covers package builds, reliable HTTP clients, concurrency,
 Arrow/DuckDB, generative testing, advanced typing, experiments, reproducible
-model delivery, service hardening, and measurement-first performance work.
+model delivery, service hardening, measurement-first performance, exact value
+and time boundaries, leakage-resistant evaluation, and restartable pipelines.
 
 Use stable lesson IDs rather than inventing Day 61 filenames:
 

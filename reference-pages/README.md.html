@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>DS60 Python, Data Science, SQL, and Engineering Learning Lab · DS60 reference</title>
+  <title>DS60 Learning Lab: Python, Data Science, SQL, and Engineering · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -112,22 +112,32 @@
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>DS60 Python, Data Science, SQL, and Engineering Learning Lab</h1>
+      <h1>DS60 Learning Lab: Python, Data Science, SQL, and Engineering</h1>
       <p class="source-path">Generated from <code>README.md</code></p>
     </header>
-    <article class="document"><h2 id="ds60-python-data-science-sql-and-engineering-learning-lab">DS60 Python, Data Science, SQL, and Engineering Learning Lab<a class="heading-anchor" href="#ds60-python-data-science-sql-and-engineering-learning-lab" aria-label="Link to this section">#</a></h2>
+    <article class="document"><h2 id="ds60-learning-lab-python-data-science-sql-and-engineering">DS60 Learning Lab: Python, Data Science, SQL, and Engineering<a class="heading-anchor" href="#ds60-learning-lab-python-data-science-sql-and-engineering" aria-label="Link to this section">#</a></h2>
 <p><a href="https://github.com/sadatnfs/ds60sqlpy/actions/workflows/ci.yml/badge.svg">![Course validation</a>](https://github.com/sadatnfs/ds60sqlpy/actions/workflows/ci.yml)</p>
 <p>DS60 is a self-paced repository for learning practical Python, data science, and PostgreSQL from introductory material through substantial projects. The existing tracks are organized as 60 numbered lessons, but the number is a navigation aid rather than a deadline: take the time you need, repeat lessons, and use the curriculum catalog to choose prerequisites.</p>
-<blockquote><p>[!TIP] <strong>On Windows, double-click <code>START_DS60.cmd</code>.</strong> It checks the machine, guides the connected first setup when <code>.venv</code> is absent or incomplete, runs the course doctor, and opens the private portal that can launch cataloged artifacts in VS Code or JupyterLab. On macOS/Linux—or before setup—double-click <a href="../START_HERE.html">START_HERE.html</a> for the static offline guide. Static browser mode can render lesson pages, but a browser cannot execute Python or SQL; use the private launcher for runnable actions.</p></blockquote>
+<blockquote><p>[!TIP] Start with the <strong>guided coding application</strong> below. On Windows, double-click <code>START_LEARNING_LAB.cmd</code> after cloning; it checks or prepares the environment and opens the lab. Docker includes the Python and PostgreSQL backends. <a href="../START_HERE.html">START_HERE.html</a> remains the static offline reading library, and <code>START_DS60.cmd</code> opens its editor/Jupyter launcher.</p></blockquote>
 <p>The repository is designed for:</p>
 <ul>
-<li>A learner working locally in Visual Studio Code</li>
+<li>A learner using the browser coding lab, Visual Studio Code, or JupyterLab</li>
 <li>Windows, macOS, and Linux</li>
 <li>A one-time connected setup followed by offline study</li>
 <li>Optional guidance from Codex without requiring Codex to run the lessons</li>
 </ul>
 <p>Each Python, SQL, and bridge guide is designed to stand on its own: it defines the mental model and vocabulary, breaks down syntax or query anatomy, provides runnable examples and visible checks, diagnoses common mistakes, and supplies a progression of practice. Its final <strong>Ask Codex about this lesson</strong> block is optional, copy-ready coaching context—not a replacement for the lesson.</p>
 <blockquote><p>[!IMPORTANT] The repository runs locally after setup, but a brand-new machine still needs internet access to install Python packages, PostgreSQL or Docker, and VS Code extensions. A few lessons use Seaborn datasets that download on first use and are cached afterward. Pretrained Hugging Face, spaCy, and torchvision exercises can also require a deliberate first download; their lesson notes identify those cases. See <a href="docs/setup/offline.md.html">Offline use</a>.</p></blockquote>
+<h3 id="start-the-guided-coding-application">Start the guided coding application<a class="heading-anchor" href="#start-the-guided-coding-application" aria-label="Link to this section">#</a></h3>
+<p>The course now includes a browser workspace with Python and PostgreSQL coding pads, a lesson guide beside your code, saved work and evidence, progressive hints, and a route generated from your goal&#x27;s prerequisites. It runs locally and works offline after the required tools, images, and lesson packages have been prepared.</p>
+<p><strong>Consistent setup on any supported OS:</strong> install Docker with Compose, then run from the repository root:</p>
+<pre><code class="language-text">docker compose --profile lab up --build</code></pre>
+<p>Open <a href="http://127.0.0.1:8765/learn">the local learning lab</a>. The initial image build needs internet access. Later starts reuse the images and persistent learner/database volumes. This is a personal environment for trusted code.</p>
+<p><strong>Use native backends:</strong> finish your <a href="docs/setup/first-success.md.html">operating-system setup</a>, then double-click <code>START_LEARNING_LAB.cmd</code> on Windows. On macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python scripts/learning_lab.py</code></pre>
+<p><strong>Build an executable:</strong> use <code>python scripts/build_app.py</code> after installing the optional <code>desktop-build</code> extra, or <code>make app PYTHON=.app-build/bin/python</code>. Build on each target OS. The application bundles its own UI runtime and the complete course; coding pads connect to a supported Python environment and PostgreSQL. See <a href="docs/offline-app.md.html">application and build instructions</a>.</p>
+<p><strong>Use Codex as your coach:</strong> the optional <a href="docs/mcp-tutor.md.html">stdio MCP tutor</a> provides bounded course search, prerequisite planning, lessons, progressive hints, and explicitly requested solutions. It is read-only by default and does not execute pad code. Your Codex connection is separate from offline study.</p>
+<p>The static <code>START_HERE.html</code> library remains available for reading. For help choosing a route, use <a href="docs/learning-paths.md.html">learning paths and placement</a>.</p>
 <h3 id="choose-a-track">Choose a track<a class="heading-anchor" href="#choose-a-track" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
 <th>Track</th>
@@ -157,7 +167,7 @@
 </tbody></table></div>
 <p>The human-readable overview is <a href="docs/curriculum-map.md.html">docs/curriculum-map.md</a>. The checked-in <code>curriculum/catalog.json</code> is a generated index for tools; lesson artifact filenames and the metadata rules in <code>src/ds60sqlpy/catalog_builder.py</code> are its inputs. Inspect the generated view with:</p>
 <pre><code class="language-text">python scripts/course.py catalog</code></pre>
-<p>After the shared lessons, use <a href="docs/professional-paths.md.html">professional and specialization paths</a> for the named modules. A new SQL learner starts with <code>sql-01</code>; relational design (<code>sql-found-01</code>) is the milestone between Days 15 and 16, and safe versioned migrations (<code>sql-found-02</code>) sit between Days 39 and 40.</p>
+<p>After the shared lessons, use <a href="docs/professional-paths.md.html">professional and specialization paths</a> for the named modules. A new SQL learner starts with <code>sql-start-01</code>, <code>sql-start-02</code>, and <code>sql-start-03</code> before <code>sql-01</code>; relational design (<code>sql-found-01</code>) is the milestone between Days 15 and 16, and safe versioned migrations (<code>sql-found-02</code>) sit between Days 39 and 40.</p>
 <h3 id="quick-start">Quick start<a class="heading-anchor" href="#quick-start" aria-label="Link to this section">#</a></h3>
 <p>Run commands from the repository root—the directory containing this README.</p>
 <h4 id="1-install-prerequisites">1. Install prerequisites<a class="heading-anchor" href="#1-install-prerequisites" aria-label="Link to this section">#</a></h4>
@@ -219,6 +229,7 @@ python scripts/course.py validate</code></pre>
 <li>Attempt exercises before opening <a href="../lesson-pages/python-01.html#solution-1">the worked solution</a>.</li>
 </ol>
 <p>SQL:</p>
+<p>Start with the three <code>sql-start</code> labs in catalog order before the historical Day 1 exercises; each uses a small fixture and a plain-language query model.</p>
 <ol>
 <li>Complete <a href="sql/postgres-60day/README.md.html">SQL setup</a>.</li>
 <li>Open the private course portal with <code>START_DS60.cmd</code> on Windows or <code>scripts/learning_portal.py</code> with the repository interpreter on macOS/Linux.</li>
@@ -270,8 +281,8 @@ curriculum/catalog.json
 scripts/
 docs/
 .agents/skills/guide-ds60sqlpy-learning/</code></pre>
-<p>The maintained content has learner artifacts, companion guides, and runnable solutions for all 60 lessons in both main tracks, eight engineering bridge lessons, and 26 named foundation/professional/specialization modules. The generated catalog indexes 154 learning modules and reports their exact artifact paths.</p>
-<p>Every lesson also has a checked exercise-enrichment target. The immutable baseline lives in <code>curriculum/practice_baseline.json</code>; the target for each learner artifact, guide, and every explanatory solution artifact is at least <code>max(6, 2 × audited baseline)</code>. Run <code>python scripts/audit_practice.py</code> or read the generated <a href="docs/practice-coverage.md.html">practice coverage report</a>. The companion <a href="docs/lesson-depth-report.md.html">lesson depth report</a> checks the self-contained beginner-teaching contract, explanatory solution floor, historical Python notebook depth, and per-lesson Codex prompts. These automated checks are minimums; runnable examples and technical explanations still receive human and execution review.</p>
+<p>The maintained content has learner artifacts, companion guides, and runnable solutions for all 60 lessons in both main tracks, eight engineering bridge lessons, and 40 named foundation/professional/specialization modules. The generated catalog indexes 168 learning modules and reports their exact artifact paths.</p>
+<p>Every lesson also has a checked exercise-enrichment target. The immutable historical baseline lives in <code>curriculum/practice_baseline.json</code>; new lessons are registered separately in <code>curriculum/practice_expansion.json</code>. The target for each learner artifact, guide, and every explanatory solution artifact is at least <code>max(6, 2 × audited baseline)</code>. Run <code>python scripts/audit_practice.py</code> or read the generated <a href="docs/practice-coverage.md.html">practice coverage report</a>. The companion <a href="docs/lesson-depth-report.md.html">lesson depth report</a> checks the self-contained beginner-teaching contract, explanatory solution floor, historical Python notebook depth, and per-lesson Codex prompts. These automated checks are minimums; runnable examples and technical explanations still receive human and execution review.</p>
 <h3 id="documentation">Documentation<a class="heading-anchor" href="#documentation" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="docs/curriculum-map.md.html">Curriculum map</a></li>

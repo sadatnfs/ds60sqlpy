@@ -3,7 +3,7 @@
 ## Level and prerequisites
 
 - **Level:** Foundation (beginner)
-- **Catalog prerequisites:** none. This is the first SQL lesson.
+- **Catalog prerequisites:** `sql-start-03`, the [query construction and debugging on-ramp](../../professional/companion-guides/sql_start_03_query_debugging.md).
 - **Environment prerequisite:** follow the [SQL track setup](../README.md) so
   the disposable `advanced_sql_training` database and guided notebook runner
   are ready. You do not need to know DDL or migrations yet.
@@ -285,7 +285,7 @@ prompt after opening the repository in Codex:
 ```text
 Tutor me through sql-01 — Select Where Orderby.
 
-I am a complete beginner with no prior SQL lessons. This lesson has no direct catalog prerequisite. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+I am a beginner who completed the direct catalog prerequisite sql-start-03. Reuse its small-stage debugging workflow and explain new clauses before relying on them. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day01_select_where_orderby.md
 - Answer-free learner SQL: sql/postgres-60day/day01_select_where_orderby.sql
 

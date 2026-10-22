@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<evaluation>
+  <qa_pair>
+    <question>I have never queried a database and want the route ending with the introductory SQL project. Trace the complete required route independently of my saved completion records, then inspect its entry lesson and coaching instructions. Which stable lesson ID first teaches why repeated station measurements are still separate observations? Return only the stable ID.</question>
+    <answer>sql-start-01</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>I want to begin the numbered SQL lesson that adds calculations while retaining detail rows. Inspect that lesson's prerequisite route and read the named design milestone immediately before it. Which stable module ID introduces table identities and integrity rules after the first fifteen numbered lessons? Return only the stable ID.</question>
+    <answer>sql-found-01</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Before entering numbered SQL Day 1, I need the required small practice lesson where a calculated output label is unavailable to the filter and a Blue blocked task can slip through an incorrectly grouped condition. Trace Day 1's prerequisite, check its guide resource, and confirm its coaching boundary. What is that prerequisite's learner filename, including its extension? Return the filename only.</question>
+    <answer>sql_start_03_query_debugging.sql</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Find the integrated goal that reviews a local delivered dataset using an independently specified answer and an honest incident handoff. Trace its required modules, then inspect the final lesson's guide without revealing a solution. In its fixed incident fixture, both row count and total cents agree: how many invoice-level discrepancies must still be reported? Return one decimal integer.</question>
+    <answer>3</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Locate the integrated review project whose repair sums two source lines for one invoice while preserving a different invoice with no lines. Confirm its prerequisite route and inspect the checked-in guide. What exact SHA-256 value identifies its unchanged, independently expected product under contract version 1? Return only the 64 lowercase hexadecimal characters.</question>
+    <answer>fddc2c8909fee69e1b96661b9e11a1e87c7212bfe2d5f731a9f45ed2ae868fc3</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>From the database engineering goal, locate the advanced lesson about continuing bounded reads without counting earlier positions. Check its prerequisites and guide resource. In the fixed event fixture, after the last known-time boundary at 09:00 UTC with identity 5, which single event identity must remain in the unknown-time tail? Do not execute SQL; return only the integer identity.</question>
+    <answer>4</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Find the advanced writer-coordination lesson through the database engineering route and inspect both its guide and coaching prompt. Use its optional real two-session experiment: A establishes its first read at stock 5/version 1, B commits stock 4/version 2, and A's second read still shows the original row. Which PostgreSQL isolation level is this contrasting run using? Return the uppercase isolation-level name only.</question>
+    <answer>REPEATABLE READ</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>I am following the small practice route required before numbered SQL Day 1. Find the lesson that separates wrong names from a query that runs but answers the wrong business question; inspect its prerequisite route, guide, and coaching instructions. What five-character SQLSTATE does its incorrectly spelled effort column produce? Return only the code.</question>
+    <answer>42703</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>I am preparing the integrated data-product handoff and need its Python background for a local import interrupted between output creation and a saved continuation record. Discover the integrated goal, trace its prerequisite route, then inspect the matching named Python guide and coaching prompt. Which stable Python module ID teaches this recovery boundary without claiming a local file protocol is a database transaction? Return only the stable ID.</question>
+    <answer>python-pro-03</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>My model looks strong because observations from one person occur on both sides of evaluation, or because later information helps predict earlier outcomes. Inspect the machine-learning goal, its required route, and the named lesson resource and coaching prompt that address both deployment questions using small baselines. Which stable lesson ID explicitly distinguishes held-out groups from forward time windows? Return only the stable ID.</question>
+    <answer>python-ml-02</answer>
+  </qa_pair>
+</evaluation>

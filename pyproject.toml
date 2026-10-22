@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ds60sqlpy"
-version = "0.2.0"
+version = "0.3.0"
 description = "Offline-capable tools for the DS60 Python, PostgreSQL, and engineering curriculum"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
@@ -114,9 +114,16 @@ quality = [
   "pytest-cov>=5.0",
   "ruff>=0.9",
 ]
+mcp = ["mcp>=2,<3"]
+desktop-build = ["pyinstaller>=6.11,<7"]
 
 [project.scripts]
 ds60 = "ds60sqlpy.cli:main"
+ds60-app = "ds60sqlpy.desktop:main"
+ds60-mcp = "ds60sqlpy.mcp_server:main"
+
+[tool.setuptools.package-data]
+ds60sqlpy = ["assets/*.html"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

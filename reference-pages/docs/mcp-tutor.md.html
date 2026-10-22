@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Use the local course tutor through MCP · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Use the local course tutor through MCP</h1>
+      <p class="source-path">Generated from <code>docs/mcp-tutor.md</code></p>
+    </header>
+    <article class="document"><h2 id="use-the-local-course-tutor-through-mcp">Use the local course tutor through MCP<a class="heading-anchor" href="#use-the-local-course-tutor-through-mcp" aria-label="Link to this section">#</a></h2>
+<p>The optional DS60 MCP server lets Codex read the local curriculum, plan a path, open the exact lesson, and provide progressive hints. MCP is the connection protocol between Codex and this local Python process. You can also learn without it using the course application, JupyterLab, and checked-in guides.</p>
+<p>The adapter uses standard input/output pipes. It opens no listening port, connects to no remote service, and does not execute Python, SQL, or shell commands. All teaching content comes from the selected repository. The adapter works offline after installation; the AI model used by Codex has its own runtime and connectivity requirements. This repository does not bundle an AI model.</p>
+<h3 id="install-the-optional-adapter">Install the optional adapter<a class="heading-anchor" href="#install-the-optional-adapter" aria-label="Link to this section">#</a></h3>
+<p>Run normal OS setup first. Install the extra into the same course interpreter while connected. It uses the official Python MCP SDK v2; old <code>FastMCP</code> examples from SDK v1 are not this adapter&#x27;s interface.</p>
+<p>Windows PowerShell, from the repository root:</p>
+<pre><code class="language-powershell">$CourseRoot = (Resolve-Path .).Path
+$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython -m pip install -e &quot;.[mcp]&quot;
+$McpScript = Join-Path $CourseRoot &quot;scripts\mcp_server.py&quot;
+&amp; $CoursePython $McpScript --help</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">CourseRoot=&quot;$(pwd -P)&quot;
+&quot;${CourseRoot}/.venv/bin/python&quot; -m pip install -e &quot;.[mcp]&quot;
+&quot;${CourseRoot}/.venv/bin/python&quot; &quot;${CourseRoot}/scripts/mcp_server.py&quot; --help</code></pre>
+<p>Expect help showing the required <code>--repo</code> argument and the optional <code>--allow-progress-writes</code> flag. The installed <code>ds60-mcp</code> entry point provides the same server, but an absolute Python path is easier to diagnose in a client configuration and works with both Windows environment layouts.</p>
+<p>If you use exact locked synchronization later, remember to retain <code>--extra mcp</code> in that synchronization. Standard Core setup intentionally does not require this optional integration.</p>
+<h3 id="add-it-to-codex">Add it to Codex<a class="heading-anchor" href="#add-it-to-codex" aria-label="Link to this section">#</a></h3>
+<p>The commands below register a local server in your Codex MCP configuration. Run them yourself when you want that integration. They use absolute paths so the server starts correctly even if Codex&#x27;s working folder differs.</p>
+<p>Windows PowerShell, using the variables above:</p>
+<pre><code class="language-powershell">codex mcp add ds60-tutor -- $CoursePython $McpScript --repo $CourseRoot
+codex mcp get ds60-tutor</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">codex mcp add ds60-tutor -- &quot;${CourseRoot}/.venv/bin/python&quot; &quot;${CourseRoot}/scripts/mcp_server.py&quot; --repo &quot;$CourseRoot&quot;
+codex mcp get ds60-tutor</code></pre>
+<p>The installed Codex CLI&#x27;s <code>codex mcp add --help</code> documents the <code>NAME -- COMMAND</code> stdio form used here. <code>codex mcp list</code> shows configured servers. Restart or refresh the Codex client if it does not immediately discover a new server. The CLI must be installed and on PATH to use these commands. No configuration file is changed by merely installing the Python extra or reading this guide.</p>
+<p>You can inspect the equivalent local configuration with <code>codex mcp get ds60-tutor</code>. The executable must be a real absolute interpreter path; <code>~</code>, an activated shell assumption, or a Python name found only in one terminal can fail when a desktop client starts the process. If you move the repository, recreate its environment and update this registration.</p>
+<h3 id="begin-a-learning-conversation">Begin a learning conversation<a class="heading-anchor" href="#begin-a-learning-conversation" aria-label="Link to this section">#</a></h3>
+<p>For example, tell Codex:</p>
+<pre><code class="language-text">Use the ds60-tutor MCP server. List the learning paths, then help me plan
+Python foundations for five hours each week. Start with the first pending
+lesson. Explain the guide, ask me to predict a result, and wait for my attempt.
+Give one hint at a time. Do not open an official solution unless I explicitly
+ask to compare it. Ask me to explain my result from memory before completion.</code></pre>
+<p>For a specific lesson:</p>
+<pre><code class="language-text">Use ds60-tutor for python-01. Read the actual guide and learner artifact.
+Ask what I think the first example will do, then wait for my attempt.
+If I am stuck, give one hint. Use my observed result to help me explain why
+it works. Keep official solutions closed unless I ask for a comparison.</code></pre>
+<p>These prompts guide the AI host. The server supplies local evidence and structured operations; it does not itself generate a model response, run your exercise, grade your explanation, or infer mastery from a page view.</p>
+<h3 id="available-teaching-operations">Available teaching operations<a class="heading-anchor" href="#available-teaching-operations" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Tool</th>
+<th>Purpose</th>
+</tr></thead><tbody>
+<tr>
+<td><code>course_paths</code></td>
+<td>Available goals and saved completion IDs</td>
+</tr>
+<tr>
+<td><code>course_plan</code></td>
+<td>Expand named paths or lesson IDs into a pending prerequisite plan</td>
+</tr>
+<tr>
+<td><code>course_lessons</code></td>
+<td>Search IDs, titles, levels, phases, and dependency groups</td>
+</tr>
+<tr>
+<td><code>course_lesson</code></td>
+<td>Guide, learner artifact, missing prerequisites, and session evidence</td>
+</tr>
+<tr>
+<td><code>course_hint</code></td>
+<td>One numbered progressive hint, with a general prompt if the guide has none</td>
+</tr>
+<tr>
+<td><code>course_solution</code></td>
+<td>Official explanatory solution, only with explicit <code>reveal: true</code></td>
+</tr>
+<tr>
+<td><code>course_session</code></td>
+<td>Read locally saved evidence for the current lesson</td>
+</tr>
+</tbody></table></div>
+<p><code>course_lessons</code> returns at most 50 lessons per page. Use its <code>next_cursor</code> with exactly the same query, track, and limit. For example:</p>
+<pre><code class="language-json">{&quot;query&quot;: &quot;pandas&quot;, &quot;track&quot;: &quot;python&quot;, &quot;limit&quot;: 10}</code></pre>
+<p>Follow-up requests add <code>&quot;cursor&quot;: &quot;THE_RETURNED_CURSOR&quot;</code> to those same filters. No results is a valid response. Changing filters requires starting a new search.</p>
+<p>Resources expose <code>ds60://course/paths</code> and <code>ds60://course/lesson/LESSON_ID</code>. The latter contains only the checked-in guide. Resource enumeration is paginated too. The <code>coach_lesson</code> prompt accepts a stable <code>lesson_id</code> and optional <code>request</code> and starts the same guide-first coaching loop. Solutions have no resource URI; they require the gated tool.</p>
+<p>The solution flag is an explicit protocol acknowledgement. The AI host must still respect the learner&#x27;s actual request; it should never set the flag just to bypass a request for hints.</p>
+<h3 id="optional-local-evidence-and-progress-writes">Optional local evidence and progress writes<a class="heading-anchor" href="#optional-local-evidence-and-progress-writes" aria-label="Link to this section">#</a></h3>
+<p>By default the adapter advertises no mutation tools and creates no progress files. If you want Codex to save your own evidence, add <code>--allow-progress-writes</code> to the server command when registering it. For an existing registration, inspect it with <code>codex mcp get ds60-tutor</code>, then replace it deliberately with <code>codex mcp remove ds60-tutor</code> and the matching <code>add</code> command ending in <code>--allow-progress-writes</code>.</p>
+<p>With that flag, two additional tools are available:</p>
+<ul>
+<li><code>course_save_evidence</code>: save learner-authored notes for <code>read</code>, <code>predict</code>, <code>attempt</code>, <code>compare</code>, or <code>explain</code> in <code>.learning/coaching.json</code>.</li>
+<li><code>course_complete</code>: require <code>confirmed: true</code>, nonempty saved prediction, attempt, and explanation, plus recorded prerequisites, before writing <code>.learning/progress.json</code>.</li>
+</ul>
+<p>These are the course application&#x27;s local evidence and progress files. Existing notes in other phases are preserved. Completion is explicitly labelled learner-confirmed self-report, not automatic grading. Ask Codex to save only your actual attempt and explanation, with your consent. Keep credentials and private workplace data out of course notes. Neither tool edits a lesson, starts a process, resets a database, or executes the learner&#x27;s code.</p>
+<h3 id="diagnose-a-connection-failure">Diagnose a connection failure<a class="heading-anchor" href="#diagnose-a-connection-failure" aria-label="Link to this section">#</a></h3>
+<ol>
+<li>Run <code>codex mcp get ds60-tutor</code> and inspect the executable, script, and absolute repository path.</li>
+<li>Run that interpreter with <code>-m pip show mcp</code> and check it reports SDK v2.</li>
+<li>Run the script with <code>--help</code>. A missing SDK message means the package was installed into a different interpreter or removed by an exact sync.</li>
+<li>Launching the script with <code>--repo</code> in a terminal normally appears to wait: it is waiting for protocol messages from a client. Press <code>Ctrl+C</code> to stop.</li>
+<li>Run the integration tests below, then inspect client/server stderr if discovery still fails. Application messages must never be printed to stdout because stdout carries MCP JSON-RPC.</li>
+</ol>
+<p>The server refuses relative or nested <code>--repo</code> paths, unknown lesson IDs, arbitrary resource/file paths, unknown tool arguments, invalid pagination cursors, and progress calls when writes are disabled. It does not require a database credential or a listening web service.</p>
+<h3 id="verification-and-source-references">Verification and source references<a class="heading-anchor" href="#verification-and-source-references" aria-label="Link to this section">#</a></h3>
+<p>Run the real protocol tests with the optional SDK installed:</p>
+<pre><code class="language-powershell"># Windows, after resolving the interpreter
+&amp; $CoursePython -m pytest tests\test_mcp_server.py -q</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python -m pytest tests/test_mcp_server.py -q</code></pre>
+<p>Tests cover a client/server stdio handshake, discovery, lesson/guide reads, prompts, solution gating, pagination, opt-in writes, evidence prerequisites, invalid requests, and clean protocol stdout. The client session runs with network connect/bind calls forbidden in the POSIX server process. Windows runs the same stdio exchange without that audit guard because its event loop may use an internal socket pair. This proves the adapter protocol in the tested environment; it does not prove that a specific Codex installation is configured, that an AI taught well, or that a learner mastered the material. No user configuration is modified by these tests.</p>
+<p>The implementation follows the official <a href="https://py.sdk.modelcontextprotocol.io/advanced/low-level-server/">SDK v2 low-level server API</a> for explicit schemas, structured tool results, and caller validation. The <a href="https://py.sdk.modelcontextprotocol.io/advanced/pagination/">SDK pagination guide</a> describes protocol list cursors. The current local Codex CLI help was checked for the registration commands above.</p>
+<h3 id="maintainer-evaluation">Maintainer evaluation<a class="heading-anchor" href="#maintainer-evaluation" aria-label="Link to this section">#</a></h3>
+<p><code>docs/mcp-tutor-evaluation.xml</code> contains ten independent read-only tutoring questions with verified stable answers. The matching <code>tests/test_mcp_tutor_evaluation.py</code> exercises real adapter searches, prerequisite plans, lesson resources and prompts, and checks that these operations create no learner-state files. This checks the adapter&#x27;s evidence and interface. It is separate from evaluating an AI model&#x27;s teaching quality with actual learners.</p></article>
+  </main>
+</body>
+</html>

@@ -276,11 +276,13 @@ plans, reconcile business totals, and explain any remaining quality exception.
 
 ## Relational foundations and professional extensions
 
-The original Days 1–60 remain stable. New learners begin at Day 1.
+The original Days 1-60 remain stable. New learners first complete the three
+small-fixture lessons `sql-start-01`, `sql-start-02`, and `sql-start-03` in the
+[SQL on-ramp](professional/README.md#learning-path), then begin Day 1.
 `sql-found-01` (relational design and constraints) follows Day 15, while
 `sql-found-02` (versioned migrations) follows relational design and the
-transaction/locking sequence through Day 39. Ten named professional modules
-then extend the track:
+transaction/locking sequence through Day 39. Named professional modules
+extend the track:
 
 - `sql-sec-01`: roles, privileges, safe search paths, and row-level security
 - `sql-prog-01`: functions, procedures, triggers, and auditing boundaries
@@ -292,6 +294,9 @@ then extend the track:
 - `sql-ext-01`: extension, spatial, and vector capability boundaries
 - `sql-repl-01`: replication, CDC, and high-availability reasoning
 - `sql-temporal-01`: temporal, ledger, and retention modelling
+- `sql-quality-01`: bag equality, keyed diagnostics, and independent-child fanout
+- `sql-scale-01`: compound cursors, NULL phases, sealed input, and batch evidence
+- `sql-concurrency-01`: guarded versions and observed two-session visibility
 
 The default labs stay inside the disposable `advanced_sql_training` database.
 Administrator-only features use capability checks and explanatory exercises

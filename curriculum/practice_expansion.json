@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "basis": "New lessons added in October 2026 have no pre-enrichment exercises; the six-prompt floor applies. Historical baselines remain unchanged.",
+  "lessons": {
+    "python-foundations-01": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-foundations-02": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-foundations-03": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-foundations-04": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-data-02": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-ml-02": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-pro-03": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "sql-start-01": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "sql-start-02": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "sql-start-03": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "sql-quality-01": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "sql-scale-01": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "sql-concurrency-01": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "bridge-capstone-01": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    }
+  }
+}

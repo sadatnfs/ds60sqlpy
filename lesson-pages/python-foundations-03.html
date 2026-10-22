@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-foundations-03 · Turn Messy Text into Trustworthy Records · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-foundations-03</p>
+        <h1>Turn Messy Text into Trustworthy Records</h1>
+        <p class="hero-copy">Python foundations and confidence</p>
+        <div class="meta">
+          <span class="tag">foundation</span>
+          <span class="tag">180 minutes</span>
+          <span class="tag">core setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-08.html">python-08</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_foundations_03_clean_records.py</code>.</p>
+          <div class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </div>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/professional/lessons/py_foundations_03_clean_records.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+
+
+        </div>
+      </section>
+
+
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/professional/companion-guides/py_foundations_03_clean_records.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/companion-guides/py_foundations_03_clean_records.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><h3 id="guide--turn-messy-text-into-trustworthy-records">Turn Messy Text into Trustworthy Records<a class="heading-anchor" href="#guide--turn-messy-text-into-trustworthy-records" aria-label="Link to this section">#</a></h3>
+<p><strong>Stable ID:</strong> <code>python-foundations-03</code></p>
+<p><strong>Estimated time:</strong> 180 minutes, split across sessions as needed.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<p>Foundation. Direct catalog prerequisites: <code>python-08</code>.</p>
+<p>You have used functions, lists, dictionaries, exceptions, and CSV from Days 1 to 8. No pandas is needed. This module makes cleaning policies visible before a table library can hide the individual records.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Declare accepted input representations and reject ambiguous ones.</li>
+<li>Preserve source rows and record specific rejection reasons.</li>
+<li>Handle zero, missing text, invalid integers, and duplicate identities differently.</li>
+<li>Reconcile input counts with accepted and rejected output.</li>
+</ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Use the repository folder in VS Code. The rendered lesson page is a preview; edit the actual <a href="python-foundations-03.html#learner">learner script</a>. Copy it to an ignored folder under <code>.learning/</code> first if you want to keep your attempt across course updates. Use the interpreter from setup. These examples need only Python&#x27;s standard library, have no network calls, and use the same inputs on each run.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython python\professional\lessons\py_foundations_03_clean_records.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_foundations_03_clean_records.py</code></pre>
+<p>The terminal shows a small worked example and the remaining TODO count. TODOs are the starting exercise state. Write predictions before changing code. Run after one change, save the observed value or exception, and compare with the exercise&#x27;s acceptance check. A successful example does not mean the unfinished exercises are complete. Keep the separate <a href="python-foundations-03.html#solution-1">explanatory solutions</a> and <a href="python-foundations-03.html#solution-2">runnable solution</a> closed until you have an attempt and evidence, or deliberately ask for a worked comparison.</p>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<p>A CSV reader gives you text, even when a column is supposed to represent a quantity. Cleaning is the translation from raw representation to a declared meaning. It should be possible to explain what changed and what was rejected. Imagine a receiving desk: every incoming parcel gets either an acceptance receipt or a reason for rejection. A parcel must never disappear simply because it looked inconvenient.</p>
+<ul>
+<li><strong>Raw record:</strong> the original field values before any cleaning decision.</li>
+<li><strong>Normalization:</strong> a permitted representation change, such as trimming spaces around an identifier.</li>
+<li><strong>Validation:</strong> checking whether a value satisfies a declared rule.</li>
+<li><strong>Identity:</strong> the field used to decide whether two records describe the same entity or event. Here it is a case-sensitive trimmed <code>id</code> string.</li>
+<li><strong>Rejection:</strong> a record retained separately with a specific failed rule.</li>
+<li><strong>Reconciliation:</strong> an independent accounting check across pipeline stages.</li>
+</ul>
+<p>Our input contract is a dictionary containing string fields <code>id</code> and <code>quantity</code>. Identifiers must remain nonempty after stripping outer whitespace. Quantities may contain outer whitespace and an optional leading plus sign, but must parse as integers greater than or equal to zero. Decimal text, missing fields, non-string fields, and negative values are rejected. This is a bounded teaching policy; other domains may legitimately allow negatives. The first valid record for an identifier wins. Invalid earlier rows do not reserve that identifier, because they never became accepted records.</p>
+<p>Zero means a known count of none. Empty text means no usable representation was supplied. Invalid text such as <code>many</code> is a third state. Mapping all three to zero makes an aggregate look complete while losing the reason for missing information. Preserve those distinctions in both returned data and tests.</p>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--example-a-parse-only-the-boundary-that-can-fail">Example A: parse only the boundary that can fail<a class="heading-anchor" href="#guide--example-a-parse-only-the-boundary-that-can-fail" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">def parse_quantity(raw):
+    if not isinstance(raw, str) or not raw.strip():
+        raise ValueError(&quot;quantity is missing or not text&quot;)
+    try:
+        quantity = int(raw.strip())
+    except ValueError as exc:
+        raise ValueError(&quot;quantity is not an integer&quot;) from exc
+    if quantity &lt; 0:
+        raise ValueError(&quot;quantity is negative&quot;)
+    return quantity
+
+
+assert parse_quantity(&quot; 0 &quot;) == 0
+assert parse_quantity(&quot;+4&quot;) == 4</code></pre>
+<p><code>raw</code> is the function parameter. <code>isinstance</code> checks the representation before calling a string method. The narrow try block wraps only conversion; <code>raise ... from exc</code> keeps the original cause for diagnosis. Returning zero is correct for the text zero, but not a fallback for a failed conversion. Expected observation: both assertions pass; <code>parse_quantity(&quot;4.5&quot;)</code> raises ValueError instead of quietly rounding.</p>
+<h5 id="guide--example-b-copy-before-changing-representation">Example B: copy before changing representation<a class="heading-anchor" href="#guide--example-b-copy-before-changing-representation" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">raw = {&quot;id&quot;: &quot; A-1 &quot;, &quot;quantity&quot;: &quot;2&quot;}
+cleaned = {&quot;id&quot;: raw[&quot;id&quot;].strip(), &quot;quantity&quot;: int(raw[&quot;quantity&quot;])}
+assert raw[&quot;id&quot;] == &quot; A-1 &quot;
+assert cleaned == {&quot;id&quot;: &quot;A-1&quot;, &quot;quantity&quot;: 2}
+print(raw, cleaned)</code></pre>
+<p>Expected observation: the raw dictionary retains its spaces while cleaned contains a normalized identifier and integer. Creating a new dictionary preserves original evidence. Assigning <code>cleaned = raw</code> would make both names refer to the same mutable dictionary; a later edit would change your evidence. This differs from the immutable integer reassignment in the first on-ramp.</p>
+<h5 id="guide--make-rejection-actionable">Make rejection actionable<a class="heading-anchor" href="#guide--make-rejection-actionable" aria-label="Link to this section">#</a></h5>
+<p>Use a one-based source row number and a stable reason such as <code>duplicate id</code> or <code>quantity is negative</code>. A row number is a location in this input, not a permanent identity across reordered files. Preserve a shallow copy of the raw dictionary here because the input values are simple strings. If nested lists were allowed, shallow copying would not isolate changes inside those lists. Document the actual data shape instead of promising universal deep copying.</p>
+<p>Only add an identifier to <code>seen</code> after all validation succeeds. That order makes first-valid-wins precise and avoids rejecting a good replacement for an invalid earlier row. Keep accepted rows in source order. Rejection order also follows source order, which makes a report easier to compare with its input. The count check <code>input_count == accepted_count + rejected_count</code> catches lost rows, but cannot prove each accepted quantity is correct. Add value checks and input-unchanged checks as separate evidence.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<ol>
+<li><strong>Define the policy before coding.</strong> Write a five-row policy table for <code>&quot;0&quot;</code>, <code>&quot;&quot;</code>, <code>&quot; 4 &quot;</code>, <code>&quot;4.5&quot;</code>, and <code>&quot;-1&quot;</code>. For each, state accepted integer or rejection reason. Implement <code>parse_quantity</code>.</li>
+</ol>
+<p><strong>Verify:</strong> Accepted results are 0 and 4. The other three inputs raise ValueError, with missing, non-integer, and negative reasons respectively.</p>
+<p><strong>Hint:</strong> Do not use a broad exception handler as a substitute for a representation check.</p>
+<ol>
+<li><strong>Keep raw records unchanged.</strong> Implement <code>normalize_record</code> for string id and quantity fields. Given <code>{&quot;id&quot;: &quot; A &quot;, &quot;quantity&quot;: &quot;2&quot;}</code>, return canonical fields without mutating the input.</li>
+</ol>
+<p><strong>Verify:</strong> The result equals <code>{&quot;id&quot;: &quot;A&quot;, &quot;quantity&quot;: 2}</code> while the original id still contains both surrounding spaces.</p>
+<p><strong>Hint:</strong> Construct a new dictionary rather than reusing the original object.</p>
+<ol>
+<li><strong>Make missing identity visible.</strong> Test an absent id, an empty id, and an all-space id. Decide whether <code>&quot;A&quot;</code> and <code>&quot;a&quot;</code> collide under the declared case-sensitive policy.</li>
+</ol>
+<p><strong>Verify:</strong> Tests capture ValueError for each missing identity and assert that normalized ids <code>A</code> and <code>a</code> remain unequal strings.</p>
+<p><strong>Hint:</strong> Normalization and identity comparison are separate policy choices.</p>
+<ol>
+<li><strong>Account for every row.</strong> Implement <code>clean_rows</code> returning accepted and rejected lists. Feed ids A, B, C with quantities 2, many, and 0.</li>
+</ol>
+<p><strong>Verify:</strong> Three inputs produce two accepted records with total quantity 2 and one rejection at one-based row 2; count reconciliation equals 3.</p>
+<p><strong>Hint:</strong> Catch only the validation failure and preserve its row with the reason.</p>
+<ol>
+<li><strong>Enforce first valid wins.</strong> Feed A/many, A/2, and A/3 in that order. Add duplicate detection after validation and preserve rejection evidence.</li>
+</ol>
+<p><strong>Verify:</strong> Only A/2 is accepted; rows 1 and 3 are rejected for non-integer quantity and duplicate id. The first invalid row does not reserve A.</p>
+<p><strong>Hint:</strong> Update the set of seen identifiers only at the acceptance step.</p>
+<ol>
+<li><strong>Reject wrong field types.</strong> Test <code>{&quot;id&quot;: &quot;A&quot;, &quot;quantity&quot;: None}</code> and <code>{&quot;id&quot;: 3, &quot;quantity&quot;: &quot;2&quot;}</code>. Avoid converting arbitrary objects with <code>str</code>.</li>
+</ol>
+<p><strong>Verify:</strong> Both records appear in rejected output with ValueError-derived reasons, and neither becomes an accepted zero or identifier <code>&quot;3&quot;</code>.</p>
+<p><strong>Hint:</strong> The contract accepts text fields, not every object that can be displayed.</p>
+<ol>
+<li><strong>Check empty and all-invalid batches.</strong> Run <code>clean_rows</code> with no rows, then with two invalid quantity rows. Summarize accepted quantities with an explicit zero start.</li>
+</ol>
+<p><strong>Verify:</strong> The empty batch returns two empty lists and total 0. The invalid batch has accepted count 0, rejected count 2, and total 0.</p>
+<p><strong>Hint:</strong> An empty total does not mean that the input was complete or valid.</p>
+<ol>
+<li><strong>Transfer to stock adjustments.</strong> Describe a second contract where negative counts represent returns. Keep the original parser unchanged and write boundary cases for a separate signed parser.</li>
+</ol>
+<p><strong>Verify:</strong> Your policy note records signed-parser output -1, the original parser&#x27;s ValueError for the same text, and rejection tests for empty and decimal text in both contracts.</p>
+<p><strong>Hint:</strong> A domain change should be named and tested rather than silently broadening shared validation.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<p>Explain why zero differs from missing and invalid input. Reconstruct the first-valid-wins sequence using a new identifier. Show why count reconciliation alone cannot detect accidentally changing quantity two into twenty. Give a second assertion that would catch that defect without opening the solution.</p>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<p>If raw evidence changes after cleaning, compare object identities and inspect assignments that reuse dictionaries. If a valid replacement is called a duplicate, locate the point where <code>seen</code> is updated. If counts reconcile but totals are wrong, inspect accepted integer values and compare with a manual small-case calculation. If <code>None</code> causes AttributeError, validate the field type before calling <code>.strip()</code>. Do not catch that programming mistake globally.</p>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Use these boundaries in the first independent data investigation, then carry the same reasoning into pandas cleaning and schema validation. A library may make conversion faster; it cannot choose your missing-value or identity policy.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning for python-foundations-03.
+Read python/professional/companion-guides/py_foundations_03_clean_records.md and python/professional/lessons/py_foundations_03_clean_records.py.
+Check my direct prerequisites: python-08.
+Keep solutions/ closed unless I request comparison after an attempt.
+Explain the mental model, ask me to predict one result, let me attempt it,
+give one hint at a time, inspect my evidence, and ask a retrieval question.
+Done when I can independently reproduce the numbered acceptance checks,
+explain a failure case, and transfer the policy to a changed input.</code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/lessons/py_foundations_03_clean_records.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/lessons/py_foundations_03_clean_records.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-foundations-03: Turn Messy Text into Trustworthy Records.</span>
+<span> </span>
+<span>Read ../companion-guides/py_foundations_03_clean_records.md before attempting the exercises.</span>
+<span>The example runs; unfinished exercise functions raise NotImplementedError.</span>
+<span>Keep solutions separate until you have attempted and checked the contract.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span> </span>
+<span>def parse_quantity(raw: object) -&gt; int:</span>
+<span>    &quot;&quot;&quot;TODO: accept nonnegative integer text; reject missing or invalid values.&quot;&quot;&quot;</span>
+<span>    raise NotImplementedError(&quot;complete parse_quantity&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def normalize_record(raw: dict[str, object]) -&gt; dict[str, object]:</span>
+<span>    &quot;&quot;&quot;TODO: return a new canonical id/quantity record; do not mutate raw.&quot;&quot;&quot;</span>
+<span>    raise NotImplementedError(&quot;complete normalize_record&quot;)</span>
+<span> </span>
+<span> </span>
+<span>def clean_rows(</span>
+<span>    rows: list[dict[str, object]],</span>
+<span>) -&gt; tuple[list[dict[str, object]], list[dict[str, object]]]:</span>
+<span>    &quot;&quot;&quot;TODO: retain source order and report rejected row number/reason/raw data.&quot;&quot;&quot;</span>
+<span>    raise NotImplementedError(&quot;complete clean_rows&quot;)</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    raw_example = {&quot;id&quot;: &quot; A &quot;, &quot;quantity&quot;: &quot;2&quot;}</span>
+<span>    worked_copy = {&quot;id&quot;: raw_example[&quot;id&quot;].strip(), &quot;quantity&quot;: int(raw_example[&quot;quantity&quot;])}</span>
+<span>    print(&quot;Worked non-mutating normalization:&quot;, raw_example, worked_copy)</span>
+<span>    print(&quot;TODO: complete three functions and eight exercises&quot;)</span>
+<span> </span>
+<span># Exercise 1. Define the policy before coding</span>
+<span># Prompt: Write a five-row policy table for `&quot;0&quot;`, `&quot;&quot;`, `&quot; 4 &quot;`, `&quot;4.5&quot;`, and `&quot;-1&quot;`. For</span>
+<span># each, state accepted integer or rejection reason. Implement `parse_quantity`.</span>
+<span># Verify: Accepted results are 0 and 4. The other three inputs raise ValueError, with missing,</span>
+<span># non-integer, and negative reasons respectively.</span>
+<span> </span>
+<span># Exercise 2. Keep raw records unchanged</span>
+<span># Prompt: Implement `normalize_record` for string id and quantity fields. Given `{&quot;id&quot;: &quot; A &quot;,</span>
+<span># &quot;quantity&quot;: &quot;2&quot;}`, return canonical fields without mutating the input.</span>
+<span># Verify: The result equals `{&quot;id&quot;: &quot;A&quot;, &quot;quantity&quot;: 2}` while the original id still contains</span>
+<span># both surrounding spaces.</span>
+<span> </span>
+<span># Exercise 3. Make missing identity visible</span>
+<span># Prompt: Test an absent id, an empty id, and an all-space id. Decide whether `&quot;A&quot;` and `&quot;a&quot;`</span>
+<span># collide under the declared case-sensitive policy.</span>
+<span># Verify: Tests capture ValueError for each missing identity and assert that normalized ids `A`</span>
+<span># and `a` remain unequal strings.</span>
+<span> </span>
+<span># Exercise 4. Account for every row</span>
+<span># Prompt: Implement `clean_rows` returning accepted and rejected lists. Feed ids A, B, C with</span>
+<span># quantities 2, many, and 0.</span>
+<span># Verify: Three inputs produce two accepted records with total quantity 2 and one rejection at</span>
+<span># one-based row 2; count reconciliation equals 3.</span>
+<span> </span>
+<span># Exercise 5. Enforce first valid wins</span>
+<span># Prompt: Feed A/many, A/2, and A/3 in that order. Add duplicate detection after validation</span>
+<span># and preserve rejection evidence.</span>
+<span># Verify: Only A/2 is accepted; rows 1 and 3 are rejected for non-integer quantity and duplicate</span>
+<span># id. The first invalid row does not reserve A.</span>
+<span> </span>
+<span># Exercise 6. Reject wrong field types</span>
+<span># Prompt: Test `{&quot;id&quot;: &quot;A&quot;, &quot;quantity&quot;: None}` and `{&quot;id&quot;: 3, &quot;quantity&quot;: &quot;2&quot;}`. Avoid</span>
+<span># converting arbitrary objects with `str`.</span>
+<span># Verify: Both records appear in rejected output with ValueError-derived reasons, and neither</span>
+<span># becomes an accepted zero or identifier `&quot;3&quot;`.</span>
+<span> </span>
+<span># Exercise 7. Check empty and all-invalid batches</span>
+<span># Prompt: Run `clean_rows` with no rows, then with two invalid quantity rows. Summarize</span>
+<span># accepted quantities with an explicit zero start.</span>
+<span># Verify: The empty batch returns two empty lists and total 0. The invalid batch has accepted</span>
+<span># count 0, rejected count 2, and total 0.</span>
+<span> </span>
+<span># Exercise 8. Transfer to stock adjustments</span>
+<span># Prompt: Describe a second contract where negative counts represent returns. Keep the</span>
+<span># original parser unchanged and write boundary cases for a separate signed parser.</span>
+<span># Verify: Your policy note records signed-parser output -1, the original parser&#x27;s ValueError for</span>
+<span># the same text, and rejection tests for empty and decimal text in both contracts.</span>
+<span> </span></code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_foundations_03_clean_records_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_foundations_03_clean_records_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--turn-messy-text-into-trustworthy-records-solution-reasoning">Turn Messy Text into Trustworthy Records: solution reasoning<a class="heading-anchor" href="#solution-1--turn-messy-text-into-trustworthy-records-solution-reasoning" aria-label="Link to this section">#</a></h3>
+<p>Stable ID: <code>python-foundations-03</code>.</p>
+<p>Read the <a href="python-foundations-03.html#guide">guide</a> and attempt the <a href="python-foundations-03.html#learner">learner artifact</a> first. The <a href="python-foundations-03.html#solution-2">executable solution</a> is a comparison implementation. It does not certify your changed program merely because its own demonstration succeeds. Copy the acceptance cases into your attempt, then change one input without changing the intended policy.</p>
+<p>The reference separates parsing, record validation, and batch policy. That makes a failed rule visible and lets each layer have a small test. The first two functions raise ValueError for an input that violates the declared contract. The batch layer catches that specific signal and records the failed row instead of losing the entire batch. Unexpected errors still escape.</p>
+<pre><code class="language-python">rows = [{&quot;id&quot;: &quot;A&quot;, &quot;quantity&quot;: &quot;2&quot;}, {&quot;id&quot;: &quot;B&quot;, &quot;quantity&quot;: &quot;many&quot;}]
+# After cleaning: accepted count 1, rejected count 1, accepted total 2.
+# Independent accounting: 2 == 1 + 1.</code></pre>
+<p>Record order is preserved. The solution copies raw dictionaries into rejection records and creates fresh canonical dictionaries for accepted rows. It makes no claim that mutable nested data would be fully isolated by a shallow copy.</p>
+<h4 id="solution-1--exercise-1-define-the-policy-before-coding">Exercise 1. Define the policy before coding<a class="heading-anchor" href="#solution-1--exercise-1-define-the-policy-before-coding" aria-label="Link to this section">#</a></h4>
+<p>The parser first checks that the supplied object is a nonempty string after whitespace removal. Conversion then distinguishes integer text from decimal or arbitrary words. A negative integer is syntactically valid but violates the quantity rule, so it gets a different reason. Zero is valid and is returned as zero. The reference deliberately accepts a leading plus sign because Python integer conversion accepts it and our contract discloses it. If a stricter external format is required later, add a lexical rule and tests rather than assuming this parser enforces one.</p>
+<h4 id="solution-1--exercise-2-keep-raw-records-unchanged">Exercise 2. Keep raw records unchanged<a class="heading-anchor" href="#solution-1--exercise-2-keep-raw-records-unchanged" aria-label="Link to this section">#</a></h4>
+<p>Normalize the identifier with strip and parse the quantity into a new dictionary. Keep the original object untouched. The input contains the only direct evidence that surrounding spaces existed, so mutating it would remove information useful for troubleshooting. Compare both canonical values and original values in a test; checking only the returned result would miss unwanted mutation. These records contain simple text fields, which is why a shallow dictionary copy is enough for rejection evidence. That argument must be reconsidered if the record schema changes.</p>
+<h4 id="solution-1--exercise-3-make-missing-identity-visible">Exercise 3. Make missing identity visible<a class="heading-anchor" href="#solution-1--exercise-3-make-missing-identity-visible" aria-label="Link to this section">#</a></h4>
+<p>Absent keys are inspected with get, then validated as text with nonempty content. An absent key returns None and is rejected instead of becoming the displayed string &quot;None&quot;. Case-sensitive identity means A and a remain distinct. That is a policy choice, not a universal rule for identifiers. Trimming normalizes outer spaces without changing internal characters or case. If a future source uses case-insensitive identities, treat that as a deliberate migration because previously separate records may collide. Preserve the original values while investigating those collisions.</p>
+<h4 id="solution-1--exercise-4-account-for-every-row">Exercise 4. Account for every row<a class="heading-anchor" href="#solution-1--exercise-4-account-for-every-row" aria-label="Link to this section">#</a></h4>
+<p>For each source row, use enumerate with start one to record a human-readable row number. A valid canonical record goes into accepted; a validation failure goes into rejected with its raw copy and reason. Quantities two and zero sum to two, while many is rejected at row two. The three-way evidence checks count conservation, value correctness, and reject location independently. A program that copies one row twice could accidentally pass a total-only check, so preserve row counts and identities as well as aggregate values.</p>
+<h4 id="solution-1--exercise-5-enforce-first-valid-wins">Exercise 5. Enforce first valid wins<a class="heading-anchor" href="#solution-1--exercise-5-enforce-first-valid-wins" aria-label="Link to this section">#</a></h4>
+<p>The seen set is updated only after a valid record passes all checks. A/many fails conversion and therefore never reserves A. A/2 becomes the first valid record and is accepted. A/3 is then rejected as a duplicate. This explicitly implements first-valid-wins, which differs from first-row-wins and last-row-wins. The original third row stays visible in rejected evidence. If the two valid rows disagree, the policy does not claim the first is factually correct; it provides deterministic behavior and enough evidence to review the conflict.</p>
+<h4 id="solution-1--exercise-6-reject-wrong-field-types">Exercise 6. Reject wrong field types<a class="heading-anchor" href="#solution-1--exercise-6-reject-wrong-field-types" aria-label="Link to this section">#</a></h4>
+<p>A None quantity violates the text representation boundary. A numeric identifier violates the identifier representation boundary. Converting arbitrary values with str would hide those distinctions, and int(True) would create another surprising coercion if booleans were accepted. The reference uses explicit string checks so its numeric policy only operates on declared text input. Tests should assert that both invalid records are rejected and that raw values remain None and integer three, respectively. That catches accidental coercion even if the final counts still reconcile.</p>
+<h4 id="solution-1--exercise-7-check-empty-and-all-invalid-batches">Exercise 7. Check empty and all-invalid batches<a class="heading-anchor" href="#solution-1--exercise-7-check-empty-and-all-invalid-batches" aria-label="Link to this section">#</a></h4>
+<p>An empty input has zero accepted rows and zero rejected rows. A batch containing two invalid rows has zero accepted rows and two rejected rows. Both accepted totals are zero, but they describe different situations and must retain different counts. Summing with a zero start makes the intended identity element explicit and avoids a reduction that crashes on empty input. A report should show counts beside totals so a reader cannot mistake a zero quantity after total rejection for a successfully observed zero quantity.</p>
+<h4 id="solution-1--exercise-8-transfer-to-stock-adjustments">Exercise 8. Transfer to stock adjustments<a class="heading-anchor" href="#solution-1--exercise-8-transfer-to-stock-adjustments" aria-label="Link to this section">#</a></h4>
+<p>A signed adjustment stream models a different meaning: negative quantities can be legitimate returns. Keep a separate parser or explicit policy parameter instead of quietly changing the shared nonnegative contract. Both versions should still reject missing input and decimal text when exact integers are required. Write normal, zero, negative, and invalid cases for each policy. The key learning is that validation follows meaning. There is no single universal cleaning rule that correctly handles inventory counts, financial adjustments, temperatures, and event counters without domain-specific decisions.</p>
+<h4 id="solution-1--compare-and-transfer">Compare and transfer<a class="heading-anchor" href="#solution-1--compare-and-transfer" aria-label="Link to this section">#</a></h4>
+<p>Change the batch order and predict which accepted quantity wins under first-valid-wins. Then ask whether order independence is a requirement for your real source. If it is, the duplicate policy must change, perhaps to reject every conflicting identity or require an explicit version. Do not describe deterministic order-sensitive behavior as evidence of order independence.</p></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_foundations_03_clean_records_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_foundations_03_clean_records_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Non-mutating text-record boundaries for python-foundations-03.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from __future__ import annotations</span>
+<span> </span>
+<span> </span>
+<span>def parse_quantity(raw: object) -&gt; int:</span>
+<span>    if not isinstance(raw, str) or not raw.strip():</span>
+<span>        raise ValueError(&quot;quantity is missing or not text&quot;)</span>
+<span>    try:</span>
+<span>        quantity = int(raw.strip())</span>
+<span>    except ValueError as exc:</span>
+<span>        raise ValueError(&quot;quantity is not an integer&quot;) from exc</span>
+<span>    if quantity &lt; 0:</span>
+<span>        raise ValueError(&quot;quantity is negative&quot;)</span>
+<span>    return quantity</span>
+<span> </span>
+<span> </span>
+<span>def normalize_record(raw: dict[str, object]) -&gt; dict[str, object]:</span>
+<span>    identifier = raw.get(&quot;id&quot;)</span>
+<span>    if not isinstance(identifier, str) or not identifier.strip():</span>
+<span>        raise ValueError(&quot;id is missing or not text&quot;)</span>
+<span>    return {&quot;id&quot;: identifier.strip(), &quot;quantity&quot;: parse_quantity(raw.get(&quot;quantity&quot;))}</span>
+<span> </span>
+<span> </span>
+<span>def clean_rows(</span>
+<span>    rows: list[dict[str, object]],</span>
+<span>) -&gt; tuple[list[dict[str, object]], list[dict[str, object]]]:</span>
+<span>    accepted: list[dict[str, object]] = []</span>
+<span>    rejected: list[dict[str, object]] = []</span>
+<span>    seen: set[str] = set()</span>
+<span>    for row_number, raw in enumerate(rows, start=1):</span>
+<span>        try:</span>
+<span>            cleaned = normalize_record(raw)</span>
+<span>            identifier = str(cleaned[&quot;id&quot;])</span>
+<span>            if identifier in seen:</span>
+<span>                raise ValueError(&quot;duplicate id&quot;)</span>
+<span>            seen.add(identifier)</span>
+<span>            accepted.append(cleaned)</span>
+<span>        except ValueError as exc:</span>
+<span>            rejected.append({&quot;row_number&quot;: row_number, &quot;reason&quot;: str(exc), &quot;raw&quot;: raw.copy()})</span>
+<span>    assert len(rows) == len(accepted) + len(rejected)</span>
+<span>    return accepted, rejected</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    sample: list[dict[str, object]] = [</span>
+<span>        {&quot;id&quot;: &quot;A&quot;, &quot;quantity&quot;: &quot;many&quot;},</span>
+<span>        {&quot;id&quot;: &quot; A &quot;, &quot;quantity&quot;: &quot;2&quot;},</span>
+<span>        {&quot;id&quot;: &quot;A&quot;, &quot;quantity&quot;: &quot;3&quot;},</span>
+<span>        {&quot;id&quot;: &quot;B&quot;, &quot;quantity&quot;: &quot;0&quot;},</span>
+<span>    ]</span>
+<span>    accepted, rejected = clean_rows(sample)</span>
+<span>    assert accepted == [{&quot;id&quot;: &quot;A&quot;, &quot;quantity&quot;: 2}, {&quot;id&quot;: &quot;B&quot;, &quot;quantity&quot;: 0}]</span>
+<span>    assert [r[&quot;row_number&quot;] for r in rejected] == [1, 3]</span>
+<span>    assert sample[1][&quot;id&quot;] == &quot; A &quot;</span>
+<span>    print({&quot;accepted&quot;: accepted, &quot;rejected&quot;: rejected})</span>
+<span> </span></code></pre></div>
+      </section>
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning for python-foundations-03.
+Read python/professional/companion-guides/py_foundations_03_clean_records.md and python/professional/lessons/py_foundations_03_clean_records.py.
+Check my direct prerequisites: python-08.
+Keep solutions/ closed unless I request comparison after an attempt.
+Explain the mental model, ask me to predict one result, let me attempt it,
+give one hint at a time, inspect my evidence, and ask a retrieval question.
+Done when I can independently reproduce the numbered acceptance checks,
+explain a failure case, and transfer the policy to a changed input.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-08.html"><small>Previous lesson</small><strong>python-08</strong><span>Files JSON Csv Context</span></a>
+        <a class="nav-card next" href="python-09.html"><small>Next lesson</small><strong>python-09</strong><span>Modules Packages</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-foundations-03";
+    const LEARNER_PATH = "python/professional/lessons/py_foundations_03_clean_records.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

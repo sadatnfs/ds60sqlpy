@@ -2,6 +2,11 @@
 
 The recommended course baseline is Python 3.12, PostgreSQL 16 or newer, and Visual Studio Code. Commands below use a POSIX shell and run from the repository root.
 
+New to terminals or notebooks? Keep [Your first successful session](first-success.md)
+beside this guide. Complete Python setup first; PostgreSQL can wait until you
+start the SQL track. Use Terminal from Applications → Utilities. Type commands
+without the surrounding Markdown fences and wait for each to finish.
+
 ## 1. Install base tools
 
 Install:
@@ -18,6 +23,14 @@ git --version
 python3.12 --version
 code --version
 ```
+
+If Git requests Apple's Command Line Tools, finish that installation and
+reopen Terminal. If `code` is missing, open VS Code normally and use **File →
+Open Folder**; its Command Palette also offers **Shell Command: Install 'code'
+command in PATH**. [Homebrew](https://brew.sh/) is a separate package manager;
+install it first if you choose the `brew` commands below. Match native Apple
+Silicon Python and Homebrew to an Apple Silicon Mac rather than mixing them
+with an Intel/Rosetta environment.
 
 Apple Silicon and Intel Macs are supported, but optional heavy machine-learning packages may install different platform wheels. CPU execution is the default.
 
@@ -50,10 +63,17 @@ python scripts/course.py doctor
 
 In VS Code, select `.venv/bin/python` as the interpreter and notebook kernel. See [VS Code](../vscode.md).
 
-Core setup installs notebook, data, and quality tooling. Before the engineering
-bridge, PostgreSQL-in-Jupyter lesson, professional modules, or later
-machine-learning, production, deep-learning, natural-language-processing, or
-geospatial lessons, install the advanced profile while connected:
+Core setup installs notebook, data, quality, bridge, professional, and SQL
+notebook tooling on every operating system. It reuses a valid `.venv` and
+does not contact a database. With an existing external `uv` installation it
+uses the checked-in lock; otherwise it installs the project declarations with
+pip. For an explicitly locked install, use
+`bash scripts/setup.sh --dependency-mode locked` after installing
+[uv](https://docs.astral.sh/uv/getting-started/installation/).
+
+Before later specialized machine-learning, production, deep-learning,
+natural-language-processing, or geospatial lessons, install the advanced
+profile while connected:
 
 ```bash
 brew install libomp
@@ -95,9 +115,26 @@ If `createdb` says the database already exists, continue to the setup command.
 
 `00_setup.sql` drops and recreates the disposable `training` schema. Never run it against a database that contains data you care about. `00_verify.sql` raises an error if expected counts, coverage, chronology, totals, or foreign keys are wrong.
 
+Tell doctor and the guided SQL notebooks to use that same native local role
+and socket connection, then keep this Terminal window for the portal:
+
+```bash
+export DS60_DATABASE_URL=advanced_sql_training
+.venv/bin/python scripts/course.py doctor
+```
+
+Expect `Course database: advanced_sql_training is reachable`. Repeat the
+export in each new Terminal session. For a password-protected native server
+or the separate JupySQL lesson, use the matching connection instructions in
+[Local PostgreSQL](postgresql.md).
+
 ### Option B: Canonical container environment
 
-Docker-based automation uses PostgreSQL 17. It is the most consistent choice for full validation but requires Docker Desktop and a first image download. See [Validation](../validation.md).
+Docker-based automation uses PostgreSQL 17. Install and start Docker Desktop,
+then use the complete [container setup and first query](postgresql.md#route-a-the-course-container).
+That route includes seed verification, port conflicts, host-client requirements
+for guided notebooks, and shutdown. The database container and Python notebook
+kernel are separate processes. See [Validation](../validation.md) for full checks.
 
 ## 5. Start learning
 
@@ -131,6 +168,9 @@ through a fixed `psql -f` path.
 
 For `%sql` and `%%sql` in the course kernel, continue with
 [PostgreSQL in Jupyter](jupyter-postgresql.md).
+
+For a tiny first notebook with explicit expected output, follow
+[Your first successful session](first-success.md#3-make-a-scratch-notebook-and-run-one-cell).
 
 ## 6. Prepare for offline study
 

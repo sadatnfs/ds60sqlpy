@@ -14,6 +14,7 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CATALOG_PATH = REPO_ROOT / "curriculum" / "catalog.json"
 BASELINE_PATH = REPO_ROOT / "curriculum" / "practice_baseline.json"
+EXPANSION_PATH = REPO_ROOT / "curriculum" / "practice_expansion.json"
 DEFAULT_REPORT_PATH = REPO_ROOT / "docs" / "practice-coverage.md"
 
 PRACTICE_WORDS = re.compile(
@@ -196,14 +197,27 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
-def audit() -> list[ArtifactCounts]:
-    """Audit every catalog lesson against its immutable enrichment target."""
+def practice_targets() -> dict[str, Any]:
+    """Combine immutable historical evidence with separately registered new lessons."""
 
-    catalog = _load_json(CATALOG_PATH)
     baseline = _load_json(BASELINE_PATH)
     targets = baseline.get("lessons")
     if not isinstance(targets, dict):
         raise ValueError("practice_baseline.json field 'lessons' must be an object")
+    expansion = _load_json(EXPANSION_PATH).get("lessons")
+    if not isinstance(expansion, dict):
+        raise ValueError("practice_expansion.json field 'lessons' must be an object")
+    overlap = set(targets) & set(expansion)
+    if overlap:
+        raise ValueError(f"Expansion must not replace historical baselines: {sorted(overlap)}")
+    return {**targets, **expansion}
+
+
+def audit() -> list[ArtifactCounts]:
+    """Audit every catalog lesson against its immutable enrichment target."""
+
+    catalog = _load_json(CATALOG_PATH)
+    targets = practice_targets()
 
     rows: list[ArtifactCounts] = []
     catalog_ids: set[str] = set()
@@ -265,7 +279,8 @@ def render_report(rows: list[ArtifactCounts]) -> str:
         "# Practice coverage report",
         "",
         "This generated report checks the repository-wide exercise-enrichment",
-        "contract recorded in `curriculum/practice_baseline.json`. For every",
+        "contract recorded in `curriculum/practice_baseline.json` and the separate",
+        "new-lesson registry `curriculum/practice_expansion.json`. For every",
         "cataloged lesson, the target is `max(6, 2 × audited baseline)` and must",
         "be visible in the learner artifact, companion guide, and every",
         "explanatory solution artifact.",

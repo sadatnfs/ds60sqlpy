@@ -283,7 +283,7 @@ def test_offline_windows_path_supports_both_repository_environment_layouts() -> 
     assert r".venv\python.exe" in text
     assert "$CoursePython" in text
     assert r"scripts\setup.ps1" not in text
-    assert "Windows `Core` bootstrap or macOS/Linux advanced setup" in text
+    assert "default Core setup on every OS" in text
 
 
 def test_posix_setup_guides_offer_the_private_portal_and_explain_static_mode() -> None:
@@ -327,7 +327,7 @@ def test_native_windows_guided_sql_authentication_is_explicit_and_secret_free() 
     )[0]
     assert "bash scripts/setup.sh\n" in posix_start
     assert "scripts/setup.sh --advanced" not in posix_start
-    assert "Use `--advanced` only for the separate JupySQL" in " ".join(posix_start.split())
+    assert "setup now includes the separate JupySQL" in " ".join(posix_start.split())
     assert "password-file handoff" in portal
     assert "portal never" in portal
     assert "asks for or stores a database password" in portal

@@ -708,6 +708,7 @@ def build_html(payload: dict[str, Any]) -> str:
         <span>Learning Guide</span>
       </a>
       <nav aria-label="Primary">
+        <a href="http://127.0.0.1:8765/learn">Docker coding lab</a>
         <a href="#setup">Set up</a>
         <a href="#run-sql">Run SQL</a>
         <a href="#paths">Choose a path</a>
@@ -1041,7 +1042,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           <div class="callout">
             <h3>Your first SQL launch</h3>
             <p>
-              Start with SQL Day 1 and the supplied training schema. Complete
+              Begin with the three SQL starter labs, then SQL Day 1 and the training schema. Complete
               relational design between Days 15–16 and migration engineering
               between Days 39–40. In private
               mode, every SQL catalog card gains an
@@ -1061,6 +1062,28 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
             <a href="docs/guided-sql-notebooks.md">Open the guided SQL handbook</a>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section id="coding-lab">
+      <div class="shell">
+        <div class="section-head"><div><p class="eyebrow">Work the course</p>
+          <h2>Your own guided coding workspace.</h2></div>
+          <p>Read a lesson, predict a result, write Python or SQL, and keep the evidence.</p></div>
+        <div class="grid three">
+          <article class="panel"><h3>Start the application</h3>
+            <p>Use START_LEARNING_LAB.cmd on Windows or scripts/learning_lab.py with your course Python. Docker users run docker compose --profile lab up --build.</p>
+            <a href="docs/offline-app.md">Application, native builds, and Docker</a></article>
+          <article class="panel"><h3>Choose a useful goal</h3>
+            <p>Build a route from the real prerequisites and your available time. Beginner practice and advanced projects belong at different checkpoints.</p>
+            <a href="docs/learning-paths.md">Placement and goal-based learning paths</a></article>
+          <article class="panel"><h3>Bring a coach</h3>
+            <p>The optional local MCP tutor gives Codex the same course context, with one hint at a time and separate solution requests.</p>
+            <a href="docs/mcp-tutor.md">Connect the Codex tutor</a></article>
+        </div>
+        <p><a href="docs/setup/first-success.md">Get your first successful run</a> ·
+          <a href="docs/setup/postgresql.md">Prepare PostgreSQL</a> ·
+          <a href="docs/repository-tour.md">Read the repository tour</a></p>
       </div>
     </section>
 
@@ -1101,7 +1124,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           <article class="panel path-card">
             <h3>PostgreSQL and engineering</h3>
             <ul>
-              <li>Querying starts at SQL Day 1</li>
+              <li>Three tiny-table starter labs lead into SQL Day 1</li>
               <li>Relational design follows the first project</li>
               <li>Analytical SQL, transactions, and migrations</li>
               <li>Performance, operations, and projects</li>
@@ -1549,8 +1572,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
         if (
           activePath === "new" &&
           !(
-            (lesson.track === "python" && lesson.day >= 1 && lesson.day <= 15) ||
-            (lesson.track === "sql" && lesson.day >= 1 && lesson.day <= 15)
+            (["python", "sql"].includes(lesson.track) && lesson.level === "foundation")
           )
         ) return false;
         if (activePath === "python" && lesson.track !== "python") return false;

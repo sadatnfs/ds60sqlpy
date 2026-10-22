@@ -17,6 +17,7 @@ from ds60sqlpy.portal import serve_portal
 from ds60sqlpy.progress import ProgressStore
 from ds60sqlpy.sql_notebook import SqlNotebookError, generate_sql_notebook
 from ds60sqlpy.sql_runner import SqlRunner, SqlRunnerError
+from ds60sqlpy.study_plan import LEARNING_PATHS, build_study_plan
 
 STATUS_MARK = {"pass": "PASS", "warn": "WARN", "fail": "FAIL"}
 
@@ -84,6 +85,42 @@ def _cmd_validate(args: argparse.Namespace, catalog: Catalog) -> int:
     if counts["fail"]:
         return 1
     return 1 if args.strict and counts["warn"] else 0
+
+
+def _cmd_plan(args: argparse.Namespace, catalog: Catalog) -> int:
+    targets = list(args.targets)
+    if args.path:
+        targets.extend(LEARNING_PATHS[args.path].targets)
+    if not targets:
+        for name, path in LEARNING_PATHS.items():
+            print(f"{name}: {path.title}. {path.description}")
+        print("\nChoose --path NAME or one or more stable lesson IDs.")
+        return 0
+    try:
+        completed = (
+            [item.lesson_id for item in ProgressStore(catalog).completions()]
+            if args.use_progress
+            else []
+        )
+        plan = build_study_plan(
+            catalog, targets, completed=completed, weekly_hours=args.weekly_hours
+        )
+    except (KeyError, OSError, ValueError) as exc:
+        print(f"Could not build study plan: {exc}", file=sys.stderr)
+        return 2
+    if args.json:
+        print(json.dumps(asdict(plan), indent=2))
+        return 0
+    print(f"Goals: {', '.join(plan.targets)}")
+    print(
+        f"{len(plan.lessons)} remaining lessons, {plan.estimated_minutes / 60:.1f} hours, "
+        f"about {plan.estimated_weeks} weeks at {plan.weekly_hours:g} hours/week."
+    )
+    print("Allow extra time for review, exercises, and project revisions.")
+    for index, lesson in enumerate(plan.lessons, 1):
+        ready = " [ready]" if lesson.id in plan.ready else ""
+        print(f"{index:3}. {lesson.id}: {lesson.title} ({lesson.estimated_minutes}m){ready}")
+    return 0
 
 
 def _cmd_progress(args: argparse.Namespace, catalog: Catalog) -> int:
@@ -247,6 +284,13 @@ def _parser() -> argparse.ArgumentParser:
     catalog_parser.add_argument("--track", choices=("python", "sql", "bridge"))
     catalog_parser.add_argument("--json", action="store_true")
 
+    plan_parser = subparsers.add_parser("plan", help="Plan a prerequisite-aware learning route.")
+    plan_parser.add_argument("targets", nargs="*", help="Stable target lesson IDs.")
+    plan_parser.add_argument("--path", choices=tuple(LEARNING_PATHS))
+    plan_parser.add_argument("--weekly-hours", type=float, default=5)
+    plan_parser.add_argument("--use-progress", action="store_true")
+    plan_parser.add_argument("--json", action="store_true")
+
     validate_parser = subparsers.add_parser(
         "validate", help="Run fast structural repository checks."
     )
@@ -357,6 +401,7 @@ def main(argv: list[str] | None = None) -> int:
     handlers = {
         "doctor": _cmd_doctor,
         "catalog": _cmd_catalog,
+        "plan": _cmd_plan,
         "validate": _cmd_validate,
         "progress": _cmd_progress,
         "portal": _cmd_portal,

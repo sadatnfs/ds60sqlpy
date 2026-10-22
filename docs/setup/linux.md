@@ -4,6 +4,10 @@ The recommended course baseline is Python 3.12, PostgreSQL 16 or newer, and Visu
 
 Run course commands from the repository root.
 
+If this is your first terminal, notebook, or database, follow
+[Your first successful session](first-success.md) alongside this guide. You
+can finish Python setup and defer PostgreSQL until you start SQL.
+
 ## 1. Install base tools
 
 On a distribution that provides Python 3.12:
@@ -14,6 +18,13 @@ sudo apt-get install -y git libgomp1 python3.12 python3.12-venv python3-pip
 git --version
 python3.12 --version
 ```
+
+These package names fit Ubuntu 24.04. Check `cat /etc/os-release` first;
+Debian 12 normally supplies supported Python 3.11 instead, so use `python3.11`
+and its matching `python3.11-venv` package. A newer distribution's default
+Python may be outside 3.11-3.12. Install a supported interpreter alongside it
+with your distributor's packages or [uv's Python management](https://docs.astral.sh/uv/guides/install-python/).
+Do not use `sudo pip`, `--break-system-packages`, or replace `/usr/bin/python3`.
 
 Install [Visual Studio Code](https://code.visualstudio.com/docs/setup/linux) through the supported package for your distribution.
 
@@ -48,10 +59,19 @@ python scripts/course.py doctor
 
 In VS Code, select `.venv/bin/python` as the interpreter and notebook kernel. See [VS Code](../vscode.md).
 
-Core setup installs notebook, data, and quality tooling. Before the engineering
-bridge, PostgreSQL-in-Jupyter lesson, professional modules, or later
-machine-learning, production, deep-learning, natural-language-processing, or
-geospatial lessons, install the advanced profile while connected:
+Core setup installs notebook, data, quality, bridge, professional, and SQL
+notebook tooling on every operating system. It reuses a valid `.venv` and
+does not contact a database. It uses `uv.lock` when external `uv` is present,
+otherwise pip installs the declarations in `pyproject.toml`. To require the
+checked-in lock after installing [uv](https://docs.astral.sh/uv/getting-started/installation/):
+
+```bash
+bash scripts/setup.sh --dependency-mode locked
+```
+
+Before later specialized machine-learning, production, deep-learning,
+natural-language-processing, or geospatial lessons, install the advanced
+profile while connected:
 
 ```bash
 bash scripts/setup.sh --advanced
@@ -94,9 +114,31 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_ver
 
 `00_setup.sql` drops and recreates the disposable `training` schema. Never run it against a database containing valuable data. `00_verify.sql` raises an error if expected counts, coverage, chronology, totals, or foreign keys are wrong.
 
+Pass the same native username/socket route to doctor and guided SQL notebooks:
+
+```bash
+export DS60_DATABASE_URL=advanced_sql_training
+.venv/bin/python scripts/course.py doctor
+```
+
+Expect the course database to be reachable, then launch the portal from this
+same terminal. Repeat the export in a new terminal. The tools otherwise use
+the container's `ds60` TCP connection. See [Local PostgreSQL](postgresql.md)
+for password authentication and the separate JupySQL URL.
+
+If `systemctl` is unavailable, use your distribution's service manager. WSL
+learners should keep the repository, interpreter, VS Code remote window, and
+PostgreSQL client in the same Linux environment, or follow the native Windows
+guide consistently. A Windows `.venv` cannot be used as a Linux `.venv`.
+
 ### Canonical container environment
 
-Docker-based automation uses PostgreSQL 17 and avoids host authentication differences. It requires a container runtime and a first image download. See [Validation](../validation.md).
+Docker-based automation uses PostgreSQL 17 and avoids host authentication
+differences. Install Docker Engine and the Compose plugin through the
+[official Linux installation guide](https://docs.docker.com/engine/install/),
+then follow the [container setup and first query](postgresql.md#route-a-the-course-container).
+That path explains readiness, host-client requirements, ports, and preserving
+database state. A first image download is required. See [Validation](../validation.md).
 
 ## 5. Start learning
 
@@ -130,6 +172,9 @@ through a fixed `psql -f` path.
 
 For `%sql` and `%%sql` in the course kernel, continue with
 [PostgreSQL in Jupyter](jupyter-postgresql.md).
+
+Use [Your first successful session](first-success.md#3-make-a-scratch-notebook-and-run-one-cell)
+for the exact clicks and expected output in your first notebook.
 
 ## 6. Prepare for offline study
 

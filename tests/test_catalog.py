@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from ds60sqlpy.catalog import Catalog, find_repo_root
+from ds60sqlpy.catalog_builder import PROFESSIONAL_LESSON_SPECS
 
 
 def test_find_repo_root_from_nested_directory() -> None:
@@ -12,9 +13,10 @@ def test_find_repo_root_from_nested_directory() -> None:
 
 def test_catalog_has_all_complete_tracks() -> None:
     catalog = Catalog.load()
-    assert len(catalog.lessons("python")) == 70
-    assert len(catalog.lessons("sql")) == 72
-    assert len(catalog.lessons("bridge")) == 12
+    for track, core in (("python", 60), ("sql", 60), ("bridge", 8)):
+        assert len(catalog.lessons(track)) == core + sum(  # type: ignore[arg-type]
+            spec["track"] == track for spec in PROFESSIONAL_LESSON_SPECS
+        )
     assert catalog.by_day("python", 1).id == "python-01"
     assert catalog.by_day("sql", 60).id == "sql-60"
     assert catalog.by_day("bridge", 8).id == "bridge-08"
@@ -33,7 +35,8 @@ def test_sql_track_starts_with_querying_before_relational_engineering() -> None:
     catalog = Catalog.load()
     sql_ids = [lesson.id for lesson in catalog.lessons("sql")]
 
-    assert catalog.by_day("sql", 1).prerequisites == ()
+    assert catalog.by_day("sql", 1).prerequisites == ("sql-start-03",)
+    assert sql_ids[:3] == ["sql-start-01", "sql-start-02", "sql-start-03"]
     assert catalog.by_day("sql", -1).prerequisites == ("sql-15",)
     assert catalog.by_day("sql", 16).prerequisites == ("sql-found-01",)
     assert catalog.by_day("sql", 0).prerequisites == ("sql-found-01", "sql-39")

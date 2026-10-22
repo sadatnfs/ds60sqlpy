@@ -254,6 +254,17 @@ python -m pytest tests/test_course_guide.py tests/test_lesson_depth_audit.py tes
 <li><code>sql/AGENTS.md</code> governs PostgreSQL scripts, guides, and SQL solutions.</li>
 <li><code>bridge/AGENTS.md</code> governs Python/PostgreSQL integration lessons and tests.</li>
 <li><a href="CONTRIBUTING.md.html">CONTRIBUTING.md</a> contains the human contribution workflow.</li>
+</ul>
+<h3 id="guided-application-and-codex-adapter">Guided application and Codex adapter<a class="heading-anchor" href="#guided-application-and-codex-adapter" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><code>scripts/learning_lab.py</code> and <code>src/ds60sqlpy/lab.py</code> are the explicit trusted-code coding application. The original portal retains its fixed action allowlist.</li>
+<li>The coding lab executes learner-submitted Python and SQL through bounded backend processes. Preserve exact Host, origin, token, request-size, output-size, and target-database checks. Do not describe this personal environment as a security sandbox for untrusted code.</li>
+<li>Only explicit container mode binds the coding app inside its container namespace; Compose publishes only loopback host ports. Native mode stays loopback-only.</li>
+<li><code>src/ds60sqlpy/coaching.py</code> and <code>study_plan.py</code> provide shared lesson/evidence and prerequisite planning for the app and MCP adapter.</li>
+<li>The MCP server uses the official optional SDK over stdio, exposes no code execution, and is read-only unless its progress-write flag is explicitly enabled. Official solutions require a separate explicit reveal.</li>
+<li><code>scripts/build_app.py</code> bundles only an allowlisted course payload. Never package learner pads, progress, credentials, Git history, caches, or a developer environment. Existing workspaces are preserved.</li>
+<li>New lessons use the separate <code>curriculum/practice_expansion.json</code>; the July historical baseline stays unchanged. Both structural and depth audits apply.</li>
+<li>Run the app, backend, and MCP tests after changes. A native build validates only its actual OS and architecture. Docker configuration or CI definitions do not prove that an image was built or started.</li>
 </ul></article>
   </main>
 </body>

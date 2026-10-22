@@ -1,30 +1,35 @@
 # Practice coverage report
 
 This generated report checks the repository-wide exercise-enrichment
-contract recorded in `curriculum/practice_baseline.json`. For every
+contract recorded in `curriculum/practice_baseline.json` and the separate
+new-lesson registry `curriculum/practice_expansion.json`. For every
 cataloged lesson, the target is `max(6, 2 × audited baseline)` and must
 be visible in the learner artifact, companion guide, and every
 explanatory solution artifact.
 
-- Lessons passing all three surfaces: **154/154**
+- Lessons passing all three surfaces: **168/168**
 - Audited baseline prompts: **534**
-- Required prompts per surface: **1228**
-- Current learner-artifact prompts: **1269**
-- Current companion-guide prompts: **1267**
-- Current explanatory-solution prompts: **1267**
+- Required prompts per surface: **1312**
+- Current learner-artifact prompts: **1370**
+- Current companion-guide prompts: **1367**
+- Current explanatory-solution prompts: **1367**
 
 | Lesson | Baseline | Target | Learner | Guide | Solution minimum | Status |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
 | `python-01` | 5 | 10 | 10 | 10 | 10 | PASS |
+| `python-foundations-01` | 0 | 6 | 8 | 8 | 8 | PASS |
 | `python-02` | 3 | 6 | 8 | 8 | 8 | PASS |
 | `python-03` | 3 | 6 | 8 | 8 | 8 | PASS |
+| `python-foundations-02` | 0 | 6 | 8 | 8 | 8 | PASS |
 | `python-04` | 3 | 6 | 8 | 8 | 8 | PASS |
 | `python-05` | 3 | 6 | 8 | 8 | 8 | PASS |
 | `python-06` | 2 | 6 | 7 | 7 | 7 | PASS |
 | `python-07` | 2 | 6 | 7 | 7 | 7 | PASS |
 | `python-08` | 2 | 6 | 7 | 7 | 7 | PASS |
+| `python-foundations-03` | 0 | 6 | 8 | 8 | 8 | PASS |
 | `python-09` | 2 | 6 | 7 | 7 | 7 | PASS |
 | `python-10` | 2 | 6 | 7 | 7 | 7 | PASS |
+| `python-foundations-04` | 0 | 6 | 8 | 8 | 8 | PASS |
 | `python-11` | 2 | 6 | 8 | 8 | 7 | PASS |
 | `python-12` | 2 | 6 | 7 | 7 | 7 | PASS |
 | `python-13` | 2 | 6 | 7 | 7 | 7 | PASS |
@@ -85,6 +90,12 @@ explanatory solution artifact.
 | `python-ml-01` | 8 | 16 | 17 | 17 | 16 | PASS |
 | `python-svc-02` | 10 | 20 | 21 | 20 | 20 | PASS |
 | `python-perf-01` | 9 | 18 | 18 | 18 | 18 | PASS |
+| `python-data-02` | 0 | 6 | 9 | 8 | 8 | PASS |
+| `python-ml-02` | 0 | 6 | 8 | 8 | 8 | PASS |
+| `python-pro-03` | 0 | 6 | 8 | 8 | 8 | PASS |
+| `sql-start-01` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `sql-start-02` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `sql-start-03` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `sql-01` | 3 | 6 | 6 | 6 | 6 | PASS |
 | `sql-02` | 3 | 6 | 6 | 6 | 6 | PASS |
 | `sql-03` | 3 | 6 | 6 | 6 | 6 | PASS |
@@ -157,6 +168,9 @@ explanatory solution artifact.
 | `sql-ext-01` | 7 | 14 | 14 | 14 | 14 | PASS |
 | `sql-repl-01` | 6 | 12 | 12 | 12 | 12 | PASS |
 | `sql-temporal-01` | 6 | 12 | 12 | 12 | 12 | PASS |
+| `sql-quality-01` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `sql-scale-01` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `sql-concurrency-01` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `bridge-01` | 5 | 10 | 10 | 10 | 10 | PASS |
 | `bridge-02` | 6 | 12 | 12 | 12 | 12 | PASS |
 | `bridge-03` | 5 | 10 | 10 | 10 | 10 | PASS |
@@ -169,6 +183,7 @@ explanatory solution artifact.
 | `bridge-ops-01` | 10 | 20 | 20 | 20 | 20 | PASS |
 | `bridge-ai-01` | 11 | 22 | 22 | 22 | 22 | PASS |
 | `bridge-analytics-01` | 12 | 24 | 24 | 24 | 24 | PASS |
+| `bridge-capstone-01` | 0 | 6 | 8 | 8 | 8 | PASS |
 
 Regenerate this report from the repository root:
 

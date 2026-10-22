@@ -489,7 +489,7 @@ FROM generate_series(1, 6000) AS g(n);</code></pre>
 <p><code>CREATE STATISTICS ... (dependencies, mcv)</code> supplies correlation evidence after <code>ANALYZE</code>. It improves estimates; it cannot force a join type or index. Compare estimated versus observed rows with representative, safe <code>EXPLAIN (ANALYZE)</code> only when executing the query is acceptable. Remember that <code>ANALYZE</code> after a write actually performs the write query.</p>
 <p>Index lifecycle review combines workload observation, query latency/plans, constraint ownership, size, cache effects, maintenance/write cost, and a full business cycle. A zero <code>idx_scan</code> after a restart or short window is not proof that an index is disposable.</p>
 <p>VACUUM reclaims dead-row space for reuse and maintains visibility/freeze state; it does not usually shrink the file. ANALYZE refreshes planner statistics. Autovacuum schedules both using per-table change thresholds. Changing its configuration or running aggressive vacuum modes is DBA work outside this transactional lab.</p>
-<p><code>pg_stat_statements</code> requires approved extension/preload configuration and its query text may contain sensitive literals. The lesson checks only installation status. A production review needs access control and normalized query IDs.</p>
+<p><code>pg_stat_statements</code> requires approved extension/preload configuration and its query text may contain sensitive literals. The lesson checks only installation status. A production review needs access control and normalized query IDs. A limited role may not see <code>shared_preload_libraries</code> in <code>pg_settings</code>. The executable solution reports <code>preload_visibility_unavailable</code> when that configuration evidence is hidden; a missing visible setting does not prove that preload is absent. It never grants global setting-reading privileges.</p>
 <h5 id="guide--dba-only-statement-statistics-boundary">DBA-only statement-statistics boundary<a class="heading-anchor" href="#guide--dba-only-statement-statistics-boundary" aria-label="Link to this section">#</a></h5>
 <p>The following is an operator runbook fragment, not a learner command. A DBA must first approve adding <code>pg_stat_statements</code> to <code>shared_preload_libraries</code> and restarting the PostgreSQL service. Only then, and only in the intended database, would an administrator run:</p>
 <pre><code class="language-sql">CREATE EXTENSION pg_stat_statements;
@@ -701,7 +701,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span>ON pro_ops_lab.events (occurred_at DESC, device_id)</span>
 <span>WHERE severity &gt;= 4;</span>
 <span> </span>
-<span>CREATE STATISTICS events_device_severity_stats (dependencies, mcv)</span>
+<span>CREATE STATISTICS pro_ops_lab.events_device_severity_stats (dependencies, mcv)</span>
 <span>ON device_id, severity</span>
 <span>FROM pro_ops_lab.events;</span>
 <span> </span>
@@ -1225,7 +1225,7 @@ WHERE severity &gt;= 4;</code></pre>
 <span>ORDER BY method;</span>
 <span> </span>
 <span>-- Exercise 3: category and severity are correlated by fixture construction.</span>
-<span>CREATE STATISTICS events_category_severity_stats (dependencies, mcv)</span>
+<span>CREATE STATISTICS pro_ops_lab.events_category_severity_stats (dependencies, mcv)</span>
 <span>ON category, severity</span>
 <span>FROM pro_ops_lab.events;</span>
 <span> </span>
@@ -1322,6 +1322,7 @@ WHERE severity &gt;= 4;</code></pre>
 <span>DECLARE</span>
 <span>    installed boolean;</span>
 <span>    preloaded boolean;</span>
+<span>    preload_setting text;</span>
 <span>    view_name regclass;</span>
 <span>BEGIN</span>
 <span>    SELECT EXISTS (</span>
@@ -1330,19 +1331,14 @@ WHERE severity &gt;= 4;</code></pre>
 <span>        WHERE extname = &#x27;pg_stat_statements&#x27;</span>
 <span>    ) INTO installed;</span>
 <span> </span>
-<span>    preloaded :=</span>
-<span>        &#x27;pg_stat_statements&#x27; = ANY (</span>
-<span>            pg_catalog.regexp_split_to_array(</span>
-<span>                COALESCE(</span>
-<span>                    pg_catalog.current_setting(</span>
-<span>                        &#x27;shared_preload_libraries&#x27;,</span>
-<span>                        true</span>
-<span>                    ),</span>
-<span>                    &#x27;&#x27;</span>
-<span>                ),</span>
-<span>                &#x27;\s*,\s*&#x27;</span>
-<span>            )</span>
-<span>        );</span>
+<span>    -- pg_settings filters settings the caller cannot inspect. A missing row is</span>
+<span>    -- unavailable evidence, not proof that no preload is configured.</span>
+<span>    SELECT setting INTO preload_setting</span>
+<span>    FROM pg_catalog.pg_settings</span>
+<span>    WHERE name = &#x27;shared_preload_libraries&#x27;;</span>
+<span>    preloaded := &#x27;pg_stat_statements&#x27; = ANY (</span>
+<span>        pg_catalog.regexp_split_to_array(preload_setting, &#x27;\s*,\s*&#x27;)</span>
+<span>    );</span>
 <span> </span>
 <span>    SELECT to_regclass(</span>
 <span>        pg_catalog.quote_ident(n.nspname) || &#x27;.pg_stat_statements&#x27;</span>
@@ -1356,6 +1352,12 @@ WHERE severity &gt;= 4;</code></pre>
 <span>    IF NOT installed THEN</span>
 <span>        INSERT INTO ds60_pgss_probe</span>
 <span>        VALUES (&#x27;absent&#x27;, &#x27;extension is not installed; no change was attempted&#x27;);</span>
+<span>    ELSIF preload_setting IS NULL THEN</span>
+<span>        INSERT INTO ds60_pgss_probe</span>
+<span>        VALUES (</span>
+<span>            &#x27;preload_visibility_unavailable&#x27;,</span>
+<span>            &#x27;caller cannot inspect shared_preload_libraries; no privilege change was attempted&#x27;</span>
+<span>        );</span>
 <span>    ELSIF NOT preloaded THEN</span>
 <span>        INSERT INTO ds60_pgss_probe</span>
 <span>        VALUES (</span>

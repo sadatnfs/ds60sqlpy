@@ -1,9 +1,34 @@
-# Python professional practice
+# Python foundations and professional practice
 
-This optional track closes engineering gaps that sit between the numbered
-Python lessons and production work. The ten modules are offline after the
-repository setup: they use local files, deterministic workloads, injected
-transports, and temporary directories.
+These named modules provide a gentler route into the numbered Python lessons
+and deeper practice beyond them. Foundation checkpoints appear at their
+prerequisite milestones; professional modules can take several sessions each.
+The stable IDs describe learning units, not a deadline or a promise that every
+unit takes one day. Modules use local files, deterministic workloads, injected
+transports, and temporary directories after connected setup.
+
+## Beginner confidence checkpoints
+
+The catalog inserts four checkpoints into the early numbered route:
+
+- After Day 1, [read and trace a program](companion-guides/py_foundations_01_read_trace_state.md)
+  using straight-line statements and handwritten predictions.
+- After Day 3, [debug from evidence](companion-guides/py_foundations_02_debug_evidence.md)
+  before loops make execution harder to track.
+- After Day 8, [clean trustworthy records](companion-guides/py_foundations_03_clean_records.md)
+  with explicit zero/missing/invalid and duplicate policies.
+- After Day 10, [finish a small auditable investigation](companion-guides/py_foundations_04_first_investigation.md)
+  with a local CSV, independent checks, JSON readback, and a bounded conclusion.
+
+The first two checkpoints do not presume loops or user-defined functions. The
+later pair combines concepts already taught rather than requiring a table
+library. Each has eight prediction, construction, diagnosis, and transfer
+exercises with separate solution reasoning. Use the catalog to check direct
+prerequisites and current ordering:
+
+```text
+python scripts/course.py catalog --track python
+```
 
 ## Recommended route
 
@@ -19,6 +44,22 @@ transports, and temporary directories.
 | `python-ml-01` | [Reproducible model delivery](companion-guides/py_ml_01_reproducible_delivery.md) | `python-45` | None |
 | `python-svc-02` | [Service hardening and observability](companion-guides/py_svc_02_hardening_observability.md) | `python-55`, `bridge-08`, `python-svc-01`, `python-ml-01` | None |
 | `python-perf-01` | [Measurement-first performance engineering](companion-guides/py_perf_01_measurement_optimization.md) | `python-23`, `python-pro-02` | Optional `numpy` |
+
+## Deeper data and reliability labs
+
+Three additional standard-library labs close gaps that do not require deep
+learning packages or live services:
+
+- [Exact values, Unicode identity, and calendar boundaries](companion-guides/py_data_02_exact_values_time_text.md)
+  distinguishes approximate floats from exact cents, preserves normalization
+  collisions, and assigns UTC window endpoints explicitly.
+- [Leakage-resistant group/time evaluation](companion-guides/py_ml_02_group_time_evaluation.md)
+  audits entity membership, feature and label availability, fold coverage, and
+  train-only fitting before comparing model scores. Day 50 is optional.
+- [Restartable local file pipelines](companion-guides/py_pro_03_restartable_file_pipeline.md)
+  pins input bytes, publishes progress and results in one checkpoint, injects
+  a pre-replacement failure, and tests resume without claiming universal
+  power-loss or multi-writer guarantees.
 
 Each module has four deliberately separate artifacts:
 
@@ -73,7 +114,14 @@ macOS/Linux:
 PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s python/professional/tests -v
 ```
 
-Some integration checks are reported as skipped when their optional package is
+The new boundary and failure drills also have a focused test suite:
+
+```text
+python -m pytest tests/test_python_expansion_boundaries.py
+```
+
+Use the same course interpreter selected in setup for that command. Some
+integration checks in the original professional tests are reported as skipped when their optional package is
 not installed. A skip is not silent: its message identifies the missing local
 bootstrap dependency.
 

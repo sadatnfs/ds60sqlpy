@@ -1,7 +1,7 @@
 # Professional Python + SQL bridge
 
 This optional track extends the eight-day
-[Python + PostgreSQL engineering bridge](../README.md) with four portfolio-size
+[Python + PostgreSQL engineering bridge](../README.md) with named portfolio-size
 modules. Each module makes a production concern runnable on a new Windows,
 macOS, or Linux machine without requiring workplace systems or personal data.
 
@@ -17,6 +17,15 @@ module's marked live integration check.
 | `bridge-ops-01` | Safe migration delivery, health checks, logs, and metrics | `sql-found-02`, `bridge-08` | [lesson](lessons/bridge_ops_01_migration_observability.py) | [guide](companion-guides/bridge_ops_01_migration_observability.md) | [code](solutions/bridge_ops_01_migration_observability_solution.py) · [reasoning](solutions/bridge_ops_01_migration_observability_solutions.md) |
 | `bridge-ai-01` | Bounded, local retrieval application with evaluation and safety gates | `bridge-08`, `python-test-01` | [lesson](lessons/bridge_ai_01_application_engineering.py) | [guide](companion-guides/bridge_ai_01_application_engineering.md) | [code](solutions/bridge_ai_01_application_engineering_solution.py) · [reasoning](solutions/bridge_ai_01_application_engineering_solutions.md) |
 | `bridge-analytics-01` | In-memory DuckDB project with a model DAG, contracts, tests, metrics, and reconciliation | `bridge-05`, `python-data-01`, `sql-analytics-01` | [lesson](lessons/bridge_analytics_01_local_project.py) | [guide](companion-guides/bridge_analytics_01_local_project.md) | [code](solutions/bridge_analytics_01_local_project_solution.py) · [reasoning](solutions/bridge_analytics_01_local_project_solutions.md) |
+
+The integrated [evidence-driven capstone](companion-guides/bridge_capstone_01_evidence_review.md)
+adds `bridge-capstone-01` after `bridge-08`, `sql-quality-01`, and
+`python-pro-03`. It uses independent synthetic golden fixtures to reject a
+misleadingly healthy summary, reconstruct a correct product, gate a fake
+publication, and write a bounded incident review. Its default requires only
+the Python standard library and performs no live publication or database work.
+The exact current inventory and prerequisites come from
+`python scripts/course.py catalog --track bridge`.
 
 Recommended order is the table order. The modules are independently runnable,
 but the operations and analytics projects assume the database-testing habits

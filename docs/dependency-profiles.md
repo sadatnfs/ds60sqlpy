@@ -9,10 +9,10 @@ value into `pip install -e ".[VALUE]"`.
 | `core` | Python standard library and course tools | Run the normal setup script |
 | `data` | NumPy, pandas, plotting, statistics, and scikit-learn | Run the normal setup script |
 | `postgres` | The disposable PostgreSQL course database and `psql` | Follow the [PostgreSQL setup](../sql/postgres-60day/README.md) |
-| `bridge` | psycopg, pooling, and Python/PostgreSQL integration | Run advanced setup, or install the `bridge` extra |
-| `professional` | Packaging (`build`, `pip`, `setuptools`, and `wheel`), Arrow/Parquet, DuckDB, and property-based tests | Run advanced setup, or install the `professional` extra |
-| `quality` | pytest, Hypothesis-aware test tooling, type checking, and linting | Run normal setup plus the `professional` extra for Hypothesis |
-| `sql-notebooks` | Jupyter SQL magics, pandas result conversion, SQLAlchemy, and the Psycopg 3 PostgreSQL driver | Run advanced setup, or install the `sql-notebooks` extra |
+| `bridge` | psycopg, pooling, and Python/PostgreSQL integration | Included in normal Core setup |
+| `professional` | Packaging (`build`, `pip`, `setuptools`, and `wheel`), Arrow/Parquet, DuckDB, and property-based tests | Included in normal Core setup |
+| `quality` | pytest, Hypothesis-aware test tooling, type checking, and linting | Included in Core, including the `professional` extra for Hypothesis |
+| `sql-notebooks` | Jupyter SQL magics, pandas result conversion, SQLAlchemy, and the Psycopg 3 PostgreSQL driver | Included in normal Core setup |
 | `geo` | Geospatial Python packages | Run advanced setup, or install the `geo` extra |
 | `ml` | Optional advanced machine-learning libraries | Run advanced setup, or install the `ml` extra |
 | `production` | FastAPI, Dask, MLflow, and Prefect | Run advanced setup, or install the `production` extra |
@@ -63,3 +63,29 @@ baseline:
 Replace `bridge` only with a real extra listed in `pyproject.toml`. First-run
 data/model downloads are separate from package installation; consult the
 lesson's catalog `network` value and companion guide before going offline.
+
+## Installation modes and evidence
+
+Windows bootstrap accepts `-DependencyMode Auto`, `Locked`, or `Project`.
+macOS/Linux setup accepts `--dependency-mode auto`, `locked`, or `project`.
+Auto uses an existing standalone `uv` installation; otherwise pip resolves
+project declarations. Locked requires `uv` and verifies agreement between
+`uv.lock` and `pyproject.toml`. Project does not reproduce exact locked versions.
+
+`uv sync` performs exact synchronization. Running Core after Advanced in locked
+mode removes packages outside the selected Core profile. Choose Advanced again
+when you need all optional groups. Source files, notebooks, progress, and
+datasets are separate from installed packages. See
+[uv locking and syncing](https://docs.astral.sh/uv/concepts/projects/sync/).
+
+Both setup paths validate and reuse the repository environment; they do not
+replace a broken `.venv` automatically. The POSIX script expects
+`.venv/bin/python`. Virtual environments depend on their base interpreter and
+location: copy source and recreate `.venv` rather than copying an environment
+to another machine. See [Python venv](https://docs.python.org/3.12/library/venv.html).
+
+The supported course range remains Python 3.11-3.12. Binary packages also depend
+on OS and CPU. A lock resolution for another platform proves dependency
+selection, not native execution there. Advanced imports do not download or
+verify model assets. Check the actual CI run before treating a configured
+matrix job as passing evidence.

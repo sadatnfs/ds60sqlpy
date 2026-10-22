@@ -241,3 +241,14 @@ Keep durable truth in checked-in artifacts, authoring metadata, docs, and the re
 - `sql/AGENTS.md` governs PostgreSQL scripts, guides, and SQL solutions.
 - `bridge/AGENTS.md` governs Python/PostgreSQL integration lessons and tests.
 - [CONTRIBUTING.md](CONTRIBUTING.md) contains the human contribution workflow.
+
+## Guided application and Codex adapter
+
+- `scripts/learning_lab.py` and `src/ds60sqlpy/lab.py` are the explicit trusted-code coding application. The original portal retains its fixed action allowlist.
+- The coding lab executes learner-submitted Python and SQL through bounded backend processes. Preserve exact Host, origin, token, request-size, output-size, and target-database checks. Do not describe this personal environment as a security sandbox for untrusted code.
+- Only explicit container mode binds the coding app inside its container namespace; Compose publishes only loopback host ports. Native mode stays loopback-only.
+- `src/ds60sqlpy/coaching.py` and `study_plan.py` provide shared lesson/evidence and prerequisite planning for the app and MCP adapter.
+- The MCP server uses the official optional SDK over stdio, exposes no code execution, and is read-only unless its progress-write flag is explicitly enabled. Official solutions require a separate explicit reveal.
+- `scripts/build_app.py` bundles only an allowlisted course payload. Never package learner pads, progress, credentials, Git history, caches, or a developer environment. Existing workspaces are preserved.
+- New lessons use the separate `curriculum/practice_expansion.json`; the July historical baseline stays unchanged. Both structural and depth audits apply.
+- Run the app, backend, and MCP tests after changes. A native build validates only its actual OS and architecture. Docker configuration or CI definitions do not prove that an image was built or started.

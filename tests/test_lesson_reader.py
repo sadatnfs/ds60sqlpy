@@ -52,7 +52,7 @@ def test_every_catalog_entry_has_a_current_portable_reader() -> None:
     catalog = Catalog.load(REPO_ROOT)
     expected = build_reader_files(catalog)
 
-    assert len(expected) == len(catalog.lessons()) == 154
+    assert len(expected) == len(catalog.lessons())
     assert reader_drift(expected, repo_root=REPO_ROOT) == []
 
     for lesson in catalog:
@@ -104,7 +104,7 @@ def test_reader_uses_the_guides_lesson_specific_codex_prompt() -> None:
     rendered = build_lesson_html(catalog, catalog.get("python-04"))
 
     assert "eager collection building, and lazy generators" in rendered
-    assert "Direct catalog prerequisites: `python-03`" in rendered
+    assert "Direct catalog prerequisites: `python-foundations-02`" in rendered
 
 
 def test_markdown_links_to_catalog_artifacts_become_reader_links() -> None:

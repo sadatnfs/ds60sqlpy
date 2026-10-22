@@ -116,6 +116,100 @@
       <p class="source-path">Generated from <code>docs/validation.md</code></p>
     </header>
     <article class="document"><h2 id="validation">Validation<a class="heading-anchor" href="#validation" aria-label="Link to this section">#</a></h2>
+<h3 id="verified-upgrade-on-2026-10-22">Verified upgrade on 2026-10-22<a class="heading-anchor" href="#verified-upgrade-on-2026-10-22" aria-label="Link to this section">#</a></h3>
+<p>These are actual local results from this upgrade, distinct from the July record and from configured hosted CI jobs. The source checkout started at <code>3ed0a31</code>; no source or image was pushed.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Surface</th>
+<th>Observed result</th>
+<th>Boundary</th>
+</tr></thead><tbody>
+<tr>
+<td>Full local suite</td>
+<td>623 passed, 2 skipped, 10 subtests passed</td>
+<td>The two skips require a native Windows PowerShell parser unavailable on the macOS host.</td>
+</tr>
+<tr>
+<td>Catalog and structure</td>
+<td>168 lessons; structural validation 26 pass, 0 warnings, 0 failures</td>
+<td>77 Python, 78 SQL, and 13 bridge; historical IDs and baseline file preserved.</td>
+</tr>
+<tr>
+<td>Practice and lesson depth</td>
+<td>168/168 pass each gate</td>
+<td>Structural/count gates supplement the exercised behavior and human content review.</td>
+</tr>
+<tr>
+<td>Generated delivery</td>
+<td>Course dashboard, 168 readers, 46 references regenerated and drift-checked</td>
+<td>Generated outputs derive from authored sources and catalog metadata.</td>
+</tr>
+<tr>
+<td>Notebook structure</td>
+<td>122 notebooks valid, with uniform metadata and clean saved state</td>
+<td>This does not execute every advanced notebook.</td>
+</tr>
+<tr>
+<td>Notebook execution</td>
+<td>13/13 dependency-light, offline-capable smoke notebooks executed</td>
+<td>Host process-introspection warnings appeared under the restricted macOS environment; cell execution completed. An air-gapped whole-course run was not performed.</td>
+</tr>
+<tr>
+<td>New Python/capstone</td>
+<td>Fresh-process scripts, runnable examples, and focused behavioral/failure tests passed</td>
+<td>Every new module is deterministic and uses local fixtures; advanced historical model training was not rerun in full.</td>
+</tr>
+<tr>
+<td>PostgreSQL 16</td>
+<td>All 78 learner scripts and 78 executable solutions completed against an isolated local database</td>
+<td>Separate from optional roles/extensions/replication/PITR capability claims.</td>
+</tr>
+<tr>
+<td>Limited PostgreSQL 17</td>
+<td>All 78 learner scripts and 78 executable solutions completed in Docker with the restricted course login</td>
+<td>Actual server and client 17.11; privileged settings/statistics issues found during these checks were repaired.</td>
+</tr>
+<tr>
+<td>Live concurrency</td>
+<td>Two-session READ COMMITTED and REPEATABLE READ observations and cleanup passed</td>
+<td>This proves the bounded local lab, not production concurrency behavior.</td>
+</tr>
+<tr>
+<td>Browser application</td>
+<td>Actual Python/SQL runs, NULL result tables, recovery history, blank pads, saved evidence, keyboard tabs, mobile width, clean console</td>
+<td>Browser review used the live local application, not screenshots alone.</td>
+</tr>
+<tr>
+<td>Native executable</td>
+<td>Built macOS ARM64 bundle; read-only self-check found 168 lessons and no missing assets; authenticated Python/SQL, reset/verify, 500-row seed query, and PNG plot capture passed</td>
+<td>Native Windows/Linux bundles were not built or executed locally.</td>
+</tr>
+<tr>
+<td>Docker application</td>
+<td>Local Linux ARM64 image built and started; Python/SQL HTTP smoke, reset, restricted-role checks, and recreation/image-replacement persistence passed</td>
+<td>46 in-container backend/app tests passed; user containers outside the isolated test project were preserved. No image was pushed.</td>
+</tr>
+<tr>
+<td>Data preservation</td>
+<td>12 demo learner-state files preserved byte-for-byte through official asset refresh; 1,103 official assets checked without drift</td>
+<td>This was the newly created test workspace, not an overwrite of a human learner&#x27;s edited course.</td>
+</tr>
+<tr>
+<td>Legacy volume migration</td>
+<td>Bootstrap-role guard left source roles, ownership, and sentinel rows unchanged; side-by-side dump/restore into a fresh limited-role PostgreSQL 17 database verified</td>
+<td>OID10 bootstrap roles cannot be demoted. The tested migration preserves the original volume rather than attempting that operation.</td>
+</tr>
+<tr>
+<td>MCP adapter</td>
+<td>Real SDK2 stdio initialize/list/call/resource/prompt sessions, gated solutions, opt-in writes, network-denied process, and ten read-only evaluation cases passed</td>
+<td>No model was called and no claim is made about model teaching quality or bundled offline AI.</td>
+</tr>
+<tr>
+<td>Portability and quality</td>
+<td>Four-platform all-extras lock dry-runs, Ruff, formatting, strict mypy, secret/history scan, and diff checks passed</td>
+<td>Dependency resolution and workflow definitions are not substitutes for native Windows/Linux execution.</td>
+</tr>
+</tbody></table></div>
+<p>The coding application is a personal trusted-code environment. Default runs have bounded execution/output and process cleanup. SQL uses only the exact local disposable target and a limited login. Completion records require saved prediction, attempt and explanation, but remain learner-confirmed evidence rather than automatic grading. See <a href="offline-app.md.html">application and build details</a> and <a href="mcp-tutor.md.html">MCP tutoring</a>.</p>
 <p>Validation separates structural confidence from actual execution. A notebook that parses has not necessarily run; a SQL file that looks plausible has not necessarily succeeded against PostgreSQL.</p>
 <p>Run commands from the repository root.</p>
 <h3 id="standard-commands">Standard commands<a class="heading-anchor" href="#standard-commands" aria-label="Link to this section">#</a></h3>
@@ -179,7 +273,7 @@ python scripts/scan_secrets.py --history</code></pre>
 <p>Review the regenerated catalog diff. CI runs these core checks on Python 3.12 for Windows, macOS, and Linux and on Python 3.11 for Linux, then executes the full SQL sequence separately against PostgreSQL 17. Each matrix leg sets <code>UV_PYTHON</code> to the requested version and asserts <code>sys.version_info[:2]</code> after sync, so the learner-default <code>.python-version</code> cannot silently collapse the matrix onto Python 3.12. The Windows core runner also registers <code>Python (ds60sqlpy)</code> and runs <code>start_ds60.ps1 -DiagnosticsOnly -NonInteractive -SkipPostgreSql</code>, exercising the native startup under Windows PowerShell 5.1 and the both-environment-layout readiness path without opening a browser.</p>
 <p>The focused learner-entry tests cover different boundaries:</p>
 <ul>
-<li><code>test_course_guide.py</code> checks dashboard catalog links, generated copy, and that all 154 guide-authored Codex prompts are embedded without fallback drift.</li>
+<li><code>test_course_guide.py</code> checks dashboard catalog links, generated copy, and that all cataloged guide-authored Codex prompts are embedded without fallback drift.</li>
 <li><code>test_lesson_depth_audit.py</code> checks the curriculum-wide beginner-depth contract, duplicate/template guards, runnable guide fences, and report.</li>
 <li><code>test_lesson_reader.py</code> checks deterministic rendered pages, safe link rewriting, recursive Markdown/SQL reference pages, mode-specific completion controls, and stale-page removal.</li>
 <li><code>test_portal.py</code> checks loopback/token/origin/path/launch restrictions and exact artifact commands.</li>

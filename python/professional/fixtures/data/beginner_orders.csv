@@ -1,0 +1,8 @@
+id,region,quantity
+a,north,2
+b,south,0
+c,north,5
+d,west,many
+b,south,3
+e,west,-1
+f,west,4

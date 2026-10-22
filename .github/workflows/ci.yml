@@ -58,7 +58,7 @@ jobs:
       - name: Install the locked core environment
         run: >-
           uv sync --frozen --extra notebooks --extra data --extra bridge
-          --extra quality --extra professional --extra sql-notebooks
+          --extra quality --extra professional --extra sql-notebooks --extra mcp
       - name: Verify the matrix interpreter
         run: >-
           uv run --no-sync python -c
@@ -132,8 +132,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Install uv for the locked Windows learner setup
-        if: runner.os == 'Windows'
+      - name: Install uv for the locked learner setup
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           version: "0.11.6"
@@ -168,7 +167,7 @@ jobs:
           }
       - name: Run the macOS/Linux learner setup
         if: runner.os != 'Windows'
-        run: bash scripts/setup.sh
+        run: bash scripts/setup.sh --dependency-mode locked
       - name: Re-run doctor with the Windows repository interpreter
         if: runner.os == 'Windows'
         shell: powershell
@@ -184,9 +183,16 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE
           }
+          & $CoursePython scripts\validate_notebooks.py --smoke --smoke-days 1
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
       - name: Re-run doctor with the POSIX repository interpreter
         if: runner.os != 'Windows'
         run: .venv/bin/python scripts/course.py doctor
+      - name: Execute the first learner notebook on macOS/Linux
+        if: runner.os != 'Windows'
+        run: .venv/bin/python scripts/validate_notebooks.py --smoke --smoke-days 1
       - name: Ensure setup generated no trackable files
         run: >-
           python -c "import subprocess;

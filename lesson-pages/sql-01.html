@@ -247,7 +247,7 @@
           <span class="tag">offline</span>
         </div>
         <p><strong>Prerequisites:</strong></p>
-        <div class="prerequisite-list"><span class="tag">None</span></div>
+        <div class="prerequisite-list"><a class="tag" href="sql-start-03.html">sql-start-03</a></div>
       </section>
 
       <section class="run-card" aria-labelledby="run-heading">
@@ -381,7 +381,7 @@
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Foundation (beginner)</li>
-<li><strong>Catalog prerequisites:</strong> none. This is the first SQL lesson.</li>
+<li><strong>Catalog prerequisites:</strong> <code>sql-start-03</code>, the <a href="sql-start-03.html#guide">query construction and debugging on-ramp</a>.</li>
 <li><strong>Environment prerequisite:</strong> follow the <a href="../reference-pages/sql/postgres-60day/README.md.html">SQL track setup</a> so the disposable <code>advanced_sql_training</code> database and guided notebook runner are ready. You do not need to know DDL or migrations yet.</li>
 <li><strong>Artifacts:</strong> <a href="sql-01.html#learner">learner SQL</a> · <a href="sql-01.html#solution-1">solution reasoning</a> · <a href="sql-01.html#solution-2">executable solution</a></li>
 </ul>
@@ -539,7 +539,7 @@ LIMIT 15;</code></pre>
 <p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
 <pre><code class="language-text">Tutor me through sql-01 — Select Where Orderby.
 
-I am a complete beginner with no prior SQL lessons. This lesson has no direct catalog prerequisite. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+I am a beginner who completed the direct catalog prerequisite sql-start-03. Reuse its small-stage debugging workflow and explain new clauses before relying on them. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day01_select_where_orderby.md
 - Answer-free learner SQL: sql/postgres-60day/day01_select_where_orderby.sql
 
@@ -613,6 +613,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span>-- Keep all numbered exercises answer-free here: write predictions and attempts</span>
 <span>-- only in your ignored working copy.</span>
 <span>--</span>
+<span>-- Prerequisite: sql-start-03 (query construction and debugging on-ramp).</span>
 <span>-- Focus: Query execution order and basic filtering/sorting</span>
 <span> </span>
 <span>BEGIN;</span>
@@ -1163,7 +1164,7 @@ LIMIT 10;</code></pre>
             <span class="cell-label">Copy-ready lesson prompt</span>
             <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-01 — Select Where Orderby.
 
-I am a complete beginner with no prior SQL lessons. This lesson has no direct catalog prerequisite. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+I am a beginner who completed the direct catalog prerequisite sql-start-03. Reuse its small-stage debugging workflow and explain new clauses before relying on them. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day01_select_where_orderby.md
 - Answer-free learner SQL: sql/postgres-60day/day01_select_where_orderby.sql
 
@@ -1194,7 +1195,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="python-perf-01.html"><small>Previous lesson</small><strong>python-perf-01</strong><span>Measurement-First Performance Engineering</span></a>
+        <a class="nav-card" href="sql-start-03.html"><small>Previous lesson</small><strong>sql-start-03</strong><span>Query Construction and Debugging</span></a>
         <a class="nav-card next" href="sql-02.html"><small>Next lesson</small><strong>sql-02</strong><span>Aggregates Groupby Having</span></a>
       </nav>
     </div>

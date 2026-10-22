@@ -1,7 +1,7 @@
 # Curriculum map
 
 DS60 contains two substantial 60-lesson cores, an eight-lesson engineering
-bridge, and 26 named foundation, professional, and specialization modules. The
+bridge, and 40 named foundation, professional, and specialization modules. The
 day number is an ordering key, not a promise that every learner should finish
 in that many calendar days.
 
@@ -29,8 +29,10 @@ for the checked-in generated inventory in `curriculum/catalog.json`. The index i
 
 ### New to programming and databases
 
-1. Complete Python Days 1–15.
-2. Complete SQL Days 1–15, beginning with a small `SELECT`.
+1. Complete Python Days 1–15 in catalog order, including the four inserted
+   foundation practice modules.
+2. Start with `sql-start-01` through `sql-start-03`, then complete SQL Days
+   1–15, beginning with small temporary-table examples.
 3. Continue Python Days 16–30.
 4. Complete `sql-found-01` for relational design, then continue SQL Days
    16–30.
@@ -80,7 +82,7 @@ Artifacts currently present:
 - Companion guides: Days 1–60
 - Markdown solutions: Days 1–60
 - Solution notebooks: Days 1–60
-- Named professional learner modules: 10, each with a guide and two solution
+- Named Python modules: 17, each with a guide and two solution
   artifacts
 
 The track is a practical Python-for-data-science curriculum. It does not replace the complete Python language reference, and some advanced topics are surveys rather than mastery in one session.
@@ -131,8 +133,8 @@ executable reference solution, and reasoning guide. Default tests use fakes and
 run offline. Optional live PostgreSQL work uses `DS60_DATABASE_URL` and the
 disposable course database.
 
-Four named bridge modules add PostgreSQL notebook magics, migration delivery
-and observability, AI application boundaries, and analytics engineering.
+Five named bridge modules add PostgreSQL notebook magics, migration delivery
+and observability, AI application boundaries, analytics engineering, and a data-product incident review.
 
 ## Artifact roles
 
@@ -182,3 +184,12 @@ For the audited gap record and implementation criteria, see the
 
 The implemented named modules and recommended lanes are in
 [Professional and specialization paths](professional-paths.md).
+
+## Guided routes and the new correctness labs
+
+Use [learning paths](learning-paths.md) for placement and evidence checkpoints,
+or launch [the coding application](offline-app.md). The planner expands actual
+prerequisites, including beginner practice, instead of forcing every learner
+through every specialization. The generated catalog now includes 77 Python,
+78 PostgreSQL, and 13 bridge lessons. Historical IDs and saved progress remain
+stable.

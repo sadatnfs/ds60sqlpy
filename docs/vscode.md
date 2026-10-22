@@ -69,6 +69,30 @@ Interpreter selection and notebook-kernel selection are related but separate.
 
 If a package imports in the terminal but not the notebook, the notebook almost always has the wrong kernel. Restart the kernel after installing packages.
 
+Prove the choice in a notebook cell:
+
+```python
+import sys
+
+print(sys.executable)
+print(sys.version)
+print(2 + 3)
+```
+
+Expected: this repository's `.venv` path, Python 3.11 or 3.12, and `5`.
+Compare the path with the activation-free terminal command above. The name
+`Python (ds60sqlpy)` alone is insufficient when you have multiple clones:
+registration uses one per-user kernel name, so the latest setup can point that
+name to another clone. Select the exact environment in **Select Kernel** or
+rerun kernel registration from the intended repository interpreter.
+
+If VS Code offers **Workspace Trust**, review the repository before granting
+trust. Restricted Mode can limit notebook execution. Restart VS Code or reload
+its window if a newly installed extension is missing. Follow the
+[official notebook workflow](https://code.visualstudio.com/docs/datascience/jupyter-notebooks)
+for current UI details. For a complete first notebook, use
+[Your first successful session](setup/first-success.md).
+
 Start at **Terminal → Run Task → Course: Learning portal** for the private
 progress dashboard and allowlisted VS Code/Jupyter launch buttons. You can also
 start JupyterLab directly with **Course: JupyterLab** or work in VS Code's

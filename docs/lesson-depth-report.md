@@ -5,7 +5,7 @@ This generated report enforces the complete-amateur teaching standard in
 review must still judge technical accuracy, progression, and whether the
 examples actually teach the named topic.
 
-- Cataloged lessons passing: **154/154**
+- Cataloged lessons passing: **168/168**
 - Minimum guide words: **1050**
 - Minimum worked-example fences: **2**
 - Minimum explicitly defined terms: **3**
@@ -19,16 +19,20 @@ examples actually teach the named topic.
 | Lesson | Guide words | Examples | Terms | Exercises checked | Solution words | Notebook | Status |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
 | `python-01` | 2347 | 10 | 18 | 10/10 | 2836 | 37 cells / 15 code / 2867 words | PASS |
-| `python-02` | 1964 | 8 | 20 | 8/8 | 2012 | 29 cells / 13 code / 2006 words | PASS |
+| `python-foundations-01` | 1650 | 5 | 10 | 8/8 | 925 | notebook gate n/a | PASS |
+| `python-02` | 1976 | 8 | 20 | 8/8 | 2012 | 30 cells / 13 code / 2031 words | PASS |
 | `python-03` | 1984 | 8 | 19 | 8/8 | 2047 | 28 cells / 12 code / 2013 words | PASS |
-| `python-04` | 2066 | 8 | 18 | 8/8 | 2207 | 27 cells / 12 code / 2120 words | PASS |
+| `python-foundations-02` | 1657 | 5 | 10 | 8/8 | 936 | notebook gate n/a | PASS |
+| `python-04` | 2083 | 8 | 18 | 8/8 | 2207 | 28 cells / 12 code / 2147 words | PASS |
 | `python-05` | 2066 | 8 | 21 | 8/8 | 2153 | 26 cells / 11 code / 2054 words | PASS |
 | `python-06` | 1965 | 8 | 22 | 7/7 | 1897 | 24 cells / 10 code / 1897 words | PASS |
 | `python-07` | 1911 | 8 | 20 | 7/7 | 2078 | 24 cells / 10 code / 1819 words | PASS |
 | `python-08` | 1973 | 8 | 19 | 7/7 | 2014 | 24 cells / 10 code / 1859 words | PASS |
-| `python-09` | 1964 | 11 | 20 | 7/7 | 1847 | 24 cells / 10 code / 1916 words | PASS |
+| `python-foundations-03` | 1645 | 5 | 10 | 8/8 | 972 | notebook gate n/a | PASS |
+| `python-09` | 1980 | 11 | 20 | 7/7 | 1847 | 25 cells / 10 code / 1942 words | PASS |
 | `python-10` | 1934 | 10 | 18 | 7/7 | 1787 | 24 cells / 10 code / 1812 words | PASS |
-| `python-11` | 2068 | 8 | 20 | 8/8 | 2293 | 26 cells / 11 code / 2085 words | PASS |
+| `python-foundations-04` | 1714 | 5 | 10 | 8/8 | 976 | notebook gate n/a | PASS |
+| `python-11` | 2084 | 8 | 20 | 8/8 | 2293 | 27 cells / 11 code / 2110 words | PASS |
 | `python-12` | 1942 | 8 | 19 | 7/7 | 2025 | 24 cells / 10 code / 1862 words | PASS |
 | `python-13` | 1916 | 8 | 23 | 7/7 | 1797 | 24 cells / 10 code / 1842 words | PASS |
 | `python-14` | 1976 | 10 | 20 | 7/7 | 1873 | 24 cells / 9 code / 1982 words | PASS |
@@ -88,7 +92,13 @@ examples actually teach the named topic.
 | `python-ml-01` | 2715 | 10 | 33 | 1/1 | 3695 | notebook gate n/a | PASS |
 | `python-svc-02` | 3004 | 10 | 36 | 0/0 | 4330 | notebook gate n/a | PASS |
 | `python-perf-01` | 2963 | 12 | 37 | 0/0 | 4067 | notebook gate n/a | PASS |
-| `sql-01` | 3263 | 7 | 21 | 6/6 | 3349 | notebook gate n/a | PASS |
+| `python-data-02` | 1716 | 5 | 11 | 8/8 | 975 | notebook gate n/a | PASS |
+| `python-ml-02` | 1817 | 5 | 11 | 8/8 | 983 | notebook gate n/a | PASS |
+| `python-pro-03` | 1911 | 5 | 10 | 8/8 | 975 | notebook gate n/a | PASS |
+| `sql-start-01` | 2226 | 5 | 15 | 6/6 | 1567 | notebook gate n/a | PASS |
+| `sql-start-02` | 2232 | 5 | 14 | 6/6 | 1602 | notebook gate n/a | PASS |
+| `sql-start-03` | 2212 | 5 | 14 | 6/6 | 1584 | notebook gate n/a | PASS |
+| `sql-01` | 3274 | 7 | 21 | 6/6 | 3349 | notebook gate n/a | PASS |
 | `sql-02` | 3064 | 7 | 20 | 6/6 | 3186 | notebook gate n/a | PASS |
 | `sql-03` | 3009 | 7 | 20 | 6/6 | 3342 | notebook gate n/a | PASS |
 | `sql-04` | 2995 | 7 | 20 | 6/6 | 3508 | notebook gate n/a | PASS |
@@ -153,13 +163,16 @@ examples actually teach the named topic.
 | `sql-sec-01` | 3615 | 8 | 21 | 10/10 | 2368 | notebook gate n/a | PASS |
 | `sql-prog-01` | 3097 | 8 | 17 | 10/10 | 2177 | notebook gate n/a | PASS |
 | `sql-types-01` | 3388 | 8 | 19 | 12/12 | 2375 | notebook gate n/a | PASS |
-| `sql-ops-01` | 3503 | 9 | 19 | 12/12 | 2301 | notebook gate n/a | PASS |
+| `sql-ops-01` | 3540 | 9 | 19 | 12/12 | 2301 | notebook gate n/a | PASS |
 | `sql-test-01` | 3072 | 8 | 16 | 10/10 | 2114 | notebook gate n/a | PASS |
 | `sql-analytics-01` | 3454 | 8 | 18 | 14/14 | 2646 | notebook gate n/a | PASS |
 | `sql-ops-02` | 3589 | 10 | 19 | 12/12 | 2464 | notebook gate n/a | PASS |
 | `sql-ext-01` | 4160 | 9 | 17 | 14/14 | 2960 | notebook gate n/a | PASS |
 | `sql-repl-01` | 4019 | 8 | 18 | 12/12 | 2689 | notebook gate n/a | PASS |
 | `sql-temporal-01` | 3350 | 9 | 18 | 12/12 | 2324 | notebook gate n/a | PASS |
+| `sql-quality-01` | 2335 | 5 | 14 | 6/6 | 1806 | notebook gate n/a | PASS |
+| `sql-scale-01` | 2404 | 5 | 14 | 6/6 | 1854 | notebook gate n/a | PASS |
+| `sql-concurrency-01` | 2838 | 11 | 14 | 6/6 | 1736 | notebook gate n/a | PASS |
 | `bridge-01` | 2014 | 5 | 13 | 10/10 | 1365 | notebook gate n/a | PASS |
 | `bridge-02` | 2011 | 5 | 13 | 12/12 | 1466 | notebook gate n/a | PASS |
 | `bridge-03` | 1944 | 8 | 13 | 10/10 | 1292 | notebook gate n/a | PASS |
@@ -172,6 +185,7 @@ examples actually teach the named topic.
 | `bridge-ops-01` | 3138 | 10 | 20 | 20/20 | 2574 | notebook gate n/a | PASS |
 | `bridge-ai-01` | 3228 | 11 | 22 | 22/22 | 2464 | notebook gate n/a | PASS |
 | `bridge-analytics-01` | 3429 | 11 | 22 | 24/24 | 2536 | notebook gate n/a | PASS |
+| `bridge-capstone-01` | 2414 | 5 | 11 | 8/8 | 2494 | notebook gate n/a | PASS |
 
 Regenerate from the repository root:
 

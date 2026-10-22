@@ -65,9 +65,9 @@ bash scripts/setup.sh
 
 Start the portal from the terminal where `psql` and any
 `DS60_DATABASE_URL` value are available. The normal setup is sufficient for a
-guided lesson notebook because it delegates complete scripts to `psql`. Use
-`--advanced` only for the separate JupySQL `%sql`/`%%sql` magics lesson or
-another cataloged advanced dependency.
+guided lesson notebook because it delegates complete scripts to `psql`. Core
+setup now includes the separate JupySQL `%sql`/`%%sql` magics packages too.
+Use `--advanced` when another cataloged lesson requires a larger optional group.
 
 ## Generate without the portal
 

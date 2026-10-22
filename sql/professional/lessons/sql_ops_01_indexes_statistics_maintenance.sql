@@ -95,7 +95,7 @@ CREATE INDEX events_high_severity_partial
 ON pro_ops_lab.events (occurred_at DESC, device_id)
 WHERE severity >= 4;
 
-CREATE STATISTICS events_device_severity_stats (dependencies, mcv)
+CREATE STATISTICS pro_ops_lab.events_device_severity_stats (dependencies, mcv)
 ON device_id, severity
 FROM pro_ops_lab.events;
 

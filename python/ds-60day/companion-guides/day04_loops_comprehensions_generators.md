@@ -16,7 +16,7 @@ By the end of this lesson, you can:
 
 ## Prerequisites
 
-Complete Day 3 (`python-03`): branches, loops, and exception behavior.
+Complete the evidence-first debugging on-ramp (`python-foundations-02`), which includes Day 3 (`python-03`). You can inspect a branch boundary and preserve a minimal failure before introducing repeated execution.
 
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
@@ -276,8 +276,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-04`
-(Day 4 — Loops, Comprehensions, and Generators). Direct catalog prerequisites: `python-03`.
-I have completed the direct prerequisites: `python-03`. Emphasize iteration, eager collection building, and lazy generators.
+(Day 4 — Loops, Comprehensions, and Generators). Direct catalog prerequisites: `python-foundations-02`.
+I have completed the direct prerequisites: `python-foundations-02`. Emphasize iteration, eager collection building, and lazy generators.
 Read `python/ds-60day/companion-guides/day04_loops_comprehensions_generators.md` and use the learner notebook
 `python/ds-60day/notebooks/day04_loops_comprehensions_generators.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

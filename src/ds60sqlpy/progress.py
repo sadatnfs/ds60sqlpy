@@ -10,6 +10,7 @@ from threading import RLock
 from typing import Any, cast
 
 from ds60sqlpy.catalog import Catalog, Lesson, Track
+from ds60sqlpy.state_files import atomic_json_write, locked_update
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,13 +31,12 @@ class ProgressStore:
         self._lock = RLock()
 
     def _payload(self) -> dict[str, Any]:
-        if not self.path.is_file():
+        try:
+            source = self.path.read_text(encoding="utf-8")
+        except FileNotFoundError:
             return {"schema_version": 1, "completed": {}}
-        payload = cast(
-            dict[str, Any],
-            json.loads(self.path.read_text(encoding="utf-8")),
-        )
-        if not isinstance(payload.get("completed"), dict):
+        payload = cast(dict[str, Any], json.loads(source))
+        if not isinstance(payload, dict) or not isinstance(payload.get("completed"), dict):
             raise ValueError(f"Invalid progress file: {self.path}")
         return payload
 
@@ -68,8 +68,8 @@ class ProgressStore:
     def mark_complete(self, lesson_id: str, notes: str = "") -> Completion:
         """Mark a known lesson complete."""
 
-        with self._lock:
-            self.catalog.get(lesson_id)
+        self.catalog.get(lesson_id)
+        with self._lock, locked_update(self.path):
             payload = self._payload()
             record = Completion(
                 lesson_id=lesson_id,
@@ -90,8 +90,8 @@ class ProgressStore:
         the lesson was already incomplete.
         """
 
-        with self._lock:
-            self.catalog.get(lesson_id)
+        self.catalog.get(lesson_id)
+        with self._lock, locked_update(self.path):
             payload = self._payload()
             removed = payload["completed"].pop(lesson_id, None) is not None
             if removed:
@@ -105,14 +105,13 @@ class ProgressStore:
         the same UTC timestamp so imports remain deterministic within one write.
         """
 
-        with self._lock:
-            unique_ids = list(dict.fromkeys(lesson_ids))
-            for lesson_id in unique_ids:
-                self.catalog.get(lesson_id)
-            if not unique_ids:
-                self.reset()
-                return ()
-
+        unique_ids = list(dict.fromkeys(lesson_ids))
+        for lesson_id in unique_ids:
+            self.catalog.get(lesson_id)
+        if not unique_ids:
+            self.reset()
+            return ()
+        with self._lock, locked_update(self.path):
             payload = self._payload()
             saved = payload["completed"]
             completed_at = datetime.now(UTC).replace(microsecond=0).isoformat()
@@ -136,19 +135,10 @@ class ProgressStore:
         )
 
     def reset(self) -> None:
-        """Remove only this repository's progress file."""
+        """Remove only progress state; retain the cross-process lock anchor."""
 
-        with self._lock:
-            if self.path.is_file():
-                self.path.unlink()
-            if self.path.parent.is_dir() and not any(self.path.parent.iterdir()):
-                self.path.parent.rmdir()
+        with self._lock, locked_update(self.path):
+            self.path.unlink(missing_ok=True)
 
     def _write(self, payload: dict[str, Any]) -> None:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        temporary = self.path.with_suffix(".json.tmp")
-        temporary.write_text(
-            json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
-            encoding="utf-8",
-        )
-        temporary.replace(self.path)
+        atomic_json_write(self.path, payload)

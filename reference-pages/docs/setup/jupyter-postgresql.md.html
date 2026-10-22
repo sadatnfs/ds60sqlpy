@@ -120,7 +120,7 @@
 <p>For a normal SQL course lesson or solution, open its <a href="../guided-sql-notebooks.md.html">generated guided notebook</a> from the learning portal. Those notebooks run the complete cataloged script through <code>psql</code> because many course files use <code>psql</code> meta-commands that are not valid JupySQL cells. Use this page for the dedicated lesson about interactive SQL magics.</p>
 <p>This is an interactive learning workflow. Application code should continue to use explicit Psycopg or SQLAlchemy boundaries, tests, and transaction ownership.</p>
 <h3 id="1-install-the-notebook-database-profile">1. Install the notebook database profile<a class="heading-anchor" href="#1-install-the-notebook-database-profile" aria-label="Link to this section">#</a></h3>
-<p>The Windows discovery bootstrap&#x27;s default <code>Core</code> profile installs the required packages. On macOS/Linux, use the aggregate advanced setup.</p>
+<p>The default Core setup installs the required packages on all three operating systems. The large advanced profile is not required for this lesson.</p>
 <p>Windows PowerShell:</p>
 <pre><code class="language-powershell">Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 &amp; .\scripts\bootstrap_windows.ps1
@@ -132,7 +132,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 }</code></pre>
 <p>The resolver supports both a standard <code>venv</code> and the Anaconda conda-prefix fallback. Reuse <code>$CoursePython</code> for the remaining Windows commands in this PowerShell window.</p>
 <p>macOS/Linux:</p>
-<pre><code class="language-bash">bash scripts/setup.sh --advanced</code></pre>
+<pre><code class="language-bash">bash scripts/setup.sh</code></pre>
 <p>For a smaller targeted installation after normal setup:</p>
 <pre><code class="language-powershell"># Windows PowerShell
 &amp; $CoursePython -m pip install -e &quot;.[sql-notebooks]&quot;</code></pre>
@@ -154,6 +154,7 @@ $env:DS60_DATABASE_URL = &quot;postgresql://ds60:ds60@localhost:5432/advanced_sq
 <pre><code class="language-bash"># macOS/Linux
 export DS60_DATABASE_URL=&quot;postgresql://ds60:ds60@localhost:5432/advanced_sql_training&quot;</code></pre>
 <p>Those <code>ds60</code> credentials belong only to the disposable local Compose service. For native PostgreSQL, use the local role and authentication method from the OS setup guide. If a password must appear in a URL, percent-encode reserved characters and keep the value out of shell history and repository files; a local password file or operating-system credential store is preferable.</p>
+<p>For a native macOS/Linux username-and-socket route, this dedicated JupySQL notebook needs <code>postgresql:///advanced_sql_training</code> rather than the literal database name accepted by the <code>psql</code>-based guided notebooks. See <a href="postgresql.md.html">Local PostgreSQL</a> for this distinction and socket-location troubleshooting.</p>
 <p>Closing the terminal clears these process-scoped settings. A personal <code>.env</code> file is ignored by Git, but the notebook deliberately does not load one silently.</p>
 <h3 id="4-start-the-course-kernel">4. Start the course kernel<a class="heading-anchor" href="#4-start-the-course-kernel" aria-label="Link to this section">#</a></h3>
 <p>Windows PowerShell:</p>

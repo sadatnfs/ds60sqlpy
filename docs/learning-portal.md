@@ -1,7 +1,7 @@
 # Learning portal
 
 `START_HERE.html` is the visual front door to the course. It is generated from
-`curriculum/catalog.json`, so its 154 lesson cards link to the same guides,
+`curriculum/catalog.json`, so its catalog-derived lesson cards link to the same guides,
 learner artifacts, solutions, prerequisites, levels, and network labels used
 by the command-line tools.
 
@@ -170,3 +170,9 @@ Browser QA should cover desktop and narrow mobile layouts, static `file://`
 behavior, launcher mode, keyboard focus, filter/pagination behavior,
 progress export/import, generated local-reference navigation, the mode-specific
 completion control, console errors, and unexpected network requests.
+
+## Prefer the coding application for integrated practice
+
+The [learning lab](offline-app.md) adds Python/SQL coding pads and a guided
+evidence workflow. This portal remains the static-library and fixed native
+launch route. Both use the same catalog and progress contract.

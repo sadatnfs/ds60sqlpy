@@ -74,7 +74,8 @@ code or queries.
 The catalog contains stable named modules such as `sql-found-01`,
 `python-pro-02`, and `bridge-jupyter-01` in addition to the historical day
 IDs. Recommend prerequisites from the catalog, not from filename order or an
-assumed 60-day ceiling. A new SQL learner starts with `sql-01`; do not put
+assumed 60-day ceiling. A new SQL learner starts with `sql-start-01` through `sql-start-03`, then
+`sql-01`; do not put
 schema migrations in front of their first `SELECT`.
 
 Catalog network labels describe lesson execution after the documented
@@ -228,3 +229,23 @@ When the request is to improve course content rather than tutor:
 - Use Serena for semantic navigation of importable Python code when available;
   use notebook-aware JSON tooling for `.ipynb` and live PostgreSQL execution
   for `.sql`.
+
+## Guided coding application and MCP
+
+For an integrated coding pad, use `START_LEARNING_LAB.cmd` on Windows or run
+`scripts/learning_lab.py` with the repository interpreter. Docker learners use
+`docker compose --profile lab up --build` and the exact printed loopback URL.
+Read `docs/offline-app.md` before diagnosing backend setup. The coding lab runs
+trusted local code and records prediction, attempt and explanation; its
+completion record is self-reported, not automatic grading.
+
+Use `scripts/course.py plan --path NAME` or a stable target ID to derive the
+actual prerequisites and session estimate. Do not force heavy specializations
+into a beginner's route. Inserted foundation modules are part of the core
+prerequisite chain, not extra optional homework silently skipped by the plan.
+
+The optional stdio MCP adapter described in `docs/mcp-tutor.md` provides the
+same course context inside Codex. Keep its read-only default, do not expose
+coding-pad execution through MCP, and request a solution only after an honest
+attempt or explicit learner request. Progress writes require the adapter's
+explicit opt-in as well as learner authorization for the particular write.

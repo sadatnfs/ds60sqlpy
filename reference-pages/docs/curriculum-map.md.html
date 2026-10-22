@@ -116,7 +116,7 @@
       <p class="source-path">Generated from <code>docs/curriculum-map.md</code></p>
     </header>
     <article class="document"><h2 id="curriculum-map">Curriculum map<a class="heading-anchor" href="#curriculum-map" aria-label="Link to this section">#</a></h2>
-<p>DS60 contains two substantial 60-lesson cores, an eight-lesson engineering bridge, and 26 named foundation, professional, and specialization modules. The day number is an ordering key, not a promise that every learner should finish in that many calendar days.</p>
+<p>DS60 contains two substantial 60-lesson cores, an eight-lesson engineering bridge, and 40 named foundation, professional, and specialization modules. The day number is an ordering key, not a promise that every learner should finish in that many calendar days.</p>
 <p>Use the repository environment directly so navigation does not depend on an activated shell:</p>
 <pre><code class="language-powershell"># Windows PowerShell
 $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
@@ -131,8 +131,8 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 <h3 id="choose-a-path">Choose a path<a class="heading-anchor" href="#choose-a-path" aria-label="Link to this section">#</a></h3>
 <h4 id="new-to-programming-and-databases">New to programming and databases<a class="heading-anchor" href="#new-to-programming-and-databases" aria-label="Link to this section">#</a></h4>
 <ol>
-<li>Complete Python Days 1–15.</li>
-<li>Complete SQL Days 1–15, beginning with a small <code>SELECT</code>.</li>
+<li>Complete Python Days 1–15 in catalog order, including the four inserted foundation practice modules.</li>
+<li>Start with <code>sql-start-01</code> through <code>sql-start-03</code>, then complete SQL Days 1–15, beginning with small temporary-table examples.</li>
 <li>Continue Python Days 16–30.</li>
 <li>Complete <code>sql-found-01</code> for relational design, then continue SQL Days 16–30.</li>
 <li>Add the engineering bridge after Python Day 15 and SQL Day 15 when you want application-oriented integration practice.</li>
@@ -181,7 +181,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 <li>Companion guides: Days 1–60</li>
 <li>Markdown solutions: Days 1–60</li>
 <li>Solution notebooks: Days 1–60</li>
-<li>Named professional learner modules: 10, each with a guide and two solution artifacts</li>
+<li>Named Python modules: 17, each with a guide and two solution artifacts</li>
 </ul>
 <p>The track is a practical Python-for-data-science curriculum. It does not replace the complete Python language reference, and some advanced topics are surveys rather than mastery in one session.</p>
 <h3 id="postgresql-track">PostgreSQL track<a class="heading-anchor" href="#postgresql-track" aria-label="Link to this section">#</a></h3>
@@ -262,7 +262,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 </tr>
 </tbody></table></div>
 <p>Bridge Day 1 requires <code>python-15</code> and <code>sql-15</code>; later bridge lessons are sequential. Every lesson includes a learner <code>.py</code> file, companion guide, executable reference solution, and reasoning guide. Default tests use fakes and run offline. Optional live PostgreSQL work uses <code>DS60_DATABASE_URL</code> and the disposable course database.</p>
-<p>Four named bridge modules add PostgreSQL notebook magics, migration delivery and observability, AI application boundaries, and analytics engineering.</p>
+<p>Five named bridge modules add PostgreSQL notebook magics, migration delivery and observability, AI application boundaries, analytics engineering, and a data-product incident review.</p>
 <h3 id="artifact-roles">Artifact roles<a class="heading-anchor" href="#artifact-roles" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><strong>Plan:</strong> broad learning sequence and goals</li>
@@ -297,7 +297,9 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 <p>The repository may grow beyond the historical numbering. New material should close a documented gap, declare prerequisites, and receive a stable catalog ID. Do not renumber established lessons merely to preserve a marketing total.</p>
 <p>See <a href="content-authoring.md.html">Content authoring</a>.</p>
 <p>For the audited gap record and implementation criteria, see the <a href="curriculum-gap-backlog.md.html">curriculum gap backlog</a>.</p>
-<p>The implemented named modules and recommended lanes are in <a href="professional-paths.md.html">Professional and specialization paths</a>.</p></article>
+<p>The implemented named modules and recommended lanes are in <a href="professional-paths.md.html">Professional and specialization paths</a>.</p>
+<h3 id="guided-routes-and-the-new-correctness-labs">Guided routes and the new correctness labs<a class="heading-anchor" href="#guided-routes-and-the-new-correctness-labs" aria-label="Link to this section">#</a></h3>
+<p>Use <a href="learning-paths.md.html">learning paths</a> for placement and evidence checkpoints, or launch <a href="offline-app.md.html">the coding application</a>. The planner expands actual prerequisites, including beginner practice, instead of forcing every learner through every specialization. The generated catalog now includes 77 Python, 78 PostgreSQL, and 13 bridge lessons. Historical IDs and saved progress remain stable.</p></article>
   </main>
 </body>
 </html>

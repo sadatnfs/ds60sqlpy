@@ -116,7 +116,7 @@
       <p class="source-path">Generated from <code>sql/postgres-60day/README.md</code></p>
     </header>
     <article class="document"><h2 id="postgresql-track">PostgreSQL track<a class="heading-anchor" href="#postgresql-track" aria-label="Link to this section">#</a></h2>
-<p>This track contains 60 ordered PostgreSQL lessons, companion guides, and projects. New learners start with Day 1. Two named relational-engineering modules form the milestones between Days 15–16 and Days 39–40, and ten professional modules extend the shared core. The number is a sequence, not a deadline.</p>
+<p>The historical core contains 60 ordered PostgreSQL lessons, companion guides, and projects. Complete beginners first use the three small-fixture lessons in the <a href="../professional/README.md.html#learning-path">SQL on-ramp</a>, then begin Day 1. Two named relational-engineering modules form the milestones between Days 15-16 and Days 39-40. Professional modules extend the core into deeper database responsibilities and correctness labs. The number is a sequence, not a deadline; the generated catalog defines the complete current curriculum.</p>
 <p>Start at the repository <a href="../../README.md.html">README</a>, and run every command from the repository root.</p>
 <p>Examples on this page use <code>python</code> for compactness. If the environment is not activated, use the repository interpreter instead: <code>&amp; $CoursePython scripts\course.py ...</code> in Windows PowerShell, or <code>.venv/bin/python scripts/course.py ...</code> on macOS/Linux. The Windows setup guide shows how to resolve <code>$CoursePython</code> for either supported <code>.venv</code> layout.</p>
 <h3 id="requirements">Requirements<a class="heading-anchor" href="#requirements" aria-label="Link to this section">#</a></h3>
@@ -167,7 +167,7 @@ python scripts/course.py sql run 1</code></pre>
 <li>If you prefer a terminal, run the cataloged learner SQL file with the <code>psql -X -v ON_ERROR_STOP=1 ... -f &lt;file&gt;</code> form shown below. Use the host and role flags from your operating-system setup guide.</li>
 <li>Attempt exercises before opening either separate solution. A browser-rendered source preview is for reading; it does not execute SQL.</li>
 </ol>
-<p>If you are new to relational databases, begin with Day 1 and the supplied training schema. Add the named relational-engineering modules only after their declared prerequisites:</p>
+<p>If you are new to relational databases, begin with the <a href="../professional/README.md.html#learning-path">SQL on-ramp</a>, then use Day 1 and the supplied training schema. Add the named relational-engineering modules only after their declared prerequisites:</p>
 <ul>
 <li>after Day 15: <a href="../../../lesson-pages/sql-found-01.html#guide">relational design guide</a> and <a href="../../../lesson-pages/sql-found-01.html#learner">learner SQL</a>;</li>
 <li>after Day 39 and relational design: <a href="../../../lesson-pages/sql-found-02.html#guide">versioned migrations guide</a> and <a href="../../../lesson-pages/sql-found-02.html#learner">learner SQL</a>.</li>

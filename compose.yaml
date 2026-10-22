@@ -5,14 +5,17 @@ services:
     image: postgres:17
     environment:
       POSTGRES_DB: advanced_sql_training
-      POSTGRES_USER: ds60
-      POSTGRES_PASSWORD: ds60
+      POSTGRES_USER: ds60_admin
+      POSTGRES_PASSWORD: ds60_admin
     ports:
-      - "${DS60_POSTGRES_PORT:-5432}:5432"
+      - "127.0.0.1:${DS60_POSTGRES_PORT:-5432}:5432"
+      - "127.0.0.1:8765:8765"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./docker/init:/docker-entrypoint-initdb.d:ro
+      - ./docker/admin:/opt/course-admin:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ds60 -d advanced_sql_training"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U ds60 -d advanced_sql_training"]
       interval: 2s
       timeout: 5s
       retries: 30
@@ -40,5 +43,25 @@ services:
       - --dbname
       - advanced_sql_training
 
+  lab:
+    image: ds60sqlpy-lab:0.3.0
+    pull_policy: never
+    build: .
+    profiles: ["lab"]
+    network_mode: "service:postgres"
+    environment:
+      DS60_DATABASE_URL: postgresql://ds60:ds60@127.0.0.1:5432/advanced_sql_training
+    volumes:
+      - learner-work:/workspace
+    depends_on:
+      postgres:
+        condition: service_healthy
+    init: true
+    mem_limit: 2g
+    pids_limit: 128
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+
 volumes:
   postgres-data:
+  learner-work:

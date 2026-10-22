@@ -116,7 +116,7 @@
       <p class="source-path">Generated from <code>docs/learning-portal.md</code></p>
     </header>
     <article class="document"><h2 id="learning-portal">Learning portal<a class="heading-anchor" href="#learning-portal" aria-label="Link to this section">#</a></h2>
-<p><code>START_HERE.html</code> is the visual front door to the course. It is generated from <code>curriculum/catalog.json</code>, so its 154 lesson cards link to the same guides, learner artifacts, solutions, prerequisites, levels, and network labels used by the command-line tools.</p>
+<p><code>START_HERE.html</code> is the visual front door to the course. It is generated from <code>curriculum/catalog.json</code>, so its catalog-derived lesson cards link to the same guides, learner artifacts, solutions, prerequisites, levels, and network labels used by the command-line tools.</p>
 <h3 id="choose-a-mode">Choose a mode<a class="heading-anchor" href="#choose-a-mode" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
 <th>Mode</th>
@@ -209,7 +209,9 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 .venv/bin/python scripts/build_lesson_readers.py
 .venv/bin/python scripts/build_lesson_readers.py --check
 .venv/bin/python -m pytest tests/test_course_guide.py tests/test_lesson_reader.py tests/test_portal.py</code></pre>
-<p>Browser QA should cover desktop and narrow mobile layouts, static <code>file://</code> behavior, launcher mode, keyboard focus, filter/pagination behavior, progress export/import, generated local-reference navigation, the mode-specific completion control, console errors, and unexpected network requests.</p></article>
+<p>Browser QA should cover desktop and narrow mobile layouts, static <code>file://</code> behavior, launcher mode, keyboard focus, filter/pagination behavior, progress export/import, generated local-reference navigation, the mode-specific completion control, console errors, and unexpected network requests.</p>
+<h3 id="prefer-the-coding-application-for-integrated-practice">Prefer the coding application for integrated practice<a class="heading-anchor" href="#prefer-the-coding-application-for-integrated-practice" aria-label="Link to this section">#</a></h3>
+<p>The <a href="offline-app.md.html">learning lab</a> adds Python/SQL coding pads and a guided evidence workflow. This portal remains the static-library and fixed native launch route. Both use the same catalog and progress contract.</p></article>
   </main>
 </body>
 </html>

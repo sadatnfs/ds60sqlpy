@@ -140,7 +140,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
 <pre><code class="language-bash">bash scripts/setup.sh
 .venv/bin/python scripts/course.py doctor
 .venv/bin/python scripts/course.py portal</code></pre>
-<p>Start the portal from the terminal where <code>psql</code> and any <code>DS60_DATABASE_URL</code> value are available. The normal setup is sufficient for a guided lesson notebook because it delegates complete scripts to <code>psql</code>. Use <code>--advanced</code> only for the separate JupySQL <code>%sql</code>/<code>%%sql</code> magics lesson or another cataloged advanced dependency.</p>
+<p>Start the portal from the terminal where <code>psql</code> and any <code>DS60_DATABASE_URL</code> value are available. The normal setup is sufficient for a guided lesson notebook because it delegates complete scripts to <code>psql</code>. Core setup now includes the separate JupySQL <code>%sql</code>/<code>%%sql</code> magics packages too. Use <code>--advanced</code> when another cataloged lesson requires a larger optional group.</p>
 <h3 id="generate-without-the-portal">Generate without the portal<a class="heading-anchor" href="#generate-without-the-portal" aria-label="Link to this section">#</a></h3>
 <p>The same catalog-restricted generator is available from the course CLI:</p>
 <pre><code class="language-powershell"># Windows PowerShell

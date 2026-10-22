@@ -1,5 +1,22 @@
 # Curriculum gap backlog
 
+## October 2026 follow-through
+
+The July implementation record below is historical evidence. The current
+catalog contains 168 lessons: 77 Python, 78 PostgreSQL, and 13 bridge. Fourteen
+new modules close the beginner-confidence, exactness, evaluation, restart,
+query-correctness, and integrated-review gaps documented in
+[the repository tour](repository-tour.md). The course now also has a guided
+[coding application and native/Docker builds](offline-app.md),
+[goal-based routes](learning-paths.md), and an optional
+[MCP tutor](mcp-tutor.md).
+
+The historical practice baseline was preserved; new IDs are registered in
+`curriculum/practice_expansion.json`. Current gates and evidence are in
+[validation](validation.md), not inferred from this dated July record.
+
+## July 2026 implementation record
+
 **Status:** implemented; all 25 audited gaps have runnable learner and solution artifacts.  
 **Reviewed:** 2026-07-30  
 **Audience:** curriculum maintainers, learners choosing an advanced path, and Codex agents planning future changes.

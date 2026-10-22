@@ -1,21 +1,20 @@
-# DS60 Python, Data Science, SQL, and Engineering Learning Lab
+# DS60 Learning Lab: Python, Data Science, SQL, and Engineering
 
 [![Course validation](https://github.com/sadatnfs/ds60sqlpy/actions/workflows/ci.yml/badge.svg)](https://github.com/sadatnfs/ds60sqlpy/actions/workflows/ci.yml)
 
 DS60 is a self-paced repository for learning practical Python, data science, and PostgreSQL from introductory material through substantial projects. The existing tracks are organized as 60 numbered lessons, but the number is a navigation aid rather than a deadline: take the time you need, repeat lessons, and use the curriculum catalog to choose prerequisites.
 
 > [!TIP]
-> **On Windows, double-click `START_DS60.cmd`.** It checks the machine, guides
-> the connected first setup when `.venv` is absent or incomplete, runs the
-> course doctor, and opens the private portal that can launch cataloged
-> artifacts in VS Code or JupyterLab. On macOS/Linux—or before setup—double-click
-> [START_HERE.html](START_HERE.html) for the static offline guide. Static browser
-> mode can render lesson pages, but a browser cannot execute Python or SQL;
-> use the private launcher for runnable actions.
+> Start with the **guided coding application** below. On Windows, double-click
+> `START_LEARNING_LAB.cmd` after cloning; it checks or prepares the environment
+> and opens the lab. Docker includes the Python and PostgreSQL backends.
+> [START_HERE.html](START_HERE.html) remains the static offline reading library,
+> and `START_DS60.cmd` opens its editor/Jupyter launcher.
+
 
 The repository is designed for:
 
-- A learner working locally in Visual Studio Code
+- A learner using the browser coding lab, Visual Studio Code, or JupyterLab
 - Windows, macOS, and Linux
 - A one-time connected setup followed by offline study
 - Optional guidance from Codex without requiring Codex to run the lessons
@@ -28,6 +27,46 @@ optional, copy-ready coaching context—not a replacement for the lesson.
 
 > [!IMPORTANT]
 > The repository runs locally after setup, but a brand-new machine still needs internet access to install Python packages, PostgreSQL or Docker, and VS Code extensions. A few lessons use Seaborn datasets that download on first use and are cached afterward. Pretrained Hugging Face, spaCy, and torchvision exercises can also require a deliberate first download; their lesson notes identify those cases. See [Offline use](docs/setup/offline.md).
+
+## Start the guided coding application
+
+The course now includes a browser workspace with Python and PostgreSQL coding
+pads, a lesson guide beside your code, saved work and evidence, progressive
+hints, and a route generated from your goal's prerequisites. It runs locally
+and works offline after the required tools, images, and lesson packages have
+been prepared.
+
+**Consistent setup on any supported OS:** install Docker with Compose, then run
+from the repository root:
+
+```text
+docker compose --profile lab up --build
+```
+
+Open [the local learning lab](http://127.0.0.1:8765/learn). The initial image
+build needs internet access. Later starts reuse the images and persistent
+learner/database volumes. This is a personal environment for trusted code.
+
+**Use native backends:** finish your [operating-system setup](docs/setup/first-success.md),
+then double-click `START_LEARNING_LAB.cmd` on Windows. On macOS/Linux:
+
+```bash
+.venv/bin/python scripts/learning_lab.py
+```
+
+**Build an executable:** use `python scripts/build_app.py` after installing the
+optional `desktop-build` extra, or `make app PYTHON=.app-build/bin/python`.
+Build on each target OS. The application bundles its own UI runtime and the
+complete course; coding pads connect to a supported Python environment and
+PostgreSQL. See [application and build instructions](docs/offline-app.md).
+
+**Use Codex as your coach:** the optional [stdio MCP tutor](docs/mcp-tutor.md)
+provides bounded course search, prerequisite planning, lessons, progressive
+hints, and explicitly requested solutions. It is read-only by default and does
+not execute pad code. Your Codex connection is separate from offline study.
+
+The static `START_HERE.html` library remains available for reading. For help
+choosing a route, use [learning paths and placement](docs/learning-paths.md).
 
 ## Choose a track
 
@@ -46,7 +85,8 @@ python scripts/course.py catalog
 
 After the shared lessons, use
 [professional and specialization paths](docs/professional-paths.md) for the
-named modules. A new SQL learner starts with `sql-01`; relational design
+named modules. A new SQL learner starts with `sql-start-01`, `sql-start-02`, and
+`sql-start-03` before `sql-01`; relational design
 (`sql-found-01`) is the milestone between Days 15 and 16, and safe versioned
 migrations (`sql-found-02`) sit between Days 39 and 40.
 
@@ -175,6 +215,9 @@ Python:
 
 SQL:
 
+Start with the three `sql-start` labs in catalog order before the historical
+Day 1 exercises; each uses a small fixture and a plain-language query model.
+
 1. Complete [SQL setup](sql/postgres-60day/README.md).
 2. Open the private course portal with `START_DS60.cmd` on Windows or
    `scripts/learning_portal.py` with the repository interpreter on macOS/Linux.
@@ -261,12 +304,13 @@ docs/
 
 The maintained content has learner artifacts, companion guides, and runnable
 solutions for all 60 lessons in both main tracks, eight engineering bridge
-lessons, and 26 named foundation/professional/specialization modules. The
-generated catalog indexes 154 learning modules and reports their exact artifact
+lessons, and 40 named foundation/professional/specialization modules. The
+generated catalog indexes 168 learning modules and reports their exact artifact
 paths.
 
 Every lesson also has a checked exercise-enrichment target. The immutable
-baseline lives in `curriculum/practice_baseline.json`; the target for each
+historical baseline lives in `curriculum/practice_baseline.json`; new lessons
+are registered separately in `curriculum/practice_expansion.json`. The target for each
 learner artifact, guide, and every explanatory solution artifact is at least
 `max(6, 2 × audited baseline)`. Run `python scripts/audit_practice.py` or read
 the generated [practice coverage report](docs/practice-coverage.md).

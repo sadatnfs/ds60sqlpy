@@ -43,8 +43,8 @@ def test_solution_files_follow_catalog_and_are_sql(runner: SqlRunner) -> None:
 
     assert len(paths) == len(runner.catalog.lessons("sql"))
     assert all(path.suffix == ".sql" for path in paths)
-    assert paths[0].name == "day01_solutions.sql"
-    assert paths[-1].name == "sql_temporal_01_domain_modelling_solutions.sql"
+    assert paths[0].name == "sql_start_01_tables_and_grain_solutions.sql"
+    assert paths[-1].name == "sql_concurrency_01_isolation_and_versions_solutions.sql"
     assert all(isinstance(path, Path) for path in paths)
 
 
@@ -92,3 +92,75 @@ def test_runner_keeps_password_bearing_target_out_of_process_arguments(
     assert environment["PGPASSWORD"] == "temporary-password"
     assert connection not in environment.values()
     assert "DS60_DATABASE_URL" not in environment
+
+
+def test_captured_preparation_timeout_is_actionable(runner: SqlRunner) -> None:
+    runner.capture_output = True
+    with (
+        patch("ds60sqlpy.sql_runner.subprocess.run", side_effect=subprocess.TimeoutExpired([], 60)),
+        pytest.raises(SqlRunnerError, match="training schema may be incomplete"),
+    ):
+        runner.setup()
+
+
+def test_frozen_runner_cleans_loader_state_without_reintroducing_pg_routing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import os
+    import sys
+    from collections.abc import Iterator
+    from contextlib import contextmanager
+
+    sql_file = tmp_path / "lesson.sql"
+    sql_file.write_text("SELECT 1;\n", encoding="utf-8")
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "_MEIPASS", "/temporary/frozen-course", raising=False)
+    monkeypatch.setenv("LD_LIBRARY_PATH", "/temporary/frozen-course")
+    monkeypatch.setenv("LD_LIBRARY_PATH_ORIG", "/system/libraries")
+    monkeypatch.setenv("_PYI_APPLICATION_HOME_DIR", "/temporary/frozen-course")
+    monkeypatch.setenv("PATH", os.pathsep.join(("/temporary/frozen-course/bin", "/usr/bin")))
+    monkeypatch.setenv("PGSERVICE", "must-not-route")
+    monkeypatch.setenv("PGOPTIONS", "must-not-inherit")
+    monkeypatch.setenv("PGHOST", "remote.invalid")
+    monkeypatch.setenv("PGDATABASE", "valuable")
+    monkeypatch.setenv("DS60_DATABASE_URL", "must-not-leak")
+    entered: list[str] = []
+
+    @contextmanager
+    def dll_boundary() -> Iterator[None]:
+        entered.append("entered")
+        yield
+        entered.append("restored")
+
+    def invoke(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+        assert entered == ["entered"]
+        environment = kwargs["env"]
+        assert isinstance(environment, dict)
+        assert environment["LD_LIBRARY_PATH"] == "/system/libraries"
+        assert "/temporary/frozen-course/bin" not in environment["PATH"]
+        assert "_PYI_APPLICATION_HOME_DIR" not in environment
+        assert "PGSERVICE" not in environment
+        assert "DS60_DATABASE_URL" not in environment
+        assert environment["PGDATABASE"] == "advanced_sql_training"
+        assert environment["PGHOST"] == "127.0.0.1"
+        assert environment["PGPORT"] == "58432"
+        assert environment["PGUSER"] == "course-user"
+        assert environment["PGOPTIONS"] == "-c statement_timeout=30000 -c lock_timeout=2000"
+        return subprocess.CompletedProcess(command, 0, "verified", "")
+
+    with (
+        patch("ds60sqlpy.sql_runner.shutil.which", return_value="/usr/bin/psql") as which,
+        patch("ds60sqlpy.sql_runner.external_dll_directory", side_effect=dll_boundary),
+        patch("ds60sqlpy.sql_runner.subprocess.run", side_effect=invoke),
+    ):
+        course_runner = SqlRunner(
+            Catalog.load(),
+            database_url="postgresql://course-user@127.0.0.1:58432/advanced_sql_training",
+            capture_output=True,
+        )
+        result = course_runner.run_file(sql_file)
+    assert result.stdout == "verified"
+    assert entered == ["entered", "restored"]
+    assert "/temporary/frozen-course/bin" not in which.call_args.kwargs["path"]
+    assert os.environ["LD_LIBRARY_PATH"] == "/temporary/frozen-course"
+    assert os.environ["PGHOST"] == "remote.invalid"

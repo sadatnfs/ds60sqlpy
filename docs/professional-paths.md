@@ -119,3 +119,40 @@ first if this is a new PowerShell window.
 .venv/bin/python scripts/course.py progress complete python-pro-01 \
   --notes "Built and inspected a wheel from a clean target."
 ```
+
+## Beginner confidence before professional work
+
+New learners take the three SQL starter modules before the historical core:
+`sql-start-01` (tables and grain), `sql-start-02` (values, NULL and order), and
+`sql-start-03` (constructing and debugging a query). Python's four named
+foundation practice modules appear after Days 1, 3, 8 and 10 in catalog order.
+They teach tracing, evidence-based debugging, trustworthy records, and an
+independent investigation without requiring an advanced library.
+
+## Advanced correctness and a cumulative review
+
+| Stable ID | Practice |
+| --- | --- |
+| `python-data-02` | Keep exact values, normalized Unicode and calendar boundaries explicit |
+| `python-ml-02` | Evaluate groups and time according to deployment, preventing leakage |
+| `python-pro-03` | Restart a local pipeline with a checkpoint that contains durable result state |
+| `sql-quality-01` | Compare bags of rows and expose join fanout that equal totals can hide |
+| `sql-scale-01` | Page with a compound cursor and reason about NULLs, mutation and bounded work |
+| `sql-concurrency-01` | Observe isolation and use an optimistic version predicate |
+| `bridge-capstone-01` | Review a data product against independent fixtures, block a faulty release and assess a repair |
+
+These modules extend the earlier lanes. Generate their exact routes rather
+than guessing prerequisites from a day label:
+
+```powershell
+& $CoursePython scripts\course.py plan bridge-capstone-01 --weekly-hours 5
+```
+
+```bash
+.venv/bin/python scripts/course.py plan bridge-capstone-01 --weekly-hours 5
+```
+
+The same goal appears in the [guided coding application](offline-app.md).
+See [placement and learning paths](learning-paths.md) before skipping beginner
+practice. Consult the generated catalog for each module's guide and learner
+file instead of maintaining another manually copied artifact inventory here.

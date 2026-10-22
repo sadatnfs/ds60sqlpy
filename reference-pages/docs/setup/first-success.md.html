@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Your first successful session · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Your first successful session</h1>
+      <p class="source-path">Generated from <code>docs/setup/first-success.md</code></p>
+    </header>
+    <article class="document"><h2 id="your-first-successful-session">Your first successful session<a class="heading-anchor" href="#your-first-successful-session" aria-label="Link to this section">#</a></h2>
+<p>You do not need to know programming, SQL, or Git before starting. Set aside a first session for getting one Python cell and one SQL query to run. Setup is part of learning. The lesson sequence starts after those two small wins.</p>
+<h3 id="understand-the-tools-before-installing-them">Understand the tools before installing them<a class="heading-anchor" href="#understand-the-tools-before-installing-them" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Word</th>
+<th>Meaning in this course</th>
+</tr></thead><tbody>
+<tr>
+<td>Repository</td>
+<td>This course folder and the files inside it</td>
+</tr>
+<tr>
+<td>Terminal</td>
+<td>A window where you type commands and read their output</td>
+</tr>
+<tr>
+<td>Shell</td>
+<td>The program interpreting terminal commands: PowerShell on Windows, Bash or Zsh on macOS/Linux</td>
+</tr>
+<tr>
+<td>Python interpreter</td>
+<td>The program that executes Python code</td>
+</tr>
+<tr>
+<td>Package</td>
+<td>A reusable library installed for one Python interpreter</td>
+</tr>
+<tr>
+<td><code>.venv</code></td>
+<td>This repository&#x27;s isolated Python and packages</td>
+</tr>
+<tr>
+<td>Notebook</td>
+<td>A file ending in <code>.ipynb</code> with text and runnable cells</td>
+</tr>
+<tr>
+<td>Kernel</td>
+<td>The Python process executing a notebook&#x27;s cells</td>
+</tr>
+<tr>
+<td>PostgreSQL server</td>
+<td>The local program storing tables and answering SQL queries</td>
+</tr>
+<tr>
+<td><code>psql</code></td>
+<td>A terminal client that sends SQL to PostgreSQL</td>
+</tr>
+<tr>
+<td>Docker container</td>
+<td>An isolated process used here to run a consistent PostgreSQL server</td>
+</tr>
+</tbody></table></div>
+<p>VS Code is the editor. JupyterLab is an alternative notebook interface that opens in your browser. The learning portal helps you navigate lessons and launch either editor; the browser&#x27;s static lesson preview is read-only.</p>
+<h3 id="1-choose-the-matching-operating-system-guide">1. Choose the matching operating-system guide<a class="heading-anchor" href="#1-choose-the-matching-operating-system-guide" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="windows.md.html">Windows with PowerShell</a></li>
+<li><a href="macos.md.html">macOS with Terminal</a></li>
+<li><a href="linux.md.html">Linux with a terminal</a></li>
+</ul>
+<p>Type only the contents of a command block, without its triple-backtick fence. Run one command at a time and wait for the prompt to return. A command can succeed without printing anything. Lines beginning with <code>#</code> explain the next command. Do not paste a PowerShell block into a Bash terminal or a SQL prompt.</p>
+<p>On Windows, open <strong>Windows PowerShell</strong> from Start. On macOS, open <strong>Terminal</strong> from Applications → Utilities. On Linux, open your desktop&#x27;s terminal app. Commands below assume you have completed the OS guide&#x27;s package setup and are in the repository root, the folder containing <code>README.md</code> and <code>pyproject.toml</code>.</p>
+<p>The first setup needs internet access. Python 3.12 is the course baseline; 3.11 is supported too. An installed newer Python can coexist with it. The course does not require you to replace your operating system&#x27;s Python.</p>
+<h3 id="2-prove-the-terminal-uses-the-course-python">2. Prove the terminal uses the course Python<a class="heading-anchor" href="#2-prove-the-terminal-uses-the-course-python" aria-label="Link to this section">#</a></h3>
+<p>Windows PowerShell, once in each new terminal:</p>
+<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython -c &quot;import sys; print(sys.executable); print(2 + 3)&quot;</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python -c &quot;import sys; print(sys.executable); print(2 + 3)&quot;</code></pre>
+<p>Expected: a Python path inside this course&#x27;s <code>.venv</code>, then <code>5</code>. Keep using that interpreter for installations and commands. Environment activation is optional.</p>
+<p>Run doctor with the same interpreter:</p>
+<pre><code class="language-powershell"># Windows
+&amp; $CoursePython scripts\course.py doctor</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python scripts/course.py doctor</code></pre>
+<p>A missing optional Docker/VS Code command is a warning. A missing course package requires setup repair. A database warning is expected if you have chosen to start with Python before installing PostgreSQL. Doctor&#x27;s package discovery is not an execution test of every library or lesson.</p>
+<h3 id="3-make-a-scratch-notebook-and-run-one-cell">3. Make a scratch notebook and run one cell<a class="heading-anchor" href="#3-make-a-scratch-notebook-and-run-one-cell" aria-label="Link to this section">#</a></h3>
+<p>Start JupyterLab from this terminal:</p>
+<pre><code class="language-powershell"># Windows
+&amp; $CoursePython -m jupyter lab</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python -m jupyter lab</code></pre>
+<p>Keep the terminal open. If a browser does not open, use the local Jupyter URL printed there. Treat a URL containing a token as private.</p>
+<ol>
+<li>In JupyterLab&#x27;s file browser, create an <code>artifacts</code> folder if it does not already exist and open it. This ignored folder is for your experiments.</li>
+<li>Create a notebook with <strong>Python (ds60sqlpy)</strong>. Rename it <code>first-success.ipynb</code>.</li>
+<li>Type the following into a code cell and press <code>Shift+Enter</code>:</li>
+</ol>
+<pre><code class="language-python">   import sys
+
+   print(sys.executable)
+   learner = &quot;Ada&quot;
+   study_minutes = 20
+   print(f&quot;Hello, {learner}. Today I studied for {study_minutes} minutes.&quot;)
+   print(2 + 3)</code></pre>
+<ol>
+<li>Expect the <code>.venv</code> path, the greeting, and <code>5</code>.</li>
+<li>Change the name and minutes, predict the new output, then run it again.</li>
+<li>Restart the kernel and run all cells. The output should remain correct. Restarting removes variables remembered from earlier cell execution.</li>
+</ol>
+<p>In VS Code, the same cell works in an <code>.ipynb</code> file after <strong>Select Kernel</strong> → the repository&#x27;s Python environment. Selecting a terminal interpreter and selecting a notebook kernel are separate steps. See the <a href="https://code.visualstudio.com/docs/datascience/jupyter-notebooks">VS Code notebook documentation</a> and the <a href="../vscode.md.html">course VS Code guide</a>.</p>
+<h3 id="4-prove-sql-works">4. Prove SQL works<a class="heading-anchor" href="#4-prove-sql-works" aria-label="Link to this section">#</a></h3>
+<p>Follow <a href="postgresql.md.html">Local PostgreSQL, step by step</a> using either the native server or the course&#x27;s container. That guide includes a query returning <code>5</code>, the disposable database setup, seed verification, and the exact connection setting needed by the private learning portal.</p>
+<p>You can study the Python fundamentals first if database setup must wait. Creating a Python environment does not install or start a PostgreSQL server.</p>
+<h3 id="5-start-the-first-lesson">5. Start the first lesson<a class="heading-anchor" href="#5-start-the-first-lesson" aria-label="Link to this section">#</a></h3>
+<p>Start the dashboard from the terminal that has your database setting:</p>
+<pre><code class="language-powershell"># Windows
+&amp; $CoursePython scripts\learning_portal.py</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python scripts/learning_portal.py</code></pre>
+<p>Choose Python Day 1 (<code>python-01</code>) or SQL Day 1 (<code>sql-01</code>). Read its guide, predict what the examples will do, run them, and attempt the exercises before reading solutions. SQL&#x27;s <strong>Create/open guided SQL notebook</strong> action preserves your working copy under <code>.learning/sql/</code>. Opening a lesson is a navigation step; being able to explain and reproduce its result is your learning check.</p>
+<p>At the end of the session, save your notebook and press <code>Ctrl+C</code> in the terminal to stop a server you started. Closing a browser tab alone does not stop Jupyter or the portal. Follow any visible confirmation prompt. Next time, open the repository, resolve the course interpreter, and launch the portal; you do not need to reinstall packages.</p>
+<h3 id="if-the-first-session-fails">If the first session fails<a class="heading-anchor" href="#if-the-first-session-fails" aria-label="Link to this section">#</a></h3>
+<p>Find the first failing step above and use the corresponding section in <a href="../troubleshooting.md.html">Troubleshooting</a>. Include the exact command, operating system, first error, and the interpreter path when seeking help. Remove passwords and private Jupyter URLs. Your scratch notebook, progress, and SQL working copies should be preserved during a repair.</p></article>
+  </main>
+</body>
+</html>

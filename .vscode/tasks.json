@@ -19,6 +19,18 @@
       "problemMatcher": []
     },
     {
+      "label": "Course: Guided coding lab",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "scripts/learning_lab.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Course: Setup",
       "type": "shell",
       "command": "bash scripts/setup.sh",

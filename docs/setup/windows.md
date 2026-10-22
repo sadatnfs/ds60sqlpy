@@ -2,7 +2,13 @@
 
 This guide assumes a new Windows 10 or Windows 11 machine and PowerShell. The recommended course baseline is Python 3.12, PostgreSQL 16 or newer, and Visual Studio Code.
 
-Run course commands from the repository root—the directory containing `README.md`.
+Run course commands from the repository root, the directory containing `README.md`.
+
+If terminals, packages, or notebooks are new to you, follow
+[Your first successful session](first-success.md) alongside this guide. Use
+**Windows PowerShell** from the Start menu for PowerShell blocks. Keep native
+Windows and WSL environments separate; this guide uses native Windows Python,
+not a Python interpreter inside WSL.
 
 ## Fastest route: double-click the guided launcher
 
@@ -12,6 +18,11 @@ and double-click:
 ```text
 START_DS60.cmd
 ```
+
+For a ZIP download, use **Extract All** before launching. Do not run from
+inside File Explorer's compressed-folder view. A normal user-owned local
+folder is preferable to a protected system directory or a folder whose cloud
+sync can replace files while they are running.
 
 The launcher finds the repository from its own location, so the folder may
 contain spaces and you do not need to type a path. It:
@@ -101,6 +112,9 @@ If the repository is already cloned:
 Set-Location <path-to-ds60sqlpy>
 code .
 ```
+
+Replace the angle-bracket placeholder with your actual folder. Quote paths
+with spaces, for example `Set-Location "C:\Users\Ada\Documents\ds60sqlpy"`.
 
 Confirm that PowerShell is at the root:
 
@@ -290,6 +304,13 @@ runner's default.
 
 Docker-based automation uses PostgreSQL 17 and gives every operating system the same database behavior. Docker Desktop requires virtualization support and a one-time image download.
 
+If you choose only Docker and have no host `psql`, bootstrap Python with
+`& .\scripts\bootstrap_windows.ps1 -SkipPostgreSql`. You can run the SQL files
+through the container commands below. Guided SQL notebooks additionally need
+host PostgreSQL client tools because they launch `psql` in the Windows
+process. See [Local PostgreSQL](postgresql.md#route-a-the-course-container)
+for the first query, client distinction, and a port-conflict walkthrough.
+
 From PowerShell at the repository root:
 
 ```powershell
@@ -340,6 +361,10 @@ The SQL lesson ends with `ROLLBACK`, so normal lesson examples should not persis
 To run PostgreSQL from the course's Python notebook kernel with `%sql` and
 `%%sql`, follow [PostgreSQL in Jupyter](jupyter-postgresql.md). Its connection
 is limited to the same disposable training database.
+
+Finish the [scratch-notebook walkthrough](first-success.md#3-make-a-scratch-notebook-and-run-one-cell)
+to verify the `.venv` kernel, run `2 + 3`, and practice restarting before
+working through Python Day 1.
 
 ## 7. PowerShell equivalents used in later lessons
 

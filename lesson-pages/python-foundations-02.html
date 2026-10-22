@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-foundations-02 · Debug from Evidence Instead of Guessing · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-foundations-02</p>
+        <h1>Debug from Evidence Instead of Guessing</h1>
+        <p class="hero-copy">Python foundations and confidence</p>
+        <div class="meta">
+          <span class="tag">foundation</span>
+          <span class="tag">150 minutes</span>
+          <span class="tag">core setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-03.html">python-03</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p>Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_foundations_02_debug_evidence.py</code>.</p>
+          <div class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </div>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/professional/lessons/py_foundations_02_debug_evidence.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+
+
+        </div>
+      </section>
+
+
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/professional/companion-guides/py_foundations_02_debug_evidence.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/companion-guides/py_foundations_02_debug_evidence.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><h3 id="guide--debug-from-evidence-instead-of-guessing">Debug from Evidence Instead of Guessing<a class="heading-anchor" href="#guide--debug-from-evidence-instead-of-guessing" aria-label="Link to this section">#</a></h3>
+<p><strong>Stable ID:</strong> <code>python-foundations-02</code></p>
+<p><strong>Estimated time:</strong> 150 minutes, split across sessions as needed.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<p>Foundation. Direct catalog prerequisites: <code>python-03</code>.</p>
+<p>You can assign values, inspect types, choose a branch, and recognize an exception from Days 1 to 3. This lab slows down the debugging process before loops and larger programs arrive. You do not need a debugger extension or any new package.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Classify syntax, runtime, and incorrect-result failures.</li>
+<li>Read an exception from its final line back to the failing statement.</li>
+<li>Reduce a failure to a small, repeatable input.</li>
+<li>Change one hypothesis at a time and preserve a regression case.</li>
+</ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Use the repository folder in VS Code. The rendered lesson page is a preview; edit the actual <a href="python-foundations-02.html#learner">learner script</a>. Copy it to an ignored folder under <code>.learning/</code> first if you want to keep your attempt across course updates. Use the interpreter from setup. These examples need only Python&#x27;s standard library, have no network calls, and use the same inputs on each run.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython python\professional\lessons\py_foundations_02_debug_evidence.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_foundations_02_debug_evidence.py</code></pre>
+<p>The terminal shows a small worked example and the remaining TODO count. TODOs are the starting exercise state. Write predictions before changing code. Run after one change, save the observed value or exception, and compare with the exercise&#x27;s acceptance check. A successful example does not mean the unfinished exercises are complete. Keep the separate <a href="python-foundations-02.html#solution-1">explanatory solutions</a> and <a href="python-foundations-02.html#solution-2">runnable solution</a> closed until you have an attempt and evidence, or deliberately ask for a worked comparison.</p>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<p>Debugging is an investigation into a disagreement between intended and observed behavior. Treat the program as evidence, not as a puzzle solved by random edits. A small program with one input and one clear failure is easier to reason about than a full application whose state you cannot reconstruct. First write what should happen and what actually happened. Then locate the earliest difference. Only then propose and test a change.</p>
+<ul>
+<li><strong>Symptom:</strong> the observable failure, such as a wrong total or an exception.</li>
+<li><strong>Hypothesis:</strong> a specific explanation that could be disproved by a check.</li>
+<li><strong>Reproduction:</strong> a repeatable input and command that produces the symptom.</li>
+<li><strong>Traceback:</strong> the execution history printed when an exception escapes.</li>
+<li><strong>Regression case:</strong> a saved example that catches a previously fixed defect.</li>
+<li><strong>Boundary case:</strong> an input exactly at a rule&#x27;s change point, such as zero.</li>
+</ul>
+<p>Syntax errors prevent Python from interpreting a statement. Runtime errors happen while a syntactically valid program executes, such as division by zero. Logic errors can produce the wrong answer while the process still exits normally. An exit code of zero is useful process evidence, but it cannot prove that your intended calculation was implemented. A comment claiming success is even weaker: it does not inspect any actual behavior.</p>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--example-a-preserve-the-exact-boundary">Example A: preserve the exact boundary<a class="heading-anchor" href="#guide--example-a-preserve-the-exact-boundary" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">quantity = 0
+if quantity &gt; 0:
+    status = &quot;ready&quot;
+else:
+    status = &quot;empty&quot;
+print(status)
+assert status == &quot;empty&quot;</code></pre>
+<p>The contract says an order is ready only when quantity is strictly positive. <code>&gt;</code> excludes zero. The colon begins a branch, and indentation marks its body. <code>else</code> covers every case that did not satisfy the first condition. Expected output is <code>empty</code>; the assertion checks that value. Replacing <code>&gt;</code> with <code>&gt;=</code> is a one-character change with a real policy effect. Testing only quantity three would miss it. Try quantities zero and one before calling the rule fixed.</p>
+<h5 id="guide--example-b-inspect-before-converting">Example B: inspect before converting<a class="heading-anchor" href="#guide--example-b-inspect-before-converting" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">raw_quantity = &quot; 12 &quot;
+print(repr(raw_quantity), type(raw_quantity).__name__)
+quantity = int(raw_quantity)
+print(quantity + 1)
+assert quantity == 12</code></pre>
+<p>Expected output first exposes surrounding spaces and type <code>str</code>, then 13. <code>repr</code> produces an inspectable representation; it can reveal whitespace that ordinary display hides. <code>int</code> accepts surrounding whitespace for this input. If the input becomes <code>&quot;twelve&quot;</code>, conversion raises <code>ValueError</code>. That symptom does not prove that integer conversion is broken. It shows that the supplied text does not match the accepted numeric representation. Decide whether to reject it, prompt again, or support another representation. Do not silently replace every invalid quantity with zero.</p>
+<h5 id="guide--read-a-traceback-deliberately">Read a traceback deliberately<a class="heading-anchor" href="#guide--read-a-traceback-deliberately" aria-label="Link to this section">#</a></h5>
+<p>Start with the final exception class and message. Find the named source line in your saved file. Inspect the values and types entering that line using a temporary, bounded print. In a longer traceback, move upward until you reach the call site that supplies those values. Do not copy a whole traceback into a bug report when it contains private paths or user data. Preserve the class, the smallest reproducing code, and harmless input that illustrates the failure.</p>
+<p>When trying a repair, keep the input fixed. If you change code and data at the same time, a successful run cannot tell you which change mattered. Test the original reproduction, then a normal case and a boundary case. Removing a failing statement, catching every exception, or editing an assertion to match the wrong answer can make a process appear healthy while preserving the bug.</p>
+<h5 id="guide--keep-an-investigation-log">Keep an investigation log<a class="heading-anchor" href="#guide--keep-an-investigation-log" aria-label="Link to this section">#</a></h5>
+<p>For each numbered task, write five short fields: expected behavior, observed behavior, hypothesis, smallest experiment, and result. If the result contradicts the hypothesis, keep it and choose a better explanation. A failed hypothesis is progress when it removes a possibility. Save the repaired example alongside its checks so a later refactor cannot quietly reintroduce the same defect.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<ol>
+<li><strong>Classify three failures.</strong> Create separate tiny scripts containing a missing closing parenthesis, <code>1 / 0</code>, and <code>total = 3 + 4</code> where the intended rule is multiplication. Classify each before running.</li>
+</ol>
+<p><strong>Verify:</strong> Your log records <code>SyntaxError</code>, <code>ZeroDivisionError</code>, and a normal run with wrong value 7 instead of 12, respectively.</p>
+<p><strong>Hint:</strong> A normal exit and a correct business result are separate claims.</p>
+<ol>
+<li><strong>Inspect the raw input.</strong> Inspect <code>raw = &quot; 08 &quot;</code> with <code>repr</code> and <code>type</code>, convert it deliberately, and calculate its successor. Then try <code>&quot;eight&quot;</code> in a separate run.</li>
+</ol>
+<p><strong>Verify:</strong> The valid parsed value is 8 and successor is 9; invalid text raises <code>ValueError</code> and is not converted to zero.</p>
+<p><strong>Hint:</strong> Read the exact characters before changing the parser.</p>
+<ol>
+<li><strong>Repair the boundary.</strong> A free-shipping rule says orders costing at least 20 qualify. The implementation uses <code>amount &gt; 20</code>. Predict values 19, 20, and 21, then repair one comparison.</li>
+</ol>
+<p><strong>Verify:</strong> A three-row observation table reports False, True, True after the change; the before table differs only at 20.</p>
+<p><strong>Hint:</strong> Translate at least into its mathematical boundary.</p>
+<ol>
+<li><strong>Read an exception precisely.</strong> Run <code>int(&quot;4.5&quot;)</code> in a fresh file. Capture the exception class and the failing line. State whether the input is invalid integer text or a missing package.</li>
+</ol>
+<p><strong>Verify:</strong> The recorded class is <code>ValueError</code>; no installation command is used, and the report identifies the text <code>&quot;4.5&quot;</code> as the failing input.</p>
+<p><strong>Hint:</strong> A decimal-looking string is not an integer representation for int.</p>
+<ol>
+<li><strong>Reduce a wrong result.</strong> A receipt with price 7, quantity 3, and a whole-order discount 2 uses <code>price * (quantity - discount)</code>. Strip unrelated output and repair only the arithmetic grouping.</li>
+</ol>
+<p><strong>Verify:</strong> The failing result is 7 and repaired result is 19. With discount zero, both formulas yield 21, showing why that case alone missed the bug.</p>
+<p><strong>Hint:</strong> State whether the discount changes the number of items or the order total.</p>
+<ol>
+<li><strong>Keep the failure visible.</strong> Write a try/except around <code>int(&quot;unknown&quot;)</code> that records the conversion failure by setting a status string. Avoid an empty except block and do not return a fake successful amount.</li>
+</ol>
+<p><strong>Verify:</strong> The terminal reports status <code>invalid quantity</code>; a valid <code>&quot;4&quot;</code> reports <code>accepted</code> and quantity 4.</p>
+<p><strong>Hint:</strong> Catch the specific conversion exception near the conversion.</p>
+<ol>
+<li><strong>Disprove a hypothesis.</strong> Investigate <code>&quot;2&quot; + &quot;3&quot;</code> yielding <code>&quot;23&quot;</code>. Test the hypothesis that Python added the numbers incorrectly by inspecting types and repeating the operation on integers.</li>
+</ol>
+<p><strong>Verify:</strong> Your log records string operands and integer result 5 in the control experiment, rejecting the arithmetic-bug hypothesis.</p>
+<p><strong>Hint:</strong> Change one variable in your experiment: the value types.</p>
+<ol>
+<li><strong>Write a regression note.</strong> Choose the shipping or receipt defect. Save a four-part note containing contract, smallest failing input, repaired observation, and one nearby boundary case. Add executable checks.</li>
+</ol>
+<p><strong>Verify:</strong> The note names concrete input 20 for shipping or (7, 3, 2) for the receipt, and assertions fail if you reintroduce the original operator.</p>
+<p><strong>Hint:</strong> Temporarily reverse the repair to see whether the check detects it, then restore it.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<p>Explain the difference between a symptom and an explanation without looking at the vocabulary list. Describe a defect that never raises an exception. Show why a boundary test can find something a normal test misses. Reproduce one fixed example in a new file without copying its final implementation.</p>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<p>If an edit appears to do nothing, verify saved file and executed path. If an except block produces a plausible number after invalid input, remove the fallback and inspect the conversion failure. If your test passes before the repair, ask whether its input reaches the failing branch. If every attempt changes many lines, return to the minimal reproduction and test one claim. Use a package installer only when the evidence identifies an import problem.</p>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue into loops and functions. Keep the investigation log for Day 10 tests and Day 11 debugging tools. Those tools make observations easier to collect; they do not replace a clear contract or a falsifiable hypothesis.</p>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning for python-foundations-02.
+Read python/professional/companion-guides/py_foundations_02_debug_evidence.md and python/professional/lessons/py_foundations_02_debug_evidence.py.
+Check my direct prerequisites: python-03.
+Keep solutions/ closed unless I request comparison after an attempt.
+Explain the mental model, ask me to predict one result, let me attempt it,
+give one hint at a time, inspect my evidence, and ask a retrieval question.
+Done when I can independently reproduce the numbered acceptance checks,
+explain a failure case, and transfer the policy to a changed input.</code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/lessons/py_foundations_02_debug_evidence.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/lessons/py_foundations_02_debug_evidence.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-foundations-02: Debug from Evidence Instead of Guessing.</span>
+<span> </span>
+<span>Read ../companion-guides/py_foundations_02_debug_evidence.md before attempting the exercises.</span>
+<span>The example runs. Complete the numbered experiments in your own working copy.</span>
+<span>Keep solutions separate until you have attempted and checked the contract.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span># Worked example: exact boundary and direct evidence.</span>
+<span>quantity = 0</span>
+<span>if quantity &gt; 0:  # noqa: SIM108 - explicit branches are the current learning objective.</span>
+<span>    status = &quot;ready&quot;</span>
+<span>else:</span>
+<span>    status = &quot;empty&quot;</span>
+<span>print(&quot;Worked status:&quot;, status)</span>
+<span>assert status == &quot;empty&quot;</span>
+<span>print(&quot;TODO: investigate the eight cases below in separate saved attempts&quot;)</span>
+<span> </span>
+<span># Place only one deliberate failing experiment in a script at a time.</span>
+<span># Preserve expected and observed values in comments or your investigation log.</span>
+<span> </span>
+<span># Exercise 1. Classify three failures</span>
+<span># Prompt: Create separate tiny scripts containing a missing closing parenthesis, `1 / 0`, and</span>
+<span># `total = 3 + 4` where the intended rule is multiplication. Classify each before running.</span>
+<span># Verify: Your log records `SyntaxError`, `ZeroDivisionError`, and a normal run with wrong</span>
+<span># value 7 instead of 12, respectively.</span>
+<span> </span>
+<span># Exercise 2. Inspect the raw input</span>
+<span># Prompt: Inspect `raw = &quot; 08 &quot;` with `repr` and `type`, convert it deliberately, and</span>
+<span># calculate its successor. Then try `&quot;eight&quot;` in a separate run.</span>
+<span># Verify: The valid parsed value is 8 and successor is 9; invalid text raises `ValueError` and</span>
+<span># is not converted to zero.</span>
+<span> </span>
+<span># Exercise 3. Repair the boundary</span>
+<span># Prompt: A free-shipping rule says orders costing at least 20 qualify. The implementation</span>
+<span># uses `amount &gt; 20`. Predict values 19, 20, and 21, then repair one comparison.</span>
+<span># Verify: A three-row observation table reports False, True, True after the change; the before</span>
+<span># table differs only at 20.</span>
+<span> </span>
+<span># Exercise 4. Read an exception precisely</span>
+<span># Prompt: Run `int(&quot;4.5&quot;)` in a fresh file. Capture the exception class and the failing line.</span>
+<span># State whether the input is invalid integer text or a missing package.</span>
+<span># Verify: The recorded class is `ValueError`; no installation command is used, and the report</span>
+<span># identifies the text `&quot;4.5&quot;` as the failing input.</span>
+<span> </span>
+<span># Exercise 5. Reduce a wrong result</span>
+<span># Prompt: A receipt with price 7, quantity 3, and a whole-order discount 2 uses `price *</span>
+<span># (quantity - discount)`. Strip unrelated output and repair only the arithmetic grouping.</span>
+<span># Verify: The failing result is 7 and repaired result is 19. With discount zero, both formulas</span>
+<span># yield 21, showing why that case alone missed the bug.</span>
+<span> </span>
+<span># Exercise 6. Keep the failure visible</span>
+<span># Prompt: Write a try/except around `int(&quot;unknown&quot;)` that records the conversion failure by</span>
+<span># setting a status string. Avoid an empty except block and do not return a fake successful</span>
+<span># amount.</span>
+<span># Verify: The terminal reports status `invalid quantity`; a valid `&quot;4&quot;` reports `accepted` and</span>
+<span># quantity 4.</span>
+<span> </span>
+<span># Exercise 7. Disprove a hypothesis</span>
+<span># Prompt: Investigate `&quot;2&quot; + &quot;3&quot;` yielding `&quot;23&quot;`. Test the hypothesis that Python added the</span>
+<span># numbers incorrectly by inspecting types and repeating the operation on integers.</span>
+<span># Verify: Your log records string operands and integer result 5 in the control experiment,</span>
+<span># rejecting the arithmetic-bug hypothesis.</span>
+<span> </span>
+<span># Exercise 8. Write a regression note</span>
+<span># Prompt: Choose the shipping or receipt defect. Save a four-part note containing contract,</span>
+<span># smallest failing input, repaired observation, and one nearby boundary case. Add executable</span>
+<span># checks.</span>
+<span># Verify: The note names concrete input 20 for shipping or (7, 3, 2) for the receipt, and</span>
+<span># assertions fail if you reintroduce the original operator.</span>
+<span> </span></code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_foundations_02_debug_evidence_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_foundations_02_debug_evidence_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--debug-from-evidence-instead-of-guessing-solution-reasoning">Debug from Evidence Instead of Guessing: solution reasoning<a class="heading-anchor" href="#solution-1--debug-from-evidence-instead-of-guessing-solution-reasoning" aria-label="Link to this section">#</a></h3>
+<p>Stable ID: <code>python-foundations-02</code>.</p>
+<p>Read the <a href="python-foundations-02.html#guide">guide</a> and attempt the <a href="python-foundations-02.html#learner">learner artifact</a> first. The <a href="python-foundations-02.html#solution-2">executable solution</a> is a comparison implementation. It does not certify your changed program merely because its own demonstration succeeds. Copy the acceptance cases into your attempt, then change one input without changing the intended policy.</p>
+<p>The reference keeps deliberate errors inside narrow demonstrations or describes them without crashing the entire module. Your original reproduction should still preserve the real failure. The central test is whether a check would detect the old defect. When a test passes both the broken and repaired program, it may document useful behavior but cannot prove that repair.</p>
+<pre><code class="language-python">amount = 20
+qualifies = amount &gt;= 20
+assert qualifies is True</code></pre>
+<p>This assertion checks the exact change point. An amount of 21 would pass both the original and repaired comparison and therefore provides weaker evidence.</p>
+<h4 id="solution-1--exercise-1-classify-three-failures">Exercise 1. Classify three failures<a class="heading-anchor" href="#solution-1--exercise-1-classify-three-failures" aria-label="Link to this section">#</a></h4>
+<p>A missing closing parenthesis is a syntax failure: Python cannot finish parsing the statement. Dividing one by zero is a runtime failure, because the expression is grammatical but the operation has no defined numeric result here. Adding three and four is valid and returns seven; it becomes a logic failure only when the independent requirement says to multiply. Preserve the requirement alongside the input so another reader can judge the result. The interpreter cannot infer the business rule from a syntactically valid formula.</p>
+<h4 id="solution-1--exercise-2-inspect-the-raw-input">Exercise 2. Inspect the raw input<a class="heading-anchor" href="#solution-1--exercise-2-inspect-the-raw-input" aria-label="Link to this section">#</a></h4>
+<p>Inspecting <code>repr(raw)</code> reveals the spaces and quotes; inspecting its type reveals str. Integer conversion returns 8, after which adding one gives 9. Leading zero and whitespace do not make this particular representation invalid. Replacing the word eight with zero would erase the distinction between an invalid record and a real quantity of zero. The reference catches ValueError only to demonstrate the rejected case, with a visible failure marker. It does not claim to support words as numeric input or silently expand the accepted language.</p>
+<h4 id="solution-1--exercise-3-repair-the-boundary">Exercise 3. Repair the boundary<a class="heading-anchor" href="#solution-1--exercise-3-repair-the-boundary" aria-label="Link to this section">#</a></h4>
+<p>The phrase at least includes equality, so the repaired predicate is amount greater than or equal to twenty. Testing 19, 20, and 21 distinguishes the nonqualifying side, the exact boundary, and the qualifying side. The original operator produces false at twenty and true only above it. The changed observation at exactly twenty is evidence for this repair. Retain that case even if a later application uses much larger typical order amounts. A threshold is a policy, so document the units and meaning of the number.</p>
+<h4 id="solution-1--exercise-4-read-an-exception-precisely">Exercise 4. Read an exception precisely<a class="heading-anchor" href="#solution-1--exercise-4-read-an-exception-precisely" aria-label="Link to this section">#</a></h4>
+<p><code>int(&quot;4.5&quot;)</code> raises ValueError because the text is not an integer literal accepted by that conversion. Nothing about the symptom suggests a missing package. Converting first to float and then int would truncate, which is a new policy with possible data loss. Rejecting the value is a valid policy when quantities must be exact integers. Record the exception class and the expression without unnecessary machine-specific path details. That gives another learner enough information to reproduce the failure in a fresh process.</p>
+<h4 id="solution-1--exercise-5-reduce-a-wrong-result">Exercise 5. Reduce a wrong result<a class="heading-anchor" href="#solution-1--exercise-5-reduce-a-wrong-result" aria-label="Link to this section">#</a></h4>
+<p>The wrong expression subtracts the order discount from the item count. With three items, a discount of two leaves one item, multiplied by seven for a result of seven. The intended calculation multiplies quantity and unit price first, then subtracts two once, producing nineteen. Both formulas yield twenty-one when the discount is zero. This is a useful example of an apparently sensible test that cannot expose the defect. Keep a nonzero-discount regression case and explain why that condition reaches the policy difference.</p>
+<h4 id="solution-1--exercise-6-keep-the-failure-visible">Exercise 6. Keep the failure visible<a class="heading-anchor" href="#solution-1--exercise-6-keep-the-failure-visible" aria-label="Link to this section">#</a></h4>
+<p>Use a narrow try around conversion and catch ValueError. Assign or print a clear invalid-quantity status on failure. On successful conversion, use the accepted status and keep the parsed numeric quantity. This separates failure reporting from numeric output. An empty except block leaves the caller unable to distinguish a failure from no work. Catching Exception would also hide unrelated programming mistakes, such as a misspelled name. The reference demonstrates only this conversion boundary and does not pretend to implement a complete interactive input workflow.</p>
+<h4 id="solution-1--exercise-7-disprove-a-hypothesis">Exercise 7. Disprove a hypothesis<a class="heading-anchor" href="#solution-1--exercise-7-disprove-a-hypothesis" aria-label="Link to this section">#</a></h4>
+<p>The control experiment compares the same visible digits as strings and as integers. The string operation joins characters and produces &quot;23&quot;, while integer addition gives five. The observations reject the hypothesis that Python&#x27;s integer addition is faulty. A better explanation is that the input values belong to a different type than expected. This style of experiment matters in larger programs too: inspect the boundary where data enters, then test a minimal operation with a controlled value before modifying downstream arithmetic or installing unrelated tools.</p>
+<h4 id="solution-1--exercise-8-write-a-regression-note">Exercise 8. Write a regression note<a class="heading-anchor" href="#solution-1--exercise-8-write-a-regression-note" aria-label="Link to this section">#</a></h4>
+<p>The regression note supplies the rule, input, incorrect observation, and corrected observation. For shipping, amount twenty is the essential sentinel. For the receipt, seven times three with discount two is the essential sentinel. Add a nearby normal case to avoid fixing the special input with a constant. Temporarily restoring the old operator should make the sentinel assertion fail. Restore the real repair afterward. That deliberate failure is evidence that the test is sensitive to the original defect, not just evidence that the repaired file can run.</p>
+<h4 id="solution-1--compare-and-transfer">Compare and transfer<a class="heading-anchor" href="#solution-1--compare-and-transfer" aria-label="Link to this section">#</a></h4>
+<p>Apply the same method to a temperature alarm that triggers below zero and to one that triggers at or below zero. Both may be legitimate contracts, but they need different expected results at zero. Explain which written requirement you implemented and show the case that would distinguish them. Debugging ends with evidence for a policy, not with the disappearance of red text.</p></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_foundations_02_debug_evidence_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_foundations_02_debug_evidence_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Small reproducible checks for python-foundations-02.&quot;&quot;&quot;</span>
+<span> </span>
+<span>raw = &quot; 08 &quot;</span>
+<span>assert repr(raw) == &quot;&#x27; 08 &#x27;&quot;</span>
+<span>quantity = int(raw)</span>
+<span>assert quantity == 8 and quantity + 1 == 9</span>
+<span>try:</span>
+<span>    int(&quot;eight&quot;)</span>
+<span>except ValueError:</span>
+<span>    invalid_word_seen = True</span>
+<span>else:</span>
+<span>    invalid_word_seen = False</span>
+<span>assert invalid_word_seen</span>
+<span>assert (19 &gt;= 20, 20 &gt;= 20, 21 &gt;= 20) == (False, True, True)</span>
+<span>try:</span>
+<span>    int(&quot;4.5&quot;)</span>
+<span>except ValueError:</span>
+<span>    invalid_integer_seen = True</span>
+<span>else:</span>
+<span>    invalid_integer_seen = False</span>
+<span>assert invalid_integer_seen</span>
+<span>price = 7</span>
+<span>quantity = 3</span>
+<span>discount = 2</span>
+<span>assert price * (quantity - discount) == 7</span>
+<span>assert price * quantity - discount == 19</span>
+<span>assert price * (quantity - 0) == price * quantity - 0 == 21</span>
+<span>try:</span>
+<span>    parsed_quantity = int(&quot;unknown&quot;)</span>
+<span>    conversion_status = &quot;accepted&quot;</span>
+<span>except ValueError:</span>
+<span>    conversion_status = &quot;invalid quantity&quot;</span>
+<span>assert conversion_status == &quot;invalid quantity&quot;</span>
+<span>try:</span>
+<span>    parsed_quantity = int(&quot;4&quot;)</span>
+<span>    conversion_status = &quot;accepted&quot;</span>
+<span>except ValueError:</span>
+<span>    conversion_status = &quot;invalid quantity&quot;</span>
+<span>assert conversion_status == &quot;accepted&quot; and parsed_quantity == 4</span>
+<span>assert &quot;2&quot; + &quot;3&quot; == &quot;23&quot;</span>
+<span>assert 2 + 3 == 5</span>
+<span>assert 20 &gt;= 20</span>
+<span>assert 7 * 3 - 2 == 19</span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    print(&quot;Boundary and regression checks passed; inspect your investigation log too.&quot;)</span>
+<span> </span></code></pre></div>
+      </section>
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning for python-foundations-02.
+Read python/professional/companion-guides/py_foundations_02_debug_evidence.md and python/professional/lessons/py_foundations_02_debug_evidence.py.
+Check my direct prerequisites: python-03.
+Keep solutions/ closed unless I request comparison after an attempt.
+Explain the mental model, ask me to predict one result, let me attempt it,
+give one hint at a time, inspect my evidence, and ask a retrieval question.
+Done when I can independently reproduce the numbered acceptance checks,
+explain a failure case, and transfer the policy to a changed input.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-03.html"><small>Previous lesson</small><strong>python-03</strong><span>Control Flow Exceptions</span></a>
+        <a class="nav-card next" href="python-04.html"><small>Next lesson</small><strong>python-04</strong><span>Loops Comprehensions Generators</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-foundations-02";
+    const LEARNER_PATH = "python/professional/lessons/py_foundations_02_debug_evidence.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

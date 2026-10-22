@@ -154,7 +154,7 @@
 <tr>
 <td>JupySQL, pandas, SQLAlchemy, and Psycopg wheels</td>
 <td>PostgreSQL notebook bridge</td>
-<td>Installed by Windows <code>Core</code> bootstrap or macOS/Linux advanced setup; queries stay local afterward</td>
+<td>Installed by the default Core setup on every OS; queries stay local afterward</td>
 </tr>
 <tr>
 <td>torchvision pretrained weights</td>
@@ -230,6 +230,13 @@ export TRANSFORMERS_OFFLINE=1</code></pre>
 <li>PyTorch: <code>.cache/torch</code> under the user home directory</li>
 </ul>
 <p>Locations can vary by operating system and environment configuration. Do not commit machine caches to the repository.</p>
+<p>Prepare the Seaborn datasets currently used by the historical lessons in a scratch notebook while connected:</p>
+<pre><code class="language-python">import seaborn as sns
+
+for name in (&quot;tips&quot;, &quot;titanic&quot;, &quot;penguins&quot;):
+    frame = sns.load_dataset(name)
+    print(name, frame.shape)</code></pre>
+<p>Expect three nonempty shapes. Then disconnect, restart the kernel, and repeat the cell. A successful connected load alone does not prove the second run avoids a network lookup. <code>HF_HUB_OFFLINE</code> only controls Hugging Face libraries; it does not disable Seaborn, pip, Docker pulls, or arbitrary HTTP requests. For downloaded model weights, exercise the exact model identifier and revision that the lesson uses, or choose its documented local fallback.</p>
 <h3 id="fully-disconnected-installation">Fully disconnected installation<a class="heading-anchor" href="#fully-disconnected-installation" aria-label="Link to this section">#</a></h3>
 <p>A completely offline fresh-machine installation requires a separately prepared bundle containing, at minimum:</p>
 <ul>
@@ -242,6 +249,25 @@ export TRANSFORMERS_OFFLINE=1</code></pre>
 <li>Checksums and licenses</li>
 </ul>
 <p>The Git repository alone is not that bundle. If you build one, generate it on a connected machine for a specific operating system, CPU architecture, and Python version, then install wheels with <code>--no-index --find-links</code>. Do not claim another platform is supported until that bundle is tested there.</p>
+<h3 id="optional-package-only-offline-bundle">Optional package-only offline bundle<a class="heading-anchor" href="#optional-package-only-offline-bundle" aria-label="Link to this section">#</a></h3>
+<p>On a connected machine matching the target OS, CPU, and Python version, create a course wheel and Core dependency wheels in an ignored folder:</p>
+<pre><code class="language-powershell"># Windows, after resolving $CoursePython as above
+&amp; $CoursePython -m pip wheel --wheel-dir artifacts\wheelhouse &quot;.[notebooks,data,quality,bridge,professional,sql-notebooks]&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+.venv/bin/python -m pip wheel --wheel-dir artifacts/wheelhouse &quot;.[notebooks,data,quality,bridge,professional,sql-notebooks]&quot;</code></pre>
+<p>On the offline machine, install Python first, copy the repository and matching wheelhouse, then create <code>.venv</code> and install the built course wheel:</p>
+<pre><code class="language-powershell"># Native Windows Python.org route
+py -3.12 -m venv .venv
+$CoursePython = (Resolve-Path .\.venv\Scripts\python.exe).Path
+&amp; $CoursePython -m pip install --no-index --find-links artifacts\wheelhouse &quot;ds60sqlpy[notebooks,data,quality,bridge,professional,sql-notebooks]&quot;
+&amp; $CoursePython -m ipykernel install --user --name ds60sqlpy --display-name &quot;Python (ds60sqlpy)&quot;
+&amp; $CoursePython scripts\course.py doctor --no-database</code></pre>
+<pre><code class="language-bash"># macOS/Linux; use python3.11 if that is the bundle&#x27;s interpreter
+python3.12 -m venv .venv
+.venv/bin/python -m pip install --no-index --find-links artifacts/wheelhouse &quot;ds60sqlpy[notebooks,data,quality,bridge,professional,sql-notebooks]&quot;
+.venv/bin/python -m ipykernel install --user --name ds60sqlpy --display-name &quot;Python (ds60sqlpy)&quot;
+.venv/bin/python scripts/course.py doctor --no-database</code></pre>
+<p>Installing the wheel avoids an offline source build. Keep the repository and installed package versions in sync. This is a package-only bundle, separate from a standalone application: it omits Python, PostgreSQL, VS Code, extensions, datasets, and models. Default setup scripts perform a connected installation; they are not offline bundle installers. Verify the intended workflow on the actual target OS before distributing it. See <a href="https://pip.pypa.io/en/stable/cli/pip_wheel/">pip wheel</a> and <a href="https://pip.pypa.io/en/stable/user_guide/#installing-from-local-packages">installing local packages</a>.</p>
 <h3 id="adding-a-lesson">Adding a lesson<a class="heading-anchor" href="#adding-a-lesson" aria-label="Link to this section">#</a></h3>
 <p>New lesson code must not make a silent network call. Record its network classification in the catalog-builder metadata, regenerate <code>curriculum/catalog.json</code>, and choose one:</p>
 <ol>

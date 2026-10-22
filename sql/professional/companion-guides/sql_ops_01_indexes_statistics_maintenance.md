@@ -218,6 +218,10 @@ transactional lab.
 `pg_stat_statements` requires approved extension/preload configuration and its
 query text may contain sensitive literals. The lesson checks only installation
 status. A production review needs access control and normalized query IDs.
+A limited role may not see `shared_preload_libraries` in `pg_settings`.
+The executable solution reports `preload_visibility_unavailable` when that
+configuration evidence is hidden; a missing visible setting does not prove
+that preload is absent. It never grants global setting-reading privileges.
 
 ### DBA-only statement-statistics boundary
 

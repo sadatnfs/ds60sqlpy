@@ -1,4 +1,4 @@
-# Python and Data Science — 60-Lesson Plan
+# Python and Data Science: foundations, 60 core lessons, and professional study
 
 Overview  
 - Goal: Progress from first Python programs to substantial data-science and
@@ -10,6 +10,13 @@ Overview
 Start with the [track guide](ds-60day/README.md). The machine-readable paths,
 prerequisites, dependency groups, and network notes live in
 [`curriculum/catalog.json`](../curriculum/catalog.json).
+
+Four foundation checkpoints now sit after Days 1, 3, 8, and 10. They teach
+program tracing, evidence-led debugging, explicit record-cleaning policies,
+and a complete first data investigation. Follow their prerequisite links in
+the catalog before the next numbered lesson. These checkpoints provide time
+to consolidate ideas without assuming that a beginner can absorb every new
+topic in one sitting.
 
 ---
 
@@ -217,25 +224,21 @@ Day 60 — Capstone completion & presentation: finalize model, prepare report & 
 
 ---
 
-## Professional extension (named modules after Day 60)
+## Professional extension with stable named modules
 
-The maintained course now continues with ten executable modules. They retain
-stable descriptive IDs so the original Days 1–60 never need renumbering:
+The maintained course continues with thirteen professional modules. They
+retain stable descriptive IDs so the original numbered sequence stays intact.
+Coverage includes packages, concurrency, reliable clients, typed interfaces,
+columnar analytics, generative tests, experiments, model delivery, service
+hardening, and performance measurement. Further labs examine exact currency
+and time boundaries, leakage-resistant group/time evaluation, and restartable
+single-writer file pipelines with injected failures.
 
-- `python-pro-01`: package engineering and a local release workflow
-- `python-svc-01`: reliable HTTP clients and service boundaries
-- `python-pro-02`: concurrency and parallelism decisions
-- `python-data-01`: Arrow, Parquet, and embedded DuckDB analytics
-- `python-test-01`: test architecture, doubles, and generative testing
-- `python-lang-01`: advanced typing and the Python data model
-- `python-stats-01`: resampling, experiments, and causal boundaries
-- `python-ml-01`: reproducible data and model delivery
-- `python-svc-02`: service hardening and observability
-- `python-perf-01`: measurement-first performance engineering
-
-Follow each module's declared prerequisites rather than assuming this list must
-be linear. See [professional paths](../docs/professional-paths.md) for direct
-learner, guide, and solution links.
+Follow each module's declared prerequisites. Evaluation and local reliability
+work do not require completing deep learning or NLP first. See the
+[Python module route](professional/README.md) and
+[professional paths](../docs/professional-paths.md) for learner, guide, and
+solution links; use the generated catalog for the complete current inventory.
 
 ---
 

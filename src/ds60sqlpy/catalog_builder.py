@@ -528,6 +528,271 @@ PROFESSIONAL_LESSON_SPECS: tuple[dict[str, Any], ...] = (
 )
 
 
+# New learning gaps have stable IDs; historical days keep their identity.
+PROFESSIONAL_LESSON_SPECS += (
+    {
+        "id": "python-foundations-01",
+        "title": "Read a Program, Trace Its State, and Predict Its Output",
+        "level": "foundation",
+        "prerequisites": ["python-01"],
+        "estimated_minutes": 120,
+        "track": "python",
+        "day": -10,
+        "phase": "Python foundations and confidence",
+        "dependency_group": "core",
+        "network": "offline",
+        "lesson_path": "python/professional/lessons/py_foundations_01_read_trace_state.py",
+        "guide_path": "python/professional/companion-guides/py_foundations_01_read_trace_state.md",
+        "solution_paths": [
+            "python/professional/solutions/py_foundations_01_read_trace_state_solutions.md",
+            "python/professional/solutions/py_foundations_01_read_trace_state_solution.py",
+        ],
+    },
+    {
+        "id": "python-foundations-02",
+        "title": "Debug from Evidence Instead of Guessing",
+        "level": "foundation",
+        "prerequisites": ["python-03"],
+        "estimated_minutes": 150,
+        "track": "python",
+        "day": -9,
+        "phase": "Python foundations and confidence",
+        "dependency_group": "core",
+        "network": "offline",
+        "lesson_path": "python/professional/lessons/py_foundations_02_debug_evidence.py",
+        "guide_path": "python/professional/companion-guides/py_foundations_02_debug_evidence.md",
+        "solution_paths": [
+            "python/professional/solutions/py_foundations_02_debug_evidence_solutions.md",
+            "python/professional/solutions/py_foundations_02_debug_evidence_solution.py",
+        ],
+    },
+    {
+        "id": "python-foundations-03",
+        "title": "Turn Messy Text into Trustworthy Records",
+        "level": "foundation",
+        "prerequisites": ["python-08"],
+        "estimated_minutes": 180,
+        "track": "python",
+        "day": -8,
+        "phase": "Python foundations and confidence",
+        "dependency_group": "core",
+        "network": "offline",
+        "lesson_path": "python/professional/lessons/py_foundations_03_clean_records.py",
+        "guide_path": "python/professional/companion-guides/py_foundations_03_clean_records.md",
+        "solution_paths": [
+            "python/professional/solutions/py_foundations_03_clean_records_solutions.md",
+            "python/professional/solutions/py_foundations_03_clean_records_solution.py",
+        ],
+    },
+    {
+        "id": "python-foundations-04",
+        "title": "Build Your First Auditable Data Investigation",
+        "level": "foundation",
+        "prerequisites": ["python-foundations-03", "python-10"],
+        "estimated_minutes": 210,
+        "track": "python",
+        "day": -7,
+        "phase": "Python foundations and confidence",
+        "dependency_group": "core",
+        "network": "offline",
+        "lesson_path": "python/professional/lessons/py_foundations_04_first_investigation.py",
+        "guide_path": (
+            "python/professional/companion-guides/py_foundations_04_first_investigation.md"
+        ),
+        "solution_paths": [
+            "python/professional/solutions/py_foundations_04_first_investigation_solutions.md",
+            "python/professional/solutions/py_foundations_04_first_investigation_solution.py",
+        ],
+    },
+    {
+        "id": "python-data-02",
+        "title": "Exact Values, Unicode Identity, and Calendar Boundaries",
+        "level": "advanced",
+        "prerequisites": ["python-21", "python-29"],
+        "estimated_minutes": 240,
+        "track": "python",
+        "day": 71,
+        "phase": "Professional data engineering",
+        "dependency_group": "core",
+        "network": "offline",
+        "lesson_path": "python/professional/lessons/py_data_02_exact_values_time_text.py",
+        "guide_path": "python/professional/companion-guides/py_data_02_exact_values_time_text.md",
+        "solution_paths": [
+            "python/professional/solutions/py_data_02_exact_values_time_text_solutions.md",
+            "python/professional/solutions/py_data_02_exact_values_time_text_solution.py",
+        ],
+    },
+    {
+        "id": "python-ml-02",
+        "title": "Leakage-Resistant Evaluation Across Groups and Time",
+        "level": "advanced",
+        "prerequisites": ["python-35", "python-data-02"],
+        "estimated_minutes": 270,
+        "track": "python",
+        "day": 72,
+        "phase": "Professional model evaluation",
+        "dependency_group": "core",
+        "network": "offline",
+        "lesson_path": "python/professional/lessons/py_ml_02_group_time_evaluation.py",
+        "guide_path": "python/professional/companion-guides/py_ml_02_group_time_evaluation.md",
+        "solution_paths": [
+            "python/professional/solutions/py_ml_02_group_time_evaluation_solutions.md",
+            "python/professional/solutions/py_ml_02_group_time_evaluation_solution.py",
+        ],
+    },
+    {
+        "id": "python-pro-03",
+        "title": "Restartable File Pipelines and Honest Durability Guarantees",
+        "level": "advanced",
+        "prerequisites": ["python-23", "python-10"],
+        "estimated_minutes": 270,
+        "track": "python",
+        "day": 73,
+        "phase": "Professional Python engineering",
+        "dependency_group": "core",
+        "network": "offline",
+        "lesson_path": "python/professional/lessons/py_pro_03_restartable_file_pipeline.py",
+        "guide_path": "python/professional/companion-guides/py_pro_03_restartable_file_pipeline.md",
+        "solution_paths": [
+            "python/professional/solutions/py_pro_03_restartable_file_pipeline_solutions.md",
+            "python/professional/solutions/py_pro_03_restartable_file_pipeline_solution.py",
+        ],
+    },
+    {
+        "id": "sql-start-01",
+        "track": "sql",
+        "day": -4,
+        "title": "Reading Tables and Result Grain",
+        "level": "foundation",
+        "phase": "Beginner practice",
+        "estimated_minutes": 90,
+        "prerequisites": [],
+        "lesson_path": "sql/professional/lessons/sql_start_01_tables_and_grain.sql",
+        "guide_path": "sql/professional/companion-guides/sql_start_01_tables_and_grain.md",
+        "solution_paths": [
+            "sql/professional/solutions/sql_start_01_tables_and_grain_solutions.md",
+            "sql/professional/solutions/sql_start_01_tables_and_grain_solutions.sql",
+        ],
+        "dependency_group": "postgres",
+        "network": "offline",
+    },
+    {
+        "id": "sql-start-02",
+        "track": "sql",
+        "day": -3,
+        "title": "Values NULL and Deterministic Order",
+        "level": "foundation",
+        "phase": "Beginner practice",
+        "estimated_minutes": 90,
+        "prerequisites": ["sql-start-01"],
+        "lesson_path": "sql/professional/lessons/sql_start_02_values_null_order.sql",
+        "guide_path": "sql/professional/companion-guides/sql_start_02_values_null_order.md",
+        "solution_paths": [
+            "sql/professional/solutions/sql_start_02_values_null_order_solutions.md",
+            "sql/professional/solutions/sql_start_02_values_null_order_solutions.sql",
+        ],
+        "dependency_group": "postgres",
+        "network": "offline",
+    },
+    {
+        "id": "sql-start-03",
+        "track": "sql",
+        "day": -2,
+        "title": "Query Construction and Debugging",
+        "level": "foundation",
+        "phase": "Beginner practice",
+        "estimated_minutes": 90,
+        "prerequisites": ["sql-start-02"],
+        "lesson_path": "sql/professional/lessons/sql_start_03_query_debugging.sql",
+        "guide_path": "sql/professional/companion-guides/sql_start_03_query_debugging.md",
+        "solution_paths": [
+            "sql/professional/solutions/sql_start_03_query_debugging_solutions.md",
+            "sql/professional/solutions/sql_start_03_query_debugging_solutions.sql",
+        ],
+        "dependency_group": "postgres",
+        "network": "offline",
+    },
+    {
+        "id": "sql-quality-01",
+        "track": "sql",
+        "day": 71,
+        "title": "Bag Reconciliation and Join Fanout",
+        "level": "advanced",
+        "phase": "Advanced correctness labs",
+        "estimated_minutes": 180,
+        "prerequisites": ["sql-06", "sql-23", "sql-test-01"],
+        "lesson_path": "sql/professional/lessons/sql_quality_01_bags_and_fanout.sql",
+        "guide_path": "sql/professional/companion-guides/sql_quality_01_bags_and_fanout.md",
+        "solution_paths": [
+            "sql/professional/solutions/sql_quality_01_bags_and_fanout_solutions.md",
+            "sql/professional/solutions/sql_quality_01_bags_and_fanout_solutions.sql",
+        ],
+        "dependency_group": "postgres",
+        "network": "offline",
+    },
+    {
+        "id": "sql-scale-01",
+        "track": "sql",
+        "day": 72,
+        "title": "Cursor Pagination and Bounded Batches",
+        "level": "advanced",
+        "phase": "Advanced correctness labs",
+        "estimated_minutes": 180,
+        "prerequisites": ["sql-35", "sql-38", "sql-test-01"],
+        "lesson_path": "sql/professional/lessons/sql_scale_01_cursors_and_batches.sql",
+        "guide_path": "sql/professional/companion-guides/sql_scale_01_cursors_and_batches.md",
+        "solution_paths": [
+            "sql/professional/solutions/sql_scale_01_cursors_and_batches_solutions.md",
+            "sql/professional/solutions/sql_scale_01_cursors_and_batches_solutions.sql",
+        ],
+        "dependency_group": "postgres",
+        "network": "offline",
+    },
+    {
+        "id": "sql-concurrency-01",
+        "track": "sql",
+        "day": 73,
+        "title": "Isolation Traces and Optimistic Concurrency",
+        "level": "advanced",
+        "phase": "Advanced correctness labs",
+        "estimated_minutes": 180,
+        "prerequisites": ["sql-39", "sql-test-01"],
+        "lesson_path": "sql/professional/lessons/sql_concurrency_01_isolation_and_versions.sql",
+        "guide_path": (
+            "sql/professional/companion-guides/sql_concurrency_01_isolation_and_versions.md"
+        ),
+        "solution_paths": [
+            "sql/professional/solutions/sql_concurrency_01_isolation_and_versions_solutions.md",
+            "sql/professional/solutions/sql_concurrency_01_isolation_and_versions_solutions.sql",
+        ],
+        "dependency_group": "postgres",
+        "network": "offline",
+    },
+)
+
+
+PROFESSIONAL_LESSON_SPECS += (
+    {
+        "id": "bridge-capstone-01",
+        "track": "bridge",
+        "day": 13,
+        "title": "Evidence-Driven Data Product and Incident Review",
+        "level": "advanced",
+        "phase": "Integrated evidence capstone",
+        "estimated_minutes": 240,
+        "prerequisites": ["bridge-08", "sql-quality-01", "python-pro-03"],
+        "lesson_path": "bridge/professional/lessons/bridge_capstone_01_evidence_review.py",
+        "guide_path": "bridge/professional/companion-guides/bridge_capstone_01_evidence_review.md",
+        "solution_paths": [
+            "bridge/professional/solutions/bridge_capstone_01_evidence_review_solutions.md",
+            "bridge/professional/solutions/bridge_capstone_01_evidence_review_solution.py",
+        ],
+        "dependency_group": "core",
+        "network": "offline",
+    },
+)
+
+
 def _title(slug: str) -> str:
     replacements = {
         "api": "API",
@@ -645,7 +910,18 @@ def _python_lessons(root: Path) -> list[dict[str, Any]]:
                 "level": level,
                 "phase": phase,
                 "estimated_minutes": minutes,
-                "prerequisites": [] if day == 1 else [f"python-{day - 1:02d}"],
+                "prerequisites": (
+                    []
+                    if day == 1
+                    else [
+                        {
+                            2: "python-foundations-01",
+                            4: "python-foundations-02",
+                            9: "python-foundations-03",
+                            11: "python-foundations-04",
+                        }.get(day, f"python-{day - 1:02d}")
+                    ]
+                ),
                 "lesson_path": notebook.relative_to(root).as_posix(),
                 "guide_path": guide.relative_to(root).as_posix(),
                 "solution_paths": solution_paths,
@@ -687,7 +963,7 @@ def _sql_lessons(root: Path) -> list[dict[str, Any]]:
                 "phase": phase,
                 "estimated_minutes": minutes,
                 "prerequisites": (
-                    []
+                    ["sql-start-03"]
                     if day == 1
                     else ["sql-found-01"]
                     if day == 16

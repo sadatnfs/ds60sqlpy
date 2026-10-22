@@ -17,8 +17,8 @@ ownership.
 
 ## 1. Install the notebook database profile
 
-The Windows discovery bootstrap's default `Core` profile installs the required
-packages. On macOS/Linux, use the aggregate advanced setup.
+The default Core setup installs the required packages on all three operating
+systems. The large advanced profile is not required for this lesson.
 
 Windows PowerShell:
 
@@ -40,7 +40,7 @@ PowerShell window.
 macOS/Linux:
 
 ```bash
-bash scripts/setup.sh --advanced
+bash scripts/setup.sh
 ```
 
 For a smaller targeted installation after normal setup:
@@ -98,6 +98,12 @@ For native PostgreSQL, use the local role and authentication method from the
 OS setup guide. If a password must appear in a URL, percent-encode reserved
 characters and keep the value out of shell history and repository files; a
 local password file or operating-system credential store is preferable.
+
+For a native macOS/Linux username-and-socket route, this dedicated JupySQL
+notebook needs `postgresql:///advanced_sql_training` rather than the literal
+database name accepted by the `psql`-based guided notebooks. See
+[Local PostgreSQL](postgresql.md) for this distinction and socket-location
+troubleshooting.
 
 Closing the terminal clears these process-scoped settings. A personal `.env`
 file is ignored by Git, but the notebook deliberately does not load one

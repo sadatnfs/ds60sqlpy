@@ -373,7 +373,7 @@ and links rendered from catalog artifacts; do not replace it with a scan of
 arbitrary untracked files. Keep completion on the dashboard in static mode and
 show the per-lesson checkbox only when the private launcher token is present.
 
-Do not create 154 hand-maintained SQL notebooks. For a cataloged SQL lesson,
+Do not create hand-maintained SQL notebooks for every lesson. For a cataloged SQL lesson,
 the private launcher derives an ignored working notebook and editable SQL copy
 under `.learning/sql/<lesson-id>/` through
 `src/ds60sqlpy/sql_notebook.py`. The generator must preserve existing learner
@@ -420,3 +420,11 @@ python scripts/build_lesson_readers.py --check
 - Unexpected machine-generated artifacts and secrets are absent.
 
 Run [repository validation](validation.md) before handoff.
+
+## New-lesson practice evidence
+
+Do not rewrite historical enrichment counts. Register genuinely new lesson IDs
+in `curriculum/practice_expansion.json` with baseline zero and target six; the
+audit merges this disjoint registry with the immutable historical baseline.
+The new guides still need distinct inspectable exercises, and the depth and
+shared guide-contract checks both apply.
