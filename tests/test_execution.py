@@ -341,17 +341,35 @@ def test_separate_process_saves_preserve_every_changed_version(course: Catalog) 
         "base=Catalog.load(Path(sys.argv[1])).get('python-01'); "
         "PadRunner(Catalog(Path(sys.argv[2]),(base,))).save('python-01','python',sys.argv[3])"
     )
-    processes = [
-        subprocess.Popen(
-            [sys.executable, "-c", program, str(root), str(course.repo_root), f"version {n}"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        for n in range(4)
-    ]
-    for process in processes:
-        _, error = process.communicate(timeout=15)
-        assert process.returncode == 0, error.decode()
+    processes: list[subprocess.Popen[bytes]] = []
+    try:
+        for n in range(4):
+            processes.append(
+                subprocess.Popen(
+                    [
+                        sys.executable,
+                        "-c",
+                        program,
+                        str(root),
+                        str(course.repo_root),
+                        f"version {n}",
+                    ],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+            )
+        for process in processes:
+            _, error = process.communicate(timeout=15)
+            assert process.returncode == 0, error.decode()
+    finally:
+        for process in processes:
+            if process.poll() is None:
+                process.terminate()
+                try:
+                    process.communicate(timeout=10)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.communicate(timeout=10)
     versions = {runner.read("python-01", "python")}
     versions.update(
         runner.read_history("python-01", "python", item["id"])

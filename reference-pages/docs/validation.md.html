@@ -125,8 +125,8 @@
 </tr></thead><tbody>
 <tr>
 <td>Full local suite</td>
-<td>885 passed and 10 subtests passed, with no skips</td>
-<td>Includes live PostgreSQL tests and portable PowerShell checks on macOS; this is not native Windows execution.</td>
+<td>890 passed and 10 subtests passed, with no skips, in 50.40 seconds using four grouped workers</td>
+<td>Earlier 885-test sequential run took 144.23 seconds on this Mac. Includes live PostgreSQL and portable PowerShell; this is not native Windows execution.</td>
 </tr>
 <tr>
 <td>Catalog and structure</td>
@@ -281,7 +281,7 @@ python scripts/build_lesson_readers.py --check</code></pre>
 <pre><code class="language-text">uv lock --check</code></pre>
 <p>Maintainers with <code>uv</code> can reproduce the CI core environment with:</p>
 <pre><code class="language-text">uv sync --frozen --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks
-uv run --no-sync pytest</code></pre>
+uv run --no-sync python -m pytest -n 4 --dist loadgroup</code></pre>
 <h3 id="maintainer-checks">Maintainer checks<a class="heading-anchor" href="#maintainer-checks" aria-label="Link to this section">#</a></h3>
 <p>Core setup installs the quality tools used by continuous integration:</p>
 <pre><code class="language-text">python scripts/build_catalog.py
@@ -292,9 +292,18 @@ python scripts/audit_lesson_depth.py
 python -m pytest tests/test_course_guide.py tests/test_lesson_depth_audit.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py
 python -m ruff check src scripts tests bridge python/professional
 python -m mypy
-python -m pytest
+python -m pytest -n 4 --dist loadgroup
 python scripts/course.py validate
 python scripts/scan_secrets.py --history</code></pre>
+<p>The canonical full-suite command uses the quality profile&#x27;s <code>pytest-xdist</code> with a bounded default of four workers:</p>
+<pre><code class="language-text">python -m pytest -n 4 --dist loadgroup</code></pre>
+<p><strong>Keep <code>--dist loadgroup</code> whenever you enable parallel workers.</strong> Tests marked with the same <code>xdist_group</code> share one worker and execute serially within that group. This protects the opt-in live PostgreSQL tests that share disposable database state. Consumers of <code>live_database</code> and <code>live_psql</code>, including transitive consumers, belong to the <code>shared-postgres</code> group. Keep that shared resource in one group when adding tests. The project also defaults to <code>--dist=loadgroup</code>, so plain <code>-n 4</code> inherits this protection. Overriding it with another distribution strategy is rejected before enabled shared database fixtures run. Existing live-test opt-ins and local disposable-database restrictions still apply. Five scheduler regressions verify shared and transitive fixture grouping, independent workers, and rejected unsafe policies.</p>
+<p>The local full run passed 890 tests and 10 subtests in 50.40 seconds with four workers and every live test enabled. The preceding 885-test sequential run took 144.23 seconds on this Mac. This is a local timing comparison; hardware, available resources and selected tests affect the result.</p>
+<p>Make provides the same command, a configurable worker count, and an explicit serial path for debugging:</p>
+<pre><code class="language-text">make test
+make test TEST_WORKERS=2
+make test-serial</code></pre>
+<p><code>make check</code> runs structural validation and then this grouped test target. <code>make testserial</code> is an alias for <code>make test-serial</code>. Without Make, the serial equivalent is <code>python -m pytest -n 0</code>. Keep focused test selections for quick iteration before running the full suite. A speed improvement is not assumed; worker startup, workload, and available resources affect measured runtime.</p>
 <p>Review the regenerated catalog diff. CI runs these core checks on Python 3.12 for Windows, macOS, and Linux and on Python 3.11 for Linux, then executes the full SQL sequence separately against PostgreSQL 17. Each matrix leg sets <code>UV_PYTHON</code> to the requested version and asserts <code>sys.version_info[:2]</code> after sync, so the learner-default <code>.python-version</code> cannot silently collapse the matrix onto Python 3.12. The Windows core runner also registers <code>Python (ds60sqlpy)</code> and runs <code>start_ds60.ps1 -DiagnosticsOnly -NonInteractive -SkipPostgreSql</code>, exercising the native startup under Windows PowerShell 5.1 and the both-environment-layout readiness path without opening a browser.</p>
 <p>The focused learner-entry tests cover different boundaries:</p>
 <ul>

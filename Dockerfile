@@ -32,7 +32,8 @@ ENV PATH="/opt/course/.venv/bin:$PATH"
 RUN python -m pip install --no-cache-dir uv==0.11.6
 COPY pyproject.toml uv.lock README.md ./
 COPY src/ds60sqlpy/docker_profiles.py /tmp/ds60-docker-profiles.py
-RUN --mount=type=cache,target=/root/.cache/uv \
+ARG DS60_UV_CACHE_ID=ds60sqlpy-uv-v1
+RUN --mount=type=cache,id=${DS60_UV_CACHE_ID},target=/root/.cache/uv \
     python /tmp/ds60-docker-profiles.py --profiles "$DS60_DOCKER_PROFILES"
 COPY . .
 RUN uv pip install --offline --python /opt/course/.venv/bin/python \

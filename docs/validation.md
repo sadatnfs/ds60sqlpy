@@ -8,7 +8,7 @@ record and from configured hosted CI jobs. The source checkout started at
 
 | Surface | Observed result | Boundary |
 | --- | --- | --- |
-| Full local suite | 885 passed and 10 subtests passed, with no skips | Includes live PostgreSQL tests and portable PowerShell checks on macOS; this is not native Windows execution. |
+| Full local suite | 890 passed and 10 subtests passed, with no skips, in 50.40 seconds using four grouped workers | Earlier 885-test sequential run took 144.23 seconds on this Mac. Includes live PostgreSQL and portable PowerShell; this is not native Windows execution. |
 | Catalog and structure | 168 lessons; structural validation 26 pass, 0 warnings, 0 failures | 77 Python, 78 SQL, and 13 bridge; historical IDs and baseline file preserved. |
 | Practice and lesson depth | 168/168 pass each gate | Structural/count gates supplement the exercised behavior and human content review. |
 | Generated delivery | Course dashboard, 168 readers, 56 references regenerated and drift-checked; 226 served pages and 12,626 local links/fragments checked | Zero broken links, missing/extra readers, or duplicate IDs; the read-only audit created no learner-state folder. |
@@ -126,7 +126,7 @@ Maintainers with `uv` can reproduce the CI core environment with:
 
 ```text
 uv sync --frozen --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks
-uv run --no-sync pytest
+uv run --no-sync python -m pytest -n 4 --dist loadgroup
 ```
 
 ## Maintainer checks
@@ -142,10 +142,49 @@ python scripts/audit_lesson_depth.py
 python -m pytest tests/test_course_guide.py tests/test_lesson_depth_audit.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py
 python -m ruff check src scripts tests bridge python/professional
 python -m mypy
-python -m pytest
+python -m pytest -n 4 --dist loadgroup
 python scripts/course.py validate
 python scripts/scan_secrets.py --history
 ```
+
+The canonical full-suite command uses the quality profile's `pytest-xdist`
+with a bounded default of four workers:
+
+```text
+python -m pytest -n 4 --dist loadgroup
+```
+
+**Keep `--dist loadgroup` whenever you enable parallel workers.** Tests marked
+with the same `xdist_group` share one worker and execute serially within that
+group. This protects the opt-in live PostgreSQL tests that share disposable
+database state. Consumers of `live_database` and `live_psql`, including
+transitive consumers, belong to the `shared-postgres` group. Keep that shared
+resource in one group when adding tests. The project also defaults to
+`--dist=loadgroup`, so plain `-n 4` inherits this protection. Overriding it with
+another distribution strategy is rejected before enabled shared database
+fixtures run. Existing live-test opt-ins and local disposable-database
+restrictions still apply. Five scheduler regressions verify shared and
+transitive fixture grouping, independent workers, and rejected unsafe policies.
+
+The local full run passed 890 tests and 10 subtests in 50.40 seconds with four
+workers and every live test enabled. The preceding 885-test sequential run
+took 144.23 seconds on this Mac. This is a local timing comparison; hardware,
+available resources and selected tests affect the result.
+
+Make provides the same command, a configurable worker count, and an explicit
+serial path for debugging:
+
+```text
+make test
+make test TEST_WORKERS=2
+make test-serial
+```
+
+`make check` runs structural validation and then this grouped test target.
+`make testserial` is an alias for `make test-serial`. Without Make, the serial
+equivalent is `python -m pytest -n 0`. Keep focused test selections for quick
+iteration before running the full suite. A speed improvement is not assumed;
+worker startup, workload, and available resources affect measured runtime.
 
 Review the regenerated catalog diff. CI runs these core checks on Python 3.12
 for Windows, macOS, and Linux and on Python 3.11 for Linux, then executes the

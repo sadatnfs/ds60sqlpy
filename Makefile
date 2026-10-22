@@ -1,10 +1,12 @@
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
+TEST_WORKERS ?= 4
 
-.PHONY: help setup generate check lab mcp app windows-starter docker docker-stop docker-status
+.PHONY: help setup generate check test test-serial testserial lab mcp app windows-starter docker docker-stop docker-status
 help:
 	@echo "setup: install learner environment; lab: open coding lab; app: build native executable"
 	@echo "generate: refresh catalog/readers/reports; check: validate; docker: build and start lab"
 	@echo "windows-starter: package the complete double-click Windows starter ZIP"
+	@echo "test: grouped parallel suite (TEST_WORKERS=4); test-serial: serial debugging"
 
 setup:
 	bash scripts/setup.sh
@@ -18,7 +20,15 @@ generate:
 
 check:
 	$(PYTHON) scripts/course.py validate
-	$(PYTHON) -m pytest
+	$(MAKE) test
+
+test:
+	$(PYTHON) -m pytest -n $(TEST_WORKERS) --dist loadgroup
+
+test-serial:
+	$(PYTHON) -m pytest -n 0
+
+testserial: test-serial
 
 lab:
 	$(PYTHON) scripts/learning_lab.py

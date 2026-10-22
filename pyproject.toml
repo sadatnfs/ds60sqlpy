@@ -112,6 +112,7 @@ quality = [
   "pre-commit>=4.0",
   "pytest>=8.0",
   "pytest-cov>=5.0",
+  "pytest-xdist>=3.6,<4",
   "ruff>=0.9",
 ]
 mcp = ["mcp>=2,<3"]
@@ -129,7 +130,7 @@ ds60sqlpy = ["assets/*.html"]
 where = ["src"]
 
 [tool.pytest.ini_options]
-addopts = "-ra --strict-config --strict-markers"
+addopts = "-ra --strict-config --strict-markers --dist=loadgroup"
 pythonpath = ["."]
 testpaths = [
   "tests",
