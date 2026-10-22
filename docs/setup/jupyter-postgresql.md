@@ -85,12 +85,12 @@ For the repository's disposable Compose database:
 
 ```powershell
 # Windows PowerShell
-$env:DS60_DATABASE_URL = "postgresql://ds60:ds60@localhost:5432/advanced_sql_training"
+$env:DS60_DATABASE_URL = "postgresql://admin:admin@localhost:55432/advanced_sql_training"
 ```
 
 ```bash
 # macOS/Linux
-export DS60_DATABASE_URL="postgresql://ds60:ds60@localhost:5432/advanced_sql_training"
+export DS60_DATABASE_URL="postgresql://admin:admin@localhost:55432/advanced_sql_training"
 ```
 
 Those `ds60` credentials belong only to the disposable local Compose service.

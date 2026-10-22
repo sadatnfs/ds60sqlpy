@@ -35,6 +35,8 @@ BUNDLE_PATHS = (
     "compose.yaml",
     "START_DS60.cmd",
     "START_LEARNING_LAB.cmd",
+    "START_DOCKER_LAB.cmd",
+    "START_DOCKER_LAB.command",
     ".vscode",
     "Makefile",
     "Dockerfile",
@@ -66,8 +68,10 @@ def prepare_workspace(source: Path, destination: Path) -> Path:
         origin = source / name
         if origin.is_dir() and destination.is_relative_to(origin):
             raise ValueError("Choose a workspace outside the course's copied content directories.")
-    if destination.is_dir() and any(destination.iterdir()):
-        raise ValueError("Choose an empty directory or an existing DS60 course workspace.")
+    if destination.is_dir():
+        remaining = list(destination.iterdir())
+        if any(path.name != ".learning" or not path.is_dir() for path in remaining):
+            raise ValueError("Choose an empty directory or an existing DS60 course workspace.")
     destination.mkdir(parents=True, exist_ok=True)
     for name in BUNDLE_PATHS:
         origin, target = source / name, destination / name

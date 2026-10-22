@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Docker learning lab, from a new computer to your first lesson · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Docker learning lab, from a new computer to your first lesson</h1>
+      <p class="source-path">Generated from <code>docs/docker-beginners.md</code></p>
+    </header>
+    <article class="document"><h2 id="docker-learning-lab-from-a-new-computer-to-your-first-lesson">Docker learning lab, from a new computer to your first lesson<a class="heading-anchor" href="#docker-learning-lab-from-a-new-computer-to-your-first-lesson" aria-label="Link to this section">#</a></h2>
+<p>This guide starts before the terminal commands. You will install a local container engine, download the course, start its Python and PostgreSQL backends, and use the lessons in your browser. You can follow this route without installing a native PostgreSQL server, Jupyter, or the course&#x27;s Python packages on your computer.</p>
+<p>The included PowerShell and Bash launchers open the browser and need no host Python installation. The first build downloads images and packages; ordinary later starts reuse them. Codex is an optional tutor.</p>
+<h3 id="1-know-the-few-names-you-will-see">1. Know the few names you will see<a class="heading-anchor" href="#1-know-the-few-names-you-will-see" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Name</th>
+<th>Meaning in this course</th>
+</tr></thead><tbody>
+<tr>
+<td>Host</td>
+<td>Your Windows, Mac, or Linux computer. Its ordinary folders can hold your saved work.</td>
+</tr>
+<tr>
+<td>Container engine</td>
+<td>The local service that runs the course&#x27;s Linux containers. Start it before starting the course.</td>
+</tr>
+<tr>
+<td>Image</td>
+<td>The installed recipe containing the course runtime and packages. Building an image does not publish it.</td>
+</tr>
+<tr>
+<td>Container</td>
+<td>A running instance of an image. You can replace it while retaining separately stored learning data.</td>
+</tr>
+<tr>
+<td>Compose</td>
+<td>The <code>docker compose</code> command that starts the app and PostgreSQL together from <code>compose.yaml</code>.</td>
+</tr>
+<tr>
+<td>Bind mount</td>
+<td>A real folder on your host exposed inside a container. The course uses it for saved learning work.</td>
+</tr>
+<tr>
+<td>Database volume</td>
+<td>Docker-managed storage for PostgreSQL. It is separate from the host folder holding your progress.</td>
+</tr>
+<tr>
+<td>Port</td>
+<td>A numbered local connection endpoint. The browser and database use different ports.</td>
+</tr>
+</tbody></table></div>
+<p>Commands in a code block are what you type. Do not type the surrounding backticks, the word <code>powershell</code> or <code>bash</code>, or a terminal prompt such as <code>$</code>. Press Enter after a command and wait for it to finish. An error is a reason to inspect that step before continuing, not a reason to delete saved data.</p>
+<h3 id="2-install-one-local-container-engine">2. Install one local container engine<a class="heading-anchor" href="#2-install-one-local-container-engine" aria-label="Link to this section">#</a></h3>
+<p>Choose the instructions for your operating system. You need a working <strong>Docker CLI</strong>, <strong>Docker API</strong>, and <strong>Compose v2</strong>. Docker Desktop bundles these components. Docker Engine users install the Compose plugin separately. <a href="https://docs.docker.com/compose/install/">Docker&#x27;s Compose installation guide</a> explains that distinction.</p>
+<p>Rancher Desktop with <strong>dockerd (moby)</strong> is also suitable. Its Moby engine exposes the Docker API; its containerd choice uses a different command-line workflow. The repository&#x27;s actual macOS container verification used Rancher Desktop with Moby. Other operating-system installation steps below follow vendor documentation and include checks you can perform locally. <a href="https://docs.rancherdesktop.io/ui/preferences/container-engine/general/">Rancher&#x27;s engine documentation</a> explains the engine choices.</p>
+<h4 id="windows-install-or-update-wsl-2-first">Windows: install or update WSL 2 first<a class="heading-anchor" href="#windows-install-or-update-wsl-2-first" aria-label="Link to this section">#</a></h4>
+<p>WSL means Windows Subsystem for Linux. WSL 2 supplies the Linux environment used by the desktop container engine. You can keep using Windows PowerShell and a normal Windows folder for this course; you do not have to learn an Ubuntu terminal first.</p>
+<ol>
+<li>Check the current <a href="https://docs.docker.com/desktop/setup/install/windows-install/">Docker Desktop Windows requirements</a> before downloading. Use a currently supported Windows version with hardware virtualization available. On an organization-managed machine, use its approved installation route if administrator access is controlled.</li>
+<li>Open the Start menu, type <strong>PowerShell</strong>, right-click it, and choose <strong>Run as administrator</strong> for this installation step.</li>
+<li>If WSL is not installed, run:</li>
+</ol>
+<pre><code class="language-powershell">   wsl --install</code></pre>
+<ol>
+<li>Restart Windows if requested. If an Ubuntu window opens, complete its first-run username/password prompts. That Linux password is separate from your Windows password and the course database password. Password characters may not appear while you type.</li>
+<li>In PowerShell, update and inspect WSL:</li>
+</ol>
+<pre><code class="language-powershell">   wsl --update
+   wsl --version
+   wsl -l -v</code></pre>
+<p>A listed Linux distribution should show <code>2</code> in the <code>VERSION</code> column. If an existing distribution shows <code>1</code>, use its exact displayed name in <code>wsl --set-version NAME 2</code>, replacing <code>NAME</code>. Do not convert or remove a distribution you use for other work without preserving that work.</p>
+<p>Microsoft documents the installation and reboot sequence in <a href="https://learn.microsoft.com/en-us/windows/wsl/install">Install WSL</a> and the inspection/update commands in <a href="https://learn.microsoft.com/en-us/windows/wsl/reference">Basic WSL commands</a>. If WSL reports that virtualization is unavailable, follow that installation page&#x27;s troubleshooting guidance for your hardware rather than repeatedly reinstalling the course.</p>
+<p>Then install <strong>one</strong> desktop engine:</p>
+<ul>
+<li><strong>Docker Desktop:</strong> download its Windows installer from the official page, run it, and start Docker Desktop from the Start menu. Use Linux containers and its WSL 2 engine. If the WSL option is shown in settings, enable it and apply the change. Docker documents this in its <a href="https://docs.docker.com/desktop/features/wsl/">WSL 2 backend guide</a>.</li>
+<li><strong>Rancher Desktop:</strong> use its <a href="https://docs.rancherdesktop.io/getting-started/installation/">official installer</a>, start the application, and select <strong>dockerd (moby)</strong> under Container Engine. Kubernetes is not required for this course.</li>
+</ul>
+<p>Wait for the engine to report that it is ready. Installing an application and having its engine running are different steps. Choose one Windows workflow:</p>
+<ul>
+<li><strong>Recommended for a Linux-based course workspace:</strong> open Ubuntu from the Start menu, enable its engine integration, and keep the repository in your Linux home folder. Follow the <a href="#9-recommended-windows-wsl-2-terminal-workflow">WSL terminal steps</a> below and use the Bash command blocks.</li>
+<li><strong>Native Windows alternative:</strong> open a new ordinary PowerShell window and keep the checkout in a normal Windows folder. Use the PowerShell blocks and <code>START_DOCKER_LAB.cmd</code>. Docker Desktop still uses its WSL 2 engine; it does not require a particular user Linux distribution for this route.</li>
+</ul>
+<p>Keep one choice for a session so paths and saved work stay easy to locate.</p>
+<h4 id="macos-install-and-start-the-desktop-engine">macOS: install and start the desktop engine<a class="heading-anchor" href="#macos-install-and-start-the-desktop-engine" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Open the Apple menu and <strong>About This Mac</strong>. Note whether it says an Apple chip such as M1/M2/M3 or an Intel processor.</li>
+<li>Download the matching Mac installer from <a href="https://docs.docker.com/desktop/setup/install/mac-install/">Docker Desktop for Mac</a> or <a href="https://docs.rancherdesktop.io/getting-started/installation/">Rancher Desktop</a>. Check the vendor&#x27;s current supported macOS versions.</li>
+<li>For a Docker <code>.dmg</code>, open it, drag Docker to Applications, then open Docker from Applications and finish the displayed setup. For Rancher Desktop, follow its installer and choose <strong>dockerd (moby)</strong>.</li>
+<li>Leave the application running and wait for its engine to become ready.</li>
+<li>Open <strong>Terminal</strong> from Applications, then Utilities. A new Terminal window picks up command-line tools installed by the desktop application.</li>
+</ol>
+<p>Choose the native installer for your Mac architecture. The container engine handles Linux containers; you do not install a separate Linux desktop to use this browser lab.</p>
+<h4 id="linux-install-engine-and-the-compose-plugin">Linux: install Engine and the Compose plugin<a class="heading-anchor" href="#linux-install-engine-and-the-compose-plugin" aria-label="Link to this section">#</a></h4>
+<p>Open Terminal from your desktop&#x27;s application menu. Follow the <a href="https://docs.docker.com/engine/install/">Docker Engine installer for your distribution</a>. Choose the instructions matching your actual distribution, which you can inspect with:</p>
+<pre><code class="language-bash">cat /etc/os-release</code></pre>
+<p>For Ubuntu, the <a href="https://docs.docker.com/engine/install/ubuntu/">official Ubuntu procedure</a> first configures Docker&#x27;s package repository, then installs the Engine, CLI, Buildx, and <strong>docker-compose-plugin</strong> packages. Follow both parts; an install command copied without the repository setup can select a different package or fail. Other distributions have their own package names and repository steps.</p>
+<p>Complete Docker&#x27;s <a href="https://docs.docker.com/engine/install/linux-postinstall/">post-installation access setup</a> so your normal user can run <code>docker info</code>. If your administrator chooses the Docker group route, group membership takes effect after logging out and back in. Docker group membership gives administrative control of the local engine. The course launcher runs as your ordinary user and expects its Docker access to be configured; it does not elevate itself with <code>sudo</code>.</p>
+<p>A distribution-supported Docker Desktop or Rancher Desktop installation is an alternative. Start the chosen engine and use its Docker-compatible Moby configuration. Keep the same local engine/context for the course&#x27;s later starts so you see the same images and database volumes.</p>
+<h4 id="verify-the-installation-before-downloading-course-packages">Verify the installation before downloading course packages<a class="heading-anchor" href="#verify-the-installation-before-downloading-course-packages" aria-label="Link to this section">#</a></h4>
+<p>Run these in PowerShell on Windows, or Terminal on macOS/Linux:</p>
+<pre><code class="language-text">docker --version
+docker compose version
+docker info</code></pre>
+<p>The first two print version information. <code>docker info</code> must also show server information without a connection or permission error. A working CLI version alone does not prove an engine is running. If more than one engine or remote context is configured, inspect:</p>
+<pre><code class="language-text">docker context show
+docker context ls</code></pre>
+<p>Use your intended <strong>local</strong> desktop/Engine context. This course mounts local folders; a remote Docker daemon does not see files on your computer in the same way. Docker explains host-path behavior in its <a href="https://docs.docker.com/engine/storage/bind-mounts/">bind-mount documentation</a>.</p>
+<h3 id="3-download-and-open-the-course-folder">3. Download and open the course folder<a class="heading-anchor" href="#3-download-and-open-the-course-folder" aria-label="Link to this section">#</a></h3>
+<p>You do not need Git for a first visit:</p>
+<ol>
+<li>Open the <a href="https://github.com/sadatnfs/ds60sqlpy">repository page</a> in your browser.</li>
+<li>Select <strong>Code</strong>, then <strong>Download ZIP</strong>. If access requires signing in, use the account that has repository access.</li>
+<li>Extract the ZIP completely. On Windows use <strong>Extract All</strong>; on a Mac open the ZIP; on Linux use the archive manager&#x27;s Extract action.</li>
+<li>Move the extracted folder to a normal user-owned local location, such as Documents. You may rename it <code>ds60sqlpy</code> to match the examples below.</li>
+<li>Open that folder. You should see <code>README.md</code>, <code>compose.yaml</code>, <code>Dockerfile</code>, and <code>scripts</code>. Do not run from a compressed-folder preview.</li>
+</ol>
+<p>If you already use Git, the equivalent is:</p>
+<pre><code class="language-text">git clone https://github.com/sadatnfs/ds60sqlpy.git</code></pre>
+<p>The <strong>repository root</strong> means the folder containing those files. Your terminal must point there before running course commands.</p>
+<p>Windows PowerShell example, for a checkout stored in the Windows filesystem:</p>
+<pre><code class="language-powershell">Set-Location &quot;C:\Users\Ada\Documents\ds60sqlpy&quot;
+Test-Path .\compose.yaml</code></pre>
+<p>Replace the example folder with your actual extracted path, keeping quotes around a path containing spaces. The second command should print <code>True</code>. You can copy the folder path from File Explorer&#x27;s address bar.</p>
+<p>macOS/Linux example, when you chose the Documents location above:</p>
+<pre><code class="language-bash">cd &quot;$HOME/Documents/ds60sqlpy&quot;
+pwd
+ls compose.yaml</code></pre>
+<p><code>pwd</code> prints the current folder and <code>ls</code> should find <code>compose.yaml</code>. If your folder is elsewhere, change the quoted path. These commands do not create or change a database.</p>
+<h3 id="4-start-the-lab-and-open-the-browser">4. Start the lab and open the browser<a class="heading-anchor" href="#4-start-the-lab-and-open-the-browser" aria-label="Link to this section">#</a></h3>
+<p>The repository includes a PowerShell launcher for Windows and a Bash launcher for macOS, Linux, and WSL. They use the installed Docker CLI and open the host browser after the app is ready. You do not need to create a native <code>.venv</code> or install Python to use these launchers.</p>
+<p>With the engine running and the repository extracted:</p>
+<ul>
+<li><strong>Windows PowerShell workflow:</strong> double-click <code>START_DOCKER_LAB.cmd</code> in File Explorer. For a Linux-local WSL checkout use the Bash command below.</li>
+<li><strong>macOS:</strong> double-click <code>START_DOCKER_LAB.command</code>. If you prefer Terminal, use the command below.</li>
+<li><strong>Linux:</strong> use the terminal command below from the repository root.</li>
+</ul>
+<p>Windows PowerShell alternative:</p>
+<pre><code class="language-powershell">powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 start</code></pre>
+<p>macOS/Linux alternative:</p>
+<pre><code class="language-bash">bash scripts/docker_lab.sh start</code></pre>
+<p>The PowerShell execution-policy option applies only to this script process; it does not change your machine&#x27;s permanent policy. If Finder does not launch a downloaded <code>.command</code> file, the Bash command above works from Terminal without making the script executable. An optional Python interface also exists at <code>scripts/docker_lab.py</code> for people who already use supported host Python.</p>
+<p>On a first start, expect an announced connected build, package/image download output, database startup, and an HTTP-readiness check. Wait for the printed ready address. The launcher opens the browser <strong>on your computer</strong> after the app responds. The normal address is <a href="http://127.0.0.1:8765/learn">http://127.0.0.1:8765/learn</a>. If the browser does not open, copy that exact printed URL into its address bar. Use <code>127.0.0.1</code>, rather than substituting a different host label, because the app validates its local Host header.</p>
+<p>No website account is needed. The Docker database&#x27;s course login is <code>admin</code> with password <code>admin</code>; the app supplies it internally. This is a limited local database role. The separate bootstrap administrator is not the pad&#x27;s login. The browser does not ask you to type a database password.</p>
+<p>The first build needs internet access and can take several minutes. Subsequent starts reuse the selected local image. The launcher does not upload an image or your learning work.</p>
+<h4 id="direct-compose-alternative-without-host-python">Direct Compose alternative, without host Python<a class="heading-anchor" href="#direct-compose-alternative-without-host-python" aria-label="Link to this section">#</a></h4>
+<p>The wrappers normally prepare the host directory and user identity for you. For a manual Compose start, do that explicitly in the same terminal first. These directory commands preserve an existing <code>.learning</code> folder.</p>
+<pre><code class="language-powershell"># Windows PowerShell, repository root
+New-Item -ItemType Directory -Force .\.learning | Out-Null
+$env:DS60_LEARNING_DIR = (Resolve-Path .\.learning).Path
+$env:DS60_UID = &quot;1000&quot;
+$env:DS60_GID = &quot;1000&quot;
+docker compose --project-name ds60-learning --profile lab up --build --detach</code></pre>
+<pre><code class="language-bash"># macOS/Linux/WSL, repository root
+mkdir -p .learning
+export DS60_LEARNING_DIR=&quot;$(pwd -P)/.learning&quot;
+export DS60_UID=&quot;$(id -u)&quot;
+export DS60_GID=&quot;$(id -g)&quot;
+docker compose --project-name ds60-learning --profile lab up --build --detach</code></pre>
+<p>On macOS/Linux this runs the app with your own user/group identifiers, so the host files stay writable to you. Repeat the environment assignments in a new terminal. The long-syntax bind mount deliberately refuses a missing host path; it does not silently create one owned by the wrong user. These manual identity examples assume an ordinary local engine. For a rootless engine, use the included launcher: it detects that mode and supplies the mapped identity instead of asking you to guess ownership settings.</p>
+<p>Then open the exact browser URL manually. On later starts with images already present:</p>
+<pre><code class="language-text">docker compose --project-name ds60-learning --profile lab up --detach --no-build --pull never</code></pre>
+<p>The direct command does not open a host browser automatically. Use the included PowerShell/Bash launcher for readiness checking and automatic opening.</p>
+<h3 id="5-get-one-python-result-and-one-sql-result">5. Get one Python result and one SQL result<a class="heading-anchor" href="#5-get-one-python-result-and-one-sql-result" aria-label="Link to this section">#</a></h3>
+<p>In the browser&#x27;s left sidebar, enter <code>python-01</code> under <strong>Or open a stable lesson ID</strong>, then choose <strong>Open lesson</strong>. The guide appears beside the coding pad.</p>
+<ol>
+<li>Keep <strong>Backend</strong> set to <strong>Python</strong>.</li>
+<li>In <strong>Your code</strong>, enter:</li>
+</ol>
+<pre><code class="language-python">   print(2 + 3)</code></pre>
+<ol>
+<li>Choose <strong>Run code</strong>. The output should contain <code>5</code> and a successful exit.</li>
+<li>Choose <strong>Save pad</strong>. In <strong>Work the idea through</strong>, write a short prediction or observation and choose <strong>Save evidence</strong>.</li>
+</ol>
+<p>Now open <code>sql-start-01</code> in the same sidebar. With <strong>PostgreSQL</strong> selected as Backend, enter:</p>
+<pre><code class="language-sql">SELECT current_database() AS database_name, 2 + 3 AS first_result;</code></pre>
+<p>Choose <strong>Run code</strong>. Expect one row containing <code>advanced_sql_training</code> and <code>5</code>. This first query needs no seed or reset. Choose <strong>Save pad</strong>.</p>
+<p>For the full beginner lesson, choose <strong>Load lesson starter</strong> and run its complete temporary-table fixture in one submission. It ends in <code>ROLLBACK</code>. Later historical lessons that need seeded tables use <strong>Prepare the disposable SQL training data</strong>, then <strong>Reset and verify training schema</strong>. Read the notice and type <code>RESET TRAINING</code> only when you want to replace the course-owned training schema. That reset preserves saved pads and progress; it does replace SQL training data. Use only the disposable course database.</p>
+<p>Choose a learning goal and <strong>Build my route</strong> when you are ready for the ordered lessons. Completion is your confirmed evidence, not an automatic award for opening the page or running these two checks.</p>
+<h3 id="6-find-the-host-files-that-preserve-your-work">6. Find the host files that preserve your work<a class="heading-anchor" href="#6-find-the-host-files-that-preserve-your-work" aria-label="Link to this section">#</a></h3>
+<p>The launcher&#x27;s default learning folder is <strong><code>.learning</code> inside your course folder</strong>. It is bind-mounted as <code>/workspace/.learning</code> inside the app container. The container path and host path name the same saved files. A bind mount persists because the files live in your own folder, independently of a particular container.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Host path under <code>.learning/</code></th>
+<th>Saved work</th>
+</tr></thead><tbody>
+<tr>
+<td><code>progress.json</code></td>
+<td>Recorded lesson completion</td>
+</tr>
+<tr>
+<td><code>coaching.json</code></td>
+<td>Your predictions, attempts, comparisons, and explanations</td>
+</tr>
+<tr>
+<td><code>pads/</code></td>
+<td>Saved Python/SQL pads and earlier saved versions</td>
+</tr>
+<tr>
+<td><code>home/</code></td>
+<td>Container user settings and caches kept outside the replaceable image</td>
+</tr>
+<tr>
+<td><code>cache/matplotlib/</code></td>
+<td>Reusable platform-specific plotting/font metadata</td>
+</tr>
+<tr>
+<td>Other files you deliberately save there</td>
+<td>Your own exported practice artifacts</td>
+</tr>
+</tbody></table></div>
+<p>On macOS/Linux, a name beginning with a dot is usually hidden in the file manager. In Terminal, <code>ls -a</code> shows it. On Windows you can paste the complete <code>.learning</code> folder path into File Explorer&#x27;s address bar. Keep the course folder or your chosen data folder when replacing containers.</p>
+<p>The database uses a separate Compose volume named from the project, normally <code>ds60-learning_postgres-data</code>. Its tables are not stored in progress.json. Backing up <code>.learning</code> protects learning work; a PostgreSQL dump protects personal database tables. Neither backup replaces the other.</p>
+<p>Only saved work under the bind-mounted <code>.learning</code> tree has this host-folder persistence contract. Code can write other files inside its container, so put practice exports you want to keep under <code>.learning/</code>. Printed output and rendered figures are observations; save the code/evidence needed to reproduce them. Some files appear only after the corresponding save or completion operation. After working through a lesson&#x27;s exercises, save prediction, attempt, and explanation evidence before checking the confirmation and choosing <strong>Record demonstrated lesson</strong>. The two environment checks above do not by themselves establish lesson mastery.</p>
+<h4 id="keep-the-same-learning-folder-across-a-future-checkout">Keep the same learning folder across a future checkout<a class="heading-anchor" href="#keep-the-same-learning-folder-across-a-future-checkout" aria-label="Link to this section">#</a></h4>
+<p>You can choose an absolute folder outside the checkout. For example:</p>
+<pre><code class="language-powershell"># Windows PowerShell; choose a real, user-owned path
+powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 start -DataDir &quot;C:\Users\Ada\Documents\DS60 learning data&quot;</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+bash scripts/docker_lab.sh start --data-dir &quot;$HOME/Documents/DS60 learning data&quot;</code></pre>
+<p>Use that same folder on future starts, including from a new checkout: <code>--data-dir</code> in Bash/Python or <code>-DataDir</code> in PowerShell. The image supplies course code. Keep the same project (<code>--project</code> or <code>-Project</code>) when you also want the same database volume. A new project name creates a different database-volume namespace.</p>
+<h3 id="7-stop-resume-and-rebuild-without-losing-progress">7. Stop, resume, and rebuild without losing progress<a class="heading-anchor" href="#7-stop-resume-and-rebuild-without-losing-progress" aria-label="Link to this section">#</a></h3>
+<p>From the same repository folder and using the same data/project choices:</p>
+<pre><code class="language-powershell"># Windows PowerShell
+powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 stop
+powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 start</code></pre>
+<pre><code class="language-bash"># macOS/Linux
+bash scripts/docker_lab.sh stop
+bash scripts/docker_lab.sh start</code></pre>
+<p>Closing a browser tab does not stop the containers. The launcher&#x27;s stop command stops services and preserves your host learning folder and database volume. <code>start</code> reuses them. A readiness failure is not a reason to erase either store.</p>
+<p>For a deliberate connected image rebuild after updating the course source:</p>
+<pre><code class="language-powershell">powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 start -Build</code></pre>
+<pre><code class="language-bash">bash scripts/docker_lab.sh start --build</code></pre>
+<p>Rebuilding the image changes the installed runtime/course payload. It does not replace the host <code>.learning</code> folder. Recreating or removing only containers also keeps that folder. Keep the same data path and project when restarting. Avoid volume-deletion and system-prune commands as routine troubleshooting: those operate on database storage or other projects, unlike an ordinary stop.</p>
+<p>To inspect without changing course state:</p>
+<pre><code class="language-powershell">powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 doctor
+powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 status</code></pre>
+<pre><code class="language-bash">bash scripts/docker_lab.sh doctor
+bash scripts/docker_lab.sh status</code></pre>
+<h3 id="8-back-up-and-restore-the-learning-folder">8. Back up and restore the learning folder<a class="heading-anchor" href="#8-back-up-and-restore-the-learning-folder" aria-label="Link to this section">#</a></h3>
+<p>Save the current pad and evidence in the browser, then stop the course. Copy the <strong>whole host learning folder</strong> to a new backup location, including hidden files and saved history. Use a new destination; do not overwrite another backup.</p>
+<p>Windows PowerShell example, from the repository root:</p>
+<pre><code class="language-powershell">$LearningSource = (Resolve-Path .\.learning).Path
+$LearningBackup = Join-Path $env:USERPROFILE &quot;Documents\DS60-learning-backup-20261022&quot;
+if (Test-Path $LearningBackup) { throw &quot;Choose a new backup folder name.&quot; }
+Copy-Item -LiteralPath $LearningSource -Destination $LearningBackup -Recurse -Force -ErrorAction Stop</code></pre>
+<p>macOS/Linux example:</p>
+<pre><code class="language-bash">LearningBackup=&quot;$HOME/DS60-learning-backup-20261022&quot;
+if [ -e &quot;$LearningBackup&quot; ]; then
+  printf &#x27;%s\n&#x27; &quot;Choose a new backup folder name.&quot;
+else
+  cp -R .learning &quot;$LearningBackup&quot;
+fi</code></pre>
+<p>The POSIX example checks that the destination is unused before copying, so a previous backup is not merged or replaced. The date is just an example label. If you chose a custom data folder, copy it instead of the default repository <code>.learning</code>.</p>
+<p>To use a backup in a new container, keep the backup untouched and make a new working copy in an unused folder. Start the launcher with <code>--data-dir</code> pointing to that copy. Open a saved lesson and inspect its code and evidence before recording more progress. Do not merge two active <code>.learning</code> trees or edit JSON state while the app is writing it.</p>
+<p>For example, restore by making an unused working copy and mounting that copy:</p>
+<pre><code class="language-powershell"># Windows PowerShell, repository root
+$LearningBackup = Join-Path $env:USERPROFILE &quot;Documents\DS60-learning-backup-20261022&quot;
+$LearningRestored = Join-Path $env:USERPROFILE &quot;Documents\DS60-restored-learning&quot;
+if (-not (Test-Path $LearningBackup -PathType Container)) { throw &quot;Backup folder not found.&quot; }
+if (Test-Path $LearningRestored) { throw &quot;Choose a new working folder name.&quot; }
+Copy-Item -LiteralPath $LearningBackup -Destination $LearningRestored -Recurse -Force -ErrorAction Stop
+powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 start -DataDir $LearningRestored</code></pre>
+<pre><code class="language-bash"># macOS/Linux/WSL, repository root
+LearningBackup=&quot;$HOME/DS60-learning-backup-20261022&quot;
+LearningRestored=&quot;$HOME/DS60-restored-learning&quot;
+if [ -d &quot;$LearningBackup&quot; ] &amp;&amp; [ ! -e &quot;$LearningRestored&quot; ]; then
+  cp -R &quot;$LearningBackup&quot; &quot;$LearningRestored&quot; &amp;&amp;
+    bash scripts/docker_lab.sh start --data-dir &quot;$LearningRestored&quot;
+else
+  printf &#x27;%s\n&#x27; &quot;Check the backup path and choose an unused working folder.&quot;
+fi</code></pre>
+<p>The Bash launcher runs only if the copy succeeds. Use your actual backup path; WSL users may choose a folder under their Linux home instead of Documents. The original backup stays untouched. On future starts choose that same restored working folder, rather than silently switching back to the default.</p>
+<p>An older course version may have stored work only in the Docker-managed <code>learner-work</code> volume. First inspect <code>docker compose ls</code> to find its original project. The following example uses the old default <code>ds60sqlpy</code>; replace it with your actual old project name. Stop its app, then export into a <strong>new, unused</strong> destination under <code>work/</code>:</p>
+<pre><code class="language-text">docker compose --project-name ds60sqlpy stop lab
+docker compose --project-name ds60sqlpy cp lab:/workspace/.learning work/legacy-learning-export-20261022</code></pre>
+<p>Check that the destination does not exist before copying, and choose a fresh name when needed. This works with a stopped container that still exists. Inspect the exported progress, coaching, and pads before making a separate working copy for <code>--data-dir</code> on Bash or <code>-DataDir</code> on PowerShell. Existing host <code>.learning</code> data wins: do not merge the export into it or overwrite it. Keep the old volume until you have verified the copied files. The detailed database migration in <a href="offline-app.md.html#bootstrap-role-volumes-side-by-side-migration">the application guide</a> is separate from moving learner notes and progress.</p>
+<h3 id="9-recommended-windows-wsl-2-terminal-workflow">9. Recommended Windows WSL 2 terminal workflow<a class="heading-anchor" href="#9-recommended-windows-wsl-2-terminal-workflow" aria-label="Link to this section">#</a></h3>
+<p>For Windows learners working in Ubuntu, the recommended layout is a Linux-local checkout and learning folder. The PowerShell alternative also uses WSL 2 through the engine, but keeps its files in the Windows filesystem. To use the Linux-terminal workflow:</p>
+<ol>
+<li>In PowerShell, confirm the Ubuntu distribution is version 2 with <code>wsl -l -v</code>.</li>
+<li>In Docker Desktop, enable that distribution under WSL Integration. Rancher Desktop users follow its distribution integration settings.</li>
+<li>Open Ubuntu from the Start menu. <code>pwd</code> now reports a Linux path, not a Windows PowerShell location.</li>
+<li>Keep the Linux checkout and its host learning folder in the Linux home filesystem, for example <code>/home/ada/ds60sqlpy</code>. To copy a downloaded/extracted course folder without installing Git, run the following in Ubuntu:</li>
+</ol>
+<pre><code class="language-bash">   cd &quot;$HOME&quot;
+   explorer.exe .</code></pre>
+<p>The File Explorer window now shows your Linux home. Copy the extracted course folder into it, using an unused folder name. If you name it <code>ds60sqlpy</code>, return to Ubuntu and run:</p>
+<pre><code class="language-bash">   cd &quot;$HOME/ds60sqlpy&quot;
+   ls compose.yaml
+   bash scripts/docker_lab.sh start</code></pre>
+<p>No Windows <code>.venv</code> or host Python is needed. Use this Linux checkout for later Bash starts, and back up its <code>.learning</code> folder from the same place.</p>
+<ol>
+<li>Open <code>http://127.0.0.1:8765/learn</code> in the Windows browser if automatic browser opening is unavailable. The launcher also prints its actual ready URL.</li>
+</ol>
+<p>Microsoft recommends keeping files in the filesystem matching the terminal you use. <code>C:\Users\Ada\Documents\ds60sqlpy</code> appears to WSL as <code>/mnt/c/Users/Ada/Documents/ds60sqlpy</code>, while <code>/home/ada/ds60sqlpy</code> is Linux-local. These are different storage locations. Use <code>explorer.exe .</code> from the Ubuntu terminal to inspect its current folder in Windows File Explorer. <a href="https://learn.microsoft.com/en-us/windows/wsl/filesystems">Microsoft&#x27;s filesystem guide</a> explains the path translation. Do not point two simultaneous Windows/WSL course instances at one learning folder.</p>
+<h3 id="10-ports-and-common-first-start-problems">10. Ports and common first-start problems<a class="heading-anchor" href="#10-ports-and-common-first-start-problems" aria-label="Link to this section">#</a></h3>
+<p>The launcher defaults to browser port <strong>8765</strong> and host database port <strong>55432</strong>. The app still reaches PostgreSQL at port 5432 inside the container network. If a port is already occupied, choose another without stopping an unrelated application:</p>
+<pre><code class="language-powershell">powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 start -Port 8766 -DatabasePort 55433</code></pre>
+<pre><code class="language-bash">bash scripts/docker_lab.sh start --port 8766 --database-port 55433</code></pre>
+<p>Open the URL printed for port 8766 in that example, and reuse the same settings on later starts. The local database is <code>advanced_sql_training</code>, with the course login <code>admin</code> and password <code>admin</code> on a fresh installation. Changing Compose credentials does not rewrite accounts in an existing database volume.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Symptom</th>
+<th>First useful check</th>
+<th>Next action</th>
+</tr></thead><tbody>
+<tr>
+<td><code>docker</code> is not recognized</td>
+<td>New terminal; desktop engine&#x27;s CLI installation</td>
+<td>Finish the engine installer, restart the terminal, and rerun all three Docker checks</td>
+</tr>
+<tr>
+<td>Cannot connect to Docker</td>
+<td>Engine application and <code>docker info</code></td>
+<td>Start the intended engine and wait for server information</td>
+</tr>
+<tr>
+<td>Compose command missing</td>
+<td><code>docker compose version</code></td>
+<td>Install/update the Compose v2 plugin supplied by the selected engine</td>
+</tr>
+<tr>
+<td>WSL/virtualization error</td>
+<td>WSL version and official Windows requirements</td>
+<td>Complete WSL installation/reboot and the vendor&#x27;s virtualization instructions</td>
+</tr>
+<tr>
+<td><code>compose.yaml</code> not found</td>
+<td>Current folder and extracted ZIP</td>
+<td>Change to the actual repository root</td>
+</tr>
+<tr>
+<td>Downloaded launcher does not open</td>
+<td>The matching shell launcher in Terminal/PowerShell</td>
+<td>Run the explicit Bash or PowerShell command above; no host Python is required</td>
+</tr>
+<tr>
+<td>Browser does not open</td>
+<td>Printed ready URL and chosen port</td>
+<td>Paste the exact <code>127.0.0.1</code> URL; inspect status if it does not load</td>
+</tr>
+<tr>
+<td>Database role/password error</td>
+<td>Fresh versus preexisting database volume</td>
+<td>Follow the explicit legacy-role/migration section; rebuilding does not change stored accounts</td>
+</tr>
+<tr>
+<td>Host folder is not writable</td>
+<td>Chosen <code>--data-dir</code>, engine file sharing, Linux user identity</td>
+<td>Choose a user-owned local folder and follow the launcher&#x27;s diagnostic; preserve the original data</td>
+</tr>
+<tr>
+<td>Saved work seems absent</td>
+<td>Exact data folder and project used at start</td>
+<td>Stop and locate the previous <code>.learning</code> folder before creating replacement evidence</td>
+</tr>
+<tr>
+<td>Download or TLS error</td>
+<td>Build output and network trust</td>
+<td>Use the documented TLS-verified fallback or correct the network trust; do not disable verification</td>
+</tr>
+</tbody></table></div>
+<p>For a network that rejects Docker Hub&#x27;s CDN but trusts the alternate official endpoints, follow <a href="offline-app.md.html#a-tls-verified-fallback-for-a-blocked-docker-hub-cdn">the TLS-verified Rancher/build fallback</a>. It keeps certificate verification enabled. <a href="setup/offline.md.html">Offline preparation</a> explains caching optional lesson assets before disconnecting.</p></article>
+  </main>
+</body>
+</html>

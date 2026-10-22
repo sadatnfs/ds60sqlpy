@@ -253,3 +253,19 @@ def test_lab_shutdown_waits_for_active_backend_cleanup(tmp_path: Path) -> None:
         server.server_close()
         client.join(timeout=3)
         serving.join(timeout=3)
+
+
+def test_workspace_initialization_preserves_prebound_learning_folder(tmp_path: Path) -> None:
+    source = tmp_path / "bundle"
+    source.mkdir()
+    (source / "README.md").write_text("current course", encoding="utf-8")
+    workspace = tmp_path / "workspace"
+    learning = workspace / ".learning"
+    learning.mkdir(parents=True)
+    prior = b'{"schema_version":1,"completed":{}}\n'
+    (learning / "progress.json").write_bytes(prior)
+    (learning / "practice.py").write_text("my prior code", encoding="utf-8")
+    prepare_workspace(source, workspace)
+    assert (workspace / "README.md").read_text() == "current course"
+    assert (learning / "progress.json").read_bytes() == prior
+    assert (learning / "practice.py").read_text() == "my prior code"

@@ -118,6 +118,11 @@
     <article class="document"><h2 id="macos-setup">macOS setup<a class="heading-anchor" href="#macos-setup" aria-label="Link to this section">#</a></h2>
 <p>The recommended course baseline is Python 3.12, PostgreSQL 16 or newer, and Visual Studio Code. Commands below use a POSIX shell and run from the repository root.</p>
 <p>New to terminals or notebooks? Keep <a href="first-success.md.html">Your first successful session</a> beside this guide. Complete Python setup first; PostgreSQL can wait until you start the SQL track. Use Terminal from Applications → Utilities. Type commands without the surrounding Markdown fences and wait for each to finish.</p>
+<h3 id="browser-lab-with-docker">Browser lab with Docker<a class="heading-anchor" href="#browser-lab-with-docker" aria-label="Link to this section">#</a></h3>
+<p>For the browser coding application, follow the complete <a href="../docker-beginners.md.html">Docker beginner walkthrough</a>. Choose the engine&#x27;s Apple Silicon or Intel installer for your Mac, start the engine, extract the course folder, then double-click <code>START_DOCKER_LAB.command</code>. The Terminal alternative, from the folder containing <code>compose.yaml</code>, is:</p>
+<pre><code class="language-bash">bash scripts/docker_lab.sh start</code></pre>
+<p>No host Python, native PostgreSQL, or VS Code installation is required for this route. The launcher builds when needed, waits for the app, and opens <code>http://127.0.0.1:8765/learn</code>. Saved pads, evidence, and progress live in the host <code>.learning</code> folder. A fresh Docker database uses the limited course login <code>admin</code> / password <code>admin</code>.</p>
+<p>Continue below when you want native Python, Jupyter, or PostgreSQL too.</p>
 <h3 id="1-install-base-tools">1. Install base tools<a class="heading-anchor" href="#1-install-base-tools" aria-label="Link to this section">#</a></h3>
 <p>Install:</p>
 <ol>
@@ -170,8 +175,8 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_ver
 <pre><code class="language-bash">export DS60_DATABASE_URL=advanced_sql_training
 .venv/bin/python scripts/course.py doctor</code></pre>
 <p>Expect <code>Course database: advanced_sql_training is reachable</code>. Repeat the export in each new Terminal session. For a password-protected native server or the separate JupySQL lesson, use the matching connection instructions in <a href="postgresql.md.html">Local PostgreSQL</a>.</p>
-<h4 id="option-b-canonical-container-environment">Option B: Canonical container environment<a class="heading-anchor" href="#option-b-canonical-container-environment" aria-label="Link to this section">#</a></h4>
-<p>Docker-based automation uses PostgreSQL 17. Install and start Docker Desktop, then use the complete <a href="postgresql.md.html#route-a-the-course-container">container setup and first query</a>. That route includes seed verification, port conflicts, host-client requirements for guided notebooks, and shutdown. The database container and Python notebook kernel are separate processes. See <a href="../validation.md.html">Validation</a> for full checks.</p>
+<h4 id="canonical-container-alternative">Canonical container alternative<a class="heading-anchor" href="#canonical-container-alternative" aria-label="Link to this section">#</a></h4>
+<p>For the full browser app, use the <a href="../docker-beginners.md.html">Docker beginner walkthrough</a>. Its shell launcher prepares host persistence and opens the ready browser without a native Python environment. For a SQL-only container server or later host notebooks, use <a href="postgresql.md.html#route-a-the-course-container">Local PostgreSQL</a>. That guide explains seed setup, the separate host-client requirement, ports, authentication, and shutdown that preserves data.</p>
 <h3 id="5-start-learning">5. Start learning<a class="heading-anchor" href="#5-start-learning" aria-label="Link to this section">#</a></h3>
 <p>For the guided dashboard, file-backed progress, and exact VS Code/Jupyter lesson actions, start the private loopback portal and keep its terminal open:</p>
 <pre><code class="language-bash">.venv/bin/python scripts/learning_portal.py</code></pre>

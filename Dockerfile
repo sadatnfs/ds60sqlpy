@@ -12,7 +12,7 @@ LABEL org.opencontainers.image.title="DS60 Learning Lab" \
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DS60_CONTAINER=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl ca-certificates \
+    curl ca-certificates gosu \
     && install -d /usr/share/postgresql-common/pgdg \
     && curl --fail --silent --show-error --location --retry 3 \
        https://www.postgresql.org/media/keys/ACCC4CF8.asc \
@@ -37,6 +37,6 @@ COPY . .
 RUN uv pip install --offline --python /opt/course/.venv/bin/python \
        --no-deps --no-build-isolation -e . \
     && mkdir /workspace && chown learner:learner /workspace
-USER learner
 EXPOSE 8765
-CMD ["ds60-app", "--repo", "/opt/course", "--workspace", "/workspace", "--container", "--port", "8765", "--no-browser"]
+ENTRYPOINT ["python", "/opt/course/docker/entrypoint.py"]
+CMD ["python", "/opt/course/docker/start_lab.py"]

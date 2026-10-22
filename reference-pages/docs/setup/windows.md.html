@@ -119,7 +119,11 @@
 <p>This guide assumes a new Windows 10 or Windows 11 machine and PowerShell. The recommended course baseline is Python 3.12, PostgreSQL 16 or newer, and Visual Studio Code.</p>
 <p>Run course commands from the repository root, the directory containing <code>README.md</code>.</p>
 <p>If terminals, packages, or notebooks are new to you, follow <a href="first-success.md.html">Your first successful session</a> alongside this guide. Use <strong>Windows PowerShell</strong> from the Start menu for PowerShell blocks. Keep native Windows and WSL environments separate; this guide uses native Windows Python, not a Python interpreter inside WSL.</p>
-<h3 id="fastest-route-double-click-the-guided-launcher">Fastest route: double-click the guided launcher<a class="heading-anchor" href="#fastest-route-double-click-the-guided-launcher" aria-label="Link to this section">#</a></h3>
+<h3 id="browser-lab-with-docker">Browser lab with Docker<a class="heading-anchor" href="#browser-lab-with-docker" aria-label="Link to this section">#</a></h3>
+<p>For the browser coding application, start with the complete <a href="../docker-beginners.md.html">Docker beginner walkthrough</a>. It covers Windows WSL 2, Docker Desktop or Rancher Desktop with Moby, getting the repository without Git, and finding your files. Recommended Windows WSL users keep the checkout in their Linux home and run <code>bash scripts/docker_lab.sh start</code> from Ubuntu. The native PowerShell alternative uses a Windows folder and <code>START_DOCKER_LAB.cmd</code>.</p>
+<p>The launchers build when needed, wait for the app, and open the browser. They need no host Python, native PostgreSQL, or VS Code installation. Saved work is in the host <code>.learning</code> folder; the database is in its own Docker volume. The default browser address is <code>http://127.0.0.1:8765/learn</code>. A fresh Docker course database uses the limited login <code>admin</code> / password <code>admin</code>.</p>
+<p>If you want native notebooks or editor execution instead, continue below. Keep that native Windows Python environment separate from a WSL Linux one.</p>
+<h3 id="native-notebook-route-double-click-the-guided-launcher">Native notebook route: double-click the guided launcher<a class="heading-anchor" href="#native-notebook-route-double-click-the-guided-launcher" aria-label="Link to this section">#</a></h3>
 <p>After downloading or cloning the repository, open its folder in File Explorer and double-click:</p>
 <pre><code class="language-text">START_DS60.cmd</code></pre>
 <p>For a ZIP download, use <strong>Extract All</strong> before launching. Do not run from inside File Explorer&#x27;s compressed-folder view. A normal user-owned local folder is preferable to a protected system directory or a folder whose cloud sync can replace files while they are running.</p>
@@ -158,9 +162,9 @@ code --version</code></pre>
 Set-Location .\ds60sqlpy
 code .</code></pre>
 <p>If the repository is already cloned:</p>
-<pre><code class="language-powershell">Set-Location &lt;path-to-ds60sqlpy&gt;
+<pre><code class="language-powershell">Set-Location &quot;C:\Users\Ada\Documents\ds60sqlpy&quot;
 code .</code></pre>
-<p>Replace the angle-bracket placeholder with your actual folder. Quote paths with spaces, for example <code>Set-Location &quot;C:\Users\Ada\Documents\ds60sqlpy&quot;</code>.</p>
+<p>Replace the example username and folder with your actual path. Quote paths with spaces, for example <code>Set-Location &quot;C:\Users\Ada\Documents\ds60sqlpy&quot;</code>.</p>
 <p>Confirm that PowerShell is at the root:</p>
 <pre><code class="language-powershell">Test-Path .\README.md</code></pre>
 <p>The result should be <code>True</code>.</p>
@@ -216,7 +220,7 @@ psql --version</code></pre>
 psql -X -v ON_ERROR_STOP=1 -h localhost -U postgres -d advanced_sql_training -f .\sql\postgres-60day\00_verify.sql</code></pre>
 <p>The setup file drops and recreates the disposable <code>training</code> schema. Do not point it at a database containing valuable data. The verification file raises an error if expected counts, coverage, chronology, totals, or foreign keys are wrong.</p>
 <h5 id="let-the-guided-notebook-authenticate-without-a-hidden-prompt">Let the guided notebook authenticate without a hidden prompt<a class="heading-anchor" href="#let-the-guided-notebook-authenticate-without-a-hidden-prompt" aria-label="Link to this section">#</a></h5>
-<p>The native Windows installer normally requires the <code>postgres</code> password. Terminal <code>psql</code> can ask for it visibly, but the guided notebook intentionally uses <code>--no-password</code> so a Jupyter cell can never hang at an invisible prompt. Configure libpq—PostgreSQL&#x27;s client connection library—once, outside this repository:</p>
+<p>The native Windows installer normally requires the <code>postgres</code> password. Terminal <code>psql</code> can ask for it visibly, but the guided notebook intentionally uses <code>--no-password</code> so a Jupyter cell can never hang at an invisible prompt. Configure libpq (PostgreSQL&#x27;s client connection library) once, outside this repository:</p>
 <ol>
 <li>In PowerShell, create PostgreSQL&#x27;s per-user configuration directory and open its password file:</li>
 </ol>
@@ -235,24 +239,14 @@ psql -X -v ON_ERROR_STOP=1 -h localhost -U postgres -d advanced_sql_training -f 
    &amp; $CoursePython scripts\course.py doctor</code></pre>
 <p>Doctor should report <code>Course database: advanced_sql_training is reachable</code>. The setting lasts only for that PowerShell process. Start the portal from this same window so Jupyter inherits it:</p>
 <pre><code class="language-powershell">   &amp; $CoursePython scripts\learning_portal.py</code></pre>
-<p>For the repository&#x27;s Docker Compose service, do not create this native password-file entry. Its disposable <code>ds60</code> connection is already the course runner&#x27;s default.</p>
+<p>For the repository&#x27;s Docker Compose service, do not create this native <code>postgres</code> password-file entry. The browser container uses its own limited <code>admin</code> login. Host notebook users explicitly select that Docker connection as described in <a href="postgresql.md.html#route-a-the-course-container">Local PostgreSQL</a>.</p>
 <h4 id="option-b-canonical-container-environment">Option B: Canonical container environment<a class="heading-anchor" href="#option-b-canonical-container-environment" aria-label="Link to this section">#</a></h4>
-<p>Docker-based automation uses PostgreSQL 17 and gives every operating system the same database behavior. Docker Desktop requires virtualization support and a one-time image download.</p>
-<p>If you choose only Docker and have no host <code>psql</code>, bootstrap Python with <code>&amp; .\scripts\bootstrap_windows.ps1 -SkipPostgreSql</code>. You can run the SQL files through the container commands below. Guided SQL notebooks additionally need host PostgreSQL client tools because they launch <code>psql</code> in the Windows process. See <a href="postgresql.md.html#route-a-the-course-container">Local PostgreSQL</a> for the first query, client distinction, and a port-conflict walkthrough.</p>
-<p>From PowerShell at the repository root:</p>
-<pre><code class="language-powershell">docker compose up -d postgres
-docker compose run --rm sql-runner -f sql/postgres-60day/00_setup.sql
-docker compose run --rm sql-runner -f sql/postgres-60day/00_verify.sql
-docker compose run --rm sql-runner -f sql/postgres-60day/day01_select_where_orderby.sql
-docker compose down</code></pre>
-<p>The setup command drops and recreates the course-owned <code>training</code> schema in the disposable Compose database. <code>docker compose down</code> stops the services but preserves the database volume; deleting the volume is a separate destructive reset and is not needed for normal study.</p>
-<p>Use this option when:</p>
-<ul>
-<li>You already use Docker Desktop</li>
-<li>Native PostgreSQL authentication is getting in the way</li>
-<li>You are validating repository-wide SQL behavior</li>
-</ul>
-<p>See <a href="../validation.md.html">Validation</a> for repository-wide checks and the distinction between structural and executed validation.</p>
+<p>Use the <a href="../docker-beginners.md.html">Docker beginner walkthrough</a> for the full browser application and WSL 2 instructions. That route runs Python and PostgreSQL inside containers and does not need the native setup above.</p>
+<p>For a terminal-only SQL workflow, start the local engine and run from the repository root in PowerShell:</p>
+<pre><code class="language-powershell">docker compose --project-name ds60-learning up -d postgres
+docker compose --project-name ds60-learning run --rm sql-runner -c &quot;SELECT current_database(), 2 + 3 AS first_result;&quot;</code></pre>
+<p>Expect <code>advanced_sql_training</code> and <code>5</code>. Follow <a href="postgresql.md.html#route-a-the-course-container">Local PostgreSQL</a> for optional seed setup, verification, the exact host connection URL, ports, and preserving data.</p>
+<p>If you later want <strong>host</strong> VS Code/Jupyter notebooks, install the native Python environment separately. <code>bootstrap_windows.ps1 -SkipPostgreSql</code> prepares Python without requiring a host database. Guided SQL notebooks still need host PostgreSQL <strong>client</strong> tools because they launch host <code>psql</code>; the browser container and <code>sql-runner</code> supply their own clients.</p>
 <h3 id="6-verify-a-lesson">6. Verify a lesson<a class="heading-anchor" href="#6-verify-a-lesson" aria-label="Link to this section">#</a></h3>
 <p>Start the private course dashboard. It saves completion in ignored <code>.learning\progress.json</code> and can open allowlisted VS Code/Jupyter targets:</p>
 <pre><code class="language-powershell">&amp; $CoursePython scripts\learning_portal.py</code></pre>
@@ -272,7 +266,7 @@ Invoke-RestMethod `
     -Uri &quot;http://127.0.0.1:8000/predict&quot; `
     -ContentType &quot;application/json&quot; `
     -Body $body</code></pre>
-<p>PowerShell uses the backtick for line continuation—not a trailing backslash.</p>
+<p>PowerShell uses the backtick for line continuation, rather than a trailing backslash.</p>
 <h3 id="8-continue-offline">8. Continue offline<a class="heading-anchor" href="#8-continue-offline" aria-label="Link to this section">#</a></h3>
 <p>Run each lesson that has a disclosed first-use download while connected, then follow <a href="offline.md.html">Offline use</a>. Seaborn data is cached after the first successful load. Pretrained model lessons require separate caches or an offline fallback.</p>
 <p>For common failures, see <a href="../troubleshooting.md.html">Troubleshooting</a>.</p></article>

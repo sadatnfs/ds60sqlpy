@@ -7,6 +7,8 @@ on:
       - "src/**"
       - "scripts/build_app.py"
       - "scripts/learning_lab.py"
+      - "scripts/docker_lab.*"
+      - "docker/**"
       - "Dockerfile"
       - "compose.yaml"
       - ".dockerignore"
@@ -51,13 +53,19 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Build and start isolated browser lab
-        run: docker compose --profile lab up --build --detach --wait
+        run: bash scripts/docker_lab.sh start --build --no-browser
       - name: Exercise authenticated browser backend with Python and SQL
         run: >-
           python scripts/check_lab_http.py --url http://127.0.0.1:8765
           --confirm-disposable --reset-sql
-      - name: Recreate the application while preserving its named workspace volume
-        run: docker compose --profile lab up --detach --wait --force-recreate --no-deps lab
+      - name: Run all SQL lessons and executable solutions with the limited course login
+        run: |
+          docker compose --profile lab exec -T lab python scripts/course.py sql --quiet all --reset
+          docker compose --profile lab exec -T lab python scripts/course.py sql --quiet solutions --reset
+      - name: Recreate the application while preserving its host learning directory
+        run: >-
+          DS60_UID="$(id -u)" DS60_GID="$(id -g)"
+          docker compose --profile lab up --detach --wait --force-recreate --no-deps lab
       - name: Verify saved work survives application recreation
         run: >-
           python scripts/check_lab_http.py --url http://127.0.0.1:8765

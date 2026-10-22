@@ -920,7 +920,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
             <p>
               <code>sql/postgres-60day/00_setup.sql</code> drops and recreates
               the course-owned <code>training</code> schema. Use only the
-              disposable <code>advanced_sql_training</code> database—never a
+              disposable <code>advanced_sql_training</code> database, never a
               shared or valuable database.
             </p>
           </div>
@@ -1072,7 +1072,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           <p>Read a lesson, predict a result, write Python or SQL, and keep the evidence.</p></div>
         <div class="grid three">
           <article class="panel"><h3>Start the application</h3>
-            <p>Use START_LEARNING_LAB.cmd on Windows or scripts/learning_lab.py with your course Python. Docker users run docker compose --profile lab up --build.</p>
+            <p>Docker users open START_DOCKER_LAB.cmd on Windows or START_DOCKER_LAB.command on macOS. Native users run scripts/learning_lab.py with their course Python.</p>
             <a href="docs/offline-app.md">Application, native builds, and Docker</a></article>
           <article class="panel"><h3>Choose a useful goal</h3>
             <p>Build a route from the real prerequisites and your available time. Beginner practice and advanced projects belong at different checkpoints.</p>
@@ -1081,7 +1081,8 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
             <p>The optional local MCP tutor gives Codex the same course context, with one hint at a time and separate solution requests.</p>
             <a href="docs/mcp-tutor.md">Connect the Codex tutor</a></article>
         </div>
-        <p><a href="docs/setup/first-success.md">Get your first successful run</a> ·
+        <p><a href="docs/docker-beginners.md">Build and start Docker, step by step</a> ·
+          <a href="docs/setup/first-success.md">Get your first successful run</a> ·
           <a href="docs/setup/postgresql.md">Prepare PostgreSQL</a> ·
           <a href="docs/repository-tour.md">Read the repository tour</a></p>
       </div>
@@ -1096,7 +1097,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           </div>
           <p>
             “Day” is an ordering key. Repeat difficult material and use
-            prerequisites—not calendar pressure—to decide what comes next.
+            prerequisites to decide what comes next.
           </p>
         </div>
         <div class="grid three">
@@ -1153,7 +1154,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           </div>
           <p>
             The course separates explanation, active work, and solutions on
-            purpose. Keep that friction—it is where learning happens.
+            purpose. Keep that friction: it is where learning happens.
           </p>
         </div>
         <div class="workflow">
@@ -1177,7 +1178,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
         <div class="callout" style="margin-top: 1rem">
           <strong>Completion means evidence.</strong>
           Mark a lesson complete when you can explain the core idea and produce
-          a working attempt—not when you merely opened every file.
+          a working attempt.
         </div>
         <div class="grid two" style="margin-top: 1rem">
           <article class="panel">
@@ -1644,7 +1645,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
         `${completed.size} of ${lessons.length} complete`;
       const next = lessons.find((lesson) => !completed.has(lesson.id) && isReady(lesson, completed));
       document.querySelector("#next-ready").textContent = next
-        ? `Next ready: ${next.id} — ${next.title}`
+        ? `Next ready: ${next.id}: ${next.title}`
         : completed.size === lessons.length
           ? "Every cataloged lesson is complete."
           : "Complete prerequisites to unlock the next cataloged lesson.";
@@ -1805,7 +1806,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
     lessons.forEach((lesson) => {
       const option = document.createElement("option");
       option.value = lesson.id;
-      option.textContent = `${lesson.id} — ${lesson.title}`;
+      option.textContent = `${lesson.id}: ${lesson.title}`;
       codexLesson.append(option);
     });
 
@@ -1824,7 +1825,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           ? `For runnable work, use the repository environment and select the Python (ds60sqlpy) kernel. Have me restart the kernel, run the notebook from the first cell downward, and show my actual output, assertion, or traceback.`
           : `For runnable work, use the repository environment and run the cataloged learner artifact from the repository root. Inspect my actual output, assertion, test result, or traceback.`;
       document.querySelector("#codex-prompt").value =
-`Use $guide-ds60sqlpy-learning to coach me through ${lesson.id} — ${lesson.title}.
+`Use $guide-ds60sqlpy-learning to coach me through ${lesson.id}: ${lesson.title}.
 
 Goal:
 Help me understand and demonstrate this lesson as a complete beginner except for its declared prerequisites: ${prerequisites}.

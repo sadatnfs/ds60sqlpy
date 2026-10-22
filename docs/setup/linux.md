@@ -8,6 +8,27 @@ If this is your first terminal, notebook, or database, follow
 [Your first successful session](first-success.md) alongside this guide. You
 can finish Python setup and defer PostgreSQL until you start SQL.
 
+## Browser lab with Docker
+
+For the browser coding application, use the
+[Docker beginner walkthrough](../docker-beginners.md). Install a local Docker
+Engine with Compose v2, or the documented Docker-compatible desktop engine,
+and configure your ordinary user's engine access. From the extracted course
+folder containing `compose.yaml`, run:
+
+```bash
+bash scripts/docker_lab.sh start
+```
+
+This route needs no host Python, native PostgreSQL, or VS Code installation.
+The launcher builds when needed, waits for the app, and opens
+`http://127.0.0.1:8765/learn` when a desktop browser is available. It also prints
+the URL. Saved learning work lives in the host `.learning` folder; the
+PostgreSQL database uses separate Docker storage. A fresh course database
+uses the limited login `admin` / password `admin`.
+
+Continue below for native Python, notebooks, or a native PostgreSQL server.
+
 ## 1. Install base tools
 
 On a distribution that provides Python 3.12:
@@ -123,7 +144,7 @@ export DS60_DATABASE_URL=advanced_sql_training
 
 Expect the course database to be reachable, then launch the portal from this
 same terminal. Repeat the export in a new terminal. The tools otherwise use
-the container's `ds60` TCP connection. See [Local PostgreSQL](postgresql.md)
+the configured course TCP connection. See [Local PostgreSQL](postgresql.md)
 for password authentication and the separate JupySQL URL.
 
 If `systemctl` is unavailable, use your distribution's service manager. WSL
@@ -131,14 +152,15 @@ learners should keep the repository, interpreter, VS Code remote window, and
 PostgreSQL client in the same Linux environment, or follow the native Windows
 guide consistently. A Windows `.venv` cannot be used as a Linux `.venv`.
 
-### Canonical container environment
+### Canonical container alternative
 
-Docker-based automation uses PostgreSQL 17 and avoids host authentication
-differences. Install Docker Engine and the Compose plugin through the
-[official Linux installation guide](https://docs.docker.com/engine/install/),
-then follow the [container setup and first query](postgresql.md#route-a-the-course-container).
-That path explains readiness, host-client requirements, ports, and preserving
-database state. A first image download is required. See [Validation](../validation.md).
+For the full browser app, use the
+[Docker beginner walkthrough](../docker-beginners.md). Its shell launcher
+prepares host persistence and opens the ready browser without a native Python
+environment. For a SQL-only container server or later host notebooks, use
+[Local PostgreSQL](postgresql.md#route-a-the-course-container). That guide
+explains seed setup, the separate host-client requirement, ports, authentication,
+and shutdown that preserves data.
 
 ## 5. Start learning
 

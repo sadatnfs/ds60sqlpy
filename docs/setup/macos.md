@@ -7,6 +7,26 @@ beside this guide. Complete Python setup first; PostgreSQL can wait until you
 start the SQL track. Use Terminal from Applications → Utilities. Type commands
 without the surrounding Markdown fences and wait for each to finish.
 
+## Browser lab with Docker
+
+For the browser coding application, follow the complete
+[Docker beginner walkthrough](../docker-beginners.md). Choose the engine's
+Apple Silicon or Intel installer for your Mac, start the engine, extract the
+course folder, then double-click `START_DOCKER_LAB.command`. The Terminal
+alternative, from the folder containing `compose.yaml`, is:
+
+```bash
+bash scripts/docker_lab.sh start
+```
+
+No host Python, native PostgreSQL, or VS Code installation is required for
+this route. The launcher builds when needed, waits for the app, and opens
+`http://127.0.0.1:8765/learn`. Saved pads, evidence, and progress live in the
+host `.learning` folder. A fresh Docker database uses the limited course
+login `admin` / password `admin`.
+
+Continue below when you want native Python, Jupyter, or PostgreSQL too.
+
 ## 1. Install base tools
 
 Install:
@@ -128,13 +148,15 @@ export in each new Terminal session. For a password-protected native server
 or the separate JupySQL lesson, use the matching connection instructions in
 [Local PostgreSQL](postgresql.md).
 
-### Option B: Canonical container environment
+### Canonical container alternative
 
-Docker-based automation uses PostgreSQL 17. Install and start Docker Desktop,
-then use the complete [container setup and first query](postgresql.md#route-a-the-course-container).
-That route includes seed verification, port conflicts, host-client requirements
-for guided notebooks, and shutdown. The database container and Python notebook
-kernel are separate processes. See [Validation](../validation.md) for full checks.
+For the full browser app, use the
+[Docker beginner walkthrough](../docker-beginners.md). Its shell launcher
+prepares host persistence and opens the ready browser without a native Python
+environment. For a SQL-only container server or later host notebooks, use
+[Local PostgreSQL](postgresql.md#route-a-the-course-container). That guide
+explains seed setup, the separate host-client requirement, ports, authentication,
+and shutdown that preserves data.
 
 ## 5. Start learning
 

@@ -38,11 +38,23 @@ from ds60sqlpy.sql_notebook import (
     course_psql_environment,
     validate_course_database_target,
 )
-from ds60sqlpy.sql_runner import DEFAULT_DATABASE_URL
+from ds60sqlpy.sql_runner import default_course_database_url
 from ds60sqlpy.state_files import locked_update
 
 MAX_CODE_BYTES = 60_000
 MAX_OUTPUT_BYTES = 128_000
+
+
+def matplotlib_cache_environment(repo_root: Path) -> dict[str, str]:
+    """Share the platform-specific font cache across lessons and app restarts."""
+
+    learning = repo_root / ".learning"
+    cache = learning / "cache" / "matplotlib" / sys.platform
+    if not cache.resolve().is_relative_to(learning.resolve()):
+        raise ValueError("The Matplotlib cache must remain inside .learning/cache/.")
+    cache.mkdir(parents=True, exist_ok=True, mode=0o700)
+    return {"MPLBACKEND": "Agg", "MPLCONFIGDIR": str(cache)}
+
 
 # On Windows the parent assigns a Job Object before releasing this gate. A
 # short-lived learner program cannot exit before its descendants are tracked.
@@ -404,6 +416,7 @@ class PadRunner:
                 with tempfile.NamedTemporaryFile(
                     mode="w",
                     encoding="utf-8",
+                    newline="\n",
                     dir=path.parent,
                     prefix=f".{path.name}.",
                     suffix=".tmp",
@@ -432,6 +445,7 @@ class PadRunner:
             with tempfile.NamedTemporaryFile(
                 mode="w",
                 encoding="utf-8",
+                newline="\n",
                 dir=path.parent,
                 prefix=".submission-",
                 suffix=path.suffix,
@@ -454,8 +468,7 @@ class PadRunner:
             environment["PYTHONPATH"] = os.pathsep.join(
                 (str(self.catalog.repo_root), str(self.catalog.repo_root / "src"))
             )
-            environment["MPLBACKEND"] = "Agg"
-            environment["MPLCONFIGDIR"] = str(path.parent / "matplotlib-cache")
+            environment.update(matplotlib_cache_environment(self.catalog.repo_root))
             with tempfile.TemporaryDirectory(prefix="figures-", dir=path.parent) as figures:
                 command = [self.python, "-u", "-c", PYTHON_WORKER, str(path), figures]
                 result = self._execute(command, environment, language)
@@ -469,7 +482,7 @@ class PadRunner:
             return {**asdict(result), "figures": images}
         try:
             target = validate_course_database_target(
-                os.environ.get("DS60_DATABASE_URL") or DEFAULT_DATABASE_URL
+                os.environ.get("DS60_DATABASE_URL") or default_course_database_url()
             )
         except SqlNotebookError as exc:
             raise ValueError(str(exc)) from exc
@@ -501,16 +514,36 @@ class PadRunner:
     @staticmethod
     def _redact(transcript: str, environment: dict[str, str]) -> str:
         secrets = {environment.get("PGPASSWORD", "")}
+        public_passwords: set[str] = set()
+        if (
+            environment.get("PGDATABASE") == "advanced_sql_training"
+            and environment.get("PGHOST") in {"localhost", "127.0.0.1", "::1"}
+            and environment.get("PGUSER") in {"admin", "ds60"}
+            and environment.get("PGPASSWORD") == environment.get("PGUSER")
+        ):
+            public_passwords.add(environment["PGPASSWORD"])
         target = environment.get("DS60_DATABASE_URL", "")
         if target:
             # Replace the complete URL even when it carries no password, keeping
             # connection settings out of execution transcripts.
             transcript = transcript.replace(target, "[redacted database URL]")
-            with contextlib.suppress(ValueError):
-                password = urlsplit(target).password
+            with contextlib.suppress(ValueError, SqlNotebookError):
+                parsed = urlsplit(target)
+                password = parsed.password
                 if password:
                     secrets.update((password, unquote(password)))
-        for secret in sorted(secrets - {""}, key=len, reverse=True):
+                    validate_course_database_target(target)
+                    if (
+                        parsed.scheme in {"postgresql", "postgres"}
+                        and parsed.hostname in {"localhost", "127.0.0.1", "::1"}
+                        and parsed.path == "/advanced_sql_training"
+                        and parsed.username in {"admin", "ds60"}
+                        and unquote(password) == parsed.username
+                    ):
+                        public_passwords.update((password, unquote(password)))
+        # Public course defaults are documented fixtures. Redacting the word
+        # "admin" would corrupt legitimate usernames, column names, and results.
+        for secret in sorted(secrets - {""} - public_passwords, key=len, reverse=True):
             transcript = transcript.replace(secret, "[redacted]")
         return transcript
 

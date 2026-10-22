@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+from html import escape
 from pathlib import Path
 
 from ds60sqlpy.secret_scan import (
@@ -24,11 +25,35 @@ def test_secret_scan_allows_documented_disposable_and_placeholder_urls() -> None
     text = "\n".join(
         (
             "postgresql://ds60:ds60@localhost:5432/advanced_sql_training",
+            "postgresql://admin:admin@localhost:55432/advanced_sql_training",
             "postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training",
         )
     )
 
     assert scan_text(Path(".env.example"), text) == []
+
+
+def test_admin_fixture_exception_requires_loopback_and_exact_course_database() -> None:
+    authority = "postgresql://admin:" + "admin@"
+    for suffix in (
+        "remote.example:55432/advanced_sql_training",
+        "localhost/private_database",
+        "localhost/advanced_sql_training_fake",
+        "localhost/advanced_sql_training?dbname=private",
+    ):
+        findings = scan_text(Path("sample.md"), authority + suffix)
+        assert [finding.kind for finding in findings] == ["credential-bearing URL"]
+
+
+def test_generated_html_preserves_narrow_public_course_url_exception() -> None:
+    authority = "postgresql://admin:" + "admin@"
+    for host in ("localhost", "127.0.0.1", "[::1]"):
+        source = 'export DS60_DATABASE_URL="' + authority + host + ':55432/advanced_sql_training"'
+        assert scan_text(Path("guide.md"), source) == []
+        assert scan_text(Path("reference.html"), escape(source)) == []
+    for suffix in ("remote.example/advanced_sql_training", "localhost/private_database"):
+        source = 'export DS60_DATABASE_URL="' + authority + suffix + '"'
+        assert scan_text(Path("reference.html"), escape(source))
 
 
 def test_sensitive_filenames_are_case_insensitive() -> None:

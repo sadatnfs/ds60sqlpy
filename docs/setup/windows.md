@@ -10,7 +10,26 @@ If terminals, packages, or notebooks are new to you, follow
 Windows and WSL environments separate; this guide uses native Windows Python,
 not a Python interpreter inside WSL.
 
-## Fastest route: double-click the guided launcher
+## Browser lab with Docker
+
+For the browser coding application, start with the complete
+[Docker beginner walkthrough](../docker-beginners.md). It covers Windows WSL 2,
+Docker Desktop or Rancher Desktop with Moby, getting the repository without
+Git, and finding your files. Recommended Windows WSL users keep the checkout
+in their Linux home and run `bash scripts/docker_lab.sh start` from Ubuntu.
+The native PowerShell alternative uses a Windows folder and
+`START_DOCKER_LAB.cmd`.
+
+The launchers build when needed, wait for the app, and open the browser. They
+need no host Python, native PostgreSQL, or VS Code installation. Saved work is
+in the host `.learning` folder; the database is in its own Docker volume.
+The default browser address is `http://127.0.0.1:8765/learn`. A fresh Docker
+course database uses the limited login `admin` / password `admin`.
+
+If you want native notebooks or editor execution instead, continue below.
+Keep that native Windows Python environment separate from a WSL Linux one.
+
+## Native notebook route: double-click the guided launcher
 
 After downloading or cloning the repository, open its folder in File Explorer
 and double-click:
@@ -109,11 +128,11 @@ code .
 If the repository is already cloned:
 
 ```powershell
-Set-Location <path-to-ds60sqlpy>
+Set-Location "C:\Users\Ada\Documents\ds60sqlpy"
 code .
 ```
 
-Replace the angle-bracket placeholder with your actual folder. Quote paths
+Replace the example username and folder with your actual path. Quote paths
 with spaces, for example `Set-Location "C:\Users\Ada\Documents\ds60sqlpy"`.
 
 Confirm that PowerShell is at the root:
@@ -255,7 +274,7 @@ The setup file drops and recreates the disposable `training` schema. Do not poin
 The native Windows installer normally requires the `postgres` password.
 Terminal `psql` can ask for it visibly, but the guided notebook intentionally
 uses `--no-password` so a Jupyter cell can never hang at an invisible prompt.
-Configure libpq—PostgreSQL's client connection library—once, outside this
+Configure libpq (PostgreSQL's client connection library) once, outside this
 repository:
 
 1. In PowerShell, create PostgreSQL's per-user configuration directory and
@@ -297,39 +316,33 @@ repository:
    ```
 
 For the repository's Docker Compose service, do not create this native
-password-file entry. Its disposable `ds60` connection is already the course
-runner's default.
+`postgres` password-file entry. The browser container uses its own limited
+`admin` login. Host notebook users explicitly select that Docker connection as
+described in [Local PostgreSQL](postgresql.md#route-a-the-course-container).
 
 ### Option B: Canonical container environment
 
-Docker-based automation uses PostgreSQL 17 and gives every operating system the same database behavior. Docker Desktop requires virtualization support and a one-time image download.
+Use the [Docker beginner walkthrough](../docker-beginners.md) for the full
+browser application and WSL 2 instructions. That route runs Python and
+PostgreSQL inside containers and does not need the native setup above.
 
-If you choose only Docker and have no host `psql`, bootstrap Python with
-`& .\scripts\bootstrap_windows.ps1 -SkipPostgreSql`. You can run the SQL files
-through the container commands below. Guided SQL notebooks additionally need
-host PostgreSQL client tools because they launch `psql` in the Windows
-process. See [Local PostgreSQL](postgresql.md#route-a-the-course-container)
-for the first query, client distinction, and a port-conflict walkthrough.
-
-From PowerShell at the repository root:
+For a terminal-only SQL workflow, start the local engine and run from the
+repository root in PowerShell:
 
 ```powershell
-docker compose up -d postgres
-docker compose run --rm sql-runner -f sql/postgres-60day/00_setup.sql
-docker compose run --rm sql-runner -f sql/postgres-60day/00_verify.sql
-docker compose run --rm sql-runner -f sql/postgres-60day/day01_select_where_orderby.sql
-docker compose down
+docker compose --project-name ds60-learning up -d postgres
+docker compose --project-name ds60-learning run --rm sql-runner -c "SELECT current_database(), 2 + 3 AS first_result;"
 ```
 
-The setup command drops and recreates the course-owned `training` schema in the disposable Compose database. `docker compose down` stops the services but preserves the database volume; deleting the volume is a separate destructive reset and is not needed for normal study.
+Expect `advanced_sql_training` and `5`. Follow
+[Local PostgreSQL](postgresql.md#route-a-the-course-container) for optional seed
+setup, verification, the exact host connection URL, ports, and preserving data.
 
-Use this option when:
-
-- You already use Docker Desktop
-- Native PostgreSQL authentication is getting in the way
-- You are validating repository-wide SQL behavior
-
-See [Validation](../validation.md) for repository-wide checks and the distinction between structural and executed validation.
+If you later want **host** VS Code/Jupyter notebooks, install the native Python
+environment separately. `bootstrap_windows.ps1 -SkipPostgreSql` prepares Python
+without requiring a host database. Guided SQL notebooks still need host
+PostgreSQL **client** tools because they launch host `psql`; the browser
+container and `sql-runner` supply their own clients.
 
 ## 6. Verify a lesson
 
@@ -379,7 +392,7 @@ Invoke-RestMethod `
     -Body $body
 ```
 
-PowerShell uses the backtick for line continuation—not a trailing backslash.
+PowerShell uses the backtick for line continuation, rather than a trailing backslash.
 
 ## 8. Continue offline
 

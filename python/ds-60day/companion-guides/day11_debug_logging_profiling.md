@@ -289,7 +289,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-11`
-(Day 11 — Debugging, Logging, and Profiling). Direct catalog prerequisites: `python-foundations-04`.
+(Day 11: Debugging, Logging, and Profiling). Direct catalog prerequisites: `python-foundations-04`.
 I have completed the direct prerequisites: `python-foundations-04`. Emphasize evidence-driven debugging, useful logs, and measurement before optimization.
 Read `python/ds-60day/companion-guides/day11_debug_logging_profiling.md` and use the learner notebook
 `python/ds-60day/notebooks/day11_debug_logging_profiling.ipynb`. Do not open or quote anything under `solutions/` unless

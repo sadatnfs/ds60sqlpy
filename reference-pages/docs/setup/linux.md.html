@@ -119,6 +119,11 @@
 <p>The recommended course baseline is Python 3.12, PostgreSQL 16 or newer, and Visual Studio Code. Commands below show Debian/Ubuntu conventions; translate package-manager commands for other distributions.</p>
 <p>Run course commands from the repository root.</p>
 <p>If this is your first terminal, notebook, or database, follow <a href="first-success.md.html">Your first successful session</a> alongside this guide. You can finish Python setup and defer PostgreSQL until you start SQL.</p>
+<h3 id="browser-lab-with-docker">Browser lab with Docker<a class="heading-anchor" href="#browser-lab-with-docker" aria-label="Link to this section">#</a></h3>
+<p>For the browser coding application, use the <a href="../docker-beginners.md.html">Docker beginner walkthrough</a>. Install a local Docker Engine with Compose v2, or the documented Docker-compatible desktop engine, and configure your ordinary user&#x27;s engine access. From the extracted course folder containing <code>compose.yaml</code>, run:</p>
+<pre><code class="language-bash">bash scripts/docker_lab.sh start</code></pre>
+<p>This route needs no host Python, native PostgreSQL, or VS Code installation. The launcher builds when needed, waits for the app, and opens <code>http://127.0.0.1:8765/learn</code> when a desktop browser is available. It also prints the URL. Saved learning work lives in the host <code>.learning</code> folder; the PostgreSQL database uses separate Docker storage. A fresh course database uses the limited login <code>admin</code> / password <code>admin</code>.</p>
+<p>Continue below for native Python, notebooks, or a native PostgreSQL server.</p>
 <h3 id="1-install-base-tools">1. Install base tools<a class="heading-anchor" href="#1-install-base-tools" aria-label="Link to this section">#</a></h3>
 <p>On a distribution that provides Python 3.12:</p>
 <pre><code class="language-bash">sudo apt-get update
@@ -165,10 +170,10 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_ver
 <p>Pass the same native username/socket route to doctor and guided SQL notebooks:</p>
 <pre><code class="language-bash">export DS60_DATABASE_URL=advanced_sql_training
 .venv/bin/python scripts/course.py doctor</code></pre>
-<p>Expect the course database to be reachable, then launch the portal from this same terminal. Repeat the export in a new terminal. The tools otherwise use the container&#x27;s <code>ds60</code> TCP connection. See <a href="postgresql.md.html">Local PostgreSQL</a> for password authentication and the separate JupySQL URL.</p>
+<p>Expect the course database to be reachable, then launch the portal from this same terminal. Repeat the export in a new terminal. The tools otherwise use the configured course TCP connection. See <a href="postgresql.md.html">Local PostgreSQL</a> for password authentication and the separate JupySQL URL.</p>
 <p>If <code>systemctl</code> is unavailable, use your distribution&#x27;s service manager. WSL learners should keep the repository, interpreter, VS Code remote window, and PostgreSQL client in the same Linux environment, or follow the native Windows guide consistently. A Windows <code>.venv</code> cannot be used as a Linux <code>.venv</code>.</p>
-<h4 id="canonical-container-environment">Canonical container environment<a class="heading-anchor" href="#canonical-container-environment" aria-label="Link to this section">#</a></h4>
-<p>Docker-based automation uses PostgreSQL 17 and avoids host authentication differences. Install Docker Engine and the Compose plugin through the <a href="https://docs.docker.com/engine/install/">official Linux installation guide</a>, then follow the <a href="postgresql.md.html#route-a-the-course-container">container setup and first query</a>. That path explains readiness, host-client requirements, ports, and preserving database state. A first image download is required. See <a href="../validation.md.html">Validation</a>.</p>
+<h4 id="canonical-container-alternative">Canonical container alternative<a class="heading-anchor" href="#canonical-container-alternative" aria-label="Link to this section">#</a></h4>
+<p>For the full browser app, use the <a href="../docker-beginners.md.html">Docker beginner walkthrough</a>. Its shell launcher prepares host persistence and opens the ready browser without a native Python environment. For a SQL-only container server or later host notebooks, use <a href="postgresql.md.html#route-a-the-course-container">Local PostgreSQL</a>. That guide explains seed setup, the separate host-client requirement, ports, authentication, and shutdown that preserves data.</p>
 <h3 id="5-start-learning">5. Start learning<a class="heading-anchor" href="#5-start-learning" aria-label="Link to this section">#</a></h3>
 <p>For the guided dashboard, file-backed progress, and exact VS Code/Jupyter lesson actions, start the private loopback portal and keep its terminal open:</p>
 <pre><code class="language-bash">.venv/bin/python scripts/learning_portal.py</code></pre>

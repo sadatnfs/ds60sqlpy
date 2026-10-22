@@ -87,6 +87,12 @@ def main() -> int:
     sql = call("run", lesson_id="sql-start-01", language="sql", code="SELECT 42 AS answer;")
     if sql["returncode"] or json.loads(sql["output"])["results"][0]["rows"] != [[42]]:
         raise RuntimeError("The PostgreSQL coding backend did not produce one row containing 42.")
+    role = call("run", lesson_id="sql-start-01", language="sql", code="SELECT current_user;")
+    if role["returncode"] or json.loads(role["output"])["results"][0]["rows"][0][0] not in {
+        "admin",
+        "ds60",
+    }:
+        raise RuntimeError("The SQL pad did not show the limited course role without masking it.")
     denied = call(
         "run",
         lesson_id="sql-start-01",

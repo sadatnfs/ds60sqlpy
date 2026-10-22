@@ -141,6 +141,57 @@ def test_python_backend_does_not_inherit_implicit_notebook_state(course: Catalog
     assert "NameError" in result["output"]
 
 
+def test_public_course_default_does_not_corrupt_username_or_column_observations(
+    course: Catalog, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ds60sqlpy.sql_runner import DEFAULT_DATABASE_URL
+
+    monkeypatch.setenv("DS60_DATABASE_URL", DEFAULT_DATABASE_URL)
+    monkeypatch.setenv("PGUSER", "admin")
+    monkeypatch.setenv("PGPASSWORD", "admin")
+    monkeypatch.setenv("PGDATABASE", "advanced_sql_training")
+    monkeypatch.setenv("PGHOST", "127.0.0.1")
+    result = PadRunner(course).run("python-01", "python", "print('admin admin_total')")
+    assert result["returncode"] == 0
+    assert result["output"].strip() == "admin admin_total"
+
+
+def test_public_password_exception_requires_an_explicit_local_course_target() -> None:
+    authority = "postgresql://admin:" + "admin@"
+    for environment in (
+        {"PGPASSWORD": "admin", "PGUSER": "admin", "PGDATABASE": "advanced_sql_training"},
+        {"DS60_DATABASE_URL": authority + "remote.invalid/advanced_sql_training"},
+        {"DS60_DATABASE_URL": authority + "localhost/private"},
+    ):
+        assert PadRunner._redact("admin", environment) == "[redacted]"
+
+
+def test_plot_cache_is_shared_across_lessons_and_preserves_existing_files(
+    course: Catalog, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    second = replace(course.get("python-01"), id="python-02", day=2)
+    catalog = Catalog(course.repo_root, (course.get("python-01"), second))
+    runner = PadRunner(catalog)
+    environments: list[dict[str, str]] = []
+
+    def capture(command: list[str], environment: dict[str, str], language: str) -> PadResult:
+        environments.append(environment)
+        return PadResult(
+            language=language, returncode=0, output="", elapsed_seconds=0.01, stopped=None
+        )
+
+    monkeypatch.setattr(runner, "_execute", capture)
+    runner.run("python-01", "python", "print(1)")
+    cache = Path(environments[0]["MPLCONFIGDIR"])
+    sentinel = cache / "existing-font-cache.json"
+    sentinel.write_text("preserved", encoding="utf-8")
+    runner.run("python-02", "python", "print(2)")
+    assert environments[0]["MPLBACKEND"] == "Agg"
+    assert environments[1]["MPLCONFIGDIR"] == str(cache)
+    assert cache == course.repo_root / ".learning/cache/matplotlib" / sys.platform
+    assert sentinel.read_text(encoding="utf-8") == "preserved"
+
+
 def test_empty_saved_pad_and_changed_versions_remain_recoverable(course: Catalog) -> None:
     runner = PadRunner(course)
     assert runner.saved("python-01", "python") is False
@@ -159,6 +210,35 @@ def test_empty_saved_pad_and_changed_versions_remain_recoverable(course: Catalog
     assert len(versions) == 2
     assert runner.read_history("python-01", "python", versions[0]["id"]) == "print(1)"
     assert runner.read("python-01", "python") == "print(2)"
+
+
+def test_lf_submissions_preserve_exact_bytes_and_do_not_create_false_history(
+    course: Catalog, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import hashlib
+
+    runner = PadRunner(course)
+    code = "first = 1\nprint(first)\n"
+    path = runner.save("python-01", "python", code)
+    assert path.read_bytes() == code.encode("utf-8")
+    runner.save("python-01", "python", code)
+    assert runner.history("python-01", "python") == []
+    snapshots: list[bytes] = []
+
+    def execute(source: Path, language: str) -> dict[str, object]:
+        snapshots.append(source.read_bytes())
+        return {"returncode": 0}
+
+    monkeypatch.setattr(runner, "_run_snapshot", execute)
+    result = runner.run("python-01", "python", code)
+    assert snapshots == [code.encode("utf-8")]
+    assert result["source_sha256"] == hashlib.sha256(snapshots[0]).hexdigest()
+    assert runner.history("python-01", "python") == []
+    path.write_bytes(code.replace("\n", "\r\n").encode("utf-8"))
+    runner.save("python-01", "python", code)
+    assert len(runner.history("python-01", "python")) == 1
+    runner.save("python-01", "python", code)
+    assert len(runner.history("python-01", "python")) == 1
 
 
 def test_history_is_bounded_in_listings_without_deleting_old_work(course: Catalog) -> None:

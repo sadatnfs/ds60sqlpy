@@ -276,7 +276,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-04`
-(Day 4 — Loops, Comprehensions, and Generators). Direct catalog prerequisites: `python-foundations-02`.
+(Day 4: Loops, Comprehensions, and Generators). Direct catalog prerequisites: `python-foundations-02`.
 I have completed the direct prerequisites: `python-foundations-02`. Emphasize iteration, eager collection building, and lazy generators.
 Read `python/ds-60day/companion-guides/day04_loops_comprehensions_generators.md` and use the learner notebook
 `python/ds-60day/notebooks/day04_loops_comprehensions_generators.ipynb`. Do not open or quote anything under `solutions/` unless

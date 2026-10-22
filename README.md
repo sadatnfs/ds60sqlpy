@@ -36,16 +36,34 @@ hints, and a route generated from your goal's prerequisites. It runs locally
 and works offline after the required tools, images, and lesson packages have
 been prepared.
 
-**Consistent setup on any supported OS:** install Docker with Compose, then run
-from the repository root:
+**Docker browser lab on Windows, macOS, or Linux:** follow the
+[beginner walkthrough](docs/docker-beginners.md) to install the engine,
+prepare Windows WSL 2 if needed, and extract the course folder. No host Python,
+PostgreSQL, or course package installation is required for this route.
 
-```text
-docker compose --profile lab up --build
+With the engine running, Windows users can double-click
+`START_DOCKER_LAB.cmd`; Mac users can double-click `START_DOCKER_LAB.command`.
+The terminal alternatives, from the folder containing `compose.yaml`, are:
+
+```powershell
+# Windows PowerShell
+powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 start
 ```
 
-Open [the local learning lab](http://127.0.0.1:8765/learn). The initial image
-build needs internet access. Later starts reuse the images and persistent
-learner/database volumes. This is a personal environment for trusted code.
+```bash
+# macOS, Linux, or an integrated WSL 2 terminal
+bash scripts/docker_lab.sh start
+```
+
+The launcher builds when needed, waits for readiness, and opens
+[the local learning lab](http://127.0.0.1:8765/learn). The first build needs
+internet; later starts reuse local images. Saved pads, history, evidence, and
+progress live in the host `.learning` folder, so replacing a container keeps
+them. PostgreSQL has a separate persistent volume and uses the limited local
+course login `admin` / password `admin`. Use the same launcher with `stop` to
+pause without deleting either store. [Backup, custom folders, ports, and
+troubleshooting](docs/docker-beginners.md#6-find-the-host-files-that-preserve-your-work)
+are covered step by step.
 
 **Use native backends:** finish your [operating-system setup](docs/setup/first-success.md),
 then double-click `START_LEARNING_LAB.cmd` on Windows. On macOS/Linux:

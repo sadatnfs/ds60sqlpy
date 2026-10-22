@@ -5,8 +5,10 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import quote, urlunsplit
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.runtime_environment import external_dll_directory, external_program_environment
@@ -16,7 +18,22 @@ from ds60sqlpy.sql_notebook import (
     validate_course_database_target,
 )
 
-DEFAULT_DATABASE_URL = "postgresql://ds60:ds60@localhost:5432/advanced_sql_training"
+# Public disposable-course defaults, never production credentials.
+# secret-scan: allow-fixture
+DEFAULT_DATABASE_URL = "postgresql://admin:admin@localhost:55432/advanced_sql_training"
+
+
+def default_course_database_url(environment: Mapping[str, str] | None = None) -> str:
+    """Choose a host target or safely encoded private-container course target."""
+
+    settings = os.environ if environment is None else environment
+    if settings.get("DS60_CONTAINER") != "1":
+        return DEFAULT_DATABASE_URL
+    user = quote(settings.get("DS60_COURSE_USER", "admin"), safe="")
+    password = quote(settings.get("DS60_COURSE_PASSWORD", "admin"), safe="")
+    return urlunsplit(
+        ("postgresql", f"{user}:{password}@127.0.0.1:5432", "/advanced_sql_training", "", "")
+    )
 
 
 class SqlRunnerError(RuntimeError):
@@ -53,7 +70,7 @@ class SqlRunner:
         self.executable = executable
         self.catalog = catalog
         database_target = (
-            database_url or os.environ.get("DS60_DATABASE_URL") or DEFAULT_DATABASE_URL
+            database_url or os.environ.get("DS60_DATABASE_URL") or default_course_database_url()
         )
         try:
             self.database_url = validate_course_database_target(database_target)

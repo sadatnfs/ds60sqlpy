@@ -38,6 +38,7 @@ COURSE_GUIDE_REFERENCE_PATHS = (
     "docs/learning-with-codex.md",
     "docs/professional-paths.md",
     "docs/offline-app.md",
+    "docs/docker-beginners.md",
     "docs/mcp-tutor.md",
     "docs/learning-paths.md",
     "docs/repository-tour.md",
@@ -797,7 +798,7 @@ def _run_copy(lesson: Lesson) -> tuple[str, str]:
                 "notebook</strong>. It opens an editable copy, a safe database-preparation "
                 "step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript "
                 "in one JupyterLab notebook. The target must be the disposable "
-                "<code>advanced_sql_training</code> database—never a shared or valuable one."
+                "<code>advanced_sql_training</code> database, never a shared or valuable one."
             ),
         )
     return (

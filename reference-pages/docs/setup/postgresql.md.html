@@ -125,6 +125,11 @@
 <th>What you need</th>
 </tr></thead><tbody>
 <tr>
+<td>Browser app in Docker</td>
+<td>You want the guided coding page and host-saved progress</td>
+<td><a href="../docker-beginners.md.html">Docker beginner walkthrough</a>; no native Python or PostgreSQL needed</td>
+</tr>
+<tr>
 <td>Native server</td>
 <td>You want the normal local database workflow</td>
 <td>Your <a href="first-success.md.html#1-choose-the-matching-operating-system-guide">OS setup guide</a>, PostgreSQL server, <code>psql</code>, and local authentication</td>
@@ -137,36 +142,37 @@
 </tbody></table></div>
 <p>Choose one for your first session. If both servers run, they need different ports. A container-only SQL workflow does not require a host PostgreSQL server or host <code>psql</code>; the <code>sql-runner</code> container supplies its own client.</p>
 <h3 id="route-a-the-course-container">Route A: the course container<a class="heading-anchor" href="#route-a-the-course-container" aria-label="Link to this section">#</a></h3>
+<p>For the full browser application with automatic opening and a host-backed learning folder, begin with the <a href="../docker-beginners.md.html">Docker walkthrough</a>. The remaining commands are the SQL-only terminal route and the optional connection from host notebooks. They use the same <code>ds60-learning</code> project. A fresh database uses <code>admin</code> / <code>admin</code>, a limited course role, on host port 55432 by default. The bootstrap administrator is a separate account.</p>
 <p>Start Docker first. Confirm both tools respond:</p>
 <pre><code class="language-text">docker --version
 docker compose version</code></pre>
 <p>From the repository root, use the same commands in PowerShell and Bash:</p>
-<pre><code class="language-text">docker compose up -d postgres
-docker compose ps
-docker compose run --rm sql-runner -c &quot;SELECT current_database(), 2 + 3 AS first_result;&quot;</code></pre>
-<p>Expect <code>advanced_sql_training</code> and <code>5</code>. The <code>sql-runner</code> waits for the server&#x27;s health check. A running container alone is not proof the database is ready; this distinction follows <a href="https://docs.docker.com/compose/how-tos/startup-order/">Compose&#x27;s startup-order documentation</a>. If a command fails, inspect <code>docker compose logs postgres</code> before rerunning it.</p>
+<pre><code class="language-text">docker compose --project-name ds60-learning up -d postgres
+docker compose --project-name ds60-learning ps
+docker compose --project-name ds60-learning run --rm sql-runner -c &quot;SELECT current_database(), 2 + 3 AS first_result;&quot;</code></pre>
+<p>Expect <code>advanced_sql_training</code> and <code>5</code>. The <code>sql-runner</code> waits for the server&#x27;s health check. A running container alone is not proof the database is ready; this distinction follows <a href="https://docs.docker.com/compose/how-tos/startup-order/">Compose&#x27;s startup-order documentation</a>. If a command fails, inspect <code>docker compose --project-name ds60-learning logs postgres</code> before rerunning it.</p>
 <p>Initialize the disposable seed and run the invariant checks:</p>
-<pre><code class="language-text">docker compose run --rm sql-runner -f sql/postgres-60day/00_setup.sql
-docker compose run --rm sql-runner -f sql/postgres-60day/00_verify.sql
-docker compose run --rm sql-runner -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
+<pre><code class="language-text">docker compose --project-name ds60-learning run --rm sql-runner -f sql/postgres-60day/00_setup.sql
+docker compose --project-name ds60-learning run --rm sql-runner -f sql/postgres-60day/00_verify.sql
+docker compose --project-name ds60-learning run --rm sql-runner -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
 <p>Each command must exit successfully. The verifier checks more than whether a table exists. You should see Day 1&#x27;s result tables after it succeeds. <code>sql-runner</code> already supplies <code>-X -v ON_ERROR_STOP=1</code> and the fixed course target.</p>
 <p>To use <strong>guided SQL notebooks</strong>, also install the PostgreSQL client tools on the host and confirm <code>psql --version</code>. The notebook launches host <code>psql</code>; it does not automatically execute a container. The standalone Docker commands above remain available if you do not install that host client.</p>
-<p>The runner defaults to the course container&#x27;s disposable local <code>ds60</code> connection. When switching from a native server, explicitly choose that URL in the terminal that starts the portal:</p>
+<p>The container runner uses the fresh course database&#x27;s limited <code>admin</code> connection. A host client needs its own explicit target. When switching from a native server, explicitly choose that URL in the terminal that starts the portal:</p>
 <pre><code class="language-powershell"># Windows PowerShell
-$env:DS60_DATABASE_URL = &quot;postgresql://ds60:ds60@localhost:5432/advanced_sql_training&quot;</code></pre>
+$env:DS60_DATABASE_URL = &quot;postgresql://admin:admin@127.0.0.1:55432/advanced_sql_training&quot;</code></pre>
 <pre><code class="language-bash"># macOS/Linux
-export DS60_DATABASE_URL=&quot;postgresql://ds60:ds60@localhost:5432/advanced_sql_training&quot;</code></pre>
+export DS60_DATABASE_URL=&quot;postgresql://admin:admin@127.0.0.1:55432/advanced_sql_training&quot;</code></pre>
 <p>For a port conflict, choose a new host port before starting the container:</p>
 <pre><code class="language-powershell"># Windows PowerShell
-$env:DS60_POSTGRES_PORT = &quot;55432&quot;
-docker compose up -d postgres
-$env:DS60_DATABASE_URL = &quot;postgresql://ds60:ds60@localhost:55432/advanced_sql_training&quot;</code></pre>
+$env:DS60_POSTGRES_PORT = &quot;55433&quot;
+docker compose --project-name ds60-learning up -d postgres
+$env:DS60_DATABASE_URL = &quot;postgresql://admin:admin@127.0.0.1:55433/advanced_sql_training&quot;</code></pre>
 <pre><code class="language-bash"># macOS/Linux
-export DS60_POSTGRES_PORT=55432
-docker compose up -d postgres
-export DS60_DATABASE_URL=&quot;postgresql://ds60:ds60@localhost:55432/advanced_sql_training&quot;</code></pre>
-<p>Container-to-container <code>sql-runner</code> commands still use port 5432 internally. For normal shutdown run <code>docker compose down</code>. It preserves the database volume. Volume deletion is a separate destructive operation and is not needed to stop or resume study.</p>
-<p>On Windows with no native <code>psql</code>, use <code>&amp; .\scripts\bootstrap_windows.ps1 -SkipPostgreSql</code> to prepare Python, then the Docker commands above for SQL. The regular Windows launcher expects a host client unless <code>-SkipPostgreSql</code> is explicitly supplied.</p>
+export DS60_POSTGRES_PORT=55433
+docker compose --project-name ds60-learning up -d postgres
+export DS60_DATABASE_URL=&quot;postgresql://admin:admin@127.0.0.1:55433/advanced_sql_training&quot;</code></pre>
+<p>Container-to-container <code>sql-runner</code> commands still use port 5432 internally. For normal shutdown use the matching Docker launcher <code>stop</code>, or run <code>docker compose --project-name ds60-learning stop</code>. Both preserve the database volume. Saved browser work remains in the separate host <code>.learning</code> bind mount. Volume deletion is a separate destructive operation and is not needed to stop or resume study.</p>
+<p>The Docker browser app and SQL-only commands above do not need host Python or host <code>psql</code>. If you separately want Windows host notebooks, use <code>&amp; .\scripts\bootstrap_windows.ps1 -SkipPostgreSql</code> for native Python, then install PostgreSQL client tools for notebook-launched SQL. The native <code>START_DS60.cmd</code> workflow differs from the Docker <code>START_DOCKER_LAB.cmd</code> workflow; choose the one matching where execution happens.</p>
 <h3 id="route-b-the-native-server">Route B: the native server<a class="heading-anchor" href="#route-b-the-native-server" aria-label="Link to this section">#</a></h3>
 <p>Complete your <a href="windows.md.html#5-set-up-postgresql">Windows</a>, <a href="macos.md.html#4-set-up-postgresql">macOS</a>, or <a href="linux.md.html#4-set-up-postgresql">Linux</a> instructions first. They explain installing, starting, creating the local role, and creating <code>advanced_sql_training</code>.</p>
 <h4 id="macos-and-linux-with-the-normal-username-socket-connection">macOS and Linux with the normal username/socket connection<a class="heading-anchor" href="#macos-and-linux-with-the-normal-username-socket-connection" aria-label="Link to this section">#</a></h4>
@@ -195,11 +201,11 @@ export DS60_DATABASE_URL=&quot;postgresql://postgres@localhost:5432/advanced_sql
 <ol>
 <li>Run doctor using the repository interpreter in the terminal with your chosen connection. Expect the course database to be reachable.</li>
 <li>Start the learning portal in that same terminal.</li>
-<li>Open <code>sql-01</code> and choose <strong>Create/open guided SQL notebook</strong>.</li>
+<li>Open <code>sql-start-01</code> for the beginner fixture, or <code>sql-01</code> after completing the on-ramp, and choose <strong>Create/open guided SQL notebook</strong>.</li>
 <li>Run the notebook&#x27;s read-only readiness step, read the reset notice before initializing the disposable seed, and run Day 1.</li>
 <li>Check the output against the lesson guide. Keep personal SQL in the ignored working copy under <code>.learning/sql/sql-01/</code>.</li>
 </ol>
-<p>The <code>DS60_DATABASE_URL</code> setting lasts for the terminal and its child processes. Repeat it in a new terminal. A <code>.env</code> file is not automatically loaded. Doctor proves bounded connectivity. Seed verification proves the fixture invariants. Successful Day 1 execution proves that lesson path. None of those checks proves that every later lesson or native OS configuration has run.</p></article>
+<p>The <code>DS60_DATABASE_URL</code> setting lasts for the terminal and its child processes. Repeat it in a new terminal. Native course tools do not automatically load <code>.env</code>; Compose has its own configuration mechanism. The browser container receives its internal database target from the Docker startup configuration, not the host port in a native notebook URL. Doctor proves bounded connectivity. Seed verification proves the fixture invariants. Successful Day 1 execution proves that lesson path. None of those checks proves that every later lesson or native OS configuration has run.</p></article>
   </main>
 </body>
 </html>

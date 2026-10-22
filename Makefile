@@ -1,6 +1,6 @@
-PYTHON ?= python3
+PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 
-.PHONY: help setup generate check lab mcp app docker
+.PHONY: help setup generate check lab mcp app docker docker-stop docker-status
 help:
 	@echo "setup: install learner environment; lab: open coding lab; app: build native executable"
 	@echo "generate: refresh catalog/readers/reports; check: validate; docker: build browser lab"
@@ -29,4 +29,10 @@ app: generate
 	$(PYTHON) scripts/build_app.py
 
 docker:
-	docker compose --profile lab up --build
+	bash scripts/docker_lab.sh start --build
+
+docker-stop:
+	bash scripts/docker_lab.sh stop
+
+docker-status:
+	bash scripts/docker_lab.sh status

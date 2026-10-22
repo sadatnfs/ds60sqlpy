@@ -17,7 +17,7 @@ from ds60sqlpy.sql_notebook import (
     course_psql_environment,
     validate_course_database_target,
 )
-from ds60sqlpy.sql_runner import DEFAULT_DATABASE_URL
+from ds60sqlpy.sql_runner import default_course_database_url
 
 Status = Literal["pass", "warn", "fail"]
 
@@ -49,7 +49,7 @@ def _version(command: list[str], timeout: float = 4.0) -> str | None:
 def _course_database_diagnostic(psql: str) -> Diagnostic:
     """Check the disposable course database without prompting or changing it."""
 
-    database_url = os.environ.get("DS60_DATABASE_URL") or DEFAULT_DATABASE_URL
+    database_url = os.environ.get("DS60_DATABASE_URL") or default_course_database_url()
     try:
         database_target = validate_course_database_target(database_url)
     except SqlNotebookError:

@@ -125,8 +125,8 @@
 </tr></thead><tbody>
 <tr>
 <td>Full local suite</td>
-<td>623 passed, 2 skipped, 10 subtests passed</td>
-<td>The two skips require a native Windows PowerShell parser unavailable on the macOS host.</td>
+<td>653 passed and 10 subtests passed, with no skips</td>
+<td>Includes live PostgreSQL tests and portable PowerShell parser checks on macOS; this is not native Windows execution.</td>
 </tr>
 <tr>
 <td>Catalog and structure</td>
@@ -140,7 +140,7 @@
 </tr>
 <tr>
 <td>Generated delivery</td>
-<td>Course dashboard, 168 readers, 46 references regenerated and drift-checked</td>
+<td>Course dashboard, 168 readers, 47 references regenerated and drift-checked</td>
 <td>Generated outputs derive from authored sources and catalog metadata.</td>
 </tr>
 <tr>
@@ -175,8 +175,8 @@
 </tr>
 <tr>
 <td>Browser application</td>
-<td>Actual Python/SQL runs, NULL result tables, recovery history, blank pads, saved evidence, keyboard tabs, mobile width, clean console</td>
-<td>Browser review used the live local application, not screenshots alone.</td>
+<td>Actual Python/SQL runs and plots, multiple SQL result tables with NULL, recovery history, blank pads, saved evidence, route restoration, editor shortcuts, keyboard tabs, mobile focus behavior, and a clean console</td>
+<td>Browser review used the live local application, not screenshots alone; small text contrast was measured.</td>
 </tr>
 <tr>
 <td>Native executable</td>
@@ -185,13 +185,13 @@
 </tr>
 <tr>
 <td>Docker application</td>
-<td>Local Linux ARM64 image built and started; Python/SQL HTTP smoke, reset, restricted-role checks, and recreation/image-replacement persistence passed</td>
-<td>46 in-container backend/app tests passed; user containers outside the isolated test project were preserved. No image was pushed.</td>
+<td>Local Linux ARM64 image built and started with limited admin/admin course credentials; Python/SQL HTTP smoke, reset, restricted-role checks, and both host launchers passed</td>
+<td>54 in-container backend/app tests passed. Shared font cache warmup produced first plots in about 1.6 seconds. Other workloads were preserved; no image was pushed.</td>
 </tr>
 <tr>
 <td>Data preservation</td>
-<td>12 demo learner-state files preserved byte-for-byte through official asset refresh; 1,103 official assets checked without drift</td>
-<td>This was the newly created test workspace, not an overwrite of a human learner&#x27;s edited course.</td>
+<td>18 learning-state files survived reuse of the same host folder by a fresh Compose project; saved pads, notes, evidence and history remained readable. Explicit UID501/GID20 preserved existing host-note bytes and mode</td>
+<td>Disposable task folders were used. Earlier 12-file volume/asset-refresh checks also passed; human learner state was not replaced.</td>
 </tr>
 <tr>
 <td>Legacy volume migration</td>
@@ -205,8 +205,8 @@
 </tr>
 <tr>
 <td>Portability and quality</td>
-<td>Four-platform all-extras lock dry-runs, Ruff, formatting, strict mypy, secret/history scan, and diff checks passed</td>
-<td>Dependency resolution and workflow definitions are not substitutes for native Windows/Linux execution.</td>
+<td>Four-platform all-extras lock dry-runs, Ruff, formatting, strict mypy, secret/history scan, and diff checks passed. Seven fake-Docker PowerShell launcher scenarios and 42 PowerShell/51 Bash documentation fences passed</td>
+<td>Official portable PowerShell 7.6.8 was checksum-verified and used privately on macOS. Windows 5.1 syntax compatibility was inspected; native Windows/Linux runtime and a rootless daemon were not executed locally.</td>
 </tr>
 </tbody></table></div>
 <p>The coding application is a personal trusted-code environment. Default runs have bounded execution/output and process cleanup. SQL uses only the exact local disposable target and a limited login. Completion records require saved prediction, attempt and explanation, but remain learner-confirmed evidence rather than automatic grading. See <a href="offline-app.md.html">application and build details</a> and <a href="mcp-tutor.md.html">MCP tutoring</a>.</p>

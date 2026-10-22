@@ -150,9 +150,9 @@ docker compose run --rm sql-runner -f sql/postgres-60day/00_verify.sql</code></p
 <p>The notebook reads <code>DS60_DATABASE_URL</code>. Keep it in the terminal environment; do not paste a real password into the notebook, commit it, or print it.</p>
 <p>For the repository&#x27;s disposable Compose database:</p>
 <pre><code class="language-powershell"># Windows PowerShell
-$env:DS60_DATABASE_URL = &quot;postgresql://ds60:ds60@localhost:5432/advanced_sql_training&quot;</code></pre>
+$env:DS60_DATABASE_URL = &quot;postgresql://admin:admin@localhost:55432/advanced_sql_training&quot;</code></pre>
 <pre><code class="language-bash"># macOS/Linux
-export DS60_DATABASE_URL=&quot;postgresql://ds60:ds60@localhost:5432/advanced_sql_training&quot;</code></pre>
+export DS60_DATABASE_URL=&quot;postgresql://admin:admin@localhost:55432/advanced_sql_training&quot;</code></pre>
 <p>Those <code>ds60</code> credentials belong only to the disposable local Compose service. For native PostgreSQL, use the local role and authentication method from the OS setup guide. If a password must appear in a URL, percent-encode reserved characters and keep the value out of shell history and repository files; a local password file or operating-system credential store is preferable.</p>
 <p>For a native macOS/Linux username-and-socket route, this dedicated JupySQL notebook needs <code>postgresql:///advanced_sql_training</code> rather than the literal database name accepted by the <code>psql</code>-based guided notebooks. See <a href="postgresql.md.html">Local PostgreSQL</a> for this distinction and socket-location troubleshooting.</p>
 <p>Closing the terminal clears these process-scoped settings. A personal <code>.env</code> file is ignored by Git, but the notebook deliberately does not load one silently.</p>

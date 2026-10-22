@@ -6,11 +6,14 @@ import os
 import re
 import subprocess
 from dataclasses import dataclass
+from html import unescape
 from pathlib import Path
 from typing import Final
 
 REPO_ROOT: Final = Path(__file__).resolve().parents[2]
 ALLOW_MARKER: Final = "secret-scan: allow-fixture"
+# secret-scan: allow-fixture
+PUBLIC_ADMIN_AUTHORITY: Final = "postgresql://admin:admin@"
 ALLOWED_LOCAL_AUTHORITIES: Final = frozenset(
     {
         "postgresql://ds60:ds60@",
@@ -149,6 +152,16 @@ def scan_text(path: Path, text: str) -> list[Finding]:
             continue
         for kind, pattern in PATTERNS:
             for match in pattern.finditer(line):
+                if (
+                    kind == "credential-bearing URL"
+                    and match.group(0) == PUBLIC_ADMIN_AUTHORITY
+                    and re.match(
+                        r"(?:localhost|127\.0\.0\.1|\[::1\])(?::[0-9]+)?"
+                        r"/advanced_sql_training(?=$|[\s`'\"<>)\]])",
+                        unescape(line[match.end() :]),
+                    )
+                ):
+                    continue
                 if kind == "credential-bearing URL" and any(
                     allowed in match.group(0) for allowed in ALLOWED_LOCAL_AUTHORITIES
                 ):

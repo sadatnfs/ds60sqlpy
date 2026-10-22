@@ -269,7 +269,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-02`
-(Day 2 — Variables and Core Types). Direct catalog prerequisites: `python-foundations-01`.
+(Day 2: Variables and Core Types). Direct catalog prerequisites: `python-foundations-01`.
 I have completed the direct prerequisites: `python-foundations-01`. Emphasize objects, names, built-in types, conversion, and truthiness.
 Read `python/ds-60day/companion-guides/day02_basics_types.md` and use the learner notebook
 `python/ds-60day/notebooks/day02_basics_types.ipynb`. Do not open or quote anything under `solutions/` unless

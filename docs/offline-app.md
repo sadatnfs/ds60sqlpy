@@ -16,27 +16,77 @@ The native executable contains its own application runtime. Its coding pads use 
 
 ## Docker browser lab
 
-From the repository root, while connected for the build:
+Begin with the [Docker beginner walkthrough](docker-beginners.md) if installing
+an engine, WSL 2, terminals, or container persistence is new. It covers Windows,
+macOS, Linux, and a Docker-compatible local Rancher Desktop Moby engine.
+The browser route requires no host Python, native PostgreSQL, or course package
+installation. With the engine running, Windows users can double-click
+`START_DOCKER_LAB.cmd`; Mac users can double-click
+`START_DOCKER_LAB.command`. Terminal alternatives from the repository root are:
 
-```text
-docker compose --profile lab up --build
+```powershell
+# Windows PowerShell
+powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 start
 ```
 
-Wait for PostgreSQL to be healthy and the application startup message. Open [the local coding lab](http://127.0.0.1:8765/learn) using that exact address. The application validates its Host header. `localhost` is a different host label and is deliberately not an alias for this session.
-
-The database and app share a container network namespace. The application reaches PostgreSQL through loopback rather than weakening the course database's local-target validation. Host ports are published only on `127.0.0.1`. The app runs as the unprivileged `learner` operating-system user, with dropped capabilities, a process limit, and a memory limit. This is a personal trusted-code environment, not a service for untrusted users or arbitrary submissions from the Internet.
-
-The `postgres-data` named volume holds database data. The `learner-work` volume holds a persistent copy of the course and `.learning/` pads, progress, and evidence. Stop with Ctrl+C; start again with the same command or `docker compose --profile lab up`. Stop detached services with:
-
-```text
-docker compose --profile lab stop
+```bash
+# macOS/Linux/WSL
+bash scripts/docker_lab.sh start
 ```
 
-Do not remove volumes to troubleshoot a lesson. Volume removal deletes saved work or database state. To back up work, copy `/workspace/.learning/` out of the app container before moving to another computer. Docker's [volume documentation](https://docs.docker.com/engine/storage/volumes/) explains persistence and backup.
+The launcher builds when needed, starts the containers, waits for HTTP
+readiness, and opens the host browser. Use the printed exact URL, normally
+[the local coding lab](http://127.0.0.1:8765/learn). The app validates its Host
+header. `localhost` is a different host label. For ports, a custom learning
+folder, no-browser mode, or a deliberate rebuild, see the
+[launcher examples](docker-beginners.md#7-stop-resume-and-rebuild-without-losing-progress).
 
-The image uses the checked-in `uv.lock` and installs the Core profile. Building requires package/image downloads. Once both images and volumes are present, start the lab without downloading again. Heavy optional deep-learning, NLP, and geospatial dependencies are not included in the default image. A lesson's dependency label still applies. For a deliberately offline classroom, rehearse every selected lesson before disconnecting, following [offline preparation](setup/offline.md).
+Course files are copied from the current image into the replaceable container
+workspace. Only the host learning folder is mounted at
+`/workspace/.learning`. Its default is `.learning` inside the repository;
+`--data-dir` on Bash/Python or `-DataDir` on PowerShell selects another absolute
+host folder. Saved pads, history, evidence, and progress therefore survive
+container replacement and can be reused by a future course image. The user
+home for container settings/caches also lives under `.learning/home`.
+Matplotlib uses reusable platform-specific font metadata under
+`.learning/cache/matplotlib/`, so cache preparation can be reused across lessons
+and future containers. Rendered plot images remain run output; save the code
+and evidence needed to reproduce them.
+[Backup and restore instructions](docker-beginners.md#8-back-up-and-restore-the-learning-folder)
+cover copying that host folder while the app is stopped. Existing host data is
+preserved. Older `learner-work` volumes require an explicit export into an
+unused host folder; startup does not merge or overwrite learner evidence.
 
-The app image does not automatically seed or reset SQL data. Start with `SELECT 1 AS first_result;`, then follow [PostgreSQL setup](setup/postgresql.md) to prepare the disposable training schema. The standalone beginner SQL lessons also include their own small temporary fixtures. Historical complete `.sql` scripts containing `psql` backslash commands run through the guided SQL notebook or terminal route; the SQL pad accepts SQL statements.
+PostgreSQL stores tables separately in the project's `postgres-data` named
+volume. The default project is `ds60-learning`, browser port 8765, and host
+database port 55432. Inside the shared container network namespace the app uses
+loopback port 5432, preserving the course database's exact local-target rule.
+The fresh course login is `admin` / `admin`, with limited database privileges;
+a separate bootstrap login owns cluster administration. The browser supplies
+the course connection internally and needs no website account.
+
+Use the same launcher with `stop` to pause services while preserving both
+stores. Rebuild deliberately with `start --build` on Bash or `start -Build` in
+PowerShell when updating the image. An image build does not replace the host
+learning folder or publish an image. Container removal alone also preserves
+the host folder; database volume deletion is a separate destructive operation.
+
+The image uses `uv.lock` and includes Core dependencies plus PostgreSQL 17
+client tools. Building needs downloads. Later starts reuse local images;
+heavy deep-learning, NLP, and geospatial dependencies and first-use lesson
+assets remain optional. Rehearse planned lessons while connected using
+[offline preparation](setup/offline.md). For direct Compose without the
+launcher, explicitly create the bind directory and pass the correct host UID
+and GID as shown in the [manual route](docker-beginners.md#direct-compose-alternative-without-host-python).
+
+The app does not seed or reset SQL automatically. Start with
+`SELECT 1 AS first_result;`, then use the beginner lesson's temporary fixture
+or explicitly prepare the course schema through the UI. Read the `RESET
+TRAINING` acknowledgement before replacing seeded data. Complete SQL files
+containing `psql` backslash commands use their guided notebook or terminal
+route; the pad accepts SQL statements. The app runs trusted local learner
+code, under the configured mapped user, and exposes no public classroom or
+hosted submission service.
 
 ## Source application
 
@@ -122,11 +172,12 @@ See [MCP tutoring](mcp-tutor.md) for the optional Codex experience and [validati
 ## Limited database logins and existing Docker volumes
 
 New Docker volumes initialize two separate roles. `ds60_admin` is the
-bootstrap administrator; the application and SQL runner continue to use
-`ds60`, a login with `NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION
-NOBYPASSRLS`, no elevated predefined-role memberships, and ownership of only
-the disposable `advanced_sql_training` database. The public local-course
-passwords are `ds60_admin` and `ds60` respectively. Keep these development
+bootstrap administrator; the application and SQL runner use `admin`, a login
+with `NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS`, no elevated
+predefined-role memberships, and ownership of only the disposable
+`advanced_sql_training` database. Its course password is `admin`; the separate
+bootstrap password is `ds60_admin`. The course role's name does not grant it
+cluster-administrator capabilities. Keep these development
 services bound to loopback. The app never uses the bootstrap administrator.
 A limited database owner can create ordinary course objects and reset its own
 course schema, but cannot run server-side programs or read server files using
@@ -142,11 +193,13 @@ administration lessons keep their existing capability rules.
 PostgreSQL initialization scripts run only on an empty volume. Rebuilding the
 app image does **not** demote a legacy `ds60` superuser, change a saved password,
 or erase database data. For an existing disposable course volume, first stop
-its writers and back up any course state you want to keep. First inspect the
-old login without changing it:
+its writers and back up any course state you want to keep. The legacy source
+examples explicitly use its former default project name, `ds60sqlpy`. Inspect
+`docker compose ls` and substitute your real old project name if it differs.
+First inspect the old login without changing it:
 
 ```text
-docker compose exec postgres psql -X -v ON_ERROR_STOP=1 -U ds60 -d advanced_sql_training -c "SELECT oid, rolsuper FROM pg_roles WHERE rolname='ds60';"
+docker compose --project-name ds60sqlpy exec postgres psql -X -v ON_ERROR_STOP=1 -U ds60 -d advanced_sql_training -c "SELECT oid, rolsuper FROM pg_roles WHERE rolname='ds60';"
 ```
 
 If its OID is **10**, this is PostgreSQL's bootstrap superuser. PostgreSQL does
@@ -156,14 +209,16 @@ below. Both administration scripts explicitly reject that case before changing
 roles, ownership, passwords, or rows. Creating another administrator cannot
 remove this PostgreSQL restriction.
 
-For a non-bootstrap `ds60` role, read
+The following legacy commands apply to old volumes whose course role was
+named `ds60`, not a newly initialized `admin` volume. For a non-bootstrap
+legacy `ds60` role, read
 `docker/admin/create-bootstrap-admin.sql` and
 `docker/admin/upgrade-course-role.sql`. When ready, run these two explicit
 commands from the repository root in PowerShell, macOS, or Linux:
 
 ```text
-docker compose exec postgres psql -X -v ON_ERROR_STOP=1 -U ds60 -d advanced_sql_training -f /opt/course-admin/create-bootstrap-admin.sql
-docker compose exec postgres psql -X -v ON_ERROR_STOP=1 -U ds60_admin -d advanced_sql_training -f /opt/course-admin/upgrade-course-role.sql
+docker compose --project-name ds60sqlpy exec postgres psql -X -v ON_ERROR_STOP=1 -U ds60 -d advanced_sql_training -f /opt/course-admin/create-bootstrap-admin.sql
+docker compose --project-name ds60sqlpy exec postgres psql -X -v ON_ERROR_STOP=1 -U ds60_admin -d advanced_sql_training -f /opt/course-admin/upgrade-course-role.sql
 ```
 
 The first command uses the old course administrator to create a separate
@@ -180,27 +235,33 @@ do not paste a password into a SQL file or commit it to the repository.
 Verify through the limited course login:
 
 ```text
-docker compose exec postgres psql -X -v ON_ERROR_STOP=1 -U ds60 -d advanced_sql_training -f /opt/course-admin/verify-course-role.sql
+docker compose --project-name ds60sqlpy exec postgres psql -X -v ON_ERROR_STOP=1 -U ds60 -d advanced_sql_training -f /opt/course-admin/verify-course-role.sql
 ```
 
-Expect `ds60` and `advanced_sql_training` with no exception. Then restart the
-app service if needed. Do not delete either named volume to perform this
+Expect `ds60` and `advanced_sql_training` with no exception for that legacy
+path. To keep using this explicitly selected legacy login with the new image,
+set `DS60_COURSE_USER=ds60` and `DS60_COURSE_PASSWORD` to its existing local
+password in your private Compose configuration. Fresh defaults are
+`admin` / `admin`; changing defaults does not change stored passwords. Then
+restart the app service if needed. Do not delete either named volume to perform this
 upgrade. A failure about inherited memberships requires inspecting that
 volume's role configuration, not bypassing the SQL pad's role guard.
 
 ### Bootstrap role volumes: side-by-side migration
 
 Keep the original database volume. A new cluster with the corrected bootstrap
-role lets restored course objects belong to the limited `ds60` login without
+role lets restored course objects belong to the limited `admin` login without
 renaming the old bootstrap role or reassigning system catalogs. This is an
 explicit migration you choose to perform, not something app startup executes.
-The recipe below assumes the original default Compose project; add your original
-`--project-name` to source commands if you used a different project name.
+The source commands below explicitly name the old default project
+`ds60sqlpy`. Confirm your original project with `docker compose ls`, and
+substitute its actual name if different. The new launcher defaults to
+`ds60-learning`, so a bare command could otherwise select a different project.
 
 Freeze all writers first. Stop the old lab while retaining its database:
 
 ```text
-docker compose stop lab
+docker compose --project-name ds60sqlpy stop lab
 ```
 
 Choose unused archive directory names. The example date is only a label;
@@ -211,7 +272,7 @@ directory already exists.
 ```powershell
 # Windows PowerShell, repository root
 if (-not (Test-Path work)) { New-Item -ItemType Directory -Path work | Out-Null }
-New-Item -ItemType Directory -Path work\course-migration-20261022
+New-Item -ItemType Directory -Path work\course-migration-20261022 -ErrorAction Stop
 ```
 
 ```bash
@@ -226,9 +287,9 @@ keeps this procedure usable in Windows PowerShell as well as POSIX terminals.
 The container-side `mkdir` also refuses an existing destination:
 
 ```text
-docker compose exec -T postgres mkdir /tmp/ds60-course-migration-20261022
-docker compose exec -T postgres pg_dump --username ds60 --dbname advanced_sql_training --format custom --file /tmp/ds60-course-migration-20261022/course.dump
-docker compose cp postgres:/tmp/ds60-course-migration-20261022/course.dump work/course-migration-20261022/course.dump
+docker compose --project-name ds60sqlpy exec -T postgres mkdir /tmp/ds60-course-migration-20261022
+docker compose --project-name ds60sqlpy exec -T postgres pg_dump --username ds60 --dbname advanced_sql_training --format custom --file /tmp/ds60-course-migration-20261022/course.dump
+docker compose --project-name ds60sqlpy cp postgres:/tmp/ds60-course-migration-20261022/course.dump work/course-migration-20261022/course.dump
 ```
 
 The archive contains course data and may contain any personal data you added.
@@ -241,10 +302,11 @@ For the cutover, stop the old database container to free its published ports,
 without deleting containers' volumes. Choose a **new, unused** target Compose
 project name; `ds60-limited` below is an example. If containers or volumes
 already exist for that name, choose another name before continuing. The new
-project creates its own database and learner-work volumes:
+project creates its own database volume. Keep its learning-folder choice
+explicit; do not overwrite or merge an existing host `.learning` tree:
 
 ```text
-docker compose stop postgres
+docker compose --project-name ds60sqlpy stop postgres
 docker compose --project-name ds60-limited up -d postgres
 ```
 
@@ -253,8 +315,8 @@ container and restore as the limited course owner:
 
 ```text
 docker compose --project-name ds60-limited cp work/course-migration-20261022/course.dump postgres:/tmp/course.dump
-docker compose --project-name ds60-limited exec -T postgres pg_restore --exit-on-error --single-transaction --no-owner --no-acl --username ds60 --dbname advanced_sql_training /tmp/course.dump
-docker compose --project-name ds60-limited exec -T postgres psql -X -v ON_ERROR_STOP=1 -U ds60 -d advanced_sql_training -f /opt/course-admin/verify-course-role.sql
+docker compose --project-name ds60-limited exec -T postgres pg_restore --exit-on-error --single-transaction --no-owner --no-acl --username admin --dbname advanced_sql_training /tmp/course.dump
+docker compose --project-name ds60-limited exec -T postgres psql -X -v ON_ERROR_STOP=1 -U admin -d advanced_sql_training -f /opt/course-admin/verify-course-role.sql
 ```
 
 `--no-owner --no-acl` restores objects under the new limited owner rather than
@@ -266,28 +328,37 @@ archive remain available. PostgreSQL documents these restore options in its
 [pg_restore reference](https://www.postgresql.org/docs/17/app-pgrestore.html).
 
 Compare your own table counts, selected identities, constraints, and business
-control totals between the archive's source and the restored database before
-calling the migration accepted. The repository's real PostgreSQL 17 rehearsal
-restored an independent sentinel row with value 7, proved that its new table
-owner is `ds60`, denied server-file access to that role, and verified unchanged
-source role flags, database ownership, and sentinel contents. That rehearsal
-is evidence for the supplied fixture, not acceptance of arbitrary learner data.
+control totals between the source and restored database before accepting the
+migration. The source volume stays intact, and restoration must pass through
+the limited course owner without global privilege grants. PostgreSQL dump
+files do not contain learner pads, progress, or private evidence notes.
 
-Only after verification, start the new project's lab:
+Only after verification, start the new project's lab using its new or
+explicitly selected host learning folder. The shell launchers prepare that
+bind mount and your user identity:
 
-```text
-docker compose --project-name ds60-limited --profile lab up -d lab
+```powershell
+# Windows PowerShell
+powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 start -Project ds60-limited -DataDir "C:\Users\Ada\Documents\DS60 migrated learning"
 ```
 
-The new project's learner workspace starts empty of personal progress. Keep the
-old learner-work volume intact; copy evidence deliberately into unused target
-paths or continue using a separately preserved workspace. Do not overwrite an
-existing `.learning/` tree. If you need to return to the original database,
-stop the new project with `docker compose --project-name ds60-limited stop`
-and restart the original project's `postgres` service. Its original bootstrap
-login remains administrative, so its SQL pad will still reject that login.
-Do not remove either project's volumes until you have independently accepted
-and backed up the new state.
+```bash
+# macOS/Linux/WSL
+bash scripts/docker_lab.sh start --project ds60-limited --data-dir "$HOME/DS60 migrated learning"
+```
+
+Replace the example path with your actual user-owned target folder. Export
+old `/workspace/.learning` into a separate unused host folder before retiring
+its old container; retain the original `learner-work` volume until the exported
+files are verified. Reuse a preserved working copy through `--data-dir` or
+`-DataDir` rather than overwriting another active learning folder. For details,
+see [backing up learning work](docker-beginners.md#8-back-up-and-restore-the-learning-folder).
+
+To return to the original database, stop the new project with
+`docker compose --project-name ds60-limited stop` and restart the original
+project's `postgres` service. Its original bootstrap login remains
+administrative, so the SQL pad still rejects it. Do not remove either project's
+volumes until you have independently accepted and backed up the new state.
 
 For a native installation, connect once through your local administrator and
 create a separate login using an interactive `psql` session:
@@ -339,31 +410,34 @@ between computers instead of concurrently editing a network-mounted copy.
 
 Compose builds the application as the local image `ds60sqlpy-lab:0.3.0`. Its
 `pull_policy: never` prevents an application-image registry pull. Building or
-tagging that image does not publish it. Once it is built and the public
-PostgreSQL base is cached, start it without rebuilding or pulling:
+tagging that image does not publish it. Once it is built and the public PostgreSQL base is cached, use the shell
+launcher for an ordinary start. A manual Compose start additionally needs the
+[bind-directory and user-identity setup](docker-beginners.md#direct-compose-alternative-without-host-python)
+in the current terminal. With that setup in place, start without rebuilding
+or pulling:
 
 ```text
 docker compose --profile lab up --detach --no-build --pull never
 ```
 
-If another local PostgreSQL server already uses port 5432, select a different
-host database port before starting the course stack:
+The course defaults to host database port 55432. If that port is occupied,
+select a different host database port before starting the course stack:
 
 ```powershell
 # Windows PowerShell
-$env:DS60_POSTGRES_PORT = "58435"
+$env:DS60_POSTGRES_PORT = "55433"
 docker compose --profile lab up --detach --no-build --pull never
 ```
 
 ```bash
 # macOS/Linux
-export DS60_POSTGRES_PORT=58435
+export DS60_POSTGRES_PORT=55433
 docker compose --profile lab up --detach --no-build --pull never
 ```
 
 The app still connects over the private shared namespace to port 5432; this
 setting changes only the host's published database port. The browser address
-remains `http://127.0.0.1:8765/learn`. Use a Docker-compatible local engine with
+remains `http://127.0.0.1:8765/learn` unless you change `DS60_LAB_PORT`. Use a Docker-compatible local engine with
 Compose. For Rancher Desktop, verify that its local Moby engine is running
 with `docker info` and `docker compose version`. Inspect the selected context
 and endpoint before using a machine that also has remote Docker contexts.

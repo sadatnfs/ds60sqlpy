@@ -290,7 +290,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-09`
-(Day 9 — Modules, Packages, Imports, and `__main__`). Direct catalog prerequisites: `python-foundations-03`.
+(Day 9: Modules, Packages, Imports, and `__main__`). Direct catalog prerequisites: `python-foundations-03`.
 I have completed the direct prerequisites: `python-foundations-03`. Emphasize modules, package namespaces, imports, and safe entry points.
 Read `python/ds-60day/companion-guides/day09_modules_packages.md` and use the learner notebook
 `python/ds-60day/notebooks/day09_modules_packages.ipynb`. Do not open or quote anything under `solutions/` unless
