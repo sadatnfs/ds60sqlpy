@@ -1,0 +1,66 @@
+{
+  "lesson_id": "spark-005",
+  "scope": "Tiny deterministic local contracts; runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Parse a strict optional amount",
+      "input_contract": "Accept trimmed ASCII digits representing 0 through 1000000 cents. Return None for absent, blank, signed, decimal, overflowing or supplied-null tokens. Do not convert invalid input to zero or call unchecked Option.get.",
+      "expected": "Some(\"0\") gives Some(0L), Some(\" 25 \") gives Some(25L), None and Some(\"bad\") give None. Some(null), Some(\"-1\"), Some(\"1.0\") and values above the bound are rejected.",
+      "verification": "Assert accepted zero and 25 independently, then test each invalid token and absence without an exception."
+    },
+    {
+      "exercise": 2,
+      "title": "Separate absence from invalid supplied content",
+      "input_contract": "Return observed for a valid supplied amount, missing for None, and rejected for any invalid Some token including Some(null). Keep the original input state available when classifying.",
+      "expected": "Some(\"0\"), Some(\"25\"), None, Some(\"bad\"), Some(null) map to observed, observed, missing, rejected, rejected.",
+      "verification": "Assert the five classifications in order and show that parseAmount alone returns None for both missing and rejected cases."
+    },
+    {
+      "exercise": 3,
+      "title": "Collect only observed numerical values",
+      "input_contract": "Return valid parsed amounts in original order using flatMap. Preserve zero and duplicate amounts; do not substitute defaults for missing or rejected tokens.",
+      "expected": "The five-token fixture yields Seq(0L,25L). Adding another Some(\"25\") yields two 25-cent occurrences.",
+      "verification": "Assert exact observed sequences and an all-missing/rejected fixture returning empty."
+    },
+    {
+      "exercise": 4,
+      "title": "Reconcile all input states",
+      "input_contract": "Return counts for all three keys observed, missing, rejected, including zero counts. Classify every original token and require the counts to sum to input size.",
+      "expected": "The five-token fixture yields observed 2, missing 1, rejected 2. Empty input retains all three keys with count 0.",
+      "verification": "Assert the full map, its summed count, and the explicit empty-ledger keys."
+    },
+    {
+      "exercise": 5,
+      "title": "Keep presentation distinct from measurement",
+      "input_contract": "Return a valid amount as decimal text, or the literal missing/rejected classification for unavailable values. Do not display every unavailable value as 0.",
+      "expected": "Some(\"0\") displays\"0\", None displays\"missing\", and Some(\"bad\") displays\"rejected\". Whitespace around a valid 25 is normalized to\"25\".",
+      "verification": "Assert all four display strings and verify that missing is not numerically indistinguishable from observed zero."
+    },
+    {
+      "exercise": 6,
+      "title": "Compose a downstream calculation without losing absence",
+      "input_contract": "Return the five-percent integer-cent fee for a valid parsed amount and None otherwise. Compose the calculation through Option rather than using getOrElse(0L) before the fee calculation.",
+      "expected": "Some(\"100\") gives Some(5L), Some(\"0\") gives Some(0L), and None or Some(\"bad\") remain None.",
+      "verification": "Assert presence and exact fee for valid zero and 100, then absence for both invalid and missing inputs."
+    }
+  ],
+  "golden": {
+    "tokens": [
+      "0",
+      "25",
+      null,
+      "bad",
+      "supplied-null"
+    ],
+    "observed": [
+      0,
+      25
+    ],
+    "counts": {
+      "observed": 2,
+      "missing": 1,
+      "rejected": 2
+    }
+  }
+}

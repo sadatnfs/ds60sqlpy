@@ -99,13 +99,14 @@ a,b=json.loads(result.stdout.strip().splitlines()[-1]); np.testing.assert_allclo
 
 The question is: Pass three rows to the statically exported module and compare with ordinary Linear.
 
-A model'smathematicalbatchflexibilitydoesnotautomaticallymaketheexportcontractdynamic. The constraint must be explicit.
+Mathematical batch flexibility does not automatically make an export contract dynamic. The pinned PyTorch2.9.1 profile raises AssertionError with the exact guard input.size()[0] == 2 for this invalid batch. The handler recognizes that shape guard and re-raises unrelated assertions. Exception types can differ across framework versions, so the diagnostic is tied to the prepared profile.
 
 ```python
 three=torch.tensor([[0.,0.],[1.,2.],[3.,4.]])
 assert tuple(restored(three).shape)==(3,1)
 try: exported_module(three)
-except (RuntimeError,ValueError): pass
+except AssertionError as error:
+    if 'Guard failed: input.size()[0] == 2' not in str(error): raise
 else: raise AssertionError('static export constraint not enforced')
 ```
 

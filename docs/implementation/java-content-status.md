@@ -19,3 +19,9 @@ Root integration compiled and executed all12 authored Java references successful
 Java013..020 are now authored and registered,bringing the inventory to20 of36. The new batch covers functional interfaces,streams,time zones andDST,owned filesystem work,Optional contracts,tests that detect mutants,data structures and complexity,and binary search/stable sorting/dynamic programming. All have separate learner,reference and explanatory artifacts. The user then prioritized a dedicated PyTorch36 course matching TensorFlow depth,so Java021..036 remain unfinished and unregistered.
 
 `tests/test_java_lessons.py` checks authored identity,paths,teaching depth,exercise separation and prerequisites. Its actual JDK execution cases are opt-in throughDS60_TEST_JAVA=1,with assertions enabled and bounded compiler/process time. Root owns prepared-container reference receipts for the new batch. The earlier12-reference Docker pass does not automatically validate Java013..020. Portable authoring sources now include all20 completed lessons.
+
+## Third coherent authoring batch
+
+Java021..028 are now authored and registered,bringing the inventory to28 of36. They cover thread happens-before relationships,controlled lost updates,executor timeouts/cancellation/backpressure,locks andatomics,Java21 virtual threads,heap reachability,actual two-module compilation/execution,JAR reproducibility and a short-lived loopbackHTTP fixture. These new references await root's prepared-image execution. Root confirmed Java013..020 all passed,so the first20 are now execution-verified in that Linux arm64 image.
+
+The user then prioritized six expert transformer-mechanism additions to LLM theory. Java029..036 remain unfinished and unregistered until that coherent addition is completed. The module/build lessons still need their separately checked-in manual fixture layouts and commands before the final Java freeze. Portable authoring sources contain the full28-lesson batch.

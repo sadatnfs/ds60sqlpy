@@ -46,7 +46,8 @@ def verify():
     three=torch.tensor([[0.,0.],[1.,2.],[3.,4.]])
     assert tuple(restored(three).shape)==(3,1)
     try: exported_module(three)
-    except (RuntimeError,ValueError): pass
+    except AssertionError as error:
+        if 'Guard failed: input.size()[0] == 2' not in str(error): raise
     else: raise AssertionError('static export constraint not enforced')
 
     # Exercise 6: Declare a bounded dynamic batch and clean up

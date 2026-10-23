@@ -395,9 +395,9 @@
         "visibility",
         "join"
       ],
-      "outcome": "Explain and apply threads and the memory model with explicit assumptions and failure handling.",
-      "lab": "Work through Thread examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Threads can execute concurrently while sharing memory.",
+      "lab": "Start a worker that writes42 into a shared holder,join it with a bound,and inspect the result.",
+      "verification": "worker terminated;result42. interruption observed and worker terminated."
     },
     {
       "id": "java-022",
@@ -414,9 +414,9 @@
         "timeout",
         "cancellation"
       ],
-      "outcome": "Explain and apply executors, futures and cancellation with explicit assumptions and failure handling.",
-      "lab": "Work through ExecutorService examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "An ExecutorService owns task scheduling and worker lifetime.",
+      "lab": "Submit a callable returning42 and get it within2seconds.",
+      "verification": "result42. third submission rejected;admitted tasks finish after release."
     },
     {
       "id": "java-023",
@@ -433,9 +433,9 @@
         "ConcurrentHashMap",
         "deadlock"
       ],
-      "outcome": "Explain and apply locks, atomics and concurrent collections with explicit assumptions and failure handling.",
-      "lab": "Work through synchronized examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Synchronization protects a state transition,not merely a variable name.",
+      "lab": "Run two workers making1000 synchronized increments each.",
+      "verification": "counter2000. 2000 increments and no blocked worker after bounded joins."
     },
     {
       "id": "java-024",
@@ -452,9 +452,9 @@
         "backpressure",
         "pinning"
       ],
-      "outcome": "Explain and apply virtual threads and blocking work with explicit assumptions and failure handling.",
-      "lab": "Work through virtual thread examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Virtual threads are lightweight Java threads intended to make large numbers of blocking tasks easier to express.",
+      "lab": "Start a virtual thread that recordsisVirtual andjoin it.",
+      "verification": "true and terminated. caller can acquire the monitor while the worker is waiting."
     },
     {
       "id": "java-025",
@@ -472,9 +472,9 @@
         "GC",
         "allocation"
       ],
-      "outcome": "Explain and apply jvm memory, gc and allocation with explicit assumptions and failure handling.",
-      "lab": "Work through heap examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "The JVM manages heap memory through reachability,not by immediately freeing an object when a local variable changes.",
+      "lab": "Store a small byte array in a list anddrop the local variable reference.",
+      "verification": "list still exposes the same array contents. nonnegative counters;max at leasttotal;no claim of exact object size."
     },
     {
       "id": "java-026",
@@ -492,9 +492,9 @@
         "exports",
         "requires"
       ],
-      "outcome": "Explain and apply packages, classpaths and modules with explicit assumptions and failure handling.",
-      "lab": "Work through package examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Packages organize class names andaccess boundaries.",
+      "lab": "ReadString.class module andpackage names.",
+      "verification": "modulejava.base;packagejava.lang. nonzero compiler exit andcaptured diagnostic."
     },
     {
       "id": "java-027",
@@ -512,9 +512,9 @@
         "Gradle",
         "locked dependencies"
       ],
-      "outcome": "Explain and apply builds and dependency reproducibility with explicit assumptions and failure handling.",
-      "lab": "Work through javac examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A build turns source anddeclared dependencies into an artifact.",
+      "lab": "Build a Hello class whose main printsbuild-ok.",
+      "verification": "compiler exit0;Hello.class exists. exactversionaccepted;LATESTnot treated as a pin."
     },
     {
       "id": "java-028",
@@ -532,9 +532,9 @@
         "timeout",
         "resource closure"
       ],
-      "outcome": "Explain and apply http services and clients with explicit assumptions and failure handling.",
-      "lab": "Work through HttpClient examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "HTTP is a request/response protocol with method,path,status,headers andbody.",
+      "lab": "Start the fixture andGET/health.",
+      "verification": "status200 andbodyok. host127.0.0.1;portpositive;closedflagtrue."
     },
     {
       "id": "java-029",

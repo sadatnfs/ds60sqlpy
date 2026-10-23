@@ -1,0 +1,68 @@
+{
+  "lesson_id": "spark-004",
+  "scope": "Tiny deterministic local contracts; runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Retain observed zero and repeated values",
+      "input_contract": "Implement a nonnegative filter for Seq(100L,-5L,0L,100L,25L). Preserve input order and duplicate values. An empty input should remain empty.",
+      "expected": "The result is Seq(100L,0L,100L,25L), with four occurrences. Both 100-cent entries and the zero remain.",
+      "verification": "Assert the exact sequence and confirm the original five-element sequence is unchanged; also assert accepted(Seq.empty) is empty."
+    },
+    {
+      "exercise": 2,
+      "title": "Keep a rejected ledger",
+      "input_contract": "Split every input amount into accepted nonnegative and rejected negative sequences, preserving order within each output. Return both sequences instead of dropping rejected data.",
+      "expected": "The five-value fixture yields accepted four values and rejected Seq(-5L). Accepted size plus rejected size equals five, including an all-negative or empty fixture.",
+      "verification": "Assert both exact outputs, their combined count and an all-negative case with empty accepted output."
+    },
+    {
+      "exercise": 3,
+      "title": "Map a bounded numeric policy",
+      "input_contract": "For nonnegative Long amounts, return integer-cent five-percent fees rounded down. Reject a negative amount with IllegalArgumentException. Avoid multiplying by five before division, which could overflow on a very large Long.",
+      "expected": "Seq(100L,0L,100L,25L) maps to Seq(5L,0L,5L,1L). Long.MaxValue maps safely to Long.MaxValue/20L.",
+      "verification": "Assert the exact four fees, the maximum-Long case and rejection of Seq(-1L)."
+    },
+    {
+      "exercise": 4,
+      "title": "Fold count and total together",
+      "input_contract": "Return occurrence count and checked Long total for a supplied sequence. Use an explicit tuple accumulator and Math.addExact for the total. Empty input returns (0L,0L); an overflowing total raises ArithmeticException.",
+      "expected": "The accepted fixture returns (4L,225L), while Seq(Long.MaxValue,1L) is rejected by checked addition.",
+      "verification": "Assert the two-component result, the empty identity and the overflow exception independently."
+    },
+    {
+      "exercise": 5,
+      "title": "Represent multiplicity in a Map",
+      "input_contract": "Return a map from amount to occurrence count without discarding repeated values. Compare maps by keys and counts rather than assuming iteration order. Empty input returns an empty map.",
+      "expected": "The accepted fixture yields Map(100L->2L,0L->1L,25L->1L); the sum of counts is four.",
+      "verification": "Assert exact map equality and reconcile all map counts to the accepted sequence size."
+    },
+    {
+      "exercise": 6,
+      "title": "Transfer the bag contract to grouped reporting",
+      "input_contract": "Given group/amount pairs, reject blank group labels, retain nonnegative amount occurrences and return per-group(count, total) using checked summary. Groups with only rejected amounts are absent from the accepted report and remain explainable through the rejection policy.",
+      "expected": "A100, A100, B0, B25, C-5 yields A:(2,200), B:(2,25). Report counts sum to four and totals to 225; a blank label is rejected even on a negative row.",
+      "verification": "Assert the complete map, both global reconciliations and the blank-label failure before filtering can hide it."
+    }
+  ],
+  "golden": {
+    "input": [
+      100,
+      -5,
+      0,
+      100,
+      25
+    ],
+    "accepted": [
+      100,
+      0,
+      100,
+      25
+    ],
+    "rejected": [
+      -5
+    ],
+    "count": 4,
+    "total_cents": 225
+  }
+}

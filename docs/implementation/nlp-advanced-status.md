@@ -31,3 +31,5 @@ The first focused run exposed two content-test gaps: the contextual example lack
 `courses/nlp/authoring/advanced/` contains the explicit original lesson source, worked snippets and a portable `build_all.py` entry point. It derives the repository path from its own location, updates only IDs005-024 and merges those entries into canonical `lessons.json` without changing other entries or executing language-model jobs. Its README documents regeneration and validation.
 
 Root integration completed the initial central manifest merge and owns shared registrations, generated readers, navigation, complete-suite checks, browser behavior and actual Docker receipts. Content authoring performed no Docker/cluster mutation, tool installation, Git staging, commit or push. This author returns to the remaining Kubernetes content after this freeze; Scala/Spark remains separately queued.
+
+After canonical registration, the combined foundation and advanced NLP suite passed **58 tests in 3.03 seconds**. The temporary handoff inventory is gone; both tests and the portable generator use the single canonical lessons.json.

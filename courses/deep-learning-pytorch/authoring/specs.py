@@ -774,8 +774,9 @@ a,b=json.loads(result.stdout.strip().splitlines()[-1]); np.testing.assert_allclo
 ex('Expose static batch specialization','Pass three rows to the statically exported module and compare with ordinary Linear.','ordinary Linear accepts3; static export rejects its batch constraint.', '''three=torch.tensor([[0.,0.],[1.,2.],[3.,4.]])
 assert tuple(restored(three).shape)==(3,1)
 try: exported_module(three)
-except (RuntimeError,ValueError): pass
-else: raise AssertionError('static export constraint not enforced')''',"A model'smathematicalbatchflexibilitydoesnotautomaticallymaketheexportcontractdynamic. The constraint must be explicit."),
+except AssertionError as error:
+    if 'Guard failed: input.size()[0] == 2' not in str(error): raise
+else: raise AssertionError('static export constraint not enforced')''',"Mathematical batch flexibility does not automatically make an export contract dynamic. The pinned PyTorch2.9.1 profile raises AssertionError with the exact guard input.size()[0] == 2 for this invalid batch. The handler recognizes that shape guard and re-raises unrelated assertions. Exception types can differ across framework versions, so the diagnostic is tied to the prepared profile."),
 ex('Declare a bounded dynamic batch and clean up','Export with batch Dim range1..4, test three rows, and remove owned files.','three-row parity passes; temporary directory absent.', '''batch=torch.export.Dim('batch',min=1,max=4)
 dynamic=torch.export.export(model,(x,),dynamic_shapes=({0:batch},),strict=True).module()
 torch.testing.assert_close(dynamic(three),restored(three),atol=1e-6,rtol=0)

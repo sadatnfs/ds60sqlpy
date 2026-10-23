@@ -261,6 +261,110 @@
         "courses/java/solutions/java-020_solutions.md"
       ],
       "verification_id": null
+    },
+    {
+      "id": "java-021",
+      "status": "authored",
+      "language": "java",
+      "runtime_profile": "java21",
+      "guide_path": "courses/java/guides/java-021.md",
+      "source_path": "courses/java/lessons/java-021.java",
+      "solution_paths": [
+        "courses/java/solutions/java-021_solution.java",
+        "courses/java/solutions/java-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "java-022",
+      "status": "authored",
+      "language": "java",
+      "runtime_profile": "java21",
+      "guide_path": "courses/java/guides/java-022.md",
+      "source_path": "courses/java/lessons/java-022.java",
+      "solution_paths": [
+        "courses/java/solutions/java-022_solution.java",
+        "courses/java/solutions/java-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "java-023",
+      "status": "authored",
+      "language": "java",
+      "runtime_profile": "java21",
+      "guide_path": "courses/java/guides/java-023.md",
+      "source_path": "courses/java/lessons/java-023.java",
+      "solution_paths": [
+        "courses/java/solutions/java-023_solution.java",
+        "courses/java/solutions/java-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "java-024",
+      "status": "authored",
+      "language": "java",
+      "runtime_profile": "java21",
+      "guide_path": "courses/java/guides/java-024.md",
+      "source_path": "courses/java/lessons/java-024.java",
+      "solution_paths": [
+        "courses/java/solutions/java-024_solution.java",
+        "courses/java/solutions/java-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "java-025",
+      "status": "authored",
+      "language": "java",
+      "runtime_profile": "java21",
+      "guide_path": "courses/java/guides/java-025.md",
+      "source_path": "courses/java/lessons/java-025.java",
+      "solution_paths": [
+        "courses/java/solutions/java-025_solution.java",
+        "courses/java/solutions/java-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "java-026",
+      "status": "authored",
+      "language": "java",
+      "runtime_profile": "java21",
+      "guide_path": "courses/java/guides/java-026.md",
+      "source_path": "courses/java/lessons/java-026.java",
+      "solution_paths": [
+        "courses/java/solutions/java-026_solution.java",
+        "courses/java/solutions/java-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "java-027",
+      "status": "authored",
+      "language": "java",
+      "runtime_profile": "java21",
+      "guide_path": "courses/java/guides/java-027.md",
+      "source_path": "courses/java/lessons/java-027.java",
+      "solution_paths": [
+        "courses/java/solutions/java-027_solution.java",
+        "courses/java/solutions/java-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "java-028",
+      "status": "authored",
+      "language": "java",
+      "runtime_profile": "java21",
+      "guide_path": "courses/java/guides/java-028.md",
+      "source_path": "courses/java/lessons/java-028.java",
+      "solution_paths": [
+        "courses/java/solutions/java-028_solution.java",
+        "courses/java/solutions/java-028_solutions.md"
+      ],
+      "verification_id": null
     }
   ]
 }

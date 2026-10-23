@@ -201,8 +201,10 @@ def _fixture_template(value: Any, *, task: bool = False) -> bool:
     if container["image"] != FIXTURE_IMAGE:
         if container["image"] == "ds60sqlpy-k8s-fixture:0.1.0":
             raise KubernetesRefusal(
-                "This saved source uses fixture 0.1.0. Prepare the current 0.2.0 fixture and a fresh owned lease, "
-                "then review and update your own image field. Saved learner source is not rewritten."
+                "This saved source uses fixture 0.1.0. Prepare the current 0.2.0 fixture "
+                "and a fresh owned lease,"
+                "then review and update your own image field. Saved learner source is not "
+                "rewritten."
             )
         raise KubernetesRefusal("Use only the approved local fixture image " + FIXTURE_IMAGE + ".")
     if container["imagePullPolicy"] != "Never":
@@ -418,7 +420,8 @@ def parse_manifests(source: str) -> list[dict[str, Any]]:
         )
     if ("ConfigMap" in kinds) != uses_config:
         raise KubernetesRefusal(
-            "A submitted hello-config and its fixed environment/volume reference must appear together."
+            "A submitted hello-config and its fixed environment/volume reference must "
+            "appear together."
         )
     order = {"ConfigMap": 0, "Deployment": 1, "Service": 2, "Job": 3}
     return sorted(documents, key=lambda doc: order[doc["kind"]])
@@ -1132,7 +1135,8 @@ def observe_owned_job(
     conditions = _optional_records(status.get("conditions"), "Job conditions")
     if any(item.get("type") == "Failed" and item.get("status") == "True" for item in conditions):
         raise KubernetesRefusal(
-            "The bounded owned Job reached a Failed condition; inspect its finite outcome and retry/deadline policy."
+            "The bounded owned Job reached a Failed condition; inspect its finite outcome "
+            "and retry/deadline policy."
         )
     completed = any(
         item.get("type") == "Complete" and item.get("status") == "True" for item in conditions
@@ -1188,7 +1192,11 @@ def observe_owned_job(
             raise KubernetesRefusal("The owned Job container did not report a zero exit code.")
         successful.append(metadata["uid"])
         successful_names.append(metadata["name"])
-    if len(set(successful)) != 1:
+    if len(successful) > 1:
+        raise KubernetesRefusal(
+            "The single-completion Job produced multiple successful Pod receipts."
+        )
+    if len(successful) != 1:
         return False, {
             "job_uid": uid,
             "complete": True,
@@ -1348,7 +1356,10 @@ def kubernetes_executor(
                     work_deadline,
                     cancel,
                 )
-                if output != {"accepted": 3, "rejected": 2, "total": 35, "fixture_contract": 2}:
+                expected_output = {"accepted": 3, "rejected": 2, "total": 35, "fixture_contract": 2}
+                if output != expected_output or any(
+                    type(output.get(key)) is not int for key in expected_output
+                ):
                     raise KubernetesRefusal(
                         "The finite owned task output does not match the independent fixed ledger."
                     )
@@ -1416,11 +1427,13 @@ def kubernetes_executor(
                         )
                 elif verification_id == "k8s-readiness-v1":
                     raise KubernetesRefusal(
-                        "The readiness verifier requires both Deployment and Service for independent routing proof."
+                        "The readiness verifier requires both Deployment and Service for "
+                        "independent routing proof."
                     )
                 elif config_message is not None:
                     log(
-                        "ConfigMap creation and workload readiness were observed; no Service was supplied for application-value verification."
+                        "ConfigMap creation and workload readiness were observed; no "
+                        "Service was supplied for application-value verification."
                     )
             result_status = "succeeded"
             detail = (
