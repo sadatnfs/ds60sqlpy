@@ -141,7 +141,7 @@ non-secret evidence use `work/modules-acceptance/`.
 
 ## Final integration verification
 
-The final grouped four-worker suite passed **1123 tests**, with **one expected
+Before the Docker-only entrypoint refinement, the grouped four-worker suite passed **1123 tests**, with **one expected
 host-only TensorFlow opt-in skip**, zero failures and zero errors in **89.18
 seconds**. All ten recorded subtests passed. Actual TensorFlow import, gradient
 verification and rejected update-sign execution passed in its Docker worker.
@@ -153,11 +153,67 @@ preserve the real authored inventory, cancellation waits for observed startup,
 normal-parent exit has a real child-readiness/PID handshake, and generated
 readers match their sources. No short-timeout proof was removed.
 
-Strict MyPy covers 160 source files; Ruff, 22 inline-JavaScript UI behavior
-checks, structural validation and notebook syntax checks pass. The Docker HTTP
-audit serves 394 HTML pages and 86 canonical/variant module documents,
+Strict MyPy, Ruff, 22 inline-JavaScript UI behavior
+checks, structural validation and notebook syntax checks pass. The first Docker HTTP
+audit served 394 HTML pages and 86 canonical/variant module documents,
 checking 15584 internal links with zero failures. Browser execution has passed
 all five subjects and the separate PySpark variant, with actual typed feedback.
 See ignored `work/modules-full-tests*` and `work/modules-acceptance/` for the
 exact non-secret runtime receipts. Native Windows execution, Linux amd64 and
 the optional PyTorch image remain unqualified.
+
+## Docker-first entrypoint refinement
+
+The user confirmed that an installed Docker engine is the operating-system
+prerequisite and PowerShell should be optional. `compose.classroom.yaml` is
+therefore the primary ordinary-course entrypoint. It uses no host Python,
+PostgreSQL, Bash or PowerShell backend. A no-network one-shot Docker initializer
+creates private credentials and local learning volumes, preserving the token
+and existing learner files on later starts. Six ordinary qualified profiles
+reuse the reviewed worker images. Kubernetes still uses its separate explicit
+owned-cluster preparation; opening the classroom does not provision it.
+
+`START_DOCKER_CLASSROOM.cmd` and `.command` are thin optional Docker launchers.
+The old host-folder launchers and setup helpers remain compatible and optional.
+Classroom progress lives in the machine-local `classroom-learning` Docker
+volume; it is separate from the old host `.learning` workflow. Credentials live
+in another private volume and are excluded from progress backups. See
+[the Docker-only guide](../docker-classroom.md) for build/start/stop, profile
+selection and shell-independent backup commands.
+
+Final Docker-only runtime, replacement/backup and image-integrity receipts use
+`work/classroom-acceptance/`. The latest grouped suite summary remains in
+`work/modules-full-tests-summary.json`; preserve earlier runs when repeating
+it. Only actual receipts qualify an OS/architecture or engine mode. Stop the
+owned validation project after acceptance and retain its learner volumes.
+
+## Docker-only acceptance result
+
+The complete grouped suite including Docker classroom initialization passed
+**1157 tests**, with **one expected host TensorFlow opt-in skip** and no failures
+in **62.53 seconds**. All ten recorded subtests passed. Strict MyPy checked
+162 files. The initializer/UI review added 35 focused passing cases; the
+22 inline JavaScript behavior checks remain green.
+
+Actual Docker Compose 5.3.1 on Linux arm64 started all six ordinary profiles
+using only named credential and learning volumes. Every profile became healthy
+and passed a reference execution through the browser application's API. A
+second initializer run preserved the private token. App, PostgreSQL and worker
+containers were replaced; all six lesson sources, notes, accepted job IDs and
+hashes remained intact, along with the database marker row. The private token
+kept its inode, UID 1000 ownership and mode 0400.
+
+The documented Docker-only learning archive and pg_dump exports passed against
+this isolated project. The archive contains sessions and job receipts and
+excludes the private runtime token; its source volume was read-only. The dump
+contains the marker table. The temporary export helper was removed. Exact
+receipts live in `work/classroom-acceptance/`.
+
+The preceding Docker-first HTML audit covered 395 served pages and 86 canonical/variant
+module documents, checking 15603 internal links with no failures. The thin
+Windows launcher checks for the PostgreSQL image and pulls it on a fresh engine
+before offline-only startup. Native Windows launch execution remains untested;
+its prepared Docker commands and storage contract are the primary interface.
+Kubernetes was qualified separately and all owned kind sessions have been
+explicitly released. No unrelated container, personal database or learner
+folder was removed.

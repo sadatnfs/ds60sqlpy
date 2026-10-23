@@ -1,5 +1,12 @@
 # Docker learning lab, from a new computer to your first lesson
 
+For the new module courses, start with the
+[Docker-only classroom walkthrough](docker-classroom.md). After installing a
+local Linux-container engine, it needs only Docker commands on Windows, macOS,
+and Linux. Its saved work uses a Docker-managed volume. This older walkthrough
+keeps the optional setup wizards and host-folder `.learning` route; the two
+storage locations do not merge automatically.
+
 This guide starts before the terminal commands. You will install a local
 container engine, download the course, start its Python and PostgreSQL
 backends, and use the lessons in your browser. You can follow this route

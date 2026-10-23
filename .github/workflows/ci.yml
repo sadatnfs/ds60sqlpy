@@ -89,11 +89,11 @@ jobs:
       - name: Exercise the module UI behavior
         run: node scripts/check_module_ui.mjs
       - name: Lint
-        run: uv run --no-sync ruff check src scripts tests bridge python/professional
+        run: uv run --no-sync ruff check src scripts tests bridge python/professional docker/init_module_runtime.py
       - name: Check formatting
         run: >-
           uv run --no-sync ruff format --check
-          src scripts tests bridge python/professional
+          src scripts tests bridge python/professional docker/init_module_runtime.py
       - name: Scan repository for common credential material
         run: uv run --no-sync python scripts/scan_secrets.py --history
       - name: Type check

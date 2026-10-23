@@ -2,14 +2,15 @@ PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 TEST_WORKERS ?= 4
 MODULE_PROFILES ?= python-core,cpp20
 
-.PHONY: help setup generate journey-preview check test test-serial testserial lab mcp app windows-starter docker docker-stop docker-status modules-build modules-start modules-stop modules-check
+.PHONY: help setup generate journey-preview check test test-serial testserial lab mcp app windows-starter docker docker-stop docker-status modules-build modules-start modules-stop modules-check classroom-build classroom-start classroom-stop
 help:
 	@echo "setup: install learner environment; lab: open coding lab; app: build native executable"
 	@echo "generate: refresh catalog/readers/reports; check: validate; docker: build and start lab"
 	@echo "windows-starter: package the complete double-click Windows starter ZIP"
 	@echo "test: grouped parallel suite (TEST_WORKERS=4); test-serial: serial debugging"
 	@echo "journey-preview: validate five planned tracks and rebuild their offline teaching preview"
-	@echo "modules-build/start/stop: optional labs (MODULE_PROFILES=python-core,cpp20)"
+	@echo "modules-build/start/stop: optional host-folder labs (MODULE_PROFILES=python-core,cpp20)"
+	@echo "classroom-build/start/stop: Docker-only labs with persistent local volumes"
 
 setup:
 	bash scripts/setup.sh
@@ -70,3 +71,19 @@ modules-stop:
 modules-check:
 	$(PYTHON) scripts/check_modules.py
 	node scripts/check_module_ui.mjs
+
+classroom-build:
+	docker image inspect postgres:17 >/dev/null 2>&1 || docker compose -f compose.classroom.yaml pull postgres
+	docker compose -f compose.classroom.yaml build lab
+	docker compose -f compose.classroom.yaml --profile python-core build python-core-worker
+	docker compose -f compose.classroom.yaml --profile cpp20 build cpp-worker
+	docker compose -f compose.classroom.yaml --profile tensorflow-cpu build tensorflow-worker
+	docker compose -f compose.classroom.yaml --profile scala-jvm build scala-worker
+	docker compose -f compose.classroom.yaml --profile spark-local-scala build spark-scala-worker
+	docker compose -f compose.classroom.yaml --profile spark-local-python build spark-python-worker
+
+classroom-start:
+	docker compose -f compose.classroom.yaml --profile python-core --profile cpp20 --profile tensorflow-cpu --profile scala-jvm --profile spark-local-scala --profile spark-local-python up -d --no-build --pull never --wait
+
+classroom-stop:
+	docker compose -f compose.classroom.yaml --profile python-core --profile cpp20 --profile tensorflow-cpu --profile scala-jvm --profile spark-local-scala --profile spark-local-python stop

@@ -5,11 +5,12 @@
 DS60 is a self-paced repository for learning practical Python, data science, and PostgreSQL from introductory material through substantial projects. The existing tracks are organized as 60 numbered lessons, but the number is a navigation aid rather than a deadline: take the time you need, repeat lessons, and use the curriculum catalog to choose prerequisites.
 
 > [!TIP]
-> Start with the **guided coding application** below. On a new Windows computer,
-> extract the Windows Starter ZIP and double-click `START_DOCKER_LAB.cmd`.
-> Its wizard guides setup, then opens the lab with Python and PostgreSQL backends.
-> [START_HERE.html](START_HERE.html) remains the static offline reading library,
-> and `START_DS60.cmd` opens its editor/Jupyter launcher.
+> Start with the [Docker-only classroom](docs/docker-classroom.md) once your
+> local Linux-container engine is installed. On Windows, extract the course and
+> double-click `START_DOCKER_CLASSROOM.cmd`; Mac users can use
+> `START_DOCKER_CLASSROOM.command`. The same Docker commands work on Linux.
+> The optional `START_DOCKER_LAB.cmd` wizard can help with Windows engine setup.
+> [START_HERE.html](START_HERE.html) remains the static offline reading library.
 
 
 The repository is designed for:
@@ -37,32 +38,34 @@ optional, copy-ready coaching context - not a replacement for the lesson.
 
 ## New module labs
 
-The authored pilot workspace at `/journeys` introduces Kubernetes, C++20,
-TensorFlow, LLM theory in Python, and Scala/Spark. It renders real guides and
-source files, saves drafts on the host, and runs explicitly prepared private
-workers. Planned lessons stay visibly planned. These pilots are separate from
+The authored workspace at `/journeys` introduces Kubernetes, C++20,
+TensorFlow, LLM theory in Python, and Scala/Spark. It shows real guides and
+editable sources beside saved drafts, evidence, and explicitly prepared
+runtimes. Planned lessons stay visibly planned. These pilots are separate from
 the existing published course and do not award automatic mastery.
 
-Prepare the base Docker course first using the instructions below, then read
-[the optional runtime guide](docs/modules-runtime.md). Local builds show their
-logs and publish no images:
+**Start with the [Docker-only classroom walkthrough](docs/docker-classroom.md).**
+Once a local Linux-container engine is installed, this route uses Docker
+commands on Windows, macOS, and Linux. It needs no host Python, PowerShell
+script, or Bash script. On Windows, `START_DOCKER_CLASSROOM.cmd` also starts the
+Python/NumPy foundation and current LLM pilot after engine setup.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1 build -Profiles python-core,cpp20
-powershell -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1 start -Profiles python-core,cpp20
-```
-
-```bash
-bash scripts/module_lab.sh build --profiles python-core,cpp20
-bash scripts/module_lab.sh start --profiles python-core,cpp20
-```
+The classroom keeps saved work in its own persistent Docker volume. Existing
+host-folder `.learning` work stays in the older launcher route; see the guide's
+export and transfer instructions before moving between them. Choose only the
+C++, TensorFlow, Scala, or Spark workers needed for your lesson and build each
+image with visible foreground logs.
 
 The [implementation checkpoint](docs/implementation/CHECKPOINT.md) records
 completed content, actual runtime evidence, limitations, and the next batch.
-Windows can use `START_MODULE_LAB.cmd` to select prepared profiles. First-time
-engine setup remains in `START_DOCKER_LAB.cmd`.
+The [optional host-launcher runtime guide](docs/modules-runtime.md) covers the
+existing PowerShell/Bash workflow and the separate owned Kubernetes setup.
+Those launchers remain available for learners who want host-folder storage.
 
 ## Start the guided coding application
+
+The Docker-managed classroom above is the primary module route. The optional
+alternatives below keep learning files in a visible host `.learning` folder.
 
 The course now includes a browser workspace with Python and PostgreSQL coding
 pads, a lesson guide beside your code, saved work and evidence, progressive

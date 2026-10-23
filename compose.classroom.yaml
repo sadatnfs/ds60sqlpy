@@ -1,0 +1,114 @@
+# Docker-only ordinary classroom. Kubernetes remains explicit owned host preparation.
+# Build sequentially: docker compose -f compose.classroom.yaml --profile cpp20 --parallel 1 build
+name: ds60-classroom
+
+x-classroom-worker: &classroom-worker
+  depends_on:
+    classroom-init:
+      condition: service_completed_successfully
+  volumes:
+    - type: volume
+      source: classroom-runtime
+      target: /run/ds60/worker-token
+      read_only: true
+      volume: {nocopy: true}
+  environment:
+    DS60_WORKER_TOKEN_FILE: /run/ds60/worker-token/token
+
+services:
+  postgres:
+    extends: {file: compose.yaml, service: postgres}
+    networks: [default, module-private]
+
+  classroom-init:
+    image: ds60sqlpy-lab:0.3.0
+    pull_policy: never
+    build:
+      context: .
+      args:
+        DS60_BASE_IMAGE: ${DS60_BASE_IMAGE:-python:3.12-slim-bookworm}
+        DS60_DOCKER_PROFILES: ${DS60_DOCKER_PROFILES:-core}
+    entrypoint: ["python", "/opt/course/docker/init_module_runtime.py"]
+    command: []
+    network_mode: none
+    read_only: true
+    user: "0:0"
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      DS60_UID: "1000"
+      DS60_GID: "1000"
+    volumes:
+      - type: volume
+        source: classroom-runtime
+        target: /runtime
+        volume: {nocopy: true}
+      - type: volume
+        source: classroom-learning
+        target: /learning
+        volume: {nocopy: true}
+
+  lab:
+    extends: {file: compose.yaml, service: lab}
+    profiles: !reset []
+    environment:
+      DS60_UID: "1000"
+      DS60_GID: "1000"
+      DS60_ROOTLESS: "0"
+      DS60_MODULE_TOKEN_FILE: /run/ds60/worker-token/token
+      DS60_MODULE_ENDPOINTS: '{"python-core":"http://python-core-worker:8081","cpp20":"http://cpp-worker:8081","tensorflow-cpu":"http://tensorflow-worker:8081","scala-jvm":"http://scala-worker:8081","spark-local-scala":"http://spark-scala-worker:8081","spark-local-python":"http://spark-python-worker:8081"}'
+    volumes:
+      - type: volume
+        source: classroom-learning
+        target: /workspace/.learning
+        volume: {nocopy: true}
+      - type: volume
+        source: classroom-runtime
+        target: /run/ds60/worker-token
+        read_only: true
+        volume: {nocopy: true}
+    depends_on:
+      classroom-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+
+  python-core-worker:
+    <<: *classroom-worker
+    extends: {file: compose.modules.yaml, service: python-core-worker}
+    build:
+      args:
+        DS60_CORE_IMAGE: classroom-base
+      additional_contexts:
+        classroom-base: service:lab
+
+  cpp-worker:
+    <<: *classroom-worker
+    extends: {file: compose.modules.yaml, service: cpp-worker}
+
+  tensorflow-worker:
+    <<: *classroom-worker
+    extends: {file: compose.modules.yaml, service: tensorflow-worker}
+
+  scala-worker:
+    <<: *classroom-worker
+    extends: {file: compose.modules.yaml, service: scala-worker}
+
+  spark-scala-worker:
+    <<: *classroom-worker
+    extends: {file: compose.modules.yaml, service: spark-scala-worker}
+
+  spark-python-worker:
+    <<: *classroom-worker
+    extends: {file: compose.modules.yaml, service: spark-python-worker}
+
+volumes:
+  postgres-data: {}
+  classroom-learning: {}
+  classroom-runtime: {}
+
+networks:
+  default: {}
+  module-private:
+    internal: true

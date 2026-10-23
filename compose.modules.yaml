@@ -16,7 +16,7 @@ x-worker: &worker
     - /tmp:size=128m,mode=1777,exec
   volumes:
     - type: bind
-      source: ${DS60_MODULE_RUNTIME_DIR:?Prepare a private module runtime session first}/worker-token
+      source: ${DS60_MODULE_RUNTIME_DIR:-./.module-runtime-not-prepared}/worker-token
       target: /run/ds60/worker-token
       read_only: true
       bind:
@@ -39,7 +39,7 @@ services:
       DS60_MODULE_ENDPOINTS: "${DS60_MODULE_ENDPOINTS:-}"
     volumes:
       - type: bind
-        source: ${DS60_MODULE_RUNTIME_DIR:?Prepare a private module runtime session first}/worker-token
+        source: ${DS60_MODULE_RUNTIME_DIR:-./.module-runtime-not-prepared}/worker-token
         target: /run/ds60/worker-token
         read_only: true
         bind:

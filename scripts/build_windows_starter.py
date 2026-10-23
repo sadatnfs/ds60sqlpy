@@ -15,24 +15,29 @@ sys.path.insert(0, str(ROOT))
 
 from scripts.build_app import stage_course  # noqa: E402
 
-README = """DS60 Learning Lab: Windows starter
+README = """DS60 Learning Lab: Docker classroom starter
 
 1. Right-click the ZIP and choose Extract All. Open the extracted DS60LearningLab folder.
-2. Double-click START_DOCKER_LAB.cmd. Keep its window open while setup runs.
-3. Follow the first-run checks. Windows may require installation consent, UAC,
-   or a WSL restart. Restart Windows yourself when asked, then run the same CMD again.
-4. The launcher builds locally and opens http://127.0.0.1:8765/learn when ready.
+2. Start an installed Docker-compatible Linux-container engine. Windows uses WSL 2.
+3. Double-click START_DOCKER_CLASSROOM.cmd. Keep its window open for build logs.
+4. The thin launcher builds locally and opens the classroom after readiness succeeds.
 
-You do not need Git, host Python, or host PostgreSQL for the Docker route.
-New Windows installations use the supported WSL 2 backend. Existing compatible
-local Docker engines are reused. No image is pushed to a registry.
+Docker and Compose are the classroom prerequisites. No host Python, PostgreSQL,
+PowerShell tutorial or Git installation is needed for the ordinary module route.
+The first build needs internet. No image is pushed to a registry.
 
-The first build needs internet access and may take several minutes.
-Keep the hidden .learning folder: it stores your notes, code, history and progress.
-PostgreSQL uses a separate Docker volume. Stop keeps both forms of storage.
+The default button prepares Python/NumPy and the original Python/SQL course.
+Read docs/docker-classroom.md to add TensorFlow, C++ and Scala/Spark with Docker
+commands, save/backup local volumes and resume. Kubernetes has separate explicit
+owned-cluster preparation; it is not silently provisioned by the classroom.
 
-Read docs/docker-beginners.md for setup, backups, resume, and troubleshooting.
-The complete course is included, along with the Dockerfile and build scripts.
+Progress stays in a local Docker learning volume; PostgreSQL has another volume.
+Stop/start and container replacement retain both. Do not delete your volumes.
+The older host .learning workflow remains an optional separate storage route.
+
+If an engine is not installed yet, read docs/docker-beginners.md. The older
+START_DOCKER_LAB.cmd first-run setup wizard remains an optional Windows helper.
+The complete course, Dockerfiles and build sources are included.
 """
 
 
