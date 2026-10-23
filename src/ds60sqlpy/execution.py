@@ -814,7 +814,7 @@ class PadRunner:
 
     @staticmethod
     def _stop(process: subprocess.Popen[bytes]) -> None:
-        if os.name == "nt":
+        if sys.platform == "win32":
             # The Job Object normally performs tree cleanup. This fallback is
             # used only if setup failed before assignment.
             with contextlib.suppress(OSError, subprocess.TimeoutExpired):

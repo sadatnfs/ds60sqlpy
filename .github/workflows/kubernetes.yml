@@ -1,0 +1,102 @@
+name: Owned Kubernetes runtime
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "41 10 * * 2"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: owned-kubernetes-${{ github.workflow }}-${{ github.ref }}
+  # Let the always-run owned cleanup finish before another scheduled run starts.
+  cancel-in-progress: false
+
+jobs:
+  owned-cluster:
+    name: Kind deployment, routing and cleanup (Linux amd64)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      COMPOSE_PROJECT_NAME: ds60-k8s-${{ github.run_id }}-${{ github.run_attempt }}
+      DS60_CLASSROOM_PORT: "0"
+      DS60_POSTGRES_PORT: "0"
+      DOCKER_HOST: unix:///var/run/docker.sock
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.6"
+          enable-cache: true
+      - name: Select private session paths outside the checkout
+        run: |
+          printf 'DS60_K8S_SESSION_DIR=%s/%s\n' "$RUNNER_TEMP" "$COMPOSE_PROJECT_NAME" >> "$GITHUB_ENV"
+          printf 'DS60_K8S_TOOLS_DIR=%s/ds60-k8s-tools\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+      - name: Install the locked host companion
+        run: uv sync --frozen
+      - name: Build and start the disposable ordinary classroom
+        run: bash classroom --registry upstream --starter --no-browser
+      - name: Build the fixed fixture and Kubernetes worker before starting the lease
+        run: |
+          docker build --progress=plain -f docker/kubernetes/Dockerfile.fixture -t ds60sqlpy-k8s-fixture:0.2.0 .
+          docker build --progress=plain -f docker/kubernetes/Dockerfile.worker -t ds60sqlpy-worker-k8s-kind:0.3.0 .
+      - name: Prepare pinned host tools with official checksum verification
+        run: >-
+          uv run --no-sync python scripts/prepare_kubernetes.py tools
+          --tools-dir "$DS60_K8S_TOOLS_DIR" --allow-download
+      - name: Create only this owned disposable kind session
+        timeout-minutes: 5
+        run: >-
+          uv run --no-sync python scripts/prepare_kubernetes.py prepare
+          --tools-dir "$DS60_K8S_TOOLS_DIR" --session "$DS60_K8S_SESSION_DIR"
+          --docker-host "$DOCKER_HOST" --confirm-create --allow-node-download
+      - name: Start the private Kubernetes worker with the same public origin
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          DS60_PUBLIC_PORT="$(python -c 'import sys; from urllib.parse import urlsplit; print(urlsplit(sys.argv[1]).port or 80)' "$url")"
+          export DS60_PUBLIC_PORT
+          printf 'DS60_PUBLIC_PORT=%s\n' "$DS60_PUBLIC_PORT" >> "$GITHUB_ENV"
+          uv run --no-sync python scripts/prepare_kubernetes.py inspect \
+            --session "$DS60_K8S_SESSION_DIR" --docker-host "$DOCKER_HOST"
+          docker compose -f compose.classroom.yaml -f compose.classroom.kubernetes.yaml \
+            --profile k8s-kind up -d --no-deps --no-build --pull never \
+            --wait --wait-timeout 120 lab kubernetes-worker
+      - name: Prove actual API execution, negative outcomes, cancellation and owned cleanup
+        timeout-minutes: 10
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          python scripts/check_kubernetes_classroom.py --url "$url" \
+            --confirm-disposable --report work/kubernetes-runtime-receipts.json
+      - name: Capture bounded service diagnostics
+        if: failure()
+        run: >-
+          docker compose -f compose.classroom.yaml -f compose.classroom.kubernetes.yaml
+          --profile k8s-kind logs --no-color --tail 100 lab kubernetes-worker
+      - name: Stop only this CI classroom before releasing its cluster
+        if: always()
+        run: >-
+          docker compose -f compose.classroom.yaml -f compose.classroom.kubernetes.yaml
+          --profile '*' down --volumes --remove-orphans
+      - name: Release only the recorded owned node and its credentials
+        if: always()
+        run: |
+          if [ -f "$DS60_K8S_SESSION_DIR/host-receipt.json" ]; then
+            uv run --no-sync python scripts/prepare_kubernetes.py release \
+              --tools-dir "$DS60_K8S_TOOLS_DIR" --session "$DS60_K8S_SESSION_DIR" --confirm-release
+          elif [ -d "$DS60_K8S_SESSION_DIR" ]; then
+            printf '%s\n' 'Preparation did not finish. Its private recovery receipt is retained on this disposable runner; no ambiguous node will be deleted.'
+          fi
+      - name: Retain only credential-free execution receipts
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: owned-kubernetes-runtime
+          path: work/kubernetes-runtime-receipts.json
+          if-no-files-found: ignore
+          retention-days: 14

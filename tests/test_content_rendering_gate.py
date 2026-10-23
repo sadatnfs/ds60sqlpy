@@ -137,3 +137,19 @@ def test_cli_discovery_failure_returns_nonzero_without_creating_repository(tmp_p
     missing = tmp_path / "missing"
     assert main(["--root", str(missing)]) == 1
     assert not missing.exists()
+
+
+def test_cli_rejects_nested_source_instead_of_validating_its_parent(
+    rendered_catalog: Catalog, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # Catalog.load deliberately discovers a parent for interactive commands.
+    # A publication gate must validate the exact root requested by its caller.
+    monkeypatch.setattr(
+        "scripts.check_content_rendering.Catalog.load", lambda _root: rendered_catalog
+    )
+    requested = rendered_catalog.repo_root / "empty-source"
+    requested.mkdir()
+    before = {p: p.read_bytes() for p in rendered_catalog.repo_root.rglob("*") if p.is_file()}
+    assert main(["--root", str(requested)]) == 1
+    assert "0 sources" in capsys.readouterr().out
+    assert {p: p.read_bytes() for p in before} == before

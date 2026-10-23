@@ -672,7 +672,7 @@ class CommandResult:
 
 
 def _stop(process: subprocess.Popen[bytes]) -> None:
-    if os.name == "posix":
+    if sys.platform != "win32":
         with contextlib.suppress(ProcessLookupError):
             os.killpg(process.pid, signal.SIGKILL)
     else:
@@ -778,6 +778,10 @@ class KubectlClient:
         isolate_user: bool = True,
         runner: Callable[..., CommandResult] = run_kubectl,
     ) -> None:
+        if isolate_user and (sys.platform != "linux" or os.geteuid() != 0):
+            raise KubernetesRefusal(
+                "Prepared Kubernetes workers require the Linux credential supervisor."
+            )
         self.lease = lease
         self.directory = directory
         self.isolate_user = isolate_user
@@ -786,7 +790,7 @@ class KubectlClient:
         self.config = directory / "scoped.kubeconfig.json"
         self.config.write_bytes(lease.kubeconfig)
         self.config.chmod(0o600)
-        if isolate_user:
+        if isolate_user and sys.platform == "linux":
             os.chown(directory, 65533, 65533)
             os.chown(self.config, 65533, 65533)
 

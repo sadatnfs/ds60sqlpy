@@ -84,9 +84,33 @@ def test_narrow_initialization_chowns_only_ephemeral_workspace_root(
     monkeypatch.setattr(
         os, "chown", lambda path, uid, gid: calls.append((path, uid, gid)), raising=False
     )
-    prepare_workspace_root(workspace, ContainerSettings(501, 20, 8765, False))
-    assert calls == [(workspace, 501, 20)]
+    # Hosted macOS already owns files as 501:20. Choose a different target
+    # rather than accidentally exercising the correct already-owned no-op.
+    current = workspace.stat()
+    target = (current.st_uid + 1, current.st_gid + 1)
+    prepare_workspace_root(workspace, ContainerSettings(*target, 8765, False))
+    assert calls == [(workspace, *target)]
     assert (note.read_bytes(), note.stat().st_mode, learning.stat().st_mode) == original
+
+
+def test_already_owned_workspace_does_not_chown_learner_storage(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    workspace = tmp_path / "owned"
+    learning = workspace / ".learning"
+    learning.mkdir(parents=True)
+    note = learning / "notes.txt"
+    note.write_text("Keep my notes", encoding="utf-8")
+    owner = workspace.stat()
+    before = (note.read_bytes(), note.stat().st_mode, learning.stat().st_mode)
+    monkeypatch.setattr(os, "geteuid", lambda: 0, raising=False)
+
+    def unexpected_chown(*args: object, **kwargs: object) -> None:
+        pytest.fail("Already-owned storage must not be chowned")
+
+    monkeypatch.setattr(os, "chown", unexpected_chown, raising=False)
+    prepare_workspace_root(workspace, ContainerSettings(owner.st_uid, owner.st_gid, 8765, False))
+    assert (note.read_bytes(), note.stat().st_mode, learning.stat().st_mode) == before
 
 
 def test_bind_preflight_keeps_notes_and_permissions_and_ignores_host_database_url(

@@ -255,7 +255,7 @@ def test_darwin_permission_error_is_ignored_only_for_terminal_group(
     def denied(*args: Any) -> None:
         raise PermissionError("fixture permission denial")
 
-    monkeypatch.setattr(os, "killpg", denied)
+    monkeypatch.setattr(os, "killpg", denied, raising=False)
     monkeypatch.setattr(sys, "platform", "darwin")
     monkeypatch.setattr(
         subprocess,

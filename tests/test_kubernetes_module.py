@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import contextlib
 import copy
 import hashlib
 import json
@@ -991,13 +992,47 @@ def test_cleanup_has_fresh_budget_after_work_deadline(
     assert any(item["name"] == "owned-cleanup" and item["passed"] for item in result.checks)
 
 
+def _wait_for_active_worker(process: subprocess.Popen[str], started: Path) -> None:
+    deadline = time.monotonic() + 10
+    while not started.exists() and process.poll() is None and time.monotonic() < deadline:
+        time.sleep(0.02)
+    if not started.exists() or process.poll() is not None:
+        if process.poll() is None:
+            with contextlib.suppress(ProcessLookupError):
+                process.kill()
+        stdout, stderr = process.communicate(timeout=5)
+        pytest.fail(
+            "The fake operation never entered a live active phase. "
+            f"Child return code: {process.returncode}.\n"
+            f"stdout:\n{stdout[-4000:]}\nstderr:\n{stderr[-4000:]}"
+        )
+
+
+def test_worker_startup_failure_reports_child_stderr(tmp_path: Path) -> None:
+    process = subprocess.Popen(
+        [sys.executable, "-c", "raise RuntimeError('synthetic startup exception')"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+    )
+    try:
+        with pytest.raises(pytest.fail.Exception, match="synthetic startup exception"):
+            _wait_for_active_worker(process, tmp_path / "never-started")
+        assert process.returncode == 1
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.wait(timeout=5)
+
+
 @pytest.mark.skipif(os.name == "nt", reason="POSIX SIGTERM protocol; Windows has a separate row")
 def test_sigterm_waits_for_active_operation_cleanup(tmp_path: Path) -> None:
     child = tmp_path / "shutdown.py"
     started = tmp_path / "started"
     cleaned = tmp_path / "cleaned"
     child.write_text(
-        """import sys, threading, time
+        """import json, sys, threading, time
 from pathlib import Path
 from ds60sqlpy.kubernetes_module import KubernetesWorkerState, install_graceful_stop
 from ds60sqlpy.module_worker import WorkerHTTPServer
@@ -1011,13 +1046,25 @@ def execute(profile, source, directory, timeout_seconds, cancel, on_status, veri
     time.sleep(0.1)
     cleaned.write_text('owned-cleanup confirmed')
     return OperationResult(1, '', False, 'cancelled', 'owned cleanup confirmed', [])
-state = KubernetesWorkerState('k8s-kind', executor=execute, ready=True, isolate_jobs=False)
+state = KubernetesWorkerState('k8s-kind', scratch_root=started.parent,
+                              executor=execute, ready=True, isolate_jobs=False)
 server = WorkerHTTPServer(('127.0.0.1', 0), state, 'x' * 64)
 restore = install_graceful_stop(server, state)
-state.submit({'job_id': 'b' * 32, 'profile': 'k8s-kind', 'operation': 'execute',
-              'source': 'kind: Deployment', 'language': 'yaml', 'timeout_seconds': 15,
-              'verification_id': None})
 try:
+    state.submit({'job_id': 'b' * 32, 'profile': 'k8s-kind', 'operation': 'execute',
+                  'source': 'kind: Deployment', 'language': 'yaml', 'timeout_seconds': 15,
+                  'verification_id': None})
+    last_status = None
+    while not started.exists():
+        snapshot = state.get('b' * 32)
+        if snapshot['status'] != last_status:
+            print('Startup state: ' + json.dumps(snapshot), file=sys.stderr, flush=True)
+            last_status = snapshot['status']
+        if snapshot['status'] in {'succeeded', 'failed', 'cancelled', 'timed_out'}:
+            raise RuntimeError(
+                'Synthetic worker ended before its active phase: ' + json.dumps(snapshot)
+            )
+        time.sleep(0.02)
     server.serve_forever(poll_interval=0.02)
 finally:
     server.server_close()
@@ -1032,12 +1079,10 @@ assert state.get('b' * 32)['status'] == 'cancelled'
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
+        encoding="utf-8",
     )
     try:
-        deadline = time.monotonic() + 10
-        while not started.exists() and process.poll() is None and time.monotonic() < deadline:
-            time.sleep(0.02)
-        assert started.exists(), "The fake operation never entered its active phase."
+        _wait_for_active_worker(process, started)
         process.send_signal(signal.SIGTERM)
         stdout, stderr = process.communicate(timeout=10)
         assert process.returncode == 0, stdout + stderr

@@ -171,6 +171,8 @@ os.execvpe(sys.argv[1], sys.argv[1:], os.environ)
 
 
 def _signal_group(process_group: int, sig: int) -> None:
+    if sys.platform == "win32":
+        raise RuntimeError("Process-group signaling requires a POSIX runtime.")
     try:
         os.killpg(process_group, sig)
     except ProcessLookupError:
@@ -194,7 +196,7 @@ def _signal_group(process_group: int, sig: int) -> None:
 
 
 def _stop_tree(process: subprocess.Popen[bytes], *, isolated: bool = False) -> None:
-    if os.name == "posix":
+    if sys.platform != "win32":
         _signal_group(process.pid, signal.SIGTERM)
         with contextlib.suppress(subprocess.TimeoutExpired):
             process.wait(timeout=0.25)

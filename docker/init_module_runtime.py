@@ -69,6 +69,10 @@ def initialize(runtime: Path, learning: Path, uid: int = 1000, gid: int = 1000) 
     Existing learner files and directories are never traversed or recursively
     chowned. Return whether this invocation published the token, never its value.
     """
+    if sys.platform == "win32":
+        raise InitializationRefusal(
+            "Classroom volume ownership requires a POSIX container runtime."
+        )
     if type(uid) is not int or type(gid) is not int:
         raise InitializationRefusal("Use integer classroom identities.")
     uid, gid = identifier(str(uid)), identifier(str(gid))
@@ -107,6 +111,10 @@ def initialize(runtime: Path, learning: Path, uid: int = 1000, gid: int = 1000) 
 
 
 def _initialize_locked(runtime: Path, learning: Path, uid: int, gid: int) -> bool:
+    if sys.platform == "win32":
+        raise InitializationRefusal(
+            "Classroom volume ownership requires a POSIX container runtime."
+        )
     token = runtime / "token"
     contents = {item.name for item in runtime.iterdir()}
     if contents - {"token", ".init.lock"}:

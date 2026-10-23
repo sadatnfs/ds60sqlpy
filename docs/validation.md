@@ -107,9 +107,10 @@ Do not describe a skipped platform as validated.
 
 ## What hosted workflows check
 
-The workflow files are the executable source of truth. Both workflows use
-read-only repository permissions, pinned action revisions and local image
-builds. They do not publish Docker images.
+The workflow files are the executable source of truth. They use read-only
+repository permissions, pinned action revisions and local image builds. They
+do not publish Docker images. Core jobs explicitly use UTF-8 on every OS and
+create their test workspace before starting four grouped pytest workers.
 
 | Workflow and job | Trigger and scope | What a pass establishes |
 | --- | --- | --- |
@@ -119,14 +120,33 @@ builds. They do not publish Docker images.
 | Course validation: Advanced imports | Manual dispatch and weekly schedule; three OS families | Frozen all-extras installation and isolated imports, without downloading pretrained models or proving full model training |
 | Application builds: Portable Docker classroom starter | Push, pull request and manual dispatch | A complete source bundle assembled through the allowlisted packaging path |
 | Application builds: Optional native application | Same triggers; Linux, Windows and macOS | A native bundle builds and passes its bundled-asset self-check on that runner |
-| Application builds: Docker classroom | Same triggers; isolated Linux groups covering all ordinary profiles | The shared launcher builds and starts workers, real reference programs run, and pads/results survive container replacement |
+| Application builds: Docker classroom | Same triggers; isolated Linux groups covering all ordinary profiles | Every admitted ordinary module reference runs in its declared worker; real compiler failures, timeout recovery and saved receipts are checked |
+| Application builds: Chromium acceptance | Python Core Docker group, after container replacement | Real browser navigation, isolated pads/results, saved progress, output contrast, mathematical rendering and the three browser JavaScript references work |
+| Owned Kubernetes runtime | Manual dispatch and weekly schedule; disposable Linux kind cluster | Every admitted bounded Kubernetes reference and explicit failure/timeout/cancellation cases produce matching receipts and verified owned cleanup |
 
-The Docker groups cover C++, Java, JavaScript/TypeScript, Scala/Spark,
-TensorFlow and PyTorch, with the Python core worker in each relevant project.
-Each group owns a disposable project so its cleanup cannot remove a learner's
-volumes. Framework builds are separated to limit peak disk use. Real Kubernetes
-cluster operations and optional pretrained downloads need their own explicitly
-prepared acceptance environments.
+The Docker groups cover Python Core, C++, Java, JavaScript/TypeScript,
+Scala/Spark, TensorFlow and PyTorch. The Core group runs the statistics book,
+NLP and compatible LLM examples once; the framework groups execute their own
+TensorFlow, PyTorch and LLM references. PySpark and tutorial example variants
+are discovered from the same catalog used by the classroom. There is no second
+hand-maintained lesson list. Reading/manual lessons and owned-cluster operations
+appear as explicit exclusions from the ordinary corpus, never successful runs.
+
+Each group owns a disposable project. At most two Docker groups run together,
+and each worker executes one reference at a time. The corpus records failures,
+source hashes, actual exit status and typed checks where registered. An overall
+time budget leaves unexecuted cases visibly pending and fails the job. Artifact
+JSON distinguishes reference execution from independent typed verification.
+Negative probes restore the previous source and notes, and container replacement
+checks read the original successful receipts without replay.
+
+Chromium runs only in a separate CI browser environment with hash-locked packages.
+It is absent from the production image. Browser reports contain check results and
+screenshots, without session credentials or network traces. The separate Kubernetes
+workflow prepares checksum-verified host tools and a short-lived owned cluster,
+checks all supported reference manifests and cleanup behavior, then releases only
+its recorded resources. Optional pretrained-model downloads and external services
+remain outside these offline qualification paths.
 
 A Linux hosted Docker result does not establish Windows WSL installation,
 macOS engine setup, another CPU architecture, GPU support or every rootless
@@ -135,12 +155,14 @@ lesson's backend. Check the actual matrix architecture and receipt before
 making a release claim.
 
 To run the workflows manually, open the repository's **Actions** tab, select
-**Course validation** or **Application builds**, choose **Run workflow**, and
+**Course validation**, **Application builds** or **Owned Kubernetes runtime**,
+choose **Run workflow**, and
 select the revision to validate. With an authenticated GitHub CLI:
 
 ```text
 gh workflow run ci.yml --ref BRANCH_NAME
 gh workflow run app-build.yml --ref BRANCH_NAME
+gh workflow run kubernetes.yml --ref BRANCH_NAME
 ```
 
 Read failed job logs and uploaded test results. A workflow syntax check is
@@ -164,6 +186,20 @@ disposable project's loopback URL:
 python scripts/check_lab_http.py --url CLASSROOM_URL --confirm-disposable --reset-sql
 python scripts/check_classroom_profiles.py --url CLASSROOM_URL --confirm-disposable --profiles "python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python" --report work/release-runtime-receipts.json
 ```
+
+To run the complete admitted module corpus for selected prepared profiles:
+
+```text
+python scripts/check_module_references.py --url CLASSROOM_URL --confirm-disposable --profiles "python-core cpp20" --report work/module-reference-results.json
+python scripts/check_classroom_failures.py --url CLASSROOM_URL --confirm-disposable --profiles "python-core cpp20" --check-timeout --report work/runtime-failures.json
+```
+
+The first command executes every selected module reference, including applicable
+book examples and variants. The second deliberately submits invalid code and a
+real 15-second Python timeout, checks diagnostics and recovery, and restores the
+prior source. These commands still need disposable state. `--list-only` on the
+corpus checker produces the inventory report without HTTP or execution; omit
+`--url` and `--confirm-disposable` in that mode.
 
 The profile checker runs cataloged reference source through the authenticated
 classroom and records source-bound results. It does not declare every lesson
@@ -195,6 +231,20 @@ Removing named volumes is a separate destructive action. Never use a global
 volume prune as part of a learner-facing cleanup procedure.
 
 ## Browser acceptance
+
+The Python Core Docker job runs `scripts/check_classroom_browser.py` against
+its actual classroom after persistence checks. For a prepared Linux x86_64
+Python 3.12 browser environment, install `requirements/ci-browser.lock`, install
+Chromium with `python -m playwright install --with-deps chromium`, then run:
+
+```text
+python scripts/check_classroom_browser.py --url CLASSROOM_URL --confirm-disposable --report work/browser-receipts.json
+```
+
+Use `--fixtures-only --report work/browser-fixtures.json` to execute just the
+isolated JavaScript browser references. A unit test of the probe's helpers is
+not a substitute for this real Chromium run. The browser probe writes its own
+disposable pads and progress; do not point it at a learner workspace.
 
 Use a separate browser profile and disposable classroom state for checks that
 edit code or notes. Inspect the actual running page at desktop and narrow

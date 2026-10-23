@@ -32,6 +32,8 @@ def initializer() -> ModuleType:
 
 @pytest.fixture
 def identity() -> tuple[int, int]:
+    if sys.platform == "win32":
+        pytest.skip("POSIX ownership helpers are exercised inside Linux containers on Windows.")
     # Root-based Linux test containers can exercise the real non-root owner too.
     return (1000, 1000) if os.geteuid() == 0 else (os.geteuid(), os.getegid())
 
@@ -211,6 +213,8 @@ def test_populated_wrong_owner_learning_is_never_recursively_repaired(
     notes = learning / "notes.txt"
     notes.write_bytes(b"Existing learner evidence.")
     before = state(notes)
+    if sys.platform == "win32":
+        pytest.skip("This ownership-repair test requires a POSIX filesystem.")
     actual_stat = Path.stat
     actual_chown = os.chown
     chowns: list[Path] = []

@@ -85,6 +85,21 @@ receipts after container replacement without running them again. Read its
 point its write mode at a learner's workspace. A subject reusing a profile does
 not need another image or runtime matrix row.
 
+`check_module_references.py` discovers all ordinary runnable references and book
+examples from `ModuleCatalog`, including variants. A new lesson must execute in
+its declared packaged worker and produce a matching source receipt; reading or
+external workflows stay explicit. Use `--list-only` to review admission before
+running the corpus on disposable state. New runtime profiles also need a real
+syntax-failure case and diagnostic contract in `check_classroom_failures.py`.
+
+Update the expected subject set in `check_classroom_browser.py` when adding a
+subject, then prove it appears in Chromium and retains separate saved work.
+Browser-only language fixtures need real browser interaction checks. Kubernetes
+references belong in the separate owned-cluster workflow and its reviewed
+observation mapping. No model downloads or ambient cluster selection belong in
+the ordinary qualification path. Read [validation](../../../../docs/validation.md)
+for commands, artifacts and platform boundaries.
+
 ## Authoring and shared checks
 
 There is no generic scaffold command. Read a subject's `authoring/README.md`

@@ -83,6 +83,13 @@ def test_normalizers_preserve_unicode_code_with_legacy_windows_text_defaults(
 
     # This models the actual Windows failure independently of PYTHONUTF8=1.
     # It also models Windows newline translation to protect program bytes.
+    # pathlib resolves a missing encoding through io.text_encoding before
+    # calling Path.open. Override that resolution too, including under the
+    # PYTHONUTF8=1 environment used by CI.
+    monkeypatch.setattr(
+        "io.text_encoding",
+        lambda encoding, stacklevel=2: "cp1252" if encoding in {None, "locale"} else encoding,
+    )
     monkeypatch.setattr(Path, "open", legacy_open)
     with pytest.raises(UnicodeDecodeError):
         (tmp_path / "courses/example/guide.md").read_text()

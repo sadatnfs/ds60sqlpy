@@ -449,6 +449,8 @@ def test_busy_recovery_mutex_preserves_stale_pid_and_does_not_build(launcher: An
 
 
 def test_concurrent_reclaimers_preserve_the_winning_launchers_new_pid(launcher: Any) -> None:
+    if sys.platform == "win32":
+        pytest.skip("The concurrent Bash process-group boundary runs inside WSL on Windows.")
     lock, stale_pid = _stale_lock_fixture(launcher)
     recovery = lock.parent / "launcher-recovery.lock"
     binaries = Path(launcher.env["PATH"].split(os.pathsep)[0])

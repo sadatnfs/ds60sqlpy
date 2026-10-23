@@ -8,6 +8,9 @@ on:
 permissions:
   contents: read
 
+env:
+  PYTHONUTF8: "1"
+
 concurrency:
   group: application-builds-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -77,7 +80,7 @@ jobs:
   docker:
     name: Docker classroom (${{ matrix.group }})
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       max-parallel: 2
@@ -85,6 +88,8 @@ jobs:
       # frameworks run separately so cold builds do not exhaust one runner's disk.
       matrix:
         include:
+          - group: python-core
+            profiles: python-core
           - group: cpp
             profiles: cpp20
           - group: java
@@ -100,6 +105,7 @@ jobs:
     env:
       COMPOSE_PROJECT_NAME: ds60-ci-${{ matrix.group }}
       DS60_PROFILES: ${{ matrix.profiles }}
+      DS60_CI_GROUP: ${{ matrix.group }}
       DS60_CLASSROOM_PORT: "0"
       DS60_POSTGRES_PORT: "0"
     steps:
@@ -127,6 +133,20 @@ jobs:
           url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
           python scripts/check_classroom_profiles.py --url "$url" --confirm-disposable \
             --profiles "python-core $DS60_PROFILES" --report work/runtime-receipts.json
+      - name: Exercise real compiler failures and bounded runtime recovery
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          options=()
+          if [ "$DS60_CI_GROUP" = python-core ]; then options+=(--check-timeout); fi
+          python scripts/check_classroom_failures.py --url "$url" --confirm-disposable \
+            --profiles "python-core $DS60_PROFILES" --report work/runtime-failures.json "${options[@]}"
+      - name: Execute every authored reference in the selected runtime profiles
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          python scripts/check_module_references.py --url "$url" --confirm-disposable \
+            --profiles "$DS60_PROFILES" --report work/module-reference-results.json
       - name: Run all SQL lessons and executable solutions with the limited course login
         if: matrix.group == 'cpp'
         run: |
@@ -148,6 +168,19 @@ jobs:
           python scripts/check_classroom_profiles.py --url "$url" --confirm-disposable \
             --profiles "python-core $DS60_PROFILES" --report work/runtime-receipts.json \
             --check-persistence
+      - name: Prepare isolated Chromium acceptance tools
+        if: matrix.group == 'python-core'
+        run: |
+          python -m venv work/browser-env
+          work/browser-env/bin/python -m pip install --require-hashes --only-binary=:all: -r requirements/ci-browser.lock
+          work/browser-env/bin/python -m playwright install --with-deps chromium
+      - name: Exercise the real classroom and browser-language examples
+        if: matrix.group == 'python-core'
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          work/browser-env/bin/python scripts/check_classroom_browser.py --url "$url" \
+            --confirm-disposable --report work/browser-receipts.json
       - name: Capture service diagnostics
         if: failure()
         run: docker compose -f compose.classroom.yaml --profile '*' logs --no-color
@@ -156,7 +189,12 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: classroom-runtime-${{ matrix.group }}
-          path: work/runtime-receipts.json
+          path: |
+            work/runtime-receipts.json
+            work/runtime-failures.json
+            work/module-reference-results.json
+            work/browser-receipts.json
+            work/browser-screenshots/*.png
           if-no-files-found: ignore
           retention-days: 14
       - name: Remove only this disposable CI project's containers and volumes

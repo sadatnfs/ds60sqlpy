@@ -104,7 +104,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--report", type=Path, help="optional JSON report destination")
     args = parser.parse_args(argv)
     try:
-        report = inspect_catalog(Catalog.load(args.root.resolve()))
+        root = args.root.resolve()
+        if not root.is_dir():
+            raise ValueError("Choose an existing repository source directory.")
+        catalog = Catalog.load(root)
+        if catalog.repo_root != root:
+            raise ValueError("Choose the repository root, not a nested source directory.")
+        report = inspect_catalog(catalog)
     except (KeyError, OSError, TypeError, ValueError, RecursionError) as exc:
         report = {
             "schema_version": 1,
