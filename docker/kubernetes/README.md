@@ -119,3 +119,12 @@ containers remain intact. A failed partial preparation retains a private
 recovery receipt; where the exact created node identity was recorded, cleanup
 is attempted only for that unchanged node. Unproved partial state requires
 explicit inspection rather than a broad delete-all or engine reset.
+
+
+The [module runtime walkthrough](../../docs/modules-runtime.md#prepare-and-run-the-owned-kubernetes-lab)
+connects build, private host preparation, explicit-session start, stop and
+release. Prepare after building because the scoped lease lasts15 minutes.
+Release/failed-preparation cleanup targets only the recorded full64hex Docker
+node ID. It does not run a name-based global kind cleanup or remove shared
+networks. Same-name replacements and ambiguous engine failures preserve the
+private recovery evidence.

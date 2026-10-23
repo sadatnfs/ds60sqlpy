@@ -154,7 +154,8 @@ class TutorAdapter:
                     (
                         "module_lessons",
                         "List authored beta lesson metadata by default. Planned metadata "
-                        "requires an explicit status filter. Variants do not inflate canonical counts.",
+                        "requires an explicit status filter. Variants do not inflate canonical "
+                        "counts.",
                         _schema(
                             {
                                 "subject": {"enum": ["all", *TRACK_IDS]},
@@ -174,7 +175,7 @@ class TutorAdapter:
                     (
                         "module_solution",
                         "Read curated beta solutions only for an explicit learner "
-                        "request to compare. Never use this tool for a hint request; reveal must be true.",
+                        "request to compare. Never use it for hints; reveal must be true.",
                         _schema(
                             {"lesson_id": module_id, "reveal": {"type": "boolean", "const": True}},
                             ("lesson_id", "reveal"),
@@ -369,8 +370,10 @@ class TutorAdapter:
                 "planned_count": len(catalog.canonical_ids),
                 "unwritten_count": len(catalog.canonical_ids) - authored_count,
                 "additional_variants": len(catalog.lessons) - authored_count,
-                "publication": "Authored beta modules are separate from the published legacy catalog.",
-                "counting": "planned_count covers the full design; variants are not additional lessons.",
+                "publication": (
+                    "Authored beta modules are separate from the published legacy catalog."
+                ),
+                "counting": "Design totals include authored lessons; variants are separate.",
                 "runtime_status": "not_probed",
             }
         )
@@ -394,7 +397,9 @@ class TutorAdapter:
                 authored = item["id"] in catalog.lessons
                 if status != "all" and (status == "authored") != authored:
                     continue
-                haystack = f"{item['id']} {item['title']} {item['outcome']} {' '.join(item['concepts'])}".casefold()
+                haystack = (
+                    f"{item['id']} {item['title']} {item['outcome']} {' '.join(item['concepts'])}"
+                ).casefold()
                 if all(term in haystack for term in terms):
                     lessons.append(planned)
         scope = json.dumps(["module-lessons", subject, status, query, limit])
@@ -425,7 +430,7 @@ class TutorAdapter:
                     "text": self._module_text(lesson.source_path, MAX_SOURCE_BYTES),
                 },
                 "coaching": INSTRUCTIONS,
-                "boundary": "Checked-in content only; no saved pad, runtime, job or mastery operation.",
+                "boundary": "Checked-in content; no saved pad, runtime, job or mastery operation.",
             }
         )
 

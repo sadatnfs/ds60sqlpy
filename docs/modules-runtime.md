@@ -30,7 +30,7 @@ preparation needs a connected bootstrap; practice uses the prepared local
 images. Nothing uploads an image or downloads a model when you press Run.
 Kubernetes uses its separate owned-cluster preparation and lease checks.
 
-| Profile | Fixed source and operation | Prepared toolchain |
+| Profile | Fixed source and operation | Toolchain definition |
 | --- | --- | --- |
 | `python-core` | `main.py`, fresh Python process | Existing Core image and NumPy |
 | `cpp20` | `main.cpp`, compile then execute | GCC 14.3.0 with C++20, hash-locked CMake 3.28.4 and Ninja |
@@ -58,8 +58,8 @@ framework. A failed probe leaves the service not ready. Preparation must inspect
 that failure rather than claiming that an image definition proves readiness.
 
 A submitted job moves through preparing, compiling when needed, running and
-verifying when requested. Compilation and execution share the selected total
-15, 60 or 120 second deadline. A compiler invocation also has a maximum
+verifying when requested. For ordinary CPU workers, compilation and execution
+share the selected total 15, 60 or 120 second deadline. A compiler invocation also has a maximum
 60-second phase deadline. Failed compilation never runs an older binary.
 Cancellation kills the owned process group and, inside the dedicated worker
 PID namespace, remaining processes with the fixed job UID. A job that creates
@@ -113,11 +113,12 @@ notice. Output draining preserves final errors and exit status. The browser
 may impose a smaller source limit.
 
 Each job has a disposable scratch directory, a 32 MiB total file allowance,
-a 1024-file allowance and a per-file 32 MiB limit. Container tmpfs is 128 MiB and explicitly permits execution of compiled job
-files; it is private disposable memory, not a host filesystem mount.
-ordinary workers have a 2 GiB memory cap and heavy framework/Spark profiles
-have 3 GiB. Two CPUs and 128 processes are the ordinary worker ceilings; Spark services
-allow 384 tasks because JVM and Python worker threads count toward that limit.
+a 1024-file allowance and a per-file 32 MiB limit. Container tmpfs is 128 MiB
+and explicitly permits execution of compiled job files; it is private
+disposable memory, not a host filesystem mount. Ordinary workers have a 2 GiB
+memory cap and heavy framework/Spark profiles have 3 GiB. Two CPUs and 128
+processes are the ordinary worker ceilings; Spark services allow 384 tasks
+because JVM and Python worker threads count toward that limit.
 JVMs receive ActiveProcessorCount=2 and fixed small GC thread budgets.
 Health, polling and cancellation use an existing HTTP control thread so child
 PID pressure cannot prevent creation of a request-control thread. These are
@@ -167,3 +168,157 @@ For an explicitly trusted registry mirror, build arguments `DS60_CPP_IMAGE`,
 corresponding reviewed base. Keep the same toolchain family and record the
 resolved digest and platform. Never disable TLS to repair registry access.
 An override is a new image input and needs the same runtime qualification.
+
+## Prepare and run the owned Kubernetes lab
+
+This is an optional host preparation path. Read the lesson and complete its
+prediction before preparing a session: the scoped credential lasts 15 minutes.
+Build images first, then prepare the cluster immediately before practice. A
+paused browser does not extend the lease. The app's Run creates and proves
+only fixed owned `hello` resources; it does not select an existing cluster or
+install Kubernetes. Opening or saving a lesson never performs preparation.
+
+Use the same local Linux-container engine for the entire session. The helper
+requires host Python 3.12, but it does not require a host Kubernetes package or
+an existing kubeconfig. The main Docker lab continues to need no host Python.
+If your interpreter has another name, pass `--python /absolute/path/to/python`
+to Bash or `-Python C:\absolute\path\python.exe` to PowerShell. Use that same
+interpreter for `prepare_kubernetes.py` below. Keep paths in the terminal's own
+OS: Linux paths in WSL, Windows paths in PowerShell.
+
+1. From the extracted full course folder, build the fixture and dedicated
+   worker while connected. This can take time and does not create a cluster.
+
+   ```bash
+   bash scripts/module_lab.sh build --profiles k8s-kind
+   python3 scripts/prepare_kubernetes.py tools --allow-download
+   ```
+
+   ```powershell
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1 build -Profiles k8s-kind
+   python .\scripts\prepare_kubernetes.py tools --allow-download
+   ```
+
+   The tool helper downloads pinned kind v0.33.0 and kubectl v1.37.0 from their
+   official release locations and verifies SHA256 before publishing the files.
+   `doctor` is a read-only availability check. Neither action creates a cluster.
+   Registry/tool downloads require a connected bootstrap. No image is pushed.
+
+2. Obtain the selected local engine endpoint. In Bash:
+
+   ```bash
+   if [ -n "${DOCKER_HOST:-}" ]; then
+     ENGINE="$DOCKER_HOST"
+   else
+     ENGINE="$(docker context inspect --format '{{.Endpoints.docker.Host}}')"
+   fi
+   python3 scripts/prepare_kubernetes.py prepare --confirm-create --docker-host "$ENGINE" --allow-node-download
+   ```
+
+   In PowerShell:
+
+   ```powershell
+   $Engine = $env:DOCKER_HOST
+   if (-not $Engine) {
+       $Engine = docker context inspect --format '{{.Endpoints.docker.Host}}'
+       if ($LASTEXITCODE -ne 0) { throw 'Select a ready local Docker context first.' }
+   }
+   python .\scripts\prepare_kubernetes.py prepare --confirm-create --docker-host $Engine --allow-node-download
+   if ($LASTEXITCODE -ne 0) { throw 'Owned preparation failed. Review its private receipt.' }
+   ```
+
+   The helper refuses remote endpoints. `--allow-node-download` explicitly
+   allows the pinned node-image bootstrap if absent; omit it for a fully
+   cached run. A reviewed TLS-preserving mirror can be selected with
+   `--node-image mirror.gcr.io/kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5`.
+   The digest is unchanged. Do not disable TLS or substitute a floating tag.
+
+3. Copy only the returned `session_dir` path into a terminal variable. The
+   helper prints no credential. The random private directory is outside the
+   course and `.learning`; do not move it into a backup, pad or export.
+   Replace the example placeholder with the actual absolute receipt path.
+
+   ```bash
+   SESSION="/absolute/private/path/from/session_dir"
+   bash scripts/module_lab.sh start --profiles k8s-kind --k8s-session "$SESSION" --no-browser
+   ```
+
+   ```powershell
+   $Session = 'C:\absolute\private\path\from\session_dir'
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1 start -Profiles k8s-kind -K8sSession $Session -NoBrowser
+   ```
+
+   Start checks the private lease, host receipt, matching local endpoint and
+   remaining lifetime before creating a worker token or starting services.
+   It uses `compose.kubernetes.yaml` and the selected `k8s-kind` profile only.
+   Remove `--no-browser` or `-NoBrowser` to open the local journey page.
+   Choose `k8s-003` for Deployment-only practice or `k8s-008` for the pilot.
+   An expired session is refused. Stop/release it, then prepare a new one;
+   there is no silent renewal or switch to an ambient admin context.
+
+4. Stop the selected app/worker before explicitly releasing the owned cluster.
+   Status and stop remain available when a lease has expired. They do not
+   create a cluster, refresh credentials or delete the cluster.
+
+   ```bash
+   bash scripts/module_lab.sh status --profiles k8s-kind --k8s-session "$SESSION"
+   bash scripts/module_lab.sh stop --profiles k8s-kind --k8s-session "$SESSION"
+   python3 scripts/prepare_kubernetes.py release --session "$SESSION" --confirm-release
+   ```
+
+   ```powershell
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1 status -Profiles k8s-kind -K8sSession $Session
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1 stop -Profiles k8s-kind -K8sSession $Session
+   python .\scripts\prepare_kubernetes.py release --session $Session --confirm-release
+   if ($LASTEXITCODE -ne 0) { throw 'Release was not confirmed. Preserve the private receipt for recovery.' }
+   ```
+
+   Release validates the recorded full Docker container ID, kind owner label
+   and namespace UID. It removes only that immutable owned one-node container,
+   preserves a same-name replacement and leaves shared engine networks and
+   unrelated contexts alone. Successful exact-name and ID listings must prove
+   absence before credentials are removed. Repeating a completed release is
+   safe while its private host receipt remains. It does not delete learner
+   work or PostgreSQL data. Ambiguous/failed cleanup preserves private evidence.
+
+The worker receives only a short-lived scoped kubeconfig in root-private
+mounts. It gets no engine socket or host admin config. The kubectl child runs
+as UID 65533, which must be unable to read supervisor credentials. Workload
+Pods run as UID 65532 without bearer-token mounts, host paths or privilege.
+The worker joins its private app network and the explicitly prepared kind
+network; no worker port is published to the host.
+
+The 15/60/120-second selection bounds work. Cleanup then has a fresh independent
+15-second reserve, even after cancellation or timeout. Shutdown requests
+cancellation and waits up to 20 seconds; Compose gives the service 30 seconds.
+The fixed synthetic Pod templates use a 1-second termination grace, rather
+than the general Kubernetes default 30 seconds, because they have no durable
+state to flush. [Pod termination](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination)
+explains this distinction. Only resource UIDs recorded or recovered with this
+Run's private nonce are eligible for cleanup. Failure to prove cleanup reports
+failed with the affected resource; it never reports an unproved clean cancel.
+
+`k8s-readiness-v1` verifies the owned Deployment and stable Ready Pod identities,
+Service EndpointSlice UID membership, an actual in-cluster `/version` client
+and exact owned cleanup. The foundation can omit the Service and receives no
+routing grade. The pilot's rolling update, Pod deletion, second-Service tasks
+and explanations remain manual scoped/teacher activities. This one-shot Run
+does not grade the complete six-task course. Native Windows ACLs/file sharing
+and other host/architecture rows require separate acceptance.
+
+## Recorded runtime boundary
+
+The private `work/modules-acceptance` receipts record actual Linux aarch64
+Ready plus positive and negative runs for `python-core`, `tensorflow-cpu`,
+`cpp20`, `scala-jvm`, `spark-local-scala` and `spark-local-python`.
+`llm-torch-cpu` currently has metadata/hash-lock evidence and remains
+unqualified. The final owned Kubernetes worker passed seven live Linux aarch64 cases:
+healthy Service/client, Deployment-only, unready timeout, wrong-selector
+timeout, namespace-escape rejection, privileged-source rejection and
+cancellation. Every applicable case confirmed owned cleanup. An actual
+SIGTERM while verifying left zero of four previously observed owned resources
+and exited zero in 6.837 seconds. Exact refreshed image and resource IDs remain
+in the root's private receipts.
+Windows WSL2/file sharing, Intel Mac, Linux amd64, rootless engines and
+emulation remain separate untested rows. Source tests and image definitions
+do not fill those rows.

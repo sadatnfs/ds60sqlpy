@@ -91,25 +91,49 @@ def test_cancel_and_timeout_reap_real_children(tmp_path: Path) -> None:
     source.write_text(script)
     for cancelled in (False, True):
         cancel = threading.Event()
-        output = BoundedOutput()
-        timer = threading.Timer(0.2, cancel.set) if cancelled else None
-        if timer:
-            timer.start()
+        started = threading.Event()
+        startup_expired = threading.Event()
+
+        def observe(text: str, _truncated: bool, ready: threading.Event = started) -> None:
+            if "started\n" in text:
+                ready.set()
+
+        def cancel_after_observed_start(
+            ready: threading.Event = started,
+            expired: threading.Event = startup_expired,
+            cancellation: threading.Event = cancel,
+        ) -> None:
+            if not ready.wait(timeout=5):
+                expired.set()
+            cancellation.set()
+
+        output = BoundedOutput(observer=observe)
+        controller = threading.Thread(target=cancel_after_observed_start) if cancelled else None
+        if controller:
+            controller.start()
         try:
             code, status = run_process(
                 [sys.executable, str(source)],
                 tmp_path,
                 child_environment(tmp_path),
-                time.monotonic() + 0.4,
+                time.monotonic() + (10 if cancelled else 0.4),
                 cancel,
                 output,
             )
             assert status == ("cancelled" if cancelled else "timed_out")
-            assert code is not None and code != 0 and "started" in output.snapshot()[0]
+            assert code is not None and code != 0
+            if cancelled:
+                assert not startup_expired.is_set(), (
+                    "Child startup was not observed before cancellation"
+                )
+                assert "started\n" in output.snapshot()[0]
+            # The timeout still includes interpreter startup. Under contention
+            # it may legitimately reap the child before any output is written.
         finally:
-            if timer:
-                timer.cancel()
-                timer.join()
+            if controller:
+                started.set()  # Release the helper if process startup itself failed.
+                controller.join(timeout=1)
+                assert not controller.is_alive()
 
 
 @pytest.mark.skipif(os.name != "posix", reason="Optional worker containers run Linux POSIX jobs.")

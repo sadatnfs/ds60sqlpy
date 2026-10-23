@@ -138,6 +138,59 @@ The solution flag is an explicit protocol acknowledgement. The AI host must
 still respect the learner's actual request; it should never set the flag just
 to bypass a request for hints.
 
+## Read authored beta modules
+
+When this checkout contains the expansion plans, four additional read-only
+operations expose the authored Kubernetes, TensorFlow, LLM, C++, and
+Scala/Spark modules. Their counts come from the curated module manifests.
+Canonical lesson counts exclude language variants. `planned_count` covers the
+full design, including the authored subset; `unwritten_count` identifies the
+remaining planned lessons.
+
+| Tool | Purpose |
+| --- | --- |
+| `module_subjects` | Subject summaries and authored/design counts |
+| `module_lessons` | Paginated canonical metadata, authored lessons by default |
+| `module_lesson` | One authored guide and checked-in learner artifact |
+| `module_solution` | Curated solution documents after explicit `reveal: true` |
+
+For example, ask Codex:
+
+```text
+Use ds60-tutor module_subjects, then module_lessons with subject scala-spark
+and status authored. Read spark-013@pyspark through module_lesson for the
+PySpark variant. Explain the guide, ask me to predict the NULL behavior, and
+wait for my attempt. Give one progressive hint from the guide. Keep official
+solutions closed until I explicitly request a comparison.
+```
+
+`module_lessons` defaults to twenty results and accepts at most fifty. Keep
+subject, status, query and limit unchanged when following `next_cursor`.
+An explicit `status: "planned"` or `status: "all"` returns labelled design
+metadata. Planned placeholders have no authored guide/source read through
+`module_lesson`. A canonical lesson can list a curated variant ID, such as
+`spark-013@pyspark`, without counting that variant as another lesson.
+
+The module tools read checked-in content. They do not read saved beta pads,
+construct job services, probe runtime availability, start a worker, execute
+source, or record mastery. Their `runtime_status` is always `not_probed`;
+a runtime profile name describes the lesson's intended backend. Use the local
+application and its host preparation instructions for experiments, then share
+your own attempt and observations with the tutor.
+
+Guide and solution documents have a 96000-byte tutor read limit; learner source
+has a 48000-byte limit, and a response has a 384000-byte bound. Oversized content
+is rejected explicitly instead of silently truncating a lesson. Only curated
+relative content paths can be read, and each read repeats the content-path
+check. Solutions have a separate reveal-gated response and are never read by
+normal module guide, index or search calls.
+
+All four module tools remain read-only when `--allow-progress-writes` enables
+the separate legacy evidence tools. An older checkout without expansion plans
+keeps its original course tools; beta module tools are not advertised there,
+and a direct request reports their unavailability. No worker, network service,
+engine session or module progress file is needed to read a beta guide.
+
 ## Optional local evidence and progress writes
 
 By default the adapter advertises no mutation tools and creates no progress
@@ -186,17 +239,19 @@ Run the real protocol tests with the optional SDK installed:
 
 ```powershell
 # Windows, after resolving the interpreter
-& $CoursePython -m pytest tests\test_mcp_server.py -q
+& $CoursePython -m pytest tests\test_mcp_server.py tests\test_module_mcp.py -q
 ```
 
 ```bash
 # macOS/Linux
-.venv/bin/python -m pytest tests/test_mcp_server.py -q
+.venv/bin/python -m pytest tests/test_mcp_server.py tests/test_module_mcp.py -q
 ```
 
-Tests cover a client/server stdio handshake, discovery, lesson/guide reads,
+Tests cover a client/server stdio handshake, legacy and beta discovery, lesson/guide reads,
 prompts, solution gating, pagination, opt-in writes, evidence prerequisites,
-invalid requests, and clean protocol stdout. The client session runs with
+invalid requests, bounded beta reads, variants, and clean protocol stdout. Beta
+module tests additionally forbid worker/service construction, source subprocesses,
+and progress-file access during a real stdio exchange. The client session runs with
 network connect/bind calls forbidden in the POSIX server process. Windows
 runs the same stdio exchange without that audit guard because its event loop
 may use an internal socket pair. This proves the adapter protocol in the tested environment; it does not prove that a specific

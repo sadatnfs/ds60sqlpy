@@ -1,6 +1,8 @@
 # Expansion implementation checkpoint
 
 Last updated: 22 October 2026. Starting commit: `19b2396`.
+Human-managed HEAD advanced to `650d8b1` during implementation; agent work
+continues directly on that checkout without staging, commits or pushes.
 
 ## Scope and current result
 
@@ -39,6 +41,9 @@ The existing 168 published Python/SQL/engineering lessons remain available.
 - Authenticated same-origin `/api/modules` requests have a separate bounded
   body allowance. Legacy API limits stay unchanged. Runtime endpoints and
   operations are fixed by the host preparation and lesson manifest.
+- The optional stdio MCP tutor has four read-only beta tools: subject discovery,
+  authored-by-default lesson search, bounded guide/source reads and explicit
+  solution reveal. It does not start workers or inspect private pads.
 - Jobs are asynchronous and idempotent. Reconnection polls an accepted job;
   it does not replay source. Uncertain cleanup holds admission. A proved new
   CPU worker instance can close an unavailable old receipt as failed; external
@@ -72,10 +77,14 @@ graded. Host preparation/release are separate visible operations.
 Actual Linux arm64 Docker proofs and image IDs are recorded in ignored
 `work/modules-acceptance/*.json`. Positive and misconception cases have passed
 for Python, TensorFlow, C++, Scala and both Spark variants. Kubernetes positive
-routing and Deployment-only checks passed; a 15-second negative test exposed
-an insufficient cleanup reserve. Final independent cleanup-grace and shutdown
-fix qualification is in progress. Do not call Kubernetes final until the
-final receipt records timeout/cancellation cleanup and graceful worker stop.
+routing and Deployment-only checks now pass together with unready timeout,
+wrong-selector timeout, namespace escape refusal, privilege refusal and active
+cancellation, all with the appropriate owned cleanup evidence. A real SIGTERM
+test observed four owned objects before stop, zero afterward and exit status
+zero in 6.837 seconds. Final image: `sha256:75313e305d1dd216b20e4fc74fa5e7c23fe6ba821cf7833f3f42a01292224200`.
+The explicit host release has also passed against a real cluster using its
+recorded immutable Docker container ID. No by-name destructive reselection is
+used. Test sources and receipts preserve both positive and rejected cases.
 
 This machine's Docker Hub download certificate validation failed. Trusted
 cached/GCR inputs were selected with TLS verification retained. Standard
@@ -129,3 +138,26 @@ Useful checks: `scripts/check_modules.py`, `scripts/check_module_ui.mjs`,
 `build_lesson_readers.py --check`, Ruff, strict MyPy and `pytest -n 4 --dist
 loadgroup`. Build logs use `work/build-*.log`; narrow runtime helpers and
 non-secret evidence use `work/modules-acceptance/`.
+
+## Final integration verification
+
+The final grouped four-worker suite passed **1123 tests**, with **one expected
+host-only TensorFlow opt-in skip**, zero failures and zero errors in **89.18
+seconds**. All ten recorded subtests passed. Actual TensorFlow import, gradient
+verification and rejected update-sign execution passed in its Docker worker.
+The disposable PostgreSQL 16 test instance on 58432 was stopped afterward.
+
+The earlier integration run exposed a synthetic-track fixture collision, two
+startup-timing assumptions and late generated-reader drift. The fixtures now
+preserve the real authored inventory, cancellation waits for observed startup,
+normal-parent exit has a real child-readiness/PID handshake, and generated
+readers match their sources. No short-timeout proof was removed.
+
+Strict MyPy covers 160 source files; Ruff, 22 inline-JavaScript UI behavior
+checks, structural validation and notebook syntax checks pass. The Docker HTTP
+audit serves 394 HTML pages and 86 canonical/variant module documents,
+checking 15584 internal links with zero failures. Browser execution has passed
+all five subjects and the separate PySpark variant, with actual typed feedback.
+See ignored `work/modules-full-tests*` and `work/modules-acceptance/` for the
+exact non-secret runtime receipts. Native Windows execution, Linux amd64 and
+the optional PyTorch image remain unqualified.

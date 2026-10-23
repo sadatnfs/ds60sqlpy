@@ -1,6 +1,6 @@
 # k8s-008 explanatory solutions
 
-Authored beta reference, checked 2026-10-22. These answers correspond to the six tasks in the [learner pilot](../guides/k8s-008.md). They describe intended evidence on a future qualified owned fixture; no cluster/profile/image is claimed installed or executed. Keep this page separate from the initial attempt. No answer requires or reveals an admin credential.
+Authored beta reference, checked 2026-10-22. These answers correspond to the six tasks in the [learner pilot](../guides/k8s-008.md). They describe the required evidence on an explicitly prepared owned fixture. The bounded one-shot app verifier has a Linux aarch64 positive qualification; these explanatory answers do not claim that every manual exercise has run on a learner system. Keep this page separate from the initial attempt. No answer requires or reveals an admin credential.
 
 ## Exercises
 

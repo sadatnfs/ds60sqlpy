@@ -198,6 +198,39 @@ it works. Keep official solutions closed unless I ask for a comparison.</code></
 <p>Follow-up requests add <code>&quot;cursor&quot;: &quot;THE_RETURNED_CURSOR&quot;</code> to those same filters. No results is a valid response. Changing filters requires starting a new search.</p>
 <p>Resources expose <code>ds60://course/paths</code> and <code>ds60://course/lesson/LESSON_ID</code>. The latter contains only the checked-in guide. Resource enumeration is paginated too. The <code>coach_lesson</code> prompt accepts a stable <code>lesson_id</code> and optional <code>request</code> and starts the same guide-first coaching loop. Solutions have no resource URI; they require the gated tool.</p>
 <p>The solution flag is an explicit protocol acknowledgement. The AI host must still respect the learner&#x27;s actual request; it should never set the flag just to bypass a request for hints.</p>
+<h3 id="read-authored-beta-modules">Read authored beta modules<a class="heading-anchor" href="#read-authored-beta-modules" aria-label="Link to this section">#</a></h3>
+<p>When this checkout contains the expansion plans, four additional read-only operations expose the authored Kubernetes, TensorFlow, LLM, C++, and Scala/Spark modules. Their counts come from the curated module manifests. Canonical lesson counts exclude language variants. <code>planned_count</code> covers the full design, including the authored subset; <code>unwritten_count</code> identifies the remaining planned lessons.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Tool</th>
+<th>Purpose</th>
+</tr></thead><tbody>
+<tr>
+<td><code>module_subjects</code></td>
+<td>Subject summaries and authored/design counts</td>
+</tr>
+<tr>
+<td><code>module_lessons</code></td>
+<td>Paginated canonical metadata, authored lessons by default</td>
+</tr>
+<tr>
+<td><code>module_lesson</code></td>
+<td>One authored guide and checked-in learner artifact</td>
+</tr>
+<tr>
+<td><code>module_solution</code></td>
+<td>Curated solution documents after explicit <code>reveal: true</code></td>
+</tr>
+</tbody></table></div>
+<p>For example, ask Codex:</p>
+<pre><code class="language-text">Use ds60-tutor module_subjects, then module_lessons with subject scala-spark
+and status authored. Read spark-013@pyspark through module_lesson for the
+PySpark variant. Explain the guide, ask me to predict the NULL behavior, and
+wait for my attempt. Give one progressive hint from the guide. Keep official
+solutions closed until I explicitly request a comparison.</code></pre>
+<p><code>module_lessons</code> defaults to twenty results and accepts at most fifty. Keep subject, status, query and limit unchanged when following <code>next_cursor</code>. An explicit <code>status: &quot;planned&quot;</code> or <code>status: &quot;all&quot;</code> returns labelled design metadata. Planned placeholders have no authored guide/source read through <code>module_lesson</code>. A canonical lesson can list a curated variant ID, such as <code>spark-013@pyspark</code>, without counting that variant as another lesson.</p>
+<p>The module tools read checked-in content. They do not read saved beta pads, construct job services, probe runtime availability, start a worker, execute source, or record mastery. Their <code>runtime_status</code> is always <code>not_probed</code>; a runtime profile name describes the lesson&#x27;s intended backend. Use the local application and its host preparation instructions for experiments, then share your own attempt and observations with the tutor.</p>
+<p>Guide and solution documents have a 96000-byte tutor read limit; learner source has a 48000-byte limit, and a response has a 384000-byte bound. Oversized content is rejected explicitly instead of silently truncating a lesson. Only curated relative content paths can be read, and each read repeats the content-path check. Solutions have a separate reveal-gated response and are never read by normal module guide, index or search calls.</p>
+<p>All four module tools remain read-only when <code>--allow-progress-writes</code> enables the separate legacy evidence tools. An older checkout without expansion plans keeps its original course tools; beta module tools are not advertised there, and a direct request reports their unavailability. No worker, network service, engine session or module progress file is needed to read a beta guide.</p>
 <h3 id="optional-local-evidence-and-progress-writes">Optional local evidence and progress writes<a class="heading-anchor" href="#optional-local-evidence-and-progress-writes" aria-label="Link to this section">#</a></h3>
 <p>By default the adapter advertises no mutation tools and creates no progress files. If you want Codex to save your own evidence, add <code>--allow-progress-writes</code> to the server command when registering it. For an existing registration, inspect it with <code>codex mcp get ds60-tutor</code>, then replace it deliberately with <code>codex mcp remove ds60-tutor</code> and the matching <code>add</code> command ending in <code>--allow-progress-writes</code>.</p>
 <p>With that flag, two additional tools are available:</p>
@@ -218,10 +251,10 @@ it works. Keep official solutions closed unless I ask for a comparison.</code></
 <h3 id="verification-and-source-references">Verification and source references<a class="heading-anchor" href="#verification-and-source-references" aria-label="Link to this section">#</a></h3>
 <p>Run the real protocol tests with the optional SDK installed:</p>
 <pre><code class="language-powershell"># Windows, after resolving the interpreter
-&amp; $CoursePython -m pytest tests\test_mcp_server.py -q</code></pre>
+&amp; $CoursePython -m pytest tests\test_mcp_server.py tests\test_module_mcp.py -q</code></pre>
 <pre><code class="language-bash"># macOS/Linux
-.venv/bin/python -m pytest tests/test_mcp_server.py -q</code></pre>
-<p>Tests cover a client/server stdio handshake, discovery, lesson/guide reads, prompts, solution gating, pagination, opt-in writes, evidence prerequisites, invalid requests, and clean protocol stdout. The client session runs with network connect/bind calls forbidden in the POSIX server process. Windows runs the same stdio exchange without that audit guard because its event loop may use an internal socket pair. This proves the adapter protocol in the tested environment; it does not prove that a specific Codex installation is configured, that an AI taught well, or that a learner mastered the material. No user configuration is modified by these tests.</p>
+.venv/bin/python -m pytest tests/test_mcp_server.py tests/test_module_mcp.py -q</code></pre>
+<p>Tests cover a client/server stdio handshake, legacy and beta discovery, lesson/guide reads, prompts, solution gating, pagination, opt-in writes, evidence prerequisites, invalid requests, bounded beta reads, variants, and clean protocol stdout. Beta module tests additionally forbid worker/service construction, source subprocesses, and progress-file access during a real stdio exchange. The client session runs with network connect/bind calls forbidden in the POSIX server process. Windows runs the same stdio exchange without that audit guard because its event loop may use an internal socket pair. This proves the adapter protocol in the tested environment; it does not prove that a specific Codex installation is configured, that an AI taught well, or that a learner mastered the material. No user configuration is modified by these tests.</p>
 <p>The implementation follows the official <a href="https://py.sdk.modelcontextprotocol.io/advanced/low-level-server/">SDK v2 low-level server API</a> for explicit schemas, structured tool results, and caller validation. The <a href="https://py.sdk.modelcontextprotocol.io/advanced/pagination/">SDK pagination guide</a> describes protocol list cursors. The current local Codex CLI help was checked for the registration commands above.</p>
 <h3 id="maintainer-evaluation">Maintainer evaluation<a class="heading-anchor" href="#maintainer-evaluation" aria-label="Link to this section">#</a></h3>
 <p><code>docs/mcp-tutor-evaluation.xml</code> contains ten independent read-only tutoring questions with verified stable answers. The matching <code>tests/test_mcp_tutor_evaluation.py</code> exercises real adapter searches, prerequisite plans, lesson resources and prompts, and checks that these operations create no learner-state files. This checks the adapter&#x27;s evidence and interface. It is separate from evaluating an AI model&#x27;s teaching quality with actual learners.</p></article>

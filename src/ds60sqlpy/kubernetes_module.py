@@ -228,10 +228,22 @@ def parse_manifests(source: str) -> list[dict[str, Any]]:
         pod = _mapping(template["spec"], "Pod spec")
         _fields(
             pod,
-            {"automountServiceAccountToken", "securityContext", "containers"},
+            {
+                "automountServiceAccountToken",
+                "securityContext",
+                "containers",
+                "terminationGracePeriodSeconds",
+            },
             {"automountServiceAccountToken", "securityContext", "containers"},
             "Pod spec",
         )
+        if "terminationGracePeriodSeconds" in pod and (
+            type(pod["terminationGracePeriodSeconds"]) is not int
+            or pod["terminationGracePeriodSeconds"] != 1
+        ):
+            raise KubernetesRefusal(
+                "The fixed synthetic workload uses a one-second termination grace."
+            )
         if not isinstance(pod["containers"], list) or len(pod["containers"]) != 1:
             raise KubernetesRefusal("Exactly one fixed fixture container is supported.")
         container = _mapping(pod["containers"][0], "container")
@@ -340,12 +352,23 @@ exit 0
     return result.returncode == 0
 
 
+def _is_path_link(path: Path) -> bool:
+    """Reject redirecting reparse tags on Python3.11 as well as native symlinks."""
+    try:
+        information = path.lstat()
+    except FileNotFoundError:
+        return False
+    return stat.S_ISLNK(information.st_mode) or getattr(information, "st_reparse_tag", 0) in {
+        0xA0000003,
+        0xA000000C,
+    }
+
+
 def _private_file(path: Path, maximum: int) -> bytes:
     absolute = path.absolute()
-    if any(part.casefold() == ".learning" for part in absolute.parts) or any(
-        part.is_symlink() or getattr(part, "is_junction", lambda: False)()
-        for part in (absolute, *absolute.parents)
-    ):
+    if any(
+        part.casefold() == ".learning" for part in (*absolute.parts, *absolute.resolve().parts)
+    ) or any(_is_path_link(part) for part in (absolute, *absolute.parents)):
         raise KubernetesRefusal(
             "Credentials must be external private files without symlink components."
         )
@@ -776,6 +799,18 @@ def _metadata(value: dict[str, Any], lease: KubernetesLease, *, name: str) -> di
     return meta
 
 
+def _optional_records(value: Any, label: str) -> list[dict[str, Any]]:
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        raise KubernetesRefusal(f"The {label} collection is malformed.")
+    return [_mapping(item, label + " item") for item in value]
+
+
+def _optional_mapping(value: Any, label: str) -> dict[str, Any]:
+    return {} if value is None else _mapping(value, label)
+
+
 def observe_ready(
     client: KubectlClient,
     deployment_uid: str,
@@ -790,13 +825,14 @@ def observe_ready(
     meta = _metadata(deployment, client.lease, name="hello")
     if meta["uid"] != deployment_uid:
         raise KubernetesRefusal("The Deployment was replaced during observation.")
-    status = _mapping(deployment.get("status", {}), "Deployment status")
+    status = _optional_mapping(deployment.get("status"), "Deployment status")
     generation = meta.get("generation")
     converged = (
         type(generation) is int
-        and status.get("observedGeneration", -1) >= generation
+        and type(status.get("observedGeneration")) is int
+        and status["observedGeneration"] >= generation
         and all(
-            status.get(field, 0) == desired
+            type(status.get(field)) is int and status[field] == desired
             for field in ("updatedReplicas", "readyReplicas", "availableReplicas")
         )
     )
@@ -806,15 +842,17 @@ def observe_ready(
     )
     rs_ids = {
         item.get("metadata", {}).get("uid")
-        for item in replica_sets.get("items", [])
+        for item in _optional_records(replica_sets.get("items"), "ReplicaSet items")
         if any(
             ref.get("uid") == deployment_uid and ref.get("controller") is True
-            for ref in item.get("metadata", {}).get("ownerReferences", [])
+            for ref in _optional_records(
+                item.get("metadata", {}).get("ownerReferences"), "ownerReferences"
+            )
         )
     }
     pods = client.call(["get", "pods", "-l", selector, "-o", "json"], deadline, cancel)
     ready_ids: set[str] = set()
-    for pod in pods.get("items", []):
+    for pod in _optional_records(pods.get("items"), "Pod items"):
         info = pod.get("metadata", {})
         if info.get("deletionTimestamp"):
             continue
@@ -822,11 +860,14 @@ def observe_ready(
             info.get("labels", {}).get(OWNER_LABEL) == client.lease.owner_id
             and any(
                 ref.get("uid") in rs_ids and ref.get("controller") is True
-                for ref in info.get("ownerReferences", [])
+                for ref in _optional_records(info.get("ownerReferences"), "Pod ownerReferences")
             )
             and any(
                 condition.get("type") == "Ready" and condition.get("status") == "True"
-                for condition in pod.get("status", {}).get("conditions", [])
+                for condition in _optional_records(
+                    _optional_mapping(pod.get("status"), "Pod status").get("conditions"),
+                    "Pod conditions",
+                )
             )
         ):
             ready_ids.add(info["uid"])
@@ -841,16 +882,21 @@ def observe_ready(
             deadline,
             cancel,
         )
-        for item in slices.get("items", []):
+        for item in _optional_records(slices.get("items"), "EndpointSlice items"):
             if not any(
                 ref.get("uid") == service_uid and ref.get("controller") is True
-                for ref in item.get("metadata", {}).get("ownerReferences", [])
+                for ref in _optional_records(
+                    item.get("metadata", {}).get("ownerReferences"), "ownerReferences"
+                )
             ):
                 continue
-            for endpoint in item.get("endpoints", []):
-                target = endpoint.get("targetRef", {})
+            for endpoint in _optional_records(item.get("endpoints"), "EndpointSlice endpoints"):
+                target = _optional_mapping(endpoint.get("targetRef"), "endpoint targetRef")
                 if (
-                    endpoint.get("conditions", {}).get("ready") is True
+                    _optional_mapping(endpoint.get("conditions"), "endpoint conditions").get(
+                        "ready"
+                    )
+                    is True
                     and target.get("kind") == "Pod"
                     and target.get("namespace", client.lease.namespace) == client.lease.namespace
                     and isinstance(target.get("uid"), str)
@@ -879,6 +925,7 @@ def _client_job(owner: str) -> dict[str, Any]:
                 "metadata": {"labels": {OWNER_LABEL: owner}},
                 "spec": {
                     "restartPolicy": "Never",
+                    "terminationGracePeriodSeconds": 1,
                     "automountServiceAccountToken": False,
                     "securityContext": {
                         "runAsNonRoot": True,
@@ -1004,6 +1051,9 @@ def kubernetes_executor(
                 kind = "deployment" if document["kind"] == "Deployment" else "service"
                 intended.append((kind, "hello"))
                 if document["kind"] == "Deployment":
+                    # The synthetic fixture has no data to flush. A short explicit
+                    # Pod grace keeps foreground controller cleanup within its budget.
+                    document["spec"]["template"]["spec"]["terminationGracePeriodSeconds"] = 1
                     document["spec"]["template"]["metadata"]["labels"][OWNER_LABEL] = lease.owner_id
                 created = client.apply(document, work_deadline, cancel)
                 metadata = _metadata(created, lease, name="hello")
@@ -1050,8 +1100,9 @@ def kubernetes_executor(
                     meta = _metadata(observed, lease, name="hello-check")
                     if meta["uid"] != metadata["uid"]:
                         raise KubernetesRefusal("The client Job identity changed.")
-                    status = observed.get("status", {})
-                    if status.get("failed", 0) > 0:
+                    status = _optional_mapping(observed.get("status"), "client Job status")
+                    failed = status.get("failed")
+                    if type(failed) is int and failed > 0:
                         raise KubernetesRefusal("The bounded in-cluster version client failed.")
                     if status.get("succeeded", 0) == 1:
                         break
@@ -1121,15 +1172,19 @@ def kubernetes_executor(
                                 )
                             owned.append((kind, name, metadata["uid"]))
                             confirmed.add((kind, name))
-                    except (KubernetesRefusal, InterruptedOperation, OSError, ValueError):
+                    except (KubernetesRefusal, InterruptedOperation, OSError, ValueError) as exc:
                         cleanup_ok = False
+                        reason = exc.status if isinstance(exc, InterruptedOperation) else str(exc)
+                        log(f"Owned create reconciliation failed for {kind}/{name}: {reason[:500]}")
                 for kind, name, uid in reversed(owned):
                     try:
                         client.cleanup(
                             kind, name, uid, cleanup_deadline, cleanup_cancel, job_nonce=job_nonce
                         )
-                    except (KubernetesRefusal, InterruptedOperation, OSError, ValueError):
+                    except (KubernetesRefusal, InterruptedOperation, OSError, ValueError) as exc:
                         cleanup_ok = False
+                        reason = exc.status if isinstance(exc, InterruptedOperation) else str(exc)
+                        log(f"Owned cleanup failed for {kind}/{name}: {reason[:500]}")
                 if intended:
                     check(
                         "owned-cleanup",
@@ -1394,10 +1449,7 @@ def prepare_owned_session(
     if not OWNER.fullmatch(owner):
         raise KubernetesRefusal("Malformed host ownership identity.")
     absolute = directory.absolute()
-    if any(
-        part.is_symlink() or getattr(part, "is_junction", lambda: False)()
-        for part in (absolute, *absolute.parents)
-    ):
+    if any(_is_path_link(part) for part in (absolute, *absolute.parents)):
         raise KubernetesRefusal("Runtime directory ancestors cannot be symlinks or junctions.")
     resolved = absolute.resolve()
     if any(part.casefold() == ".learning" for part in (*absolute.parts, *resolved.parts)):
@@ -1777,29 +1829,25 @@ def prepare_owned_session(
                     and current.get("Config", {}).get("Labels", {}).get("io.x-k8s.kind.cluster")
                     == cluster
                 ):
-                    deleted = call(
-                        [
-                            tools.kind,
-                            "delete",
-                            "cluster",
-                            "--name",
-                            cluster,
-                            "--kubeconfig",
-                            str(admin),
-                        ],
-                        timeout=90,
-                        may_fail=True,
-                    )
-                    absent = call(
-                        [tools.docker, "--host", endpoint, "inspect", cluster + "-control-plane"],
-                        timeout=10,
-                        may_fail=True,
-                    )
-                    cleaned = (
-                        deleted.returncode == 0
-                        and absent.returncode != 0
-                        and "No such" in absent.stderr
-                    )
+                    if _owned_node_present(tools, endpoint, cluster, created_id, env, runner):
+                        deleted = call(
+                            [
+                                tools.docker,
+                                "--host",
+                                endpoint,
+                                "container",
+                                "rm",
+                                "--force",
+                                created_id,
+                            ],
+                            timeout=90,
+                            may_fail=True,
+                        )
+                        cleaned = deleted.returncode == 0 and not _owned_node_present(
+                            tools, endpoint, cluster, created_id, env, runner
+                        )
+                    else:
+                        cleaned = True
             except (OSError, ValueError, subprocess.TimeoutExpired):
                 cleaned = False
         _write_private(
@@ -1834,6 +1882,57 @@ def prepare_owned_session(
         ) from error
 
 
+def _owned_node_present(
+    tools: HostTools,
+    endpoint: str,
+    cluster: str,
+    expected: str,
+    environment: dict[str, str],
+    runner: Callable[..., CommandResult],
+) -> bool:
+    # Successful structured listings prove absence independently of localized
+    # daemon stderr. Check both the exact name and full recorded ID so a
+    # renamed original or a same-name replacement is never silently adopted.
+    name = cluster + "-control-plane"
+    if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
+        raise KubernetesRefusal("The private receipt lacks its recorded node ID.")
+    rows: set[tuple[str, str]] = set()
+    for selection in ("name=^/" + name + "$", "id=" + expected):
+        listing = runner(
+            [
+                tools.docker,
+                "--host",
+                endpoint,
+                "container",
+                "ls",
+                "--all",
+                "--no-trunc",
+                "--filter",
+                selection,
+                "--format",
+                "{{.ID}}\t{{.Names}}",
+            ],
+            environment=environment,
+            timeout=10,
+        )
+        if listing.returncode:
+            raise KubernetesRefusal(
+                "The engine could not list the exact owned node; private evidence is retained."
+            )
+        for line in listing.stdout.splitlines():
+            fields = line.split("\t")
+            if len(fields) != 2 or not all(fields):
+                raise KubernetesRefusal("The engine node listing was malformed; release refused.")
+            rows.add((fields[0], fields[1]))
+    if not rows:
+        return False
+    if rows != {(expected, name)}:
+        raise KubernetesRefusal(
+            "The control-plane container was replaced or renamed; release refused."
+        )
+    return True
+
+
 def release_owned_session(
     directory: Path, tools: HostTools, *, runner: Callable[..., CommandResult] = host_command
 ) -> None:
@@ -1854,53 +1953,7 @@ def release_owned_session(
         KUBECONFIG=str(directory / "admin.kubeconfig.json"),
     )
 
-    def owned_node_present() -> bool:
-        # Successful structured listings prove absence independently of localized
-        # daemon stderr. Check both the exact name and full recorded ID so a
-        # renamed original or a same-name replacement is never silently adopted.
-        name = cluster + "-control-plane"
-        expected = receipt.get("control_plane_id")
-        if not isinstance(expected, str) or not expected:
-            raise KubernetesRefusal("The private receipt lacks its recorded node ID.")
-        rows: set[tuple[str, str]] = set()
-        for selection in ("name=^/" + name + "$", "id=" + expected):
-            listing = runner(
-                [
-                    tools.docker,
-                    "--host",
-                    endpoint,
-                    "container",
-                    "ls",
-                    "--all",
-                    "--no-trunc",
-                    "--filter",
-                    selection,
-                    "--format",
-                    "{{.ID}}\t{{.Names}}",
-                ],
-                environment=env,
-                timeout=10,
-            )
-            if listing.returncode:
-                raise KubernetesRefusal(
-                    "The engine could not list the exact owned node; private evidence is retained."
-                )
-            for line in listing.stdout.splitlines():
-                fields = line.split("\t")
-                if len(fields) != 2 or not all(fields):
-                    raise KubernetesRefusal(
-                        "The engine node listing was malformed; release refused."
-                    )
-                rows.add((fields[0], fields[1]))
-        if not rows:
-            return False
-        if rows != {(expected, name)}:
-            raise KubernetesRefusal(
-                "The control-plane container was replaced or renamed; release refused."
-            )
-        return True
-
-    if owned_node_present():
+    if _owned_node_present(tools, endpoint, cluster, receipt.get("control_plane_id"), env, runner):
         observed = runner(
             [tools.docker, "--host", endpoint, "inspect", cluster + "-control-plane"],
             environment=env,
@@ -1944,7 +1997,15 @@ def release_owned_session(
         ):
             raise KubernetesRefusal("The namespace was replaced; release refused.")
         result = runner(
-            [tools.kind, "delete", "cluster", "--name", cluster, "--kubeconfig", str(admin)],
+            [
+                tools.docker,
+                "--host",
+                endpoint,
+                "container",
+                "rm",
+                "--force",
+                receipt["control_plane_id"],
+            ],
             environment=env,
             timeout=90,
         )
@@ -1952,7 +2013,7 @@ def release_owned_session(
             raise KubernetesRefusal(
                 "Owned cluster release did not complete; private recovery evidence is retained."
             )
-        if owned_node_present():
+        if _owned_node_present(tools, endpoint, cluster, receipt["control_plane_id"], env, runner):
             raise KubernetesRefusal(
                 "The owned control-plane remains; private recovery evidence is retained."
             )

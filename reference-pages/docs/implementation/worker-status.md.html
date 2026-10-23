@@ -120,13 +120,14 @@
 <p>Implemented source: <code>module_worker.py</code>, <code>worker_operations.py</code>, seven optional profile services in <code>compose.modules.yaml</code>, five worker Dockerfiles and six architecture-specific framework/toolchain hash locks. No worker image was built, downloaded or started by this agent. The root integration agent owns image qualification and its separate runtime ledger.</p>
 <h3 id="observed-source-acceptance">Observed source acceptance<a class="heading-anchor" href="#observed-source-acceptance" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>38 focused worker tests passed in 10.00 seconds on the existing macOS arm64 host environment with <code>PYTHONPATH=src</code> explicitly selecting this repository.</li>
-<li>Strict MyPy passed for both modules and both test files; Ruff passed.</li>
+<li>42 focused worker/UI tests passed in 10.77 seconds on the existing macOS arm64 host environment with <code>PYTHONPATH=src</code> explicitly selecting this repository.</li>
+<li>Strict MyPy passed for both modules and all three test files; Ruff passed.</li>
+<li>The actual inline module UI passed twenty-two deterministic Node behavior checks covering stale responses, draft revisions, one polling loop, startup recovery, exact-source diagnostics, independent curated Scala/PySpark variant saves, and explicit interrupted-job recovery confirmations without source replay. No application HTTP server was started for that harness.</li>
 <li>Real loopback submit/poll/cancel, malformed bodies/types, bounded terminal retention and a real HTTP-to-Python process path passed.</li>
 <li>Python exit/error propagation, bounded head/tail logs, short flushed log visibility, cancellation and descendant termination passed.</li>
 <li>Existing Apple Clang compiled and ran the C++ reference through all 14 typed verifier checks. Incomplete learner source failed; compile errors did not run an older artifact. These are native snippet checks, not a Linux image proof.</li>
 <li>The NumPy attention reference passed thirteen checks, including independent nonuniform/prefix/future fixtures. Four actual child-process mutation cases rejected ignored queries/keys, omitted scaling, wrong normalization axis and swapped queries/keys, independently of the learner reference verify() function.</li>
-<li>The TensorFlow oracle was checked using an independent mathematical function, without importing or installing TensorFlow on the host. Actual framework import and numeric execution remain image-qualification steps.</li>
+<li>The TensorFlow oracle was checked using an independent mathematical function, without importing or installing TensorFlow on the host. Actual framework import and numeric execution also passed in the integration receipts below.</li>
 </ul>
 <h3 id="production-worker-boundary">Production worker boundary<a class="heading-anchor" href="#production-worker-boundary" aria-label="Link to this section">#</a></h3>
 <p>Each service runs one operation at a time. Source is bounded to 256 KiB, logs to 128000 bytes, disposable files to 32 MiB / 1024 files, and the total deadline to 15, 60 or 120 seconds. Compile has its own maximum 60-second phase within that total. Worker terminal history retains at most 32 snapshots. The service never accepts shell commands, image references, host mounts or learner-supplied tool flags.</p>
@@ -135,7 +136,43 @@
 <h3 id="dependency-resolution-evidence">Dependency resolution evidence<a class="heading-anchor" href="#dependency-resolution-evidence" aria-label="Link to this section">#</a></h3>
 <p>Metadata resolution selected 38 TensorFlow packages and 11 CPU PyTorch packages for Python 3.12 Linux amd64/arm64. It installed no framework and downloaded no model. The resolver fetched a 1.2 MiB setuptools metadata helper. Docker installs use exact versions, <code>--require-hashes</code> and binary wheels only. TensorFlow uses its common <code>tensorflow</code> package without a CUDA extra because the 2.20.0 <code>tensorflow_cpu</code> package lacks an ARM64 wheel.</p>
 <p>The root integration agent found the engine mounts worker tmpfs noexec by default. The overlay now explicitly enables exec for private <code>/tmp</code>, which is necessary to run compiled C++ and may be needed for framework/JVM native code. Root also observed apt CMake 3.25 in Bookworm; the C++ image now adds a separate hash-locked CMake 3.28.4 environment to meet the authored project minimum. No host tool was installed.</p>
-<p>Actual image IDs, startup/UID/process tests, framework imports, Spark JVM jobs, Windows host mount behavior, amd64 execution and Kubernetes lease qualification must be recorded by the integration owner. No configuration-only claim fills those evidence gaps. Kubernetes uses a separately injected lease-aware adapter; the generic operation explicitly refuses cluster work without that adapter.</p></article>
+<p>Actual image IDs, startup/UID/process tests, framework imports, Spark JVM jobs, Windows host mount behavior, amd64 execution and Kubernetes lease qualification must be recorded by the integration owner. No configuration-only claim fills those evidence gaps. Kubernetes uses a separately injected lease-aware adapter; the generic operation explicitly refuses cluster work without that adapter.</p>
+<h3 id="qualification-driven-process-budget-repair">Qualification-driven process-budget repair<a class="heading-anchor" href="#qualification-driven-process-budget-repair" aria-label="Link to this section">#</a></h3>
+<p>The integration owner observed a Spark JVM exhausting the 128-task limit, preventing a thread-per-request server from starting its HTTP control thread. The worker now keeps health/poll/cancel on an existing synchronous control loop, with the single job in the background. A regression forces all further thread creation to fail while confirming health, polling and cancellation still work. Child JVMs receive a fixed ActiveProcessorCount=2 and bounded GC worker counts. Only the Spark services increase their task ceiling to 384; other profiles retain 128. Actual JVM peak usage and successful runtime jobs remain in the integration owner&#x27;s image ledger.</p>
+<p>The same pressure review reproduced a child-process leak when an output-reader thread could not start after Popen. Reader setup now belongs to the complete process cleanup try/finally; a real-child regression confirms termination and wait. Job-controller thread admission failure also becomes an explicit failed receipt instead of a permanently queued job. Unexpected infrastructure errors make readiness false and do not claim cancellation cleanup was confirmed.</p>
+<h3 id="inspected-integration-receipts-and-remaining-qualification">Inspected integration receipts and remaining qualification<a class="heading-anchor" href="#inspected-integration-receipts-and-remaining-qualification" aria-label="Link to this section">#</a></h3>
+<p>On 22 October 2026, read-only inspection of <code>work/modules-acceptance/*.json</code> found Ready=true and actual positive/negative results for the following Linux aarch64 workers. These are separate from the macOS source-test results above.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Profile</th>
+<th>Recorded execution evidence</th>
+</tr></thead><tbody>
+<tr>
+<td><code>python-core</code></td>
+<td>Ordinary execution, thirteen attention checks, a negative learner and cancellation</td>
+</tr>
+<tr>
+<td><code>tensorflow-cpu</code></td>
+<td>Fifteen gradient-step checks, real TensorFlow execution and a negative learner</td>
+</tr>
+<tr>
+<td><code>cpp20</code></td>
+<td>Fourteen ownership checks, negative learner, compile failure and cancellation</td>
+</tr>
+<tr>
+<td><code>scala-jvm</code></td>
+<td>Compiled Main entry point and nonzero negative source</td>
+</tr>
+<tr>
+<td><code>spark-local-scala</code></td>
+<td>Six typed row/schema/NULL/transfer checks and a negative learner</td>
+</tr>
+<tr>
+<td><code>spark-local-python</code></td>
+<td>Same six logical checks through PySpark and a negative learner</td>
+</tr>
+</tbody></table></div>
+<p>The integration owner refreshes image source layers and records the exact image IDs and latest runtime results in those receipts. A passing result does not qualify every code path or erase the regression repairs described above. No runtime receipt currently qualifies the optional <code>llm-torch-cpu</code> image. Its dependency hashes and two-architecture wheel metadata are available; a built/started CPU Torch worker and executed tensor checks remain pending. The authored NumPy attention lesson does not require that optional image.</p>
+<p>Windows WSL 2/file-sharing behavior, Intel macOS host use, Linux amd64 execution, arm64 hosts beyond this tested engine, rootless-engine mappings and emulation performance remain separate unqualified rows. The existing Linux aarch64 proof does not establish any of those rows. Kubernetes lease and cleanup execution is recorded separately by the systems integration owner; generic workers still refuse cluster operations without the dedicated adapter.</p></article>
   </main>
 </body>
 </html>

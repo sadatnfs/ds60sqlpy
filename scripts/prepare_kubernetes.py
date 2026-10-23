@@ -192,7 +192,7 @@ def main(argv: list[str] | None = None) -> int:
         session = args.session or Path(tempfile.gettempdir()).resolve() / (
             "ds60-k8s-" + uuid.uuid4().hex
         )
-        lease = prepare_owned_session(
+        prepared_lease_path = prepare_owned_session(
             session,
             tools,
             endpoint,
@@ -203,7 +203,7 @@ def main(argv: list[str] | None = None) -> int:
             json.dumps(
                 {
                     "session_dir": str(session),
-                    "lease_path": str(lease),
+                    "lease_path": str(prepared_lease_path),
                     "DS60_K8S_SESSION_DIR": str(session),
                     "credentials_printed": False,
                 }

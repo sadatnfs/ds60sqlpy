@@ -466,7 +466,7 @@ class FakeHost:
         self.calls: list[tuple[list[str], dict[str, str], bytes | None]] = []
         self.cluster = "ds60-" + OWNER[:12]
         self.namespace_uid = "namespace-uid"
-        self.container_id = "owned-control-plane-id"
+        self.container_id = "d" * 64
         self.fail_token = False
         self.node_cached = True
         self.deleted = False
@@ -490,6 +490,12 @@ class FakeHost:
         if argv[0] == "docker":
             if "image" in argv:
                 return CommandResult(0 if self.node_cached or FIXTURE_IMAGE in argv else 1, "[{}]")
+            if "container" in argv and "rm" in argv:
+                assert argv[-2] == "--force"
+                if argv[-1] != self.container_id:
+                    return CommandResult(1, "", "error: no such container")
+                self.deleted = True
+                return CommandResult(0, self.container_id)
             if "container" in argv and "ls" in argv:
                 return CommandResult(
                     0,
@@ -690,12 +696,12 @@ def test_host_release_preserves_replaced_namespace_and_other_clusters(tmp_path: 
     host.namespace_uid = "replacement"
     with pytest.raises(KubernetesRefusal, match="namespace was replaced"):
         release_owned_session(session, tools, runner=host)
-    assert not any(argv[:3] == ["kind", "delete", "cluster"] for argv, _, _ in host.calls)
+    assert not any("container" in argv and "rm" in argv for argv, _, _ in host.calls)
     assert (session / "worker.kubeconfig.json").exists()
     host.namespace_uid = "namespace-uid"
     release_owned_session(session, tools, runner=host)
-    deletes = [argv for argv, _, _ in host.calls if argv[:3] == ["kind", "delete", "cluster"]]
-    assert len(deletes) == 1 and host.cluster in deletes[0]
+    deletes = [argv for argv, _, _ in host.calls if "container" in argv and "rm" in argv]
+    assert len(deletes) == 1 and deletes[0][-1] == host.container_id
     assert not (session / "worker.kubeconfig.json").exists()
 
 
@@ -1032,6 +1038,194 @@ def test_release_uses_successful_exact_listings_not_daemon_error_text(
         release_owned_session(session, tools, runner=runner)
         assert not (session / "worker.kubeconfig.json").exists()
         assert (session / "host-receipt.json").exists()
-        assert len([a for a, _, _ in host.calls if a[:3] == ["kind", "delete", "cluster"]]) == (
+        assert len([a for a, _, _ in host.calls if "container" in a and "rm" in a]) == (
             0 if mode == "already-absent" else 1
         )
+
+
+def test_submitted_synthetic_pods_have_one_second_termination_grace(
+    tmp_path: Path, lease: KubernetesLease
+) -> None:
+    cluster = FakeCluster(lease)
+    result = kubernetes_executor(lease, runner=cluster, stable_seconds=0)(
+        "k8s-kind",
+        SOURCE.read_text(),
+        tmp_path,
+        60,
+        threading.Event(),
+        lambda _: None,
+        "k8s-readiness-v1",
+        isolate_user=False,
+    )
+    assert result.status == "succeeded"
+    submitted = [payload for args, payload in cluster.calls if args[0] == "create"]
+    templates = [
+        item["spec"]["template"]["spec"]
+        for item in submitted
+        if item and item["kind"] in ("Deployment", "Job")
+    ]
+    assert len(templates) == 2
+    assert all(item["terminationGracePeriodSeconds"] == 1 for item in templates)
+
+
+def test_cleanup_failure_output_names_the_preserved_resource(
+    tmp_path: Path, lease: KubernetesLease
+) -> None:
+    cluster = FakeCluster(lease)
+    cluster.replacement_on_cleanup = True
+    result = kubernetes_executor(lease, runner=cluster, stable_seconds=0)(
+        "k8s-kind",
+        SOURCE.read_text(),
+        tmp_path,
+        60,
+        threading.Event(),
+        lambda _: None,
+        None,
+        isolate_user=False,
+    )
+    assert result.status == "failed"
+    assert "Owned cleanup failed for service/hello:" in result.output
+    assert "replacement" in result.output
+
+
+@pytest.mark.parametrize("phase", ["release", "rollback"])
+def test_immutable_node_deletion_preserves_name_replacement_race(
+    tmp_path: Path, phase: str
+) -> None:
+    from ds60sqlpy.kubernetes_module import HostTools, prepare_owned_session, release_owned_session
+
+    host = FakeHost()
+    original = host.container_id
+    replacement = "e" * 64
+    tools = HostTools("kind", "kubectl", "docker")
+    session = tmp_path / "private"
+    armed = phase == "rollback"
+    if armed:
+        host.fail_token = True
+
+    def runner(argv: list[str], **kwargs: Any) -> CommandResult:
+        result = host(argv, **kwargs)
+        if armed and phase == "release" and "get" in argv and "namespace" in argv:
+            host.container_id = replacement
+        if armed and phase == "rollback" and "inspect" in argv and "image" not in argv:
+            count = sum("inspect" in a and "image" not in a for a, _, _ in host.calls)
+            if count == 2:
+                host.container_id = replacement
+        return result
+
+    if phase == "release":
+        prepare_owned_session(
+            session, tools, "unix:///explicit/local.sock", runner=runner, owner_id=OWNER
+        )
+        armed = True
+        with pytest.raises(KubernetesRefusal):
+            release_owned_session(session, tools, runner=runner)
+        assert (session / "admin.kubeconfig.json").exists()
+    else:
+        with pytest.raises(KubernetesRefusal):
+            prepare_owned_session(
+                session, tools, "unix:///explicit/local.sock", runner=runner, owner_id=OWNER
+            )
+        assert (
+            json.loads((session / "preparation-failure.json").read_text())["cleanup_confirmed"]
+            is False
+        )
+    assert host.container_id == replacement and not host.deleted
+    removal = [a for a, _, _ in host.calls if "container" in a and "rm" in a]
+    assert all(a[-1] == original for a in removal)
+    assert not any(a[:3] == ["kind", "delete", "cluster"] for a, _, _ in host.calls)
+
+
+@pytest.mark.parametrize("tag", [0xA0000003, 0xA000000C])
+def test_python311_reparse_ancestors_are_refused_before_any_host_command(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, tag: int
+) -> None:
+    from types import SimpleNamespace
+
+    from ds60sqlpy.kubernetes_module import HostTools, _private_file, prepare_owned_session
+
+    ancestor = tmp_path / "redirect"
+    ancestor.mkdir()
+    original = Path.lstat
+
+    def information(path: Path) -> Any:
+        if path == ancestor:
+            return SimpleNamespace(st_mode=0o40700, st_reparse_tag=tag)
+        return original(path)
+
+    monkeypatch.setattr(Path, "lstat", information)
+    host = FakeHost()
+    with pytest.raises(KubernetesRefusal, match="ancestors"):
+        prepare_owned_session(
+            ancestor / "private",
+            HostTools("kind", "kubectl", "docker"),
+            "unix:///explicit/local.sock",
+            runner=host,
+            owner_id=OWNER,
+        )
+    with pytest.raises(KubernetesRefusal, match="symlink components"):
+        _private_file(ancestor / "token", 100)
+    assert not host.calls
+
+
+def test_private_file_rejects_resolved_portable_state_boundary(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ds60sqlpy.kubernetes_module import _private_file
+
+    path = tmp_path / "ordinary" / "token"
+    original = Path.resolve
+
+    def resolved(item: Path, strict: bool = False) -> Path:
+        if item == path:
+            return tmp_path / ".learning" / "token"
+        return original(item, strict=strict)
+
+    monkeypatch.setattr(Path, "resolve", resolved)
+    with pytest.raises(KubernetesRefusal, match="symlink components"):
+        _private_file(path, 100)
+
+
+@pytest.mark.parametrize("empty_shape", [None, []])
+def test_empty_nullable_endpoint_slice_is_unhealthy_not_an_api_error(
+    tmp_path: Path, lease: KubernetesLease, empty_shape: Any
+) -> None:
+    cluster = FakeCluster(lease)
+
+    def runner(argv: list[str], **kwargs: Any) -> CommandResult:
+        response = cluster(argv, **kwargs)
+        args = argv[argv.index("--request-timeout=5s") + 1 :]
+        if args[:2] == ["get", "endpointslices"]:
+            value = json.loads(response.stdout)
+            for item in value["items"]:
+                item["endpoints"] = empty_shape
+            return CommandResult(0, json.dumps(value))
+        return response
+
+    client = KubectlClient(lease, tmp_path, runner=runner, isolate_user=False)
+    deadline = time.monotonic() + 5
+    event = threading.Event()
+    uids = []
+    for document in parse_manifests(SOURCE.read_text()):
+        document["metadata"].setdefault("labels", {})[OWNER_LABEL] = OWNER
+        uids.append(client.apply(document, deadline, event)["metadata"]["uid"])
+    healthy, evidence = observe_ready(client, uids[0], 2, uids[1], deadline, event)
+    assert not healthy
+    assert evidence["ready_endpoint_uids"] == []
+    assert len(evidence["ready_pod_uids"]) == 2
+
+
+def test_nullable_controller_status_stays_unhealthy(tmp_path: Path, lease: KubernetesLease) -> None:
+    cluster = FakeCluster(lease)
+    client = KubectlClient(lease, tmp_path, runner=cluster, isolate_user=False)
+    deadline = time.monotonic() + 5
+    event = threading.Event()
+    document = parse_manifests(SOURCE.read_text())[0]
+    document["metadata"].setdefault("labels", {})[OWNER_LABEL] = OWNER
+    uid = client.apply(document, deadline, event)["metadata"]["uid"]
+    cluster.objects[("deployment", "hello")]["status"] = {
+        "observedGeneration": None,
+        "readyReplicas": None,
+    }
+    healthy, _ = observe_ready(client, uid, 2, None, deadline, event)
+    assert not healthy

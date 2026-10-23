@@ -116,46 +116,76 @@
       <p class="source-path">Generated from <code>docs/implementation/CHECKPOINT.md</code></p>
     </header>
     <article class="document"><h2 id="expansion-implementation-checkpoint">Expansion implementation checkpoint<a class="heading-anchor" href="#expansion-implementation-checkpoint" aria-label="Link to this section">#</a></h2>
-<p>Last updated: 22 October 2026. Starting commit: <code>19b2396</code>.</p>
-<h3 id="objective">Objective<a class="heading-anchor" href="#objective" aria-label="Link to this section">#</a></h3>
-<p>Implement the five designed courses in the main repository, with durable learner content, real bounded execution, Docker/browser rendering, and resumable work. Keep the historical 168 published lessons usable. Planned lessons are not automatically published.</p>
-<h3 id="current-batch">Current batch<a class="heading-anchor" href="#current-batch" aria-label="Link to this section">#</a></h3>
+<p>Last updated: 22 October 2026. Starting commit: <code>19b2396</code>. Human-managed HEAD advanced to <code>650d8b1</code> during implementation; agent work continues directly on that checkout without staging, commits or pushes.</p>
+<h3 id="scope-and-current-result">Scope and current result<a class="heading-anchor" href="#scope-and-current-result" aria-label="Link to this section">#</a></h3>
+<p>Work happens directly in <code>~/workspace/ds60sqlpy</code>. There are no additional clones, worktrees, agent commits, pushes or published container images. The human owns Git staging and commits. Read <code>git status --short</code> before resuming.</p>
+<p>The five-course design contains 204 planned lessons. The first implementation batch has <strong>29 authored lesson sets</strong>, with guides, learner sources or worksheets, separate explained solutions, fixtures and track authoring rules:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Track</th>
+<th>Authored IDs</th>
+<th>Still planned</th>
+</tr></thead><tbody>
+<tr>
+<td>TensorFlow</td>
+<td><code>tf-001</code> through <code>tf-008</code></td>
+<td>28</td>
+</tr>
+<tr>
+<td>LLM theory in Python</td>
+<td><code>llm-001</code> through <code>llm-009</code></td>
+<td>33</td>
+</tr>
+<tr>
+<td>C++</td>
+<td><code>cpp-001</code>, <code>cpp-002</code>, <code>cpp-003</code>, <code>cpp-009</code></td>
+<td>38</td>
+</tr>
+<tr>
+<td>Kubernetes</td>
+<td><code>k8s-001</code>, <code>k8s-002</code>, <code>k8s-003</code>, <code>k8s-008</code></td>
+<td>38</td>
+</tr>
+<tr>
+<td>Scala and Spark</td>
+<td><code>spark-001</code>, <code>spark-002</code>, <code>spark-003</code>, <code>spark-013</code></td>
+<td>38</td>
+</tr>
+</tbody></table></div>
+<p>The PySpark variant of <code>spark-013</code> has its own source, solution and saved pad; it is not an extra lesson in the count. There are <strong>175 planned lesson bodies remaining</strong>. Some systems pilots therefore have planned prerequisites. They are clearly marked pilots, not a complete beginner-to-advanced publication. The existing 168 published Python/SQL/engineering lessons remain available.</p>
+<h3 id="implemented-application">Implemented application<a class="heading-anchor" href="#implemented-application" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>Root: module registry, persisted asynchronous jobs, authenticated browser integration, owned Kubernetes bootstrap, acceptance and integration.</li>
-<li>Worker agent: private-network worker protocol, fixed language operations, optional Docker images and Compose overlay, worker tests. See <a href="worker-status.md.html">worker status</a>.</li>
-<li>ML content agent: TensorFlow and LLM foundations plus their pilots. See <a href="ml-content-status.md.html">ML content status</a>.</li>
-<li>Systems content agent: C++, Kubernetes and Scala/Spark foundations plus pilots. See <a href="systems-content-status.md.html">systems content status</a>.</li>
+<li><code>/journeys</code> renders the authored course guides beside editable pads, prediction and explanation notes, explicit solution reveal, structured verification, compiler diagnostics, bounded logs and attempt history.</li>
+<li><code>/journey-preview</code> retains the complete planned route. Planned lessons have no fake execution or completion action.</li>
+<li>Module state is separate from existing progress: <code>.learning/modules/</code> holds source, notes, sessions and persisted job receipts on the host. Empty source is a valid saved draft. Scala and PySpark drafts remain separate.</li>
+<li>Authenticated same-origin <code>/api/modules</code> requests have a separate bounded body allowance. Legacy API limits stay unchanged. Runtime endpoints and operations are fixed by the host preparation and lesson manifest.</li>
+<li>The optional stdio MCP tutor has four read-only beta tools: subject discovery, authored-by-default lesson search, bounded guide/source reads and explicit solution reveal. It does not start workers or inspect private pads.</li>
+<li>Jobs are asynchronous and idempotent. Reconnection polls an accepted job; it does not replay source. Uncertain cleanup holds admission. A proved new CPU worker instance can close an unavailable old receipt as failed; external Kubernetes cleanup requires explicit owned recovery.</li>
+<li>The optional local launcher selects profiles, builds sequentially with foreground logs, checks local engine/disk prerequisites and reuses host learner state. Windows has <code>START_MODULE_LAB.cmd</code>; base engine setup remains in <code>START_DOCKER_LAB.cmd</code> with its WSL 2 walkthrough.</li>
 </ul>
-<p>Each agent owns its listed files. Shared configuration and registration have one owner. Edits happen directly in <code>~/workspace/ds60sqlpy</code>; no extra worktrees, staging, commits, pushes or image publication.</p>
-<h3 id="runtime-boundaries">Runtime boundaries<a class="heading-anchor" href="#runtime-boundaries" aria-label="Link to this section">#</a></h3>
-<p>The temporary native HTTP preview was stopped. The personal Docker lab HTTP process is stopped at user request; its database and host learner files are retained. Do not restart unrelated containers or alter an engine configuration. Use an isolated Compose project and temporary learner directory for acceptance. Stop test HTTP servers after verification.</p>
-<p>No Docker socket or ambient Kubernetes context belongs in the browser application. Worker credentials live in private temporary session storage, outside <code>.learning</code>. Default model/data fixtures are tiny and offline after explicit preparation. Build heavy profiles sequentially only after host and engine filesystem checks. Never prune unrelated caches or resources.</p>
-<h3 id="resume-procedure">Resume procedure<a class="heading-anchor" href="#resume-procedure" aria-label="Link to this section">#</a></h3>
+<h3 id="runtime-boundaries-and-evidence">Runtime boundaries and evidence<a class="heading-anchor" href="#runtime-boundaries-and-evidence" aria-label="Link to this section">#</a></h3>
+<p>See <a href="../modules-runtime.md.html">runtime instructions</a>, <a href="worker-status.md.html">worker status</a>, <a href="ml-content-status.md.html">ML content status</a>, and <a href="systems-content-status.md.html">systems content status</a>.</p>
+<p>Fixed private workers implement Python/NumPy, C++20, TensorFlow CPU, standalone Scala, Spark Scala and PySpark. CPU PyTorch has a separate locked image recipe; its image/runtime has not been qualified in this batch. The current LLM pilot uses NumPy and does not require PyTorch. Single-file C++ compilation is implemented; a browser multi-file CMake project workflow is still future work.</p>
+<p>Kubernetes uses an explicitly prepared owned kind cluster, scoped expiring credentials, pinned fixture image and exact namespace identity. The browser and workers have no Docker socket or ambient kubeconfig. The one-shot operation accepts only the fixed bounded hello Deployment and optional Service. It checks real controller/Pod readiness, matching EndpointSlice Pod UIDs, a fresh in-cluster version client, and UID-precondition cleanup. Stateful rolling changes, arbitrary commands and the entire six-task pilot are not automatically graded. Host preparation/release are separate visible operations.</p>
+<p>Actual Linux arm64 Docker proofs and image IDs are recorded in ignored <code>work/modules-acceptance/*.json</code>. Positive and misconception cases have passed for Python, TensorFlow, C++, Scala and both Spark variants. Kubernetes positive routing and Deployment-only checks now pass together with unready timeout, wrong-selector timeout, namespace escape refusal, privilege refusal and active cancellation, all with the appropriate owned cleanup evidence. A real SIGTERM test observed four owned objects before stop, zero afterward and exit status zero in 6.837 seconds. Final image: <code>sha256:75313e305d1dd216b20e4fc74fa5e7c23fe6ba821cf7833f3f42a01292224200</code>. The explicit host release has also passed against a real cluster using its recorded immutable Docker container ID. No by-name destructive reselection is used. Test sources and receipts preserve both positive and rejected cases.</p>
+<p>This machine&#x27;s Docker Hub download certificate validation failed. Trusted cached/GCR inputs were selected with TLS verification retained. Standard upstream defaults remain portable build inputs; optional base overrides are supported. No engine trust, VM configuration, unrelated cache or service was changed. Builds and acceptance are Linux arm64 on this engine, not proof of Windows, Linux amd64 or native Windows ACL behavior.</p>
+<h3 id="acceptance-resources-and-stop-policy">Acceptance resources and stop policy<a class="heading-anchor" href="#acceptance-resources-and-stop-policy" aria-label="Link to this section">#</a></h3>
+<p>The user&#x27;s temporary native preview and personal Docker HTTP app were stopped at their request. Preserve their <code>.learning</code>, personal PostgreSQL volume, native PostgreSQL 5432 and unrelated containers.</p>
+<p>Current test resources belong only to Compose project <code>ds60-modules-validation</code>: browser port 58769, PostgreSQL port 58433 and ignored host learner folder <code>work/modules-acceptance/learning</code>. Private runtime tokens and Kubernetes receipts are outside <code>.learning</code> in a private temporary session. Never print or package credentials. Read the last non-secret record in <code>work/kubernetes-owned-preparation.log</code> to find the owned session; do not adopt an ambient cluster or create another session without checking that record.</p>
+<p>Stop test HTTP and workers after verification, then explicitly release only the recorded owned kind session using <code>scripts/prepare_kubernetes.py release</code>. Keep the user&#x27;s personal HTTP app stopped. Never restart the engine, prune unrelated resources, delete learner state or stop the user&#x27;s personal database.</p>
+<h3 id="resume-and-next-authoring-batch">Resume and next authoring batch<a class="heading-anchor" href="#resume-and-next-authoring-batch" aria-label="Link to this section">#</a></h3>
 <ol>
-<li>Read this file, the three owner status documents, and <code>git status --short</code>.</li>
-<li>Read <a href="../expansion/README.md.html">the expansion design</a>, <a href="../expansion/architecture.md.html">architecture</a>, and <a href="../expansion/delivery-roadmap.md.html">publication gates</a>.</li>
-<li>Inspect completed course <code>lessons.json</code> manifests, actual worker images and runtime receipts. Configuration does not establish execution acceptance.</li>
-<li>Run narrow relevant checks, then regenerate/check the preview/readers and run the four-worker grouped suite after a coherent integration.</li>
-<li>Record exact completed IDs, image digests, executed checks, failures and remaining work below before pausing or switching context.</li>
+<li>Read this checkpoint, owner status files, <code>git status</code> and the final receipts.</li>
+<li>Inspect actual owned test services before starting more. Source/configuration alone is not runtime evidence. Check host and engine free disk before builds.</li>
+<li>Finish any recorded acceptance gap, then run the grouped four-worker suite with isolated caches and the disposable PostgreSQL on port 58432. The host-only TensorFlow opt-in test is expected to skip when TensorFlow is not installed; actual TensorFlow execution must still pass in its worker.</li>
+<li>Regenerate/check readers and the journey preview after authoring changes. Never hand-edit generated HTML or the original published catalog.</li>
+<li>Fill the missing systems foundations before expanding their intermediate stages. Follow <code>courses/&lt;track&gt;/AGENTS.md</code>, the per-track <code>lessons.json</code>, <code>docs/expansion/architecture.md</code>, <a href="ADDING_A_MODULE.md.html">the module authoring contract</a> and publication gates. Each new lesson needs a full explanation, vocabulary, worked examples, graded practice, separate solutions, meaningful fixtures and appropriate execution checks.</li>
+<li>Promote a module into the published catalog only after its prerequisite chain, runtime and supported platform rows pass their publication gates. Do not mark all 204 lessons complete because five pilots execute.</li>
 </ol>
-<h3 id="completed-and-remaining">Completed and remaining<a class="heading-anchor" href="#completed-and-remaining" aria-label="Link to this section">#</a></h3>
-<p>Implementation started. Design phase delivered 204 planned lessons and five full sample guides. This batch must replace design-only behavior with real course files and bounded pilot execution. Full intermediate/advanced authoring and platform qualification remain pending until specifically recorded as complete. Do not mark the entire expansion finished because its pilots work.</p>
-<h3 id="runtime-and-source-checkpoint-first-integration">Runtime and source checkpoint: first integration<a class="heading-anchor" href="#runtime-and-source-checkpoint-first-integration" aria-label="Link to this section">#</a></h3>
-<ul>
-<li>Main browser workspace <code>/journeys</code>, module manifests, persistent module drafts, authenticated actions and asynchronous job receipts are implemented in source. The personal native preview and personal Docker HTTP app were stopped at the user&#x27;s request. The personal database and unrelated containers are retained.</li>
-<li>Twenty complete initial lesson sets exist across all five tracks. ML content authoring is extending the actual prerequisite chains; owner status files contain the current exact IDs. The published catalog remains 168.</li>
-<li>Real isolated Docker acceptance has passed Python/NumPy attention, credential isolation, cancellation, TensorFlow reference arithmetic and wrong-sign rejection, C++ compiler/ownership/diagnostic/cancellation, and standalone Scala compilation. Receipts are in ignored <code>work/modules-acceptance/</code>.</li>
-<li>Local images were built only on this engine&#x27;s Linux arm64. No other OS or architecture is qualified by these runs. No image has been pushed.</li>
-<li>This engine rejects Docker Hub&#x27;s download certificate. Trusted cached/GCR bases were used with TLS verification retained. Standard image defaults remain available; optional base override build arguments are documented by the worker owner. No engine trust setting, VM configuration or unrelated cache was changed.</li>
-<li>Actual C++ qualification caught a noexec scratch mount, now corrected to an executable private tmpfs. An image-only CMake 3.28.4 hash lock aligns the installed tools with the authored projects.</li>
-<li>Current runtime issue: a Spark job can exhaust the initial 128 PID/thread cap and prevent the HTTP controller starting a request thread. The worker owner is implementing measured JVM/control-thread and profile PID-budget fixes before paired Spark qualification is repeated. Do not report Spark execution accepted until its receipts pass.</li>
-<li>Kubernetes ownership/lease checks, fixture, host preparation and the dedicated adapter are being implemented by the systems owner; no cluster has been created yet. Root must recheck host and engine free space before provisioning.</li>
-<li>The UI owner is fixing independent review findings in response sequencing, exact source diagnostic mapping, polling, queued saves and resumed active jobs. Do not freeze a Docker app image until those fixes and source checks finish.</li>
-</ul>
-<h3 id="resume-commands-and-resource-ownership">Resume commands and resource ownership<a class="heading-anchor" href="#resume-commands-and-resource-ownership" aria-label="Link to this section">#</a></h3>
-<p>All implementation changes are in the main working tree. No staging or agent commits have occurred. Check <code>git status</code> before continuing.</p>
-<p>The test Compose project is <code>ds60-modules-validation</code>, with browser port 58769, PostgreSQL port 58433, and host learner data under ignored <code>work/modules-acceptance/learning</code>. Runtime credentials are in the private session directory selected by <code>DS60_MODULE_RUNTIME_DIR</code>, outside that learning folder. Never print the token. Existing test workers may be running internally; inspect this project rather than restarting the engine. The personal HTTP app must remain stopped when test acceptance is finished.</p>
-<p>Build logs are <code>work/build-worker-*.log</code>. The runtime acceptance helper is <code>work/qualify_worker.py</code>; it uses only test containers and fixed authored fixture sources. Keep a final receipt per prepared profile, including actual image ID, architecture, passing reference and rejected misconception. Finish with focused checks, generated-reader checks, Docker/browser verification and the grouped four-worker suite. Stop only this task&#x27;s test services afterward.</p></article>
+<p>Useful checks: <code>scripts/check_modules.py</code>, <code>scripts/check_module_ui.mjs</code>, <code>build_journey_preview.py --check</code>, <code>build_course_guide.py --check</code>, <code>build_lesson_readers.py --check</code>, Ruff, strict MyPy and <code>pytest -n 4 --dist loadgroup</code>. Build logs use <code>work/build-*.log</code>; narrow runtime helpers and non-secret evidence use <code>work/modules-acceptance/</code>.</p>
+<h3 id="final-integration-verification">Final integration verification<a class="heading-anchor" href="#final-integration-verification" aria-label="Link to this section">#</a></h3>
+<p>The final grouped four-worker suite passed <strong>1123 tests</strong>, with <strong>one expected host-only TensorFlow opt-in skip</strong>, zero failures and zero errors in <strong>89.18 seconds</strong>. All ten recorded subtests passed. Actual TensorFlow import, gradient verification and rejected update-sign execution passed in its Docker worker. The disposable PostgreSQL 16 test instance on 58432 was stopped afterward.</p>
+<p>The earlier integration run exposed a synthetic-track fixture collision, two startup-timing assumptions and late generated-reader drift. The fixtures now preserve the real authored inventory, cancellation waits for observed startup, normal-parent exit has a real child-readiness/PID handshake, and generated readers match their sources. No short-timeout proof was removed.</p>
+<p>Strict MyPy covers 160 source files; Ruff, 22 inline-JavaScript UI behavior checks, structural validation and notebook syntax checks pass. The Docker HTTP audit serves 394 HTML pages and 86 canonical/variant module documents, checking 15584 internal links with zero failures. Browser execution has passed all five subjects and the separate PySpark variant, with actual typed feedback. See ignored <code>work/modules-full-tests*</code> and <code>work/modules-acceptance/</code> for the exact non-secret runtime receipts. Native Windows execution, Linux amd64 and the optional PyTorch image remain unqualified.</p></article>
   </main>
 </body>
 </html>

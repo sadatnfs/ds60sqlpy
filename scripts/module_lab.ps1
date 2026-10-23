@@ -80,13 +80,13 @@ if ($Action -eq 'status' -or $Action -eq 'stop') {
 $PrivatePath = [IO.Path]::GetFullPath($Session)
 while ($PrivatePath) {
     if ([IO.Path]::GetFileName($PrivatePath) -ieq '.learning') { throw 'Private runtime cannot be inside portable .learning.' }
-    if ((Test-Path -LiteralPath $PrivatePath) -and ((Get-Item -LiteralPath $PrivatePath).Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'Private runtime ancestors cannot be links or junctions.' }
+    if ((Test-Path -LiteralPath $PrivatePath) -and ((Get-Item -Force -LiteralPath $PrivatePath).Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'Private runtime ancestors cannot be links or junctions.' }
     $ParentPath = [IO.Path]::GetDirectoryName($PrivatePath)
     if ($ParentPath -eq $PrivatePath) { break }
     $PrivatePath = $ParentPath
 }
 if (Test-Path -LiteralPath $Session) {
-    if ((Get-Item -LiteralPath $Session).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Runtime session cannot be a link or junction.' }
+    if ((Get-Item -Force -LiteralPath $Session).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Runtime session cannot be a link or junction.' }
 }
 New-Item -ItemType Directory -Path $Session -Force | Out-Null
 if ($env:OS -eq 'Windows_NT') {
@@ -98,7 +98,7 @@ if ($env:OS -eq 'Windows_NT') {
     Set-Acl -LiteralPath $Session -AclObject $Acl
 } else { & chmod 700 $Session; if ($LASTEXITCODE -ne 0) { throw 'Cannot protect private runtime directory.' } }
 $TokenPath = Join-Path $Session 'worker-token'
-if ((Test-Path -LiteralPath $TokenPath) -and ((Get-Item -LiteralPath $TokenPath).Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'Worker token cannot be a symbolic link.' }
+if ((Test-Path -LiteralPath $TokenPath) -and ((Get-Item -Force -LiteralPath $TokenPath).Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'Worker token cannot be a symbolic link.' }
 if (-not (Test-Path -LiteralPath $TokenPath)) {
     $Bytes = New-Object byte[] 32
     $Generator = [Security.Cryptography.RandomNumberGenerator]::Create()

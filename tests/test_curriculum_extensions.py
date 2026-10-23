@@ -46,7 +46,7 @@ def skeleton(tmp_path: Path) -> Path:
 
 
 def extension(root: Path, runner: str = "none") -> tuple[Path, dict[str, Any]]:
-    folder = root / "courses/llm-theory"
+    folder = root / "courses/reasoning-demo"
     folder.mkdir(parents=True)
     suffix = RUNNERS[runner].file_suffix
     for name, content in {
@@ -59,24 +59,24 @@ def extension(root: Path, runner: str = "none") -> tuple[Path, dict[str, Any]]:
     payload: dict[str, Any] = {
         "schema_version": 1,
         "tracks": {
-            "llm-theory": {
+            "reasoning-demo": {
                 "title": "Language-model reasoning",
-                "plan": "courses/llm-theory/README.md",
+                "plan": "courses/reasoning-demo/README.md",
             }
         },
         "lessons": [
             {
-                "id": "llm-theory-01",
-                "track": "llm-theory",
+                "id": "reasoning-demo-01",
+                "track": "reasoning-demo",
                 "day": 1,
                 "title": "Compare language-model claims",
                 "level": "foundation",
                 "phase": "Reasoning",
                 "estimated_minutes": 40,
                 "prerequisites": ["python-01"],
-                "lesson_path": f"courses/llm-theory/lesson{suffix}",
-                "guide_path": "courses/llm-theory/guide.md",
-                "solution_paths": ["courses/llm-theory/solutions.md"],
+                "lesson_path": f"courses/reasoning-demo/lesson{suffix}",
+                "guide_path": "courses/reasoning-demo/guide.md",
+                "solution_paths": ["courses/reasoning-demo/solutions.md"],
                 "dependency_group": "standard-library",
                 "network": "offline",
                 "runner": runner,
@@ -87,11 +87,11 @@ def extension(root: Path, runner: str = "none") -> tuple[Path, dict[str, Any]]:
             "language-model-reasoning": {
                 "title": "Language-model reasoning",
                 "description": "Compare claims with explicit evidence.",
-                "targets": ["llm-theory-01"],
+                "targets": ["reasoning-demo-01"],
             }
         },
     }
-    manifest = root / "curriculum/extensions/llm-theory.json"
+    manifest = root / "curriculum/extensions/reasoning-demo.json"
     manifest.parent.mkdir(parents=True, exist_ok=True)
     manifest.write_text(json.dumps(payload), encoding="utf-8")
     return manifest, payload
@@ -103,27 +103,27 @@ def test_registered_theory_flows_through_catalog_plan_cli_and_tutor(
     extension(skeleton)
     write_catalog(skeleton)
     catalog = Catalog.load(skeleton)
-    lesson = catalog.get("llm-theory-01")
+    lesson = catalog.get("reasoning-demo-01")
     assert len(catalog.lessons()) == 169
     assert lesson.runner == "none" and lesson.topics == ("language-models", "evidence")
-    assert [item.id for item in catalog.lessons("llm-theory")] == [lesson.id]
+    assert [item.id for item in catalog.lessons("reasoning-demo")] == [lesson.id]
     assert [item.id for item in build_study_plan(catalog, [lesson.id]).lessons] == [
         "python-01",
         lesson.id,
     ]
     service = CoachingService(catalog)
     paths = service.paths()
-    assert paths["tracks"]["llm-theory"]["title"] == "Language-model reasoning"
+    assert paths["tracks"]["reasoning-demo"]["title"] == "Language-model reasoning"
     assert paths["paths"]["language-model-reasoning"]["targets"] == (lesson.id,)
     assert "Predict what evidence" in service.lesson(lesson.id)["guide"]
     adapter = TutorAdapter(service)
-    result = adapter.invoke("course_lessons", {"track": "llm-theory", "query": "evidence"})
+    result = adapter.invoke("course_lessons", {"track": "reasoning-demo", "query": "evidence"})
     assert result["lessons"][0]["id"] == lesson.id
     assert "solution_paths" not in result["lessons"][0]
     assert adapter.invoke("course_plan", {"targets": ["language-model-reasoning"]})["targets"] == (
         lesson.id,
     )
-    assert main(["--repo", str(skeleton), "catalog", "--track", "llm-theory", "--json"]) == 0
+    assert main(["--repo", str(skeleton), "catalog", "--track", "reasoning-demo", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)[0]["id"] == lesson.id
     assert (
         main(["--repo", str(skeleton), "plan", "--path", "language-model-reasoning", "--json"]) == 0
@@ -138,7 +138,7 @@ def test_future_topics_are_registered_without_claiming_an_executor(
 ) -> None:
     extension(skeleton, runner)
     catalog = build_catalog(skeleton)
-    item = next(item for item in catalog["lessons"] if item["id"] == "llm-theory-01")
+    item = next(item for item in catalog["lessons"] if item["id"] == "reasoning-demo-01")
     assert item["runner"] == runner
     assert RUNNERS[runner].executor is None
 
@@ -154,7 +154,7 @@ def test_future_topics_are_registered_without_claiming_an_executor(
         ("prerequisites", "python-01"),
         ("lesson_path", "../../private.txt"),
         ("guide_path", "/etc/passwd"),
-        ("guide_path", "courses\\llm-theory\\guide.md"),
+        ("guide_path", "courses\\reasoning-demo\\guide.md"),
         ("solution_paths", []),
     ],
 )
@@ -189,7 +189,7 @@ def test_extensions_cannot_replace_inventory_or_break_the_graph(
     if change == "existing-id":
         lesson["id"] = "python-01"
     elif change == "existing-track":
-        payload["tracks"] = {"python": payload["tracks"]["llm-theory"]}
+        payload["tracks"] = {"python": payload["tracks"]["reasoning-demo"]}
     elif change == "missing-prerequisite":
         lesson["prerequisites"] = ["not-registered"]
     elif change == "cycle":
@@ -246,7 +246,7 @@ def test_duplicate_artifact_identity_is_rejected_before_writing_catalog(skeleton
 def test_internal_symlink_is_rejected_consistently_with_packaging(skeleton: Path) -> None:
     manifest, payload = extension(skeleton)
     (skeleton / "courses/alias").symlink_to(
-        skeleton / "courses/llm-theory", target_is_directory=True
+        skeleton / "courses/reasoning-demo", target_is_directory=True
     )
     payload["lessons"][0]["lesson_path"] = "courses/alias/lesson.md"
     manifest.write_text(json.dumps(payload), encoding="utf-8")
@@ -256,7 +256,7 @@ def test_internal_symlink_is_rejected_consistently_with_packaging(skeleton: Path
 
 def test_manifest_paths_use_exact_case_on_every_host(skeleton: Path) -> None:
     manifest, payload = extension(skeleton)
-    payload["lessons"][0]["guide_path"] = "courses/llm-theory/GUIDE.MD"
+    payload["lessons"][0]["guide_path"] = "courses/reasoning-demo/GUIDE.MD"
     manifest.write_text(json.dumps(payload), encoding="utf-8")
     with pytest.raises(ValueError):
         write_catalog(skeleton)
@@ -267,7 +267,7 @@ def test_windows_redirect_tags_are_rejected_but_cloud_files_remain_portable(
     skeleton: Path, monkeypatch: pytest.MonkeyPatch, reparse_tag: int
 ) -> None:
     extension(skeleton)
-    directory = skeleton / "courses/llm-theory"
+    directory = skeleton / "courses/reasoning-demo"
     original_lstat = Path.lstat
 
     def windows_lstat(path: Path) -> Any:
@@ -291,7 +291,7 @@ def test_manifest_cannot_reference_files_omitted_from_distribution(
     skeleton: Path, relative: str
 ) -> None:
     manifest, payload = extension(skeleton)
-    target = skeleton / "courses/llm-theory" / relative
+    target = skeleton / "courses/reasoning-demo" / relative
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text("Public test fixture", encoding="utf-8")
     payload["lessons"][0]["lesson_path"] = target.relative_to(skeleton).as_posix()
@@ -302,7 +302,7 @@ def test_manifest_cannot_reference_files_omitted_from_distribution(
 
 def test_notebook_starter_preserves_magic_cell_boundaries(skeleton: Path) -> None:
     manifest, payload = extension(skeleton, "python")
-    payload["lessons"][0]["lesson_path"] = "courses/llm-theory/lesson.ipynb"
+    payload["lessons"][0]["lesson_path"] = "courses/reasoning-demo/lesson.ipynb"
     notebook = {
         "cells": [
             {"cell_type": "markdown", "source": ["# Explain the evidence"]},
@@ -315,7 +315,7 @@ def test_notebook_starter_preserves_magic_cell_boundaries(skeleton: Path) -> Non
     )
     manifest.write_text(json.dumps(payload), encoding="utf-8")
     write_catalog(skeleton)
-    response = CoachingService(Catalog.load(skeleton)).lesson("llm-theory-01")
+    response = CoachingService(Catalog.load(skeleton)).lesson("reasoning-demo-01")
     assert response["learner_code"].count("# %%\n") == 2
     assert "%timeit" in response["learner_code"]
     assert len(response["notebook_cells"]) == 2
@@ -329,13 +329,16 @@ def test_new_track_reader_is_served_in_lab_mode_and_original_portal_stays_readin
 ) -> None:
     root = tmp_path / "complete course"
     stage_course(root)
+    beta_inventory = root / "courses/llm-theory/lessons.json"
+    beta_before = beta_inventory.read_bytes()
     extension(root)
+    assert beta_inventory.read_bytes() == beta_before
     write_catalog(root)
     catalog = Catalog.load(root)
-    lesson = catalog.get("llm-theory-01")
+    lesson = catalog.get("reasoning-demo-01")
     targets = rendered_targets(catalog)
-    assert catalog.resolve("courses/llm-theory/README.md") in targets
-    page = root / "lesson-pages/llm-theory-01.html"
+    assert catalog.resolve("courses/reasoning-demo/README.md") in targets
+    page = root / "lesson-pages/reasoning-demo-01.html"
     page.write_text(build_lesson_html(catalog, lesson, targets=targets), encoding="utf-8")
     assert "const LAB_MODE = false;" in page.read_text()
     opener = build_opener(ProxyHandler({}))
@@ -344,7 +347,9 @@ def test_new_track_reader_is_served_in_lab_mode_and_original_portal_stays_readin
         thread = threading.Thread(target=server.serve_forever)
         thread.start()
         try:
-            with opener.open(server.url + "lesson-pages/llm-theory-01.html", timeout=5) as response:
+            with opener.open(
+                server.url + "lesson-pages/reasoning-demo-01.html", timeout=5
+            ) as response:
                 served = response.read().decode()
             assert f"const LAB_MODE = {expected};" in served
             assert "Compare language-model claims" in served

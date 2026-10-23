@@ -48,25 +48,57 @@ def test_output_limit_bounds_unicode_bytes_and_stops_an_infinite_writer(course: 
     assert result["elapsed_seconds"] < 4
 
 
-@pytest.mark.parametrize("parent_finishes", [False, True])
-def test_descendants_are_stopped_on_timeout_and_after_normal_parent_exit(
-    course: Catalog, parent_finishes: bool
-) -> None:
+def test_descendants_are_stopped_on_timeout(course: Catalog) -> None:
     sentinel = course.repo_root / "child-continued.txt"
     child = f"import time; from pathlib import Path; time.sleep(1); Path({str(sentinel)!r}).touch()"
     code = (
         "import subprocess, sys, time\n"
         f"subprocess.Popen([sys.executable, '-c', {child!r}])\n"
-        + ("print('parent finished')\n" if parent_finishes else "time.sleep(30)\n")
+        "time.sleep(30)\n"
     )
     result = PadRunner(course, timeout=0.3).run("python-01", "python", code)
     assert result["elapsed_seconds"] < 3
-    if parent_finishes:
-        assert result["returncode"] == 0
-    else:
-        assert result["stopped"] == "time limit"
+    assert result["stopped"] == "time limit"
     time.sleep(1.1)
-    assert not sentinel.exists(), "A descendant survived the completed coding-pad run."
+    assert not sentinel.exists(), "A descendant survived the timed-out coding-pad run."
+
+
+def test_descendants_are_stopped_after_normal_parent_exit(course: Catalog) -> None:
+    ready = course.repo_root / "child-ready.txt"
+    sentinel = course.repo_root / "child-continued.txt"
+    child = (
+        "import os, time\n"
+        "from pathlib import Path\n"
+        f"ready = Path({str(ready)!r})\n"
+        "pending = ready.with_suffix('.pending')\n"
+        "pending.write_text(str(os.getpid()), encoding='utf-8')\n"
+        "pending.replace(ready)\n"
+        "time.sleep(1)\n"
+        f"Path({str(sentinel)!r}).touch()\n"
+    )
+    code = (
+        "import subprocess, sys, time\n"
+        "from pathlib import Path\n"
+        f"child = subprocess.Popen([sys.executable, '-c', {child!r}])\n"
+        f"ready = Path({str(ready)!r})\n"
+        "deadline = time.monotonic() + 10\n"
+        "while not ready.exists():\n"
+        "    if child.poll() is not None or time.monotonic() >= deadline:\n"
+        "        raise RuntimeError('The owned child did not become ready.')\n"
+        "    time.sleep(0.01)\n"
+        "print('parent finished with child', child.pid)\n"
+    )
+    # A normal exit needs its ordinary run budget. The separate timeout test
+    # retains the short deadline; startup contention cannot turn this proof
+    # into a timeout proof before the child has actually begun executing.
+    result = PadRunner(course).run("python-01", "python", code)
+    assert result["returncode"] == 0
+    assert result["stopped"] is None
+    child_pid = int(ready.read_text(encoding="utf-8"))
+    assert child_pid > 0
+    assert result["output"].strip() == f"parent finished with child {child_pid}"
+    time.sleep(1.1)
+    assert not sentinel.exists(), "A descendant survived the normally completed coding-pad run."
 
 
 def test_frozen_discovery_prefers_workspace_venv_without_resolving_its_python_symlink(
